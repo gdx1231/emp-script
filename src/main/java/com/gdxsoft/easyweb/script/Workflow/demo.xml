@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EwaWfs>
+	<EwaWf Name="test" Des="请假审批" Unid='z'>
+		<Units>
+			<Unit Name="start" Des="开始" Unid='0' Type='Start' />
+			<Unit Name="write" Des="填写申请表" Unid='0' />
+			<Unit Name="dept" Des="部门领导审批" Unid='2' Type="Chk" />
+			<Unit Name="oo" Des="总监审批" Unid='3' Type="Chk" />
+			<Unit Name="gm" Des="总经理审批" Unid='4' Type="Chk" />
+			<Unit Name="xj" Des="销假" Unid='5' />
+			<Unit Name="hr" Des="人事确认" Unid='5' />
+			<Unit Name="end" Des="结束" Unid='6' Type='End' />
+		</Units>
+		<Cnns>
+			<Cnn Unid='_' From='0' To='1' />
+			<Cnn Unid='a' From='1' To='2' Logic="@HR.MASTER=0" />
+			<Cnn Unid='b' From='1' To='3'
+				Logic="@HR.MASTER=1 AND @HR.POS_LVL=3" />
+			<Cnn Unid='c' From='1' To='4'
+				Logic="@HR.MASTER=1 AND @HR.POS_LVL=4" />
+			<Cnn Unid='d' From='2' To='3'
+				Logic="@HR.MASTER=1 AND @HR.POS_LVL=5" />
+			<Cnn Unid='e' From='3' To='4' />
+			<Cnn Unid='f' From='4' To='5' />
+			<Cnn Unid='g' From='5' To='6' />
+		</Cnns>
+	</EwaWf>
+</EwaWfs>
