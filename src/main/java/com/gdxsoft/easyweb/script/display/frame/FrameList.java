@@ -4,7 +4,6 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,9 +13,6 @@ import org.json.JSONObject;
 
 import com.gdxsoft.easyweb.cache.CachedValue;
 import com.gdxsoft.easyweb.cache.CachedValueManager;
-import com.gdxsoft.easyweb.charts.Charts;
-import com.gdxsoft.easyweb.charts.ICategory;
-import com.gdxsoft.easyweb.charts.IPie;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
@@ -37,7 +33,6 @@ import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
-import com.gdxsoft.easyweb.script.userConfig.UserXItems;
 import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
@@ -437,23 +432,7 @@ public class FrameList extends FrameBase implements IFrame {
 
 		}
 
-		if (!type.equals("TABLE")) {// 仅表
-			MStr sb = new MStr();
-
-			// charts
-			try {
-				String chartsHtml = this.createCharts();
-				if (chartsHtml != null && chartsHtml.trim().length() > 0) {
-					sb.append("<div align='center'>");
-					sb.append(chartsHtml);
-					sb.append("</div>");
-				}
-			} catch (Exception e) {
-				sb.append(e.getLocalizedMessage());
-			}
-			if (sb.length() > 0)
-				doc.addScriptHtml(sb.toString(), "Charts");
-		}
+		 
 	}
 
 	/**
@@ -1713,46 +1692,7 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 
 	}
-
-	private String createCharts() {
-		UserXItems chartsItems = super.getHtmlClass().getUserConfig().getUserCharts();
-		MList tbs = super.getHtmlClass().getItemValues().getDTTables();
-		if (chartsItems.count() == 0 || tbs.size() == 0) {
-			return "";
-		}
-		MStr s1 = new MStr();
-		Charts charts = new Charts();
-		String cp = super.getHtmlClass().getItemValues().getRequestValue().getContextPath();
-		try {
-			charts.init(chartsItems);
-			DTTable tb = (DTTable) tbs.get(tbs.size() - 1);
-			charts.setChartData(tb);
-		} catch (Exception e) {
-			return e.getLocalizedMessage();
-		}
-
-		Enumeration<IPie> pies = charts.getPies().elements();
-		while (pies.hasMoreElements()) {
-			IPie pie = pies.nextElement();
-			try {
-				pie.createChart();
-				s1.append("<img src='" + cp + pie.getUrl() + "' /><br>\r\n");
-			} catch (RuntimeException e) {
-				s1.append(e.getLocalizedMessage());
-			}
-		}
-		Enumeration<ICategory> categories = charts.getCategories().elements();
-		while (categories.hasMoreElements()) {
-			ICategory category = categories.nextElement();
-			try {
-				category.createChart();
-				s1.append("<img src='" + cp + category.getUrl() + "' /><br>\r\n");
-			} catch (Exception e) {
-				s1.append(e.getLocalizedMessage());
-			}
-		}
-		return s1.toString();
-	}
+ 
 
 	private String createSkinFCFist(String lang) {
 

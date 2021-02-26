@@ -16,7 +16,6 @@ import org.xml.sax.SAXException;
 
 import com.gdxsoft.easyweb.datasource.ConnectionConfig;
 import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
-import com.gdxsoft.easyweb.define.Dir;
 import com.gdxsoft.easyweb.define.group.Exchange;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
@@ -46,28 +45,21 @@ public class ServletGroup extends HttpServlet {
 	 * 
 	 * This method is called when a form has its tag value method equals to get.
 	 * 
-	 * @param request
-	 *            the request send by the client to the server
-	 * @param response
-	 *            the response send by the server to the client
-	 * @throws ServletException
-	 *             if an error occurred
-	 * @throws IOException
-	 *             if an error occurred
+	 * @param request  the request send by the client to the server
+	 * @param response the response send by the server to the client
+	 * @throws ServletException if an error occurred
+	 * @throws IOException      if an error occurred
 	 */
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.show(request, response);
 	}
 
-	private void show(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession session = request.getSession();
 		RequestValue rv = new RequestValue(request, session);
 		PageValue pv = rv.getPageValues().getPageValue("EWA_ADMIN_ID");
 		// not login
-		if (pv == null
-				|| (pv.getPVTag() != PageValueTag.SESSION && pv.getPVTag() != PageValueTag.COOKIE_ENCYRPT)) {
+		if (pv == null || (pv.getPVTag() != PageValueTag.SESSION && pv.getPVTag() != PageValueTag.COOKIE_ENCYRPT)) {
 			response.getWriter().println("deny! request login");
 			return;
 		}
@@ -87,8 +79,7 @@ public class ServletGroup extends HttpServlet {
 
 			response.setHeader("Location", id + ".zip");
 			response.setHeader("Cache-Control", "max-age=0");
-			response.setHeader("Content-Disposition", "attachment; filename="
-					+ id + ".zip");
+			response.setHeader("Content-Disposition", "attachment; filename=" + id + ".zip");
 			// filename应该是编码后的(utf-8)
 			response.setContentType("image/oct");
 			response.setContentLength(buf.length);
@@ -105,35 +96,30 @@ public class ServletGroup extends HttpServlet {
 		sbHead.al("<head>");
 		sbHead.al("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
 		sbHead.al("<title></title>");
-		sbHead.al("<link rel=\"stylesheet\" rev=\"stylesheet\"  href=\""
-				+ rv.s("rv_ewa_style_path")
+		sbHead.al("<link rel=\"stylesheet\" rev=\"stylesheet\"  href=\"" + rv.s("rv_ewa_style_path")
 				+ "/EWA_STYLE/skins/default/css.css\" type=\"text/css\" />");
-		sbHead.al("<script type='text/javascript' src='"
-				+ rv.s("rv_ewa_style_path") + "/EWA_STYLE/js/EWA.js'></script>");
-		sbHead.al("<script type='text/javascript' src='"
-				+ rv.s("rv_ewa_style_path")
+		sbHead.al(
+				"<script type='text/javascript' src='" + rv.s("rv_ewa_style_path") + "/EWA_STYLE/js/EWA.js'></script>");
+		sbHead.al("<script type='text/javascript' src='" + rv.s("rv_ewa_style_path")
 				+ "/EWA_STYLE/js/EWA_UI.js'></script>");
-		sbHead.al("<script type='text/javascript' src='"
-				+ rv.s("rv_ewa_style_path")
+		sbHead.al("<script type='text/javascript' src='" + rv.s("rv_ewa_style_path")
 				+ "/EWA_STYLE/js/EWA_FRAME.js'></script>");
 		sbHead.al("</head>");
-		sbHead.al("<body style=\"margin: 1px; overflow: auto\" onload='EWA.CP=\""
-				+ request.getContextPath() + "\";EWA.LANG=\"zhcn\"'>");
+		sbHead.al("<body style=\"margin: 1px; overflow: auto\" onload='EWA.CP=\"" + request.getContextPath()
+				+ "\";EWA.LANG=\"zhcn\"'>");
 		response.getWriter().println(sbHead.toString());
 
 		if (oType.equalsIgnoreCase("install")) {
 			String root = UPath.getGroupPath() + "/imports/";
 			File fileRoot = new File(root);
 			String[] ff = { ".zip" };
-			Dir[] dirs = UFile.getFiles(root, ff);
+			File[] dirs = UFile.getFiles(root, ff);
 			if (dirs == null) {
-				response.getWriter().println(
-						fileRoot.getAbsolutePath() + " 没有数据!");
+				response.getWriter().println(fileRoot.getAbsolutePath() + " 没有数据!");
 				return;
 			}
 			MStr sb = new MStr();
-			sb.al("<div align=center><h1>可用的组件" + fileRoot.getAbsolutePath()
-					+ "</h1></div>");
+			sb.al("<div align=center><h1>可用的组件" + fileRoot.getAbsolutePath() + "</h1></div>");
 			sb.al("<table border=0 bgcolor='#cdcdcd' align=center cellpadding=1 cellspacing=1 width=800>");
 			sb.al("<tr bgcolor=white><th>文件</th><th>时间</th><th>字节</th><th>安装</th></tr>");
 			for (int i = 0; i < dirs.length; i++) {
@@ -148,11 +134,9 @@ public class ServletGroup extends HttpServlet {
 					dateStr = e.getMessage();
 				}
 
-				sb.al("<tr bgcolor=white><td height=24>" + f.getName()
-						+ "</td><td>" + dateStr + "</td><td>" + f.length()
-						/ 1024 + "k</td><td align=center>");
-				sb.al(" <a href='./?TYPE=step1&id=" + name
-						+ "'>安装</a></td></tr>");
+				sb.al("<tr bgcolor=white><td height=24>" + f.getName() + "</td><td>" + dateStr + "</td><td>"
+						+ f.length() / 1024 + "k</td><td align=center>");
+				sb.al(" <a href='./?TYPE=step1&id=" + name + "'>安装</a></td></tr>");
 			}
 			sb.al("</table>");
 			response.getWriter().println(sb.toString());
@@ -165,16 +149,14 @@ public class ServletGroup extends HttpServlet {
 				cfgs = ConnectionConfigs.instance();
 				for (int i = 0; i < cfgs.size(); i++) {
 					ConnectionConfig cfg = cfgs.getConfig(i);
-					sb1.append("<option value='" + cfg.getName() + "'>"
-							+ cfg.getName() + "  (" + cfg.getType() + ", "
+					sb1.append("<option value='" + cfg.getName() + "'>" + cfg.getName() + "  (" + cfg.getType() + ", "
 							+ cfg.getConnectionString() + ")</option>");
 				}
 				sb.al("<div align=center><h1>设定导入参数</h1></div>");
 				sb.al("<form action=\"./?TYPE=step2\" method=post>");
 				sb.al("<table bgcolor='#cdcdcd' width=600 border=0 cellpadding=1 cellspacing=1 align=center>");
 				sb.al("	<tr bgcolor=white><td>组件Id：</td>");
-				sb.al("<td>" + request.getParameter("id")
-						+ "<input type=hidden name=id value=\""
+				sb.al("<td>" + request.getParameter("id") + "<input type=hidden name=id value=\""
 						+ request.getParameter("id") + "\">");
 				sb.al("</td></tr>");
 				sb.al("<tr bgcolor=white><td>目标数据源：</td><td>");
@@ -257,14 +239,13 @@ public class ServletGroup extends HttpServlet {
 			String s2;
 			try {
 				s = ex.exportGroup();
-				File f1=new File(s);
-				  s2=f1.getAbsolutePath();
+				File f1 = new File(s);
+				s2 = f1.getAbsolutePath();
 			} catch (Exception e) {
-				s2= e.getMessage();
+				s2 = e.getMessage();
 			}
 			response.getWriter().println("<h1>生产组件结果</h1>");
-			response.getWriter().println(
-					"<h2><a target=_blank href='./?type=dl&id=" + id + "'>");
+			response.getWriter().println("<h2><a target=_blank href='./?type=dl&id=" + id + "'>");
 			response.getWriter().println(s2);
 			response.getWriter().println("</a></h2>");
 		}
@@ -275,20 +256,14 @@ public class ServletGroup extends HttpServlet {
 	/**
 	 * The doPost method of the servlet. <br>
 	 * 
-	 * This method is called when a form has its tag value method equals to
-	 * post.
+	 * This method is called when a form has its tag value method equals to post.
 	 * 
-	 * @param request
-	 *            the request send by the client to the server
-	 * @param response
-	 *            the response send by the server to the client
-	 * @throws ServletException
-	 *             if an error occurred
-	 * @throws IOException
-	 *             if an error occurred
+	 * @param request  the request send by the client to the server
+	 * @param response the response send by the server to the client
+	 * @throws ServletException if an error occurred
+	 * @throws IOException      if an error occurred
 	 */
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.show(request, response);
 	}
 
@@ -305,8 +280,7 @@ public class ServletGroup extends HttpServlet {
 	/**
 	 * Initialization of the servlet. <br>
 	 * 
-	 * @throws ServletException
-	 *             if an error occurs
+	 * @throws ServletException if an error occurs
 	 */
 	public void init() throws ServletException {
 		// Put your code here

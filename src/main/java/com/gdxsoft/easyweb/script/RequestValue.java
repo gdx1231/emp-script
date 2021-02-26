@@ -1200,9 +1200,9 @@ public class RequestValue implements Cloneable {
 	}
 
 	/**
-	 * 替换表达式的参数
+	 * 替换原始字符串中的@参数
 	 * 
-	 * @param exp
+	 * @param exp 字符串表达式
 	 * @return
 	 */
 	public String replaceParameters(String exp) {

@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.gdxsoft.easyweb</groupId>
-	<artifactId>EmpScriptClassV2</artifactId>
-	<version>20210108</version>
+	<artifactId>emp-script</artifactId>
+	<version>1.0.0</version>
 	<name>Easy Web Appliaction Builder</name>
 	<description>Web系统快速成型系统</description>
 	<properties>
@@ -46,6 +46,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -55,7 +56,6 @@
 				<executions>
 					<execution>
 						<id>复制类到指定的文件夹，同步时用</id>
-						<!-- here the phase you need -->
 						<phase>validate</phase>
 						<goals>
 							<goal>copy-resources</goal>
@@ -71,7 +71,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin>-->
 								<!-- <version>3.2.0</version> -->
 						<!-- Maven在Java8下忽略Javadoc的编译错误 https://liumapp.gitee.io/articles/2018/08/22/1534905949519.html/ -->
 			
@@ -97,11 +97,10 @@
 		</plugins>
 	</build>
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20180813</version>
+			<groupId>com.gdxsoft.easyweb</groupId>
+			<artifactId>emp-script-utils</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->

@@ -120,7 +120,7 @@ public class DTTable implements Serializable {
 	 */
 	public static DTTable getCachedTable(String sql, int intLifeSeconds, String dataSourceName, RequestValue rv)
 			throws IOException, ClassNotFoundException {
-		String cachedKey = Utils.replaceParameters(sql, rv).toUpperCase();
+		String cachedKey = rv.replaceParameters(sql).toUpperCase();
 		SqlCached ins = SqlCached.getInstance();
 		SqlCachedValue sc = ins.getBinary(cachedKey);
 
