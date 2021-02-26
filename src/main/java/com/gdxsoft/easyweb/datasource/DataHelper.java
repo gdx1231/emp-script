@@ -6,14 +6,18 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.druid.pool.DruidDataSource;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * <p>
@@ -24,9 +28,9 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * </p>
  */
 public class DataHelper {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataHelper.class);
 	// 记录使用的数据库连接池
-	private static HashMap<String, ComboPooledDataSource> C3P0S;
-	private static HashMap<String, DruidDataSource> DRUIDS;
+	private static Map<String, DataSource> DATASOURCES = new ConcurrentHashMap<String, DataSource>();
 
 	private Connection _conn;
 	private boolean _connected;
@@ -57,15 +61,7 @@ public class DataHelper {
 		if (this._Cfg == null) {
 			throw new Exception("ConnectionConfig 没有设置");
 		}
-		// for debug
-		/*
-		 * try{ Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-		 * String url="jdbc:sqlserver://localhost;DatabaseName=ASIAEC;";
-		 * _conn=DriverManager.getConnection(url,"sa","gdx1231");
-		 * 
-		 * }catch(Exception e){ _connected = false; this._ErrorMsg =
-		 * e.getMessage(); throw e; }
-		 */
+
 		DataSource pool;
 		if (_Cfg.getPool() == null) {
 			try {
@@ -74,8 +70,7 @@ public class DataHelper {
 				if (env != null) {
 					pool = (DataSource) env.lookup(_Cfg.getConnectionString());
 				} else {
-					String connString = "java:comp/env/"
-							+ _Cfg.getConnectionString();
+					String connString = "java:comp/env/" + _Cfg.getConnectionString();
 					pool = (DataSource) ctx.lookup(connString);
 				}
 				_conn = pool.getConnection();
@@ -83,21 +78,22 @@ public class DataHelper {
 			} catch (Exception ee) {
 				_connected = false;
 				this._ErrorMsg = ee.getMessage();
+				LOGGER.error(_ErrorMsg);
 				throw ee;
 			}
 		} else {
 			String key = _Cfg.getName().toUpperCase().trim();
-			DruidDataSource cpds;
-			if (DRUIDS == null || !DRUIDS.containsKey(key)) {
+			DataSource cpds;
+			if (DATASOURCES == null || !DATASOURCES.containsKey(key)) {
 				try {
-					cpds = this.createMyDatasourcesDruids();
+					cpds = this.createMyDatasource();
 				} catch (Exception e) {
 					_connected = false;
 					this._ErrorMsg = e.getMessage();
 					throw e;
 				}
 			} else {
-				cpds = DRUIDS.get(key);
+				cpds = DATASOURCES.get(key);
 			}
 
 			try {
@@ -106,47 +102,87 @@ public class DataHelper {
 			} catch (SQLException e) {
 				_connected = false;
 				this._ErrorMsg = e.getMessage();
+				LOGGER.error(_ErrorMsg);
 				throw e;
 			}
-		} 
-//		else {
-//			String key = _Cfg.getName().toUpperCase().trim();
-//			ComboPooledDataSource cpds;
-//			if (C3P0S == null || !C3P0S.containsKey(key)) {
-//				try {
-//					cpds = this.createMyDatasources();
-//				} catch (Exception e) {
-//					_connected = false;
-//					this._ErrorMsg = e.getMessage();
-//					throw e;
-//				}
-//			} else {
-//				cpds = C3P0S.get(key);
-//			}
-//
-//			try {
-//				this._conn = cpds.getConnection();
-//				_connected = true;
-//			} catch (SQLException e) {
-//				_connected = false;
-//				this._ErrorMsg = e.getMessage();
-//				throw e;
-//			}
-//		}
-		return true;
-	}
-	synchronized DruidDataSource createMyDatasourcesDruids() throws Exception {
-		if (DRUIDS == null) {
-			DRUIDS = new HashMap<String, DruidDataSource>();
 		}
+
+		return _connected;
+	}
+
+	/**
+	 * 创建自定义的数据库连接池
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	private DataSource createMyDatasource() throws Exception {
+		String poolType = this._Cfg.getPool().get("poolType");
+		if ("druid".equalsIgnoreCase(poolType)) {
+			return this.createMyDatasourcesDruids();
+		} else {
+			return this.createMyDatasourcesHikariCP();
+		}
+	}
+
+	/**
+	 * 使用 HikariCP（默认）
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	private DataSource createMyDatasourcesHikariCP() throws Exception {
+		LOGGER.info("Using HikariCP");
 		String driverClassName = _Cfg.getPool().get("driverClassName");
 		String url = _Cfg.getPool().get("url");
 		String username = _Cfg.getPool().get("username");
 		String password = _Cfg.getPool().get("password");
 		String maxActive = _Cfg.getPool().get("maxActive");
-		//String maxIdle = _Cfg.getPool().get("maxIdle");
+		// String maxIdle = _Cfg.getPool().get("maxIdle");
 
+		HikariDataSource cpds = new HikariDataSource();
 
+		cpds.setDriverClassName(driverClassName);
+		cpds.setJdbcUrl(url);
+		cpds.setUsername(username);
+		cpds.setPassword(password);
+		try {
+			int maxActive1 = Integer.parseInt(maxActive);
+			cpds.setMaximumPoolSize(maxActive1);
+		} catch (Exception err) {
+			cpds.setMaximumPoolSize(40);
+		}
+
+		cpds.setMinimumIdle(1);
+
+		try {
+			// 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0
+			String maxWait = _Cfg.getPool().get("maxWait");
+			long maxWaitMs = Long.parseLong(maxWait) * 1000;
+			cpds.setIdleTimeout(maxWaitMs);
+		} catch (Exception err) {
+			// 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0
+			cpds.setIdleTimeout(60 * 1000);
+		}
+		DATASOURCES.put(_Cfg.getName().toUpperCase().trim(), cpds);
+		return cpds;
+	}
+
+	/**
+	 * 使用 Druid
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	private DataSource createMyDatasourcesDruids() throws Exception {
+		LOGGER.info("Using Druid");
+
+		String driverClassName = _Cfg.getPool().get("driverClassName");
+		String url = _Cfg.getPool().get("url");
+		String username = _Cfg.getPool().get("username");
+		String password = _Cfg.getPool().get("password");
+		String maxActive = _Cfg.getPool().get("maxActive");
+		// String maxIdle = _Cfg.getPool().get("maxIdle");
 
 		DruidDataSource cpds = new DruidDataSource();
 
@@ -155,7 +191,7 @@ public class DataHelper {
 		cpds.setUsername(username);
 		cpds.setPassword(password);
 		cpds.setMaxActive(Integer.parseInt(maxActive));
-		
+
 		cpds.setInitialSize(1);
 		cpds.setMinIdle(1);
 		cpds.setFilters("stat");
@@ -163,11 +199,11 @@ public class DataHelper {
 		cpds.setTestOnBorrow(false);
 		cpds.setTestOnReturn(false);
 		cpds.setTestWhileIdle(false);
-		
-		//查询超时 60 s
+
+		// 查询超时 60 s
 		cpds.setValidationQueryTimeout(60);
 		// cpds.setConnectionProperties("druid.stat.mergeSql=true");
-		//cpds.setValidationQuery("select 1");
+		// cpds.setValidationQuery("select 1");
 		try {
 			// 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0
 			String maxWait = _Cfg.getPool().get("maxWait");
@@ -175,39 +211,7 @@ public class DataHelper {
 		} catch (Exception err) {
 			cpds.setMaxWait(60);
 		}
-		DRUIDS.put(_Cfg.getName().toUpperCase().trim(), cpds);
-		return cpds;
-	}
-	synchronized ComboPooledDataSource createMyDatasources() throws Exception {
-		if (C3P0S == null) {
-			C3P0S = new HashMap<String, ComboPooledDataSource>();
-		}
-		String driverClassName = _Cfg.getPool().get("driverClassName");
-		String url = _Cfg.getPool().get("url");
-		String username = _Cfg.getPool().get("username");
-		String password = _Cfg.getPool().get("password");
-		String maxActive = _Cfg.getPool().get("maxActive");
-		String maxIdle = _Cfg.getPool().get("maxIdle");
-
-
-
-		ComboPooledDataSource cpds = new ComboPooledDataSource();
-
-		cpds.setDriverClass(driverClassName);
-		cpds.setJdbcUrl(url);
-		cpds.setUser(username);
-		cpds.setPassword(password);
-		cpds.setMaxPoolSize(Integer.parseInt(maxActive));
-		cpds.setMinPoolSize(5);
-		cpds.setMaxIdleTime(Integer.parseInt(maxIdle));
-		try {
-			// 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0
-			String maxWait = _Cfg.getPool().get("maxWait");
-			cpds.setMaxConnectionAge(Integer.parseInt(maxWait));
-		} catch (Exception err) {
-			cpds.setMaxConnectionAge(60);
-		}
-		C3P0S.put(_Cfg.getName().toUpperCase().trim(), cpds);
+		DATASOURCES.put(_Cfg.getName().toUpperCase().trim(), cpds);
 		return cpds;
 	}
 
@@ -244,6 +248,7 @@ public class DataHelper {
 		this._ListPrepared.add(pst);
 		return pst;
 	}
+
 	/**
 	 * 获取CallableStatement
 	 * 

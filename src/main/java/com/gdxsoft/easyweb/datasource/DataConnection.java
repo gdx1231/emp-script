@@ -1124,16 +1124,9 @@ public class DataConnection {
 
 		String sql1 = rebuildSql(sql);
 		this.createEwaSplitTempData(); // guolei 2015-09-08
-
 		SqlPart sp = new SqlPart();
-		String sqlDbType = "";
-		if (this.getDatabaseType().equals("ORACLE")) {
-			sqlDbType = com.alibaba.druid.util.JdbcUtils.ORACLE;
-		} else if (this.getDatabaseType().equals("MSSQL")) {
-			sqlDbType = com.alibaba.druid.util.JdbcUtils.SQL_SERVER;
-		} else if (this.getDatabaseType().equals("MYSQL")) {
-			sqlDbType = com.alibaba.druid.util.JdbcUtils.MYSQL;
-		}
+		String sqlDbType = this.getDatabaseType().toLowerCase();
+		 
 		// 解析update ，提取表名和where值
 		boolean is_ok = sp.setUpdateSql(sql1, sqlDbType);
 
