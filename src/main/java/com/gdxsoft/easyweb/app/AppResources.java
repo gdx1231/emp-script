@@ -12,7 +12,6 @@ import com.gdxsoft.easyweb.cache.CachedValueManager;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFileCheck;
-import com.gdxsoft.easyweb.utils.UPath;
 
 public class AppResources {
 

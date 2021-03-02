@@ -1,6 +1,7 @@
 package com.gdxsoft.easyweb.cache;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 值缓存管理
@@ -10,7 +11,7 @@ import java.util.HashMap;
  */
 public class CachedValueManager {
 
-	private static HashMap<Integer, CachedValue> _MAP = new HashMap<Integer, CachedValue>();
+	private static Map<Integer, CachedValue> _MAP = new ConcurrentHashMap<Integer, CachedValue>();
 
 	/**
 	 * 获取缓存，如果存在并在指定的存活时间内，则返回 <br>

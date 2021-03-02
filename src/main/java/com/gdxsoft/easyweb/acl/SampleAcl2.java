@@ -5,7 +5,8 @@ import com.gdxsoft.easyweb.script.RequestValue;
 public class SampleAcl2 implements IAcl2 {
 
 	private RequestValue _RequestValue;
-	private String _GoToUrl; //验证失败跳转页面
+	private String _GoToUrl; // 验证失败跳转页面
+
 	public boolean canRun() {
 		return true;
 	}
@@ -13,7 +14,7 @@ public class SampleAcl2 implements IAcl2 {
 	public SampleAcl2() {
 
 	}
-	 
+
 	public void setRequestValue(RequestValue requestValue) {
 		this._RequestValue = requestValue;
 
@@ -31,7 +32,7 @@ public class SampleAcl2 implements IAcl2 {
 	}
 
 	public boolean canRunAction(String actionName) {
-		if(actionName.equalsIgnoreCase("OnPageLoad")){
+		if (actionName.equalsIgnoreCase("OnPageLoad")) {
 			return true;
 		}
 		return false;
@@ -40,9 +41,5 @@ public class SampleAcl2 implements IAcl2 {
 	public String getNotRunTitle() {
 		return "NOT ALLOW RUN!";
 	}
- 
- 
- 
- 
 
 }
