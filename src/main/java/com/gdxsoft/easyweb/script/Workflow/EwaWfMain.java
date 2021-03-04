@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTRow;
@@ -20,7 +21,7 @@ import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class EwaWfMain {
-	private static Logger LOGGER = Logger.getLogger(EwaWfMain.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(EwaWfMain.class);
 	/**
 	 * 当前节点
 	 */
@@ -291,7 +292,7 @@ public class EwaWfMain {
 			IEwaWfNotification impl = (IEwaWfNotification) notificationClass;
 			impl.notification(rv, this.getWf(), unitCur, unitNext);
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 	}
 

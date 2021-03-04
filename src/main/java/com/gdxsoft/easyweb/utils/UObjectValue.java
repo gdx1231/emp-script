@@ -11,8 +11,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -27,7 +28,7 @@ import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class UObjectValue {
-	private static Logger LOGGER = Logger.getLogger(UObjectValue.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(UObjectValue.class);
 
 	public static Object convert(Class<?> t, Object val) {
 		if (val == null)
@@ -891,7 +892,7 @@ public class UObjectValue {
 				try {
 					v[0] = UConvert.ToInt32(str);
 				} catch (Exception err) {
-					LOGGER.error(err);
+					LOGGER.error(err.getLocalizedMessage());
 					return false;
 				}
 			}
@@ -912,7 +913,7 @@ public class UObjectValue {
 						v[0] = Utils.getDate(t, "yyyy-MM-dd hh:mm:ss.SSS");
 					}
 				} catch (Exception err) {
-					LOGGER.error(err);
+					LOGGER.error(err.getLocalizedMessage());
 					return false;
 				}
 			}
@@ -924,7 +925,7 @@ public class UObjectValue {
 				try {
 					v[0] = UConvert.ToDouble(str);
 				} catch (Exception err) {
-					LOGGER.error(err);
+					LOGGER.error(err.getLocalizedMessage());
 					return false;
 				}
 			}

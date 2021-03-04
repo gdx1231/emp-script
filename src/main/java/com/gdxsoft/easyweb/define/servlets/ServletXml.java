@@ -12,8 +12,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.gdxsoft.easyweb.define.CodeFormat;
@@ -45,7 +46,7 @@ public class ServletXml extends HttpServlet {
 	 *
 	 */
 	private static final long serialVersionUID = 3799263110869941332L;
-	private static Logger LOGGER = Logger.getLogger(ServletXml.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(ServletXml.class);
 
 	public ServletXml() {
 		super();
@@ -429,7 +430,7 @@ public class ServletXml extends HttpServlet {
 			rst.put("MSG", pathAndName);
 		} catch (IOException e) {
 			rst.put("ERR", e);
-			LOGGER.info(e);
+			LOGGER.info(e.getLocalizedMessage());
 		}
 
 		return rst;

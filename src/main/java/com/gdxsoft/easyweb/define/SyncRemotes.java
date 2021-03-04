@@ -5,7 +5,8 @@ import java.util.HashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -25,7 +26,7 @@ import com.gdxsoft.easyweb.utils.UXml;
 public class SyncRemotes {
 
 	public static HashMap<String, SyncRemote> MAP_REMOTE;
-	private static Logger LOOGER = Logger.getLogger(SqlCached.class);
+	private static Logger LOOGER = LoggerFactory.getLogger(SqlCached.class);
 
 	public SyncRemotes() {
 		initCfgs();

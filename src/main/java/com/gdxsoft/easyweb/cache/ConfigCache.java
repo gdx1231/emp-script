@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.script.project.Project;
@@ -15,7 +16,7 @@ import com.gdxsoft.easyweb.utils.UFileCheck;
 import com.gdxsoft.easyweb.utils.UPath;
 
 public class ConfigCache {
-	private static Logger LOGGER = Logger.getLogger(ConfigCache.class);
+	private static  Logger LOGGER = LoggerFactory.getLogger(ConfigCache.class);
 	private static ConcurrentHashMap<String, Object> _Objects = new ConcurrentHashMap<String, Object>();
 
 	/**

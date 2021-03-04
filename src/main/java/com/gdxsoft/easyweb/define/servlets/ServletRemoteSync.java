@@ -12,9 +12,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.define.SyncRemote;
 import com.gdxsoft.easyweb.define.SyncRemotes;
@@ -30,7 +31,7 @@ import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
  * 
  */
 public class ServletRemoteSync extends HttpServlet {
-	private static Logger LOGGER = Logger.getLogger(ServletRemoteSync.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(ServletRemoteSync.class);
 	/**
 	 * 
 	 */
@@ -101,7 +102,7 @@ public class ServletRemoteSync extends HttpServlet {
 		try {
 			session = _Request.getSession();
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 
 		RequestValue rv = new RequestValue(_Request, session);
@@ -180,7 +181,7 @@ public class ServletRemoteSync extends HttpServlet {
 					String contentDecode = s.decode(contentEncode);
 					contentJson = new JSONObject(contentDecode);
 				} catch (Exception err) {
-					LOGGER.error(err);
+					LOGGER.error(err.getLocalizedMessage());
 					out("{RST:false,ERR:'decode error'}");
 					return;
 				}
@@ -215,7 +216,7 @@ public class ServletRemoteSync extends HttpServlet {
 					String contentDecode = s.decode(contentEncode);
 					contentJson = new JSONObject(contentDecode);
 				} catch (Exception err) {
-					LOGGER.error(err);
+					LOGGER.error(err.getLocalizedMessage());
 
 					out("{RST:false,ERR:'decode error'}");
 					return;
@@ -255,7 +256,7 @@ public class ServletRemoteSync extends HttpServlet {
 					String contentDecode = s.decode(contentEncode);
 					contentJson = new JSONObject(contentDecode);
 				} catch (Exception err) {
-					LOGGER.error(err);
+					LOGGER.error(err.getLocalizedMessage());
 					out("{RST:false,ERR:'decode error'}");
 					return;
 				}
@@ -279,7 +280,7 @@ public class ServletRemoteSync extends HttpServlet {
 				out(rstJson.toString());
 			}
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 
 			rstJson.put("RST", false);
 			rstJson.put("method", method);

@@ -1,6 +1,8 @@
 package com.gdxsoft.easyweb.datasource;
 
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.cache.SqlCached;
 import com.gdxsoft.easyweb.script.RequestValue;
@@ -26,7 +28,7 @@ public class CreateJsonData {
 
 	private RequestValue rv_;
 	private static String tag = "EWA_JSON";
-	private static Logger LOOGER = Logger.getLogger(SqlCached.class);
+	private static Logger LOOGER = LoggerFactory.getLogger(SqlCached.class);
 
 	public CreateJsonData(RequestValue rv) {
 		rv_ = rv;
@@ -43,7 +45,7 @@ public class CreateJsonData {
 			}
 			return sql;
 		} catch (Exception err) {
-			LOOGER.error(err);
+			LOOGER.error(err.getLocalizedMessage());
 			throw err;
 		}
 	}

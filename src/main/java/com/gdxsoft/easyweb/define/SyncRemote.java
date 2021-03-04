@@ -9,9 +9,10 @@ import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -23,7 +24,7 @@ import com.gdxsoft.easyweb.utils.UNet;
 import com.gdxsoft.easyweb.utils.UPath;
 
 public class SyncRemote {
-	private static Logger LOGGER = Logger.getLogger(SyncRemote.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(SyncRemote.class);
 	private String _CfgKey; // 本配置的Key "CFG_" + url.hashCode()
 	private UAes AES;
 	private JSONObject CFGS;
@@ -60,7 +61,7 @@ public class SyncRemote {
 	 * @throws Exception
 	 */
 	public String decode(String encodeString) throws Exception {
-		return AES.getDesString(encodeString);
+		return AES.decrypt(encodeString);
 	}
 
 	/**
@@ -71,7 +72,7 @@ public class SyncRemote {
 	 * @throws Exception
 	 */
 	public String encode(String str) throws Exception {
-		return AES.getEncString(str);
+		return AES.encrypt(str);
 	}
 
 	/**
@@ -126,7 +127,7 @@ public class SyncRemote {
 		ff = new File(path);
 		if (ff.exists()) {
 			LOGGER.info("读取缓存文件");
-			LOGGER.info(ff.getAbsoluteFile());
+			LOGGER.info(ff.getAbsoluteFile().getAbsolutePath());
 			try {
 				String cnt = UFile.readFileText(path);
 				_HisJson = new JSONObject(cnt);
@@ -370,7 +371,7 @@ public class SyncRemote {
 		paras.put("fjson", this._Json);
 
 		// 加密内容
-		String contentEncode = AES.getEncString(paras.toString());
+		String contentEncode = AES.encrypt(paras.toString());
 
 		HashMap<String, String> vals = new HashMap<String, String>();
 		vals.put("method", "recv_json"); // 模式
@@ -486,7 +487,7 @@ public class SyncRemote {
 		try {
 			buf = decodeFile(cnt);
 		} catch (IOException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.toString());
 
@@ -499,7 +500,7 @@ public class SyncRemote {
 			obj.put("f1", name);
 			return obj.toString();
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.toString());
 
@@ -559,7 +560,7 @@ public class SyncRemote {
 		vals.put("cfg_key", this._CfgKey);
 
 		// 加密内容
-		String contentEncode = AES.getEncString(paras.toString());
+		String contentEncode = AES.encrypt(paras.toString());
 		vals.put("GDX", contentEncode); // 内容
 
 		// 提交到远程获取文件

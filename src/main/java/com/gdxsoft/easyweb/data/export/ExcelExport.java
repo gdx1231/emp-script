@@ -10,7 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.json.JSONArray;
 
 import com.gdxsoft.easyweb.data.DTColumn;
@@ -36,7 +37,7 @@ public class ExcelExport implements IExport {
 	private WritableWorkbook _WorkBook;
 	private String _Lang;
 	private JSONArray _WaitMergeCells;
-	private static Logger LOGGER = Logger.getLogger(ExcelExport.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(ExcelExport.class);
 
 	/*
 	 * (non-Javadoc)
@@ -77,7 +78,7 @@ public class ExcelExport implements IExport {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		} finally {
 		}
@@ -231,7 +232,7 @@ public class ExcelExport implements IExport {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		} finally {
 		}

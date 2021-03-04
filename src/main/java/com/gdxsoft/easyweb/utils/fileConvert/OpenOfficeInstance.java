@@ -2,16 +2,17 @@ package com.gdxsoft.easyweb.utils.fileConvert;
 
 import java.io.File;
 
-import org.apache.log4j.Logger;
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
 import org.artofsolving.jodconverter.office.OfficeManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.utils.UPath;
 
 public class OpenOfficeInstance {
 
-	private static Logger LOGGER = Logger.getLogger(OpenOfficeInstance.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(OpenOfficeInstance.class);
 
 	public static OfficeManager officeManager;
 	public static int port[] = { 8100 };
@@ -39,7 +40,7 @@ public class OpenOfficeInstance {
 
 			LOGGER.error("office转换服务启动失败!详细信息:" + ce);
 			LOGGER.error(UPath.getCVT_OPENOFFICE_HOME());
-			LOGGER.error(ce);
+			LOGGER.error(ce.getLocalizedMessage());
 			SERVICE_START = false;
 		}
 	}

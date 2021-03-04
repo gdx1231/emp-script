@@ -6,9 +6,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -24,7 +25,7 @@ import com.gdxsoft.easyweb.utils.UXml;
  *
  */
 public class Resources {
-	private static Logger LOOGER = Logger.getLogger(Resources.class);
+	private static Logger LOOGER = LoggerFactory.getLogger(Resources.class);
 	private static HashMap<String, Resources> INSTS = new HashMap<String, Resources>();
 
 	/**

@@ -11,7 +11,8 @@ import java.util.Iterator;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -32,7 +33,7 @@ import com.gdxsoft.easyweb.utils.*;
  * 
  */
 public class UserConfig implements Serializable {
-	private static Logger LOGGER = Logger.getLogger(UserConfig.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(UserConfig.class);
 	/**
 	 * 
 	 */
@@ -159,7 +160,7 @@ public class UserConfig implements Serializable {
 				try {
 					configStatus.setMd5(tb.getCell(0, "md5").toString());
 				} catch (Exception e) {
-					LOGGER.warn(e);
+					LOGGER.warn(e.getLocalizedMessage());
 				}
 				LOGGER.debug("SQL:" + xmlName + "/" + itemName + "," + configStatus.length() + ","
 						+ configStatus.lastModified());

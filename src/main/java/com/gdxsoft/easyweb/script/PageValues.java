@@ -2,13 +2,14 @@ package com.gdxsoft.easyweb.script;
 
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class PageValues {
-	private static Logger LOGGER = Logger.getLogger(PageValues.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(PageValues.class);
 	private MTable _Values;
 
 	public PageValues() {

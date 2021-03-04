@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.gdxsoft.easyweb.data.DTCell;
@@ -34,7 +35,7 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class FrameFrame extends FrameBase implements IFrame {
-	private static Logger LOGGER = Logger.getLogger(FrameFrame.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(FrameFrame.class);
 	private boolean _IsGroup;
 	private String[] _GroupInfos;
 	private String _GroupShow;
@@ -61,7 +62,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 		try {
 			super.createSkinTop();
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		}
 		super.addDebug(this, "HTML", "createSkinTop");
@@ -69,7 +70,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 		try {
 			super.createCss();
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		}
 		
@@ -80,7 +81,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 		try {
 			this.createContent();
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		}
 		
@@ -90,7 +91,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 		try {
 			this.createJsFramePage();
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		}
 		super.addDebug(this, "HTML", "createJsFramePage");
@@ -98,7 +99,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 		try {
 			super.createSkinBottom();
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		}
 		

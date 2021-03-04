@@ -19,10 +19,11 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -84,7 +85,7 @@ public class DTTable implements Serializable {
 		this._TimeDiffMinutes = timeDiffMinutes;
 	}
 
-	private static Logger LOOGER = Logger.getLogger(SqlCached.class);
+	private static Logger LOOGER = LoggerFactory.getLogger(SqlCached.class);
 
 	// 郭磊
 	// 2016-08-20
@@ -196,6 +197,7 @@ public class DTTable implements Serializable {
 		}
 		return sb.toString();
 	}
+
 	/**
 	 * 获取 JDBC 表，自动关闭连接,使用默认的数据库连接
 	 * 
@@ -1093,7 +1095,7 @@ public class DTTable implements Serializable {
 		try {
 			json_o = new JSONObject(json_str);
 		} catch (Exception err) {
-			LOOGER.error(err);
+			LOOGER.error(err.getMessage());
 			return;
 		}
 		Iterator<?> it = json_o.keys();

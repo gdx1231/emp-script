@@ -2,9 +2,10 @@ package com.gdxsoft.easyweb.cache;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
@@ -17,7 +18,7 @@ import com.gdxsoft.easyweb.utils.UFileCheck;
  *
  */
 public class ConfigCacheWidthSqlCached {
-	private static Logger LOOGER = Logger.getLogger(ConfigCacheWidthSqlCached.class);
+	private static Logger LOOGER = LoggerFactory.getLogger(ConfigCacheWidthSqlCached.class);
 
 	/**
 	 * 获取配置文件的缓存key
@@ -91,10 +92,10 @@ public class ConfigCacheWidthSqlCached {
 				return uc;
 
 			} catch (ClassNotFoundException e) {
-				LOOGER.error(e);
+				LOOGER.error(e.getMessage());
 				return null;
 			} catch (IOException e) {
-				LOOGER.error(e);
+				LOOGER.error(e.getMessage());
 				return null;
 			}
 		}
@@ -142,12 +143,12 @@ public class ConfigCacheWidthSqlCached {
 			} catch (ClassNotFoundException e) {
 				UFileCheck.remove(id);
 				UFileCheck.remove(fileId);
-				LOOGER.error(e);
+				LOOGER.error(e.getMessage());
 				return null;
 			} catch (IOException e) {
 				UFileCheck.remove(id);
 				UFileCheck.remove(fileId);
-				LOOGER.error(e);
+				LOOGER.error(e.getMessage());
 				return null;
 			}
 		} else {
@@ -297,7 +298,7 @@ public class ConfigCacheWidthSqlCached {
 			cached.add(key, userConfig.toSerialize());
 			UFileCheck.putTimeAndFileCode(key.hashCode(), System.currentTimeMillis(), 0);
 		} catch (IOException e) {
-			LOOGER.error(e);
+			LOOGER.error(e.getMessage());
 		}
 
 	}

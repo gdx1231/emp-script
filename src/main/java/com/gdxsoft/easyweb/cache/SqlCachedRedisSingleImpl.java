@@ -3,6 +3,8 @@ package com.gdxsoft.easyweb.cache;
 import java.io.IOException;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.utils.UConvert;
 
@@ -10,7 +12,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
-import org.apache.log4j.Logger;
 
 /**
  * 单点redis的操作
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
  */
 public class SqlCachedRedisSingleImpl implements ISqlCached {
 	private static JedisPool POOL;
-	private static Logger LOOGER = Logger.getLogger(SqlCachedRedisSingleImpl.class);
+	private static Logger LOOGER = LoggerFactory.getLogger(SqlCachedRedisSingleImpl.class);
 	public static Boolean DEBUG = true;
 
 	/**

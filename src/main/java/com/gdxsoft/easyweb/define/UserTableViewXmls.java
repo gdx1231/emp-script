@@ -16,13 +16,14 @@ import com.gdxsoft.easyweb.define.database.Tables;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UXml;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 public class UserTableViewXmls {
 
-	private static Logger LOGGER = Logger.getLogger(UserTableViewXmls.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(UserTableViewXmls.class);
 	private ConnectionConfigs _Cfgs;
 	private Schema _Schema;
 	private Tables _Tables;

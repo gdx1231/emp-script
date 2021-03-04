@@ -6,8 +6,9 @@ import java.util.Date;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -21,7 +22,7 @@ import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
-	private static Logger LOGER = Logger.getLogger(UpdateXmlImpl.class);
+	private static Logger LOGER = LoggerFactory.getLogger(UpdateXmlImpl.class);
 	private int _BakFilesCount;
 
 	public UpdateXmlImpl(String xmlName) {
@@ -39,12 +40,9 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	/**
 	 * 导入xml配置
 	 * 
-	 * @param path
-	 *            路径
-	 * @param name
-	 *            xml名称
-	 * @param sourceXmlFilePath
-	 *            要导入的xml文件
+	 * @param path              路径
+	 * @param name              xml名称
+	 * @param sourceXmlFilePath 要导入的xml文件
 	 * @return
 	 */
 	public JSONObject importXml(String path, String name, String sourceXmlFilePath) {
@@ -79,19 +77,19 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 		try {
 			doc = UXml.retDocument(f1.getAbsolutePath());
 		} catch (ParserConfigurationException e) {
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.getMessage());
 
 			return obj;
 		} catch (SAXException e) {
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.getMessage());
 
 			return obj;
 		} catch (IOException e) {
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.getMessage());
 

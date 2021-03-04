@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -23,7 +24,7 @@ import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 
 public class JdbcConfig {
-	private static Logger LOGER = Logger.getLogger(JdbcConfig.class);
+	private static Logger LOGER = LoggerFactory.getLogger(JdbcConfig.class);
 
 	/**
 	 * 导入文件
@@ -597,7 +598,7 @@ public class JdbcConfig {
 				String xml = tb.getCell(i, "XMLDATA").toString();
 				sb.append(xml);
 			} catch (Exception e) {
-				LOGER.error(e);
+				LOGER.error(e.getLocalizedMessage());
 			}
 		}
 		sb.append("</EasyWebTemplates>");
@@ -662,7 +663,7 @@ public class JdbcConfig {
 			UFile.createNewTextFile(cahced_file_name + ".json", obj.toString());
 			return true;
 		} catch (IOException e) {
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 
 			return false;
 		}
@@ -736,7 +737,7 @@ public class JdbcConfig {
 				}
 			}
 		} catch (Exception e) {
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 
 		}
 		return true;
@@ -809,7 +810,7 @@ public class JdbcConfig {
 			xmlData = tb2.getCell(0, "XMLDATA").toString();
 		} catch (Exception e) {
 			xmlData = e.getMessage();
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 		}
 		return xmlData;
 	}

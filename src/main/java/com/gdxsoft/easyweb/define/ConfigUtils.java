@@ -1,25 +1,27 @@
 package com.gdxsoft.easyweb.define;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
-import java.io.*;
-import java.util.HashMap;
-
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 public class ConfigUtils {
 	public static String RECYCLE_NAME = "__recycle__";
 	public static String XML_ROOT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><EasyWebTemplates />";
-	private static Logger LOGGER = Logger.getLogger(ConfigUtils.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(ConfigUtils.class);
 
 	/**
 	 * 获取Xml操作对象
@@ -71,7 +73,7 @@ public class ConfigUtils {
 					cnt = sb.toString();
 				} catch (Exception err) {
 					cnt = "var ddls=[]";
-					LOGGER.error(err);
+					LOGGER.error(err.getLocalizedMessage());
 				}
 			}
 		}

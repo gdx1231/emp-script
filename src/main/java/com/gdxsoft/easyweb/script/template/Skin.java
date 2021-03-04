@@ -6,7 +6,8 @@ import java.util.HashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
@@ -15,7 +16,7 @@ import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public class Skin implements Serializable {
-	private static Logger LOGGER = Logger.getLogger(Skin.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(Skin.class);
 	/**
 	 * 
 	 */
@@ -61,7 +62,7 @@ public class Skin implements Serializable {
 			Skin skin = new Skin();
 			return skin;
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		}
 

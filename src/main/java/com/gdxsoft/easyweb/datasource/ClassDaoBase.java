@@ -9,14 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 
 public class ClassDaoBase<T> {
-	private static Logger LOGGER = Logger.getLogger(ClassDaoBase.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(ClassDaoBase.class);
 	private String _ErrorMsg;
 	private DataConnection _Conn;
 	private String _ConfigName = "default";
@@ -96,22 +97,22 @@ public class ClassDaoBase<T> {
 			obj = (T) this.instanceClass.getDeclaredConstructor().newInstance();
 			return this.executeQuery(sql, obj, arrFields);
 		} catch (InstantiationException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		} catch (IllegalAccessException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		} catch (IllegalArgumentException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		} catch (InvocationTargetException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		} catch (NoSuchMethodException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		} catch (SecurityException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		}
 
@@ -134,22 +135,22 @@ public class ClassDaoBase<T> {
 			obj = (T) this.instanceClass.getDeclaredConstructor().newInstance();
 			return this.executeQuery(sql, obj, this.fields, pkFieldName, pageSize, currentPage);
 		} catch (InstantiationException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		} catch (IllegalAccessException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		} catch (IllegalArgumentException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		} catch (InvocationTargetException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		} catch (NoSuchMethodException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		} catch (SecurityException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return null;
 		}
 

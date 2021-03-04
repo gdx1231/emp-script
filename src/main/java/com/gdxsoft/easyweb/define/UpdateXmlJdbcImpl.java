@@ -6,8 +6,9 @@ import java.util.Date;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -26,7 +27,7 @@ import com.gdxsoft.easyweb.utils.Utils;
  *
  */
 public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
-	private static Logger LOGER = Logger.getLogger(UpdateXmlJdbcImpl.class);
+	private static Logger LOGER = LoggerFactory.getLogger(UpdateXmlJdbcImpl.class);
 	private Integer _Hash;
 	private String _ItemName;
 	private boolean _IsBatch;
@@ -73,19 +74,19 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		try {
 			UXml.retDocument(file.getAbsolutePath());
 		} catch (ParserConfigurationException e) {
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.getMessage());
 
 			return obj;
 		} catch (SAXException e) {
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.getMessage());
 
 			return obj;
 		} catch (IOException e) {
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.getMessage());
 
@@ -98,7 +99,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 
 			return obj;
 		} catch (Exception e) {
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.getMessage());
 
@@ -267,7 +268,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 			this._Md5 = tb.getCell(0, "MD5").toString();
 			return xml;
 		} catch (Exception e) {
-			LOGER.error(e);
+			LOGER.error(e.getLocalizedMessage());
 			return null;
 		}
 

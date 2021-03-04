@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTTable;
@@ -36,7 +37,7 @@ import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ActionListFrame extends ActionBase implements IAction {
-	private static Logger LOG = Logger.getLogger(ActionListFrame.class);
+	private static Logger LOG = LoggerFactory.getLogger(ActionListFrame.class);
 
 	public void executeCallClass(String name) throws Exception {
 
@@ -550,7 +551,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 						sb.al(")");
 					} catch (Exception err) {
 						LOG.error(lsp.toString());
-						LOG.error(err);
+						LOG.error(err.getLocalizedMessage());
 					}
 				} else if (dataType.indexOf("NUM") == 0 || dataType.indexOf("INT") >= 0) {
 					try {
@@ -563,7 +564,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 					} catch (Exception err) {
 						sb.append(" ");
 						LOG.error(lsp.toString());
-						LOG.error(err);
+						LOG.error(err.getLocalizedMessage());
 					}
 
 				} else {

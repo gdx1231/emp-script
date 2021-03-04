@@ -8,7 +8,8 @@ import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -27,7 +28,7 @@ import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class TreeViewMain {
-	private static Logger LOGGER = Logger.getLogger(TreeViewMain.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(TreeViewMain.class);
 	private String _Caption;
 	private String _FieldDispVal;
 	private String _FieldKey;
@@ -628,7 +629,7 @@ public class TreeViewMain {
 		try {
 			addColsHtml = this.createTreeAddHtml(node);
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			addColsHtml = "";
 		}
 

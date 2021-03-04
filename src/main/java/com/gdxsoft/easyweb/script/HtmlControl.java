@@ -4,7 +4,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.acl.IAcl;
 import com.gdxsoft.easyweb.acl.SampleAcl;
@@ -18,7 +19,7 @@ import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
 
 public class HtmlControl {
-	private static Logger LOGGER = Logger.getLogger(HtmlControl.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(HtmlControl.class);
 	private boolean isError = false;
 	private String Html;
 	private String _Title;
@@ -152,7 +153,7 @@ public class HtmlControl {
 			this.initHtmlCreator(hc);
 		} catch (Exception e) {
 			isError = true;
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 		}
 
 	}
@@ -175,7 +176,7 @@ public class HtmlControl {
 			this.initHtmlCreator(hc);
 		} catch (Exception e) {
 			isError = true;
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 		}
 
 	}

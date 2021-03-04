@@ -3,6 +3,8 @@ package com.gdxsoft.easyweb.cache;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -12,13 +14,12 @@ import com.gdxsoft.easyweb.utils.UPath;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisPoolConfig;
 
-import org.apache.log4j.Logger;
 
 public class SqlCached {
 
 	private static SqlCached INSTANCE;
 	public static Boolean DEBUG = false;
-	private static Logger LOGGER = Logger.getLogger(SqlCached.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(SqlCached.class);
 
 	/**
 	 * 获取 SqlCached的实例

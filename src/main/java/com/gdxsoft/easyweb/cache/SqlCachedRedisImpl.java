@@ -3,8 +3,9 @@ package com.gdxsoft.easyweb.cache;
 import java.io.IOException;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.utils.UConvert;
 
@@ -21,7 +22,7 @@ import redis.clients.jedis.JedisPoolConfig;
 public class SqlCachedRedisImpl implements ISqlCached {
 
 	public static Boolean DEBUG = true;
-	private static Logger LOOGER = Logger.getLogger(SqlCachedRedisImpl.class);
+	private static Logger LOOGER = LoggerFactory.getLogger(SqlCachedRedisImpl.class);
 
 	public static SqlCachedRedisImpl getInstance(Set<HostAndPort> clusterNodes, JedisPoolConfig config) {
 		SqlCachedRedisImpl o1 = new SqlCachedRedisImpl();

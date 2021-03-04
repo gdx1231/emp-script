@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.debug.DebugFrames;
@@ -29,7 +30,7 @@ import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class DataConnection {
-	private static Logger LOGGER = Logger.getLogger(DataConnection.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(DataConnection.class);
 
 	private DataHelper _ds;
 	private CallableStatement _cst;
@@ -339,7 +340,7 @@ public class DataConnection {
 			_Connection = _ds.getConnection();
 		} catch (Exception e2) {
 			_IsTrans = false;
-			LOGGER.error(e2);
+			LOGGER.error(e2.getLocalizedMessage());
 			this.setError(e2, "连接到数据库");
 			return false;
 		}
@@ -352,10 +353,10 @@ public class DataConnection {
 			try {
 				_Connection.close();
 			} catch (SQLException e1) {
-				LOGGER.error(e1);
+				LOGGER.error(e1.getLocalizedMessage());
 				this.setError(e1, "关闭错误的事务");
 			}
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			this.setError(e, "事务开始错误");
 			return false;
 		}
@@ -371,7 +372,7 @@ public class DataConnection {
 			this._Connection.commit();
 			return true;
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			this.setError(e, "提交事务");
 			this.close();
 			return false;
@@ -390,7 +391,7 @@ public class DataConnection {
 		try {
 			this._Connection.rollback();
 		} catch (SQLException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			this.setError(e, "回滚事务");
 		} finally {
 			this.close();
@@ -412,7 +413,7 @@ public class DataConnection {
 		try {
 			_Configs = ConnectionConfigs.instance();
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			this._errorMsg = e.getMessage();
 		}
 
@@ -426,7 +427,7 @@ public class DataConnection {
 			this.setRequestValue(rv);
 
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			this._errorMsg = e.getMessage();
 		}
 
@@ -440,7 +441,7 @@ public class DataConnection {
 			this.setRequestValue(rv);
 
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			this._errorMsg = e.getMessage();
 		}
 
@@ -473,7 +474,7 @@ public class DataConnection {
 			_ds.connect();
 			return true;
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return false;
 		}
 	}
@@ -512,7 +513,7 @@ public class DataConnection {
 			writeDebug(this, "SQL", "[executeQuery(sql)] End query.");
 			return true;
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			LOGGER.error(sql);
 			this.setError(e, sql);
 			if (!this.isTrans()) {
@@ -601,7 +602,7 @@ public class DataConnection {
 			return true;
 		} catch (Exception e) {
 			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			LOGGER.error(sql1);
 			setError(e, sql1);
 			return false;
@@ -780,19 +781,19 @@ public class DataConnection {
 		}
 		this.connect();
 		this.getConnection();
-		boolean isMysql =this.getDatabaseType().equals("MYSQL");
+		boolean isMysql = this.getDatabaseType().equals("MYSQL");
 		Statement stmt = null;
 		try {
 			stmt = _Connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
 			for (String key : this._CreateSplitData.getTempData().keySet()) {
 				ArrayList<String> al = this._CreateSplitData.getTempData().get(key);
-				if(isMysql) {
+				if (isMysql) {
 					// mysql 批量更新
 					StringBuilder sb = new StringBuilder();
 					sb.append("insert into _EWA_SPT_DATA(idx,col,tag) values\n");
 					for (int i = 0; i < al.size(); i++) {
-						if(i>0) {
+						if (i > 0) {
 							sb.append(",\n");
 						}
 						sb.append("(");
@@ -816,9 +817,9 @@ public class DataConnection {
 						sb.append(key.replace("'", "''"));
 						sb.append("')");
 						String sql1 = sb.toString();
-	
+
 						// System.out.println(sql1);
-	
+
 						stmt.addBatch(sql1);
 					}
 				}
@@ -828,19 +829,18 @@ public class DataConnection {
 				this._Connection.commit();
 			}
 		} catch (SQLException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 		} finally {
 			if (stmt != null) {
 				try {
 					stmt.close();
 				} catch (SQLException e) {
-					LOGGER.error(e);
+					LOGGER.error(e.getLocalizedMessage());
 				}
 			}
 		}
 
 	}
-	
 
 	/**
 	 * 执行多个更新 sql语句，语句用“;”分割，不能在拼接的Sql中有“;”出现
@@ -1037,7 +1037,7 @@ public class DataConnection {
 
 			return autoKey;
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 			this.writeDebug(this, "ERR", err.getMessage());
 			setError(err, sql1);
 			return -1;
@@ -1055,7 +1055,7 @@ public class DataConnection {
 		try {
 			return Integer.parseInt(autoInc.toString());
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 			this.writeDebug(this, "ERR", err.getMessage());
 			setError(err, sql);
 			return -1;
@@ -1103,7 +1103,7 @@ public class DataConnection {
 			// if (_IsTrans) {// 如果事务处理开始
 			// this.transRollback();
 			// }
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 			LOGGER.error(sql1);
 			this.writeDebug(this, "ERR", err.getMessage());
 			setError(err, sql1);
@@ -1126,7 +1126,7 @@ public class DataConnection {
 		this.createEwaSplitTempData(); // guolei 2015-09-08
 		SqlPart sp = new SqlPart();
 		String sqlDbType = this.getDatabaseType().toLowerCase();
-		 
+
 		// 解析update ，提取表名和where值
 		boolean is_ok = sp.setUpdateSql(sql1, sqlDbType);
 
@@ -1177,7 +1177,7 @@ public class DataConnection {
 			// if (_IsTrans) {// 如果事务处理开始
 			// this.transRollback();
 			// }
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 			LOGGER.error(sql1);
 			this.writeDebug(this, "ERR", err.getMessage());
 			setError(err, sql1);
@@ -1206,7 +1206,7 @@ public class DataConnection {
 			// if (_IsTrans) {// 如果事务处理开始
 			// this.transRollback();
 			// }
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 			LOGGER.error(sql);
 			this.writeDebug(this, "ERR", err.getMessage());
 			setError(err, sql);
@@ -1261,8 +1261,8 @@ public class DataConnection {
 				rs.next();
 				m1 = rs.getInt("GDX");
 			} catch (Exception err) {
-				LOGGER.error(err);
-				LOGGER.error(sb);
+				LOGGER.error(err.getLocalizedMessage());
+				LOGGER.error(sb.toString());
 				this.setError(err, sb.toString());
 				m1 = -1;
 			} finally {
@@ -1270,7 +1270,7 @@ public class DataConnection {
 					rs.close();
 					rs = null;
 				} catch (SQLException e) {
-					LOGGER.error(e);
+					LOGGER.error(e.getLocalizedMessage());
 				}
 				this._ResultSetList.removeAt(rsIndex);
 			}
@@ -1342,7 +1342,7 @@ public class DataConnection {
 		try {
 			sql1 = createJsonData.replaceJsonData(sql1);
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 		// 合成SQL语句，如果参数名为XX_SPLIT，为分割参数
 		// 例如 select * from users where id in(1,2,3)
@@ -1748,7 +1748,7 @@ public class DataConnection {
 				try {
 					r.getResultSet().close();
 				} catch (SQLException e) {
-					LOGGER.error(e);
+					LOGGER.error(e.getLocalizedMessage());
 					setError(e, "Error _resultSet close");
 				}
 			}
@@ -1768,7 +1768,7 @@ public class DataConnection {
 			try {
 				_cst.close();
 			} catch (SQLException e) {
-				LOGGER.error(e);
+				LOGGER.error(e.getLocalizedMessage());
 				setError(e, "Error _cst close !");
 			}
 		}
@@ -1776,7 +1776,7 @@ public class DataConnection {
 			try {
 				_pst.close();
 			} catch (SQLException e) {
-				LOGGER.error(e);
+				LOGGER.error(e.getLocalizedMessage());
 				setError(e, "Error _pst close !");
 			}
 		}
@@ -1874,7 +1874,7 @@ public class DataConnection {
 			}
 			cst.close();
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			LOGGER.error(sql1);
 			this.setError(e, sql);
 		}
@@ -1903,7 +1903,7 @@ public class DataConnection {
 			}
 			cst.close();
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			LOGGER.error(sql);
 			this.setError(e, sql);
 		}
@@ -1922,7 +1922,7 @@ public class DataConnection {
 				String v1 = cst.getString(Integer.parseInt(index));
 				outValues1.put(key, v1);
 			} catch (Exception e) {
-				LOGGER.error(e);
+				LOGGER.error(e.getLocalizedMessage());
 			}
 		}
 		outValues.clear();

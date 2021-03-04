@@ -3,7 +3,8 @@ package com.gdxsoft.easyweb.cache;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.ConnectionConfig;
@@ -13,7 +14,7 @@ import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.msnet.MTableStr;
 
 public class SqlCachedHsqldbImpl implements ISqlCached {
-	private static Logger LOGGER = Logger.getLogger(SqlCachedHsqldbImpl.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(SqlCachedHsqldbImpl.class);
 	private static SqlCachedHsqldbImpl INSTANCE;
 
 	public static String CONN_STR = "____ewa_cached_hsqldb__"; // 必须小写
@@ -39,7 +40,7 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 			INSTANCE = new SqlCachedHsqldbImpl();
 			boolean rst = SqlCachedHsqldbImpl.init();
 			if (!rst) {
-				LOGGER.error(rst);
+				LOGGER.error(rst + "");
 			}
 		}
 		return INSTANCE;
@@ -282,7 +283,7 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 			c1.put(CONN_STR, poolCfg);
 
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 			return false;
 		}
 

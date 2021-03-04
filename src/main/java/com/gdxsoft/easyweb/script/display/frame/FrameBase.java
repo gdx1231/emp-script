@@ -3,9 +3,10 @@ package com.gdxsoft.easyweb.script.display.frame;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -34,7 +35,7 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class FrameBase {
-	private static Logger LOGGER = Logger.getLogger(FrameBase.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(FrameBase.class);
 	private HashMap<String, String> _ItemParentHtmls = new HashMap<String, String>();
 	private HtmlClass _HtmlClass;
 
@@ -51,7 +52,7 @@ public class FrameBase {
 		try {
 			createCss();
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 
 		String id = "vue_" + getHtmlClass().getSysParas().getFrameUnid();
@@ -73,7 +74,7 @@ public class FrameBase {
 
 			doc.addJs("vue", vueJs.toString(), false);
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 		}
 
 		String pageAddTop = this.getPageItemValue("AddHtml", "Top");

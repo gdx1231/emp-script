@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.cache.CachedValue;
 import com.gdxsoft.easyweb.cache.CachedValueManager;
@@ -45,7 +46,7 @@ import com.gdxsoft.easyweb.utils.msnet.MTable;
  * 
  */
 public class FrameList extends FrameBase implements IFrame {
-	private static Logger LOGGER = Logger.getLogger(FrameList.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(FrameList.class);
 
 	int _ListFrameRecordCount = 0;
 
@@ -100,7 +101,7 @@ public class FrameList extends FrameBase implements IFrame {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getLocalizedMessage());
 		}
 
 		DataConnection conn = super.getHtmlClass().getItemValues().getDataConn();
@@ -351,19 +352,19 @@ public class FrameList extends FrameBase implements IFrame {
 		try {
 			super.createSkinTop();
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 
 		try {
 			super.createCss();
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 
 		try {
 			super.createJsTop();
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 
 		// 重绘为box
@@ -390,26 +391,26 @@ public class FrameList extends FrameBase implements IFrame {
 				}
 			}
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 
 		try {
 			// 生成主底部 AddHtml-Bottom
 			this.createSkinBottom();
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 		try {
 			// 配置页面定义的底部附加 Js
 			this.createJsBottom();
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 		try {
 			// Frame脚本
 			this.createJsFramePage();
 		} catch (Exception err) {
-			LOGGER.error(err);
+			LOGGER.error(err.getLocalizedMessage());
 		}
 	}
 
@@ -432,7 +433,6 @@ public class FrameList extends FrameBase implements IFrame {
 
 		}
 
-		 
 	}
 
 	/**
@@ -1692,7 +1692,6 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 
 	}
- 
 
 	private String createSkinFCFist(String lang) {
 
