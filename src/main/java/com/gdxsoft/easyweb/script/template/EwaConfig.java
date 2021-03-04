@@ -2,17 +2,19 @@ package com.gdxsoft.easyweb.script.template;
 
 import java.io.Serializable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.utils.UFileCheck;
+import com.gdxsoft.easyweb.SystemXmlUtils;
 import com.gdxsoft.easyweb.utils.UObjectValue;
-import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
-public class EwaConfig implements Cloneable , Serializable{
+public class EwaConfig implements Cloneable, Serializable {
+	private static Logger LOGGER = LoggerFactory.getLogger(EwaConfig.class);
 	/**
 	 * 
 	 */
@@ -27,32 +29,41 @@ public class EwaConfig implements Cloneable , Serializable{
 	private EwaConfigItems _ConfigItems;
 	private EwaConfigFrames _ConfigFrames;
 
-	private static String CFG_NAME = "EwaConfig.xml";
+	private final static String CFG_NAME = "EwaConfig.xml";
 	private Document _XmlDoc;
 	private UObjectValue _OV;
 	private static EwaConfig CUR_CONFIG;
 
 	/**
-	 * 获取config定义对象
+	 * Get the instance of EwaConfig
 	 * 
-	 * @return
+	 * @return instance of EwaConfig
 	 * @throws Exception
 	 */
-	public static EwaConfig instance() throws Exception {
-		String path = UPath.getConfigPath() + CFG_NAME;
-		if (CUR_CONFIG != null && !UFileCheck.fileChanged(path)) {
-			return CUR_CONFIG;
-		} else {
-			CUR_CONFIG = new EwaConfig();
-			return CUR_CONFIG;
+	public synchronized static EwaConfig instance() throws Exception {
+		if (CUR_CONFIG != null) {
+			if(!SystemXmlUtils.checkConfChanged(CFG_NAME)) {
+				return CUR_CONFIG;
+			}
 		}
+		CUR_CONFIG = new EwaConfig();
+		return CUR_CONFIG;
 	}
 
 	public EwaConfig() throws Exception {
 		_OV = new UObjectValue();
+		this._ConfigItems = new EwaConfigItems();
+		this._ConfigPage = new EwaConfigPage();
+		this._ConfigAction = new EwaConfigPage();
+		this._ConfigMenu = new EwaConfigPage();
+		this._ConfigPageInfos = new EwaConfigPage();
+		this._ConfigChart = new EwaConfigPage();
+		this._ConfigWorkflow = new EwaConfigPage();
+		
 		try {
 			initConfig();
 		} catch (Exception e) {
+			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		}
 	}
@@ -63,16 +74,8 @@ public class EwaConfig implements Cloneable , Serializable{
 	 * @throws Exception
 	 */
 	private void initConfig() throws Exception {
-		this._ConfigItems = new EwaConfigItems();
-		this._ConfigPage = new EwaConfigPage();
-		this._ConfigAction = new EwaConfigPage();
-		this._ConfigMenu = new EwaConfigPage();
-		this._ConfigPageInfos = new EwaConfigPage();
-		this._ConfigChart = new EwaConfigPage();
-		this._ConfigWorkflow = new EwaConfigPage();
-
-		String path = UPath.getConfigPath() + CFG_NAME;
-		this._XmlDoc = UXml.retDocument(path);
+ 
+		this._XmlDoc = SystemXmlUtils.getSystemConfDocument(CFG_NAME);
 
 		_ConfigFrames = initFrames();
 
@@ -200,8 +203,7 @@ public class EwaConfig implements Cloneable , Serializable{
 		// 设置子参数
 		for (int i = 0; i < ps.count(); i++) {
 			XItemParameter p = ps.getItem(i);
-			if (p.getChildrenParameters() == null
-					|| p.getChildrenParameters().trim().length() == 0) {
+			if (p.getChildrenParameters() == null || p.getChildrenParameters().trim().length() == 0) {
 				continue;
 			}
 			String[] childrenNames = p.getChildrenParameters().split(",");

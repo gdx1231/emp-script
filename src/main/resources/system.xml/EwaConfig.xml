@@ -1,0 +1,4995 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EasyWebConfig>
+	<Frames>
+		<Frame Name="Frame"
+			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameFrame"
+			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionFrame">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="输入修改界面" />
+				<Set Lang="enus" Info="Frame" />
+			</DescriptionSet>
+		</Frame>
+		<Frame Name="ListFrame"
+			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameList"
+			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionListFrame">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="表格" />
+				<Set Lang="enus" Info="List Show" />
+			</DescriptionSet>
+		</Frame>
+		<Frame Name="Grid"
+			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameGrid"
+			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionListFrame">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="网格显示" />
+				<Set Lang="enus" Info="Grid Show" />
+			</DescriptionSet>
+		</Frame>
+		<Frame Name="Tree"
+			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameTree"
+			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionTree">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="树" />
+				<Set Lang="enus" Info="Tree" />
+			</DescriptionSet>
+		</Frame>
+		<Frame Name="Menu"
+			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameMenu"
+			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionFrame">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="菜单" />
+				<Set Lang="enus" Info="Menu" />
+			</DescriptionSet>
+		</Frame>
+		<Frame Name="MultiGrid"
+			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameMultiGrid"
+			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionMultiGrid">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="多维表格" />
+				<Set Lang="enus" Info="MultiGrid" />
+			</DescriptionSet>
+		</Frame>
+		<Frame Name="Logic"
+			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameLogic"
+			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionFrame">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="逻辑" />
+				<Set Lang="enus" Info="Logic" />
+			</DescriptionSet>
+		</Frame>
+		<Frame Name="Report"
+			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameReport"
+			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionFrame">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="逻辑" />
+				<Set Lang="enus" Info="Logic" />
+			</DescriptionSet>
+		</Frame>
+		<Frame Name="Combine"
+			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameCombine"
+			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionCombine">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="组合" />
+				<Set Lang="enus" Info="Combine" />
+			</DescriptionSet>
+		</Frame>
+		<Frame Name="Complex"
+			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameComplex"
+			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionComplex">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="复合页面" />
+				<Set Lang="enus" Info="Complex" />
+			</DescriptionSet>
+		</Frame>
+	</Frames>
+	<Items>
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="页面元素" />
+			<Set Lang="enus" Info="Page Items" />
+		</DescriptionSet>
+		<XItems>
+			<UIGroups>
+				<UIGroup Name="Standard">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="标准对象" />
+						<Set Lang="zhcn" Info="Standard elements" />
+					</DescriptionSet>
+				</UIGroup>
+				<UIGroup Name="Extend">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="扩展对象" />
+						<Set Lang="zhcn" Info="Extends elements" />
+					</DescriptionSet>
+				</UIGroup>
+			</UIGroups>
+			<XItem Name="text" HtmlTag="input$text" BaseType="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex ,DispEnc, Name, DescriptionSet, AttributeSet,EventSet, Events, DataItem, IsMustInput, 
+				MaxMinLength,MaxMinValue,OrderSearch, InitValue, Valid, Style, ParentStyle,VaildEx">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="单行文本" />
+					<Set Lang="enus" Info="Textbox" />
+
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<input autocomplete="off" type="text" class="EWA_INPUT" value="{__EWA_VAL__}" !!/>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="textarea" HtmlTag="textarea" BaseType="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DispEnc, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle, IsMustInput, MaxMinLength">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="多行文本" />
+					<Set Lang="enus" Info="Textarea" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<textarea class="EWA_TEXTAREA" !!>{__EWA_VAL__}</textarea>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="span" HtmlTag="span" BaseType="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name,InitValue, DescriptionSet, 
+					Style, ParentStyle, AttributeSet,EventSet,DispEnc,
+					DataItem, OrderSearch, IsHtml,DataRef,XStyle">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="文本" />
+					<Set Lang="enus" Info="Text" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<span class="IX_SPAN" !!>{__EWA_VAL__}</span>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="file" HtmlTag="input$file" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet, DataItem,
+			Style, ParentStyle,IsMustInput,Upload">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="文件" />
+					<Set Lang="enus" Info="File" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<table border=0 cellpadding=0 cellpadding=1 width=100%>
+<tr>
+<td><input readonly class="EWA_INPUT" type=text value="{__EWA_VAL__}" !! /></td>
+<td width=20><input type=button class="EWA_BUTTON" value="..."
+	onclick='EWA.F.U.Upload("@XmlName","@ItemName",this.parentNode.parentNode.getElementsByTagName("input")[0]);' />
+</td>
+</tr>
+</table>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="hidden" HtmlTag="input$hidden" BaseType="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="DescriptionSet, Name, DataItem, InitValue">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="隐含内容" />
+					<Set Lang="enus" Info="Hidden" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<input type="hidden" value="{__EWA_VAL__}" !!/>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="password" HtmlTag="input$password" BaseType="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, Attributes, Events,DataItem, IsMustInput,
+			Style, ParentStyle, MaxMinLength, Valid">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="密码" />
+					<Set Lang="enus" Info="Password" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<input autocomplete="off" type="password" class="EWA_INPUT" value="{__EWA_VAL__}" !!/>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="date" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle,IsMustInput,MaxMinValue">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="日期" />
+					<Set Lang="enus" Info="Date" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<input ewa_tag="date" readonly class="EWA_INPUT ewa-ipt-date" type="text" size="12" 
+ onclick="EWA.F.I.Date(this);" onfocus="EWA.F.I.Date(this);" onkeydown="EWA.F.I.Date(this);"
+ value="{__EWA_VAL__}" !! />
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="datetime" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem, IsMustInput,
+			Style, IsMustInput, ParentStyle, InitValue">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="日期时间" />
+					<Set Lang="enus" Info="Datetime" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<input readonly ewa_tag="datetime" class="EWA_INPUT ewa-ipt-date" type="text" size="18" 
+onfocus="EWA.UI.Calendar.Pop(this,true);" 
+onclick="EWA.UI.Calendar.Pop(this,true);"  value="{__EWA_VAL__}" !!/>
+]]></Html>
+
+				</Template>
+			</XItem>
+			<XItem Name="time" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem, IsMustInput,
+			Style, IsMustInput, ParentStyle, InitValue">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="时间" />
+					<Set Lang="enus" Info="Time" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<input readonly ewa_tag="time" class="EWA_INPUT" type="text" size="18" 
+onfocus="EWA.UI.Calendar.PopTime(this);" 
+onclick="EWA.UI.Calendar.PopTime(this);"  value="{__EWA_VAL__}" !!/>
+]]></Html>
+
+				</Template>
+			</XItem>
+			<XItem Name="combo" HtmlTag="combo" IsRepeat="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
+				BaseType="1"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle, IsMustInput, InitValue, List">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="组合框" />
+					<Set Lang="enus" Info="Combo" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+					<div class="ewa-combo-box">
+	<input type="text" autocomplete="off" class="EWA_INPUT" !!/>
+	<i class="fa fa-chevron-down ewa-combo-btn-down"></i>
+	<i class="fa fa-chevron-up ewa-combo-btn-close"></i>
+	<div class="ewa-combo-droplist">
+		<div class="ewa-combo-dp">
+		<ul>{__EWA_VAL__}</ul>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+var __cus_@NAME=-1;
+$(function(){
+	var o=$("#@NAME");	
+	var fun={
+		pp:o.parent(),
+		hideList:function(){
+			this.pp.find(".ewa-combo-droplist").hide();
+			this.pp.find(".ewa-combo-btn-down").show();
+			this.pp.find(".ewa-combo-btn-close").hide();
+			o.trigger("blur");
+			},
+		showList:function(){
+			this.pp.find(".ewa-combo-droplist").show();
+			this.pp.find(".ewa-combo-btn-down").hide();
+			this.pp.find(".ewa-combo-btn-close").show();
+		}
+	};
+	o.parent().find("li").click(function(){
+		o.val($(this).text());		
+		fun.hideList();
+		});
+	o.parent().find("li").each(function(){
+		$(this).attr("data-val2",$(this).attr("data-val").toLowerCase());
+	});
+	o.parent().find(".ewa-combo-btn-down").click(function(){
+		fun.showList();
+		o.focus();
+		});
+	o.parent().find(".ewa-combo-btn-close").click(function(){
+		fun.hideList();
+		});
+	var h1=$(document).height();
+	var h2=o.parent().find(".ewa-combo-droplist").height();
+	var h3=o.offset().top;
+	var h4=o.height();
+	if((h1-h3-h4)<h2)o.parent().find(".ewa-combo-droplist").css({"top":(h2*-1)+"px"});
+	window.setTimeout(function(){
+		o.trigger("blur");
+		o.focus(function(){fun.showList();$("#@NAME").keyup()});
+	},230);
+	$("#@NAME").keydown(function(){
+		if(event.keyCode==13){
+			return false;
+		}
+		if(event.keyCode==9){
+			fun.hideList();
+			return true;
+		}
+	});
+	$("#@NAME").keyup(function(){
+		if(event.keyCode==13){
+			fun.hideList();
+			return false;
+		}
+		var aa=$(this).parent().find(".ewa-combo-dp li:visible");
+		if(event.keyCode==38 || event.keyCode==40){
+			if($(this).parent().find(".ewa-combo-droplist:hidden").length>0){
+				return false;
+			}
+			if(event.keyCode==38){
+				__cus_@NAME--;
+				if(__cus_@NAME<0)__cus_@NAME=aa.length-1;
+			}
+			if(event.keyCode==40){
+				__cus_@NAME++;
+				if(__cus_@NAME>=aa.length)__cus_@NAME=0;
+			}
+			
+			aa.removeClass("combo-cur-item");
+			aa.eq(__cus_@NAME).addClass("combo-cur-item");
+			$(this).val(aa.eq(__cus_@NAME).text());
+			var scrTop=$(this).parent().find(".ewa-combo-dp").scrollTop();
+			var comboH=$(this).parent().find(".ewa-combo-dp").height();
+			var comboT=$(this).parent().find(".ewa-combo-dp").offset().top;
+			var ccT=__cus_@NAME>=0?aa.eq(__cus_@NAME).offset().top:comboT;
+			if(ccT<comboT || ccT>comboH){ 
+				$(this).parent().find(".ewa-combo-dp").scrollTop(scrTop+ccT-comboH);
+			}
+		}else{
+			if($(this).parent().find(".ewa-combo-droplist:hidden").length>0){
+				fun.showList();
+			}
+			if($(this).val().trim().length>0){
+				$(this).parent().find(".ewa-combo-dp li").not("[data-val2*='"+$(this).val().toLowerCase()+"']").hide();
+				$(this).parent().find(".ewa-combo-dp li").filter("[data-val2*='"+$(this).val().toLowerCase()+"']").show();
+			}else{
+				$(this).parent().find(".ewa-combo-dp li").show();
+			}
+			aa.removeClass("combo-cur-item");
+			if(aa.length>0 && aa.eq(0).attr("data-val2")==$(this).val().toLowerCase()){
+				__cus_@NAME=0;
+				aa.eq(__cus_@NAME).addClass("combo-cur-item");
+			}else{
+				__cus_@NAME=-1;
+			}
+		}
+	});
+});
+</script>
+]]></Html>
+					<Repeat><![CDATA[
+					<li title="{__EWA_LST_TITLE__}" data-val="{__EWA_LST_VAL__}">{__EWA_LST_TXT__}</li>
+]]></Repeat>
+				</Template>
+			</XItem>
+			<XItem Name="select" HtmlTag="select" IsRepeat="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
+				BaseType="1"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle, IsMustInput, InitValue, List, OrderSearch">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="选择" />
+					<Set Lang="enus" Info="Select" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<select class="EWA_SELECT" !!>{__EWA_VAL__}</select>]]></Html>
+					<Repeat><![CDATA[
+<option title="{__EWA_LST_TITLE__}" value="{__EWA_LST_VAL__}" !!>{__EWA_LST_TXT__}</OptIon>
+]]></Repeat>
+				</Template>
+			</XItem>
+			<XItem Name="checkbox" HtmlTag="input$checkbox" IsRepeat="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
+				BaseType="1"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle, IsMustInput, List">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="多选" />
+					<Set Lang="enus" Info="Checkbox" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<div TAG="REPT" !!>{__EWA_VAL__}</div>]]></Html>
+					<Repeat><![CDATA[
+<nobr><input title="{__EWA_LST_TITLE__}" class="IX_CHECKBOX" type="checkbox" 
+value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TITLE__}" for="{__EWA_LST_IDS__}">{__EWA_LST_TXT__}</label></nobr>
+]]></Repeat>
+				</Template>
+			</XItem>
+			<XItem Name="switch" IsRepeat="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
+				BaseType="1"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
+					Style, ParentStyle, EventSet,DataItem, IsMustInput,OrderSearch,List">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="开关" />
+					<Set Lang="enus" Info="Switch button" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<DIV class='ewa-switch' TAG="REPT" !!>{__EWA_VAL__}</DIV>]]></Html>
+					<Repeat><![CDATA[
+<input class="IX_CHECKBOX" type="checkbox" title="{__EWA_LST_TITLE__}" value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/>
+]]>
+					</Repeat>
+				</Template>
+			</XItem>
+			<XItem Name="radio" HtmlTag="input$radio" IsRepeat="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
+				BaseType="1"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
+					Style, ParentStyle, EventSet,DataItem, IsMustInput,List">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="单选" />
+					<Set Lang="enus" Info="Radio" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<DIV TAG="REPT" !!>{__EWA_VAL__}</DIV>]]></Html>
+					<Repeat><![CDATA[
+<nobr><input class="IX_CHECKBOX" type="radio" title="{__EWA_LST_TITLE__}" value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TITLE__}" for="{__EWA_LST_IDS__}">{__EWA_LST_TXT__}</label></nobr>
+]]>
+					</Repeat>
+				</Template>
+			</XItem>
+			<XItem Name="checkboxgrid" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				BaseType="1"
+				Parameters="Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="用于列表的复选框" />
+					<Set Lang="enus" Info="Checkbox for list" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<input class="IX_CHECKBOX" type="checkbox" value="{__EWA_VAL__}" !! />]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="radiogrid" HtmlTag="input$radio" IsRepeat="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
+				BaseType="1"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
+					Style, ParentStyle, EventSet,DataItem, IsMustInput,List">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="用于列表的单选" />
+					<Set Lang="enus" Info="Radio for list" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<input class="IX_CHECKBOX" type="radio" title="{__EWA_LST_TITLE__}" value="{__EWA_LST_VAL__}" !!/>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="anchor" HtmlTag="" BaseType="0" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemButton"
+				Parameters="GroupIndex, Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle, AnchorParas">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="链接" />
+					<Set Lang="enus" Info="Anchor" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<a class="ewa-anchor" href="@aHref" target="@aTarget" !! >{__EWA_DES__}</a>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="anchor2" HtmlTag="" BaseType="" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex, Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle, AnchorParas,OrderSearch,DataRef">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="链接，显示值内容" />
+					<Set Lang="enus" Info="Anchor, View Value" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<a class="ewa-anchor" href="@aHref" target="@aTarget" !!>{__EWA_VAL__}</a>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="linkButton" HtmlTag="" BaseType=""
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex, Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle, LinkButtonParas,OrderSearch, IsHtml,DataRef,XStyle">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="链接按钮,触发对应按钮click事件" />
+					<Set Lang="enus" Info="LinkModify" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<a class="ewa-anchor" href="javascript:void(0)" onclick="$(this).parentsUntil('tbody').find('input[id=@lkbButtonId]').trigger('click')" !!>{__EWA_VAL__}</a>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="droplist" HtmlTag="" BaseType="0"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,IsMustInput,
+			Style, ParentStyle,Frame, DopListShow">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="动态列表" />
+					<Set Lang="enus" Info="Drop List" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<input class="EWA_INPUT ewa-ipt-droplist" ewa_class='droplist' type="text"
+ onkeyup="if(EWA.B.IE){EWA.F.I.DropList(this);}"
+ oninput="EWA.F.I.DropList(this);" onfocus="this.select()"
+ placeholder="输入字符选择"
+ /><input type="hidden" value="{__EWA_VAL__}" !!/>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="submit" HtmlTag="input$submit" BaseType="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemButton"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet, Style, ParentStyle">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="提交" />
+					<Set Lang="enus" Info="Submit" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<input type="submit" class="IX_BUTTON" value="{__EWA_DES__}" !!/>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="button" HtmlTag="input$button" BaseType="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemButton"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, Style, ParentStyle, EventSet,OpenFrame,CallAction">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="按钮,ewa_click在ListFrame中用于新增等功能" />
+					<Set Lang="enus" Info="Button" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<input type="button" class="IX_BUTTON" value="{__EWA_DES__}" EWA_MSG="{__EWA_MSG__}" !!/>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="butFlow" BaseType="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemButton"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, Style, ParentStyle, EventSet">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="流程控制按钮" />
+					<Set Lang="enus" Info="Button Flow" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<input type="button" ewa_tag='butFlow' class="IX_BUTTON" value="{__EWA_DES__}" EWA_MSG="{__EWA_MSG__}" {WF} !!/>
+]]></Html>
+				</Template>
+			</XItem>
+
+
+
+			<XItem Name="dHtml" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, DataField, IsMustInput, MaxMinLength,
+				 Style, ParentStyle, Upload">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="HTML文本" />
+					<Set Lang="enus" Info="DHtml" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<div class='EWA_DHTML' EWA_DHTML="1" !!>
+<input type=hidden value="{__EWA_VAL__}"><input type=hidden id='UP_IMG_@NAME' />
+<iframe src="@RV_EWA_STYLE_PATH/EWA_STYLE/editor/editor.htm?jsessionid=@JSESSIONID&ver=2&name=@Name" 
+	width="100%" height="100%" frameborder="0"></iframe></div>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="dHtmlNoImages" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, DataField, IsMustInput, MaxMinLength,
+				 Style, ParentStyle">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="HTML文本,不含图片上传" />
+					<Set Lang="enus" Info="DHtml No Upload" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<div class='EWA_DHTML' EWA_DHTML="1" !!>
+<input type=hidden value="{__EWA_VAL__}"><input type=hidden id='UP_IMG_@NAME' />
+<iframe src="@RV_EWA_STYLE_PATH/EWA_STYLE/editor/editor_noimages.htm?name=@Name" 
+	width="100%" height="100%" frameborder=0></iframe></div>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="dHtml5" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, DataField, IsMustInput, MaxMinLength,
+				 Style, ParentStyle">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="HTML5,含图片上传" />
+					<Set Lang="enus" Info="DHtml No Upload" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<textarea class='EWA_TEXTAREA EWA_DHTML' EWA_DHTML="1" !!>{__EWA_VAL__}</textarea><script type="text/javascript">
+(function(){
+	var editor=new EWA_UI_HtmlEditorClass();
+	editor.Create($X('@NAME'));
+})();
+</script>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="markDown" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, DataField, IsMustInput, MaxMinLength,
+				 Style, ParentStyle">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="Markdown 编辑器" />
+					<Set Lang="enus" Info="Markdown Editor" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<div class="ewa-markdown-editor"><textarea
+ ewa_tag="markdown" style='display:none' id="@NAME" name="@NAME">{__EWA_VAL__}</textarea>
+<textarea style='display:none' id="@NAME_HTML" name="@NAME_HTML"></textarea><iframe 
+	src="@RV_EWA_STYLE_PATH/EWA_STYLE/editor/editor_markdown.htm" 
+	width="100%" height="100%" frameborder="0"></iframe></div>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="h5upload" HtmlTag="input$file" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle,IsMustInput,Upload">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="Html5 上传文件" />
+					<Set Lang="enus" Info="Html5 Upload" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<input ewa_tag='ht5upload' val_ref="window['h5u_@sys_frame_unid$@NAME'].getValue()" type="hidden" value="{__EWA_VAL__}" !! /><div 
+title="{__EWA_MSG__}" class="ewa_htm5_upload_box"><div class="ewa_app_upload_form "><input multiple id="h5uinput_@sys_frame_unid$@NAME"
+ onchange="window['h5u_@sys_frame_unid$@NAME'].showPreview(this, event)" type="file"
+name="aaa" ref="h5u_@sys_frame_unid$@NAME"><span>{__EWA_DES__}</span></div></div>
+<script type="text/javascript">
+(function () {
+	var name = "h5uinput_" + "@sys_frame_unid"+"_1_2_3_4_5_"+"@NAME";
+	var js_name = "h5u_" + "@sys_frame_unid"+"$"+"@NAME";
+	var exts="@UpExts".split(',');
+	var exts1=[];
+	for(var i=0;i<exts.length;i++){
+		exts1.push('.'+exts[i].toLowerCase().trim());
+	}
+	var up1 = new EWA_Html5UploadClass();
+	up1.POST_XMLNAME = "@XMLNAME".toURL();
+	up1.POST_ITEMNAME = "@ITEMNAME".toURL();
+	up1.POST_NAME = "@NAME";
+	up1.POST_REF = "@SYS_UNID";
+	up1.UpNewSizes = "@UpNewSizes";
+	up1.NewSizesIn = "@NewSizesIn";
+	up1.UpMulti = "@UpMulti"; 
+	up1.SYS_FRAME_UNID = "@sys_frame_unid";
+	var iput = document.getElementById("h5uinput_@sys_frame_unid$@NAME");
+	iput.id = name;
+	if(exts1.length > 0){
+		iput.setAttribute('accept',exts1.join(','));
+	}
+	if(up1.UpMulti != 'yes'){
+		iput.removeAttribute('multiple');
+	}
+	up1._name= js_name;
+	window[js_name] = up1;
+	up1.showPreviewExists();
+})();
+</script>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="h5TakePhoto" HtmlTag="input$file" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle,IsMustInput,Upload">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="Html5 拍照" />
+					<Set Lang="enus" Info="Html5 TakePhoto" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<script type="text/javascript">
+window["_EWA_h5takephoto_@sys_frame_unid$@NAME"] = function() {
+	var up1 = new EWA_Html5TakePhotoClass();
+	up1.init("@NAME");
+
+	up1.H5_UPLOAD.POST_XMLNAME 		= "@XMLNAME".toURL();
+	up1.H5_UPLOAD.POST_ITEMNAME 	= "@ITEMNAME".toURL();
+	up1.H5_UPLOAD.POST_NAME 		= "@NAME".toURL();
+	up1.H5_UPLOAD.POST_REF 			= "@SYS_UNID".toURL();
+	up1.H5_UPLOAD.SYS_FRAME_UNID	= "@sys_frame_unid".toURL();
+	
+	up1._name = "h5takephoto_@sys_frame_unid$@NAME";
+	window[up1._name] = up1;
+	delete window["_EWA_h5takephoto_@sys_frame_unid$@NAME"];
+	$('.ewa-row-'+'@NAME td:eq(0)').hide();
+	$('.ewa-row-'+'@NAME td:eq(1)').attr('colSpan',2);
+	
+};
+addEvent(window,'load', _EWA_h5takephoto_@sys_frame_unid$@NAME);
+</script>
+<input ewa_tag='ht5takephoto' type="hidden" value="{__EWA_VAL__}" !! /><div class="ewa-h5-take-photo">
+<div title="{__EWA_MSG__}" id='h5TakePhoto_@Name' class="ewa-h5-take-photo-wrap">
+	<img id='h5TakePhotoImg_@Name' class="ewa-h5-take-photo-img" style='display:none;'/>
+	<video id='h5TakePhotoVod_@Name' class="ewa-h5-take-photo-vod" autoplay style='display:none;'></video>
+	<canvas id='h5TakePhotoCan_@Name' class='ewa-h5-take-photo-can' style='display:none;'></canvas>
+	<div class='ewa-h5-take-photo-process'>
+		<span></span>
+		<div class='ewa-h5-take-photo-process1'></div>
+	</div>
+	<div class="ewa-h5-take-photo-but">
+		<button type="button" onclick="window['h5takephoto_@sys_frame_unid$@NAME'].takePhoto(this);">点击获取照片</button>
+	</div>
+</div>
+</div>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="swffile" HtmlTag="input$file" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			Style, ParentStyle,IsMustInput,Upload">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="上传文件(SWFUpload)" />
+					<Set Lang="enus" Info="SWFUpload" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<style>
+#fsUploadProgress{
+	height: 21px;
+	overflow:hidden;
+	width:100%;
+}
+.progressWrapper{
+}
+.progressName{
+	float:left;
+}
+.progressBarStatus{
+	float:left;
+}
+.progressBarComplete{
+	float:left;
+}
+</style>
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/upload/swfupload.js"></script>
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/upload/swfupload.queue.js"></script>
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/upload/fileprogress.js"></script>
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/upload/handlers.js"></script>
+<script type="text/javascript">
+var swfu;
+function _EWA_@sys_frame_unid() {
+	var p ="@RV_EWA_STYLE_PATH";
+	var exts="@UpExts".split(',');
+	var exts1=[];
+	for(var i=0;i<exts.length;i++){
+		exts1.push('*.'+exts[i].toLowerCase());
+		exts1.push('*.'+exts[i].toUpperCase());
+	}
+ settings = {
+		flash_url : p+"/EWA_STYLE/images/flash/upload/swfupload.swf",
+		flash9_url :p+"/EWA_STYLE/images/flash/upload/swfupload_fp9.swf",
+		upload_url: window.location.origin + EWA.CP + "/EWA_STYLE/cgi-bin/_up_/index.jsp",
+		post_params : {
+			"EWA_UP_REF" : "@SYS_UNID",
+			"EWA_UP_TYPE" : "SWFUPLOAD",
+			"NAME" : "@NAME"
+		},
+		file_size_limit : "10 MB",
+		file_types : exts1.join(';'),
+		file_types_description : "@UpType",
+		file_upload_limit : 100,
+		file_queue_limit : 0,
+		custom_settings : {
+			progressTarget : "fsUploadProgress",
+			cancelButtonId : "btnCancel"
+		},
+		debug: false,
+
+		// Button settings
+		button_width: "65",
+		button_height: "18",
+		button_placeholder_id: "spanButtonPlaceHolder",
+		button_text: EWA.LANG=='enus'?'<span>Upload...</span>':'<span>上传文件</span>',
+		button_text_style: ".theFont { font-size: 16; }",
+		button_text_left_padding: 12,
+		button_text_top_padding: 3,
+		
+		// The event handler functions are defined in handlers.js
+		swfupload_preload_handler : preLoad,
+		swfupload_load_failed_handler : loadFailed,
+		file_queued_handler : fileQueued,
+		file_queue_error_handler : fileQueueError,
+		file_dialog_complete_handler : fileDialogComplete,
+		upload_start_handler : uploadStart,
+		upload_progress_handler : uploadProgress,
+		upload_error_handler : uploadError,
+		upload_success_handler : uploadSuccess,
+		upload_complete_handler : uploadComplete,
+		queue_complete_handler : queueComplete	// Queue plugin event
+	};
+	var ref = window.location.href;
+	if(ref.toUpperCase().indexOf('XMLNAME=')<0){
+		ref += (ref.indexOf('?')>0?'&':'?')+"XmlName="+"@XMLNAME".toURL()+"&ItemName=@ITEMNAME";
+	}
+	var url = new EWA_UrlClass();
+	url.SetUrl(ref);
+	var refPara=[];
+	for(var a in url._Paras){
+		settings.post_params[a] = url._Paras[a];
+	}
+	swfu = new SWFUpload(settings);
+};
+addEvent(window,'load',_EWA_@sys_frame_unid);
+</script>
+<table border='0' cellpadding='0' style='width:100%'>
+<tr>
+<td><input readonly ewa_tag='swffile' class="EWA_INPUT" type="text" value="{__EWA_VAL__}" !! /></td>
+<td width=50><div id='spanButtonPlaceHolder' style='cursor:pointer'></div>
+<div style='display:none'><span id=btnCancel></span></div>
+</td>
+</tr>
+</table>
+<div id="fsUploadProgress"></div>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="image" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemImage"
+				Parameters="GroupIndex,Name,DescriptionSet,Attributes,Events,
+				DataItem,Style,ParentStyle,Upload">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="图片上传" />
+					<Set Lang="enus" Info="Image Upload" />
+
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<style>
+#fsUploadProgress{
+	height: 21px;
+	overflow:hidden;
+	width:100%;
+}
+.progressWrapper{
+}
+.progressName{
+	float:left;
+}
+.progressBarStatus{
+	float:left;
+}
+.progressBarComplete{
+	float:left;
+}
+</style>
+
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/upload/swfupload.js"></script>
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/upload/swfupload.queue.js"></script>
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/upload/fileprogress.js"></script>
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/upload/handlers.js"></script>
+<script type="text/javascript">
+var swfu;
+function ewa_load_upload_image() {
+	var p="@RV_EWA_STYLE_PATH";
+	var exts="@UpExts".split(',');
+	var exts1=[];
+	for(var i=0;i<exts.length;i++){
+		exts1.push('*.'+exts[i].toLowerCase());
+		exts1.push('*.'+exts[i].toUpperCase());
+	}
+	var settings = {
+		flash_url : p+"/EWA_STYLE/images/flash/upload/swfupload.swf",
+		flash9_url : p+"/EWA_STYLE/images/flash/upload/swfupload_fp9.swf",
+		upload_url: window.location.origin +  EWA.CP + "/EWA_STYLE/cgi-bin/_up_/index.jsp",
+		file_size_limit : "5 MB",
+		file_types : "*.bmp;*.png;*.jpg;*.jpeg;*.gif",
+		file_types_description : "*.bmp;*.png;*.jpg;*.jpeg;*.gif",
+		file_upload_limit : 1,
+		file_queue_limit : 0,
+		post_params : {
+			"EWA_UP_REF" : "@SYS_UNID",
+			"EWA_UP_TYPE" : "SWFUPLOAD",
+			"NAME" : "@NAME"
+		},
+		custom_settings : {
+			progressTarget : "fsUploadProgress",
+			cancelButtonId : "btnCancel"
+		},
+		debug: false,
+		custom_settings : {
+			progressTarget : "fsUploadProgress",
+			cancelButtonId : "btnCancel"
+		},
+		
+		// Button settings
+		button_width: "65",
+		button_height: "18",
+		button_placeholder_id: "spanButtonPlaceHolder",
+		button_text: EWA.LANG=='enus'?'<span>Upload...</span>':'<span>上传文件</span>',
+		button_text_style: ".theFont { font-size: 16; }",
+		button_text_left_padding: 3,
+		button_text_top_padding: 3,
+		
+		// The event handler functions are defined in handlers.js
+		swfupload_preload_handler : preLoad,
+		swfupload_load_failed_handler : loadFailed,
+		file_queued_handler : fileQueued,
+		file_queue_error_handler : fileQueueError,
+		file_dialog_complete_handler : fileDialogComplete,
+		upload_start_handler : uploadStart,
+		upload_progress_handler : uploadProgress,
+		upload_error_handler : uploadError,
+		upload_success_handler : uploadSuccessIMG,
+		upload_complete_handler : uploadComplete,
+		queue_complete_handler : queueComplete	// Queue plugin event
+	};
+	
+	var ref = EWA.F.FOS['@sys_frame_unid'].Url;
+	if(ref.toUpperCase().indexOf('XMLNAME=')<0){
+		ref += (ref.indexOf('?')>0?'&':'?')+"XmlName="+"@XMLNAME".toURL()+"&ItemName=@ITEMNAME";
+	}
+	var url = new EWA_UrlClass();
+	url.SetUrl(ref);
+	var refPara=[];
+	for(var a in url._Paras){
+		settings.post_params[a] = url._Paras[a];
+	}
+	swfu = new SWFUpload(settings);
+};
+addEvent(window, 'load', ewa_load_upload_image);
+</script>
+<table border=0 cellpadding=0 cellpadding=1 width=100%>
+<tr>
+<td>
+	<div style='cursor:pointer'>
+	<img src="{__EWA_VAL__}" style="{__EWA_IMG_STYLE__}" />
+	<input ewa_tag='IMG_UPLOAD' type="hidden" value="{__EWA_VAL__}" !! /> 
+	</div>
+</td>
+<td width=100>
+<span id='spanButtonPlaceHolder'></span>
+<br />
+<span id="fsUploadProgress" style="margin-left: 2px;"></span>
+<div style='display:none'><span id=btnCancel></span></div>
+</td>
+</tr>
+</table>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="valid" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
+					DataItem, EventSet, Style, ParentStyle,IsMustInput,
+				MaxMinLength">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="验证码" Js="错误的验证码" />
+					<Set Lang="enus" Info="Valid Code" Js="Error Code" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<table class='ewa-valid-box' border="0" width=100% cellspacing="0" cellpadding="0"><tr>
+<td><input autocomplete="off" class="EWA_INPUT ewa-valid-code-input" type="text" !!/></td>
+<td width="63"><img class='ewa-valid-code-img' 
+	onclick='this.src=this.src.split("&gdx=")[0]+"&gdx="+Math.random()' 
+	style='cursor:pointer' border="0"	
+	onload="var tr=this.parentNode.parentNode;tr.getElementsByTagName('input')[0].style.width=(tr.cells[0].clientWidth-2)+'px';" 
+/></td></tr></table>
+<script>(function(){
+$(".ewa-valid-code-img").attr("src","@SYS_CONTEXTPATH/EWA_STYLE/cgi-bin/_co_/?xmlname="+"@xmlname".toURL()+"&itemname="+"@itemname".toURL()+"&gdx=" );
+})();</script>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="smsValid" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
+					DataItem, EventSet, Style, ParentStyle,IsMustInput, LinkButtonParas,
+				MaxMinLength">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="短信验证码" Js="错误的验证码" />
+					<Set Lang="enus" Info="Sms valid Code" Js="Error Code" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<table class='ewa-sms-valid-box' border="0" width=100% cellspacing="0" cellpadding="0"><tr>
+<td><input ewa_tag='smsValid' autocomplete="off" class="EWA_INPUT ewa-sms-valid-code-input" type="text" !!/></td>
+<td width="63"><input class='IX_BUTTON ewa-sms-valid-code-button' type="button" value="{__EWA_DES__}" onclick="EWA.F.FOS['@sys_frame_unid'].SmsValid(this, '@lkbButtonId')"></td>
+</tr></table>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="user" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemUser"
+				Parameters="GroupIndex,OrderSearch,Name,XStyle,DataItem,
+				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle, Format,UserSet">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="自定义" />
+					<Set Lang="enus" Info="User" />
+
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<div !!>{__EWA_VAL__}</div>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="userControl" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemUserControl"
+				Parameters="GroupIndex,OrderSearch,Name,XStyle,DataItem,UserControl,
+				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,IsMustInput">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="控件" />
+					<Set Lang="enus" Info="Control" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[{__EWA_VAL__}]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="addressMap" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,OrderSearch,Name,XStyle,DataItem,AddrMapRels,
+				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,IsMustInput">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="带地图的地址栏" />
+					<Set Lang="enus" Info="Addr with map" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<input type="text" ewa_tag="addressMap" class="EWA_INPUT" value="{__EWA_VAL__}" !!/>
+<script>window['@name$MAPClass']=new EWA_UI_MapClass({
+		country: "@AmrCountry",
+		province: "@AmrProvince",
+		city: "@AmrCity",
+		zip: "@AmrZip",
+		lat: "@AmrLat",
+		lng: "@AmrLng"
+	}, "@NAME");
+setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="gridImage" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemImage"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet,ImageDefault, EventSet, Style, ParentStyle, DataItem">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="列表显示图片" />
+					<Set Lang="enus" Info="Image for list" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<img src="{__EWA_VAL__}" class='EWA_GRID_IMG'
+  onclick='EWA_Utils.ShowPic(this);' !! />]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="gridBgImage" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemImage"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet,ImageDefault, EventSet, Style, ParentStyle, DataItem">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="列表显示背景图片" />
+					<Set Lang="enus" Info="Background Image for list" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<a style="{__BACKGROUND_IMAGE__}"
+ class='EWA_GRID_BG_IMG'
+ ori_src="{__EWA_VAL__}"
+ is_lazy_load="{__IS_LAZY_LOAD__}"					
+ !! href="javascript:void(0)" onclick='EWA_Utils.ShowBgPic(this);'  ></a>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="popselect" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="Group,Name, DescriptionSet, Style, ParentStyle, PopFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="弹出对话框选择" />
+					<Set Lang="enus" Info="Pop Select" />
+
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<table border='0' cellspacing=0 cellpadding=0 style='width:100%;table-layout:fixed;'>
+<tr>
+<td width=40%><input readonly value="{__EWA_VAL__}"
+	onclick='EWA.UI.Dialog.OpenReloadClose("@SYS_FRAME_UNID","@PopXmlName", "@PoPItemname", false, "@PopPara&EWA_TREE_INIT_KEY=" + this.value + "&EWA_FROM_ID=" + this.id);'
+	 class="EWA_INPUT" type="text" !!/></td>
+<td>@PopTitleField</td>
+</tr>
+</table>					
+					]]></Html>
+				</Template>
+			</XItem>
+
+			<XItem Name="ewaconfigitem" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemEwaConfigItem"
+				Parameters="GroupIndex,Name, DescriptionSet, Style, ParentStyle, DefineFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="定义的配置项目" />
+					<Set Lang="enus" Info="Ewa Define" />
+
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<DIV !!>{__EWA_VAL__}</DIV>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="MGAddField" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="Name, DescriptionSet, MGAddField">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="多维表格汇总" />
+					<Set Lang="enus" Info="Multi Grid" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<DIV !!>{__EWA_VAL__}</DIV>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="LogicItem" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="Name, DescriptionSet, LogicParas">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="复合逻辑条目" />
+					<Set Lang="enus" Info="Logic" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<DIV !!>{__EWA_VAL__}</DIV>]]></Html>
+				</Template>
+			</XItem>
+
+			<XItem Name="ReportItem" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="Name, DescriptionSet, ReportCfg">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="报表" />
+					<Set Lang="enus" Info="Report" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<div !!>{__EWA_VAL__}</div>]]></Html>
+				</Template>
+			</XItem>
+
+			<XItem Name="SwfDoc" HtmlTag="span" BaseType="1"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet,Style, ParentStyle, DataItem">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="文库显示" />
+					<Set Lang="enus" Info="Flash Doc" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/swfdoc/flexpaper_flash.js"></script>
+<div !!> 					
+<script type="text/javascript"> 
+var fp = new FlexPaperViewer('@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/swfdoc/FlexPaperViewer', "@name", { config : {
+ SwfFile : escape('@REF_CONTEXT/{__EWA_VAL__}'.replace('//','/').replace('//','/').replace('//','/')),
+ Scale : 0.6, 
+ ZoomTransition : 'easeOut',
+ ZoomTime : 0.5,
+ ZoomInterval : 0.2,
+ FitPageOnLoad : false,
+ FitWidthOnLoad : true,
+ FullScreenAsMaxWindow : false,
+ ProgressiveLoading : false,
+ MinZoomSize : 0.2,
+ MaxZoomSize : 5,
+ SearchMatchAll : false,
+ InitViewMode : 'Portrait',
+ PrintPaperAsBitmap : false,
+ ViewModeToolsVisible : true,
+ ZoomToolsVisible : true,
+ NavToolsVisible : true,
+ CursorToolsVisible : true,
+ SearchToolsVisible : true,
+ localeChain: 'en_US'
+}});
+</script>
+]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="SwfTakePhoto" HtmlTag="span" BaseType="1"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet,Style, ParentStyle, DataItem">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="获取照片" />
+					<Set Lang="enus" Info="Flash Take Photo" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/swfTakePhoto/swfobject.js"></script>
+<input type="hidden" !! />
+<div style='width:400px;height:300px'><div  id="EWA_TAKE_PHOTO_@name"></div>
+<script type="text/javascript"> 
+function _EWA_savePhoto(s){
+ 	$X("@name").value=s;
+ 	_EWA_savePhoto_show(false);
+}
+function _EWA_savePhoto_show(v){
+	var objs=$('EWA_FRAME_@sys_frame_unid').getElementsByTagName('input');
+	for(var i=0;i<objs.length;i++){
+		objs[i].disabled=v;
+	}
+}
+var swfVersionStr = "11.1.0";
+  var xiSwfUrlStr = "@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/swfTakePhoto/playerProductInstall.swf";
+  var flashvars = {};
+  var params = {};
+  params.quality = "high";
+  params.bgcolor = "#ffffff";
+  params.allowscriptaccess = "sameDomain";
+  params.allowfullscreen = "true";
+  var attributes = {};
+  attributes.id = "TakePhoto";
+  attributes.name = "TakePhoto";
+  attributes.align = "middle";
+  swfobject.embedSWF(
+      "@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/swfTakePhoto/TakePhoto.swf", "EWA_TAKE_PHOTO_@name", 
+      "100%", "100%", 
+      swfVersionStr, xiSwfUrlStr, 
+      flashvars, params, attributes);
+  swfobject.createCSS("#flashContent", "display:block;text-align:left;");
+</script>
+</div>
+]]></Html>
+				</Template>
+			</XItem>
+
+			<XItem Name="SqlEditor" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,OrderSearch,Name,
+				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,DataItem">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="SQL编辑器" />
+					<Set Lang="enus" Info="SQL Editor" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<div class="ewa_sql_editor"><textarea style='display:none' !! >{__EWA_VAL__}</textarea><div style="position:relative"></div></div>
+<script type="text/javascript">
+(function(){
+	__TYPE__='sql';
+	__VAL__= $X('@Name').value;
+	var s='@RV_EWA_STYLE_PATH/EWA_STYLE/editor/CodeMirror/index.html?__TYPE__=sql&__SID__=@Name';
+	s='<iframe name="IF_SQL_@NAME" src="'+s+'" width=100% height=100% scrolling=yes scroll=yes frameborder=0></iframe>';
+	var s1="<i id='IF_SQL_B_@NAME' class='fa fa-expand' style='text-align:center;position:absolute;top:-10px;left:-4px;width:20px;"
+		+"box-shadow: 0px 0px 10px 2px #08c;font-size:12px;line-height:20px;border-radius:10px;color:#fff;background:#08c;cursor:pointer;'></i>";
+	var p=$($X('@Name').parentNode.getElementsByTagName('div')[0]);
+	p.html(s+s1);
+	p.find('i')[0].onclick=function(){
+		if(this.getAttribute('ismax')=='yes'){
+			$(this).parent().css({
+				position:'relative',
+				width: '100%',
+				height:'100%',
+				top:0,
+				left:0,
+				'box-shadow': 'none',
+				'z-index': 0
+			});
+			this.setAttribute('ismax','');
+		}else{
+			$(this).parent().css({
+				position:'absolute',
+				width: $('body').width()-20,
+				height:$('body').height()-20,
+				top:10,
+				left:10,
+				'box-shadow': '1px 3px 12px #000',
+				'z-index': 1
+			});
+			this.setAttribute('ismax','yes');
+		}
+	};
+})();
+</script>	
+					
+					]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="JsEditor" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,OrderSearch,Name,
+				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,DataItem">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="JS编辑器" />
+					<Set Lang="enus" Info="JS Editor" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<div class="ewa_sql_editor"><textarea style='display:none' !! >{__EWA_VAL__}</textarea><div style='position:relative'></div></div>
+<script type="text/javascript">
+(function(){
+	var s='@RV_EWA_STYLE_PATH/EWA_STYLE/editor/CodeMirror/index.html?__TYPE__=jscript&__SID__=@Name';
+	s='<iframe name="IF_SQL_@NAME" src="'+s+'" width=100% height=100% scrolling=yes scroll=yes frameborder=0></iframe>';
+	var s1="<i id='IF_SQL_B_@NAME' class='fa fa-expand' style='text-align:center;position:absolute;top:-10px;left:-4px;width:20px;"
+		+"box-shadow: 0px 0px 10px 2px #08c;font-size:12px;line-height:20px;border-radius:10px;color:#fff;background:#08c;cursor:pointer;'></i>";
+
+	var p=$($X('@Name').parentNode.getElementsByTagName('div')[0]);
+	p.html(s+s1);
+	p.find('i')[0].onclick=function(){
+		if(this.getAttribute('ismax')=='yes'){
+			$(this).parent().css({
+				position:'relative',
+				width: '100%',
+				height:'100%',
+				top:0,
+				left:0,
+				'box-shadow': 'none',
+				'z-index': 0
+			});
+			this.setAttribute('ismax','');
+		}else{
+			$(this).parent().css({
+				position:'absolute',
+				width: $('body').width()-20,
+				height:$('body').height()-20,
+				top:10,
+				left:10,
+				'box-shadow': '1px 3px 12px #000',
+				'z-index': 10
+			});
+			this.setAttribute('ismax','yes');
+		}
+	};
+})();
+</script>	
+					
+					]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="code2d" HtmlTag="" BaseType="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex , Name, DescriptionSet, AttributeSet,EventSet, Events, DataItem, IsMustInput, 
+				MaxMinLength,MaxMinValue, InitValue, Valid, Style, ParentStyle,VaildEx">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="二维码(有图片)" />
+					<Set Lang="enus" Info="code2d" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<input type="text" class="EWA_INPUT" value="{__EWA_VAL__}" !!/>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="code2dNoImg" HtmlTag="" BaseType="1"
+				UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex , Name, DescriptionSet, AttributeSet,EventSet, Events, DataItem, IsMustInput, 
+				MaxMinLength,MaxMinValue, InitValue, Valid, Style, ParentStyle,VaildEx">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="二维码（无图片）" />
+					<Set Lang="enus" Info="code2d No Image" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<input type="text" class="EWA_INPUT" value="{__EWA_VAL__}" !!/>]]></Html>
+				</Template>
+			</XItem>
+
+			<XItem Name="CombineItem" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemCombine"
+				Parameters="Name, DescriptionSet, CombineFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="组合配置项目" />
+					<Set Lang="enus" Info="Combine Item" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<div class='ewa_cb_box'><div class='ewa_cb_subject' id='DES_@Name'><a 
+	 class='ewa_cb_subject_expand' onclick='EWA.F.FOS["@sys_frame_unid"].showFull("DES_@Name")'></a><div 
+	 class='ewa_cb_caption' [$] style='float:left'>@DES</div></div><div class='ewa_cb_left' id='@Name' >{__EWA_VAL__}</div></div>]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="ComplexItem" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemComplex"
+				Parameters="Name, DescriptionSet, CombineFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="组合配置项目" />
+					<Set Lang="enus" Info="Combine Item" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<div class="caption-info" id='@Name-caption'>
+<div class="fcaption">@DES</div>
+</div>
+<div class="frame" id='@Name'>{__EWA_VAL__}</div>]]></Html>
+				</Template>
+			</XItem>
+		</XItems>
+
+		<XItemParameters>
+			<UIGroups>
+				<UIGroup Name="Main">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="主信息" />
+						<Set Lang="enus" Info="Main infomation" />
+					</DescriptionSet>
+				</UIGroup>
+				<UIGroup Name="Data">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="数据相关" />
+						<Set Lang="zhcn" Info="Data" />
+					</DescriptionSet>
+				</UIGroup>
+				<UIGroup Name="UI">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="用户界面" />
+						<Set Lang="enus" Info="User interface" />
+					</DescriptionSet>
+				</UIGroup>
+				<UIGroup Name="Valid">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="验证" />
+						<Set Lang="enus" Info="Valid" />
+					</DescriptionSet>
+				</UIGroup>
+
+				<UIGroup Name="Others">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="其它" />
+						<Set Lang="enus" Info="Others" />
+					</DescriptionSet>
+				</UIGroup>
+			</UIGroups>
+			<XItemParameter Name="Tag" IsShow="0" IsSet="0"
+				UIGroup="Main" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="对象类型" />
+					<Set Lang="enus" Info="Object Type" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Tag" Type="ref"
+						CreateValue="this.Field.GetTag()" Ref="EasyWebConfig/XItems/XItem">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="对象类型" />
+							<Set Lang="enus" Info="Object Type" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="IsLFEdit" Type="group" CreateValue="'0'">
+						<DescriptionSet>
+							<Set Lang="zhcn"
+								Info="是否在列表时可编辑, 默认调用OnListFrameUpdateCell&#x0D;&#x0A;
+可在参数中（AttributeSet）设置的参数：&#x0D;&#x0A;
+action_name 执行的动作的名称&#x0D;&#x0A;
+action_confirm 执行前确认信息&#x0D;&#x0A;
+action_tip 执行后提示&#x0D;&#x0A;
+action_js 执行后调用脚本&#x0D;&#x0A;" />
+							<Set Lang="enus"
+								Info="ListFrame Editabled, Default call OnListFrameUpdateCell&#x0D;&#x0A;
+In AttributeSet 设置的参数：&#x0D;&#x0A;
+action_name 执行的动作的名称&#x0D;&#x0A;
+action_confirm 执行前确认信息&#x0D;&#x0A;
+action_tip 执行后提示&#x0D;&#x0A;
+action_js 执行后调用脚本&#x0D;&#x0A;" />
+						</DescriptionSet>
+					</Value>
+					<Value Name='SpanShowAs' Type='group'>
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="当设置文本，设置显示标签" />
+							<Set Lang="enus" Info="Span tag as" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="Name" IsSet="0" IsShow="1"
+				IsMulti="0" UIGroup="Main" Html=' id="@Name" name="@Name" '
+				IsJsShow="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="名称" />
+					<Set Lang="enus" Info="Name" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name"
+						CreateValue="this.Field.Name">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+							<Set Lang="enus" Info="Name" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="GroupIndex" IsSet="0" IsShow="1"
+				IsMulti="0" UIGroup="Main" Frames="Frame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="分组索引" />
+					<Set Lang="enus" Info="Group Index" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="int" Name="GroupIndex">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="分组索引" />
+							<Set Lang="enus" Info="Group Index" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="InitValue" IsSet="0" IsShow="1"
+				UIGroup="Data" IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="初始化值" />
+					<Set Lang="enus" Info="Init Value" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="InitValue" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="初始化值" />
+							<Set Lang="enus" Info="Init value" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DescriptionSet" IsSet="1"
+				IsMulti="1" UIGroup="Main" IsShow="1" IsJsShow="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="描述" />
+					<Set Lang="enus" Info="Description" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Lang" Type="group" IsUnique="1"
+						CreateValue="EWA.LANG">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="国别" />
+							<Set Lang="enus" Info="Lang" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Info" Type="string"
+						CreateValue="this.Field.Description">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="信息" />
+							<Set Lang="enus" Info="Info" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Memo" Type="string" CreateValue="">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="备注" />
+							<Set Lang="enus" Info="Memo" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="XStyle" IsSet="0" IsShow="1"
+				UIGroup="UI" IsJsShow="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="标准样式" />
+					<Set Lang="enus" Info="St Style" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="XStyleAlign" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="居中" />
+							<Set Lang="enus" Info="Center" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="XStyleVAlign" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="垂直居中" />
+							<Set Lang="enus" Info="Middle" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="XStyleNoWrap" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="不换行" />
+							<Set Lang="enus" Info="No Wrap" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="XStyleFixed" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="固定宽度" />
+							<Set Lang="enus" Info="Fixed Width" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="XStyleColor" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="颜色" />
+							<Set Lang="enus" Info="Color" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="XStyleBold" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="加粗" />
+							<Set Lang="enus" Info="Bold" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="XStyleCursor" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="鼠标图标" />
+							<Set Lang="enus" Info="Mouse Icon" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="XStyleWidth" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="宽度" />
+							<Set Lang="enus" Info="Width" />
+						</DescriptionSet>
+					</Value>
+
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="Style" IsSet="0" IsShow="1"
+				UIGroup="UI" IsJsShow="0" IsMulti="0" Html='style="@Style"'>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="样式" />
+					<Set Lang="enus" Info="Style" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Style" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="样式" />
+							<Set Lang="enus" Info="Style" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="ParentStyle" IsSet="0"
+				IsShow="1" UIGroup="UI" IsMulti="0" Html='style="@ParentStyle"'>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="父体样式" />
+					<Set Lang="enus" Info="Parent Style" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="ParentStyle" Type="string"
+						CreateValue="this.Field.GetParentStyle()">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="父体样式" />
+							<Set Lang="enus" Info="Parent Style" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="AttributeSet" IsShow="1"
+				IsSet="1" UIGroup="Others" IsJsShow="0" IsMulti="1"
+				Html='@AttName="@AttValue"'>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="属性值" />
+					<Set Lang="enus" Info="Atts" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="AttName" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="属性名称" />
+							<Set Lang="enus" Info="Att Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="AttValue">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="属性值" />
+							<Set Lang="enus" Info="Att Value" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="AttLogic">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="逻辑表达式，当为true时期作用" />
+							<Set Lang="enus" Info="Att Logic (true)" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="EventSet" IsSet="1" IsShow="1"
+				UIGroup="Others" IsMulti="1" Html='@EventName="@EventValue"'>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="事件" />
+					<Set Lang="enus" Info="Events" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="EventName" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="事件名称" />
+							<Set Lang="enus" Info="Evt Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="EventType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="事件类型" />
+							<Set Lang="enus" Info="Evt Type" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="EventValue">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="事件" />
+							<Set Lang="enus" Info="Evt Value" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="EventLogic">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="逻辑表达式，当为true时期作用" />
+							<Set Lang="enus" Info="Evt Logic(true)" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="IsHtml" IsShow="1" IsSet="0"
+				UIGroup="UI" IsJsShow="0" IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="是否显示为HTML" />
+					<Set Lang="enus" Info="Is Html" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="IsHtml">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否显示为HTML" />
+							<Set Lang="enus" Info="Is Html" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="OrderSearch" IsShow="1"
+				IsSet="0" UIGroup="Data" IsMulti="1" IsJsShow="1" Frames="ListFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="是否排序" />
+					<Set Lang="enus" Info="Order and Search" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="IsOrder">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否排序" />
+							<Set Lang="enus" Info="Is Order" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="OrderExp">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="排序表达式" />
+							<Set Lang="enus" Info="Order exp" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="SearchType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="检索模式" />
+							<Set Lang="enus" Info="Search Type" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="SearchSql" IsNotJsShow="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="检索字段SQL" />
+							<Set Lang="enus" Info="Search SQL" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="SearchMulti">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否多选检索" />
+							<Set Lang="enus" Info="Search Multi" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="SearchExp">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="检索表达式" />
+							<Set Lang="enus" Info="Order exp" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="IsSearchQuick">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否点击筛选" />
+							<Set Lang="enus" Info="Is Quick Search " />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="IsGroup">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否分组" />
+							<Set Lang="enus" Info="Is Group" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="int" Name="GroupTestLength">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="测试字符长度" />
+							<Set Lang="enus" Info="Test length" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="IsGroupDefault">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="默认分组" />
+							<Set Lang="enus" Info="Is Group Default" />
+						</DescriptionSet>
+					</Value>
+
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="MaxMinLength" IsSet="0"
+				IsShow="1" UIGroup="Valid" IsMulti="1" Html="maxLength='@MaxLength'"
+				IsJsShow="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="最大最小长度"
+						Js="长度应在{MinLength}-{MaxLength}之间 " />
+					<Set Lang="enus" Info="Max &amp; Min length"
+						Js="length must in ({MinLength}-{MaxLength})" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="number" Name="MaxLength"
+						CreateValue="this.Field.Length">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="最大长度" />
+							<Set Lang="enus" Info="Max" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="number" Name="MinLength">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="最小长度" />
+							<Set Lang="enus" Info="Min" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="MaxMinValue" IsSet="0"
+				IsShow="1" UIGroup="Valid" IsMulti="1" IsJsShow="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="最大最小值"
+						Js="值应在({MinValue} - {MaxValue})之间" />
+					<Set Lang="enus" Info="Max &amp; Min Value"
+						Js="Value must in {MinValue} - {MinValue} " />
+				</DescriptionSet>
+				<Values>
+					<Value Type="number" Name="MaxValue">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="最大值" />
+							<Set Lang="enus" Info="Max" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="number" Name="MinValue">
+
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="最小值" />
+							<Set Lang="enus" Info="Min" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="IsMustInput" IsSet="0"
+				IsShow="1" UIGroup="Valid" IsMulti="0" IsJsShow="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="必输项" Js="*" />
+					<Set Lang="enus" Info="Must input" Js="*" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="IsMustInput"
+						CreateValue="this.Field.MustInput">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否必须输入" />
+							<Set Lang="enus" Info="Must input" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DataItem" IsSet="0" IsShow="1"
+				UIGroup="Data" IsMulti="1" IsJsShow="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="数据项" />
+					<Set Lang="enus" Info="Data Item" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="DataType"
+						CreateValue="this.Field.GetType()">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="数据类型" />
+							<Set Lang="enus" Info="Data Type" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="DataField" IsNotJsShow="1"
+						CreateValue="this.Field.Name">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="映射字段" />
+							<Set Lang="enus" Info="Data Field" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="group" Name="Translation">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="翻译方式" />
+							<Set Lang="enus" Info="Translation" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="TransTarget"
+						Ref="EasyWebTemplate/XItems/XItem">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="翻译到" />
+							<Set Lang="enus" Info="Translation Target" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="DisableOnModify">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="修改时禁用" />
+							<Set Lang="enus" Info="Disabled On Modify" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="IsEncrypt" IsNotJsShow="0">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否加密" />
+							<Set Lang="enus" Info="Is Encrypt" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Ref="EwaGlobal.xml|Globals/Valids/Valid"
+						Name="Valid">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="效验值" />
+							<Set Lang="enus" Info="Valid" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="Format"
+						CreateValue="this.Field.GetFormat()">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="格式化" />
+							<Set Lang="enus" Info="Format" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="NumberScale">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="数值比例" />
+							<Set Lang="enus" Info="Number scale" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="SumBottom">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="列表底部合计" />
+							<Set Lang="enus" Info="Sum at bottom" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="icon" Name="Icon">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="图标" />
+							<Set Lang="enus" Info="Icon" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="IconLoction">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="图标位置" />
+							<Set Lang="enus" Info="Icon Loction" />
+						</DescriptionSet>
+					</Value>
+					<!-- <Value Type="ref" Name="MeargeTo" Ref="EasyWebTemplate/XItems/XItem"> 
+						<DescriptionSet> <Set Lang="zhcn" Info="合并到" /> <Set Lang="enus" Info="MeargeTo" 
+						/> </DescriptionSet> </Value> -->
+
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DispEnc" IsSet="0" IsMulti="1"
+				IsShow="1" IsJsShow="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="加密显示" />
+					<Set Lang="enus" Info="Encryption" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="EncType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="加密方式" />
+							<Set Lang="enus" Info="Encryption type" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="EncShowUrl">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="全部显示验证地址" />
+							<Set Lang="enus" Info="Show all url" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DataRef" IsSet="0" IsShow="1"
+				OuterButton="
+if(this.id==''){
+	this.id='__'+Math.random();
+}
+var id=this.id;
+var ds='DATABASE;'+_EWAC_UI._UserClass.PageTables.Tables.GetItem('datasource').Rows[0].Fields[0];
+EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql&amp;a=0&amp;datasource='+ds+'&amp;fromId='+id,'list')"
+				IsJsShow="0" UIGroup="Data" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="数据引用" />
+					<Set Lang="enus" Info="Data Ref" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="sql" Name="RefSql">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="引用的SQL语句" />
+							<Set Lang="enus" Info="Refs SQL" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="RefShow" IsNotJsShow="0">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示字段" />
+							<Set Lang="enus" Info="Display Field" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="RefKey">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="引用字段" />
+							<Set Lang="enus" Info="Value Field" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="group" Name="RefShowType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示方式" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="RefShowStyle">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示样式字段(ClassName)" />
+							<Set Lang="enus" Info="Show Type" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="List" IsSet="0" IsShow="1"
+				OuterButton="
+if(this.id==''){
+	this.id='__'+Math.random();
+}
+var id=this.id;
+var ds='DATABASE;'+_EWAC_UI._UserClass.PageTables.Tables.GetItem('datasource').Rows[0].Fields[0];
+EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql&amp;a=0&amp;datasource='+ds+'&amp;fromId='+id,'list')"
+				IsJsShow="0" UIGroup="Data" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="列表" />
+					<Set Lang="enus" Info="List" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="sql" Name="Sql"
+						CreateValue="this.Field.CreateFkSql();">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="Sql数据" />
+							<Set Lang="enus" Info="SQL" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="DisplayField"
+						CreateValue="this.Field.FkColumnName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示字段" />
+							<Set Lang="enus" Info="Display Field" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ValueField"
+						CreateValue="this.Field.FkColumnName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="值字段" />
+							<Set Lang="enus" Info="Value Field" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="TitleField"
+						CreateValue="this.Field.FkColumnName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="提示字段" />
+							<Set Lang="enus" Info="Title Field" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ParentField">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="父节点字段" />
+							<Set Lang="enus" Info="Parent key Field" />
+						</DescriptionSet>
+					</Value>
+					
+					<Value Type="string" Name="GroupField"
+						CreateValue="this.Field.FkColumnName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="分组字段" />
+							<Set Lang="enus" Info="Group Field" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ValueList">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="值列表“,”分割" />
+							<Set Lang="enus" Info="Value List, Split by ','" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="DisplayList">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示列表“,”分割" />
+							<Set Lang="enus" Info="Display List, Split by ','" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="TitleList">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="提示列表“,”分割" />
+							<Set Lang="enus" Info="Title List, Split by ','" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="ListShowType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示方式，仅对Select起作用" />
+							<Set Lang="enus" Info="Show Type(select)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="ListAddBlank">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="增加第一选项为空白，仅对Select起作用" />
+							<Set Lang="enus" Info="Add Blank(select)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="ListFilterType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="过滤方式，仅对Select起作用" />
+							<Set Lang="enus" Info="Add Blank(select)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ListFilterField">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="过滤字段，仅对ListFilterType=json起作用" />
+							<Set Lang="enus" Info="Add Blank(select)" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="UserSet" IsSet="1" IsShow="1"
+				UIGroup="Others" IsMulti="1" IsJsShow="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="用户自定义" />
+					<Set Lang="enus" Info="User defined" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="Lang">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="语言" />
+							<Set Lang="enus" Info="Lang" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="html" Name="User">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="用户自定义" />
+							<Set Lang="enus" Info="Defined Html" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="CallAction" IsSet="0" IsShow="1"
+				UIGroup="Others" IsMulti="1" IsJsShow="0"
+				Html="onclick=&quot;EWA.F.FOS['@SYS_FRAME_UNID'].DoAction(this,'@Action','@ConfirmInfo','@AfterTip')&quot;">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="调用Action" />
+					<Set Lang="enus" Info="Action Call" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="ref" Ref="EwaGlobal.xml|Globals/Infos/Info"
+						Name="ConfirmInfo">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行前的确认信息" />
+							<Set Lang="enus" Info="Confirm Before" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Ref="EwaGlobal.xml|Globals/Infos/Info"
+						Name="AfterTip">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="调用后的提示信息" />
+							<Set Lang="enus" Info="Title After" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="Action"
+						Ref="EasyWebTemplate/Action/ActionSet">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行的Action" />
+							<Set Lang="enus" Info="Action name" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="OpenFrame" IsSet="0" IsShow="1"
+				UIGroup="Others"
+				OuterButton="
+if(this.id==''){
+	this.id='_WWW_'+Math.random();
+}
+var id=this.id;
+var u='./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=define_select_xitem&amp;TYPE=OpenFrame&amp;fromId='+id;
+EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400)"
+				IsMulti="1" IsJsShow="0"
+				Html=" onclick=&quot;EWA.UI.Dialog.@CallMethod('@SYS_FRAME_UNID','@CallXmlName','@CallItemName', false,'@CallParas', null, '@AttatchParas')&quot;">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="相关配置名称" />
+					<Set Lang="enus" Info="Relate Cfg" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="CallMethod">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="调用模式" />
+							<Set Lang="enus" Info="Call method" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CallXmlName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置文件" />
+							<Set Lang="enus" Info="Xml File Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CallItemName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置名称" />
+							<Set Lang="enus" Info="Item Name" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="CallParas">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="参数集合" />
+							<Set Lang="enus" Info="Paramters" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="AttatchParas">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="附加来源参数" />
+							<Set Lang="enus" Info="Attatch Paras" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="Frame" IsSet="0" IsShow="1"
+				UIGroup="Others"
+				OuterButton="
+if(this.id==''){
+	this.id='_WWW_'+Math.random();
+}
+var id=this.id;
+var u='./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=define_select_xitem&amp;TYPE=Frame&amp;fromId='+id;
+EWA.UI.Dialog.OpenWindow(u, 'selectxitem', 624, 400);
+"
+				IsMulti="1" IsJsShow="0"
+				Html=" xmlName='@CallXmlName' itemName='@CallItemName' paraName='@CallPara'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="相关配置名称" />
+					<Set Lang="enus" Info="Frame" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="CallXmlName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置文件" />
+							<Set Lang="enus" Info="Xml File Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CallItemName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置名称" />
+							<Set Lang="enus" Info="Item Name" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="CallPara">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="传递本值参数" />
+							<Set Lang="enus" Info="Parameters" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="UserControl" IsSet="0"
+				IsShow="1" UIGroup="Others" IsJsShow="0"
+				OuterButton="
+if(this.id==''){
+	this.id='_WWW_'+Math.random();
+}
+var id=this.id;
+var u='./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=define_select_xitem&amp;TYPE=UserControl&amp;fromId='+id;
+EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
+				IsMulti="1" Html="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="用户控件引用" />
+					<Set Lang="enus" Info="User Control Ref" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="UCCallXmlName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置文件" />
+							<Set Lang="enus" Info="Xml File Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="UCCallItemName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置名称" />
+							<Set Lang="enus" Info="Item Name" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="UCCallPara">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="传递本值参数" />
+							<Set Lang="enus" Info="Parameters" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="UCCallItem">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="引用条目" />
+							<Set Lang="enus" Info="Item" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DefineFrame" IsSet="0"
+				IsShow="1" UIGroup="Others" IsJsShow="0"
+				OuterButton="
+if(this.id==''){
+	this.id='_WWW_'+Math.random();
+}
+var id=this.id;
+var u='./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=define_select_xitem&amp;TYPE=Frame&amp;fromId='+id;
+EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
+				IsMulti="1" Html="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="调用配置项" />
+					<Set Lang="enus" Info="Define Frame" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="CallXmlName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置文件" />
+							<Set Lang="enus" Info="Xml File Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CallItemName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置名称" />
+							<Set Lang="enus" Info="Item Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CallPara">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="传递本值参数" />
+							<Set Lang="enus" Info="Parameters" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="PopFrame" IsSet="0" IsShow="1"
+				UIGroup="Others" IsJsShow="0"
+				OuterButton="
+if(this.id==''){
+	this.id='_W2GW_'+Math.random();
+}
+var id=this.id;
+var u='./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=define_select_xitem&amp;TYPE=Frame&amp;fromId='+id;
+EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
+				IsMulti="1" Html="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="弹出框" />
+					<Set Lang="enus" Info="Pop Frame" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="PopXmlName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置文件" />
+							<Set Lang="enus" Info="Xml File Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="PopItemName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置名称" />
+							<Set Lang="enus" Info="Item Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="PopPara">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="传递本值参数" />
+							<Set Lang="enus" Info="Parameters" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="PopTitleField">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示注解字段,用 @前缀" />
+							<Set Lang="enus" Info="Pop Title Field(@XX)" />
+						</DescriptionSet>
+					</Value>
+
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="Upload" IsSet="0" IsShow="1"
+				IsJsShow="0" UIGroup="Others" IsMulti="1" Html="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="文件上传配置" />
+					<Set Lang="enus" Info="File Upload" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="UpSaveMethod">
+						<DescriptionSet>
+							<Set Lang="zhcn"
+								Info="保存模式, [WithFrame]参数：&#x0D;&#x0A;
+{NAME} 文件二进制&#x0D;&#x0A;
+{NAME}_NAME 文件服务器名称&#x0D;&#x0A;
+{NAME}_URL 文件http的url&#x0D;&#x0A;
+{NAME}_EXT 文件扩展名&#x0D;&#x0A;
+{NAME}_PATH 文件服务器保存位置&#x0D;&#x0A;
+{NAME}_SIZE 文件长度" />
+							<Set Lang="enus" Info="Save Method" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="UpMulti">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="多文件上传" />
+							<Set Lang="enus" Info="Multi" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="UpType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="上传类型，SWF上传无效" />
+							<Set Lang="enus" Info="Upload Type" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="UpExts">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="扩展名列表，用,分割" />
+							<Set Lang="enus" Info="Exts, Split by ','" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="UpUnZip">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="解压压缩文件" />
+							<Set Lang="enus" Info="UnPack Zip File" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="Up2Swf">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="自动转换成Swf文件" />
+							<Set Lang="enus" Info="Convert To Flash" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="UpPath">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="上传路径" />
+							<Set Lang="enus" Info="Upload Path" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="group" Name="UpDelete">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="删除上传文件，用于数据库保存" />
+							<Set Lang="enus" Info="Delete Uploaded" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="UpNewSizes">
+						<DescriptionSet>
+							<Set Lang="zhcn"
+								Info="新的尺寸列表，例如100x50, 200x100,用“x”分割宽和高，用“，”分割不同尺寸" />
+							<Set Lang="enus" Info="New Sizes, Ex: 100x50,200x100" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="NewSizesIn">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="生成新的尺寸方式" />
+							<Set Lang="enus" Info="New Sizes Method" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="sql" Name="UpSQL">
+						<DescriptionSet>
+							<Set Lang="zhcn"
+								Info="保存SQL, 参数：&#x0D;&#x0A;
+EWA_UP_FILE 文件二进制&#x0D;&#x0A;
+EWA_UP_NAME 文件服务器名称&#x0D;&#x0A;
+EWA_UP_URL 文件http的url&#x0D;&#x0A;
+EWA_UP_EXT 文件扩展名&#x0D;&#x0A;
+EWA_UP_PATH 文件服务器保存位置&#x0D;&#x0A;
+EWA_UP_TYPE 文件的http的contenttype&#x0D;&#x0A;
+EWA_UP_UNID 文件GUNID&#x0D;&#x0A;
+EWA_UP_FROM  来源，用于图片的重新生成&#x0D;&#x0A;
+EWA_UP_LOCAL 服务器本地路径&#x0D;&#x0A;
+EWA_UP_LENGTH 文件长度&#x0D;&#x0A;
+EWA_UP_LOCAL 用户本地文件名称
+" />
+							<Set Lang="enus"
+								Info="SQL, Parameters：&#x0D;&#x0A;
+EWA_UP_FILE Binarys&#x0D;&#x0A;
+EWA_UP_NAME Name in server&#x0D;&#x0A;
+EWA_UP_URL Url&#x0D;&#x0A;
+EWA_UP_EXT Ext&#x0D;&#x0A;
+EWA_UP_PATH Path of server&#x0D;&#x0A;
+EWA_UP_TYPE Contenttype&#x0D;&#x0A;
+EWA_UP_UNID GUNID&#x0D;&#x0A;
+EWA_UP_FROM  Source, &#x0D;&#x0A;
+EWA_UP_LOCAL Local Path&#x0D;&#x0A;
+EWA_UP_LENGTH Length &#x0D;&#x0A;
+EWA_UP_LOCAL User local file name
+" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="RunUpSQLResized">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="重新生成图片是否执行SQL" />
+							<Set Lang="enus" Info="Run sql on resized" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="VaildEx" IsSet="0" IsShow="1"
+				UIGroup="Valid" IsMulti="1"
+				Html="onblur=&quot;EWA.F.FOS['@SYS_FRAME_UNID'].DoValidEx(this,'@VXMode','@VXJs','@VXAction','@VXOk','@VXFail')&quot;">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="高级验证" />
+					<Set Lang="enus" Info="Valid Extend" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="VXMode">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="验证模式" />
+							<Set Lang="enus" Info="Valid Mode" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="VXJs">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="脚本调用" />
+							<Set Lang="enus" Info="Javascript Call" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="VXAction"
+						Ref="EasyWebTemplate/Action/ActionSet">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行的Action" />
+							<Set Lang="enus" Info="Call Action" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="VXOk"
+						Ref="EasyWebTemplate/PageInfos/PageInfo">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="验证成功信息" />
+							<Set Lang="enus" Info="Infomation of valided ok" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="VXFail"
+						Ref="EasyWebTemplate/PageInfos/PageInfo">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="验证失败信息" />
+							<Set Lang="enus" Info="Infomation of vailded failure" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="MGAddField" IsSet="0" IsShow="1"
+				IsJsShow="0" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="字段映射" />
+					<Set Lang="enus" Info="Map Fields" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="MgfId">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="数据填充字段定位值" />
+							<Set Lang="enus" Info="MgfId" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="MgfTarget">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="所在行或列" />
+							<Set Lang="enus" Info="Target" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="MgfComput">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="汇总方式" />
+							<Set Lang="enus" Info="Comput" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="MgfCalc">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="计算方式，例如 (@X0-@X1)/2" />
+							<Set Lang="enus" Info="Calc, Ex: (@X-@X1)/2" />
+						</DescriptionSet>
+					</Value>
+
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="AnchorParas" IsSet="0"
+				IsShow="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="连接参数" />
+					<Set Lang="enus" Info="Anchor Paras" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="aHref">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="链接" />
+							<Set Lang="enus" Info="Href" />
+						</DescriptionSet>
+					</Value>
+					<Value Step="0" Type="string" Name="aTarget">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="目标" />
+							<Set Lang="enus" Info="Target" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="LinkButtonParas" IsSet="0"
+				IsShow="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="链接按钮参数" />
+					<Set Lang="enus" Info="Link Button Paras" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="lkbButtonId">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="按钮" />
+							<Set Lang="enus" Info="Button" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DopListShow" IsSet="0"
+				IsShow="1" UIGroup="Others" IsMulti="1"
+				Html=" DlsShow='@DlsShow' DlsAction='@DlsAction' AfterEvent='@DlsAfterEvent' isdlseventload='@isDlsEventLoad'"
+				IsJsShow="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="动态列表定义" />
+					<Set Lang="enus" Info="Droplist Paras" />
+				</DescriptionSet>
+				<Values>
+
+					<Value Name="DlsAfterEvent" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn"
+								Info="数据获取后事件, 只要Js方法名，不带括号，参数为 value, text, hidden对象, textbox对象" />
+							<Set Lang="enus" Info="After Event" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="isDlsEventLoad" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="加载时是否执行" />
+							<Set Lang="enus" Info="Is Load Run After Event" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="DlsShow" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示模式,例如：@id/@name(@idcard)" />
+							<Set Lang="enus" Info="Show Method, Ex: @id/@name(@idcard)" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="DlsAction" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示内容执行的配置文件的Action" />
+							<Set Lang="enus" Info="Action Call" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="ReportCfg" IsSet="0" IsShow="1"
+				UIGroup="Others" IsMulti="1" IsJsShow="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="报告定义" />
+					<Set Lang="enus" Info="Report" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="ReportAction" Type="ref"
+						Ref="EasyWebTemplate/Action/ActionSet">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="数据源" />
+							<Set Lang="enus" Info="Action Call" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="IsReportRepeat" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否明细信息" />
+							<Set Lang="enus" Info="Is Repeat" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="ReportTemplate" Type="html" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn"
+								Info="报告模板，用&lt;!--EWA_REPT_START--&gt;和&lt;!--EWA_REPT_END--&gt;" />
+							<Set Lang="enus"
+								Info="Template using &lt;!--EWA_REPT_START--&gt; and &lt;!--EWA_REPT_END--&gt;" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="CombineFrame" IsSet="0"
+				IsShow="1" UIGroup="Others" IsJsShow="0"
+				OuterButton="
+if(this.id==''){
+	this.id='_WWW_'+Math.random();
+}
+var id=this.id;
+var u='./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=define_select_xitem&amp;TYPE=Frame&amp;fromId='+id;
+EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
+				IsMulti="1" Html="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="组合配置项" />
+					<Set Lang="enus" Info="Combine Frame" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="CbXmlName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置文件" />
+							<Set Lang="enus" Info="Xml File Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CbItemName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置名称" />
+							<Set Lang="enus" Info="Item Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CbPara">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="传递本值参数" />
+							<Set Lang="enus" Info="Parameters" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="CbInstall">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="加载模式" />
+							<Set Lang="enus" Info="Install method" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CbGrp">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="分组" />
+							<Set Lang="enus" Info="Group Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CbLst">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="针对Box模式的列表" />
+							<Set Lang="enus" Info="Box List" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CbMearge">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="合并到哪里" />
+							<Set Lang="enus" Info="Mearge to" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CbAll">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="在所有分类中显示" />
+							<Set Lang="enus" Info="Show always" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="CbJsRename">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="脚本更改名称，避免冲突" />
+							<Set Lang="enus" Info="Is Javascript Rename?" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Name="CbJs" Type="jscript" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="特有脚本" />
+							<Set Lang="enus" Info="Self Javascript" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="AddrMapRels" IsSet="0"
+				IsShow="1" UIGroup="Others" IsJsShow="0" IsMulti="1" Html="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="地图关联字段" />
+					<Set Lang="enus" Info="Map relative fields" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="ref" Name="AmrCountry"
+						Ref="EasyWebTemplate/XItems/XItem">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="国家" />
+							<Set Lang="enus" Info="Country" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="AmrProvince"
+						Ref="EasyWebTemplate/XItems/XItem">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="省" />
+							<Set Lang="enus" Info="Province" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="AmrCity"
+						Ref="EasyWebTemplate/XItems/XItem">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="城市" />
+							<Set Lang="enus" Info="City" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="AmrZip"
+						Ref="EasyWebTemplate/XItems/XItem">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="邮政编码" />
+							<Set Lang="enus" Info="Zip" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="AmrLng"
+						Ref="EasyWebTemplate/XItems/XItem">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="经度" />
+							<Set Lang="enus" Info="Longitute" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="AmrLat"
+						Ref="EasyWebTemplate/XItems/XItem">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="纬度" />
+							<Set Lang="enus" Info="Latitude" />
+						</DescriptionSet>
+					</Value>
+
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="ImageDefault" IsSet="0"
+				IsShow="1" UIGroup="Others" IsJsShow="0" IsMulti="1" Html="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="无图默认的图片" />
+					<Set Lang="enus" Info="Image Default" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="ImageDefault">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="默认图片" />
+							<Set Lang="enus" Info="Image Default" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ImageUrl">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="指定图片" />
+							<Set Lang="enus" Info="Image Url" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="ImageLazyLoad">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="图片后加载" />
+							<Set Lang="enus" Info="LazyLoad" />
+						</DescriptionSet>
+					</Value>
+
+				</Values>
+			</XItemParameter>
+		</XItemParameters>
+
+
+		<XGroupValues>
+
+			<XGroupValue Name="EncType" Default=""
+				Values=",all,end3,before3,email,phone">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",全部,后三位, 前三位, 邮件, 电话" />
+					<Set Lang="enus" Info=",all,end3,before3,email,phone" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="ImageDefault" Default=""
+				Values="imageDefault,transparent,url">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="默认图片,透明,指定图片" />
+					<Set Lang="enus" Info="Default,Transparent,Url" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="IconLoction" Default="no"
+				Values="left,right">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="左边,右边" />
+					<Set Lang="enus" Info="Left,Right" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="Translation" Default=""
+				Values=",zh2en,en2zh">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",中文-英文,英文-中文" />
+					<Set Lang="enus" Info=",Chinese-English,English-Chinese" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="SpanShowAs" Default=""
+				Values=",H1,H2,H3,H4,H5,H6,DIV,A,P,SUB,CODE,PRE">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",H1,H2,H3,H4,H5,H6,DIV,A,P,SUB,CODE,PRE" />
+					<Set Lang="enus" Info=",H1,H2,H3,H4,H5,H6,DIV,A,P,SUB,CODE,PRE" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="ImageLazyLoad" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="AttatchParas" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="RunUpSQLResized" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="DisableOnModify" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="NewSizesIn" Default="server"
+				Values="server,client">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="服务器,客户端" />
+					<Set Lang="enus" Info="Server,Client" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="ListFilterType" Default="no"
+				Values=",value,text,json">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",选项值,选项文字,选项的JSON对象" />
+					<Set Lang="enus" Info=",value,text,json" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="SumBottom" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="isDlsEventLoad" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="CbInstall" Default="html"
+				Values="html,js,iframe,iframeLazy,box">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="程序内,脚本加载,IFrame,IFrame后加载,显示为盒子" />
+					<Set Lang="enus" Info="html,js,iframe,iframeLazy,box" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="UpUnZip" Default="no" Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="UpMulti" Default="no" Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="XStyleAlign" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="XStyleAlign" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="XStyleVAlign" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="XStyleNoWrap" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="XStyleCursor" Default=""
+				Values=",pointer">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="默认,手势" />
+					<Set Lang="enus" Info="Default, Pointer" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="XStyleFixed" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="XStyleColor" Default="no"
+				Values=",red,blue,green,darkred,darkblue,darkgreen">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",红,蓝色,绿色,暗红,暗蓝,暗绿" />
+					<Set Lang="enus"
+						Info=",red,blue,green,darkred,darkblue,darkgreen" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="XStyleBold" Default="no"
+				Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+
+
+			<XGroupValue Name="ListShowType" Default="0"
+				Values=", Text-Key, Key-Text">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",文字(Key),Key(文字)" />
+					<Set Lang="enus" Info=", Text-Key, Key-Text" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="RefShowType" Default="0"
+				Values=", Text-Key, Key-Text, Text-Title, Key-Title">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",文字(Key),Key(文字),文字-提示,Key-提示" />
+					<Set Lang="enus"
+						Info=", Text-Key, Key-Text, Text-Title, Key-Title" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="Format" Default="0"
+				Values=", Date, ShortDate, Time,ShortTime, DateTime, DateShortTime
+				, ShortDateTime, Week, Age, Int, Money,  Fixed2, Percent, LeastMoney, LeastDecimal
+				 ">
+				<DescriptionSet>
+					<Set Lang="zhcn"
+						Info=",日期,短日期,时间,短时间,日期和时间,日期和短时间
+						,短日期和时间,周几,年龄, 整型,货币,保留2位小数,百分比,最短货币(千位分隔),最短小数
+						 " />
+					<Set Lang="enus"
+						Info=", Date, ShortDate, Time,ShortTime, DateTime, DateShortTime
+						, ShortDateTime, DayName, Age, Int, Money, Fixed2, Percent, LeastMoney, LeastDecimal
+						 " />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="NumberScale" Default="0"
+				Values=", 100, 1000, 10000, 100000, 1000000, 10000000">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",百,千,万,十万,百万,千万" />
+					<Set Lang="enus"
+						Info=",Hundred,Thousand,Ten thousand, One hundred thousand, Million，Ten million" />
+				</DescriptionSet>
+			</XGroupValue>
+
+
+			<XGroupValue Name="Up2Swf" Default="0" Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="UpDelete" Default="no" Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="UpSaveMethod" Default="0"
+				Values="File,SQL,WithFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="文件保存,SQL保存,当前配置处理" />
+					<Set Lang="enus" Info="File,SQL,WithFrame" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="MgfTarget" Default="0" Values="X,Y">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="X轴,Y轴,数据" />
+					<Set Lang="enus" Info="AxisX,AxisY" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="MgfComput" Default="0"
+				Values=",Sum,Avg,Max,Min,Count">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="自定义,合计,平均值,最大值,最小值,计数" />
+					<Set Lang="enus" Info="z,Sum,Avg,Max,Min,Count" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="InitValue" Default="0"
+				Values=",Tody,Tody-Time,Year-Month,Year,Time,IP,SEQID,GUID,ZERO">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",当前日期,当前日期时间,年月,年,时间,IP地址,序号,全球唯一标识,数字零" />
+					<Set Lang="enus"
+						Info=",Tody,Tody-Time,Year-Month,Year,Time,IP,SEQID,GUID,ZERO" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="Lang" Default="0" Values=",zhcn,enus">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",中文简体,英文" />
+					<Set Lang="enus" Info=",Chinese(GB),English" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="UpTarget" Default="0"
+				Values="DIR,TABLE">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="目录,数据库" />
+					<Set Lang="enus" Info="Dir, Database" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="DataType" Default="0"
+				Values=",String,Int,Boolen,Number,Date,Binary">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",字符,整型,逻辑,数字,日期,二进制" />
+					<Set Lang="enus" Info=",String,Int,Boolen,Number,Date,Binary" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="EventType" Default="0"
+				Values="Javascript,Ajax">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="脚本,AJAX调用" />
+					<Set Lang="enus" Info="JavaScript,Ajax" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="ListAddBlank" Default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="IsGroup" Default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="IsSearchQuick" Default="0"
+				Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="IsGroupDefault" Default="0"
+				Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="IsEncrypt" Default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="IsMustInput" Default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="IsHtml" Default="0" Values="0,1,2,3">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否（回车替换为BR标签）,是,否（回车替换为P标签）,否（不替换回车）" />
+					<Set Lang="enus" Info="No(BR),Yes,No(P),No(Nothing)" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="IsOrder" Default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="IsLFEdit" Default="0" Values="0,1,2">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是(双击),是(单击)" />
+					<Set Lang="enus" Info="No,Yes(Double Click),Yes(Click)" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="IsReportRepeat" Default="0"
+				Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="SearchType" Default="0"
+				Values=",text,date,number,fix">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",文字,日期,数字,固定格式" />
+					<Set Lang="enus" Info=",Text,Date,Number,Fix" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="SearchMulti" Default="2"
+				Values="2,1,0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="SELECT,Checkbox,RADIO" />
+					<Set Lang="enus" Info="Select,Checkbox,Radio" />
+				</DescriptionSet>
+			</XGroupValue>
+
+			<XGroupValue Name="CallMethod" Default="0"
+				Values=",OpenReloadClose,OpenReload">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",刷新并关闭,刷新" />
+					<Set Lang="enus" Info=",OpenReloadClose,OpenReload" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="VXMode" Default="0"
+				Values=",js,action">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",脚本调用,执行Action" />
+					<Set Lang="enus" Info=",Js Call,Action Call" />
+				</DescriptionSet>
+			</XGroupValue>
+		</XGroupValues>
+	</Items>
+	<Page>
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="页面信息" />
+			<Set Lang="enus" Info="Page Information" />
+		</DescriptionSet>
+		<XItemParameters>
+			<XItemParameter Name="Name" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="配置名称" />
+					<Set Lang="enus" Info="Item Name" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" ReadOnly="1" Step="0" Name="Name"
+						CreateValue="this.Name">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="配置名称" />
+							<Set Lang="enus" Info="Name" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="FrameTag" IsShow="0" IsSet="0"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="框架名称" />
+					<Set Lang="enus" Info="Frame Tag" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="FrameTag" Type="string"
+						CreateValue="this.FrameTag">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="框架名称" />
+							<Set Lang="enus" Info="Frame Tag" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="SkinName" IsSet="0" IsShow="1"
+				IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="皮肤" />
+					<Set Lang="enus" Info="Skin" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="SkinName" Type="string" CreateValue="'Test1'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="皮肤" />
+							<Set Lang="enus" Info="Skin" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="IsXhtml" Type="group" CreateValue="'0'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否显示为XHTML页面" />
+							<Set Lang="enus" Info="Is XHtml" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DataSource" IsShow="1" IsSet="0"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="数据源" />
+					<Set Lang="enus" Info="Datasource" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="ref" Name="DataSource"
+						CreateValue="this.Fields.CfgName" Ref="EWAD$Connections">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="数据源" />
+							<Set Lang="enus" Info="Datasource" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="ConfigMemo" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="本配置说明" />
+					<Set Lang="enus" Info="This Config Memo" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="md" Name="ConfigMemo" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="本配置说明" />
+							<Set Lang="enus" Info="This Config Memo" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="Cached" IsShow="0" IsSet="0"
+				IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面缓存" />
+					<Set Lang="enus" Info="Page Cache" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="CachedType" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否缓存" />
+							<Set Lang="enus" Info="Cache Type" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="CachedSeconds" Type="int">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="缓存时间（秒）" />
+							<Set Lang="enus" Info="Life(seconds)" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="Acl" IsShow="0" IsSet="0"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="权限验证类" />
+					<Set Lang="enus" Info="ACL" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Acl" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="权限验证" />
+							<Set Lang="enus" Info="ACL" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="Log" IsShow="0" IsSet="0"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="日志类" />
+					<Set Lang="enus" Info="Class of ACL" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Log" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="日志类" />
+							<Set Lang="enus" Info="Class Of ACL" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DescriptionSet" IsSet="1"
+				IsShow="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="描述" />
+					<Set Lang="enus" Info="Description" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Lang" Type="group" IsUnique="1"
+						CreateValue="EWA.LANG">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="国别" />
+							<Set Lang="enus" Info="Lang" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Info" Step="0" Type="string"
+						CreateValue="'{' + this.Fields.TableName + '} 的信息'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="信息" />
+							<Set Lang="enus" Info="Info" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Memo" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="备注" />
+							<Set Lang="enus" Info="Memo" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="PageAttributeSet" IsSet="1"
+				IsShow="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面属性" />
+					<Set Lang="enus" Info="Page Attrs" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="PageAttName" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="属性名称" />
+							<Set Lang="enus" Info="Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="PageAttValue">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="属性值" />
+							<Set Lang="enus" Info="Value" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="GroupSet" IsSet="1" IsShow="1"
+				IsMulti="1" FrameTag="Frame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="分组描述" />
+					<Set Lang="enus" Info="Group set" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Lang" Type="group" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="国别" />
+							<Set Lang="enus" Info="Lang" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="GroupInfo" Step="0" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="分组信息，用“,”分割" />
+							<Set Lang="enus" Info="Infos, Split by ','" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="GroupShow" Step="0" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示模式" />
+							<Set Lang="enus" Info="Show Type" />
+						</DescriptionSet>
+					</Value>
+
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="Size" IsSet="0" IsShow="1"
+				IsMulti="1" FrameTag="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面尺寸" />
+					<Set Lang="enus" Info="Size" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="HiddenCaption" Type="group"
+						CreateValue="this.HiddenCaption()" Step="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示列头" />
+							<Set Lang="enus" Info="Caption Hidden" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Width" Type="String" IsUnique="1"
+						CreateValue="this.Width()" Step="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="宽度" />
+							<Set Lang="enus" Info="Width" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Height" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="高度" />
+							<Set Lang="enus" Info="Height" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="HAlign" Type="group" Step="1"
+						CreateValue="'center'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="水平对齐" />
+							<Set Lang="enus" Info="Align" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="VAlign" Type="group" CreateValue="'top'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="垂直对齐" />
+							<Set Lang="enus" Info="Middle" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="FrameCols" Type="group" CreateValue="'C2'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="Frame每行栏数" />
+							<Set Lang="enus" Info="Cols" />
+						</DescriptionSet>
+					</Value>
+
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="AddHtml" IsSet="0" IsShow="1"
+				IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="附加HTML" />
+					<Set Lang="enus" Info="Add Html" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="Html" Name="Top" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="头部" />
+							<Set Lang="enus" Info="Top" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="Html" Name="Bottom" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="尾部" />
+							<Set Lang="enus" Info="Bottom" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="AddScript" IsSet="0" IsShow="1"
+				IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="附加脚本" />
+					<Set Lang="enus" Info="Add Js" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="jscript" Name="Top" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="头部" />
+							<Set Lang="enus" Info="Top" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="jscript" Name="Bottom" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="尾部" />
+							<Set Lang="enus" Info="Bottom" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="AddCss" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="附加样式" />
+					<Set Lang="enus" Info="Css" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="css" Name="AddCss" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="附加样式" />
+							<Set Lang="enus" Info="Css" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="ChartsShow" IsSet="0" IsShow="1"
+				IsMulti="0" FrameTag="ListFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="图表显示方式" />
+					<Set Lang="enus" Info="Charts" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="ChartsShow" IsCDATA="0">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="图表显示方式" />
+							<Set Lang="enus" Info="Show Type" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="RedrawJson" IsSet="0" IsShow="1"
+				IsMulti="0" FrameTag="Frame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="重绘布局" />
+					<Set Lang="enus" Info="Redraw" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="jscript" Name="RedrawJson" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="重绘布局" />
+							<Set Lang="enus" Info="Redraw" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="BoxJson" IsSet="0" IsShow="1"
+				IsMulti="0" FrameTag="ListFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="BoxJson" />
+					<Set Lang="enus" Info="BoxJson" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="jscript" Name="BoxJson" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="BoxJson" />
+							<Set Lang="enus" Info="BoxJson" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="LeftJson" IsSet="0" IsShow="1"
+				IsMulti="0" FrameTag="ListFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="LeftJson" />
+					<Set Lang="enus" Info="LeftJson" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="jscript" Name="LeftJson" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="LeftJson" />
+							<Set Lang="enus" Info="LeftJson" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="FrameHtml" IsSet="0" IsShow="1"
+				IsMulti="0" FrameTag="Frame,Report,ListFrame,Grid">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="框架HTML" />
+					<Set Lang="enus" Info="Frame Html" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="Html" Name="FrameHtml" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="框架HTML" />
+							<Set Lang="enus" Info="Frame Html" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="PageSize" IsSet="0" IsShow="1"
+				IsMulti="1" FrameTag="ListFrame,Grid">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="列表分页" />
+					<Set Lang="enus" Info="Split" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="number" Name="PageSize" Step="0"
+						CreateValue="'10'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="分页数" />
+							<Set Lang="enus" Info="Page Number" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="IsSplitPage" Step="0"
+						CreateValue="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否分页" />
+							<Set Lang="enus" Info="Is Split" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="number" Name="ColSize">
+						<DescriptionSet>
+							<Set Lang="zhcn"
+								Info="分栏数，填写数值,&#x0D;&#x0A;
+							如果LfShowType是列表，则是分割栏数，&#x0D;&#x0A;
+							如果是网格则是每行显示的数量" />
+							<Set Lang="enus" Info="Cols" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="KeyField" Step="0"
+						CreateValue="this.Fields.Pk">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="主键" />
+							<Set Lang="enus" Info="Key" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="AllowExport">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="允许导出数据" />
+							<Set Lang="enus" Info="Allow Export" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="group" Name="Recycle" Step="0" CreateValue="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="回收站" />
+							<Set Lang="enus" Info="Recycle" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="StatusField" IsShow="0"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="状态字段" />
+							<Set Lang="enus" Info="Status Field" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="ListUI" IsSet="0" IsShow="1"
+				IsMulti="1" FrameTag="ListFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="列表UI特性" />
+					<Set Lang="enus" Info="List UI" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="luButtons" Step="0"
+						CreateValue="'1'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="重新设置按钮样式" />
+							<Set Lang="enus" Info="Buttons" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="luSearch" Step="0"
+						CreateValue="'1'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示检索栏" />
+							<Set Lang="enus" Info="Searchs" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="luSelect" Step="0"
+						CreateValue="'S'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="鼠标选择" />
+							<Set Lang="enus" Info="Selected" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="luDblClick" Step="0"
+						CreateValue="'1'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="双击事件" />
+							<Set Lang="enus" Info="Dbl Click" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="luDblClickIdx" Step="0"
+						CreateValue="'0'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="双击事件按钮顺序" />
+							<Set Lang="enus" Info="Dbl Click Button Index" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="luAddPreRowFunc">
+						<DescriptionSet>
+							<Set Lang="zhcn"
+								Info="在每一行增加空行，填入方法名，!!不带括号!!
+&#x0D;&#x0A; 参数：FrameUnid, 当前行，当前行的key，下一行(要放置东西的行)，鼠标事件
+&#x0D;&#x0A; AddPreRowCheck 检查是否显示子窗口
+&#x0D;&#x0A; AddPreRowCloseBeforeEvent, 关闭前方法
+&#x0D;&#x0A; AddPreRowCloseEvent, 关闭后方法
+
+" />
+							<Set Lang="enus" Info="Dbl Click Button Index" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="MenuShow" IsSet="0" IsShow="1"
+				IsMulti="1" FrameTag="Menu">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="菜单安装对象Id" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="String" Name="MenuShow">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="菜单安装对象Id" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="MenuType" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="菜单显示类型" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="Menu" IsSet="0" IsShow="1"
+				IsMulti="1" FrameTag="Menu">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="菜单字段定义" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="String" Name="RootId">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="根ID值" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Key"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="主键" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ParentKey"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="父键" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Text"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示文字" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Cmd"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="脚本" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Icon"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="图标" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="IconType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="图标类型" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="Tree" IsSet="0" IsShow="1"
+				IsMulti="1" FrameTag="Tree">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="树字段定义" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="String" Name="RootId">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="根ID值" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Key"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="主键" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ParentKey"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="父键" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Text"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Title"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="提示" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="Level"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="级别" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Order"
+						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="排序" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="LoadByLevel">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="分级加载" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="strubg" Name="MenuGroup">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="菜单组" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="AddPara1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="附加参数1(指定字段名称)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="AddPara2">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="附加参数2(指定字段名称)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="AddPara3">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="附加参数3(指定字段名称)" />
+						</DescriptionSet>
+					</Value>
+
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="HtmlFrame" IsSet="0" IsShow="1"
+				IsMulti="1" FrameTag="Frame,Tree,ListFrame">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面框架" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="FrameType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="框架类型" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="int" Name="FrameBorder">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="框架边宽" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="FrameSize">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="尺寸(100,*)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="FrameSubUrl">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="子页面URL" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="TreeIconSet" IsSet="1"
+				IsShow="1" IsMulti="1" FrameTag="Tree">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="自定义图标" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Close">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="未选中图标" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Open">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="选中图标" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Filter">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="过滤正则表达式" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="Test">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="过滤类型" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="MGAxisX" IsSet="0" IsShow="1"
+				IsMulti="1" FrameTag="MultiGrid">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="多维表格X轴设置" />
+				</DescriptionSet>
+				<Values>
+					<Value Step="0" Type="string" Name="XAxisField"
+						CreateValue="'Month,Day;Day'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="X轴字段名称，用“,”分割字段，“;”分割显示和对应值字段" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" CreateValue="'X'"
+						Ref="EasyWebTemplate/Action/ActionSet" Name="XAxisAction">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="X轴Action" />
+						</DescriptionSet>
+					</Value>
+
+
+					<Value Type="string" Name="XAxisAttrExp">
+						<DescriptionSet>
+							<Set Lang="zhcn"
+								Info="X附加属性表达式(name1=@f_name name2=@t_name ...)" />
+							<Set Lang="enus"
+								Info="X attr exp (name1=@f_name name2=@t_name ...)" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="MGAxisY" IsSet="0" IsShow="1"
+				IsMulti="1" FrameTag="MultiGrid">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="多维表格Y轴设置" />
+				</DescriptionSet>
+				<Values>
+					<Value Step="0" Type="string" Name="YAxisField"
+						CreateValue="'DepName,UserName;UserId'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="Y轴字段名称，用“,”分割字段，“;”分割显示和对应值字段" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" CreateValue="'Y'"
+						Ref="EasyWebTemplate/Action/ActionSet" Name="YAxisAction">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="Y轴Action" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="YAxisAttrExp">
+						<DescriptionSet>
+							<Set Lang="zhcn"
+								Info="Y附加属性表达式(name1=@f_name name2=@t_name ...)" />
+							<Set Lang="enus"
+								Info="Y attr exp (name1=@f_name name2=@t_name ...)" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="MGCell" IsSet="0" IsShow="1"
+				IsMulti="1" FrameTag="MultiGrid">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="多维表格数据设置" />
+				</DescriptionSet>
+				<Values>
+					<Value Step="0" Type="string" Name="CellDataField"
+						CreateValue="'字段'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="数据字段，用“,”分割字段，“@”字段表示调用字段名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Step="0" Type="string" Name="CellXField"
+						CreateValue="'对应X轴定义字段'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="映射X轴字段" />
+						</DescriptionSet>
+					</Value>
+					<Value Step="0" Type="string" Name="CellYField"
+						CreateValue="'对应Y轴定义字段'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="映射Y轴字段" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" CreateValue="'DATA'"
+						Ref="EasyWebTemplate/Action/ActionSet" Name="CellAction">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="数据Action" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="html" Name="CellHtml">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="显示，@Val表示单元值，@Col表示Col值,@Row表示Row值" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="LogicShow" IsSet="1" IsShow="1"
+				IsMulti="1" FrameTag="ListFrame,Frame,Complex">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="逻辑显示" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ParaExp">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="参数表达式"
+								Memo="采用SQL表达式(@ID>100 AND @NAME LIKE '%S')" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="HiddenFields" Type="String">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="隐含字段列表" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+		</XItemParameters>
+		<XGroupValues>
+			<XGroupValue Name="FrameCols" default="0"
+				Values="C3,C2,C1,C11">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="三栏,两栏,一栏,一栏(上下)" />
+					<Set Lang="enus" Info="Tree,Two,One,One and up down" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="AllowExport" default="0"
+				Values=",XLS|DBF|XML|TXT,XLS|DBF|XML,XLS|TXT,XLS|XML,XLS|DBF,XML|DBF,XLS,DBF,XML,TXT">
+				<DescriptionSet>
+					<Set Lang="zhcn"
+						Info=",XLS|DBF|XML|TXT,XLS|DBF|XML,XLS|TXT,XLS|XML,XLS|DBF,XML|DBF,XLS,DBF,XML,TXT" />
+					<Set Lang="enus"
+						Info=",XLS|DBF|XML|TXT,XLS|DBF|XML,XLS|TXT,XLS|XML,XLS|DBF,XML|DBF,XLS,DBF,XML,TXT" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="MenuType" default="0"
+				Values="TOP,LEFT,METRO">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="顶部,左菜单,WIN8" />
+					<Set Lang="enus" Info="Top,Left,Metro" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="GroupShow" default="0"
+				Values="LST,TOP,BOTTOM,GUIDE">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="列表显示,顶部,尾部,向导模式" />
+					<Set Lang="enus" Info="List,Top,Bottom,Guide" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="CachedType" default="0"
+				Values="none,all,load,action">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="无,全部,加载时,执行过程时" />
+					<Set Lang="enus" Info="None,All,Load,Action" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="HiddenCaption" default="0"
+				Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="Recycle" default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="IsSplitPage" default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="luButtons" default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="luDblClick" default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="luSearch" default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="luSelect" default="0" Values=",S,M">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",单选,多选" />
+					<Set Lang="enus" Info=",Single,Multi" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="Test" default="0"
+				Values="Key,ParentKey,Text,P0,P1,P2,MG">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="主键,父键,文本,附加参数1,附加参数2,附加参数3,图标组" />
+					<Set Lang="enus"
+						Info="Master,Parent,Text,Add Para1,Add Para2,Add Para3,Meun Group" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="LoadByLevel" default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="IsXhtml" default="0" Values="0,1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="Option" default="0" Values="C,R">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="生成,删除" />
+					<Set Lang="enus" Info="Create,Remove" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="Lang" default="0" Values="zhcn,enus">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="中文简体,英文" />
+					<Set Lang="enus" Info="Chinese(GB),English" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="HAlign" default="0"
+				Values=",center,left,right">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",居中,左对齐,右对齐" />
+					<Set Lang="enus" Info=",Center,Left,Right" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="VAlign" default="0"
+				Values=",top,bottom,middle">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",顶部,底部,垂直居中" />
+					<Set Lang="enus" Info=",Top,Bottom,Middle" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="FrameType" default="0"
+				Values=",H,V,H5,V5">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",左右,上下,左右(H5),上下(H5)" />
+					<Set Lang="enus"
+						Info=",LeftRigth,TopBottom,LeftRigth(H5),TopBottom(H5)" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="IconType" default="0"
+				Values="Path,Image">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="图片路径,图片数据" />
+					<Set Lang="enus" Info="Image Path, Image Data" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="ChartsShow" default="0"
+				Values="TableChart,Table,Chart">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="图和表,只有表,只有图" />
+					<Set Lang="enus" Info="Table and Charts,Table only,Charts only" />
+				</DescriptionSet>
+			</XGroupValue>
+
+		</XGroupValues>
+	</Page>
+	<Menu>
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="菜单项" />
+			<Set Lang="enus" Info="Menu items" />
+		</DescriptionSet>
+		<XItemParameters>
+			<XItemParameter Name="Name" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="名称" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name" CreateValue="this.Menu.Name">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DescriptionSet" IsSet="1"
+				IsShow="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="菜单名称" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Lang" Type="group" IsUnique="1"
+						CreateValue="EWA.LANG">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="国别" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Info" Step="0" Type="string"
+						CreateValue="this.Menu.Txt">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="信息" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="Icon" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="图标" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Step="0" Name="Icon"
+						CreateValue="this.Menu.Icon">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="图标" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="Cmd" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="执行的脚本" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Cmd" Type="string" CreateValue="this.Menu.Cmd">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行的脚本" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="Group" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="菜单组" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Group" Type="string" CreateValue="">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="菜单组" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+		</XItemParameters>
+		<XGroupValues>
+			<XGroupValue Name="Lang" Default="0" Values=",zhcn,enus">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",中文简体,英文" />
+					<Set Lang="enus" Info=",Chinese(GB),English" />
+				</DescriptionSet>
+			</XGroupValue>
+		</XGroupValues>
+	</Menu>
+
+
+	<Chart>
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="图表" />
+			<Set Lang="enus" Info="Charts" />
+		</DescriptionSet>
+		<XItemParameters>
+			<XItemParameter Name="Name" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="名称" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name" CreateValue="this.Menu.Name">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DescriptionSet" IsSet="1"
+				IsShow="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="描述" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Lang" Type="group" IsUnique="1"
+						CreateValue="EWA.LANG">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="国别" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Info" Step="0" Type="string"
+						CreateValue="this.Menu.Txt">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="信息" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="ChartType" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="图形" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Step="0" Name="ChartType"
+						CreateValue="this.Menu.Icon">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="图标" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="ChartSize" IsSet="0" IsShow="1"
+				IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="尺寸" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="ChartWidth" Type="number" CreateValue="'800'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="宽" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="ChartHeight" Type="number" CreateValue="'600'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="高" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DataMap" IsSet="0" IsShow="1"
+				IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="数据映射" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="LabelData" Type="ref"
+						Ref="EasyWebTemplate/XItems/XItem" CreateValue="'800'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="标记" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="SeriesData" Type="ref"
+						Ref="EasyWebTemplate/XItems/XItem" CreateValue="'600'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="系列" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="ChartData" Type="ref"
+						Ref="EasyWebTemplate/XItems/XItem" CreateValue="'600'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="图数据" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+		</XItemParameters>
+		<XGroupValues>
+			<XGroupValue Name="Lang" Default="0" Values=",zhcn,enus">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",中文简体,英文" />
+					<Set Lang="enus" Info=",Chinese(GB),English" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="ChartType" Default="0"
+				Values="LINE,PIE,PIE3D,COLUMN,COLUMN3D,COLUMNSTACKED,COLUMNSTACKED3D,BAR,BAR3D,BARSTACKED,BARSTACKED3D">
+				<DescriptionSet>
+					<Set Lang="zhcn"
+						Info="线图,饼图,饼图3D,柱状图,柱状图3D,柱状堆砌图,柱状堆砌图3D,带状图,带状图3D,带状堆砌图,带状堆砌图3D" />
+					<Set Lang="enus"
+						Info="Line, PIE,PIE3D,COLUMN,COLUMN3D,COLUMNSTACKED,COLUMNSTACKED3D,BAR,BAR3D,BARSTACKED,BARSTACKED3D" />
+				</DescriptionSet>
+			</XGroupValue>
+		</XGroupValues>
+	</Chart>
+
+	<PageInfos>
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="信息" />
+			<Set Lang="enus" Info="Informations" />
+		</DescriptionSet>
+		<XItemParameters>
+			<XItemParameter Name="Name" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="名称" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DescriptionSet" IsSet="1"
+				IsShow="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="菜单名称" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Lang" Type="group" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="国别" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Info" Step="0" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="信息" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Memo" Step="0" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="备注" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+		</XItemParameters>
+		<XGroupValues>
+			<XGroupValue Name="Lang" Default="0" Values=",zhcn,enus">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",中文简体,英文" />
+					<Set Lang="enus" Info=",Chinese(GB),English" />
+				</DescriptionSet>
+			</XGroupValue>
+		</XGroupValues>
+	</PageInfos>
+	<Action>
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="活动脚本" />
+			<Set Lang="enus" Info="Action Items" />
+		</DescriptionSet>
+		<XItemParameters>
+			<XItemParameter Name="ActionSet" IsSet="1" IsShow="1"
+				IsMulti="1" ChildrenParameters="CallSet">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="事件处理" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Type"
+						CreateValue="this.Action.ActionName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="事件类型" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="LogMsg">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="日志信息" />
+							<Set Lang="enus" Info="Log message" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="IsPostMsg">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否提交系统消息" />
+							<Set Lang="enus" Info="IsPostMsg" />
+						</DescriptionSet>
+					</Value>
+
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="SqlSet" IsSet="1" IsShow="1"
+				IsMulti="1" ChildrenParameters="CSSet">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="SQL语句" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name" IsUnique="1"
+						CreateValue="this.Action.Name+' SQL'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="SqlType"
+						CreateValue="this.Action.SqlType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="Sql类型" Memo="查询,更新,存储过程" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="TransType" CreateValue="'no'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="事务处理方式"
+								Memo="是(yes),否(no),继承(inherit)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="sql" Name="Sql" IsCDATA="1"
+						CreateValue="this.Action.SetSql">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="SQL语句" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="JSONSet" IsSet="1" IsShow="1"
+				IsMulti="1" ChildrenParameters="CSSet">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="JSON调用" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name" IsUnique="1"
+						CreateValue="this.Action.Name+' JSON'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="json" Name="JSON" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="JSON" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="ClassSet" IsSet="1" IsShow="1"
+				IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="数据类调用" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ClassName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="类名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ConData">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="构造数据" Memo="是(yes),否(no),继承(inherit)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="MethodName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行方法名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="MethodData">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行数据" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="XmlTag">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="Xml数据Tag" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="XmlSet" IsSet="1" IsShow="1"
+				IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="XML数据操作" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="XmlSetData"
+						Ref="EasyWebTemplate/Action/XmlSetData">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="XML数据源" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="XmlAction">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行模式" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="XmlData">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="数据(用,和;分割)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="XmlFields">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="字段(用,分割)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="XmlWhere">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行条件" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="XmlSetData" IsSet="1" IsShow="1"
+				IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="XML数据源" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="XmlName">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="xml文件路径" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="XmlFields">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="字段(,)" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="string" Name="XmlTagPath">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="数据路径" />
+						</DescriptionSet>
+					</Value>
+
+					<Value Type="group" Name="XmlLoadType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="加载方式" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="ScriptSet" IsSet="1" IsShow="1"
+				IsMulti="1" ChildrenParameters="CSSet">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="脚本" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="ScriptType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="脚本类型" Memo="Javascript 或 Vbscript" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Script" IsCDATA="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="脚本内容" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="UrlSet" IsSet="1" IsShow="1"
+				IsMulti="1" ChildrenParameters="CSSet">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="跳转页面" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Url">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="URL" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="CSSet" IsSet="1" IsShow="1"
+				IsChildren="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="数据集合" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="ParaName" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="参数名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="CSType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="类型" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Life">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="生命(秒)" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Domain">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="作用域" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="Option">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="操作" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+
+
+			<XItemParameter Name="CallSet" IsSet="1" IsShow="1"
+				IsChildren="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="事件调用" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="CallType" Target="CallName"
+						CreateValue="'SqlSet'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="调用类型" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Name="CallName"
+						CreateValue="this.Action.Name+' SQL'"
+						Ref="EasyWebTemplate/Action/{CallType}">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="调用名称" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="CallIsChk">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="检测" Memo="返回记录含有EWA_ERR_OUT" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="Test"
+						CreateValue='this.Action.Test'>
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="逻辑表达式" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XGroupValues>
+				<XGroupValue Name="CallIsChk" default="0" Values=",yes">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="否,是" />
+						<Set Lang="enus" Info="No,Yes" />
+					</DescriptionSet>
+				</XGroupValue>
+
+				<XGroupValue Name="IsPostMsg" default="0"
+					Values="no,yes">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="否,是" />
+						<Set Lang="enus" Info="No,Yes" />
+					</DescriptionSet>
+				</XGroupValue>
+				<XGroupValue Name="CSType" default="0"
+					Values="session,cookie,all">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="仅Session,仅Cookie,全部" />
+						<Set Lang="enus" Info="Only Session,Only Cookie,All" />
+					</DescriptionSet>
+				</XGroupValue>
+				<XGroupValue Name="CallType" default="0"
+					Values=",SqlSet,JSONSet, ClassSet,XmlSet,ScriptSet,UrlSet">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info=",SQL集合,JSON集合,数据类集合,XML数据操作,脚本集合,跳转集合" />
+						<Set Lang="enus"
+							Info=",SqlSet,JSON Set, ClassSet,XmlSet,ScriptSet,UrlSet" />
+					</DescriptionSet>
+				</XGroupValue>
+				<XGroupValue Name="SqlType" default="0"
+					Values="query,update,procedure">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="查询,更新,存储过程" />
+						<Set Lang="enus" Info="query,update,procedure" />
+					</DescriptionSet>
+				</XGroupValue>
+				<XGroupValue Name="Option" default="0" Values="C,R">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="生成,删除" />
+						<Set Lang="enus" Info="Create,Remove" />
+					</DescriptionSet>
+				</XGroupValue>
+				<XGroupValue Name="TransType" default="0"
+					Values="yes,no">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="是,否" />
+						<Set Lang="enus" Info="Yes,No" />
+					</DescriptionSet>
+				</XGroupValue>
+				<XGroupValue Name="ScriptType" default="0"
+					Values="javascript,vbscript">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="Js脚本,Vb脚本" />
+						<Set Lang="enus" Info="Js,Vb" />
+					</DescriptionSet>
+				</XGroupValue>
+				<XGroupValue Name="Lang" default="0" Values="zhcn,enus">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="中文简体,英文,日文" />
+						<Set Lang="enus" Info="Chinese(GB),English,Jpanese" />
+					</DescriptionSet>
+				</XGroupValue>
+				<XGroupValue Name="XmlAction" default="0"
+					Values=",load,insert,update,inertOrUpdate,deletes">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info=",加载数据,新数据,更新数据,新或更新多条数据,删除数据" />
+						<Set Lang="enus"
+							Info=",load,insert,update,inertOrUpdate,deletes" />
+					</DescriptionSet>
+				</XGroupValue>
+				<XGroupValue Name="XmlLoadType" default="0"
+					Values="attribute,childnode">
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="属性,子节点" />
+						<Set Lang="enus" Info="Attribute,ChildNode" />
+					</DescriptionSet>
+				</XGroupValue>
+			</XGroupValues>
+		</XItemParameters>
+	</Action>
+	<Workflow>
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="流程控制" />
+			<Set Lang="enus" Info="Workflow" />
+		</DescriptionSet>
+		<XItemParameters>
+			<XItemParameter Name="Name" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="名称" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="Name"
+						CreateValue="this.Workflow.Name">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="名称" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="DescriptionSet" IsSet="1"
+				IsShow="1" IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="描述" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="Lang" Type="group" IsUnique="1"
+						CreateValue="EWA.LANG">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="国别" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="Info" Step="0" Type="string"
+						CreateValue="this.Menu.Txt">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="信息" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+
+			<XItemParameter Name="WfType" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="类型" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="WfType">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="类型" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="WfLogic" IsSet="0" IsShow="1"
+				IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="是否可运行操作的表达式" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="WfLogic">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否可运行操作的表达式" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="WfAction" IsSet="0" IsShow="1"
+				IsMulti="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="调用之前的Action" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="WFABefore" Type="ref"
+						Ref="EasyWebTemplate/Action/ActionSet">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行前用于检查的Action" Memo="如果有记录表示错误，不能执行" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="WFABeforeMsg" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行错误消息" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="WFAAfter" Type="ref"
+						Ref="EasyWebTemplate/Action/ActionSet">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="执行的Action" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="WFANextYes" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="成功的下一步" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="WFANextNo" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="失败的下一步" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+		</XItemParameters>
+		<XGroupValues>
+			<XGroupValue Name="Lang" Default="0" Values=",zhcn,enus">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",中文简体,英文" />
+					<Set Lang="enus" Info=",Chinese(GB),English" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="WfType" Default="0"
+				Values="normal,control,end">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="流转,控制,终止" />
+					<Set Lang="enus" Info="normal,control,end" />
+				</DescriptionSet>
+			</XGroupValue>
+		</XGroupValues>
+	</Workflow>
+</EasyWebConfig>

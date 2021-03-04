@@ -1,18 +1,15 @@
 package com.gdxsoft.easyweb.script.template;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.utils.UFileCheck;
-import com.gdxsoft.easyweb.utils.UPath;
+import com.gdxsoft.easyweb.SystemXmlUtils;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public class Skin implements Serializable {
@@ -21,6 +18,8 @@ public class Skin implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 5005393509202838654L;
+	private final static String CFG_NAME = "EwaSkin.xml";
+
 	private String _Head;
 	private String _HeadXHtml;
 	private String _HeadH5; // h5d的头
@@ -40,15 +39,14 @@ public class Skin implements Serializable {
 	private static Skin SKIN;
 
 	public static Skin instance() throws Exception {
-		String path = UPath.getConfigPath() + "EwaSkin.xml";
 
 		// 30s 检查一次是否变化
-		if (SKIN != null && !UFileCheck.fileChanged(path, 30)) {
-			return SKIN;
-		} else {
-			SKIN = syncInitSkin();
+		if (SKIN != null && !SystemXmlUtils.checkConfChanged(CFG_NAME, 30)) {
 			return SKIN;
 		}
+		SKIN = syncInitSkin();
+		return SKIN;
+
 	}
 
 	/**
@@ -72,18 +70,20 @@ public class Skin implements Serializable {
 		initSkin();
 	}
 
-	private void initSkin() throws ParserConfigurationException, SAXException, IOException {
-		String path = UPath.getConfigPath() + "EwaSkin.xml";
-		LOGGER.info(path);
+	private void initSkin() throws Exception {
+		Document doc;
+		try {
+			doc = SystemXmlUtils.getSystemConfDocument(CFG_NAME);
+			Node mainSkinNode = UXml.retNodeList(doc, "SkinRoot/MainSkin").item(0);
+			this.initMainSkin(mainSkinNode);
 
-		Document doc = UXml.retDocument(path);
-
-		Node mainSkinNode = UXml.retNodeList(doc, "SkinRoot/MainSkin").item(0);
-		this.initMainSkin(mainSkinNode);
-
-		NodeList nl = UXml.retNodeList(doc, "SkinRoot/Skin");
-		for (int i = 0; i < nl.getLength(); i++) {
-			initSkinFrames(nl.item(i));
+			NodeList nl = UXml.retNodeList(doc, "SkinRoot/Skin");
+			for (int i = 0; i < nl.getLength(); i++) {
+				initSkinFrames(nl.item(i));
+			}
+		} catch (Exception e) {
+			LOGGER.error(e.getLocalizedMessage());
+			throw e;
 		}
 	}
 
@@ -150,7 +150,7 @@ public class Skin implements Serializable {
 		this._HeadH5 = getChildNodeText(node, "HeadH5");
 		this._HeadMobile = getChildNodeText(node, "HeadMobile");
 		this._HeadVue = getChildNodeText(node, "HeadVue");
-		
+
 		this._Style = getChildNodeText(node, "Style");
 		this._Script = getChildNodeText(node, "Script");
 		this._BodyStart = getChildNodeText(node, "BodyStart");
@@ -283,12 +283,11 @@ public class Skin implements Serializable {
 
 	/**
 	 * vue的头
+	 * 
 	 * @return the _HeadVue
 	 */
 	public String getHeadVue() {
 		return _HeadVue;
 	}
-
-	 
 
 }

@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Globals>
+	<Global Lang='zhcn'>
+		<Calendar>
+			<Months>一月,二月,三月,四月,五月,六月,七月,八月,九月,十月,十一月,十二月</Months>
+			<Weeks>日,一,二,三,四,五,六</Weeks>
+			<Date>yyyy-MM-dd</Date>
+			<Time>hh:MM:ss</Time>
+			<Today>今天</Today>
+			<Hour>小时</Hour>
+			<Minute>分钟</Minute>
+			<Second>秒</Second>
+		</Calendar>
+		<Currency>￥</Currency>
+	</Global>
+	<Global Lang='enus'>
+		<Calendar>
+			<Months>
+				January,February,March,April,May,June,July,August,September,October,November,December
+			</Months>
+			<Weeks>Sun,Mon,Tue,Wed,Thu,Fri,Sat</Weeks>
+			<Date>MM/dd/yyyy</Date>
+			<Time>hh:MM:ss</Time>
+			<Today>Today</Today>
+			<Hour>H</Hour>
+			<Minute>M</Minute>
+			<Second>S</Second>
+		</Calendar>
+		<Currency>$</Currency>
+	</Global>
+	<Infos>
+		<Info Name="">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="" Memo="" />
+				<Set Lang="enus" Info="" Memo="" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.SYS.CHOOSE_ITEM_TITLE" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="操作提示" Memo="操作提示" />
+				<Set Lang="enus" Info="Tips" Memo="Tips" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.SYS.CHOOSE_ITEM" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="请选择您要操作的内容" Memo="请选择您要操作的内容" />
+				<Set Lang="enus" Info="Please select a record first" Memo="Please select a record first" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.SYS.DATASEARCH" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="检索" Memo="检索" />
+				<Set Lang="enus" Info="Search" Memo="Search" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.SYS.INVALID_NUMBER_FORMAT" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="数字格式错误" Memo="数字格式错误！" />
+				<Set Lang="enus" Info="Invalid Number Format" Memo="Invalid Format" />
+			</DescriptionSet>
+		</Info>
+
+		<Info Name="EWA.SYS.ERROR" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="系统执行错误" Memo="系统执行错误！" />
+				<Set Lang="enus" Info="System runtime error" Memo="System runtime error" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.F.VAILD" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="验证错误" Memo="验证码输入错误" />
+				<Set Lang="enus" Info="VailidError" Memo="Validation code error" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.F.PASSWORD" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="验证错误" Memo="密码不一致" />
+				<Set Lang="enus" Info="VailidError" Memo="Passwords not match" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.LF.SEARCH.BUT.TITLE" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="查询" Memo="数据查询" />
+				<Set Lang="enus" Info="Search" Memo="Data Search" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.LF.SEARCH.BUT.CLEAR" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="清空" Memo="清空" />
+				<Set Lang="enus" Info="Clear" Memo="Clear" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.LF.SEARCH.BUT.SEARCH" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="查询" Memo="查询" />
+				<Set Lang="enus" Info="Search" Memo="Search" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.LF.SEARCH.BUT.CLOSE" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="关闭" Memo="关闭" />
+				<Set Lang="enus" Info="Close" Memo="Close" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA.LF.DOWN_DATA.DENY" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="您没有下载数据权限" Memo="没有下载数据权限" />
+				<Set Lang="enus" Info="Access right required" Memo="Access right required" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="BUT.OK" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="确定" Memo="确定" />
+				<Set Lang="enus" Info="OK" Memo="OK" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="BUT.CANCEL" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="取消" Memo="取消" />
+				<Set Lang="enus" Info="Cancel" Memo="Cancel" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="BUT.YES" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="是" Memo="是" />
+				<Set Lang="enus" Info="Yes" Memo="Yes" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="BUT.NO" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="否" Memo="否" />
+				<Set Lang="enus" Info="No" Memo="No" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="DeleteBefore" ShowDefine="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="删除前询问" Memo="您确认要删除么？" />
+				<Set Lang="enus" Info="Before delete confirm infomation" Memo="Are you sure?" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="DeleteAfter" ShowDefine="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="删除后提示" Memo="删除成功!" />
+				<Set Lang="enus" Info="Tip of deleted" Memo="Record deleted!" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="UpdateAfter" ShowDefine="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="更新后提示" Memo="更新成功!" />
+				<Set Lang="enus" Info="Tip of updated" Memo="Record updated ok!" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="CommonTitle" ShowDefine="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="常用提示" Memo="您确认么!" />
+				<Set Lang="enus" Info="Tip of updated" Memo="Record updated ok!" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA_MTYPE_N" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="新建" Memo="新建" />
+				<Set Lang="enus" Info="New" Memo="New" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA_MTYPE_M" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="修改" Memo="修改" />
+				<Set Lang="enus" Info="Modify" Memo="Modify" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="EWA_MTYPE_C" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="复制到" Memo="复制到" />
+				<Set Lang="enus" Info="Copy to" Memo="Copy to" />
+			</DescriptionSet>
+		</Info>
+		<Info Name="RECYCLE" DefinedHidden="1">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="回收站" Memo="回收站" />
+				<Set Lang="enus" Info="Recycle" Memo="Recycle" />
+			</DescriptionSet>
+		</Info>
+		
+	</Infos>
+	<Events>
+		<Event Name="ValidCodeError" BackValue="EWA.C.Utils.ReloadValidCodeImage();">
+			<Front>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="" Memo="验证码错误" />
+					<Set Lang="enus" Info="" Memo="Error Valid Code" />
+				</DescriptionSet>
+			</Front>
+		</Event>
+
+		<Event Name="EWA_DELETE" FrontValue="EWA.F.FOS['@SYS_FRAME_UNID'].DoDelete(this)"
+			BackValue="EWA.F.FOS['@SYS_FRAME_UNID'].Reload();">
+			<Front>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="ListFrame删除记录" Memo="您确认要删除么？ " />
+					<Set Lang="enus" Info="Delete record(s) from ListFrame" Memo="Are you sure?" />
+				</DescriptionSet>
+			</Front>
+			<Back>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="" Memo="删除成功!" />
+					<Set Lang="enus" Info="" Memo="Record deleted!" />
+				</DescriptionSet>
+			</Back>
+		</Event>
+		<Event Name="OnTreeNodeNew"
+			BackValue='EWA.F.FOS["@SYS_FRAME_UNID"].NewNodeAfter("@Key_out","@PARAMETERS_OUT","@MENUGROUP_OUT");'>
+			<Front>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="新节点" Memo="新节点" />
+					<Set Lang="enus" Info="" Memo="New Node " />
+				</DescriptionSet>
+			</Front>
+		</Event>
+		<Event Name="OnTreeNodeDelete" FrontValue="EWA.F.FOS['@SYS_FRAME_UNID'].Delete()"
+			BackValue="EWA.F.FOS['@SYS_FRAME_UNID'].DeleteAfter();">
+			<Front>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="删除树节点" Memo="您确认要删除么？ " />
+					<Set Lang="enus" Info="Delete record(s) from ListFrame" Memo="Are you sure?" />
+				</DescriptionSet>
+			</Front>
+		</Event>
+		<Event Name="OnTreeNodeDeleteHaveChildren">
+			<Front>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="删除树节点" Memo="还有子目录，不能删除。 " />
+					<Set Lang="enus" Info="Delete record(s) from ListFrame" Memo="Don't delete!" />
+				</DescriptionSet>
+			</Front>
+		</Event>
+		<Event Name="OnTreeNodeNameRepeat">
+			<Front>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="a" Memo="名称重复，请修改" />
+					<Set Lang="enus" Info="a" Memo="Name duplicated, pls change it!" />
+				</DescriptionSet>
+			</Front>
+		</Event>
+	</Events>
+	<Valids>
+		<Valid Name="" Regex="">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="" Memo="" />
+				<Set Lang="enus" Info="" Memo="" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="Email" Regex="/^$|^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="电子邮件" Memo="请用aa@bb.cn格式" />
+				<Set Lang="enus" Info="Email" Memo="Pls using name@gdxsoft.com style" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="Alpha" Regex="/^[\w]*$/g">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="字符" Memo="只能由数字和字母组成" />
+				<Set Lang="enus" Info="字符" Memo="only numbers or letters" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="Digit" Regex="/^$|^[-+]?\d+(\.\d*)?$/">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="数字" Memo="只能由数字组成" />
+				<Set Lang="enus" Info="数字" Memo="only numbers" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="Duration" Regex="/^$|^(\d{1,2}:)?[0-5][0-9]:[0-5][0-9]$/">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="持续时间" Memo="格式错误" />
+				<Set Lang="enus" Info="持续时间" Memo="Format error" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="Mobile" Regex="/^$|^(13|14|15|16|17|18|19)([0-9]{9})$/">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="手机" Memo="手机格式错误" />
+				<Set Lang="enus" Info="手机" Memo="Format error" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="Phone"
+			Regex="/^$|^((\+?[0-9]{2,4}\-[0-9]{3,4}\-)|([0-9]{3,4}\-))?([0-9]{7,8})(\-[0-9]+)?$/">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="座机" Memo="座机格式错误，区号或分机用-分隔" />
+				<Set Lang="enus" Info="座机" Memo="Format error" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="Tele"
+			Regex="/^$|^(13|14|15|16|17|18|19)([0-9]{9})$|^((\+?[0-9]{2,4}\-[0-9]{3,4}\-)|([0-9]{3,4}\-))?([0-9]{7,8})(\-[0-9]+)?$/">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="电话" Memo="电话格式错误,请填写手机或座机（区号或分机用-分隔）" />
+				<Set Lang="enus" Info="电话" Memo="Format error" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="IDCard" Regex="/^$|^\d{14}(\d{1}|\d{4}|(\d{3}[xX]))$/">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="身份证" Memo="身份证错误" />
+				<Set Lang="enus" Info="身份证" Memo="Format error" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="Date"
+			Regex="/^$|^((((1[6-9]|[2-9]\d)\d{2})-(0?[13578]|1[02])-(0?[1-9]|[12]\d|3[01]))|(((1[6-9]|[2-9]\d)\d{2})-(0?[13456789]|1[012])-(0?[1-9]|[12]\d|30))|(((1[6-9]|[2-9]\d)\d{2})-0?2-(0?[1-9]|1\d|2[0-9]))|(((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))-0?2-29-))$/">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="日期" Memo="日期格式错误" />
+				<Set Lang="enus" Info="日期" Memo="Format error" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="YYYY_YYYY" Regex="/^\d{4}\-\d{4}$/gi">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="从那年到那年" Memo="格式：2014-2018" />
+				<Set Lang="enus" Info="从那年到那年" Memo="e.g.：2014-2018" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="YYYYMMDD" Regex="/^([1-2]\d{3})(0?[1-9]|10|11|12)([1-2]?[0-9]|0[1-9]|30|31)$/gi">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="8位日期" Memo="格式：20140131" />
+				<Set Lang="enus" Info="8位日期" Memo="e.g.：20140131" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="YYYYMM" Regex="/^([1-2]\d{3})(0?[1-9]|10|11|12)$/gi">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="6位年月" Memo="格式：201408" />
+				<Set Lang="enus" Info="6位年月" Memo="e.g.：201408" />
+			</DescriptionSet>
+		</Valid>
+		<Valid Name="HH_MM" Regex="/^$|^(\d{1}|0\d{1}|1\d{1}|2[0-3]):[0-5]\d{1}$/">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="时间 HH:MM" Memo="格式：09:18 或 9:18" />
+				<Set Lang="enus" Info="Time HH:MM" Memo="e.g.：09:18 or 9:18" />
+			</DescriptionSet>
+		</Valid>		
+		<Valid Name="HH_MM_d4" Regex="/^$|^(\d{1}|0\d{1}|1\d{1}|2[0-3]):[0-5]\d{1}$|^(0\d{1}|1\d{1}|2[0-3])[0-5]\d{1}$/">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="时间 HH:MM,4位数字需自己处理格式" Memo="格式：09:18 或 9:18 或 0918" />
+				<Set Lang="enus" Info="Time HH:MM" Memo="e.g.：09:18 or 9:18 or 0918" />
+			</DescriptionSet>
+		</Valid>
+	</Valids>
+</Globals>

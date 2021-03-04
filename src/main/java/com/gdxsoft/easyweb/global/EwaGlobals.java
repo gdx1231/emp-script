@@ -1,31 +1,29 @@
 package com.gdxsoft.easyweb.global;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.gdxsoft.easyweb.SystemXmlUtils;
 import com.gdxsoft.easyweb.cache.ConfigCache;
 import com.gdxsoft.easyweb.script.template.Descriptions;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.utils.UObjectValue;
-import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public class EwaGlobals {
-
-	public static String FILE_NAME = "EwaGlobal.xml";
+	private static Logger LOGGER = LoggerFactory.getLogger(EwaGlobals.class);
+	public final static String FILE_NAME = "EwaGlobal.xml";
 	private EwaEvents _EwaEvents;
 	private EwaInfos _EwaInfos;
 	private EwaValids _EwaValids;
 	private EwaSettings _EwaSettings;
 	private UObjectValue _OV;
-
-	public EwaGlobals() throws Exception {
-		_OV = new UObjectValue();
-		this.init();
-	}
-
+	
 	public static EwaGlobals instance() throws Exception {
 		EwaGlobals o = ConfigCache.getGlobals();
 		if (o == null) {
@@ -34,15 +32,31 @@ public class EwaGlobals {
 		}
 		return o;
 	}
-
+	
 	private synchronized static EwaGlobals newIntance() throws Exception {
-		EwaGlobals o = new EwaGlobals();
-		return o;
+		try {
+			EwaGlobals o = new EwaGlobals();
+			return o;
+		} catch (Exception e) {
+			LOGGER.error(e.getLocalizedMessage());
+			throw e;
+		}
 	}
+	
+	public EwaGlobals() throws Exception {
+		_OV = new UObjectValue();
+		this.init();
+	}
+	
 
-	private void init() throws Exception {
-		String path = UPath.getConfigPath() + FILE_NAME;
-		Document doc = UXml.retDocument(path);
+	private void init() throws Exception  {
+		Document doc = null;
+		try {
+			doc = SystemXmlUtils.getSystemConfDocument(FILE_NAME);
+		} catch (Exception e) {
+			LOGGER.error(e.getLocalizedMessage());
+			throw e;
+		}
 		NodeList nl = UXml.retNodeList(doc, "Globals/Global");
 		this._EwaSettings = new EwaSettings();
 		for (int i = 0; i < nl.getLength(); i++) {

@@ -1,0 +1,1240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EwaDefine>
+	<Steps>
+		<Step AfterEval="this.CreateMainInfo();">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="第一步：从数据库树选择一个表" />
+				<Set Lang="enus" Info="First,select table" />
+			</DescriptionSet>
+		</Step>
+		<Step Eval="this.SelectType()">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="第二步：选择类型" />
+				<Set Lang="enus" Info="First: select table" />
+			</DescriptionSet>
+		</Step>
+		<Step Eval="this.ModifyMainInfo()">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="第三步：修改主要信息" />
+				<Set Lang="enus" Info="First: select table" />
+			</DescriptionSet>
+		</Step>
+		<Step Eval="this.ModifyFields();" AfterEval="this.SelectFields('field');"
+			Using="Frame,ListFrame">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="第四步：选择字段" />
+				<Set Lang="enus" Info="First: select table" />
+			</DescriptionSet>
+		</Step>
+		<Step Eval="this.ModifyMenus();" AfterEval="this.SelectFields('menu');"
+			Using="Tree">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="第四步：选择菜单" />
+				<Set Lang="enus" Info="First: Select menus" />
+			</DescriptionSet>
+		</Step>
+		<Step Eval="this.ModifySQL();">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="第五步：修改SQL语句" />
+				<Set Lang="enus" Info="First: select table" />
+			</DescriptionSet>
+		</Step>
+	</Steps>
+	<Frame Name="MultiGrid">
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="生成多维表格"><![CDATA[
+生成多维表格
+]]></Set>
+			<Set Lang="enus" Info="Create MutiGrid"><![CDATA[Create MutiGrid]]></Set>
+		</DescriptionSet>
+		<Tmp Name="Show">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="新建和修改数据"><![CDATA[
+多维表格简单模板
+]]></Set>
+				<Set Lang="enus" Info="New data"><![CDATA[Simple Template]]></Set>
+			</DescriptionSet>
+			<Button Name="DATA" Tag="gridfield">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="数据" />
+					<Set Lang="enus" Info="Data" />
+				</DescriptionSet>
+				<Add>
+					<GridField>
+						<Set FieldXName="X字段列表" FieldYName="Y字段列表" FieldDataName="DATA字段列表"
+							FieldTarget="DATA" FieldAction="DATA" />
+					</GridField>
+				</Add>
+			</Button>
+			<Action Name="X" SqlType="query" ActionName="X" Test=""
+				Sql="'SELECT XX FROM XXX WHERE 1=1'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="X轴数据" />
+					<Set Lang="enus" Info="AxisX Data" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="Y" ActionName="Y" SqlType="query" Test=""
+				Sql="'SELECT YY FROM YYY WHERE 1=1'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="X轴数据" />
+					<Set Lang="enus" Info="AxisX Data" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="DATA" ActionName="DATA" SqlType="query" Test=""
+				Sql="'SELECT DD FROM DDD WHERE 1=1'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="数据" />
+					<Set Lang="enus" Info="Data of cell" />
+				</DescriptionSet>
+			</Action>
+		</Tmp>
+	</Frame>
+	<Frame Name="Frame">
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="生成Frame配置"><![CDATA[
+生成Frame<br>
+生成Frame<br>
+生成Frame<br>
+生成Frame<br>
+生成Frame<br>
+]]></Set>
+			<Set Lang="enus" Info="Create Frame config"><![CDATA[Create Frame config]]></Set>
+		</DescriptionSet>
+		<Tmp Name="NM">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="新建和修改数据"><![CDATA[
+<ol>
+	<li>用于在表中增加新的和修改已有记录</li>
+	<li>调用新增方法在URL加上 EWA_MTYPE=N</li>
+	<li>调用更新方法在URL加上 EWA_MTYPE=M</li>
+</ol>]]></Set>
+				<Set Lang="enus" Info="New data"><![CDATA[new data]]></Set>
+			</DescriptionSet>
+			<Button Name="butOk" Tag="submit">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="确定" />
+					<Set Lang="enus" Info="Ok" />
+				</DescriptionSet>
+			</Button>
+			<Button Name="butClose" Tag="button">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="关闭" />
+					<Set Lang="enus" Info="Cancel" />
+				</DescriptionSet>
+			</Button>
+			<Action Name="OnPageLoad" SqlType="query" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"
+				Sql="this.Fields.GetSqlSelect()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="OnNew" ActionName="OnPagePost" SqlType="update"
+				Test="'@EWA_MTYPE'='N' or '@EWA_MTYPE'='C'" Sql="this.Fields.GetSqlNew()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="添加新记录" />
+					<Set Lang="enus" Info="The SQL of data new" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="OnModify" ActionName="OnPagePost" SqlType="update"
+				Test="'@EWA_MTYPE'='M'" Sql="this.Fields.GetSqlUpdate()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="更新SQL" />
+					<Set Lang="enus" Info="The SQL of data update" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="UAct0" SqlType="update" Sql="'-- write your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="活动1" />
+					<Set Lang="enus" Info="The SQL of data update" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="UAct1" SqlType="update" Sql="'-- write your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="活动1" />
+					<Set Lang="enus" Info="The SQL of data update" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="SAct0" SqlType="query" Sql="'-- SELECT ...'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="活动1" />
+					<Set Lang="enus" Info="The SQL of data update" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="SAct1" SqlType="query" Sql="'-- SELECT ...'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="活动1" />
+					<Set Lang="enus" Info="The SQL of data update" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="检查错误" />
+					<Set Lang="enus" Info="Check Error" />
+				</DescriptionSet>
+			</Action>
+			<Adds>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@SYS_FRAME_UNID .EWA_TD_M{width:400px;}]]></Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
+	var ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
+	//提交后台数据时执行的检查或附加数据处理
+	ewa.DoPostBefore = function(){
+		/*
+		//附加数据处理
+		// ewa.PostAddData = {add1:'a',add2:2};
+
+        // 附加检查合法性
+    	if(getObj('#aaa').val()==''){
+    		return false; //检查不通过
+    	}else{
+    		return true; //检查通过
+    	}
+	    */
+	    return true;
+	};
+	function getObj(exp){
+		return $('#f_@sys_frame_unid').find(exp);
+	}
+	function init(){
+	}
+	init();
+})();
+				]]></Add>
+			</Adds>
+			<PageInfos>
+				<PageInfo Name="msg0">
+					<Name>
+						<Set Name="msg0" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息0" Memo="" />
+						<Set Lang="enus" Info="Msg0" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg1">
+					<Name>
+						<Set Name="msg1" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息1" Memo="" />
+						<Set Lang="enus" Info="Msg1" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg2">
+					<Name>
+						<Set Name="msg2" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息2" Memo="" />
+						<Set Lang="enus" Info="Msg2" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+			</PageInfos>
+		</Tmp>
+		<Tmp Name="N">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="新数据"><![CDATA[
+<ol>
+	<li>用于在表中增加新的记录</li>
+	<li>执行SQL为 INSERT .... VALUES ...</li>
+	<li>.....</li>
+</ol>]]></Set>
+				<Set Lang="enus" Info="New data"><![CDATA[new data]]></Set>
+			</DescriptionSet>
+			<Button Name="butOk" Tag="submit">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="确定" />
+					<Set Lang="enus" Info="Ok" />
+				</DescriptionSet>
+			</Button>
+			<Button Name="butClose" Tag="button">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="关闭" />
+					<Set Lang="enus" Info="Cancel" />
+				</DescriptionSet>
+			</Button>
+			<Action Name="OnPagePost" SqlType="update" Sql="this.Fields.GetSqlNew()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="添加新记录" />
+					<Set Lang="enus" Info="The SQL of data new" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="检查错误" />
+					<Set Lang="enus" Info="Check Error" />
+				</DescriptionSet>
+			</Action>
+			<Adds>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@sys_frame_unid .EWA_TD_M{width:400px;}]]></Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
+	var ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
+	//提交后台数据时执行的检查或附加数据处理
+	ewa.DoPostBefore = function(){
+		/*
+		//附加数据处理
+		// ewa.PostAddData = {add1:'a',add2:2};
+
+        // 附加检查合法性
+    	if(getObj('#aaa').val()==''){
+    		return false; //检查不通过
+    	}else{
+    		return true; //检查通过
+    	}
+	    */
+	    return true;
+	};
+	// 提交后附加处理
+	// ewa.ReloadAfter = function(){};
+	
+	function getObj(exp){
+		if(exp){
+			return $('#f_@sys_frame_unid').find(exp);
+		} else {
+			return $('#f_@sys_frame_unid');
+		}
+	}
+	function init(){
+		if(window.EWA_App){
+			// app
+		} 
+		// 在对话框里限制最高高度，默认400px
+		if ("@EWA_PARENT_FRAME" && !window.EWA_App) { 
+			// getObj().parent().addClass("ewa-in-dialog");
+        }
+	}
+	init();
+})();
+]]></Add>
+			</Adds>
+			<PageInfos>
+				<PageInfo Name="msg0">
+					<Name>
+						<Set Name="msg0" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息0" Memo="" />
+						<Set Lang="enus" Info="Msg0" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg1">
+					<Name>
+						<Set Name="msg1" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息1" Memo="" />
+						<Set Lang="enus" Info="Msg1" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg2">
+					<Name>
+						<Set Name="msg2" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息2" Memo="" />
+						<Set Lang="enus" Info="Msg2" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+			</PageInfos>
+		</Tmp>
+		<Tmp Name="M">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="数据更新"><![CDATA[用于查看和修改记录]]></Set>
+				<Set Lang="enus" Info="Update data"><![CDATA[用于增加新的记录]]></Set>
+			</DescriptionSet>
+			<Button Name="butOk" Tag="submit">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="确定" />
+					<Set Lang="enus" Info="Ok" />
+				</DescriptionSet>
+			</Button>
+			<Button Name="butClose" Tag="button">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="关闭" />
+					<Set Lang="enus" Info="Cancel" />
+				</DescriptionSet>
+			</Button>
+			<Action Name="OnPageLoad" SqlType="query" Sql="this.Fields.GetSqlSelect()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="OnPagePost" SqlType="update" Sql="this.Fields.GetSqlUpdate()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="更新SQL" />
+					<Set Lang="enus" Info="The SQL of data update" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="检查错误" />
+					<Set Lang="enus" Info="Check Error" />
+				</DescriptionSet>
+			</Action>
+			<Adds>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@sys_frame_unid .EWA_TD_M{width:400px;}]]></Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
+	var ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
+	//提交后台数据时执行的检查或附加数据处理
+	ewa.DoPostBefore = function(){
+		/*
+		//附加数据处理
+		// ewa.PostAddData = {add1:'a',add2:2};
+
+        // 附加检查合法性
+    	if(getObj('#aaa').val()==''){
+    		return false; //检查不通过
+    	}else{
+    		return true; //检查通过
+    	}
+	    */
+	    return true;
+	};
+	function getObj(exp){
+		if(exp){
+			return $('#f_@sys_frame_unid').find(exp);
+		} else {
+			return $('#f_@sys_frame_unid');
+		}
+	}
+	function init(){
+		if(window.EWA_App){
+			// app
+		} 
+		// 在对话框里限制最高高度，默认400px
+		if ("@EWA_PARENT_FRAME" && !window.EWA_App) { 
+			// getObj().parent().addClass("ewa-in-dialog");
+        }
+	}
+	init();
+})();
+				]]></Add>
+			</Adds>
+			<PageInfos>
+				<PageInfo Name="msg0">
+					<Name>
+						<Set Name="msg0" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息0" Memo="" />
+						<Set Lang="enus" Info="Msg0" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg1">
+					<Name>
+						<Set Name="msg1" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息1" Memo="" />
+						<Set Lang="enus" Info="Msg1" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg2">
+					<Name>
+						<Set Name="msg2" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息2" Memo="" />
+						<Set Lang="enus" Info="Msg2" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+			</PageInfos>
+		</Tmp>
+		<Tmp Name="V">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="查看页面"><![CDATA[所有对象显示为SPAN]]></Set>
+				<Set Lang="enus" Info="Update data"><![CDATA[View]]></Set>
+			</DescriptionSet>
+			 
+			<Button Name="butClose" Tag="button">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="关闭" />
+					<Set Lang="enus" Info="Cancel" />
+				</DescriptionSet>
+			</Button>
+			<Action Name="OnPageLoad" SqlType="query" Sql="this.Fields.GetSqlSelect()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+			 
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="检查错误" />
+					<Set Lang="enus" Info="Check Error" />
+				</DescriptionSet>
+			</Action>
+			<Adds>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@sys_frame_unid .EWA_TD_M{width:400px;}]]></Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
+	var ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
+	function getObj(exp){
+		if(exp){
+			return $('#f_@sys_frame_unid').find(exp);
+		} else {
+			return $('#f_@sys_frame_unid');
+		}
+	}
+	function init(){
+		if(window.EWA_App){
+			// app
+		} 
+		// 在对话框里限制最高高度，默认400px
+		if ("@EWA_PARENT_FRAME" && !window.EWA_App) { 
+			// getObj().parent().addClass("ewa-in-dialog");
+        }
+	}
+	init();
+})();
+				]]></Add>
+			</Adds>
+			<PageInfos>
+				<PageInfo Name="msg0">
+					<Name>
+						<Set Name="msg0" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息0" Memo="" />
+						<Set Lang="enus" Info="Msg0" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg1">
+					<Name>
+						<Set Name="msg1" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息1" Memo="" />
+						<Set Lang="enus" Info="Msg1" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg2">
+					<Name>
+						<Set Name="msg2" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息2" Memo="" />
+						<Set Lang="enus" Info="Msg2" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+			</PageInfos>
+		</Tmp>
+		<Tmp Name="Login">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="用户登录"><![CDATA[用户登录]]></Set>
+				<Set Lang="enus" Info="Login"><![CDATA[用于用户登录]]></Set>
+			</DescriptionSet>
+			<Button Name="_EWA_ValidCode" Tag="valid">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="验证码" />
+					<Set Lang="enus" Info="Valid Code" />
+				</DescriptionSet>
+			</Button>
+			<Button Name="butOk" Tag="submit">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="登录" />
+					<Set Lang="enus" Info="Login" />
+				</DescriptionSet>
+			</Button>
+			<Action Name="OnPagePost" SqlType="update" Sql="this.Fields.GetSqlLogin()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="读取用户信息" />
+					<Set Lang="enus" Info="Load user info" />
+				</DescriptionSet>
+			</Action>
+		</Tmp>
+	</Frame>
+	<Frame Name="ListFrame">
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="生成列表配置"><![CDATA[生成ListFrame<br>]]></Set>
+			<Set Lang="enus" Info="Create Frame config"><![CDATA[Create Frame config]]></Set>
+		</DescriptionSet>
+		<Tmp Name="V">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="浏览数据"><![CDATA[
+<ol style='margin:0px'>
+	<li>用于数据浏览</li>
+	<li>无附加功能键</li>
+</ol>]]></Set>
+				<Set Lang="enus" Info="View data"><![CDATA[
+View data]]></Set>
+			</DescriptionSet>
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlSelectLF()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="SAct0" SqlType="query" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展0" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="SAct1" SqlType="query" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展1" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="SAct2" SqlType="query" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展2" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="UAct0" SqlType="update" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展0" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="UAct1" SqlType="update" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展1" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="UAct2" SqlType="update" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展2" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="检查错误" />
+					<Set Lang="enus" Info="Check Error" />
+				</DescriptionSet>
+			</Action>
+			<Adds>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){
+	var ewa = EWA.F.FOS['@SYS_FRAME_UNID'];
+	ewa.ReloadAfter = function(httpReferer){
+		/*
+		if(httpReferer) {
+			var uref = new EWA_UrlClass(httpReferer);
+			var mtype   = uref.GetParameter("EWA_MTYPE");
+			var refXml  = uref.GetParameter("XMLNAME");
+			var refItem = uref.GetParameter("ITEMNAME");
+		}
+		*/
+		// ewa.Merge('fromId', 'toId'); //合并单元格
+		// var exp="@@aa <h1>@@bb</h1> <div>@@cc</div>";
+		// ewa.MergeExp('toId', exp); //合并多个单元格
+	};
+
+	function getObj(exp){
+		return exp? $('#EWA_LF_@sys_frame_unid').find(exp):$('#EWA_LF_@sys_frame_unid');
+	}
+	
+	// 执行刷新后事件
+	function init(){
+		ewa.ReloadAfter ();
+	}
+	init();
+})();
+]]></Add>
+			</Adds>
+			<PageInfos>
+				<PageInfo Name="msg0">
+					<Name>
+						<Set Name="msg0" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息0" Memo="" />
+						<Set Lang="enus" Info="Msg0" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg1">
+					<Name>
+						<Set Name="msg1" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息1" Memo="" />
+						<Set Lang="enus" Info="Msg1" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg2">
+					<Name>
+						<Set Name="msg2" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息2" Memo="" />
+						<Set Lang="enus" Info="Msg2" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+			</PageInfos>
+		</Tmp>
+		<!-- 关联的模板 ReleateFrame（类型）ReleateTmp （名称） -->
+		<Tmp Name="M" ReleateFrame="Frame" ReleateTmp="NM">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="浏览并修改"><![CDATA[
+<ol style='margin:0px'>
+	<li>用于在浏览数据</li>
+	<li>可修改和删除数据</li>
+	<li>同时生成Frame</li>	
+</ol>]]></Set>
+				<Set Lang="enus" Info="New data"><![CDATA[new data]]></Set>
+			</DescriptionSet>
+			<Button Name="butNew" Tag="button">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="新增" />
+					<Set Lang="enus" Info="New" />
+				</DescriptionSet>
+				<Para XmlPath="EventSet/Set" Name="EventName" Val="'ewa_click'" />
+				<Para XmlPath="EventSet/Set" Name="EventValue"
+					Val="'EWA.F.FOS[&quot;@'+'sys_frame_unid&quot;].ext_AddNew()'" />
+				<Para XmlPath="EventSet/Set" Name="EventType" Val="'Javascript'" />
+			</Button>
+			<Button Name="butModify" Tag="button">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="修改" />
+					<Set Lang="enus" Info="Modify" />
+				</DescriptionSet>
+				<Para XmlPath="OpenFrame/Set" Name="CallMethod" Val="'OpenReloadClose'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallXmlName" Val="'@xmlname'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallItemName"
+					Val="define.Fields.TableName+'.F.NM'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallParas"
+					Val="'EWA_MTYPE=M' + define.Fields.GetPkParas()" />
+			</Button>
+			<Button Name="butCopy" Tag="button">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="复制到..." />
+					<Set Lang="enus" Info="Copy to ..." />
+				</DescriptionSet>
+				<Para XmlPath="OpenFrame/Set" Name="CallMethod" Val="'OpenReloadClose'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallXmlName" Val="'@xmlname'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallItemName"
+					Val="define.Fields.TableName+'.F.NM'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallParas"
+					Val="'EWA_MTYPE=C' + define.Fields.GetPkParas()" />
+			</Button>
+			<Button Name="butDelete" Tag="button">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="删除" />
+					<Set Lang="enus" Info="Delete" />
+				</DescriptionSet>
+				<Para XmlPath="CallAction/Set" Name="ConfirmInfo" Val="'DeleteBefore'" />
+				<Para XmlPath="CallAction/Set" Name="Action" Val="'OnFrameDelete'" />
+			</Button>
+			<Button Name="butRestore" Tag="button">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="恢复数据" />
+					<Set Lang="enus" Info="Restore" />
+				</DescriptionSet>
+				<Para XmlPath="CallAction/Set" Name="Action" Val="'OnFrameRestore'" />
+			</Button>
+			<!-- actions -->
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlSelectLF()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="OnFrameDelete" SqlType="update"
+				Sql="this.Fields.GetSqlDeleteA()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="删除记录" />
+					<Set Lang="enus" Info="SQL of delete" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="OnFrameRestore" SqlType="update"
+				Sql="this.Fields.GetSqlRestore()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="删除记录" />
+					<Set Lang="enus" Info="SQL of delete" />
+				</DescriptionSet>
+			</Action>
+			
+			<Action Name="SAct0" SqlType="query" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展0" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="SAct1" SqlType="query" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展1" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="SAct2" SqlType="query" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展2" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="UAct0" SqlType="update" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展0" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="UAct1" SqlType="update" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展1" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="UAct2" SqlType="update" Sql="'-- enter your sql'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="扩展2" />
+					<Set Lang="enus" Info="Extends 0" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行/javascript_func() as EWA_ERR_OUT FROM xxx where 1=2'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="检查错误" />
+					<Set Lang="enus" Info="Check Error" />
+				</DescriptionSet>
+			</Action>
+			<Adds>
+<!-- 			<LogicShow>
+      <Set HiddenFields="butNew,butModify,butCopy,butDelete" Name="aaa" ParaExp="'@EWA_RECYCLE' = '1'"/>
+    </LogicShow>
+ 
+ 				<Add SetMethod="ATT" XmlPath="EasyWebTemplate/Page/LogicShow">
+ 					<Att Name="HiddenFields" Value="butNew,butModify,butCopy,butDelete"></Att>
+ 					<Att Name="Name" Value="On Recycle's Hidden"></Att>
+ 					<Att Name="ParaExp" Value="'@EWA_RECYCLE' = '1'"></Att>
+ 				</Add>
+ 				<Add SetMethod="ATT" XmlPath="EasyWebTemplate/Page/LogicShow">
+ 					<Att Name="HiddenFields" Value="butRestore"></Att>
+ 					<Att Name="Name" Value="Normal Hidden"></Att>
+ 					<Att Name="ParaExp" Value="'@EWA_RECYCLE' != '1'"></Att>
+ 				</Add>-->
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top"><![CDATA[]]>
+				</Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom"><![CDATA[]]>
+				</Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[//{$EasyWebTemplate/Page/Name/Set#Name}
+(function(){
+	var ewa = EWA.F.FOS['@SYS_FRAME_UNID'];
+	ewa.ReloadAfter = function(httpReferer){
+		/*
+		if(httpReferer) {
+			var uref = new EWA_UrlClass(httpReferer);
+			var mtype   = uref.GetParameter("EWA_MTYPE");
+			var refXml  = uref.GetParameter("XMLNAME");
+			var refItem = uref.GetParameter("ITEMNAME");
+		}
+		*/
+		// ewa.Merge('fromId', 'toId'); //合并单元格
+		// var exp="@@aa <h1>@@bb</h1> <div>@@cc</div>";
+		// ewa.MergeExp('toId', exp); //合并多个单元格
+	};
+
+	ewa.ext_AddNew = function(){
+		var u1 = new EWA_UrlClass(ewa.Url);
+		u1.RemoveEwa();
+		u1.AddParameter("EWA_MTYPE","N");
+		var paras = u1.GetParas();
+		EWA.UI.Dialog.OpenReloadClose('@SYS_FRAME_UNID','@xmlName', '{@define.Fields.TableName}.F.NM', false, paras);
+	};
+
+	function getObj(exp){
+		return exp?$('#EWA_LF_@sys_frame_unid').find(exp):$('#EWA_LF_@sys_frame_unid');
+	}
+	
+	// 执行刷新后事件
+	function init(){
+		ewa.ReloadAfter ();
+	}
+	init();
+})();
+]]></Add>
+			</Adds>
+			<PageInfos>
+				<PageInfo Name="msg0">
+					<Name>
+						<Set Name="msg0" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息0" Memo="" />
+						<Set Lang="enus" Info="Msg0" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg1">
+					<Name>
+						<Set Name="msg1" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息1" Memo="" />
+						<Set Lang="enus" Info="Msg1" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="msg2">
+					<Name>
+						<Set Name="msg2" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="消息2" Memo="" />
+						<Set Lang="enus" Info="Msg2" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+			</PageInfos>
+		</Tmp>
+		<Tmp Name="AddToRelation">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="添加到相关表中"><![CDATA[添加数据到关系表中]]></Set>
+				<Set Lang="enus" Info="Update data"><![CDATA[Add data to relationship table]]></Set>
+			</DescriptionSet>
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlRelationSelect()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="OnAddDataToRelation" SqlType="update"
+				Sql="this.Fields.GetSqlRelationUpdate()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="更新数据到关系表中" />
+					<Set Lang="enus" Info="The SQL of data update" />
+				</DescriptionSet>
+			</Action>
+			<PageInfos>
+				<PageInfo Name="Ok">
+					<Name>
+						<Set Name="Ok" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="确定" Memo="" />
+						<Set Lang="enus" Info="Ok" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="Cancel">
+					<Name>
+						<Set Name="Cancel" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="取消" Memo="" />
+						<Set Lang="enus" Info="Cancel" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="NoSelect">
+					<Name>
+						<Set Name="NoSelect" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="请您先选择" Memo="" />
+						<Set Lang="enus" Info="Pls select" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+			</PageInfos>
+			<Adds>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top"><![CDATA[
+<DIV STYLE="width:700px;height:240px;overflow:auto">
+				]]></Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom"><![CDATA[
+</DIV>
+<hr>
+<DIV STYLE="width:700px;text-align:right">
+	<input type=button value='确定' onclick="AddToRelation()" res='EWA.F.FOS["@SYS_FRAME_UNID"].Resources.Ok.GetInfo()' />
+	<input type=button value='取消' res='EWA.F.FOS["@SYS_FRAME_UNID"].Resources.Cancel.GetInfo()'/>
+</DIV>
+				]]></Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Top"><![CDATA[
+function AddToRelation(){
+	var s1 = EWA.F.FOS["@SYS_FRAME_UNID"].SelectChecked();
+	if(s1==''){
+		var msg=EWA.F.FOS["@SYS_FRAME_UNID"].Resources["NoSelect"].GetInfo();
+		alert(msg);
+		return;
+	}
+	var paras=new Array();
+	paras.push({
+		Name: 'IDS_SPLIT',
+		Value: s1
+	});
+	EWA.F.FOS['@SYS_FRAME_UNID'].DoAction(this, 'OnAddDataToRelation', '', '', paras);
+}
+				]]></Add>
+			</Adds>
+		</Tmp>
+	</Frame>
+	<Frame Name="Tree">
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="生成树"><![CDATA[生成树<br>]]></Set>
+			<Set Lang="enus" Info="Create Tree config"><![CDATA[Create Frame config]]></Set>
+		</DescriptionSet>
+		<Tmp Name="Modify">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="树修改"><![CDATA[
+<ol style='margin:0px'>
+	<li>查看树信息</li>
+	<li>支持修改，删除和新增节点</li>
+</ol>]]></Set>
+				<Set Lang="enus" Info="New data"><![CDATA[new data]]></Set>
+			</DescriptionSet>
+			<Menu Name="itemNew" Cmd="EWA.CurUI.NewNode();"
+				Icon="@SYS_CONTEXTPATH/EWA_STYLE/images/defined/new.gif">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="新建" />
+					<Set Lang="enus" Info="New" />
+				</DescriptionSet>
+			</Menu>
+			<Menu Name="itemRename" Cmd="EWA.CurUI.Rename();" Icon="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="修改名称" />
+					<Set Lang="enus" Info="Rename" />
+				</DescriptionSet>
+			</Menu>
+			<Menu Name="line" Cmd="" Icon="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="&lt;hr>" />
+					<Set Lang="enus" Info="&lt;hr>" />
+				</DescriptionSet>
+			</Menu>
+			<Menu Name="itemDelete" Cmd="EWA.CurUI.Delete();"
+				Icon="@SYS_CONTEXTPATH/EWA_STYLE/images/defined/del.gif">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="删除" />
+					<Set Lang="enus" Info="Delete" />
+				</DescriptionSet>
+			</Menu>
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlTreeLoad()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="OnTreeNodeDelete" SqlType="update"
+				Sql="this.Fields.GetSqlTreeNodeDelete()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="删除节点" />
+					<Set Lang="enus" Info="Delete node" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="OnTreeNodeRename" SqlType="update"
+				Sql="this.Fields.GetSqlTreeNodeRename()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="修改节点名称" />
+					<Set Lang="enus" Info="Rename node" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="OnTreeNodeNew" SqlType="update"
+				Sql="this.Fields.GetSqlTreeNodeNew()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="新建节点" />
+					<Set Lang="enus" Info="New node" />
+				</DescriptionSet>
+			</Action>
+		</Tmp>
+
+		<Tmp Name="ChangeNode">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="更改列表的节点"><![CDATA[
+<ol style='margin:0px'>
+	<li>更改节点下的列表变换节点</li>
+</ol>]]></Set>
+				<Set Lang="enus" Info="New data"><![CDATA[new data]]></Set>
+			</DescriptionSet>
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlTreeLoad()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+			<Action Name="OnChangeNode" SqlType="update"
+				Sql="this.Fields.GetSqlTreeChangeNode()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+			<PageInfos>
+				<PageInfo Name="Ok">
+					<Name>
+						<Set Name="Ok" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="确定" Memo="" />
+						<Set Lang="enus" Info="Ok" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="Cancel">
+					<Name>
+						<Set Name="Cancel" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="取消" Memo="" />
+						<Set Lang="enus" Info="Cancel" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="NoSelect">
+					<Name>
+						<Set Name="NoSelect" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="请您先选择" Memo="" />
+						<Set Lang="enus" Info="Pls select" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+			</PageInfos>
+			<Adds>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top">
+					<![CDATA[
+<DIV STYLE="width:700px;height:240px;overflow:auto">
+				]]>
+				</Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom">
+					<![CDATA[
+</DIV>
+<hr>
+<DIV STYLE="width:700px; text-align:right">
+	<input id='__EWA_BUT_OK' disabled type=button value='确定' onclick="ok()" res='EWA.F.FOS["@SYS_FRAME_UNID"].Resources.Ok.GetInfo()' />
+	<input type=button value='取消' res='EWA.F.FOS["@SYS_FRAME_UNID"].Resources.Cancel.GetInfo()'/>
+</DIV>
+				]]>
+				</Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Top">
+					<![CDATA[
+var linkedId=null;
+
+function link(id){
+	linkedId =id;
+	$('__EWA_BUT_OK').disabled=false;
+}
+
+function ok(){
+	var p=[];
+	p.push({Name: 'CAT_ID', Value: linkedId});
+	p.push({Name: 'IDS_SPLIT', Value: "@IDS_SPLIT"});
+	EWA.F.POP.PostBehavior('@SYS_FRAME_UNID', p ,'OnChangeNode');
+}
+				]]>
+				</Add>
+			</Adds>
+		</Tmp>
+		<Tmp Name="PopSelect">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="弹出框选择"><![CDATA[
+<ol style='margin:0px'>
+	<li>用于输入选择树装结构数据，例如地区等。一般和<b>PopSelect</b>成对使用!</li>
+</ol>]]></Set>
+				<Set Lang="enus" Info="Pop dialog 4 select"><![CDATA[Pop]]></Set>
+			</DescriptionSet>
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlTreeLoad()">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+			<PageInfos>
+				<PageInfo Name="Ok">
+					<Name>
+						<Set Name="Ok" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="确定" Memo="" />
+						<Set Lang="enus" Info="Ok" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="Cancel">
+					<Name>
+						<Set Name="Cancel" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="取消" Memo="" />
+						<Set Lang="enus" Info="Cancel" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+				<PageInfo Name="NoSelect">
+					<Name>
+						<Set Name="NoSelect" />
+					</Name>
+					<DescriptionSet>
+						<Set Lang="zhcn" Info="请您先选择" Memo="" />
+						<Set Lang="enus" Info="Pls select" Memo="" />
+					</DescriptionSet>
+				</PageInfo>
+			</PageInfos>
+			<Adds>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top">
+					<![CDATA[
+<div style='width:700px;height:330px;overflow:auto'>
+				]]>
+				</Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom">
+					<![CDATA[
+</div>
+<hr>
+<div align=right>
+　　<span id='a'></span>&nbsp;
+	<input id='__EWA_BUT_OK' type=button value='确定' onclick="ok()" res='EWA.F.FOS["@SYS_FRAME_UNID"].Resources.Ok.GetInfo()' />
+	<input type=button value='取消' res='EWA.F.FOS["@SYS_FRAME_UNID"].Resources.Cancel.GetInfo()'/>
+</div>]]>
+				</Add>
+				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Top">
+					<![CDATA[
+var sid,sname;
+function link(id,pid,name){
+	sid=id;
+	var node= EWA.F.FOS["@SYS_FRAME_UNID"].GetNodeById(id);
+	sname=node.Text;
+	var m=0;
+	while(EWA.F.FOS["@SYS_FRAME_UNID"].GetParentNode(node)){
+		node=EWA.F.FOS["@SYS_FRAME_UNID"].GetParentNode(node);
+		  		sname=node.Text+'/'+sname;
+		m++;
+		if(m>10){
+			break;
+		}
+	}
+	$('a').innerHTML=sname+'('+id+')';
+}
+function ok(){
+	if(sid==null){
+		alert(EWA.F.FOS["@SYS_FRAME_UNID"].Resources.NoSelect.GetInfo());
+		return; 
+	}
+	var dia=window. _EWA_DialogWnd;
+	var obj=dia._OpenerWindow.$('@EWA_FROM_ID')
+	obj.value=sid;
+	obj.parentNode.nextSibling.innerHTML=sname;
+	dia.CloseWindow();
+}
+				]]>
+				</Add>
+			</Adds>
+		</Tmp>
+	</Frame>
+	<Frame Name="Menu">
+		<DescriptionSet>
+			<Set Lang="zhcn" Info="生成菜单"><![CDATA[生成菜单]]></Set>
+			<Set Lang="enus" Info="Create Tree config"><![CDATA[Create Menu config]]></Set>
+		</DescriptionSet>
+		<Tmp Name="Modify">
+			<DescriptionSet>
+				<Set Lang="zhcn" Info="默认菜单"><![CDATA[
+<ol style='margin:0px'>
+	<li>默认默认默认</li>
+	<li>默认默认默认</li>
+</ol>]]></Set>
+				<Set Lang="enus" Info="New data"><![CDATA[new data]]></Set>
+			</DescriptionSet>
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="'SELECT * FROM '+this.Fields.TableName+' WHERE 1=1'">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
+					<Set Lang="enus" Info="The SQL of page load" />
+				</DescriptionSet>
+			</Action>
+		</Tmp>
+	</Frame>
+</EwaDefine>
