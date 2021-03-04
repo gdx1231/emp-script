@@ -20,7 +20,6 @@ public class WfUnits {
 	private String _WfLogAction;
 	private HtmlClass _HtmlClass;
 	private String _WfMainAction;
-	private String _WfXItem;
 
 	public WfUnits(String checkedField, String mainAction, String logAction) {
 		_Units = new MTable();

@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +33,6 @@ import com.gdxsoft.easyweb.utils.UMail;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
-import com.gdxsoft.easyweb.utils.msnet.MStr;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTRow;
@@ -710,7 +708,7 @@ public class ActionBase {
 					a = 0;
 				}
 
-				String cVal = des.getEncString(val);
+				String cVal = des.encrypt(val);
 				cVal = URLEncoder.encode(cVal, "ascii");
 				Cookie cookie = new Cookie(ckName, cVal);
 

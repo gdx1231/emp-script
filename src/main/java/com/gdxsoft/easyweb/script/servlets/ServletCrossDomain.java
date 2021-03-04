@@ -8,6 +8,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UNet;
@@ -20,7 +23,7 @@ import com.gdxsoft.easyweb.utils.UPath;
  *
  */
 public class ServletCrossDomain extends HttpServlet {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ServletCrossDomain.class);
 	/**
 	 * 
 	 */
@@ -166,7 +169,7 @@ public class ServletCrossDomain extends HttpServlet {
 				UNet net = new UNet();
 				String rst;
 				if (map1.size() > 0) {
-					rst = net.doPost_old(urlLogin, map1);
+					rst = net.doPost(urlLogin, map1);
 				} else {
 					rst = net.doGet(urlLogin);
 				}
@@ -174,6 +177,8 @@ public class ServletCrossDomain extends HttpServlet {
 
 				request.getSession().setAttribute(seesionName, cookies);
 				response.setHeader("X-EWA-CROSS-DOMAIN-LOGIN", urlLogin);
+
+				LOGGER.debug(rst);
 			} else {
 				// 已经登录过
 				cookies = request.getSession().getAttribute(seesionName)
@@ -194,7 +199,7 @@ public class ServletCrossDomain extends HttpServlet {
 
 		String rst2;
 		if (map1.size() > 0) {
-			rst2 = net2.doPost_old(url, map1);
+			rst2 = net2.doPost(url, map1);
 		} else {
 			rst2 = net2.doGet(url);
 		}
@@ -205,6 +210,8 @@ public class ServletCrossDomain extends HttpServlet {
 			rst2 = "<base href='" + base_u + "' />" + rst2;
 
 		}
+		LOGGER.debug(rst2);
+
 		this.outContent(request, response, rst2);
 	}
 

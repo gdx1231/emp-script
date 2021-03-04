@@ -1,6 +1,5 @@
 package com.gdxsoft.easyweb.script.Workflow;
 
-import java.util.Date;
 import com.gdxsoft.easyweb.datasource.ClassBase;
 /**表_EWA_WF映射类
 * @author gdx 时间：Sat Jul 11 2020 20:59:31 GMT+0800 (中国标准时间)*/

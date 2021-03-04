@@ -40,7 +40,8 @@ public class SampleLog extends LogBase implements ILog {
 	 * nvarchar(200) )
 	 */
 	private void WriteToLog() {
-		if (1 == 1) {
+		int abc = 0;
+		if (1 == abc) {
 			return;
 		}
 

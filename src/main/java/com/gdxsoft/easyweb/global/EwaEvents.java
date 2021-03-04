@@ -7,6 +7,10 @@ import com.gdxsoft.easyweb.utils.Utils;
 
 public class EwaEvents extends SetBase<EwaEvent> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4689644876612090091L;
 	private HashMap<String, String> _Js = new HashMap<String, String>();
 
 	public String createJs(String lang) throws Exception {

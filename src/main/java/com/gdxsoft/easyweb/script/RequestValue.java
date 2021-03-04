@@ -895,7 +895,7 @@ public class RequestValue implements Cloneable {
 				}
 				try {
 
-					val = _UDes.getDesString(val);
+					val = _UDes.decrypt(val);
 					key = key.replace(ckPrefix, "");
 					this._ReqValues.addValue(key, val, PageValueTag.COOKIE_ENCYRPT);
 				} catch (Exception e) {

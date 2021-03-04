@@ -13,7 +13,6 @@ import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
-import com.gdxsoft.easyweb.script.display.TreeViewNode;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
 import com.gdxsoft.easyweb.script.template.XItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;

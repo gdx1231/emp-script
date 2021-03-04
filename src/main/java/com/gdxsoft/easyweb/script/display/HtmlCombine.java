@@ -61,15 +61,13 @@ public class HtmlCombine {
 		return this._Items;
 	}
 
-	public void init(RequestValue rv, String combineCfgXml,
-			HttpServletResponse response) throws ParserConfigurationException,
-			SAXException, IOException, JSONException {
+	public void init(RequestValue rv, String combineCfgXml, HttpServletResponse response)
+			throws ParserConfigurationException, SAXException, IOException, JSONException {
 		this._CombineCfgXml = combineCfgXml;
 		this._Response = response;
 		this._Rv = rv;
 
-		if (rv.getString("SYS_EWA_LANG") != null
-				&& rv.getString("SYS_EWA_LANG").equalsIgnoreCase("enus")) {
+		if (rv.getString("SYS_EWA_LANG") != null && rv.getString("SYS_EWA_LANG").equalsIgnoreCase("enus")) {
 			this._IsEn = true;
 		} else {
 			this._IsEn = false;
@@ -84,10 +82,9 @@ public class HtmlCombine {
 		rv.addValue("__CFG_SPLIT", split);
 		rv.addValue("__CFG_full", full);
 		String user_id = "";
-		String unid = "";
 		String xml = "";
 		user_id = rv.getString("G_ADM_ID");
-		unid = rv.getString("MENU_UNID");
+		// String unid = rv.getString("MENU_UNID");
 		xml = rv.getString("XML");
 		if (user_id == null || user_id == "") {
 			return;
@@ -163,15 +160,13 @@ public class HtmlCombine {
 	 * @throws IOException
 	 * @throws JSONException
 	 */
-	public void initRobert(RequestValue rv, String combineCfgXml,
-			HttpServletResponse response) throws ParserConfigurationException,
-			SAXException, IOException, JSONException {
+	public void initRobert(RequestValue rv, String combineCfgXml, HttpServletResponse response)
+			throws ParserConfigurationException, SAXException, IOException, JSONException {
 		this._CombineCfgXml = combineCfgXml;
 		this._Response = response;
 		this._Rv = rv;
 
-		if (rv.getString("SYS_EWA_LANG") != null
-				&& rv.getString("SYS_EWA_LANG").equalsIgnoreCase("enus")) {
+		if (rv.getString("SYS_EWA_LANG") != null && rv.getString("SYS_EWA_LANG").equalsIgnoreCase("enus")) {
 			this._IsEn = true;
 		} else {
 			this._IsEn = false;
@@ -197,16 +192,14 @@ public class HtmlCombine {
 		HtmlCombineGrp htmlCombineGrp = new HtmlCombineGrp(doc);
 		htmlCombineGrp.init();
 
-		HashMap<String, DTRow> aclMap = this.getUserGrpItemsRobert(
-				"MENU_GRP_ITEM", xml);
+		HashMap<String, DTRow> aclMap = this.getUserGrpItemsRobert("MENU_GRP_ITEM", xml);
 
 		if (rv.getString("combin_all") == null) {
 			ArrayList<String> al = new ArrayList<String>();
 			for (String grp : htmlCombineGrp.getMap().keySet()) {
 				boolean isHas = false;
 				for (String key : aclMap.keySet()) {
-					if (key.endsWith("=" + grp)
-							|| key.indexOf("=" + grp + "&") > 0) {
+					if (key.endsWith("=" + grp) || key.indexOf("=" + grp + "&") > 0) {
 						isHas = true;
 						break;
 					}
@@ -272,13 +265,10 @@ public class HtmlCombine {
 	 */
 	private HashMap<String, DTRow> getUserGrpItemsRobert(String grp, String xml) {
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder
-				.append("select a.* from ADM_MENU a"
-						+ " inner join ADM_MENU_SUPPLY b on a.MNU_ID=b.MNU_ID and b.SUP_ID=@G_SUP_ID"
-						+ "	inner join ADM_ACL_MNU c on c.MNU_ID=b.MNU_ID and b.SUP_ID=c.SUP_ID and c.ADM_ID=@G_ADM_ID"
-						+ " where MNU_CMD like '%"
-						+ xml.replace("'", "''").replace("%", "")
-						+ "%' and MNU_GRP='rob'");
+		stringBuilder.append("select a.* from ADM_MENU a"
+				+ " inner join ADM_MENU_SUPPLY b on a.MNU_ID=b.MNU_ID and b.SUP_ID=@G_SUP_ID"
+				+ "	inner join ADM_ACL_MNU c on c.MNU_ID=b.MNU_ID and b.SUP_ID=c.SUP_ID and c.ADM_ID=@G_ADM_ID"
+				+ " where MNU_CMD like '%" + xml.replace("'", "''").replace("%", "") + "%' and MNU_GRP='rob'");
 		String sql = stringBuilder.toString();
 		DTTable table = DTTable.getJdbcTable(sql, "globaltravel", this._Rv);
 
@@ -296,8 +286,7 @@ public class HtmlCombine {
 	}
 
 	private HashMap<String, String> getParameters(Node item) {
-		String[] params = "x,i,p,install,id,des,is_rename,his,his_name,lst,js,grp,js,js_rename"
-				.split(",");
+		String[] params = "x,i,p,install,id,des,is_rename,his,his_name,lst,js,grp,js,js_rename".split(",");
 		HashMap<String, String> map = new HashMap<String, String>();
 		Element ele = (Element) item;
 		String ref = ele.getAttribute("ref"); // 引用的对象
@@ -321,8 +310,7 @@ public class HtmlCombine {
 			this._Html.al("<P>ref:" + ref + "表达错误</p>");
 			return null;
 		}
-		String path = item.getOwnerDocument().getDocumentURI()
-				.replace("file:", "");
+		String path = item.getOwnerDocument().getDocumentURI().replace("file:", "");
 		File f = new File(path);
 		String path1 = f.getParent() + "/" + refs[0].trim();
 		if (!f.exists()) {
@@ -374,7 +362,7 @@ public class HtmlCombine {
 		String id = map.get("id");
 		String des = map.get("des");
 
-		if (this._IsEn && this._AclMap !=null && this._AclMap.containsKey(id)) {
+		if (this._IsEn && this._AclMap != null && this._AclMap.containsKey(id)) {
 			DTRow r = this._AclMap.get(id);
 			if (r.getTable().getColumns().testName("MENU_NAME_EN")) {
 				try {
@@ -416,48 +404,36 @@ public class HtmlCombine {
 			if (!id.equalsIgnoreCase(initId)) {
 				if (all == null || all.trim().length() == 0) {
 					String q = createQueryParameters("init_id");
-					String lnk = "<a item_id='" + id + "' [" + grp
-							+ "] class='crm_main_nav1' href='combine_crm.jsp?"
-							+ q + "&init_id=" + id + "' title=\"" + des + "\">"
-							+ des + "</a>";
+					String lnk = "<a item_id='" + id + "' [" + grp + "] class='crm_main_nav1' href='combine_crm.jsp?"
+							+ q + "&init_id=" + id + "' title=\"" + des + "\">" + des + "</a>";
 					_TopNav.al(lnk);
 					return;
 				}
 			} else {
 				if (all == null || all.trim().length() == 0) {
-					String lnk = "<a item_id='"
-							+ id
-							+ "' class='crm_main_nav1 crm_main_nav1_cur' title=\""
-							+ des + "\">" + des + "</a>";
+					String lnk = "<a item_id='" + id + "' class='crm_main_nav1 crm_main_nav1_cur' title=\"" + des
+							+ "\">" + des + "</a>";
 					_TopNav.al(lnk);
 				}
 			}
 
-			_Rv.changeValue("__CFG_TITLE", _Rv.getString("__CFG_TITLE") + " "
-					+ des, "string", 100);
+			_Rv.changeValue("__CFG_TITLE", _Rv.getString("__CFG_TITLE") + " " + des, "string", 100);
 		}
 
 		// 分组
 		String init_grp = _Rv.getString("init_grp");
-		if (init_grp != null && init_grp.trim().length() > 0
-				&& (all == null || all.trim().length() == 0)) {
+		if (init_grp != null && init_grp.trim().length() > 0 && (all == null || all.trim().length() == 0)) {
 			if (grp.equalsIgnoreCase(init_grp)) {
 				if (_TopNav.indexOf("[" + grp + "]") < 0) {
-					String lnk = "<a  item_id='"
-							+ id
-							+ "'["
-							+ grp
-							+ "] class='crm_main_nav1 crm_main_nav1_cur' title=\""
-							+ des + "\">" + des + "</a>";
+					String lnk = "<a  item_id='" + id + "'[" + grp
+							+ "] class='crm_main_nav1 crm_main_nav1_cur' title=\"" + des + "\">" + des + "</a>";
 					_TopNav.al(lnk);
 				}
 			} else {
 				if (_TopNav.indexOf("[" + grp + "]") < 0) {
 					String q = createQueryParameters("init_grp");
-					String lnk = "<a item_id='" + id + "'  [" + grp
-							+ "] class='crm_main_nav1' href='combine_crm.jsp?"
-							+ q + "&init_grp=" + grp + "' title=\"" + des
-							+ "\">" + des + "</a>";
+					String lnk = "<a item_id='" + id + "'  [" + grp + "] class='crm_main_nav1' href='combine_crm.jsp?"
+							+ q + "&init_grp=" + grp + "' title=\"" + des + "\">" + des + "</a>";
 					_TopNav.al(lnk);
 				}
 				return;
@@ -472,18 +448,15 @@ public class HtmlCombine {
 
 		MStr s = new MStr();
 		s.a("<div id='crm_main_box'>");
-		s.al("<div class='subject' [st1]  id='DES_" + id
-				+ "'><a class='subject_expand' " + "onclick='showFull(\"DES_"
-				+ id + "\")'></a><div class='ewa_lf_func_caption'"
-				+ " [$] style='float:left'>" + des
+		s.al("<div class='subject' [st1]  id='DES_" + id + "'><a class='subject_expand' " + "onclick='showFull(\"DES_"
+				+ id + "\")'></a><div class='ewa_lf_func_caption'" + " [$] style='float:left'>" + des
 				+ "</div></div><div class='left' id='" + id + "'>");
 		if (i == null || i.trim().length() == 0) {
 			// nothing
 		} else if (install.equals("html")) {
 			String html = this.createHtml(item, map);
 			s.al(html);
-			_Js.al("if(window.EWA_COMBINES_HTML==null){"
-					+ "EWA_COMBINES_HTML=[];}EWA_COMBINES_HTML.push('" + id
+			_Js.al("if(window.EWA_COMBINES_HTML==null){" + "EWA_COMBINES_HTML=[];}EWA_COMBINES_HTML.push('" + id
 					+ "');");
 		} else if (install.equals("json")) {
 			String rst = this.createJson(item, map);
@@ -517,8 +490,7 @@ public class HtmlCombine {
 		s.al("</div></div>");
 		s.replace("[st1]", "");
 		if (install.equalsIgnoreCase("json")) {
-			s.al("<div id='crm_more' class='left' show='1'"
-					+ " onclick='showMore(\"" + id + "\")'>更多</div>");
+			s.al("<div id='crm_more' class='left' show='1'" + " onclick='showMore(\"" + id + "\")'>更多</div>");
 		}
 		_Items.put(id.toUpperCase(), s.toString());
 		_Html.al(s.toString());
@@ -533,22 +505,11 @@ public class HtmlCombine {
 		String name = this.replaceParameters(his_name);
 		String q = _Rv.getString("EWA_QUERY_ALL");
 		int code = name.hashCode();
-		String sql = "if not exists(select 1 from adm_his where adm_id=@g_adm_id and code="
-				+ code
-				+ ")"
-				+ "\r\nbegin\r\n"
-				+ "INSERT INTO ADM_HIS(ADM_ID,CODE,NAME,Q,DT)VALUES(@G_ADM_ID,"
-				+ code
-				+ ",'"
-				+ name.replace("'", "''")
-				+ "','"
-				+ q.replace("'", "''")
-				+ "',getdate())"
-				+ "\r\nend\r\n else begin update adm_his set dt=getdate(),name='"
-				+ name.replace("'", "''")
-				+ "', q='"
-				+ q.replace("'", "''")
-				+ "' where code=" + code + " and adm_id=@g_adm_id end";
+		String sql = "if not exists(select 1 from adm_his where adm_id=@g_adm_id and code=" + code + ")"
+				+ "\r\nbegin\r\n" + "INSERT INTO ADM_HIS(ADM_ID,CODE,NAME,Q,DT)VALUES(@G_ADM_ID," + code + ",'"
+				+ name.replace("'", "''") + "','" + q.replace("'", "''") + "',getdate())"
+				+ "\r\nend\r\n else begin update adm_his set dt=getdate(),name='" + name.replace("'", "''") + "', q='"
+				+ q.replace("'", "''") + "' where code=" + code + " and adm_id=@g_adm_id end";
 		DataConnection cnn = new DataConnection();
 		cnn.setConfigName("");
 		cnn.setRequestValue(_Rv);
@@ -556,8 +517,7 @@ public class HtmlCombine {
 		cnn.close();
 	}
 
-	private String createJs(Node item, HashMap<String, String> map)
-			throws JSONException {
+	private String createJs(Node item, HashMap<String, String> map) throws JSONException {
 		String x = map.get("x");
 		String i = map.get("i");
 		String p = map.get("p");
@@ -575,8 +535,7 @@ public class HtmlCombine {
 		json.put("des", des);
 		json.put("install", install);
 
-		_Js.al("if(window.EWA_COMBINES==null){"
-				+ "EWA_COMBINES=[];}EWA_COMBINES.push(" + json + ");");
+		_Js.al("if(window.EWA_COMBINES==null){" + "EWA_COMBINES=[];}EWA_COMBINES.push(" + json + ");");
 		return "";
 	}
 
@@ -596,15 +555,11 @@ public class HtmlCombine {
 		if (params == null || params.trim().length() == 0) {
 			params = "_xxx0099=1";
 		}
-		params = params
-				+ "&EWA_AJAX=INSTALL&EWA_FRAMESET_NO=1&EWA_CALL_METHOD=INNER_CALL&COMBINE_ID="
-				+ id;
+		params = params + "&EWA_AJAX=INSTALL&EWA_FRAMESET_NO=1&EWA_CALL_METHOD=INNER_CALL&COMBINE_ID=" + id;
 		ht.init(x, i, params, _Rv.getRequest(), _Rv.getSession(), _Response);
 		String html = ht.getHtml();
 		if (isJsRename) {
-			Pattern pat = Pattern.compile(
-					"function[ \\t\\n\\r]+\\w+[ \\t\\n\\r]{0,}\\(",
-					Pattern.CASE_INSENSITIVE);
+			Pattern pat = Pattern.compile("function[ \\t\\n\\r]+\\w+[ \\t\\n\\r]{0,}\\(", Pattern.CASE_INSENSITIVE);
 			Matcher mat = pat.matcher(html);
 
 			String newJsTag = id.replace("-", "_").trim();
@@ -617,27 +572,22 @@ public class HtmlCombine {
 				String newJsName = jsName.replace("(", newJsTag + "(");
 				html = html.replace(jsName + "(", newJsName + "(");
 
-				String findName = jsName.replace("function", "")
-						.replace("(", "").trim();
+				String findName = jsName.replace("function", "").replace("(", "").trim();
 				String newJsName1 = findName + newJsTag;
 				html = html.replace(findName + "(", newJsName1 + "(");
 				html = html.replace(findName + " (", newJsName1 + "(");
-				html = html.replace("=" + findName + ";", "=" + newJsName1
-						+ ";");
-				html = html.replace("=" + findName + " ;", "=" + newJsName1
-						+ ";");
+				html = html.replace("=" + findName + ";", "=" + newJsName1 + ";");
+				html = html.replace("=" + findName + " ;", "=" + newJsName1 + ";");
 				html = html.replace("(" + findName, "(" + newJsName1);
 				html = html.replace(findName + ")", newJsName1 + ")");
 			}
 		}
 		s.al(html);
-		_Js.al("if(window.EWA_COMBINES_HTML==null){"
-				+ "EWA_COMBINES_HTML=[];}EWA_COMBINES_HTML.push('" + id + "');");
+		_Js.al("if(window.EWA_COMBINES_HTML==null){" + "EWA_COMBINES_HTML=[];}EWA_COMBINES_HTML.push('" + id + "');");
 		return s.toString();
 	}
 
-	private String createIframe(Node item, HashMap<String, String> map)
-			throws JSONException {
+	private String createIframe(Node item, HashMap<String, String> map) throws JSONException {
 		String x = map.get("x");
 		String i = map.get("i");
 		String p = map.get("p");
@@ -645,18 +595,15 @@ public class HtmlCombine {
 
 		String params = replaceParameters(p);
 
-		String html = "<iframe id='__IF_"
-				+ id
+		String html = "<iframe id='__IF_" + id
 				+ "' frameborder=0 width=100% height=100% style='min-height:300px' scroll=no src='"
-				+ _Rv.getContextPath() + "/EWA_STYLE/cgi-bin/?xmlname=" + x
-				+ "&ewa_debug_no=1&itemname=" + i + "&" + params
-				+ "'></iframe>";
+				+ _Rv.getContextPath() + "/EWA_STYLE/cgi-bin/?xmlname=" + x + "&ewa_debug_no=1&itemname=" + i + "&"
+				+ params + "'></iframe>";
 
 		return html;
 	}
 
-	private String createJson(Node item, HashMap<String, String> map)
-			throws JSONException {
+	private String createJson(Node item, HashMap<String, String> map) throws JSONException {
 		String x = map.get("x");
 		String i = map.get("i");
 		String p = map.get("p");
@@ -676,8 +623,7 @@ public class HtmlCombine {
 		return s.toString();
 	}
 
-	private String createBox(Node item, HashMap<String, String> map)
-			throws JSONException {
+	private String createBox(Node item, HashMap<String, String> map) throws JSONException {
 
 		String x = map.get("x");
 		String i = map.get("i");
@@ -705,8 +651,7 @@ public class HtmlCombine {
 		}
 		String[] lsts = lst.split("\\;");
 		MStr s1 = new MStr();
-		int cols = _Rv.getString("__CFG_full") == null
-				|| _Rv.getString("__CFG_full").trim().length() == 0 ? 4 : 4;
+		int cols = _Rv.getString("__CFG_full") == null || _Rv.getString("__CFG_full").trim().length() == 0 ? 4 : 4;
 		for (int ia = 0; ia < lsts.length; ia++) {
 			String name2 = lsts[ia].trim();
 			String[] names = name2.split("\\|");
@@ -732,8 +677,7 @@ public class HtmlCombine {
 			}
 
 			String onclick = "";
-			s1.a("<li class='am0' rid='" + name + "'>" + cfg.getString("DES")
-					+ "</li>");
+			s1.a("<li class='am0' rid='" + name + "'>" + cfg.getString("DES") + "</li>");
 			if (names.length > 1) {
 				String jsName = names[1].trim();
 				if (jsName.indexOf("(") > 0) {
@@ -742,9 +686,7 @@ public class HtmlCombine {
 					if (map1.containsKey(jsName.toUpperCase())) {
 						JSONObject objClick = map1.get(jsName.toUpperCase());
 						if (objClick.has("ONCLICK")) {
-							onclick = " onclick=\""
-									+ Utils.textToInputValue(objClick
-											.getString("ONCLICK")) + "\"";
+							onclick = " onclick=\"" + Utils.textToInputValue(objClick.getString("ONCLICK")) + "\"";
 						} else if (o.has("WF")) {
 							JSONObject wf = o.getJSONObject("WF");
 							JSONArray ids = wf.getJSONArray("RID");
@@ -757,24 +699,17 @@ public class HtmlCombine {
 								}
 								rid += vRid0;
 							}
-							String wfParams = wf.getString("P").replace(
-									"[RID]", rid);
+							String wfParams = wf.getString("P").replace("[RID]", rid);
 							wfParams = this.replaceParameters(wfParams);
 							wfParams = "combine_id=" + id + "&" + wfParams;
-							String u = "EWA.UI.Dialog.OpenReloadClose('-1','"
-									+ wf.getString("X") + "','"
-									+ wf.getString("I") + "', false,\""
-									+ wfParams + "\")";
-							onclick = " onclick=\"" + Utils.textToInputValue(u)
-									+ "\"";
+							String u = "EWA.UI.Dialog.OpenReloadClose('-1','" + wf.getString("X") + "','"
+									+ wf.getString("I") + "', false,\"" + wfParams + "\")";
+							onclick = " onclick=\"" + Utils.textToInputValue(u) + "\"";
 						}
 					}
 				}
-				s1.a("<li class='am1'><div class='am1_txt'>" + val
-						+ "</div><a " + onclick
-						+ "  class='am1_edit'><img src='"
-						+ _Rv.getContextPath()
-						+ "/images/pencil.png' /></a></li>");
+				s1.a("<li class='am1'><div class='am1_txt'>" + val + "</div><a " + onclick
+						+ "  class='am1_edit'><img src='" + _Rv.getContextPath() + "/images/pencil.png' /></a></li>");
 			} else {
 				s1.a("<li class='am1'>" + val + "</li>");
 			}
@@ -816,8 +751,7 @@ public class HtmlCombine {
 		MTable tb = new MTable();
 
 		for (int ia = 0; ia < _Rv.getPageValues().getQueryValues().getCount(); ia++) {
-			PageValue pv = (PageValue) _Rv.getPageValues().getQueryValues()
-					.getByIndex(ia);
+			PageValue pv = (PageValue) _Rv.getPageValues().getQueryValues().getByIndex(ia);
 			boolean isRemove = false;
 			for (int m = 0; m < ids.length; m++) {
 				if (pv.getName().equalsIgnoreCase(ids[m].trim())) {
@@ -897,12 +831,11 @@ public class HtmlCombine {
 		boolean bl = false;
 
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder
-				.append("SELECT B.MENU_NAME_EN FROM MENU_ADM A INNER JOIN MENU_NEW B ON A.MENU_ID=B.MENU_ID AND A.ADM_ID=");
+		stringBuilder.append(
+				"SELECT B.MENU_NAME_EN FROM MENU_ADM A INNER JOIN MENU_NEW B ON A.MENU_ID=B.MENU_ID AND A.ADM_ID=");
 		stringBuilder.append(user_id.replace("'", "''"));
 		stringBuilder.append("  WHERE B.MENU_PID IN ");
-		stringBuilder
-				.append("(SELECT MENU_ID FROM MENU_NEW  WHERE MENU_UNID='");
+		stringBuilder.append("(SELECT MENU_ID FROM MENU_NEW  WHERE MENU_UNID='");
 		stringBuilder.append(unid.replace("'", "''"));
 		stringBuilder.append("') AND  B.MENU_REMARK= '");
 		stringBuilder.append(xmlid.replace("'", "''"));
@@ -941,8 +874,7 @@ public class HtmlCombine {
 		return map;
 	}
 
-	public boolean hasItemByGrp(String user_id, String grp, String xmlid,
-			String xml) {
+	public boolean hasItemByGrp(String user_id, String grp, String xmlid, String xml) {
 		boolean bl = false;
 		if (user_id == null) {
 			return false;

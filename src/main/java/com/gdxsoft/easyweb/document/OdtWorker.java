@@ -34,17 +34,13 @@ public class OdtWorker {
 	/**
 	 * 生成文件
 	 * 
-	 * @param tmplate
-	 *            模板
-	 * @param exportName
-	 *            输出文件名
-	 * @param rv
-	 *            参数表
+	 * @param tmplate    模板
+	 * @param exportName 输出文件名
+	 * @param rv         参数表
 	 * @return
 	 * @throws Exception
 	 */
-	public String doWork(String tmplate, String exportName, RequestValue rv)
-			throws Exception {
+	public String doWork(String tmplate, String exportName, RequestValue rv) throws Exception {
 		this.templateName = tmplate;
 		this.exportName = exportName;
 		this.rv = rv;
@@ -71,8 +67,7 @@ public class OdtWorker {
 
 				String top = cnt.substring(0, start);
 				String bottom = cnt.substring(end + officeBody1.length());
-				String middle = cnt
-						.substring(start, end + officeBody1.length());
+				String middle = cnt.substring(start, end + officeBody1.length());
 
 				this.initOdfLevels(middle);
 				StringBuilder sb = new StringBuilder();
@@ -196,21 +191,18 @@ public class OdtWorker {
 		}
 		DataConnection conn1 = new DataConnection();
 		conn1.setConfigName("");
-		RequestValue aRv = new RequestValue(this.rv.getRequest(), this.rv
-				.getSession());
+		RequestValue aRv = new RequestValue(this.rv.getRequest(), this.rv.getSession());
 		if (o.getParent().getCurRow() != null) {
 			DTRow r = o.getParent().getCurRow();
 			DTColumns cols = r.getTable().getColumns();
 			for (int i = 0; i < cols.getCount(); i++) {
-				aRv.addValue(cols.getColumn(i).getName(), r.getCell(i)
-						.getValue());
+				aRv.addValue(cols.getColumn(i).getName(), r.getCell(i).getValue());
 			}
 		}
 		conn1.setRequestValue(aRv);
 		o.setMeRv(aRv);
 		String sql = o.getJson().getString("sql");
-		sql = sql.replace("&apos;", "'").replace("&lt;", "<").replace("&gt;",
-				">").replace("?", "");
+		sql = sql.replace("&apos;", "'").replace("&lt;", "<").replace("&gt;", ">").replace("?", "");
 		if (sql.codePointAt(0) == 65279) {
 			sql = sql.substring(1);
 		}
@@ -250,9 +242,7 @@ public class OdtWorker {
 		// Pattern pat = Pattern.compile(
 		// "<text:p[^<.]*?>&lt;!--(?s).*?--&gt;(?s).*?</text:p>",
 		// Pattern.CASE_INSENSITIVE);
-		Pattern pat = Pattern.compile(
-				"<office:annotation>[\\s\\S.]*?</office:annotation>",
-				Pattern.CASE_INSENSITIVE);
+		Pattern pat = Pattern.compile("<office:annotation>[\\s\\S.]*?</office:annotation>", Pattern.CASE_INSENSITIVE);
 
 		Matcher mat = pat.matcher(cnt);
 		String str0 = "{";
@@ -267,10 +257,8 @@ public class OdtWorker {
 			String s = s1.replaceAll("<[^>]*?>", "");
 			String json = subStr(s, str0, 0, str1);
 			json = json.replace("\n", "").replace("\r", "");
-			json = "{"
-					+ json.replace("“", "\"").replace("”", "\"").replace("，",
-							",").replace("&quot;", "\"").replace("：", ":")
-					+ "}";
+			json = "{" + json.replace("“", "\"").replace("”", "\"").replace("，", ",").replace("&quot;", "\"")
+					.replace("：", ":") + "}";
 			JSONObject obj = new JSONObject(json);
 			System.out.println(idx + "," + obj.toString());
 			idx++;
@@ -304,15 +292,12 @@ public class OdtWorker {
 		for (int i = 1; i < map.size(); i++) {
 			o = map.get(i);
 			oPrev = o.getParent();
-			String parentCnt = oPrev.getContentFixed() == null ? oPrev
-					.getContent() : oPrev.getContentFixed();
+			String parentCnt = oPrev.getContentFixed() == null ? oPrev.getContent() : oPrev.getContentFixed();
 			String curCnt = o.getContent();
 			String rept = o.getUnid();
-			int loc1 = parentCnt.indexOf(curCnt);
-			if (loc1 < 0) {
-				int mm = 0;
-				mm++;
-			}
+			/*
+			 * int loc1 = parentCnt.indexOf(curCnt); if (loc1 < 0) { int mm = 0; mm++; }
+			 */
 			parentCnt = parentCnt.replace(curCnt, rept);
 			// System.out.println(parentCnt.indexOf(rept));
 			oPrev.setContentFixed(parentCnt);
@@ -331,8 +316,7 @@ public class OdtWorker {
 	 * @throws JSONException
 	 */
 	private void initCntParts(OdfLevel o) throws JSONException {
-		String fixedCnt = o.getContentFixed() == null ? o.getContent() : o
-				.getContentFixed();
+		String fixedCnt = o.getContentFixed() == null ? o.getContent() : o.getContentFixed();
 
 		String cnt = subStr(fixedCnt, o.getMarkStart(), 0, o.getMarkEnd());
 		if (cnt == null) {
@@ -358,14 +342,12 @@ public class OdtWorker {
 
 	public void checkTable(String cnt1) {
 		int skip = 0;
-		String cnt2 = subStr(cnt1, "<table:table-row>", skip,
-				"</table:table-row>");
+		String cnt2 = subStr(cnt1, "<table:table-row>", skip, "</table:table-row>");
 
 		System.out.println(cnt2.replace("><", ">\n<"));
 	}
 
-	private static String subStr(String cnt1, String str1, int str1SkipNumber,
-			String str2) {
+	private static String subStr(String cnt1, String str1, int str1SkipNumber, String str2) {
 		int loc0 = 0;
 		if (str1 == null || str2 == null) {
 			return cnt1;

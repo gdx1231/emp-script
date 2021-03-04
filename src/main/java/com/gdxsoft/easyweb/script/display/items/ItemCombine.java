@@ -12,15 +12,9 @@ import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
-import com.gdxsoft.easyweb.data.DTRow;
-import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.HtmlControl;
-import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
-import com.gdxsoft.easyweb.script.display.HtmlCreator;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.SysParameters;
 import com.gdxsoft.easyweb.script.template.SkinFrame;

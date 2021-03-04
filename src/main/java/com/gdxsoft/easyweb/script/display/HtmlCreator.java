@@ -406,7 +406,7 @@ public class HtmlCreator {
 					// 空白字符串的加密也会有值 DA39A3EE5E6B4B0D3255BFEF95601890AFD80709
 					this._RequestValue.addValue(key, ""); // 2018-05-22
 				} else {
-					this._RequestValue.addValue(key, Utils.createEncryptString(val));
+					this._RequestValue.addValue(key, Utils.sha1(val));
 				}
 			} else {
 				int maxLength = 4000;

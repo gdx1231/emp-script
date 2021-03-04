@@ -29,8 +29,6 @@ public class HtmlMobile {
 	private HtmlControl _Ht;
 	private DTRow _CfgRow;
 	private RequestValue _Rv;
-	private JSONArray _FormCfgArr;
-	private JSONObject _FormData;
 	private HashMap<String, String> _DataMap;
 	private JSONObject _LastListData;
 	private ArrayList<String> _History;

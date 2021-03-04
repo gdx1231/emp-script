@@ -25,7 +25,6 @@ public class FrameLogic extends FrameBase implements IFrame {
 	 * @see com.gdxsoft.easyweb.script.display.frame.IFrame#createContent()
 	 */
 	public void createContent() throws Exception {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -36,7 +35,6 @@ public class FrameLogic extends FrameBase implements IFrame {
 	 * @see com.gdxsoft.easyweb.script.display.frame.IFrame#createFrameContent()
 	 */
 	public void createFrameContent() throws Exception {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -46,7 +44,6 @@ public class FrameLogic extends FrameBase implements IFrame {
 	 * @see com.gdxsoft.easyweb.script.display.frame.IFrame#createFrameFooter()
 	 */
 	public void createFrameFooter() throws Exception {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -56,7 +53,6 @@ public class FrameLogic extends FrameBase implements IFrame {
 	 * @see com.gdxsoft.easyweb.script.display.frame.IFrame#createFrameHeader()
 	 */
 	public String createFrameHeader() throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -89,7 +85,7 @@ public class FrameLogic extends FrameBase implements IFrame {
 		String xmlName = userXItem.getSingleValue("LogicParas", "LgXmlName");
 		String itemName = userXItem.getSingleValue("LogicParas", "LgItemName");
 		String paras = userXItem.getSingleValue("LogicParas", "LgParas");
-		String hiddens = userXItem.getSingleValue("LogicParas", "LgHidden");
+		// String hiddens = userXItem.getSingleValue("LogicParas", "LgHidden");
 		HtmlControl ht = new HtmlControl();
 		ht.init(xmlName, itemName, paras, request, session, response);
 		String s = ht.getAllHtml();
@@ -102,7 +98,6 @@ public class FrameLogic extends FrameBase implements IFrame {
 	 * @see com.gdxsoft.easyweb.script.display.frame.IFrame#createItemHtmls()
 	 */
 	public String createItemHtmls() throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

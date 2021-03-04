@@ -1,8 +1,5 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
-import java.util.HashMap;
-
-import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.items.IItem;
@@ -18,9 +15,7 @@ import com.gdxsoft.easyweb.utils.msnet.MTable;
 public class FrameComplex extends FrameBase implements IFrame {
 	private RequestValue _Rv;
 	private String init_grp;
-	private HashMap<String, String> _Mearge = new HashMap<String, String>();
 	private String _InstallHtmls = "";
-	private String _InstallJss = "";
 	private MTable _HiddenFields = null;
 	MStr _TopNav = new MStr();
 
@@ -197,29 +192,8 @@ public class FrameComplex extends FrameBase implements IFrame {
 	}
 
 	public String createaXmlData() throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	private String createQueryParameters(String removeIds) {
-		String[] ids = removeIds.split(",");
-		MTable tb = new MTable();
-
-		for (int ia = 0; ia < _Rv.getPageValues().getQueryValues().getCount(); ia++) {
-			PageValue pv = (PageValue) _Rv.getPageValues().getQueryValues()
-					.getByIndex(ia);
-			boolean isRemove = false;
-			for (int m = 0; m < ids.length; m++) {
-				if (pv.getName().equalsIgnoreCase(ids[m].trim())) {
-					isRemove = true;
-					break;
-				}
-			}
-			if (!isRemove) {
-				tb.add(pv.getName(), pv.getValue());
-			}
-		}
-		String q = tb.join("=", "&");
-		return q;
-	}
+	 
 }

@@ -80,7 +80,7 @@ public class MsgQueue {
 		return s.toString();
 	}
 
-	@SuppressWarnings( { "unchecked", "unchecked" })
+	@SuppressWarnings("unchecked")
 	public void addMsg(String id, String type, String q) {
 		MsgBody m = new MsgBody();
 		m.setId(id);

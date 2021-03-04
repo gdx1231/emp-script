@@ -65,7 +65,7 @@ public class XmlExport implements IExport {
 		String name = col.getName();
 		String type = col.getTypeName().toUpperCase();
 		if (type.indexOf("BIN") >= 0 || type.indexOf("IMAGE") >= 0) {
-			v1 = Utils.byte2hex((byte[]) o);
+			v1 = Utils.bytes2hex((byte[]) o);
 		} else if (type.indexOf("DATE") >= 0 || type.indexOf("TIME") >= 0) {
 			v1 = Utils.getDateXmlString(o);
 		} else {

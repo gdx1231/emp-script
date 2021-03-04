@@ -6,6 +6,10 @@ import com.gdxsoft.easyweb.script.template.SetBase;
 import com.gdxsoft.easyweb.utils.Utils;
 
 public class EwaValids extends SetBase<EwaValid> {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -828780828388825895L;
 	private HashMap<String, String> _Js = new HashMap<String, String>();
 
 	 

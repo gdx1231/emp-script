@@ -56,7 +56,7 @@ public class CreateCert {
 			System.out.println("开始" + f1.getAbsolutePath());
 
 			String xml = UFile.readFileText(f1.getAbsolutePath());
-			byte[] buf = aes.getEncBytes(xml);
+			byte[] buf = aes.encryptBytes(xml.getBytes("UTF8"));
 
 			String path = pathSave + "/" + f1.getName() + ".bin";
 

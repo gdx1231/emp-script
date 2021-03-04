@@ -360,7 +360,9 @@ public class UserDirXmls {
 		Integer id = Integer.valueOf(fileName.hashCode());
 		StringBuilder sb = new StringBuilder();
 		sb.append(createNodeXml(d.getPath(), d.getName(), d.getParentPath(), "1", ""));
-		if (!this._IsShowItems || 1 == 1) {// 显示配置项信息
+		// why ? forget
+		int abc =1;
+		if (!this._IsShowItems || abc == 1) {// 显示配置项信息
 			return sb.toString();
 		}
 		if (!UFileCheck.fileChanged(fileName) && _XmlItems.containsKey(id)) {
@@ -405,7 +407,7 @@ public class UserDirXmls {
 			_XmlItems.remove(id);
 		}
 		_XmlItems.put(id, sb.toString());
-		this.saveCntToCache(fileName, sb.toString());
+		saveCntToCache(fileName, sb.toString());
 		return sb.toString();
 	}
 

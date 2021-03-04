@@ -3,15 +3,11 @@
  */
 package com.gdxsoft.easyweb.script.display.items;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.gdxsoft.easyweb.script.HtmlControl;
 import com.gdxsoft.easyweb.script.RequestValue;
@@ -68,7 +64,6 @@ public class ItemComplex extends ItemBase {
 		String s1 = super.getXItemFrameHtml();
 		s1 = s1.replace("@DES", des);
 
-		MStr s = new MStr();
 		if (i == null || i.trim().length() == 0) {
 			// nothing
 		} else if (install.equals("html")) {
@@ -164,127 +159,7 @@ public class ItemComplex extends ItemBase {
 		return html;
 	}
 
-	private String createBox(String id, String x, String i, String p, String des, String lst) throws JSONException {
-
-		String params = replaceParameters(p);
-		if (params.toUpperCase().indexOf("EWA_AJAX=JSON_EXT") < 0) {
-			params += "&EWA_AJAX=JSON_EXT";
-		}
-		if (params.toUpperCase().indexOf("EWA_FRAMESET_NO=1") < 0) {
-			params += "&EWA_FRAMESET_NO=1";
-		}
-		MStr s = new MStr();
-
-		HtmlControl ht = new HtmlControl();
-		ht.init(x, i, params + "&COMBINE_ID=" + id, _Rv, super.getHtmlClass().getResponse());
-		JSONObject o = new JSONObject(ht.getHtml());
-
-		this.putJsonToRv(o);
-
-		JSONArray cfgs = o.getJSONArray("CFG");
-		JSONObject data = o.getJSONArray("DATA").getJSONObject(0);
-		HashMap<String, JSONObject> map1 = new HashMap<String, JSONObject>();
-		for (int ia = 0; ia < cfgs.length(); ia++) {
-			JSONObject cfg = cfgs.getJSONObject(ia);
-			String name = cfg.getString("NAME").toUpperCase();
-			map1.put(name, cfg);
-		}
-		String[] lsts = lst.split("\\;");
-		MStr s1 = new MStr();
-		int cols = _Rv.getString("__CFG_full") == null || _Rv.getString("__CFG_full").trim().length() == 0 ? 4 : 4;
-		for (int ia = 0; ia < lsts.length; ia++) {
-			String name2 = lsts[ia].trim();
-			String[] names = name2.split("\\|");
-			String name = names[0];
-			String name1 = name.toUpperCase();
-			if (ia == 0) {
-				s1.a("<ul>");
-			} else if (ia % cols == 0) {
-				s1.a("</ul><ul>");
-			}
-			JSONObject cfg = map1.get(name1);
-			String val = "";
-			if (cfg.has("VAL")) {
-				val = cfg.getString("VAL");
-			}
-			if (data.has(name + "_HTML")) {
-				val = data.getString(name + "_HTML");
-			}
-			if (val.trim().length() == 0) {
-				if (data.has(name)) {
-					val = data.getString(name);
-				}
-			}
-
-			String onclick = "";
-			s1.a("<li class='am0' rid='" + name + "'>" + cfg.getString("DES") + "</li>");
-			if (names.length > 1) {
-				String jsName = names[1].trim();
-				if (jsName.indexOf("(") > 0) {
-					onclick = " onclick=\"" + jsName + "\"";
-				} else {
-					if (map1.containsKey(jsName.toUpperCase())) {
-						JSONObject objClick = map1.get(jsName.toUpperCase());
-						if (objClick.has("ONCLICK")) {
-							onclick = " onclick=\"" + Utils.textToInputValue(objClick.getString("ONCLICK")) + "\"";
-						} else if (o.has("WF")) {
-							JSONObject wf = o.getJSONObject("WF");
-							JSONArray ids = wf.getJSONArray("RID");
-							String rid = "";
-							for (int ib = 0; ib < ids.length(); ib++) {
-								String rid0 = ids.getString(ib);
-								String vRid0 = _Rv.getString(rid0);
-								if (ib > 0) {
-									rid += ",";
-								}
-								rid += vRid0;
-							}
-							String wfParams = wf.getString("P").replace("[RID]", rid);
-							wfParams = this.replaceParameters(wfParams);
-							wfParams = "combine_id=" + id + "&" + wfParams;
-							String u = "EWA.UI.Dialog.OpenReloadClose('-1','" + wf.getString("X") + "','"
-									+ wf.getString("I") + "', false,\"" + wfParams + "\")";
-							onclick = " onclick=\"" + Utils.textToInputValue(u) + "\"";
-						}
-					}
-				}
-				s1.a("<li class='am1'><div class='am1_txt'>" + val + "</div><a " + onclick
-						+ "  class='am1_edit'><img src='" + _Rv.getContextPath() + "/images/pencil.png' /></a></li>");
-			} else {
-				s1.a("<li class='am1'>" + val + "</li>");
-			}
-
-		}
-		s1.a("</ul>");
-		if (o.has("JS")) {
-			String pageJs = o.getString("JS");
-			s1.al("<script>");
-			s1.al(pageJs);
-			s1.al("</script>");
-		}
-		s.al(s1.toString());
-
-		return s.toString();
-	}
-
-	private void putJsonToRv(JSONObject o) {
-		try {
-			if (o.getJSONArray("DATA").length() > 0) {
-				JSONObject row = o.getJSONArray("DATA").getJSONObject(0);
-				Iterator<String> keys = row.keys();
-				while (keys.hasNext()) {
-					String name = keys.next();
-					String v = row.getString(name);
-					if (this._Rv.getString(name) == null) {
-						this._Rv.addValue(name, v);
-						// System.out.println("name="+name+", val="+v);
-					}
-				}
-			}
-		} catch (JSONException e) {
-			return;
-		}
-	}
+	  
 
 	private String replaceParameters(String s) {
 		return super.getHtmlClass().getItemValues().replaceParameters(s, false);

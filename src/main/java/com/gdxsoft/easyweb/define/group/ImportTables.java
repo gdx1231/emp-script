@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -20,6 +22,7 @@ import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ImportTables {
+	private static Logger LOGGER = LoggerFactory.getLogger(ImportTables.class);
 	private Document _DocTable;
 	private Document _DocData;
 
@@ -175,8 +178,7 @@ public class ImportTables {
 				}
 			}
 		} catch (Exception e) {
-			int a = 1;
-			a++;
+			LOGGER.warn(e.getLocalizedMessage());
 		} finally {
 			_Conn.close();
 		}

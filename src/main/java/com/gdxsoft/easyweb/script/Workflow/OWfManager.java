@@ -14,7 +14,7 @@ public class OWfManager {
 	}
 
 	public void start(){
-		OWfUnit startUnit = _Workflow.getUStart();
+		// OWfUnit startUnit = _Workflow.getUStart();
 		
 	}
 	

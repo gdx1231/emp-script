@@ -12,7 +12,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
@@ -91,7 +90,7 @@ public class Table {
 						String v1;
 						String cvt = mapType.getEwa().getInsertCovert();
 						if (cvt.equals("BIN")) {
-							v1 = Utils.byte2hex(rs.getBytes(f.getName()));
+							v1 = Utils.bytes2hex(rs.getBytes(f.getName()));
 							row.setAttribute(f.getName(), v1);
 						} else if (cvt.equals("DATE")) {
 							v1 = Utils.getDateXmlString(rs.getTimestamp(f.getName()));
