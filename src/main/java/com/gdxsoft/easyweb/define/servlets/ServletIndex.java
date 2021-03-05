@@ -65,8 +65,9 @@ public class ServletIndex extends HttpServlet {
 
 		String urlLogin = request.getContextPath()
 				+ "/EWA_STYLE/cgi-bin/?XMLNAME=/ewa/m.xml&ITEMNAME=login";
+		// version =3 menus call by EwaDefineMenu
 		String urlDefine = request.getContextPath()
-				+ "/EWA_STYLE/cgi-bin/?XMLNAME=/ewa/ewa.xml&ITEMNAME=index&EWA_DEBUG_NO=0";
+				+ "/EWA_STYLE/cgi-bin/?XMLNAME=/ewa/ewa.xml&ITEMNAME=index&version=3&EWA_DEBUG_NO=0";
 		PageValue pv = rv.getPageValues().getPageValue("EWA_ADMIN_ID");
 		// not login
 		if (pv == null

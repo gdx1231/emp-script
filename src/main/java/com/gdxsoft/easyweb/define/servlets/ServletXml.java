@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
+import com.gdxsoft.easyweb.SystemXmlUtils;
 import com.gdxsoft.easyweb.define.CodeFormat;
 import com.gdxsoft.easyweb.define.ConfigUtils;
 import com.gdxsoft.easyweb.define.IUpdateXml;
@@ -437,7 +438,6 @@ public class ServletXml extends HttpServlet {
 	}
 
 	private String getCfgXml(String name) {
-		String name1 = UPath.getConfigPath() + name;
 		String xml;
 		if (name.equals("EwaConnections.xml")) { // 数据库连接
 			// 新方法 从ewa_conf.xml中获取
@@ -449,7 +449,8 @@ public class ServletXml extends HttpServlet {
 			}
 		}
 		try {
-			xml = UXml.asXmlAll(UXml.retDocument(name1));
+			xml = SystemXmlUtils.getSystemConfContent(name);
+			//xml = UXml.asXmlAll(UXml.retDocument(name1));
 		} catch (Exception e) {
 			xml = "GET " + name + " ERROR:" + e.getMessage();
 		}

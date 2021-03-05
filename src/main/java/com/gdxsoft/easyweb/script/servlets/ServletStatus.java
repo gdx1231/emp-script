@@ -85,8 +85,6 @@ public class ServletStatus extends HttpServlet {
 			}
 		}
 		out.println("_EWA_STATUS_VALUE=\"" + statusValue + "\";");
-		out.flush();
-		out.close();
 	}
 
 	/**

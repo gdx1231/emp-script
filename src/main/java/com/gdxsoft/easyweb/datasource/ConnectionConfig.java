@@ -3,10 +3,15 @@
  */
 package com.gdxsoft.easyweb.datasource;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.msnet.MTableStr;
 
 /**
@@ -14,12 +19,42 @@ import com.gdxsoft.easyweb.utils.msnet.MTableStr;
  * 
  */
 public class ConnectionConfig {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ConnectionConfig.class);
 	private String _Name;
 	private String _Type;
 	private String _ConnectionString;
 	private String _SchemaName;
 	private MTableStr _Pool;
+	
+	public ConnectionConfig(Node node) {
+		this.setObj(node);
+	}
+	
+	private void setObj(Node node) {
+		Element ele = (Element) node;
+		Map<String, String> params = UXml.getElementAttributes(ele, true);
+ 
+		this._Name = params.get("name") == null ? "" : params.get("name").toLowerCase();
+		this._ConnectionString = params.get("connectionstring");
+		this._Type = params.get("type");
+		this._SchemaName = params.get("schemaname");
+
+		if (StringUtils.isBlank(_Name) || StringUtils.isBlank(_ConnectionString) || StringUtils.isBlank(_Type)
+				|| StringUtils.isBlank(_SchemaName)) {
+			LOGGER.warn("Invalid database cfg -> " + UXml.asXml(node));
+			return;
+		}
+
+		// self defined database pool parameter
+		if (ele.getElementsByTagName("pool").getLength() > 0) {
+			this._Pool = new MTableStr();
+			Element p = (Element) ele.getElementsByTagName("pool").item(0);
+			for (int i = 0; i < p.getAttributes().getLength(); i++) {
+				Node att = p.getAttributes().item(i);
+				_Pool.add(att.getNodeName(), att.getNodeValue());
+			}
+		}
+	}
 
 	/**
 	 * @return the _Name
@@ -71,46 +106,7 @@ public class ConnectionConfig {
 		this._SchemaName = _SchemaName;
 	}
 
-	public ConnectionConfig(Node node) {
-		this.setObj(node);
-	}
-
-	private void setObj(Node node) {
-		this._Name = getNodeValue(node, "name").toLowerCase();
-		this._ConnectionString = getNodeValue(node, "connectionString");
-		this._Type = getNodeValue(node, "type");
-		this._SchemaName = getNodeValue(node, "schemaName");
-
-		Element ele = (Element) node;
-		if (ele.getElementsByTagName("pool").getLength() > 0) {
-			this._Pool = new MTableStr();
-			Element p = (Element) ele.getElementsByTagName("pool").item(0);
-			for (int i = 0; i < p.getAttributes().getLength(); i++) {
-				Node att = p.getAttributes().item(i);
-				_Pool.add(att.getNodeName(), att.getNodeValue());
-			}
-		}
-	}
-
-	/**
-	 * 获取节点的Attribute的值
-	 * 
-	 * @param node 节点
-	 * @param name 名称
-	 * @return 值，null转换为""
-	 */
-	private String getNodeValue(Node node, String name) {
-		Element ele = (Element) node;
-		NamedNodeMap attrs = ele.getAttributes();
-		for (int i = 0; i < attrs.getLength(); i++) {
-			Node attr = attrs.item(i);
-			String nodeName = attr.getNodeName();
-			if (nodeName.equalsIgnoreCase(name)) {
-				return attr.getNodeValue();
-			}
-		}
-		return "";
-	}
+	
 
 	/**
 	 * @return the _Pool

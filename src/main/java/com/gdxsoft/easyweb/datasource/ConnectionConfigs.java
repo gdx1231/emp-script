@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -32,17 +33,18 @@ public class ConnectionConfigs extends HashMap<String, ConnectionConfig> {
 
 	private ArrayList<String> _ListNames;
 
-	public static ConnectionConfigs instance()
-			throws ParserConfigurationException, SAXException, IOException {
+	public static ConnectionConfigs instance() throws ParserConfigurationException, SAXException, IOException {
 		if (CNNS == null) {
-			CNNS = new ConnectionConfigs();
-			CNNS.initDataSource();
+			ConnectionConfigs cnn1s = new ConnectionConfigs();
+			cnn1s.initDataSource();
+			CNNS = cnn1s;
 		} else {
-			if (LAST_CODE > 0) {
+			if (LAST_CODE > 0 && UPath.getDATABASEXML() != null) {
 				int code = UPath.getDATABASEXML().hashCode();
 				if (code != LAST_CODE) {
-					CNNS = new ConnectionConfigs();
-					CNNS.initDataSource();
+					ConnectionConfigs cnn1s = new ConnectionConfigs();
+					cnn1s.initDataSource();
+					CNNS = cnn1s;
 				}
 			}
 
@@ -50,19 +52,16 @@ public class ConnectionConfigs extends HashMap<String, ConnectionConfig> {
 		return CNNS;
 	}
 
-	private synchronized void initDataSource() throws ParserConfigurationException,
-			SAXException, IOException {
-		NodeList nl;
-		if (UPath.getDATABASEXML() == null) { // 老模式
-			String configFile = UPath.getConfigPath() + "EwaConnections.xml";
-			Document doc = UXml.retDocument(configFile);
-			nl = UXml.retNodeList(doc, "root/database");
-		} else { // 新模式 在ewa_conf.xml中定义
-			String xml = UPath.getDATABASEXML();
-			LAST_CODE = xml.hashCode();
-			Document doc = UXml.asDocument(xml);
-			nl = doc.getElementsByTagName("database");
+	private synchronized void initDataSource() throws ParserConfigurationException, SAXException, IOException {
+
+		if (StringUtils.isBlank(UPath.getDATABASEXML())) {
+			return;
 		}
+
+		String xml = UPath.getDATABASEXML();
+		LAST_CODE = xml.hashCode();
+		Document doc = UXml.asDocument(xml);
+		NodeList nl = doc.getElementsByTagName("database");
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			ConnectionConfig cc = new ConnectionConfig(node);
@@ -71,8 +70,7 @@ public class ConnectionConfigs extends HashMap<String, ConnectionConfig> {
 		}
 	}
 
-	private ConnectionConfigs() throws ParserConfigurationException,
-			SAXException, IOException {
+	private ConnectionConfigs() throws ParserConfigurationException, SAXException, IOException {
 		_ListNames = new ArrayList<String>();
 		initDataSource();
 

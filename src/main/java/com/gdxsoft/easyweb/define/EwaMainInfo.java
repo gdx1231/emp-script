@@ -1,14 +1,18 @@
 package com.gdxsoft.easyweb.define;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.gdxsoft.easyweb.SystemXmlUtils;
 import com.gdxsoft.easyweb.utils.UObjectValue;
-import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public class EwaMainInfo {
+	public static final String CONF_NAME = "EwaMainInfo.xml";
+	private static Logger LOGGER = LoggerFactory.getLogger(EwaMainInfo.class);
 	private String _Copyright; // 版权
 	private String _Company; // 公司
 	private String _Website; // 网站
@@ -21,25 +25,24 @@ public class EwaMainInfo {
 
 	/**
 	 * 获取公司信息
+	 * 
 	 * @return
 	 */
 	public synchronized static EwaMainInfo getInstance() {
 		if (MAIN_INFO != null) {
-			//return MAIN_INFO;
+			return MAIN_INFO;
 		}
 
 		MAIN_INFO = new EwaMainInfo();
-		String xmlPath = UPath.getConfigPath()+"/EwaMainInfo.xml";
 		try {
-			Document doc = UXml.retDocument(xmlPath);
+			Document doc = SystemXmlUtils.getSystemConfDocument(CONF_NAME);
 			Node node = UXml.retNode(doc.getFirstChild(), "MainInfo");
 			UObjectValue.fromXmlNodes((Element) node, MAIN_INFO);
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getLocalizedMessage());
 		}
 		return MAIN_INFO;
 	}
-	
 
 	/**
 	 * @return the _Copyright
@@ -49,8 +52,7 @@ public class EwaMainInfo {
 	}
 
 	/**
-	 * @param copyright
-	 *            the _Copyright to set
+	 * @param copyright the _Copyright to set
 	 */
 	public void setCopyright(String copyright) {
 		_Copyright = copyright;
@@ -64,8 +66,7 @@ public class EwaMainInfo {
 	}
 
 	/**
-	 * @param company
-	 *            the _Company to set
+	 * @param company the _Company to set
 	 */
 	public void setCompany(String company) {
 		_Company = company;
@@ -79,8 +80,7 @@ public class EwaMainInfo {
 	}
 
 	/**
-	 * @param website
-	 *            the _Website to set
+	 * @param website the _Website to set
 	 */
 	public void setWebsite(String website) {
 		_Website = website;
@@ -94,8 +94,7 @@ public class EwaMainInfo {
 	}
 
 	/**
-	 * @param contact
-	 *            the _Contact to set
+	 * @param contact the _Contact to set
 	 */
 	public void setContact(String contact) {
 		_Contact = contact;
@@ -109,8 +108,7 @@ public class EwaMainInfo {
 	}
 
 	/**
-	 * @param email
-	 *            the _Email to set
+	 * @param email the _Email to set
 	 */
 	public void setEmail(String email) {
 		_Email = email;
@@ -124,8 +122,7 @@ public class EwaMainInfo {
 	}
 
 	/**
-	 * @param telephone
-	 *            the _Telephone to set
+	 * @param telephone the _Telephone to set
 	 */
 	public void setTelephone(String telephone) {
 		_Telephone = telephone;
@@ -139,8 +136,7 @@ public class EwaMainInfo {
 	}
 
 	/**
-	 * @param version
-	 *            the _Version to set
+	 * @param version the _Version to set
 	 */
 	public void setVersion(String version) {
 		_Version = version;

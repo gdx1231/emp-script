@@ -513,7 +513,7 @@ public class ActionBase {
 			}
 			this._HtmlClass.getDebugFrames().addDebug(this, "ACT", "调用完成，并返回数字对象, " + oo.getClass().toString());
 		} else if (oo.getClass().equals(java.util.List.class) || oo.getClass().equals(java.util.ArrayList.class)) {
-			// 返回的是List对象
+			// 返回的是List
 			DTTable tb = new DTTable();
 			List<Object> o = (List<Object>) oo;
 			tb.initData(o);
@@ -521,8 +521,8 @@ public class ActionBase {
 				this.getDTTables().add(tb);
 			}
 			this._HtmlClass.getDebugFrames().addDebug(this, "ACT", "调用完成，并返List对象, " + oo.getClass().toString());
-		} else if (oo.getClass().equals(java.util.HashMap.class)) {
-			// 返回哈希表
+		} else if (oo.getClass().equals(java.util.HashMap.class) || oo.getClass().equals(java.util.Map.class)) {
+			// 返回map
 			DTTable tb = new DTTable();
 			HashMap<Object, Object> o = (HashMap<Object, Object>) oo;
 			tb.initData(o);
@@ -530,7 +530,13 @@ public class ActionBase {
 				this.getDTTables().add(tb);
 			}
 			this._HtmlClass.getDebugFrames().addDebug(this, "ACT", "调用完成，并返回Map对象, " + oo.getClass().toString());
-		} else if (oo.getClass().equals(org.json.JSONObject.class)) {// 返回json
+		}  else if (oo.getClass().equals(DTTable.class)) {
+			// 返回表
+			DTTable tb =  (DTTable)oo;
+			this.getDTTables().add(tb);
+			
+			this._HtmlClass.getDebugFrames().addDebug(this, "ACT", "调用完成，并返回Map对象, " + oo.getClass().toString());
+		}else if (oo.getClass().equals(org.json.JSONObject.class)) {// 返回json
 																		// object
 			this.getJSONObjects().add(oo);
 			this._HtmlClass.getDebugFrames().addDebug(this, "ACT", "调用完成，并返回 JSON 对象, " + oo.getClass().toString());
