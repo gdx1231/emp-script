@@ -16,7 +16,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.gdxsoft.easyweb.data.DTTable;
-import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
+import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -32,9 +33,13 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 	private String _ItemName;
 	private boolean _IsBatch;
 	private String _Md5;
+	private JdbcConfigOperation op;
 
-	public UpdateXmlJdbcImpl(String xmlName) {
-		super._XmlName = xmlName;
+	public UpdateXmlJdbcImpl(IConfig configType) {
+		super._XmlName = configType.getXmlName();
+		super.configType = configType;
+
+		op = new JdbcConfigOperation(super.getConfigType().getScriptPath());
 	}
 
 	/**
@@ -50,7 +55,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		String xmlname = path + "|" + name;
 		xmlname = UserConfig.filterXmlNameByJdbc(xmlname);
 
-		DTTable tb = JdbcConfig.getXmlMeta(xmlname);
+		DTTable tb = op.getXmlMeta(xmlname);
 		if (tb.getCount() > 0) {
 			LOGER.error(xmlname + "已经存在");
 
@@ -94,7 +99,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		}
 
 		try {
-			JdbcConfig.importXml(file, xmlname);
+			op.importXml(file, xmlname);
 			obj.put("RST", true);
 
 			return obj;
@@ -112,7 +117,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 	 * 获取文档的xml字符串
 	 */
 	public String getDocXml() {
-		return JdbcConfig.getXml(this._XmlName);
+		return op.getXml(this._XmlName);
 	}
 
 	@Override
@@ -120,7 +125,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		if (xmlname.equals("EWA_TREE_ROOT")) { // 根节点
 			xmlname = "";
 		}
-		return JdbcConfig.deleteBaks(xmlname);
+		return op.deleteBaks(xmlname);
 	}
 
 	@Override
@@ -146,7 +151,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		e1.setAttribute("Name", newItemName);
 
 		String xml = UXml.asXml(node);
-		JdbcConfig.renameItem(_XmlName, newItemName, itemName, xml);
+		op.renameItem(_XmlName, newItemName, itemName, xml);
 
 		this.writeXml(null);
 
@@ -191,7 +196,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 
 		xml = UXml.asXml(node);
 
-		JdbcConfig.updateItem(_XmlName, itemName, xml, super.getAdmin(), hashCode, md5);
+		op.updateItem(_XmlName, itemName, xml, super.getAdmin(), hashCode, md5);
 
 		if (!this._IsBatch) {
 			this.writeXml(null);
@@ -207,7 +212,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 	@Override
 	public boolean writeXml(Document doc) {
 
-		JdbcConfig.combine2OneXml(this._XmlName);
+		op.combine2OneXml(this._XmlName);
 		return true;
 	}
 
@@ -218,7 +223,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 
 	@Override
 	public boolean removeItem(String itemName, boolean isWrite) {
-		JdbcConfig.removeItem(_XmlName, itemName);
+		op.removeItem(_XmlName, itemName);
 		if (isWrite) {
 			this.writeXml(null);
 		}
@@ -257,7 +262,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 	 * 获取配置项的 xml
 	 */
 	public String queryItemXml(String itemName) {
-		DTTable tb = JdbcConfig.getJdbcItem(this._XmlName, itemName);
+		DTTable tb = op.getJdbcItem(this._XmlName, itemName);
 		if (tb.getCount() == 0) {
 			return null;
 		}
@@ -297,7 +302,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 
 	@Override
 	public void saveBackup() {
-		JdbcConfig.saveBackup(_XmlName, this._ItemName);
+		op.saveBackup(_XmlName, this._ItemName);
 	}
 
 	@Override
@@ -336,14 +341,14 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		String path = UserConfig.filterXmlNameByJdbc(this._XmlName);
 		String sql1 = "select XMLNAME from ewa_cfg ec where XMLNAME like '" + path.replace("'", "")
 				+ "|%' and ITEMNAME ='' order by XMLNAME";
-		DTTable tbXml = JdbcConfig.getJdbcTable(sql1);
+		DTTable tbXml = op.getJdbcTable(sql1);
 		for (int i = 0; i < tbXml.getCount(); i++) {
 			String xmlName = tbXml.getCell(i, 0).toString();
 			String sql2 = "select ITEMNAME from ewa_cfg ec where XMLNAME = '" + xmlName.replace("'", "") + "'";
-			DTTable tbItems = JdbcConfig.getJdbcTable(sql2);
+			DTTable tbItems = op.getJdbcTable(sql2);
 			String itemNames = tbItems.joinIds("ITEMNAME", false);
 
-			UpdateXmlJdbcImpl ux = new UpdateXmlJdbcImpl(xmlName);
+			UpdateXmlJdbcImpl ux = new UpdateXmlJdbcImpl(this.getConfigType());
 			ux.batchUpdate(itemNames, paraName, paraValue);
 
 		}

@@ -6,20 +6,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Iterator;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
-import org.xml.sax.SAXException;
 
 import com.gdxsoft.easyweb.cache.ConfigCache;
 import com.gdxsoft.easyweb.cache.ConfigCacheWidthSqlCached; //有问题
 import com.gdxsoft.easyweb.cache.ConfigStatus;
-import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.script.template.XItemParameter;
@@ -53,7 +48,6 @@ public class UserConfig implements Serializable {
 	private UserXItems _UserCharts; // EasyWebTemplates/EasyWebTemplate/Charts
 	private UserXItems _UserWorkflows; // EasyWebTemplates/EasyWebTemplate/Workflows
 
-	private Document _XmlDoc;
 	private String _XmlName;
 	private String _ItemName;
 	private Node _ItemNode;
@@ -61,39 +55,93 @@ public class UserConfig implements Serializable {
 	private String _ItemNodeXml;
 	private String _JS_XML; // 配置文件的对象的 JS表达式
 
-	public static UserConfig instance(String xmlFileName, String itemName, DebugFrames debugFrames) throws Exception {
-		if (xmlFileName.indexOf("../") >= 0 || xmlFileName.indexOf("..|") >= 0 || xmlFileName.indexOf("..\\") >= 0) {
-			throw new Exception("非法的参数'../'");
+	private IConfig configType;
+
+	public IConfig getConfigType() {
+		return configType;
+	}
+
+	/**
+	 * Get a UserConfig instance from all configurations
+	 * 
+	 * @param xmlName the configuration XML file name
+	 * @param itemName the configuration item name
+	 * @param debugFrames the DebugFrames
+	 * @return
+	 * @throws Exception
+	 */
+	public static UserConfig instance(String xmlName, String itemName, DebugFrames debugFrames) throws Exception {
+		if (xmlName.indexOf("../") >= 0 || xmlName.indexOf("..|") >= 0 || xmlName.indexOf("..\\") >= 0) {
+			String err = "invalid string '../' in the " + xmlName;
+			LOGGER.error(err);
+			throw new Exception(err);
 		}
 
-		boolean isJdbcCall = JdbcConfig.isJdbcResources();
-
-		// 处理 xmlName，去除多余的字符
-		String xmlName = isJdbcCall ? UserConfig.filterXmlNameByJdbc(xmlFileName)
-				: UserConfig.filterXmlName(xmlFileName);
-
-		UserConfig o;
-		if (UPath.getCfgCacheMethod() != null && UPath.getCfgCacheMethod().equals("sqlcached")) {
-			o = ConfigCacheWidthSqlCached.getUserConfig(xmlName, itemName);
-			if (o == null) {
-				o = new UserConfig(xmlName, itemName);
-				o.setDebugFrames(debugFrames);
-				o.loadUserDefined();
-				o.setDebugFrames(null);
-				ConfigCacheWidthSqlCached.setUserConfig(xmlName, itemName, o);
-			}
-		} else { // 利用内存模式
-			o = ConfigCache.getUserConfig(xmlName, itemName);
-			if (o == null) {
-				o = new UserConfig(xmlName, itemName);
-				o.setDebugFrames(debugFrames);
-				o.loadUserDefined();
-				o.setDebugFrames(null);
-				ConfigCache.setUserConfig(xmlName, itemName, o);
-			}
+		// load instance from cached
+		UserConfig o = getInstanceFromCahced(xmlName, itemName);
+		if (o != null) {
+			return o;
 		}
+
+		IConfig iConfig = getConfig(xmlName, itemName);
+
+		o = new UserConfig(xmlName, itemName);
+		o.configType = iConfig;
+		o.setDebugFrames(debugFrames);
+		o.loadUserDefined();
+		o.setDebugFrames(null);
+		ConfigCacheWidthSqlCached.setUserConfig(iConfig.getFixedXmlName(), itemName, o);
 
 		return o;
+	}
+
+	private static synchronized UserConfig getInstanceFromCahced(String xmlName, String itemName) {
+		String fixedXmlName = UserConfig.filterXmlName(xmlName);
+		UserConfig o = null;
+		if (UPath.getCfgCacheMethod() != null && UPath.getCfgCacheMethod().equals("sqlcached")) {
+			o = ConfigCacheWidthSqlCached.getUserConfig(fixedXmlName, itemName);
+		} else { // 利用内存模式
+			try {
+				o = (UserConfig) ConfigCache.getUserConfig(fixedXmlName, itemName).clone();
+			} catch (CloneNotSupportedException e) {
+				ConfigCache.removeUserConfig(fixedXmlName, itemName);
+				LOGGER.error(e.getLocalizedMessage());
+			}
+		}
+		return o;
+	}
+
+	/**
+	 * Get the configuration from all ScriptPaths
+	 * 
+	 * @param xmlName  the configuration name
+	 * @param itemName the item name
+	 * @return IConfig
+	 */
+	public static IConfig getConfig(String xmlName, String itemName) {
+		IConfig ic = null;
+		ScriptPaths sps = ScriptPaths.getInstance();
+		for (int i = 0; i < sps.getLst().size(); i++) {
+			ScriptPath sp = sps.getLst().get(i);
+
+			if (sp.isResources()) {
+				ic = new ResourceConfig(sp, xmlName, itemName);
+				if (ic.checkConfigurationExists()) {
+					return ic;
+				}
+			} else if (sp.isJdbc()) {
+				ic = new JdbcConfig(sp, xmlName, itemName);
+				if (ic.checkConfigurationExists()) {
+					return ic;
+				}
+			} else { // file
+				ic = new FileConfig(sp, xmlName, itemName);
+				if (ic.checkConfigurationExists()) {
+					return ic;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -106,84 +154,12 @@ public class UserConfig implements Serializable {
 	 */
 	public static UserConfig fromSerialize(byte[] buf) throws IOException, ClassNotFoundException {
 		// Serialize
-
 		ByteArrayInputStream fis = new ByteArrayInputStream(buf);
 		ObjectInputStream ois = new ObjectInputStream(fis);
 		UserConfig tb = (UserConfig) ois.readObject();
 		ois.close();
 		fis.close();
 		return tb;
-	}
-
-	/**
-	 * 获取配置文件状态
-	 * 
-	 * @param xmlFileName
-	 * @return
-	 */
-	public static ConfigStatus getXmlConfigPath(String xmlFileName, String itemName) {
-		ConfigStatus configStatus;
-		if (JdbcConfig.isJdbcResources()) {
-			configStatus = new ConfigStatus();
-
-			String xmlName = UserConfig.filterXmlNameByJdbc(xmlFileName);
-			configStatus.setAbsolutePath(xmlName);
-
-			if (itemName == null) {
-				configStatus.setLength(0);
-				configStatus.setLastModified(new Date().getTime());
-			} else {
-//				StringBuilder sb = new StringBuilder();
-//				sb.append("select HASH_CODE, MD5, UPDATE_DATE  from EWA_CFG where xmlname='");
-//				sb.append(xmlName.replace("'", "''"));
-//				sb.append("' and itemname='");
-//				// 2019-01-24 删除
-//				// sb.append(itemName.replace("'", "''"));
-//				sb.append("'");
-//				String sql = sb.toString();
-
-				DTTable tb = JdbcConfig.getXmlMeta(xmlName);
-
-				if (tb.getCount() == 0) {
-					LOGGER.error("Not found configure " + xmlName);
-					return null;
-				}
-
-				int haseCode = tb.getCell(0, 0).toInt();
-				configStatus.setLength(haseCode);
-
-				if (tb.getCell(0, 1).isNull()) {
-					configStatus.setLastModified(0);
-				} else {
-					configStatus.setLastModified(tb.getCell(0, 1).toTime());
-				}
-				try {
-					configStatus.setMd5(tb.getCell(0, "md5").toString());
-				} catch (Exception e) {
-					LOGGER.warn(e.getLocalizedMessage());
-				}
-				LOGGER.debug("SQL:" + xmlName + "/" + itemName + "," + configStatus.length() + ","
-						+ configStatus.lastModified());
-			}
-		} else {
-			String path = UPath.getScriptPath() + xmlFileName.replace("|", "/");
-			java.io.File f = new java.io.File(path);
-			if (!f.exists()) {
-				path = f.getAbsolutePath();
-				path = path + ".bin";
-				f = new java.io.File(path);
-			}
-			configStatus = new ConfigStatus(f);
-		}
-		return configStatus;
-	}
-
-	public UserConfig() {
-	}
-
-	public UserConfig(String xmlFileName, String itemName) throws Exception {
-		this._XmlName = xmlFileName.trim();
-		this._ItemName = itemName.trim();
 	}
 
 	/**
@@ -198,8 +174,14 @@ public class UserConfig implements Serializable {
 		xmlFileName = xmlFileName.replace("%7c", "/");
 		xmlFileName = xmlFileName.replace("%7C", "/");
 		// 去除危险的 ../符号
-		xmlFileName = xmlFileName.replace("|", "/").replace("../", "");
-
+		xmlFileName.replace("..", "");
+		xmlFileName = xmlFileName.replace("|", "/");
+		while (xmlFileName.indexOf("//") >= 0) {
+			xmlFileName = xmlFileName.replace("//", "/");
+		}
+		if (!xmlFileName.startsWith("/")) {
+			xmlFileName = "/" + xmlFileName;
+		}
 		return xmlFileName;
 	}
 
@@ -221,89 +203,27 @@ public class UserConfig implements Serializable {
 		return xmlFileName;
 	}
 
-	/**
-	 * 加载xml文件
-	 * 
-	 * @param xmlFileName
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
-	 */
-	private void loadXmlFile(String xmlFileName) throws ParserConfigurationException, SAXException, IOException {
-		if (this._DebugFrames != null) {
-			this._DebugFrames.addDebug(this, "配置", "开始加载配置文件(" + this._XmlName + ")");
-		}
-
-		this._XmlName = filterXmlName(xmlFileName);
-
-		String path = UPath.getScriptPath() + this._XmlName;
-		try {
-			_XmlDoc = UXml.retDocument(path);
-		} catch (ParserConfigurationException e) {
-			System.out.println(xmlFileName + "," + _ItemName + ":" + e.getMessage());
-		} catch (SAXException e) {
-			System.out.println(xmlFileName + "," + _ItemName + ":" + e.getMessage());
-		}
-		if (this._DebugFrames != null) {
-			this._DebugFrames.addDebug(this, "配置", "结束加载配置文件");
-		}
+	public UserConfig() {
 	}
 
-	/**
-	 * 在xml文件中查找 itemName
-	 * 
-	 * @param itemName
-	 * @throws Exception
-	 */
-	private void loadItem(String itemName) throws Exception {
-		if (this._DebugFrames != null)
-			this._DebugFrames.addDebug(this, "配置", "开始加载配置项(" + this._ItemName + ")");
+	public UserConfig(String xmlFileName, String itemName) throws Exception {
+		this._XmlName = xmlFileName.trim();
 		this._ItemName = itemName.trim();
-		NodeList nl = UXml.retNodeList(this._XmlDoc, "EasyWebTemplates/EasyWebTemplate");
-		for (int i = 0; i < nl.getLength(); i++) {
-			String name = UXml.retNodeValue(nl.item(i), "Name").trim();
-			if (name.equalsIgnoreCase(this._ItemName)) {
-				this._ItemNode = nl.item(i);
-				return;
-			}
-		}
-		if (this._DebugFrames != null)
-			this._DebugFrames.addDebug(this, "配置", "结束加载配置项");
-		throw new Exception(this._ItemName + "未发现在" + this._XmlName + "中");
 	}
 
 	/**
-	 * 通过数据库调用配置信息
+	 * 获取配置文件状态
 	 * 
-	 * @param dataSourceName
+	 * @return
 	 */
-	private void loadItemByJdbc(String dataSourceName) throws Exception {
-		if (this._DebugFrames != null) {
-			this._DebugFrames.addDebug(this, "配置", "JDBC 开始加载配置项(" + this._XmlName + "," + this._ItemName + ")");
-		}
-
-		this._XmlName = filterXmlNameByJdbc(this._XmlName);
-
-		String xmlStr = JdbcConfig.getJdbcItemXml(_XmlName, _ItemName);
-
-		if (xmlStr == null) {
-			throw new Exception("jdbc: " + this._ItemName + "未发现在" + this._XmlName + "中");
-		}
-
-		this._ItemNode = UXml.asNode(xmlStr);
-
-		if (this._DebugFrames != null)
-			this._DebugFrames.addDebug(this, "配置", "结束加载配置项");
+	public ConfigStatus getConfigStatus() {
+		ConfigStatus configStatus = new ConfigStatus(this.configType);
+		return configStatus;
 	}
 
 	public void loadUserDefined() throws Exception {
-		if (JdbcConfig.isJdbcResources()) { // 通过数据库调用
-			String dataSourceName = JdbcConfig.getJdbcConfigName();
-			this.loadItemByJdbc(dataSourceName);
-		} else {
-			this.loadXmlFile(this._XmlName);
-			this.loadItem(this._ItemName);
-		}
+		this._ItemNode = this.configType.loadItem();
+
 		this.initXItems();
 		this.initPage();
 		this.initAction();
@@ -314,7 +234,6 @@ public class UserConfig implements Serializable {
 
 		_ItemNodeXml = UXml.asXmlAll(this._ItemNode);
 		this._ItemNode = null;
-		this._XmlDoc = null;
 	}
 
 	public String getItemNodeXml() {

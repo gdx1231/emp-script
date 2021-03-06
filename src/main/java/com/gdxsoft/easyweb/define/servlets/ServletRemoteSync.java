@@ -23,6 +23,9 @@ import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
+import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPaths;
 
 /**
  * 同步本地和远程数据
@@ -41,6 +44,7 @@ public class ServletRemoteSync extends HttpServlet {
 	 * 
 	 */
 
+	private RequestValue rv;
 	private HttpServletRequest _Request;
 	private HttpServletResponse _Response;
 	//
@@ -106,6 +110,7 @@ public class ServletRemoteSync extends HttpServlet {
 		}
 
 		RequestValue rv = new RequestValue(_Request, session);
+		this.rv = rv;
 		String method = rv.getString("method");
 
 		if (method == null) {
@@ -152,17 +157,10 @@ public class ServletRemoteSync extends HttpServlet {
 		}
 		try {
 			String cfgkey = rv.s("CFG_KEY");
+			
 			if (method.equals("getCfgs")) {// 获取本地配置
 				SyncRemote s = this.getRemote(cfgkey);
-
-				// 因为安全原因删除了属性，因此需要克隆配置
-				JSONObject cfg = new JSONObject(s.getCfgs().toString());
-				cfg.remove("REMOTE_CODE");
-				cfg.remove("REMOTE_URL");
-				if (JdbcConfig.isJdbcResources()) {
-					// 数据库管理的配置文件，输出到本地cache
-					JdbcConfig.exportAll();
-				}
+				JSONObject cfg = this.handleGetCfgs(s);
 				out(cfg.toString());
 			} else if (method.equals("start")) {// local
 				SyncRemote s = this.getRemote(cfgkey);
@@ -238,39 +236,16 @@ public class ServletRemoteSync extends HttpServlet {
 
 			} else if (method.equals("start_send")) {// local
 				SyncRemote s = this.getRemote(cfgkey);
-				String name = rv.getString("name");
-				String id = rv.getString("id");
-				String rst = s.sendFile(id, name);
+				String rst = this.handleStartSend(s);
 				out(rst);
 			} else if (method.equals("local_recv_remote_file")) {// 本地请求远程文件
 				SyncRemote s = this.getRemote(cfgkey);
-				String name = rv.getString("name");
-				String id = rv.getString("id");
-				String rst = s.localRequstRemoveFile(id, name);
+				String rst = this.handleLocalReviceRemoteFile(s);
 				out(rst);
 			} else if (method.equals("remote_send_file")) {// 远程发送文件到本地
 				SyncRemote s = this.getRemote(cfgkey);
-				String contentEncode = rv.getString("GDX");
-				JSONObject contentJson;
-				try {
-					String contentDecode = s.decode(contentEncode);
-					contentJson = new JSONObject(contentDecode);
-				} catch (Exception err) {
-					LOGGER.error(err.getLocalizedMessage());
-					out("{RST:false,ERR:'decode error'}");
-					return;
-				}
-				String id = contentJson.optString("remote_id");
-				String name = contentJson.getString("name");
-
-				JSONObject cfgs = s.getCfgs();
-				JSONObject cfg = cfgs.getJSONObject(id);
-				String pathThis = cfg.getString("target");
-
-				String rst = s.removeSendFile(id, pathThis, name);
-				String encoderst = s.encode(rst);
+				String encoderst = this.handleRemoteSendFile(s);
 				out(encoderst);
-
 			} else {
 				LOGGER.error("method not defined");
 				LOGGER.error("建议查看Tomcat server.xml 的 maxPostSize的设置是否正确");
@@ -290,6 +265,84 @@ public class ServletRemoteSync extends HttpServlet {
 		}
 	}
 
+	/**
+	 * The local server sends a file to the remote server
+	 * @param s
+	 * @return
+	 * @throws Exception
+	 */
+	private String handleStartSend(SyncRemote s) throws Exception {
+		String name = rv.getString("name");
+		String id = rv.getString("id");
+		String rst = s.sendFile(id, name);
+		
+		return rst;
+	}
+	
+	/**
+	 * The local server receives a file from the remote server
+	 * @param s
+	 * @return
+	 * @throws Exception
+	 */
+	private String handleLocalReviceRemoteFile(SyncRemote s) throws Exception {
+		String name = rv.getString("name");
+		String id = rv.getString("id");
+		String rst = s.localRequstRemoveFile(id, name);
+		
+		return rst;
+	}
+	
+	/**
+	 * the remote server sends a file to the local
+	 * @param s
+	 * @return
+	 * @throws Exception
+	 */
+	private String handleRemoteSendFile(SyncRemote s) throws Exception {
+		String contentEncode = rv.getString("GDX");
+		JSONObject contentJson;
+		try {
+			String contentDecode = s.decode(contentEncode);
+			contentJson = new JSONObject(contentDecode);
+		} catch (Exception err) {
+			LOGGER.error(err.getLocalizedMessage());
+			return "{RST:false,ERR:'decode error'}";
+		}
+		String id = contentJson.optString("remote_id");
+		String name = contentJson.getString("name");
+
+		JSONObject cfgs = s.getCfgs();
+		JSONObject cfg = cfgs.getJSONObject(id);
+		String pathThis = cfg.getString("target");
+
+		String rst = s.removeSendFile(id, pathThis, name);
+		String encoderst = s.encode(rst);
+		
+		return encoderst;
+	}
+	
+	private JSONObject handleGetCfgs(SyncRemote s ) {
+		String ewascriptpath = rv.s("EWA_SCRIPT_PATH");
+		
+		ScriptPath sp = ScriptPaths.getInstance().getScriptPath(ewascriptpath);
+		// 因为安全原因删除了属性，因此需要克隆配置
+		JSONObject cfg = new JSONObject(s.getCfgs().toString());
+		cfg.remove("REMOTE_CODE");
+		cfg.remove("REMOTE_URL");
+		if (sp.isJdbc()) {
+			JdbcConfigOperation op = new JdbcConfigOperation(sp);
+			// 数据库管理的配置文件，输出到本地cache
+			try {
+				op.exportAll();
+			} catch (Exception e) {
+				LOGGER.error(e.getMessage());
+			}
+		}
+		
+		return cfg;
+	}
+	
 	private SyncRemote getRemote(String cfgkey) {
 		SyncRemotes syncRemotes = new SyncRemotes();
 		SyncRemote s = syncRemotes.getRemoteInstance(cfgkey);

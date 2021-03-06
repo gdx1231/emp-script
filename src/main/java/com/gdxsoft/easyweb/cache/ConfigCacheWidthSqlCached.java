@@ -7,14 +7,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFileCheck;
 
 /**
- * 有问题，没改完
- * 
- * @author admin
  *
  */
 public class ConfigCacheWidthSqlCached {
@@ -27,16 +23,10 @@ public class ConfigCacheWidthSqlCached {
 	 * @return
 	 */
 	public static String getConfigFileKey(String xmlFileName) {
+		String xmlName = UserConfig.filterXmlName(xmlFileName);
 		StringBuilder sbkey = new StringBuilder();
 		sbkey.append("ConfigCached:XMLNAME=");
-		if (JdbcConfig.isJdbcResources()) {
-			sbkey.append(JdbcConfig.getJdbcConfigName());
-			String xmlName = UserConfig.filterXmlNameByJdbc(xmlFileName);
-			sbkey.append(xmlName);
-		} else {
-			String xmlName = UserConfig.filterXmlName(xmlFileName);
-			sbkey.append(xmlName);
-		}
+		sbkey.append(xmlName);
 		String file_key = sbkey.toString();
 
 		return file_key;
@@ -76,6 +66,23 @@ public class ConfigCacheWidthSqlCached {
 
 		SqlCached cached = SqlCached.getInstance();
 
+		SqlCachedValue cv = cached.getBinary(key);
+		if (cv == null) {
+			return null;
+		}
+		UserConfig uc = null;
+		try {
+			uc = UserConfig.fromSerialize(cv.getBinary());
+		} catch (ClassNotFoundException e) {
+			LOOGER.error(e.getMessage());
+			removeUserConfig(xmlFileName);
+			return null;
+		} catch (IOException e) {
+			LOOGER.error(e.getMessage());
+			removeUserConfig(xmlFileName);
+			return null;
+		}
+
 		int id = key.hashCode();
 		// 是否存在
 		boolean isHave = UFileCheck.isHave(id);
@@ -83,21 +90,7 @@ public class ConfigCacheWidthSqlCached {
 		boolean isOverTime = UFileCheck.isOverTime(id, UserConfig.CHECK_CHANG_SPAN_SECONDS);
 		if (isHave && !isOverTime) {
 			// 5秒内不重新扫描数据库数据
-			SqlCachedValue cv = cached.getBinary(key);
-			if (cv == null) {
-				return null;
-			}
-			try {
-				UserConfig uc = UserConfig.fromSerialize(cv.getBinary());
-				return uc;
-
-			} catch (ClassNotFoundException e) {
-				LOOGER.error(e.getMessage());
-				return null;
-			} catch (IOException e) {
-				LOOGER.error(e.getMessage());
-				return null;
-			}
+			return uc;
 		}
 
 		int fileId = file_key.hashCode();
@@ -106,51 +99,24 @@ public class ConfigCacheWidthSqlCached {
 			// 指定的时间内不重复检查
 		} else {
 			// 对于文件保存获取文件的状态
-			ConfigStatus fileStatus = UserConfig.getXmlConfigPath(xmlFileName, "");
+			ConfigStatus fileStatus = uc.getConfigStatus();
 			SqlCachedValue cvFile = cached.getText(file_key);
 			if (cvFile == null) { // 没有cached
 				return null;
 			}
-
 			// long fileLastModify = fileStatus.lastModified();
 			// long len = fileStatus.length();
 			// String code = fileLastModify + "," + len + "," + fileStatus.getMd5();
-
 			// 从数据库返回的整个 XML 文件的 code
 			String code = fileStatus.getStatusCode();
-
 			JSONObject json = new JSONObject(cvFile.toString());
-
 			// 缓存中 整个 XML 文件的 code
 			String old_code = json.optString("code");
-
 			// 检查文件是否被修改
 			is_file_not_changed = old_code.equals(code);
 		}
 		if (is_file_not_changed) {
-			SqlCachedValue cv = cached.getBinary(key);
-			if (cv == null) {
-				return null;
-			}
-			try {
-				UserConfig uc = UserConfig.fromSerialize(cv.getBinary());
-				// 记录配置项的时间
-				UFileCheck.putTime(id, System.currentTimeMillis());
-				// 记录配置文件的时间
-				UFileCheck.putTime(fileId, System.currentTimeMillis());
-				return uc;
-
-			} catch (ClassNotFoundException e) {
-				UFileCheck.remove(id);
-				UFileCheck.remove(fileId);
-				LOOGER.error(e.getMessage());
-				return null;
-			} catch (IOException e) {
-				UFileCheck.remove(id);
-				UFileCheck.remove(fileId);
-				LOOGER.error(e.getMessage());
-				return null;
-			}
+			return uc;
 		} else {
 			// 文件变化了，清除本文件下的所有缓存
 			removeUserConfig(xmlFileName);
@@ -243,7 +209,7 @@ public class ConfigCacheWidthSqlCached {
 	 */
 	public synchronized static void setUserConfig(String xmlFileName, String itemName, UserConfig userConfig) {
 		// 获取文件的状态
-		ConfigStatus fileStatus = UserConfig.getXmlConfigPath(xmlFileName, "");
+		ConfigStatus fileStatus = userConfig.getConfigStatus();
 		// long fileLastModify = fileStatus.lastModified();
 		// long len = fileStatus.length();
 		// fileLastModify + "," + len + "," + fileStatus.getMd5();
@@ -257,7 +223,7 @@ public class ConfigCacheWidthSqlCached {
 		if (cvFile == null) {
 			configJson = new JSONObject();
 			configJson.put("code", code);
-			configJson.put("file", fileStatus.getAbsolutePath());
+			configJson.put("file", fileStatus.getFixedXmlName());
 			configJson.put("itemnames", new JSONArray());
 			configJson.put("key", file_key);
 		} else {
@@ -269,7 +235,7 @@ public class ConfigCacheWidthSqlCached {
 
 				configJson = new JSONObject();
 				configJson.put("code", code);
-				configJson.put("file", fileStatus.getAbsolutePath());
+				configJson.put("file", fileStatus.getFixedXmlName());
 				configJson.put("itemnames", new JSONArray());
 				configJson.put("key", file_key);
 			}

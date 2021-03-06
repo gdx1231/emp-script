@@ -2,6 +2,14 @@ package com.gdxsoft.easyweb.cache;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
+import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
+import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFileCheck;
 
 /**
@@ -11,14 +19,18 @@ import com.gdxsoft.easyweb.utils.UFileCheck;
  *
  */
 public class ConfigStatus {
+	private static Logger LOGGER = LoggerFactory.getLogger(ConfigStatus.class);
 
-	private boolean _isFile;
+	private boolean jdbc;
+	private boolean file;
+	private boolean resource;
 	private long _lastModified;
 	private long _length;
-	private String _absolutePath;
-	private File _file;
+	private String fixedXmlName;
 
 	private String md5;
+
+	private IConfig configType;
 
 	/**
 	 * 初始化，用于数据库返回数据
@@ -27,18 +39,61 @@ public class ConfigStatus {
 
 	}
 
-	/**
-	 * 按文件初始化
-	 * 
-	 * @param file
-	 */
-	public ConfigStatus(File file) {
-		this._file = file;
+	public ConfigStatus(IConfig config) {
+		if (config.getScriptPath().isJdbc()) {
+			this.initByJdbc();
+		} else if (config.getScriptPath().isResources()) {
+			this.initByResource();
+		} else {
+			this.initByFile();
+		}
+		this.fixedXmlName = this.configType.getFixedXmlName();
+	}
+
+	private void initByFile() {
+		File file = new File(this.configType.getPath());
 		this._length = file.length();
 		this._lastModified = file.lastModified();
-		this._absolutePath = file.getAbsolutePath();
-		this._isFile = true;
+
+		this.file = true;
 		this.md5 = ""; // 避免计算压力，不验证文件md5
+	}
+
+	private void initByJdbc() {
+		this.jdbc = true;
+		ScriptPath sp = configType.getScriptPath();
+		JdbcConfigOperation op = new JdbcConfigOperation(sp);
+
+		DTTable tb = op.getXmlMeta(configType.getXmlName(), configType.getItemName());
+
+		if (tb.getCount() == 0) {
+			LOGGER.error("Not found configure " + configType.getXmlName() + ", " + configType.getItemName());
+			return;
+		}
+
+		// HASH_CODE, UPDATE_DATE, MD5, DATASOURCE, CLASS_ACL, CLASS_LOG, ADM_LID
+		int haseCode = tb.getCell(0, 0).toInt();
+		this.setLength(haseCode);
+
+		if (tb.getCell(0, 1).isNull()) {
+			this._lastModified = 0;
+		} else {
+			this._lastModified = tb.getCell(0, 1).toTime();
+		}
+		try {
+			this.md5 = tb.getCell(0, "md5").toString();
+		} catch (Exception e) {
+			this.md5 = "";
+			LOGGER.warn(e.getLocalizedMessage());
+		}
+	}
+
+	private void initByResource() {
+		this.resource = true;
+		this.md5 = "1231";
+		this._lastModified = 1231;
+		this._length = 1231;
+
 	}
 
 	/**
@@ -59,16 +114,20 @@ public class ConfigStatus {
 	 */
 	public boolean isChanged() {
 		boolean rst;
-		if (this.isFile()) {
-			rst = UFileCheck.fileChanged(this.getAbsolutePath());
-		} else {
-			int id = this._absolutePath.hashCode();
-			// 对应数据库的配置，长度放 xml 字符串的 hash
-			int hashCode = Integer.parseInt(this._length + "");
-			rst = UFileCheck.isChanged(id, hashCode, 5);
+		if (this.resource) {
+			// the resource configuration can't be modified
+			return false;
 		}
+		int fileCode = getFileCode();
+		int statusCode = this.getStatusCode().hashCode();
+
+		rst = UFileCheck.isChanged(fileCode, statusCode, UserConfig.CHECK_CHANG_SPAN_SECONDS);
 
 		return rst;
+	}
+	
+	public int getFileCode() {
+		return this.fixedXmlName.hashCode();
 	}
 
 	/**
@@ -90,25 +149,16 @@ public class ConfigStatus {
 	}
 
 	/**
-	 * 文件路径，或数据库xmlname
+	 * The fixed XML name
 	 * 
-	 * @return
+	 * @return the fixedXmlName
 	 */
-	public String getAbsolutePath() {
-		return _absolutePath;
+	public String getFixedXmlName() {
+		return this.fixedXmlName;
 	}
 
 	/**
-	 * 文件路径，或数据库xmlname
-	 * 
-	 * @param absolutePath
-	 */
-	public void setAbsolutePath(String absolutePath) {
-		this._absolutePath = absolutePath;
-	}
-
-	/**
-	 * 文件上次更新时间
+	 * The configuration last modified time
 	 * 
 	 * @return the _lastModified
 	 */
@@ -117,39 +167,30 @@ public class ConfigStatus {
 	}
 
 	/**
-	 * 文件上次更新时间
-	 * 
-	 * @param _lastModified the _lastModified to set
-	 */
-	public void setLastModified(long _lastModified) {
-		this._lastModified = _lastModified;
-	}
-
-	/**
-	 * 文件本身
-	 * 
-	 * @return the _file
-	 */
-	public File getFile() {
-		return _file;
-	}
-
-	/**
-	 * 文件本身 是否是文件
+	 * return whether it is a file type
 	 * 
 	 * @return the _isFile
 	 */
 	public boolean isFile() {
-		return _isFile;
+		return file;
 	}
 
 	/**
-	 * 是否文件
+	 * return whether it is a jdbc type
 	 * 
-	 * @param _isFile the _isFile to set
+	 * @return
 	 */
-	public void setIsFile(boolean isFile) {
-		this._isFile = isFile;
+	public boolean isJdbc() {
+		return jdbc;
+	}
+
+	/**
+	 * return whether it is a resource type
+	 * 
+	 * @return
+	 */
+	public boolean isResource() {
+		return resource;
 	}
 
 	/**
@@ -161,12 +202,5 @@ public class ConfigStatus {
 		return md5;
 	}
 
-	/**
-	 * 数据库返回数据的md5
-	 * 
-	 * @param md5 the md5 to set
-	 */
-	public void setMd5(String md5) {
-		this.md5 = md5;
-	}
+	 
 }

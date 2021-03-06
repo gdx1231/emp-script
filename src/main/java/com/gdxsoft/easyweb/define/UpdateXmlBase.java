@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -29,6 +30,16 @@ public class UpdateXmlBase {
 	String _CreateDate;
 	String _UpdateDate;
 	String _BackUpXmlName;
+	
+	IConfig configType;
+
+	public IConfig getConfigType() {
+		return configType;
+	}
+
+	public void setConfigType(IConfig configType) {
+		this.configType = configType;
+	}
 
 	private String _AdmId; // 管理员
 
@@ -70,7 +81,9 @@ public class UpdateXmlBase {
 	 * @return
 	 */
 	public String fixXml(String xml, String itemName) {
-		xml = xml.replaceAll("[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]", "");
+		xml = UXml.filterInvalidXMLcharacter(xml);
+		// xml = xml.replaceAll("[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]", "");
+		
 		Document doc1 = UXml.asDocument(xml);
 		Element e1 = (Element) doc1.getFirstChild();
 		e1.setAttribute("Name", itemName);

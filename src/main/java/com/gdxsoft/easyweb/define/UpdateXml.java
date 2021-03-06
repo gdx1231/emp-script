@@ -1,17 +1,12 @@
 package com.gdxsoft.easyweb.define;
 
-import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
 
 public class UpdateXml {
 
 	private IUpdateXml ux;
 
 	public UpdateXml(String xmlName) {
-		if (JdbcConfig.isJdbcResources()) {
-			ux = new UpdateXmlJdbcImpl(xmlName);
-		} else {
-			ux = new UpdateXmlImpl(xmlName);
-		}
+		ux = ConfigUtils.getUpdateXml(xmlName);
 	}
 
 	/**

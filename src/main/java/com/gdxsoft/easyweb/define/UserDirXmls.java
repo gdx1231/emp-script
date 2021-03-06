@@ -6,13 +6,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.data.DTTable;
-import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
+import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
+import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFileCheck;
 import com.gdxsoft.easyweb.utils.UPath;
@@ -21,17 +27,21 @@ import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
 
 public class UserDirXmls {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(UserDirXmls.class);
 	private StringBuilder _Xml;
 	private boolean _IsShowItems = false;
 	private static HashMap<Integer, String> _XmlItems = new HashMap<Integer, String>();
 
-	public UserDirXmls(String group) {
+	private ScriptPath scriptPath;
+
+	public UserDirXmls(ScriptPath scriptPath, String group) {
 		if (group != null && group.trim().equalsIgnoreCase("group")) {
 			this._IsShowItems = false;
 		} else {
 			this._IsShowItems = true;
 		}
+
+		this.scriptPath = scriptPath;
 		_Xml = new StringBuilder();
 		this.initUnIncludes();
 
@@ -80,8 +90,8 @@ public class UserDirXmls {
 	}
 
 	public Dirs getCfgsByJdbc() {
-
-		DTTable tb = JdbcConfig.getJdbcCfgDirs();
+		JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
+		DTTable tb = op.getJdbcCfgDirs();
 		Dirs dirs = new Dirs();
 
 		HashMap<String, String> map = new HashMap<String, String>();
@@ -113,9 +123,13 @@ public class UserDirXmls {
 	}
 
 	private void createTreeNode() {
+		if (scriptPath.isResources()) {
+			return;
+		}
+
 		long t_start = System.currentTimeMillis();
 		Dirs dirs;
-		if (JdbcConfig.isJdbcResources()) {
+		if (scriptPath.isJdbc()) {
 			dirs = this.getCfgsByJdbc();
 		} else {
 			String scriptPath = UPath.getScriptPath();
@@ -158,9 +172,9 @@ public class UserDirXmls {
 		_Xml.append("</FrameData>");
 
 		long t_xml = System.currentTimeMillis();
-		System.out.println("DIRS_AND_FILES: " + (t_dirs_and_files - t_start));
-		System.out.println("XMLS: " + (t_xml - t_dirs_and_files));
-		System.out.println("TOTAL: " + (t_xml - t_start));
+		String msg = "DIRS_AND_FILES: " + (t_dirs_and_files - t_start) + ", XMLS: " + (t_xml - t_dirs_and_files)
+				+ ", TOTAL: " + (t_xml - t_start);
+		LOGGER.info(msg);
 
 	}
 
@@ -281,9 +295,15 @@ public class UserDirXmls {
 	public static String loadXmlItems(String xmlname) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<FrameData>");
+		IConfig ct = UserConfig.getConfig(xmlname, null);
+		if (ct.getScriptPath().isResources()) {
+			sb.append("</FrameData>");
+			return sb.toString();
+		}
 
-		if (JdbcConfig.isJdbcResources()) {
-			DTTable tb = JdbcConfig.getJdbcItems(xmlname);
+		if (ct.getScriptPath().isJdbc()) {
+			JdbcConfigOperation op = new JdbcConfigOperation(ct.getScriptPath());
+			DTTable tb = op.getJdbcItems(xmlname);
 
 			for (int i = 0; i < tb.getCount(); i++) {
 				String itemname = tb.getCell(i, 0).toString();
@@ -314,9 +334,10 @@ public class UserDirXmls {
 				return cachedValue;
 			}
 
-			UserXmls userXmls = new UserXmls();
-			userXmls.InitXml(fileName);
-			ArrayList<UserXml> a = userXmls.getXmls();
+			UserXmls userXmls = new UserXmls(fileName);
+			userXmls.initXml();
+			List<UserXml> a = userXmls.getXmls();
+
 			String[] xmls = new String[a.size()];
 			HashMap<String, UserXml> ha = new HashMap<String, UserXml>();
 			for (int m = 0; m < a.size(); m++) {
@@ -342,11 +363,6 @@ public class UserDirXmls {
 				String xml = createNodeXml(key, name, xmlname, "3", ux.getDescription());
 				sb.append(xml);
 			}
-			// if (_XmlItems.containsKey(id)) {
-			// _XmlItems.remove(id);
-			// }
-			// _XmlItems.put(id, sb.toString());
-
 			sb.append("</FrameData>");
 			saveCntToCache(fileName, sb.toString());
 		}
@@ -361,7 +377,7 @@ public class UserDirXmls {
 		StringBuilder sb = new StringBuilder();
 		sb.append(createNodeXml(d.getPath(), d.getName(), d.getParentPath(), "1", ""));
 		// why ? forget
-		int abc =1;
+		int abc = 1;
 		if (!this._IsShowItems || abc == 1) {// 显示配置项信息
 			return sb.toString();
 		}
@@ -375,9 +391,10 @@ public class UserDirXmls {
 			return cachedValue;
 		}
 
-		UserXmls userXmls = new UserXmls();
-		userXmls.InitXml(fileName);
-		ArrayList<UserXml> a = userXmls.getXmls();
+		UserXmls userXmls = new UserXmls(fileName);
+		userXmls.initXml();
+		List<UserXml> a = userXmls.getXmls();
+		
 		String[] xmls = new String[a.size()];
 		HashMap<String, UserXml> ha = new HashMap<String, UserXml>();
 		for (int m = 0; m < a.size(); m++) {

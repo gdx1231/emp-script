@@ -4,7 +4,10 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
+
 public interface IUpdateXml {
+	IConfig getConfigType(); 
 	/**
 	 * 导入xml配置
 	 * 

@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EasyWebTemplates><EasyWebTemplate CreateDate="2013-02-26 10:56:02" Name="_EWA_APP_CFG.ListFrame.View" UpdateDate="2015-03-30 18:17:35"><Page><FrameTag><Set FrameTag="ListFrame"/></FrameTag><Name><Set Name="_EWA_APP_CFG.ListFrame.View"/></Name><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="globaltravel"/></DataSource><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="APP 信息" Lang="zhcn" Memo=""/><Set Info="APP information" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet/><Size><Set FrameCols="C3" HAlign="center" Height="" HiddenCaption="0" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<script type="text/javascript" 
+         src="@sys_contextpath/EWA_STYLE/js/UTILS/EWA_UT_TRANS.js"></script>
+<input type=button value='TransAll' onclick='tall()' >
+<input type=button value='SaveAll' onclick='saveall()' >
+]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[idx1=0;
+function saveall(){
+  if (idx1 < ipts.length) {
+    var m=idx1;
+    idx1++;
+    
+    aa1(ipts[m]);
+    
+  } else {
+    alert('save ok');
+  }
+}
+function aa1(fromObj){
+  var obj1=fromObj.parentNode.nextElementSibling.getElementsByTagName('span')[0];
+  if(obj1.innerHTML==''){
+    setTimeout(saveall,10);
+    return;
+  }
+  var id=fromObj.parentNode.parentNode.getAttribute('EWA_KEY');
+  var u=window.location
+      +'&ewa_action=extendAction0&ewa_ajax=json&a='+obj1.id+'&v='
+      +obj1.innerHTML.toURL()+'&id='+id;
+  console.log(u)
+  $J(u,function(){
+    setTimeout(saveall,10);
+  });
+}]]></Top><Bottom><![CDATA[var ipts;
+var idx;
+function tall() {
+  var o1 = $('span[id=APP_TITLE]');
+  var o2 = $('span[id=APP_MAP_LABEL]');
+  var o3 = $('span[id=APP_MAP_MSG]');
+  
+  ipts=[];  
+  addToIpts(o1);
+  addToIpts(o2);
+  addToIpts(o3);
+  
+  idx = 0;
+  bb();
+}
+function addToIpts(o){
+  o.each(function(){
+    ipts.push(this);
+  });
+}
+var trans;
+function aa(fromObj) {
+  var obj1=fromObj.parentNode.nextElementSibling.getElementsByTagName('span')[0];
+  
+  if (obj1.innerHTML != '') {
+    return;
+  }
+  if (trans == null) {
+    trans = new EWA_UT_TRANS();
+  }
+  trans.TransToEn(fromObj.innerHTML, obj1);
+}
+function bb() {
+  if (idx < ipts.length) {
+    aa(ipts[idx]);
+    idx++;
+    setTimeout(bb, 123);
+  } else {
+    //alert('ok');
+  }
+}]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow><Set ChartsShow=""/></ChartsShow><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="1" KeyField="APP_ID" PageSize="10"/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="1" luDblClick="" luDblClickIdx="" luSearch="1" luSelect="S"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="ExtendAction0"><CallSet><Set CallIsChk="" CallName="ExtendAction0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="ExtendAction1"><CallSet><Set CallIsChk="" CallName="ExtendAction1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="ExtendAction2"><CallSet><Set CallIsChk="" CallName="ExtendAction2 SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM _EWA_APP_CFG WHERE 1=1]]></Sql><CSSet/></Set><Set Name="ExtendAction0 SQL" SqlType="update" TransType="no"><Sql><![CDATA[UPDATE _EWA_APP_CFG
+SET ~A=@V
+WHERE APP_ID=@ID]]></Sql><CSSet/></Set><Set Name="ExtendAction1 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="ExtendAction2 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="APP_ID"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_ID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="编号" Lang="zhcn" Memo="编号"/><Set Info="Number" Lang="enus" Memo="Numbering"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_ID" DataType="Int" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_TITLE"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_TITLE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="标题" Lang="zhcn" Memo="标题"/><Set Info="Title" Lang="enus" Memo="Title"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType="text"/></OrderSearch><DataItem><Set DataField="APP_TITLE" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_TITLE_ENUS"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="APP_TITLE_ENUS"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="" Lang="" Memo=""/><Set Info="标题E" Lang="zhcn" Memo=""/><Set Info="Heading e" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType="text"/></OrderSearch><DataItem><Set DataField="APP_TITLE_ENUS" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="APP_MAP_LABEL"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_MAP_LABEL"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="列表表达式" Lang="zhcn" Memo="列表表达式"/><Set Info="A list of expressions" Lang="enus" Memo="A list of expressions"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_MAP_LABEL" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_MAP_LABEL_ENUS"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="APP_MAP_LABEL_ENUS"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="" Lang="" Memo=""/><Set Info="列表表达式E" Lang="zhcn" Memo=""/><Set Info="List expression e" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_MAP_LABEL_ENUS" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="APP_MAP_MSG"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_MAP_MSG"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="列表信息表达式" Lang="zhcn" Memo="列表信息表达式"/><Set Info="List of information expression" Lang="enus" Memo="List of information expression"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_MAP_MSG" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_MAP_MSG_ENUS"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="APP_MAP_MSG_ENUS"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="" Lang="" Memo=""/><Set Info="列表信息表达式E" Lang="zhcn" Memo=""/><Set Info="List of information expression e" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_MAP_MSG_ENUS" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="APP_XML_NAME"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_XML_NAME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="XmlName" Lang="zhcn" Memo="XmlName"/><Set Info="XmlName" Lang="enus" Memo="XmlName"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_XML_NAME" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_ITEM_NAME"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_ITEM_NAME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="ItemName" Lang="zhcn" Memo="ItemName"/><Set Info="ItemName" Lang="enus" Memo="ItemName"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_ITEM_NAME" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_URL_PARAS"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_URL_PARAS"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="调用参数" Lang="zhcn" Memo="调用参数"/><Set Info="Invocation parameters" Lang="enus" Memo="Call arguments"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_URL_PARAS" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_SEARCH_NAME"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_SEARCH_NAME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="查询字段" Lang="zhcn" Memo="查询字段"/><Set Info="Query field" Lang="enus" Memo="Query field"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_SEARCH_NAME" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_BUT_TITLE"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_BUT_TITLE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="导航按钮文字" Lang="zhcn" Memo="导航按钮文字"/><Set Info="Navigation button text" Lang="enus" Memo="Navigation button text"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_BUT_TITLE" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_TYPE"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_TYPE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="类型" Lang="zhcn" Memo="类型"/><Set Info="Type" Lang="enus" Memo="Type"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_TYPE" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_VIEW"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_VIEW"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="指定视图" Lang="zhcn" Memo="指定视图"/><Set Info="Specifies the view" Lang="enus" Memo="Specifies the view"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_VIEW" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_URL"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_URL"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="指定地址" Lang="zhcn" Memo="指定地址"/><Set Info="Specifying addresses" Lang="enus" Memo="Specifying addresses"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_URL" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_SKIP"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_SKIP"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="是否跳过" Lang="zhcn" Memo="是否跳过"/><Set Info="Whether to skip" Lang="enus" Memo="Whether to skip"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_SKIP" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_PID"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_PID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="父编号" Lang="zhcn" Memo="父编号"/><Set Info="Parent code" Lang="enus" Memo="Parent ID"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_PID" DataType="Int" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_FRAME_DETAIL_ID"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_FRAME_DETAIL_ID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="细节编号" Lang="zhcn" Memo="细节编号"/><Set Info="Detail number" Lang="enus" Memo="Detail ID"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_FRAME_DETAIL_ID" DataType="Int" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_FRAME_MODIFY_ID"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_FRAME_MODIFY_ID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="修改编号" Lang="zhcn" Memo="修改编号"/><Set Info="Modify the numbering" Lang="enus" Memo="Change number"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_FRAME_MODIFY_ID" DataType="Int" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_FRAME_ADD_ID"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_FRAME_ADD_ID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="新增编号" Lang="zhcn" Memo="新增编号"/><Set Info="New number" Lang="enus" Memo="New number"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_FRAME_ADD_ID" DataType="Int" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_LVL"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_LVL"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="等级" Lang="zhcn" Memo="等级"/><Set Info="Class" Lang="enus" Memo="Class"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_LVL" DataType="Int" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_ORD"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_ORD"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="排序" Lang="zhcn" Memo="排序"/><Set Info="Sorting" Lang="enus" Memo="Sorting"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_ORD" DataType="Int" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_ADD_PARA0"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_ADD_PARA0"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="附加参数0" Lang="zhcn" Memo="附加参数0"/><Set Info="Additional parameters to 0" Lang="enus" Memo="Additional parameters to 0"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_ADD_PARA0" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_ADD_PARA1"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_ADD_PARA1"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="附加参数1" Lang="zhcn" Memo="附加参数1"/><Set Info="Additional parameters 1" Lang="enus" Memo="Additional parameters 1"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_ADD_PARA1" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="APP_ADD_PARA2"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="APP_ADD_PARA2"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="附加参数2" Lang="zhcn" Memo="附加参数2"/><Set Info="Additional parameter 2" Lang="enus" Memo="Additional parameter 2"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="APP_ADD_PARA2" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2014-05-23 14:41:44" Name="_EWA_APP_CFG.Frame.Des" UpdateDate="2015-03-30 18:17:35"><Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="_EWA_APP_CFG.Frame.Des"/></Name><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="globaltravel"/></DataSource><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="修改信息（@APP_ID)" Lang="zhcn" Memo=""/><Set Info="Modify information (@APP_ID)" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet><Size><Set FrameCols="C2" HAlign="center" Height="" HiddenCaption="0" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@EWA.CP/EWA_STYLE/skins/icons.css">
+<table width=100%>
+  <tr>
+    <td width=700>
+      <input type='button' id='z1' value='保存' onclick="$X('butOk').click()" />
+      <input type='button' id='z2' value='加载参数' onclick="$X('butJSon').click()" />
+      <input type='button' id='z3' value='拷贝' onclick="copyXml()" />
+      <input type='button' id='z4' value='粘贴' onclick="parseXml()" />
+      
+    </td>
+  </tr>
+  <tr>
+    <td width=700 valign=top>
+      ]]></Top><Bottom><![CDATA[</td><td id=v1 valign=top></td></table>]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[function cvtParas(){
+  var s=$X('APP_URL_PARAS').value;
+  var u=new EWA_UrlClass();
+  u.SetUrl('a?'+s);
+  var s1=[];
+  for(var n in u._Paras){
+    s1.push(n+'=@'+n);
+  }
+  $X('APP_URL_PARAS').value=s1.join('&');
+}
+function params(){
+  var v=$X('APP_XML_NAME').value;
+  if(v.indexOf('&')>0){
+    var u=new EWA_UrlClass();
+    u.SetUrl(v);
+    var x=u.GetParameter('xmlname');
+    var i=u.GetParameter('itemname');
+    if(x!=null && i!=null){
+      $X('APP_XML_NAME').value=x;
+      $X('APP_ITEM_NAME').value=i;
+    }
+    
+  }
+}
+function loadCfg(){
+  var u='./?xmlname='+$X('APP_XML_NAME').value+'&itemname='+$X('APP_ITEM_NAME').value
+      +'&ewa_ajax=json_ext&EWA_FRAMESET_NO=1';
+  $J(u,loadCfg1);
+}
+function loadCfg1(data){
+  var cfg=data.CFG;
+  var s=[];
+  s.push('<table cellpadding=1 cellspacing=1>');
+  for(var i=0;i<cfg.length;i++){
+    var c=cfg[i]
+        var s1='<tr><td>'+c.DES+": @"+c.NAME+ '</td></tr>';
+    s.push(s1);
+  }
+  s.push('</table>');
+  $X('v1').innerHTML=s.join('');
+}
+function chType(){
+  var obj=$X('_ewa_tr$APP_MAP_MSG');
+  var o=$X('APP_TYPE');
+  if(o.value=='js'){
+    obj.cells[0].setAttribute('aaa',obj.cells[0].innerHTML);
+    obj.cells[0].innerHTML='!!请写脚本!!';
+    $X('APP_MAP_MSG').focus();
+  }else if(o.value=='ref'){
+    var u=location.href+'&ewa_action=ref&ewa_ajax=json';
+    $J(u,$X('APP_FRAME_DETAIL_ID'),'APP_TITLE','APP_ID',true,'@APP_FRAME_DETAIL_ID');
+  } else {
+    var s=obj.cells[0].getAttribute('aaa');
+    if(s==null || s==''){
+      return;
+    }
+    obj.cells[0].innerHTML=obj.cells[0].getAttribute('aaa');
+  }
+}]]></Top><Bottom><![CDATA[function loadIcons() {
+  var u = '@EWA.CP/EWA_STYLE/skins/icons.css';
+  $.get(u,
+  function(v) {
+    loadIcons1(v);
+  });
+  chType();
+  var td=$X('_ewa_tr$APP_URL_PARAS').cells[0];
+  td.innerHTML='<a href="javascript:cvtParas();">'+td.innerHTML+'</a>';
+  
+}
+function loadIcons1(v) {
+  var v1 = '@APP_ADD_PARA2';
+  var mm = v.match(/.icon-[^:]+/ig);
+  var o = $X('APP_ADD_PARA2');
+  var opt = new Option('', '');
+  o.options[o.options.length] = opt;
+  for (var i in mm) {
+    var t = mm[i].replace('.', '');
+    var opt = new Option(t, t);
+    o.options[o.options.length] = opt;
+    if (v1 == t) {
+      opt.selected = true;
+    }
+  }
+  $(o).parent().append('&nbsp; <span style="color:blue" id=zzz></span>');
+  o.onchange = function() {
+    showIcon(this);
+  };
+  showIcon(o);
+}
+function showIcon(obj) {
+  $X('zzz').className = 'icon ' + obj.value;
+}
+addEvent(window, 'load', loadIcons);
+var maps;
+function copyXml() {
+  maps = {};
+  var objs = document.getElementsByTagName('input');
+  copyItems(objs);
+  objs = document.getElementsByTagName('select');
+  copyItems(objs);
+  objs = document.getElementsByTagName('textarea');
+  copyItems(objs);
+  window.parent.MAPS = maps;
+  alert('拷贝完成，可以切换进行复制');
+}
+function copyItems(objs) {
+  for (var i = 0; i < objs.length; i++) {
+    var o = objs[i];
+    if (o.type == 'input' || o.type == 'submit') {
+      continue;
+    }
+    if (o.id == 'APP_PID' || o.id == 'APP_LVL' || o.id == 'APP_ORD') {
+      continue;
+    }
+    maps[o.id] = o.value;
+  }
+}
+function parseXml() {
+  var maps = window.parent.MAPS;
+  if (maps == null) {
+    alert('请先复制配置');
+    return;
+  }
+
+  for (var n in maps) {
+    var v = maps[n];
+    try {
+      $X(n).value = v;
+    } catch(e) {
+      alert(n + ',' + v + ',' + e);
+    }
+  }
+  alert('复制完毕');
+}]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.EWA_TD_M{width:400px}]]></AddCss></Set></AddCss><ChartsShow/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="OnPagePost SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="ref"><CallSet><Set CallIsChk="" CallName="ref" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM _EWA_APP_CFG WHERE  app_id=@app_id]]></Sql><CSSet/></Set><Set Name="OnPagePost SQL" SqlType="update" TransType="no"><Sql><![CDATA[UPDATE _EWA_APP_CFG SET
+ APP_TITLE_ENUS = @APP_TITLE_ENUS,
+ APP_MAP_LABEL_ENUS = @APP_MAP_LABEL_ENUS,
+ APP_MAP_MSG_ENUS = @APP_MAP_MSG_ENUS,
+ APP_BUT_TITLE_ENUS = @APP_BUT_TITLE_ENUS
+WHERE APP_ID=@APP_ID;
+
+ 
+]]></Sql><CSSet/></Set><Set Name="ref" SqlType="query" TransType="no"><Sql><![CDATA[SELECT APP_ID,
+       convert(varchar,APP_ID)+'. '+APP_TITLE + '/' +APP_TYPE APP_TITLE
+FROM _EWA_APP_CFG a
+WHERE APP_Add_para0 in (select app_add_para0 from _EWA_APP_CFG where app_id=@app_id)
+ORDER BY a.APP_TITLE]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="APP_TITLE"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_TITLE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="【中文】标题" Lang="zhcn" Memo="标题"/><Set Info="Title" Lang="enus" Memo="Title"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="50" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_TITLE" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_TITLE_ENUS"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="APP_TITLE_ENUS"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="【英文】标题" Lang="zhcn" Memo=""/><Set Info="&quot;English&quot; title" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_TITLE_ENUS" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="APP_MAP_LABEL"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_MAP_LABEL"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="【中文】列表表达式" Lang="zhcn" Memo="MAP_LABEL"/><Set Info="A list of expressions" Lang="enus" Memo="MAP_LABEL"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="500" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_MAP_LABEL" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_MAP_LABEL_ENUS"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="APP_MAP_LABEL_ENUS"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="【英文】列表表达式" Lang="zhcn" Memo=""/><Set Info="&quot;English&quot; list expressions" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_MAP_LABEL_ENUS" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="APP_MAP_MSG"><Tag><Set IsLFEdit="0" Tag="textarea"/></Tag><Name><Set Name="APP_MAP_MSG"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="【中文】列表信息表达式" Lang="zhcn" Memo="MAP_MSG"/><Set Info="List of information expression" Lang="enus" Memo="MAP_MSG"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="500" MinLength=""/></MaxMinLength><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_MAP_MSG" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem></XItem><XItem Name="APP_MAP_MSG_ENUS"><Tag><Set IsLFEdit="" Tag="textarea"/></Tag><Name><Set Name="APP_MAP_MSG_ENUS"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="【英文】列表信息表达式" Lang="zhcn" Memo=""/><Set Info="&quot;English&quot; list information expressions" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><MaxMinLength/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_MAP_MSG_ENUS" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem></XItem><XItem Name="APP_BUT_TITLE"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="APP_BUT_TITLE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="【中文】导航文字说明" Lang="zhcn" Memo=""/><Set Info="Navigation text" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_BUT_TITLE" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="APP_BUT_TITLE_ENUS"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="APP_BUT_TITLE_ENUS"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="【英文】导航文字说明" Lang="zhcn" Memo=""/><Set Info="&quot;English&quot; navigation text description" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_BUT_TITLE_ENUS" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="butOk"><Tag><Set IsLFEdit="0" Tag="submit"/></Tag><Name><Set Name="butOk"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="确定" Lang="zhcn" Memo=""/><Set Info="Ok" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet></XItem><XItem Name="butJSon"><Tag><Set IsLFEdit="" Tag="button"/></Tag><Name><Set Name="butJSon"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="加载参数" Lang="zhcn" Memo=""/><Set Info="Load parameter" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet><Set EventLogic="" EventName="onclick" EventType="Javascript" EventValue="loadCfg()"/></EventSet><CallAction/><OpenFrame/></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2013-02-26 09:48:56" Name="_EWA_APP_CFG.Tree.Modify" UpdateDate="2015-06-08 12:24:14"><Page><FrameTag><Set FrameTag="Tree"/></FrameTag><Name><Set Name="_EWA_APP_CFG.Tree.Modify"/></Name><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="globaltravel"/></DataSource><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl=" "/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="APP应用配置" Lang="zhcn" Memo=""/><Set Info="APP configuration" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet/><Size><Set FrameCols="C3" HAlign="center" Height="" HiddenCaption="0" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top/><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[function link(id){
+  var u;
+  if('@en'==1){
+    u="./?xmlname=@xmlname&itemname=_ewa_app_cfg.frame.Des&app_id="+id;
+  }else{
+    u="./?xmlname=@xmlname&itemname=_ewa_app_cfg.frame.modify&ewa_redraw=1&app_id="+id;
+  }
+  window.parent.frames[1].location=u;
+  
+}]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize/><ListUI/><MenuShow/><Menu/><Tree><Set AddPara1="" AddPara2="" AddPara3="" Key="APP_ID" Level="APP_LVL" LoadByLevel="" MenuGroup="" Order="APP_ORD" ParentKey="APP_PID" RootId="" Text="APP_TITLE" Title="APP_TITLE"/></Tree><HtmlFrame><Set FrameBorder="1" FrameSize="200,*" FrameSubUrl="" FrameType="H"/></HtmlFrame><TreeIconSet><Set Close="" Filter="" Open="" Test=""/></TreeIconSet><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@method'=''"/><Set CallIsChk="" CallName="OnPageLoad4Tree SQL" CallType="SqlSet" Test="'@method'='all'"/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeDelete"><CallSet><Set CallIsChk="" CallName="OnTreeNodeDelete SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeRename"><CallSet><Set CallIsChk="" CallName="OnTreeNodeRename SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeNew"><CallSet><Set CallIsChk="" CallName="OnTreeNodeNew SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad4Tree"><CallSet/></Set><Set IsPostMsg="no" LogMsg="" Type="loadicons"><CallSet><Set CallIsChk="" CallName="loadicons" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM _EWA_APP_CFG WHERE ( 
+      (app_add_para0=isnull(@para0,'ERPV2'))
+      and
+      (app_add_para1=@para1 or @para1 is null)
+      and
+      (app_add_para2=@para2 or @para2 is null)
+  )
+  or(
+    @para0='CAMPV2' 
+    and 
+    @para1='student'
+    and app_add_para1='student_add'
+  )
+AND APP_LVL>1
+
+ORDER BY APP_LVL , APP_ORD]]></Sql><CSSet/></Set><Set Name="OnTreeNodeDelete SQL" SqlType="update" TransType="no"><Sql><![CDATA[DELETE FROM _EWA_APP_CFG WHERE APP_ID=@APP_ID]]></Sql><CSSet/></Set><Set Name="OnTreeNodeRename SQL" SqlType="update" TransType="no"><Sql><![CDATA[UPDATE _EWA_APP_CFG SET APP_TITLE=@APP_TITLE WHERE APP_ID=@APP_ID]]></Sql><CSSet/></Set><Set Name="OnTreeNodeNew SQL" SqlType="update" TransType="no"><Sql><![CDATA[INSERT INTO _EWA_APP_CFG(APP_PID, APP_TITLE, APP_LVL, APP_ORD)
+	SELECT @APP_PID, @APP_TITLE, A.LVL, B.ORD FROM 
+		(SELECT CASE WHEN MAX(APP_LVL) IS NULL THEN 1 ELSE MAX(APP_LVL) + 1 END LVL FROM _EWA_APP_CFG WHERE APP_ID=@APP_PID) A,
+		 (SELECT CASE WHEN MAX(APP_ORD) IS NULL THEN 1 ELSE MAX(APP_ORD) + 1 END ORD FROM _EWA_APP_CFG WHERE APP_PID=@APP_PID) B;
+SELECT * FROM _EWA_APP_CFG WHERE APP_PID=@APP_PID AND APP_TITLE=@APP_TITLE]]></Sql><CSSet/></Set><Set Name="OnPageLoad4Tree SQL" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM _EWA_APP_CFG WHERE 1=1
+  
+
+ORDER BY APP_LVL , APP_ORD]]></Sql><CSSet/></Set><Set Name="loadicons" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM _EWA_APP_CFG WHERE 
+  (app_add_para0=isnull(@para0,'ERP'))
+AND APP_LVL>=2
+
+ORDER  by APP_LVL, APP_ORD]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@method'=''"/><Set CallIsChk="" CallName="OnPageLoad4Tree SQL" CallType="SqlSet" Test="'@method'='all'"/></CallSet></Action><XItems/><Menus><Menu Name="itemNew"><Name><Set Name="itemNew"/></Name><DescriptionSet><Set Info="新建" Lang="zhcn"/><Set Info="New" Lang="enus"/></DescriptionSet><Icon><Set Icon="@SYS_CONTEXTPATH/EWA_STYLE/images/defined/new.gif"/></Icon><Cmd><Set Cmd="EWA.CurUI.NewNode();"/></Cmd><Group><Set Group=""/></Group></Menu><Menu Name="itemRename"><Name><Set Name="itemRename"/></Name><DescriptionSet><Set Info="修改名称" Lang="zhcn"/><Set Info="Rename" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd="EWA.CurUI.Rename();"/></Cmd><Group><Set Group=""/></Group></Menu><Menu Name="line"><Name><Set Name="line"/></Name><DescriptionSet><Set Info="&lt;hr>" Lang="zhcn"/><Set Info="&lt;hr>" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd=""/></Cmd><Group><Set Group=""/></Group></Menu><Menu Name="itemDelete"><Name><Set Name="itemDelete"/></Name><DescriptionSet><Set Info="删除" Lang="zhcn"/><Set Info="Delete" Lang="enus"/></DescriptionSet><Icon><Set Icon="@SYS_CONTEXTPATH/EWA_STYLE/images/defined/del.gif"/></Icon><Cmd><Set Cmd="EWA.CurUI.Delete();"/></Cmd><Group><Set Group=""/></Group></Menu></Menus><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2013-02-26 09:51:17" Name="_EWA_APP_CFG.Frame.Modify" UpdateDate="2015-07-20 11:14:47"><Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="_EWA_APP_CFG.Frame.Modify"/></Name><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="globaltravel"/></DataSource><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="修改信息（@APP_ID)" Lang="zhcn" Memo=""/><Set Info="Modify information (@APP_ID)" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet><Size><Set FrameCols="C2" HAlign="center" Height="" HiddenCaption="0" VAlign="top" Width="900"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@RV_EWA_STYLE_PATH/EWA_STYLE/skins/icons.css">
+<table width=100%>
+  <tr>
+    <td width=700>
+      <input type='button' id='z1' value='保存' onclick="$X('butOk').click()" />
+      <input type='button' id='z2' value='加载参数' onclick="$X('butJSon').click()" />
+      <input type='button' id='z3' value='拷贝' onclick="copyXml()" />
+      <input type='button' id='z4' value='粘贴' onclick="parseXml()" />
+      
+    </td>
+  </tr>
+  <tr>
+    <td width=900 valign=top>
+      ]]></Top><Bottom><![CDATA[</td><td id=v1 valign=top></td></table>]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[function cvtParas(){
+  var s=$X('APP_URL_PARAS').value;
+  var u=new EWA_UrlClass();
+  u.SetUrl('a?'+s);
+  var s1=[];
+  for(var n in u._Paras){
+    s1.push(n+'=@'+n);
+  }
+  $X('APP_URL_PARAS').value=s1.join('&');
+}
+function params(){
+  var v=$X('APP_XML_NAME').value;
+  if(v.indexOf('&')>0){
+    var u=new EWA_UrlClass();
+    u.SetUrl(v);
+    var x=u.GetParameter('xmlname');
+    var i=u.GetParameter('itemname');
+    if(x!=null && i!=null){
+      $X('APP_XML_NAME').value=x;
+      $X('APP_ITEM_NAME').value=i;
+    }
+    
+  }
+}
+function loadCfg(){
+  var u='./?xmlname='+$X('APP_XML_NAME').value+'&itemname='+$X('APP_ITEM_NAME').value
+      +'&ewa_ajax=json_ext&EWA_FRAMESET_NO=1';
+  $J(u,loadCfg1);
+}
+function loadCfg1(data){
+  var cfg=data.CFG;
+  var s=[];
+  s.push('<table cellpadding=1 cellspacing=1>');
+  for(var i=0;i<cfg.length;i++){
+    var c=cfg[i]
+        var s1='<tr><td>'+c.DES+": @"+c.NAME+ '</td></tr>';
+    s.push(s1);
+  }
+  s.push('</table>');
+  $X('v1').innerHTML=s.join('');
+}
+function chType(){
+  var obj=$X('_ewa_tr$APP_MAP_MSG');
+  var o=$X('APP_TYPE');
+  if(o.value=='js'){
+    obj.cells[0].setAttribute('aaa',obj.cells[0].innerHTML);
+    obj.cells[0].innerHTML='!!请写脚本!!';
+    $X('APP_MAP_MSG').focus();
+  }else if(o.value=='ref'){
+    var u=location.href+'&ewa_action=ref&ewa_ajax=json';
+    $J(u,$X('APP_FRAME_DETAIL_ID'),'APP_TITLE','APP_ID',true,'@APP_FRAME_DETAIL_ID');
+  } else {
+    var s=obj.cells[0].getAttribute('aaa');
+    if(s==null || s==''){
+      return;
+    }
+    obj.cells[0].innerHTML=obj.cells[0].getAttribute('aaa');
+  }
+}]]></Top><Bottom><![CDATA[function loadIcons() {
+  var u = '@RV_EWA_STYLE_PATH/EWA_STYLE/skins/icons.css';
+  $.get(u,
+  function(v) {
+    loadIcons1(v);
+  });
+  chType();
+  var td=$X('_ewa_tr$APP_URL_PARAS').cells[0];
+  td.innerHTML='<a href="javascript:cvtParas();">'+td.innerHTML+'</a>';
+  
+}
+function loadIcons1(v) {
+  var v1 = '@APP_ADD_PARA2';
+  var mm = v.match(/.icon-[^:]+/ig);
+  mm.sort();
+  var o = $X('APP_ADD_PARA2');
+  var opt = new Option('', '');
+  o.options[o.options.length] = opt;
+  for (var i in mm) {
+    var t = mm[i].replace('.', '');
+    var opt = new Option(t, t);
+    o.options[o.options.length] = opt;
+    if (v1 == t) {
+      opt.selected = true;
+    }
+  }
+  $(o).parent().append('&nbsp; <span style="color:blue" id=zzz></span>');
+  o.onchange = function() {
+    showIcon(this);
+  };
+  showIcon(o);
+}
+function showIcon(obj) {
+  $X('zzz').className = 'icon ' + obj.value;
+}
+addEvent(window, 'load', loadIcons);
+var maps;
+function copyXml() {
+  maps = {};
+  var objs = document.getElementsByTagName('input');
+  copyItems(objs);
+  objs = document.getElementsByTagName('select');
+  copyItems(objs);
+  objs = document.getElementsByTagName('textarea');
+  copyItems(objs);
+  window.parent.MAPS = maps;
+  alert('拷贝完成，可以切换进行复制');
+}
+function copyItems(objs) {
+  for (var i = 0; i < objs.length; i++) {
+    var o = objs[i];
+    if (o.type == 'input' || o.type == 'submit') {
+      continue;
+    }
+    if (o.id == 'APP_PID' || o.id == 'APP_LVL' || o.id == 'APP_ORD') {
+      continue;
+    }
+    maps[o.id] = o.value;
+  }
+}
+function parseXml() {
+  var maps = window.parent.MAPS;
+  if (maps == null) {
+    alert('请先复制配置');
+    return;
+  }
+
+  for (var n in maps) {
+    var v = maps[n];
+    try {
+      $X(n).value = v;
+    } catch(e) {
+      alert(n + ',' + v + ',' + e);
+    }
+  }
+  alert('复制完毕');
+}]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.EWA_TD_M{width:400px}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson><Set><RedrawJson><![CDATA[{"rows":"12","cols":"4","map":[{"id":"APP_TITLE","row":"0","col":"0"},{"id":"APP_TITLE_ENUS","row":"0","col":"2"},{"id":"APP_ADD_PARA2","row":"1","col":"0"},{"id":"APP_ADD_PARA0","row":"1","col":"1"},{"id":"APP_ADD_PARA1","row":"1","col":"2"},{"id":"APP_XML_NAME","row":"2","col":"0"},{"id":"APP_ITEM_NAME","row":"2","col":"1"},{"id":"APP_URL_PARAS","row":"2","col":"2"},{"id":"APP_SEARCH_NAME","row":"2","col":"3"},{"id":"APP_LOGIN","row":"3","col":"0"},{"id":"APP_MAP_LABEL","row":"4","col":"0"},{"id":"APP_MAP_LABEL_ENUS","row":"4","col":"2"},{"id":"APP_MAP_MSG","row":"5","col":"0"},{"id":"APP_MAP_MSG_ENUS","row":"5","col":"2"},{"id":"APP_BUT_TITLE","row":"6","col":"0"},{"id":"APP_BUT_TITLE_ENUS","row":"6","col":"2"},{"id":"APP_TYPE","row":"7","col":"0"},{"id":"APP_VIEW","row":"7","col":"1"},{"id":"APP_URL","row":"7","col":"2"},{"id":"APP_SKIP","row":"7","col":"3"},{"id":"APP_PID","row":"8","col":"0"},{"id":"APP_FRAME_DETAIL_ID","row":"8","col":"1"},{"id":"APP_FRAME_MODIFY_ID","row":"8","col":"2"},{"id":"APP_FRAME_ADD_ID","row":"8","col":"3"},{"id":"APP_LVL","row":"9","col":"0"},{"id":"APP_ORD","row":"9","col":"1"},{"id":"APP_SCROLL_LOAD_MORE","row":"9","col":"2"},{"id":"APP_JS_LOADED","row":"10","col":"0"}]}]]></RedrawJson></Set></RedrawJson><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="OnPagePost SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="ref"><CallSet><Set CallIsChk="" CallName="ref" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM _EWA_APP_CFG WHERE  app_id=@app_id]]></Sql><CSSet/></Set><Set Name="OnPagePost SQL" SqlType="update" TransType="no"><Sql><![CDATA[UPDATE _EWA_APP_CFG SET
+ APP_TITLE = @APP_TITLE,
+ APP_XML_NAME = @APP_XML_NAME,
+ APP_ITEM_NAME = @APP_ITEM_NAME,
+ APP_URL_PARAS = @APP_URL_PARAS,
+ APP_MAP_LABEL = @APP_MAP_LABEL,
+ APP_MAP_MSG = @APP_MAP_MSG,
+ APP_SEARCH_NAME = @APP_SEARCH_NAME,
+ APP_BUT_TITLE = @APP_BUT_TITLE,
+ APP_TYPE = @APP_TYPE,
+ APP_VIEW = @APP_VIEW,
+ APP_URL = @APP_URL,
+ APP_SKIP = @APP_SKIP,
+ APP_PID = @APP_PID,
+ APP_FRAME_DETAIL_ID = @APP_FRAME_DETAIL_ID,
+ APP_FRAME_MODIFY_ID = @APP_FRAME_MODIFY_ID,
+ APP_FRAME_ADD_ID = @APP_FRAME_ADD_ID,
+ APP_LVL = @APP_LVL,
+ APP_ORD = @APP_ORD,
+ APP_ADD_PARA0 = @APP_ADD_PARA0,
+ APP_ADD_PARA1 = @APP_ADD_PARA1,
+ APP_ADD_PARA2 = @APP_ADD_PARA2,
+ APP_TITLE_ENUS = @APP_TITLE_ENUS,
+ APP_MAP_LABEL_ENUS = @APP_MAP_LABEL_ENUS,
+ APP_MAP_MSG_ENUS = @APP_MAP_MSG_ENUS,
+ APP_BUT_TITLE_ENUS = @APP_BUT_TITLE_ENUS,
+    APP_LOGIN=@APP_LOGIN,
+    APP_JS_LOADED=@APP_JS_LOADED,
+    APP_SCROLL_LOAD_MORE=@APP_SCROLL_LOAD_MORE
+
+WHERE APP_ID=@APP_ID;
+
+EXEC PR_EWA_APP_CFG_LVL @APP_ID;
+]]></Sql><CSSet/></Set><Set Name="ref" SqlType="query" TransType="no"><Sql><![CDATA[SELECT APP_ID,
+       convert(varchar,APP_ID)+'. '+APP_TITLE + '/' +APP_TYPE APP_TITLE
+FROM _EWA_APP_CFG a
+WHERE APP_Add_para0 in (select app_add_para0 from _EWA_APP_CFG where app_id=@app_id)
+ORDER BY a.APP_TITLE]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="APP_TITLE"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_TITLE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="【中文】标题" Lang="zhcn" Memo="标题"/><Set Info="Title" Lang="enus" Memo="Title"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="50" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_TITLE" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_TITLE_ENUS"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="APP_TITLE_ENUS"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="【英文】标题" Lang="zhcn" Memo=""/><Set Info="&quot;English&quot; title" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_TITLE_ENUS" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="APP_ADD_PARA2"><Tag><Set IsLFEdit="" Tag="select"/></Tag><Name><Set Name="APP_ADD_PARA2"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="图标" Lang="zhcn" Memo=""/><Set Info="" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_ADD_PARA2" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List/></XItem><XItem Name="APP_ADD_PARA0"><Tag><Set IsLFEdit="" Tag="select"/></Tag><Name><Set Name="APP_ADD_PARA0"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="应用类型" Lang="zhcn" Memo=""/><Set Info="Type of application" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_ADD_PARA0" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List><Set DisplayField="" DisplayList=",ERP,CAMP,OUTSIDE,ERP - V2,CAMP - V2,OUTSIDE - V2,CAMPUS_AGENT,OUKLOOK" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=",ERP,CAMP,OUTSIDE,ERPV2,CAMPV2,OUTSIDEV2,CAMPUS_AGENT,OUTLOOK"/></List></XItem><XItem Name="APP_ADD_PARA1"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="APP_ADD_PARA1"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="附加参数1" Lang="zhcn" Memo=""/><Set Info="Additional parameters 1" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_ADD_PARA1" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="APP_XML_NAME"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_XML_NAME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="配置文件" Lang="zhcn" Memo="XmlName"/><Set Info="Profile" Lang="enus" Memo="XmlName"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="onblur" EventType="Javascript" EventValue="params()"/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="150" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_XML_NAME" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_ITEM_NAME"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_ITEM_NAME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="配置项" Lang="zhcn" Memo="ItemName"/><Set Info="Configuration item" Lang="enus" Memo="ItemName"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="150" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_ITEM_NAME" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_URL_PARAS"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_URL_PARAS"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="调用参数" Lang="zhcn" Memo="URL_PARAS"/><Set Info="Invocation parameters" Lang="enus" Memo="URL_PARAS"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="500" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_URL_PARAS" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_SEARCH_NAME"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_SEARCH_NAME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="查询字段" Lang="zhcn" Memo="查询字段"/><Set Info="Query field" Lang="enus" Memo="Query field"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="50" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_SEARCH_NAME" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_LOGIN"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="APP_LOGIN"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="" Lang="" Memo=""/><Set Info="登录地址" Lang="zhcn" Memo=""/><Set Info="Login address" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_LOGIN" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="APP_MAP_LABEL"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_MAP_LABEL"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="【中文】列表表达式" Lang="zhcn" Memo="MAP_LABEL"/><Set Info="A list of expressions" Lang="enus" Memo="MAP_LABEL"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="500" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_MAP_LABEL" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_MAP_LABEL_ENUS"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="APP_MAP_LABEL_ENUS"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="【英文】列表表达式" Lang="zhcn" Memo=""/><Set Info="&quot;English&quot; list expressions" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_MAP_LABEL_ENUS" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="APP_MAP_MSG"><Tag><Set IsLFEdit="0" Tag="textarea"/></Tag><Name><Set Name="APP_MAP_MSG"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="【中文】列表信息表达式" Lang="zhcn" Memo="MAP_MSG"/><Set Info="List of information expression" Lang="enus" Memo="MAP_MSG"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="500" MinLength=""/></MaxMinLength><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_MAP_MSG" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem></XItem><XItem Name="APP_MAP_MSG_ENUS"><Tag><Set IsLFEdit="" Tag="textarea"/></Tag><Name><Set Name="APP_MAP_MSG_ENUS"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="【英文】列表信息表达式" Lang="zhcn" Memo=""/><Set Info="&quot;English&quot; list information expressions" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><MaxMinLength/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_MAP_MSG_ENUS" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem></XItem><XItem Name="APP_BUT_TITLE"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="APP_BUT_TITLE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="【中文】导航文字说明" Lang="zhcn" Memo=""/><Set Info="Navigation text" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_BUT_TITLE" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="APP_BUT_TITLE_ENUS"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="APP_BUT_TITLE_ENUS"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="【英文】导航文字说明" Lang="zhcn" Memo=""/><Set Info="&quot;English&quot; navigation text description" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_BUT_TITLE_ENUS" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="APP_TYPE"><Tag><Set IsLFEdit="0" Tag="select"/></Tag><Name><Set Name="APP_TYPE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="类型" Lang="zhcn" Memo="类型"/><Set Info="Type" Lang="enus" Memo="Type"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="onchange" EventType="Javascript" EventValue="chType()"/></EventSet><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_TYPE" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List><Set DisplayField="" DisplayList="list（列表）,frame（修改页面）,detail（细节）,web（页面）,other（其它）,home（主页列表）,js（脚本动态生成）,calendar（日历）,ref（引用）,catalog（分类目录）" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" Sql="" TitleField="" TitleList="" ValueField="" ValueList="list,frame,detail,web,other,home,js,calendar,ref,catalog"/></List></XItem><XItem Name="APP_VIEW"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_VIEW"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="指定视图" Lang="zhcn" Memo="指定视图"/><Set Info="Specifies the view" Lang="enus" Memo="Specifies the view"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="250" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_VIEW" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_URL"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_URL"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="指定地址" Lang="zhcn" Memo="指定地址"/><Set Info="Specifying addresses" Lang="enus" Memo="Specifying addresses"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="500" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_URL" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_SKIP"><Tag><Set IsLFEdit="0" Tag="select"/></Tag><Name><Set Name="APP_SKIP"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="显示在FOOTER" Lang="zhcn" Memo=""/><Set Info="Show FOOTER" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_SKIP" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List><Set DisplayField="" DisplayList="No,Yes" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=",y"/></List></XItem><XItem Name="APP_SCROLL_LOAD_MORE"><Tag><Set IsLFEdit="" Tag="select"/></Tag><Name><Set Name="APP_SCROLL_LOAD_MORE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="滚动加载列表" Lang="zhcn" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_SCROLL_LOAD_MORE" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List><Set DisplayField="" DisplayList="No,Yes" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=",y"/></List></XItem><XItem Name="APP_PID"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_PID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="父编号" Lang="zhcn" Memo="父编号"/><Set Info="Parent ID" Lang="enus" Memo="Parent code"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="10" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_PID" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_FRAME_DETAIL_ID"><Tag><Set IsLFEdit="0" Tag="select"/></Tag><Name><Set Name="APP_FRAME_DETAIL_ID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="细节编号" Lang="zhcn" Memo="细节编号"/><Set Info="Detail ID" Lang="enus" Memo="Detail number"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_FRAME_DETAIL_ID" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List><Set DisplayField="APP_TITLE" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="" ListFilterType="" ListShowType="" Sql="SELECT APP_ID , APP_TITLE + '' +APP_TYPE APP_TITLE FROM _EWA_APP_CFG WHERE APP_PID=@APP_ID ORDER BY APP_ORD" TitleField="" TitleList="" ValueField="APP_ID" ValueList=""/></List></XItem><XItem Name="APP_FRAME_MODIFY_ID"><Tag><Set IsLFEdit="0" Tag="select"/></Tag><Name><Set Name="APP_FRAME_MODIFY_ID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="修改编号" Lang="zhcn" Memo="修改编号"/><Set Info="Change number" Lang="enus" Memo="Modify the numbering"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_FRAME_MODIFY_ID" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List><Set DisplayField="APP_TITLE" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="" ListFilterType="" ListShowType="" Sql="SELECT APP_ID , APP_TITLE + '' +APP_TYPE APP_TITLE FROM _EWA_APP_CFG WHERE APP_PID=@APP_ID ORDER BY APP_ORD" TitleField="" TitleList="" ValueField="APP_ID" ValueList=""/></List></XItem><XItem Name="APP_FRAME_ADD_ID"><Tag><Set IsLFEdit="0" Tag="select"/></Tag><Name><Set Name="APP_FRAME_ADD_ID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="新增编号" Lang="zhcn" Memo="新增编号"/><Set Info="New number" Lang="enus" Memo="New number"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_FRAME_ADD_ID" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List><Set DisplayField="APP_TITLE" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="" ListFilterType="" ListShowType="" Sql="SELECT APP_ID, APP_TITLE + '' +APP_TYPE APP_TITLE FROM _EWA_APP_CFG WHERE APP_PID=@APP_ID ORDER BY APP_ORD" TitleField="" TitleList="" ValueField="APP_ID" ValueList=""/></List></XItem><XItem Name="APP_LVL"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_LVL"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="等级" Lang="zhcn" Memo="等级"/><Set Info="Class" Lang="enus" Memo="Class"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="10" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_LVL" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_ORD"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="APP_ORD"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="排序" Lang="zhcn" Memo="排序"/><Set Info="Sorting" Lang="enus" Memo="Sorting"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><OrderSearch/><MaxMinLength><Set MaxLength="10" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="APP_ORD" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="APP_JS_LOADED"><Tag><Set IsLFEdit="" Tag="JsEditor"/></Tag><Name><Set Name="APP_JS_LOADED"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="加载完成执行脚本" Lang="zhcn" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><OrderSearch/><DataItem><Set DataField="APP_JS_LOADED" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem></XItem><XItem Name="butOk"><Tag><Set IsLFEdit="0" Tag="submit"/></Tag><Name><Set Name="butOk"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="确定" Lang="zhcn" Memo=""/><Set Info="Ok" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet></XItem><XItem Name="butJSon"><Tag><Set IsLFEdit="" Tag="button"/></Tag><Name><Set Name="butJSon"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="加载参数" Lang="zhcn" Memo=""/><Set Info="Load parameter" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet><Set EventLogic="" EventName="onclick" EventType="Javascript" EventValue="loadCfg()"/></EventSet><CallAction/><OpenFrame/></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>

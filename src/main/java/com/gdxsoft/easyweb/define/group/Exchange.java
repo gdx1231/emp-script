@@ -17,7 +17,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-
 import com.gdxsoft.easyweb.datasource.ConnectionConfig;
 import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
 import com.gdxsoft.easyweb.datasource.DataConnection;
@@ -77,8 +76,7 @@ public class Exchange {
 
 	public String importTableAndData() throws Exception {
 		StringBuilder sbErr = new StringBuilder();
-		ImportTables importTables = new ImportTables(this._DocTable,
-				this._DocData, this._Conn);
+		ImportTables importTables = new ImportTables(this._DocTable, this._DocData, this._Conn);
 		String s = importTables.importTables();
 		sbErr.append(s);
 		s = importTables.importDatas();
@@ -118,8 +116,7 @@ public class Exchange {
 	/**
 	 * 导入配置文件
 	 * 
-	 * @param path
-	 *            文件路径及文件名 例如：|test|oa_master.xml
+	 * @param path 文件路径及文件名 例如：|test|oa_master.xml
 	 * @return 生成文件的路径
 	 * @throws IOException
 	 */
@@ -167,8 +164,7 @@ public class Exchange {
 
 		try {
 			MapFunctions funcs = Maps.instance().getMapFunctions();
-			HashMap<String, MapFunction> types = funcs.getTypes(this._Conn
-					.getDatabaseType());
+			HashMap<String, MapFunction> types = funcs.getTypes(this._Conn.getDatabaseType());
 
 			for (int i = 0; i < al.size(); i++) {
 				CDATASection sec = al.get(i);
@@ -303,16 +299,15 @@ public class Exchange {
 	 * @param xmlName
 	 */
 	public void exportItem(String itemName, String xmlName) {
-		UserXmls ux = new UserXmls();
-		ux.InitXml(xmlName);
-		ArrayList<UserXml> al = ux.getXmls();
+		UserXmls ux = new UserXmls(xmlName);
+		ux.initXml();
+		List<UserXml> al = ux.getXmls();
 		String itemName1 = itemName.trim().toUpperCase();
 		for (int i = 0; i < al.size(); i++) {
 			UserXml u = al.get(i);
 			if (u.getName().trim().toUpperCase().equals(itemName1)) {
 				String xml = this.replaceParas(u.getXml(), xmlName);
-				this._DocCfg = UXml.appendNode(this._DocCfg, xml, _DocCfg
-						.getFirstChild().getNodeName());
+				this._DocCfg = UXml.appendNode(this._DocCfg, xml, _DocCfg.getFirstChild().getNodeName());
 				break;
 			}
 		}
@@ -333,8 +328,7 @@ public class Exchange {
 		}
 
 		s1 = s1.replace("|", "\\|");
-		Pattern pat = Pattern.compile("\\b" + s1 + "\\b",
-				Pattern.CASE_INSENSITIVE);
+		Pattern pat = Pattern.compile("\\b" + s1 + "\\b", Pattern.CASE_INSENSITIVE);
 		Matcher m = pat.matcher(source);
 		while (m.find()) {
 			MatchResult r = m.toMatchResult();
@@ -350,8 +344,7 @@ public class Exchange {
 	 * 替换不同数据库的function
 	 */
 	private void replaceFunctions() {
-		NodeList nl0 = UXml.retNodeList(this._DocCfg,
-				"EasyWebTemplates/EasyWebTemplate");
+		NodeList nl0 = UXml.retNodeList(this._DocCfg, "EasyWebTemplates/EasyWebTemplate");
 		ConnectionConfigs connCfgs = null;
 		try {
 			connCfgs = ConnectionConfigs.instance();
@@ -361,15 +354,12 @@ public class Exchange {
 		}
 		for (int k = 0; k < nl0.getLength(); k++) {
 			Node node0 = nl0.item(k);
-			NodeList nlDataSource = UXml.retNodeListByPath(node0,
-					"Page/DataSource/Set");
+			NodeList nlDataSource = UXml.retNodeListByPath(node0, "Page/DataSource/Set");
 			if (nlDataSource == null || nlDataSource.getLength() == 0) {
 				continue;
 			}
-			String dataSource = ((Element) nlDataSource.item(0))
-					.getAttribute("DataSource");
-			ConnectionConfig connCfg = connCfgs.get(dataSource.toLowerCase()
-					.trim());
+			String dataSource = ((Element) nlDataSource.item(0)).getAttribute("DataSource");
+			ConnectionConfig connCfg = connCfgs.get(dataSource.toLowerCase().trim());
 			if (connCfg == null) {
 				continue;
 			}
@@ -390,8 +380,7 @@ public class Exchange {
 	private void replaceFunctions(CDATASection sec, ConnectionConfig connCfg) {
 		try {
 			MapFunctions funcs = Maps.instance().getMapFunctions();
-			HashMap<String, MapFunction> types = funcs.getTypes(connCfg
-					.getType().toUpperCase());
+			HashMap<String, MapFunction> types = funcs.getTypes(connCfg.getType().toUpperCase());
 			Iterator<String> it = types.keySet().iterator();
 			String sql = sec.getTextContent();
 			while (it.hasNext()) {

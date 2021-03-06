@@ -3,6 +3,7 @@ package com.gdxsoft.easyweb.define;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,7 +14,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.data.DTTable;
-import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
+import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
+import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -30,18 +34,21 @@ public class ConfigUtils {
 	 * @return
 	 */
 	public static IUpdateXml getUpdateXml(String xmlName) {
-		IUpdateXml up;
-
-		if (JdbcConfig.isJdbcResources()) {
-			up = new UpdateXmlJdbcImpl(xmlName);
-		} else {
-			up = new UpdateXmlImpl(xmlName);
+		IUpdateXml up = null;
+		IConfig configType = UserConfig.getConfig(xmlName, null);
+		if (configType.getScriptPath().isJdbc()) {
+			up = new UpdateXmlJdbcImpl(configType);
+		} else if (configType.getScriptPath().isResources()) {
+		} else { // file
+			up = new UpdateXmlImpl(configType);
 		}
 		return up;
 	}
 
-	public ConfigUtils() {
+	private ScriptPath scriptPath;
 
+	public ConfigUtils(ScriptPath sp) {
+		scriptPath = sp;
 	}
 
 	/**
@@ -52,17 +59,19 @@ public class ConfigUtils {
 	public String loadDdls() {
 		String cnt = null;
 
-		if (JdbcConfig.isJdbcResources()) {
+		if (scriptPath.isJdbc()) {
+			JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
 			StringBuilder sb = new StringBuilder();
 			sb.append("var ddls=");
-			sb.append(JdbcConfig.getOth("ewa_drop_list.json"));
+			sb.append(op.getOth("ewa_drop_list.json"));
 			cnt = sb.toString();
+		} else if (scriptPath.isResources()) {
+			cnt = null;
 		} else {
 			String root = UPath.getScriptPath();
 			String ddl_file = root + "/ewa_drop_list.json";
 
 			File f = new File(ddl_file);
-
 			if (f.exists()) {
 				try {
 					String json = UFile.readFileText(f.getAbsolutePath());
@@ -90,23 +99,22 @@ public class ConfigUtils {
 	 * @throws Exception
 	 */
 	public int renewDdls(String admId) throws Exception {
-		HashMap<String, JSONObject> map = new HashMap<String, JSONObject>();
-		String root = UPath.getScriptPath();
-		if (JdbcConfig.isJdbcResources()) {
-			DTTable tb = JdbcConfig.getAllXmlnames();
-			for (int ia = 0; ia < tb.getCount(); ia++) {
-				String xmlName = tb.getCell(ia, "XMLNAME").toString();
-				String xml = JdbcConfig.getXml(xmlName);
-				Document doc = UXml.asDocument(xml);
-				NodeList nl = doc.getElementsByTagName("DopListShow");
-				for (int i = 0; i < nl.getLength(); i++) {
-					Element ele = (Element) nl.item(i);
-					handleDdl(ele, map);
-				}
-			}
+		ScriptPath sp = this.scriptPath;
+		if (sp.isJdbc()) {
+			return this.renewDdlsJdbc(admId);
+		} else if (sp.isJdbc()) {
+			return 0;
 		} else {
-			handleFiles(root, map);
+			return this.renewDdlsFile(admId);
 		}
+	}
+
+	private int renewDdlsFile(String admId) throws Exception {
+		Map<String, JSONObject> map = new HashMap<String, JSONObject>();
+
+		ScriptPath sp = this.scriptPath;
+		String root = sp.getPath();
+		handleFiles(root, map);
 
 		JSONArray ddl = new JSONArray();
 		int inc = 0;
@@ -114,17 +122,39 @@ public class ConfigUtils {
 			ddl.put(map.get(key));
 			inc++;
 		}
-		if (JdbcConfig.isJdbcResources()) {
-			JdbcConfig.updateOth("ewa_drop_list.json", ddl.toString(), admId);
-		} else {
-			String ddl_file = root + "/ewa_drop_list.json";
-			UFile.createNewTextFile(ddl_file, ddl.toString());
-		}
+		String ddl_file = root + "/ewa_drop_list.json";
+		UFile.createNewTextFile(ddl_file, ddl.toString());
 
 		return inc;
 	}
 
-	private void handleFiles(String root, HashMap<String, JSONObject> map) {
+	private int renewDdlsJdbc(String admId) throws Exception {
+		ScriptPath sp = this.scriptPath;
+		Map<String, JSONObject> map = new HashMap<String, JSONObject>();
+		JdbcConfigOperation op = new JdbcConfigOperation(sp);
+		DTTable tb = op.getAllXmlnames();
+		for (int ia = 0; ia < tb.getCount(); ia++) {
+			String xmlName = tb.getCell(ia, "XMLNAME").toString();
+			String xml = op.getXml(xmlName);
+			Document doc = UXml.asDocument(xml);
+			NodeList nl = doc.getElementsByTagName("DopListShow");
+			for (int i = 0; i < nl.getLength(); i++) {
+				Element ele = (Element) nl.item(i);
+				handleDdl(ele, map);
+			}
+		}
+		JSONArray ddl = new JSONArray();
+		int inc = 0;
+		for (String key : map.keySet()) {
+			ddl.put(map.get(key));
+			inc++;
+		}
+
+		op.updateOth("ewa_drop_list.json", ddl.toString(), admId);
+		return inc;
+	}
+
+	private void handleFiles(String root, Map<String, JSONObject> map) {
 		File froot = new File(root);
 		File[] files = froot.listFiles();
 		for (int i = 0; i < files.length; i++) {
@@ -137,7 +167,7 @@ public class ConfigUtils {
 		}
 	}
 
-	private void handleFile(File f, HashMap<String, JSONObject> map) {
+	private void handleFile(File f, Map<String, JSONObject> map) {
 		if (!f.getName().toLowerCase().endsWith(".xml")) {
 			return;
 		}
@@ -153,7 +183,7 @@ public class ConfigUtils {
 		}
 	}
 
-	private void handleDdl(Element ele, HashMap<String, JSONObject> map) {
+	private void handleDdl(Element ele, Map<String, JSONObject> map) {
 		NodeList sets = ele.getElementsByTagName("Set");
 		if (sets.getLength() == 0) {
 			return;
@@ -209,8 +239,9 @@ public class ConfigUtils {
 
 	public String rename(String path, String newName) {
 		if (path.indexOf("*") < 0) {
-			if (JdbcConfig.isJdbcResources()) {
-				JdbcConfig.renameTree(path, newName);
+			if (scriptPath.isJdbc()) {
+				JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
+				op.renameTree(path, newName);
 			} else {
 				UFile.renameFile(path, newName);
 			}
@@ -224,10 +255,14 @@ public class ConfigUtils {
 	}
 
 	public String copyXmlFile(String fromFileName, String toPath, String toFileName) throws IOException {
-		if (JdbcConfig.isJdbcResources()) {
+		if (scriptPath.isResources()) {
+			return null;
+		}
+		if (scriptPath.isJdbc()) {
+			JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
 			String from = fromFileName.replace("|", "/");
 			String to = toPath.replace("|", "/") + "/" + toFileName;
-			JdbcConfig.copyXml(from, to, "");
+			op.copyXml(from, to, "");
 		} else {
 			String from = UPath.getScriptPath() + fromFileName.replace("|", "/");
 			String to = UPath.getScriptPath() + toPath.replace("|", "/") + "/" + toFileName;
@@ -242,12 +277,15 @@ public class ConfigUtils {
 	}
 
 	public String createNewXml(String xmlName, String path) throws IOException {
+		if (scriptPath.isResources()) {
+			return null;
+		}
 		if (xmlName.endsWith(".xml")) {
-			if (JdbcConfig.isJdbcResources()) {
+			if (scriptPath.isJdbc()) {
+				JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
 				String path1 = path.replace("|", "/");
 				String fileName = path1 + "/" + xmlName;
-
-				JdbcConfig.createXml(fileName, "");
+				op.createXml(fileName, "");
 			} else {
 				String s1 = XML_ROOT;
 				String path1 = UPath.getScriptPath() + path.replace("|", "/");
@@ -261,10 +299,11 @@ public class ConfigUtils {
 			String out = "key=" + path + "|" + xmlName + "&type=1";
 			return out;
 		} else {
-			if (JdbcConfig.isJdbcResources()) {
+			if (scriptPath.isJdbc()) {
+				JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
 				String path1 = path.replace("|", "/");
 				String fileName = path1 + "/" + xmlName;
-				JdbcConfig.createPath(fileName);
+				op.createPath(fileName);
 			} else {
 				String path1 = UPath.getScriptPath() + path.replace("|", "/");
 				String fileName = path1 + "/" + xmlName;
@@ -277,8 +316,11 @@ public class ConfigUtils {
 	}
 
 	public String deleteFile(String key) {
-		if (JdbcConfig.isJdbcResources()) {
-			JdbcConfig.removeItem(key, "");
+		if (scriptPath.isResources()) {
+			return null;
+		} else if (scriptPath.isJdbc()) {
+			JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
+			op.removeItem(key, "");
 		} else {
 			String path1 = UPath.getScriptPath() + key.replace("|", "/");
 			String pathRecycle = UPath.getScriptPath() + RECYCLE_NAME;

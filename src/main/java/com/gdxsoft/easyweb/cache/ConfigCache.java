@@ -3,6 +3,7 @@ package com.gdxsoft.easyweb.cache;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -10,14 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.script.project.Project;
-import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFileCheck;
 import com.gdxsoft.easyweb.utils.UPath;
 
 public class ConfigCache {
-	private static  Logger LOGGER = LoggerFactory.getLogger(ConfigCache.class);
-	private static ConcurrentHashMap<String, Object> _Objects = new ConcurrentHashMap<String, Object>();
+	private static Logger LOGGER = LoggerFactory.getLogger(ConfigCache.class);
+	private static Map<String, Object> _Objects = new ConcurrentHashMap<String, Object>();
 
 	/**
 	 * 获取项目
@@ -39,69 +40,65 @@ public class ConfigCache {
 	/**
 	 * 获取UserConfig
 	 * 
-	 * @param xmlFileName
+	 * @param xmlName
 	 * @param itemName
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static UserConfig getUserConfig(String xmlFileName, String itemName) {
-
-		boolean isJdbcCall = JdbcConfig.isJdbcResources();
-		if (isJdbcCall) {
-			int id = xmlFileName.hashCode();
-			// 是否存在
-			boolean isHave = UFileCheck.isHave(id);
-			// 是否超时
-			boolean isOverTime = UFileCheck.isOverTime(id, UserConfig.CHECK_CHANG_SPAN_SECONDS);
-			if (isHave && !isOverTime) {
-				// 5秒内不重新扫描数据库数据
-				CacheGroup<UserConfig> cg = (CacheGroup<UserConfig>) _Objects.get(xmlFileName);
-				UserConfig uc = cg.getItem(itemName);
-				LOGGER.debug("NOT OVERTIME: " + xmlFileName + "-" + itemName);
-				return uc;
-			}
+	public static UserConfig getUserConfig(String xmlName, String itemName) {
+		if (!_Objects.containsKey(xmlName)) {
+			return null;
 		}
 
-		ConfigStatus configStatus = UserConfig.getXmlConfigPath(xmlFileName, itemName);
+		CacheGroup<UserConfig> cg = (CacheGroup<UserConfig>) _Objects.get(xmlName);
+		UserConfig uc = cg.getItem(itemName);
+
+		if (uc == null) {
+			return null;
+		}
+		ScriptPath sp = uc.getConfigType().getScriptPath();
+		// the configuration in the resources, can not be modify
+		if (sp.isResources()) {
+			return uc;
+		}
+
+		// the configuration in the database
+		int xmlNameHashCode = xmlName.hashCode();
+		// 是否存在
+		boolean isHave = UFileCheck.isHave(xmlNameHashCode);
+		// 是否超时
+		boolean isOverTime = UFileCheck.isOverTime(xmlNameHashCode, UserConfig.CHECK_CHANG_SPAN_SECONDS);
+		if (isHave && !isOverTime) {
+			// 5秒内不重新扫描数据库数据
+			LOGGER.debug("NOT OVERTIME: " + xmlName + "-" + itemName);
+			return uc;
+		}
+
+		ConfigStatus configStatus = uc.getConfigStatus();
 		// 没有找到配置
 		if (configStatus == null) {
 			return null;
 		}
-		String path = configStatus.getAbsolutePath();
-		if (_Objects.containsKey(path)) {
-			if (configStatus.isChanged()) {// 检查文件或数据库的hash是否被修改
-				removeObject(path);
-				// 删除和配置文件相关的缓存文件
-				CacheEwaScript ces = new CacheEwaScript(xmlFileName, itemName);
-				ces.removeCached();
-				LOGGER.info("CHANGED: " + xmlFileName + "-" + itemName);
-				return null;
-			} else {
-				CacheGroup<UserConfig> cg = (CacheGroup<UserConfig>) _Objects.get(path);
-				UserConfig uc = cg.getItem(itemName);
-				LOGGER.debug("NOT CHANGED: " + xmlFileName + "-" + itemName);
-				return uc;
-			}
-		} else {
+
+		if (configStatus.isChanged()) {// 检查文件或数据库的hash是否被修改
+			removeObject(xmlName);
+
+			LOGGER.info("The conf has changed: " + xmlName + "-" + itemName);
 			return null;
+		} else {
+			LOGGER.debug("The conf hasn't changed: " + xmlName + "-" + itemName);
+			return uc;
 		}
+
 	}
 
-	public static void removeUserConfig(String xmlFileName, String itemName) {
-		ConfigStatus configStatus = UserConfig.getXmlConfigPath(xmlFileName, itemName);
-		//
-		// String path = UPath.getScriptPath() + xmlFileName.replace("|", "/");
-		// File f = new File(path);
-		// path = f.getAbsolutePath();
-
-		String path = configStatus.getAbsolutePath();
-		if (_Objects.containsKey(path)) {
-			removeObject(path);
+	public static void removeUserConfig(String xmlName, String itemName) {
+		if (_Objects.containsKey(xmlName)) {
+			removeObject(xmlName);
 		}
-		CacheEwaScript ces = new CacheEwaScript(xmlFileName, itemName);
+		// remove the file cached
+		CacheEwaScript ces = new CacheEwaScript(xmlName, itemName);
 		ces.removeCached();
-		// 2017-02-28 多站点情况下会已经死锁 guolei
-		// Runtime.getRuntime().gc();
 	}
 
 	/**
@@ -113,21 +110,12 @@ public class ConfigCache {
 	 */
 	@SuppressWarnings("unchecked")
 	public synchronized static void setUserConfig(String xmlFileName, String itemName, UserConfig userConfig) {
-		boolean isJdbcCall = JdbcConfig.isJdbcResources();
-		String path;
-		if (isJdbcCall) {
-			path = xmlFileName;
-		} else {
-			path = UPath.getScriptPath() + xmlFileName.replace("|", "/");
-			java.io.File f = new java.io.File(path);
-			path = f.getAbsolutePath();
-		}
 		CacheGroup<UserConfig> cg = null;
-		if (_Objects.containsKey(path)) {
-			cg = (CacheGroup<UserConfig>) _Objects.get(path);
+		if (_Objects.containsKey(xmlFileName)) {
+			cg = (CacheGroup<UserConfig>) _Objects.get(xmlFileName);
 		} else {
 			cg = new CacheGroup<UserConfig>();
-			_Objects.put(path, cg);
+			_Objects.put(xmlFileName, cg);
 		}
 		cg.addItem(itemName, userConfig);
 	}

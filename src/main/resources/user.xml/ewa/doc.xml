@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EasyWebTemplates><EasyWebTemplate CreateDate="2014-07-23 12:15:23" Name="doc_sql" UpdateDate="2015-03-30 18:18:12"><Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="doc_sql"/></Name><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource="ow_main"/></DataSource><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="SQL" Lang="zhcn" Memo=""/><Set Info="SQL" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet/><Size><Set FrameCols="C2" HAlign="center" Height="" HiddenCaption="1" VAlign="top" Width="800"/></Size><AddHtml><Set><Top/><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[function ok(){
+  EWA.OW.Load();
+  EWA.OW.PWin.set_sql(@idx,NAME.value,SQL.value);
+  EWA.OW.Close();
+}]]></Top><Bottom><![CDATA[ ]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.ewa_td_m{width:700px}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="SAVE" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="onload" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="onload" SqlType="query" TransType="no"><Sql/><CSSet/></Set><Set Name="SAVE" SqlType="update" TransType="no"><Sql><![CDATA[
+
+ ]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet><Set Name="update" XmlAction="update" XmlData="@ADM_PWD" XmlFields="Password" XmlSetData="users" XmlWhere="LoginId=@EWA_ADMIN_ID"/></XmlSet><XmlSetData><Set Name="users" XmlFields="LoginId,UserName,Password,CreateDate" XmlLoadType="attribute" XmlName="@EWA.CONFIG.PATH/EwaDefineConfig.xml" XmlTagPath="EwaDefine/Admins/Admin"/></XmlSetData><ScriptSet><Set Name="ok" ScriptType="javascript"><Script><![CDATA[alert('密码修改完毕');
+$X('butClose').click();]]></Script><CSSet/></Set></ScriptSet><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="SAVE" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="NAME"><Tag><Set IsLFEdit="" Tag="text"/></Tag><Name><Set Name="NAME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="名称" Lang="zhcn" Memo=""/><Set Info="The name" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:700px"/></ParentStyle><AttributeSet/><EventSet/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><DataItem><Set DataField="" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="SQL"><Tag><Set IsLFEdit="" Tag="SqlEditor"/></Tag><Name><Set Name="SQL"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="SQL" Lang="zhcn" Memo=""/><Set Info="SQL" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet/><EventSet/><OrderSearch/><DataItem><Set DataField="" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem></XItem><XItem Name="butok1"><Tag><Set IsLFEdit="" Tag="button"/></Tag><Name><Set Name="butok1"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="确定" Lang="zhcn" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet><Set EventLogic="" EventName="onclick" EventType="Javascript" EventValue="ok()"/></EventSet><CallAction/><OpenFrame/></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2014-07-23 11:27:15" Name="doc_tree" UpdateDate="2015-03-30 18:18:12"><Page><FrameTag><Set FrameTag="Tree"/></FrameTag><Name><Set Name="doc_tree"/></Name><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="ow_main"/></DataSource><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="文档目录" Lang="zhcn" Memo=""/><Set Info="List of documents" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet/><Size><Set FrameCols="C3" HAlign="center" Height="" HiddenCaption="0" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top/><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[function link(id) {
+  var u = EWA.CP + '/EWA_STYLE/cgi-bin/?xmlname=@xmlname&itemname=doc_cnt&doc_unid=' + id;
+  window.parent.frames[1].location = u;
+}]]></Top><Bottom/></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><FrameHtml/><PageSize/><ListUI/><MenuShow/><Menu/><Tree><Set AddPara1="" AddPara2="" AddPara3="" Key="DOC_UNID" Level="DOC_LVL" LoadByLevel="" MenuGroup="" Order="DOC_ORD" ParentKey="DOC_PUNID" RootId="" Text="DOC_NAME" Title="DOC_NAME"/></Tree><HtmlFrame><Set FrameBorder="1" FrameSize="200,*" FrameSubUrl="" FrameType="H"/></HtmlFrame><TreeIconSet><Set Close="" Filter="" Open="" Test=""/></TreeIconSet><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnTreeNodeDelete"><CallSet><Set CallIsChk="" CallName="OnTreeNodeDelete SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnTreeNodeRename"><CallSet><Set CallIsChk="" CallName="OnTreeNodeRename SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnTreeNodeNew"><CallSet><Set CallIsChk="" CallName="OnTreeNodeNew SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM _EWA_DOC WHERE 1=1 ORDER BY DOC_LVL , DOC_ORD]]></Sql><CSSet/></Set><Set Name="OnTreeNodeDelete SQL" SqlType="update" TransType="no"><Sql><![CDATA[DELETE FROM _EWA_DOC WHERE DOC_UNID=@DOC_UNID]]></Sql><CSSet/></Set><Set Name="OnTreeNodeRename SQL" SqlType="update" TransType="no"><Sql><![CDATA[UPDATE _EWA_DOC SET DOC_NAME=@DOC_NAME WHERE DOC_UNID=@DOC_UNID]]></Sql><CSSet/></Set><Set Name="OnTreeNodeNew SQL" SqlType="update" TransType="no"><Sql><![CDATA[INSERT INTO _EWA_DOC(DOC_PUNID, DOC_UNID, DOC_NAME, DOC_LVL, DOC_ORD)
+	SELECT @DOC_PUNID, @SYS_UNID, @DOC_NAME, A.LVL, B.ORD FROM 
+		(SELECT CASE WHEN MAX(DOC_LVL) IS NULL THEN 1 ELSE MAX(DOC_LVL) + 1 END LVL FROM _EWA_DOC WHERE DOC_UNID=@DOC_PUNID) A,
+		 (SELECT CASE WHEN MAX(DOC_ORD) IS NULL THEN 1 ELSE MAX(DOC_ORD) + 1 END ORD FROM _EWA_DOC WHERE DOC_PUNID=@DOC_PUNID) B;
+
+
+SELECT * FROM _EWA_DOC WHERE DOC_UNID=@SYS_UNID]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems/><Menus><Menu Name="itemNew"><Name><Set Name="itemNew"/></Name><DescriptionSet><Set Info="新建" Lang="zhcn"/><Set Info="New" Lang="enus"/></DescriptionSet><Icon><Set Icon="@SYS_CONTEXTPATH/EWA_STYLE/images/defined/new.gif"/></Icon><Cmd><Set Cmd="EWA.CurUI.NewNode();"/></Cmd><Group><Set Group=""/></Group></Menu><Menu Name="itemRename"><Name><Set Name="itemRename"/></Name><DescriptionSet><Set Info="修改名称" Lang="zhcn"/><Set Info="Rename" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd="EWA.CurUI.Rename();"/></Cmd><Group><Set Group=""/></Group></Menu><Menu Name="line"><Name><Set Name="line"/></Name><DescriptionSet><Set Info="&lt;hr>" Lang="zhcn"/><Set Info="&lt;hr>" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd=""/></Cmd><Group><Set Group=""/></Group></Menu><Menu Name="itemDelete"><Name><Set Name="itemDelete"/></Name><DescriptionSet><Set Info="删除" Lang="zhcn"/><Set Info="Delete" Lang="enus"/></DescriptionSet><Icon><Set Icon="@SYS_CONTEXTPATH/EWA_STYLE/images/defined/del.gif"/></Icon><Cmd><Set Cmd="EWA.CurUI.Delete();"/></Cmd><Group><Set Group=""/></Group></Menu></Menus><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2014-07-28 18:38:29" Name="doc_modify" UpdateDate="2015-03-30 18:18:12"><Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="doc_modify"/></Name><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="ow_main"/></DataSource><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="文档信息" Lang="zhcn" Memo=""/><Set Info="Document information" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet><Size><Set FrameCols="C3" HAlign="center" Height="" HiddenCaption="1" VAlign="top" Width="700"/></Size><AddHtml><Set><Top/><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[function sync_tree(){
+  EWA.OW.Load();
+  
+  if(EWA.OW.PWin.parent.frames.length==0){
+    return;
+  }
+  var o=EWA.OW.PWin.parent.frames[0].$X('@doc_unid');
+  if(!o){
+    return;
+  }
+  o.rows[0].cells[2].getElementsByTagName('span')[0].innerHTML=$X('DOC_NAME').value;
+}]]></Top><Bottom/></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson><Set><RedrawJson/></Set></RedrawJson><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="OnPagePost SQL" CallType="SqlSet" Test=""/><Set CallIsChk="" CallName="aa" CallType="ScriptSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="CheckError"><CallSet><Set CallIsChk="" CallName="CheckError SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM _EWA_DOC WHERE DOC_UNID = @DOC_UNID]]></Sql><CSSet/></Set><Set Name="OnPagePost SQL" SqlType="update" TransType="no"><Sql><![CDATA[UPDATE _EWA_DOC SET 
+	DOC_NAME = @DOC_NAME,
+	DOC_ORD = @DOC_ORD,
+	DOC_TAG = @DOC_TAG,
+	DOC_TYPE = @DOC_TYPE,
+	DOC_PARA0 = @DOC_PARA0,
+	DOC_PARA1 = @DOC_PARA1,
+	DOC_PARA2 = @DOC_PARA2
+WHERE DOC_UNID = @DOC_UNID]]></Sql><CSSet/></Set><Set Name="CheckError SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet/><XmlSetData/><ScriptSet><Set Name="aa" ScriptType="javascript"><Script><![CDATA[sync_tree()]]></Script><CSSet/></Set></ScriptSet><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="DOC_NAME"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="DOC_NAME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="名称" Lang="zhcn" Memo=""/><Set Info="The name" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="250" MinLength=""/></MaxMinLength><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><DataItem><Set DataField="DOC_NAME" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx/></XItem><XItem Name="DOC_ORD"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="DOC_ORD"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="排序" Lang="zhcn" Memo=""/><Set Info="Sorting" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="10" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="DOC_ORD" DataType="Int" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="DOC_TAG"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="DOC_TAG"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="唯一标记" Lang="zhcn" Memo=""/><Set Info="A unique tag" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="20" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="DOC_TAG" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="DOC_TYPE"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="DOC_TYPE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="Type" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="20" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="DOC_TYPE" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="DOC_PARA0"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="DOC_PARA0"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="参数0" Lang="zhcn" Memo=""/><Set Info="Parameter 0" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="50" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="DOC_PARA0" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="DOC_PARA1"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="DOC_PARA1"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="参数1" Lang="zhcn" Memo=""/><Set Info="Parameter 1" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="50" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="DOC_PARA1" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="DOC_PARA2"><Tag><Set IsLFEdit="0" Tag="text"/></Tag><Name><Set Name="DOC_PARA2"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="参数2" Lang="zhcn" Memo=""/><Set Info="Parameter 2" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="50" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="DOC_PARA2" DataType="String" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx></XItem><XItem Name="butOk"><Tag><Set IsLFEdit="0" Tag="submit"/></Tag><Name><Set Name="butOk"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="确定" Lang="zhcn" Memo=""/><Set Info="Ok" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet></XItem><XItem Name="butClose"><Tag><Set IsLFEdit="0" Tag="button"/></Tag><Name><Set Name="butClose"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="关闭" Lang="zhcn" Memo=""/><Set Info="Cancel" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2014-07-22 17:04:02" Name="doc_cnt" UpdateDate="2015-03-30 18:18:12"><Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="doc_cnt"/></Name><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource="ow_main"/></DataSource><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="文档编辑" Lang="zhcn" Memo=""/><Set Info="Document editing" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet/><Size><Set FrameCols="C2" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<table style='width: 100%; height: 100%;' cellspacing=0 cellpadding=0>
+    <tr>
+        <td height=25 id=menu colspan=2>
+            <input type=button value='保存' onclick="save_doc()">
+          <input type=button value='修改信息' onclick="modi_info()">
+          
+            <input type=button value='清理文档' onclick="clean_html()">
+            <input type=button value='替换老标签' onclick="replace_old_tag()">
+          
+            |
+            <select id='sqls' style='width: 100px'>
+            </select>
+            <input type=button value='修改SQL' onclick="mdi_sql()">
+            <input type=button value='添加SQL' onclick="add_sql()">
+            <input type=button onclick='load_parameters()' value='加载参数'>
+            <input id='butShowParts' type=button onclick='show_parts(this)' value='显示文档部分'>
+            <span id='parts'>
+            </span>
+          |
+          <input type=button value='测试' onclick="test()">
+        </td>
+    </tr>
+    <tr>
+        <td bgcolor=white>]]></Top><Bottom><![CDATA[</td>
+<td bgcolor=white width=250 valign=top>
+    <div id='paras' style='overflow: auto; height: 100%; background-color: #cdcdcd'>
+    </div>
+</td>
+</tr>
+</table>]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[var editTop;
+var editLeft;
+function init() {
+  $(document.forms[0]).append('<input type=submit id="a123" style="display:none">');
+  var sql = $('#DOC_SQL').val();
+  if (sql == '') {
+    return;
+  }
+  var aa = document.createElement('div');
+  aa.innerHTML = sql;
+  sql = aa.innerHTML;
+  var ss;
+  eval('ss=' + sql);
+  for (var i = 0; i < ss.length; i++) {
+    var s = ss[i];
+    var opt = new Option(s.name, s.idx);
+    opt.setAttribute('sql', s.sql);
+    $X('sqls').options[s.idx] = opt;
+  }
+
+}
+function clean_html() {
+  var td = window.frames[0].document.getElementsByTagName('td')[1];
+  editTop = $(td).offset().top + 2;
+  editLeft = 2;
+
+  $(window.frames[0].frames[0].document.body).find('td').each(function() {
+    this.style.cssText = "";
+    //this.innerHTML=this.innerText;
+  });
+  $(window.frames[0].frames[0].document.body).find('tr').each(function() {
+    this.style.cssText = "";
+    //this.innerHTML=this.innerText;
+  });
+  $(window.frames[0].frames[0].document.body).find('p').each(function() {
+    this.style.cssText = "";
+    //this.innerHTML=this.innerText;
+    $(this).attr('class', null);
+    $(this).attr('align', null);
+    this.innerHTML = this.innerText;
+  });
+}
+
+function add_sql() {
+  var idx = $X('sqls').options.length;
+  var refParas = "idx=" + idx + "&name=new sql" + idx;
+  EWA.UI.Dialog.OpenReloadClose('aaaaa', '|ewa|doc.xml', 'doc_sql', false, refParas);
+}
+function mdi_sql() {
+  var idx = $X('sqls').value;
+  if (idx == '') {
+    alert('没有可修改的SQL, 选择添加SQL');
+    return;
+  }
+  var opt = $X('sqls').options[idx];
+  var txt = opt.text;
+  var refParas = "idx=" + idx + "&name=" + txt.toURL() + "&SQL=" + opt.getAttribute('sql').toURL();
+  EWA.UI.Dialog.OpenReloadClose('aaaaa', '|ewa|doc.xml', 'doc_sql', false, refParas);
+}
+function set_sql(idx, name, sql) {
+  var opt;
+  if ($X('sqls').options.length <= idx) {
+    $X('sqls').options[idx] = new Option(name, idx);
+  }
+  opt = $X('sqls').options[idx];
+  opt.text = name;
+  $X('sqls').options[idx].setAttribute('sql', sql);
+  $X('sqls').value = idx;
+}
+
+function load_parameters() {
+  var idx = $X('sqls').value;
+  if (idx == '') {
+    alert('没有可用的SQL, 选择添加SQL');
+    return;
+  }
+  var opt = $X('sqls').options[idx];
+  var s = opt.getAttribute('sql');
+  var u1 = EWA.CP + "/back_admin/doc/doc_design2.jsp";
+  var u = u1+"?sql_run=" + s.toURL();
+  $J(u, load_parameters1);
+}
+function load_parameters1(v) {
+  var idx = $X('sqls').value;
+  var txt = $X('sqls').options[idx].text;
+  if ($X('para' + idx) == null) {
+    var s = '<table class="para_box" id="para' + idx + '" cellspaing=0 cellpadding=0 width=100%><tr><td onclick="show_hide(this)" ' + ' align=center class="para_title">--<a  style="color:#fff">' + txt + '</a>--</td></tr><tr><td></td></tr></table>';
+    $('#paras').append(s);
+  }
+  var obj = $('#para' + idx);
+  obj.find('a').html(txt);
+
+  var box = obj.find('td:last()');
+  box.html("");
+  if (v.rst) {
+    var u1 = EWA.CP + "/back_admin/doc/txt_img.jsp";
+    for (var i = 0; i < v.cols.length; i++) {
+      var div = document.createElement('div');
+      div.className = 'para';
+      div.innerHTML = "<span><img class='para_img' src='" + u1 + "?txt=@" + idx + '.' + v.cols[i].name + "'></span><span> " + v.cols[i].type + "</span>";
+      box.append(div);
+    }
+  } else {
+    $('#paras').html(v.err);
+  }
+}
+function show_hide(obj) {
+
+  var tb = obj.parentNode.parentNode.parentNode;
+  if (tb.rows[1].style.display == 'none') {
+    tb.rows[1].style.display = '';
+  } else {
+    tb.rows[1].style.display = 'none';
+  }
+}
+function save_doc() {
+  var but = $X('butShowParts');
+  if (but.getAttribute('ss') == 1) {
+    //关闭 文档部分显示
+    show_parts(but);
+
+  }
+  var html = $X('DOC_CNT').parentNode.getElementsByTagName('input')[0].value;
+  var cnt1 = create_doc_tmp(html);
+  var ss = [];
+  for (var i = 0; i < $X('sqls').options.length; i++) {
+    var opt = $X('sqls').options[i];
+    var sql = opt.getAttribute('sql');
+    ss.push({
+      idx: i,
+      name: opt.text,
+      sql: sql
+
+    });
+
+  }
+  var s1 = JSON.stringify(ss);
+  $X('DOC_SQL').value = s1;
+  $X('DOC_CNT_WORK').value = cnt1;
+
+  //console.log(s1);
+  $('#a123').click();
+}
+function create_doc_tmp(cnt) {
+  var obj = document.createElement('div');
+  document.body.appendChild(obj);
+  obj.innerHTML = cnt;
+  var o = $(obj);
+  var paras = o.find('.para_img');
+  for (var i = 0; i < paras.length; i++) {
+    var p = paras[i];
+    var tag = p.src.split('=')[1];
+    var span = "<span>" + tag + "</span>";
+    $(span).insertBefore($(p));
+    $(p).remove();
+  }
+  var cnt1 = obj.innerHTML;
+  $(obj).remove();
+  //console.log(cnt1);
+  return cnt1;
+}
+
+var comments = {};
+var comments_part = [];
+
+//显示文档部分
+function show_parts(obj) {
+  comments = {};
+  comments_part = [];
+  var w = window.frames[0].frames[0];
+  if (obj.getAttribute('ss') == 1) {
+    obj.setAttribute('ss', 0);
+    obj.value = '显示文档部分';
+    $(w.document.body).find('.part1').remove();
+    $('#parts').html("");
+    return;
+  }
+
+  get_comments(w.document.body);
+
+  for (var n in comments) {
+    if (n.indexOf('S') > 0) {
+      var sc = comments[n];
+      var endTag = n.replace('S', 'E');
+      var ec = comments[endTag];
+      if (!ec) {
+        alert('开始标记' + n + '，没有结束标记' + endTag);
+      } else {
+        comments_part.push([sc, ec]);
+      }
+    }
+  }
+  var colors = ['red', 'green', 'blue', 'yellow'];
+  var width = w.document.body.clientWidth;
+  for (var i = 0; i < comments_part.length; i++) {
+    var c = comments_part[i];
+    var p0 = c[0].previousElementSibling;
+    if (!p0) {
+      p0 = c[0].nextElementSibling;
+    }
+    var p1 = c[1].previousElementSibling;
+    if (!p1) {
+      p1 = c[1].nextElementSibling;
+    }
+    if (p0.tagName == 'BR') {
+      p0 = replace_br(p0);
+    }
+    if (p1.tagName == 'BR') {
+      p1 = replace_br(p1);
+    }
+    var t0 = $(p0).offset().top;
+    var t1 = $(p1).offset().top + $(p1).height();
+    var color = colors[i];
+    var left = $(c[0].parentNode).offset().left;
+    var width = $(c[0].parentNode).width();
+    var s = "<div id='pp" + i + "' class='part1' style='position:absolute;top:" + t0 + "px;left:" + left + "px;height:" + (t1 - t0) + "px;width:" + width + "px;background-color:" + color + ";opacity:0.3'>" + c[0].nodeValue + "</div>";
+    $(w.document.body).append(s);
+
+    var chk = "<input type=checkbox checked onclick='show_part(" + i + ",this)'>" + c[0].nodeValue;
+    $('#parts').append(chk);
+  }
+  obj.setAttribute('ss', 1);
+  obj.value = '关闭显示';
+}
+function replace_br(br) {
+  var aaa = $('<div>&nbsp</div>').insertBefore($(br));
+  $(br).remove();
+  return aaa[0];
+}
+//显示文档部分
+function show_part(idx, obj) {
+  var w = window.frames[0].frames[0].document.body;
+  var o = $(w).find('.part1')[idx];
+  if (obj.checked) {
+    o.style.display = '';
+  } else {
+    o.style.display = 'none';
+  }
+}
+function get_comments(p) {
+  var objs = p.childNodes;
+  for (var i = 0; i < objs.length; i++) {
+    var o = objs[i];
+    if (o.nodeType == 8) {
+      var tag = o.nodeValue.trim().toUpperCase();
+      if (comments[tag]) {
+        alert(tag + '重复');
+      } else {
+        comments[tag] = o;
+      }
+    }
+  }
+  for (var i = 0; i < objs.length; i++) {
+    var o = objs[i];
+    if (o.nodeType == 1) {
+      get_comments(o);
+    }
+  }
+}]]></Top><Bottom><![CDATA[addEvent(window, 'load',
+function() {
+  $X('_ewa_tr$DOC_CNT').style.display = 'none';
+  $X('EWA_FRAME_@sys_frame_unid').style.height = (document.body.clientHeight - 30) + 'px';
+  $X('paras').style.height = (document.body.clientHeight - 30) + 'px';
+  $X('DOC_CNT').style.height = '100%';
+  init();
+  document.body.style.overflow = 'hidden';
+
+});
+function replace_old_tag() {
+  var bb = /(@[a-zA-Z0-9\-\._:]*)\b/ig;
+  var obj = window.frames[0].frames[0].document.body;
+  h0 = obj.innerHTML.replace(bb, '<img class="para_img" src="/pf/back_admin/doc/txt_img.jsp?txt=$1">');
+  h = h0.replace(/@/img, '@' + '0.');
+  obj.innerHTML = h;
+
+}
+function test() {
+  var u = EWA.CP + '/back_admin/doc/doc_design3.jsp?doc_unid=@doc_unid';
+  window.open(u);
+}
+function modi_info() {
+  var x = "@xmlname";
+  var i = "doc_modify";
+  var p = "doc_unid=@doc_unid";
+  EWA.UI.Dialog.OpenReloadClose('@sys_frame_unid', x, i, false, p);
+}]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.para_title {
+	cursor: pointer;
+	background-color: #08c;
+	color: #fff;
+	height: 25px;
+}
+
+.para_box {
+	margin-bottom: 4px;
+}
+
+.para {
+	background-color: #f2f2f2;
+	border-radius: 5px;
+	height: 20px;
+	line-height: 20px;
+	margin-bottom: 2px;
+}
+
+.para span {
+	line-height: 20px;
+	display: block;
+	float: left;
+	margin-left: 5px;
+}
+.para img{
+  cursor:pointer;
+}
+input[type=button], button {
+background-color: #08c;
+color: #fff;
+ background: none
+cursor: pointer;
+ padding-left: 5px; 
+ padding-right: 5px; 
+padding-top: 4px;
+padding-bottom: 4px;
+ 
+font-weight: normal;
+font-size: 12px;
+border: 1px;
+border-radius: 5px;
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="SAVE" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="onload" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="onload" SqlType="query" TransType="no"><Sql><![CDATA[SELECT   * FROM _EWA_DOC where DOC_UNID=@DOC_UNID]]></Sql><CSSet/></Set><Set Name="SAVE" SqlType="update" TransType="no"><Sql><![CDATA[ 
+UPDATE _EWA_DOC SET 
+    DOC_CNT = @DOC_CNT,
+    DOC_SQL = @DOC_SQL,
+    DOC_CNT_WORK=@DOC_CNT_WORK,
+
+    DOC_MDATE = @sys_DATE
+WHERE DOC_UNID=@DOC_UNID
+
+ ]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet><Set Name="update" XmlAction="update" XmlData="@ADM_PWD" XmlFields="Password" XmlSetData="users" XmlWhere="LoginId=@EWA_ADMIN_ID"/></XmlSet><XmlSetData><Set Name="users" XmlFields="LoginId,UserName,Password,CreateDate" XmlLoadType="attribute" XmlName="@EWA.CONFIG.PATH/EwaDefineConfig.xml" XmlTagPath="EwaDefine/Admins/Admin"/></XmlSetData><ScriptSet><Set Name="ok" ScriptType="javascript"><Script><![CDATA[alert('密码修改完毕');
+$X('butClose').click();]]></Script><CSSet/></Set></ScriptSet><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="SAVE" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="DOC_CNT"><Tag><Set IsLFEdit="" Tag="dHtmlNoImages"/></Tag><Name><Set Name="DOC_CNT"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="内容" Lang="zhcn" Memo=""/><Set Info="Content" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><MaxMinLength/><IsMustInput><Set IsMustInput="0"/></IsMustInput></XItem><XItem Name="DOC_SQL"><Tag><Set IsLFEdit="" Tag="hidden"/></Tag><Name><Set Name="DOC_SQL"/></Name><InitValue/><DescriptionSet><Set Info="" Lang="zhcn" Memo=""/></DescriptionSet><DataItem><Set DataField="DOC_SQL" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem></XItem><XItem Name="DOC_CNT_WORK"><Tag><Set IsLFEdit="" Tag="hidden"/></Tag><Name><Set Name="DOC_CNT_WORK"/></Name><InitValue/><DescriptionSet><Set Info="" Lang="zhcn" Memo=""/></DescriptionSet><DataItem><Set DataField="DOC_CNT_WORK" DataType="" Format="" IsEncrypt="" MeargeTo="" SumBottom="" Valid=""/></DataItem></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EasyWebTemplates><EasyWebTemplate CreateDate="2010-06-23 11:30:50" Name="cr_view" UpdateDate="2015-03-30 18:20:21">
+	<Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="cr_view"/></Name><SkinName><Set SkinName="test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="About us" Lang="zhcn" Memo=""/><Set Info="About us" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="onselectstart" PageAttValue="return false;"/></PageAttributeSet><Size><Set HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top/><Bottom><![CDATA[<div id=D></div>]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[var links=[];
+function link(t1){
+	var tbT1=t1.parentNode.parentNode.parentNode;
+	
+	var tbs=document.getElementsByTagName('table');
+	for(var i=0;i<tbs.length;i++){
+		var tb=tbs[i];
+		if(tb.id.indexOf('TABLE#') !=0){
+			continue;
+		}
+		if(tb==tbT1){
+			continue;
+		}
+		var id=tb.getAttribute('field');
+		
+		if(id !=null && id !=''){
+			var id=tb.getAttribute('field');
+			var k=new EWA_UI_LinkClass($X(id), t1.parentNode);
+			links.push(k);
+			k.Link();
+			
+			tb.setAttribute('field','');
+			tbT1.setAttribute('field','');
+			
+			$X(id).cells[1].style.backgroundColor='#fff';
+			t1.style.backgroundColor='#fff';
+			//alert($X(id).outerHTML); 
+		}
+	}
+}
+function bb(){
+	for(var i=0;i<links.length;i++){
+		links[i].Link();
+	}
+}]]></Top><Bottom><![CDATA[var a;
+document.body.onload=function(){
+	//document.onselectstart="return false" ;
+	document.body.oncontextmenu=function(){
+		EWA.UI.Dialog.OpenReloadClose("@sys_frame_unid", "|ewa|database.xml", "tables", true, 'key=@key');
+		return false;
+	}
+		
+	EWA.CP="@SYS_CONTEXTPATH";
+	a=new EWA.UI.Move();
+	a.Init(a);
+}
+function addTable(html,name){
+	$X('D').innerHTML = html;
+	var o=$X('D').childNodes[0];
+	document.body.appendChild(o);
+	o.style.position='absolute';
+	o.style.left='200px';
+	o.style.top='100px';
+	
+	for(var i=1;i<o.rows.length;i++){
+		o.rows[i].cells[1].onclick=function(){
+			var tb = this.parentNode.parentNode.parentNode;
+			var oid=tb.getAttribute('field');
+			for(var i=1; i<tb.rows.length; i++){
+				var td= tb.rows[i].cells[1];
+				if(td==this){
+					if(td.parentNode.id==oid){
+						td.style.backgroundColor='#fff';
+						tb.setAttribute('field','');
+					}else{
+						td.style.backgroundColor='gray';
+						tb.setAttribute('field',td.parentNode.id);
+						
+						link(this);
+					}
+				}else{
+					td.style.backgroundColor='#fff';
+				}
+			}
+		}
+	}
+	
+	a.AddMoveObject(o.rows[0].cells[0],o,bb);
+}
+ ]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="50%,*" FrameType=""/></HtmlFrame><TreeIconSet/></Page><Action><ActionSet/><SqlSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/></EasyWebTemplate><EasyWebTemplate CreateDate="2010-06-23 14:42:17" Name="cr_view_main" UpdateDate="2015-03-30 18:20:21">
+	<Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="cr_view_main"/></Name><SkinName><Set SkinName="test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="创建视图" Lang="zhcn" Memo=""/><Set Info="Create View" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="scroll" PageAttValue="no"/></PageAttributeSet><Size><Set HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<table border=0 cellpdding=0 cellspacing=0 width=100% height=100% >
+<tr>
+	<td height=25 style='border-bottom:1px solid gray'>
+		<input type=button onclick="cview()" value='生成'> 
+	</td>
+</tr>
+<tr>
+	<td height=80><textarea id=sql style='height:80px;width:100%;font-size:12px;'></textarea></td>
+</tr> 
+<tr>
+	<td><iframe width=100% height=100% frameborder=1
+		 src='./?xmlname=|ewa|database.xml&ITEMNAME=cr_view&key=@key'></iframe>
+	</td>
+</tr>
+</table>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[function cview(){
+	var s="";
+	var tbs=window.frames[0].document.getElementsByTagName('table');
+	var m=0;
+	var firstTb;
+	for(var i=0;i<tbs.length;i++){
+		var tb=tbs[i];
+		if(tb.id.indexOf('TABLE#') !=0){
+			continue;
+		}
+		if(m==0){
+			firstTb=tb;
+			m=1;
+		} 
+		var chks=tb.getElementsByTagName('input');
+		for(var j=0;j<chks.length;j++){
+			var chk=chks[j];
+			if(chk.checked){
+				if(s.length >0){
+					s+=", ";
+				}
+				s+=chk.parentNode.parentNode.id.replace('ROW#','').replace('#','.');
+			}
+		}
+	}
+	s='SELECT ' + s + ' FROM '+firstTb.id.replace('TABLE#','');
+	var tb=firstTb;
+	var tb1=null;
+	var kk;
+	links={};
+	
+	while((kk=getLink2( tb, tb1)) !=null){
+		var tr=kk.loc==1?kk.LinkObj2:kk.LinkObj1;
+		var tr1=kk.loc==1?kk.LinkObj1:kk.LinkObj2;
+		
+		var tb=tr.parentNode.parentNode;
+		var tb1=tr1.parentNode.parentNode;
+		s+='\r\n\t JOIN ' +tb.id.replace('TABLE#','')
+			+' ON (' + kk.LinkObj2.id.replace('ROW#','').replace('#','.') 
+			+ ' = ' + kk.LinkObj1.id.replace('ROW#','').replace('#','.') + ')';
+		m++;
+		if(m>100)
+			break;
+	}
+	
+	$X('sql').value=s;
+}
+var links={};
+function getLink2(tb,tb1){
+	var k=getLink(tb);
+	if(k==null && tb1 !=null){
+		k=getLink(tb1);
+	}
+	return k;
+}
+function getLink(tb){
+	for(var i=0;i<window.frames[0].links.length;i++){
+		var k=window.frames[0].links[i];
+	
+		if(k==null){
+			continue;
+		}
+		var o1=k.LinkObj1.parentNode.parentNode;
+		var o2=k.LinkObj2.parentNode.parentNode;
+		if(o1==tb || o2==tb){
+			var id=o1.id+'@@'+o2.id;
+			var id1=o2.id+'@@'+o1.id;
+			if(links[id]==null && links[id1]==null){
+				links[id]=1;
+				k.loc= (o1==tb ? 1 : 2);
+				return k;
+			}
+		}
+	}
+	
+	return null;
+}]]></Top><Bottom><![CDATA[document.body.style.overflow='hidden'; ]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[body{overflow:hidden;}]]></AddCss></Set></AddCss><ChartsShow/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="50%,*" FrameType=""/></HtmlFrame><TreeIconSet/></Page><Action><ActionSet/><SqlSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/></EasyWebTemplate><EasyWebTemplate CreateDate="2012-02-14 17:14:33" Name="tables_same" UpdateDate="2015-03-30 18:20:21"><Page><FrameTag><Set FrameTag="ListFrame"/></FrameTag><Name><Set Name="tables_same"/></Name><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="表/试图一致性 cfgFrom, cfgTo" Lang="zhcn" Memo=""/><Set Info="Table/trying to consistency cfgFrom, cfgTo" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="" Height="" HiddenCaption="" VAlign="" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[ ]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[var xmlName="@VIEW_XMLNAME";     
+function openFrame(itemName){  
+	var url= './?XMLNAME=ewa|ewa.xml&ITEMNAME=define_right&D_XMLNAME=' 
+     + encodeURIComponent(xmlName) + '&D_ITEMNAME=' 
+     + encodeURIComponent(itemName); 
+	window.parent.AddTab( url,itemName);
+}
+if('@linktype'=='group'){
+	$X('divButton').style.display='none';
+	var tb=$X('EWA_LF_@SYS_FRAME_UNID');
+	for(var i=0;i<tb.rows.length;i++){
+		tb.rows[i].cells[tb.rows[i].cells.length-1].style.display='none';
+		tb.rows[i].cells[tb.rows[i].cells.length-2].style.display='none';
+		tb.rows[i].cells[tb.rows[i].cells.length-3].style.display='none';
+		
+	}
+}
+VIEW_XMLNAME ='@VIEW_XMLNAME';]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[
+#col_true{
+						 width:16px;
+						  background-image : url('@SYS_CONTEXTPATH/EWA_DEFINE/images/sql/key_p.gif') }
+#col_false{ 
+							width:16px;
+							background-image : url('@SYS_CONTEXTPATH/EWA_DEFINE/images/sql/column.gif')
+}
+#fk_false{
+							display:none;
+}
+					]]></AddCss></Set></AddCss><ChartsShow/><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="" KeyField="getname" PageSize=""/></PageSize><ListUI><Set luButtons="1" luDblClick="" luDblClickIdx="" luSearch="" luSelect="M"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnListFrameUpdateCell"><CallSet><Set CallIsChk="" CallName="update des" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.database.DiffTables" ConData="@cfgFrom, @cfgTo" MethodData="" MethodName="getMap" Name="LoadFields" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.UpdateXml" ConData="@VIEW_XMLNAME" MethodData="@EWA_ACTION_KEY,@getdescription" MethodName="updateDescription" Name="update des" XmlTag=""/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Action><XItems><XItem Name="inc"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="inc"/></Name><GroupIndex/><InitValue><Set InitValue="SEQID"/></InitValue><DescriptionSet><Set Info="序号" Lang="zhcn" Memo=""/><Set Info="No" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="" DataType="" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem><XItem Name="getDName"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="getDName"/></Name><GroupIndex/><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="名称" Lang="zhcn" Memo="a"/><Set Info="Select" Lang="enus" Memo="a"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="getDName" DataType="String" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem><XItem Name="getDType"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="getDType"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="Name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="getDType" DataType="String" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List><Set DisplayField="" DisplayList="" ListAddBlank="" ListShowType="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/></List><UserSet><Set Lang="zhcn" User="&lt;a href='javascript:openFrame(&quot;@getName&quot;)'>@getName&lt;/a>"/></UserSet><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem><XItem Name="getFlen"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="getFlen"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="源字段" Lang="zhcn" Memo=""/><Set Info="Source fields" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="getFlen" DataType="" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem><XItem Name="getTlen"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="getTlen"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="目标字段" Lang="zhcn" Memo=""/><Set Info="Target field" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="getTlen" DataType="" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem><XItem Name="isSame"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="isSame"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="一致" Lang="zhcn" Memo=""/><Set Info="Frame Type" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="isSame" DataType="" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem><XItem Name="isSamePk"><Tag><Set IsLFEdit="0" Tag="span"/></Tag><Name><Set Name="isSamePk"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="主键" Lang="zhcn" Memo=""/><Set Info="Description" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="isSamePk" DataType="String" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem><XItem Name="isSameFields"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="isSameFields"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="字段" Lang="zhcn" Memo=""/><Set Info="Datasource" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml><Set IsHtml="0"/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="isSameFields" DataType="String" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem><XItem Name="getDes"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="getDes"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="描述" Lang="zhcn" Memo=""/><Set Info="Description" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="getDes" DataType="" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem><XItem Name="getSql"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="getSql"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="SQL" Lang="zhcn" Memo=""/><Set Info="SQL" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml><Set IsHtml="1"/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="getSql" DataType="" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem><XItem Name="buta"><Tag><Set IsLFEdit="" Tag="button"/></Tag><Name><Set Name="buta"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="测试" Lang="zhcn" Memo=""/><Set Info="Test" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:30px;"/></ParentStyle><AttributeSet/><EventSet><Set EventLogic="" EventName="onclick" EventType="Javascript" EventValue="test('@getName')"/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="" DataType="" Format="" IsEncrypt="" Valid=""/></DataItem><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><DopListShow/><ReportCfg/></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2010-06-23 10:33:14" Name="tables" UpdateDate="2015-03-30 18:20:29"><Page><FrameTag><Set FrameTag="ListFrame"/></FrameTag><Name><Set Name="tables"/></Name><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="字段列表" Lang="zhcn" Memo=""/><Set Info="Fields" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="" HiddenCaption="" VAlign="" Width="400"/></Size><AddHtml><Set><Top><![CDATA[<script language="javascript" src="@SYS_CONTEXTPATH/EWA_DEFINE/js/EWAC_CONFIG.js" ></script>
+<script language="javascript" src="@SYS_CONTEXTPATH/EWA_DEFINE/js/EWAC_DEFINE.js" ></script>
+<script language="javascript" src="@SYS_CONTEXTPATH/EWA_DEFINE/js/EWAC_SQL.js" ></script>
+<script language="javascript" src="@SYS_CONTEXTPATH/EWA_STYLE/js/EWA_COLOR_MARK.js"></script>
+
+<input type='radio' value='TABLE' name=t checked onclick=show('TABLE')>表
+<input type='radio' value='VIEW' name=t onclick=show('VIEW')>视图
+<hr>
+<div style='width:450px;overflow:auto;height:290px;'> ]]></Top><Bottom><![CDATA[</div>
+<hr/>
+<div align=right>
+	<input type=button onclick='add()' value='添加'>
+	<input type=button value='关闭'>
+</div>
+<div id='F' style='display:none'></div>]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[function add(){
+	while($X('F').childNodes.length>0){
+		$X('F').removeChild($X('F').childNodes[0]);
+	}
+	
+	var ids= EWA.F.FOS["@SYS_FRAME_UNID"].SelectChecked();
+	if(ids.length==0){
+		alert('请选择');
+		return;
+	}
+	
+	var dd=ids.split(',');
+	for(var i=0;i<dd.length;i++){
+		var d1=dd[i].split(';')[3];
+		addTable(d1); 
+	}
+	wait();
+}
+function addTable(name){
+	var key='@key';
+	var cfg=key.split(';')[1];
+	var u='./?xmlname=|ewa|ewa.xml&itemname=fields&cfg='+cfg
+		+ '&tablename=' + name + '&linkType=CLASS&EWA_FRAMESET_NO=1';
+	var ff=document.createElement('iframe');
+	$X('F').appendChild(ff);
+	ff.name=name;
+	window.frames[window.frames.length-1].location.href=u;
+}
+function wait(){
+	var ok=true;
+	for(var i=0;i<window.frames.length;i++){
+		var w=window.frames[i];
+		if(w.document.readyState != 'complete' ){
+			ok=false;
+			break;
+		} 
+	}
+	if(ok){
+		showTables();
+	}else{
+		window.setTimeout(wait,300);
+	}
+}
+function showTables(){
+	for(var i=0;i<window.frames.length;i++){
+		var w=window.frames[i];
+		var s=w.sql.GetHtmlTable();
+		//alert(s.outerHTML);
+		window.parent.addTable(s.outerHTML,'aa');
+	}	
+}]]></Top><Bottom><![CDATA[function show(t){
+	var tb=$X('EWA_LF_@sys_frame_unid');
+	for(var i=1;i<tb.rows.length;i++){
+		var tr=tb.rows[i];
+		var chk=tr.getElementsByTagName('input')[0];
+		if(chk.value.indexOf(';  '+t+'  ;')>0){
+			tr.style.display='';
+		}else{
+			tr.style.display='none';
+		}
+	}
+}
+show('TABLE');]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@key,@linkType" MethodName="getMoreXml1" Name="LoadFields" XmlTag="TableViewList/Row"/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Action><XItems><XItem Name="cccc"><Tag><Set IsLFEdit="" Tag="checkbox"/></Tag><Name><Set Name="cccc"/></Name><GroupIndex/><DescriptionSet><Set Info="选择" Lang="zhcn" Memo="a"/><Set Info="Select" Lang="enus" Memo="a"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:30px"/></ParentStyle><AttributeSet/><EventSet/><IsMustInput/><DataItem><Set DataField="Key" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List/></XItem><XItem Name="columnname"><Tag><Set IsLFEdit="" Tag="span"/></Tag><Name><Set Name="columnname"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="字段名" Lang="zhcn" Memo=""/><Set Info="Filed Name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="name" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>

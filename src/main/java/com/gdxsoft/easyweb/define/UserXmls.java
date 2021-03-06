@@ -3,23 +3,20 @@ package com.gdxsoft.easyweb.define;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.data.DTTable;
-import com.gdxsoft.easyweb.script.userConfig.JdbcConfig;
-import com.gdxsoft.easyweb.utils.UPath;
+import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public class UserXmls {
-	private ArrayList<UserXml> _Xmls;
+	private List<UserXml> _Xmls;
 	private IUpdateXml _UpdateXml;
-
-	public UserXmls() {
-
-	}
 
 	public UserXmls(String xmlName) {
 		this._UpdateXml = ConfigUtils.getUpdateXml(xmlName);
@@ -34,9 +31,10 @@ public class UserXmls {
 	public void updateDescription(String itemName, String des) {
 		this._UpdateXml.updateDescription(itemName, des);
 	}
-	
+
 	/**
 	 * 批量更新
+	 * 
 	 * @param itemNames
 	 * @param paraName
 	 * @param paraValue
@@ -48,12 +46,14 @@ public class UserXmls {
 	/**
 	 * 从数据库中加载
 	 * 
-	 * @param xmlPath
 	 * @throws Exception
 	 */
-	public void initXmlJdbc(String xmlPath) throws Exception {
+	public void initXmlJdbc() throws Exception {
 		_Xmls = new ArrayList<UserXml>();
-		DTTable tb = JdbcConfig.getJdbcItems(xmlPath);
+
+		JdbcConfigOperation op = new JdbcConfigOperation(this._UpdateXml.getConfigType().getScriptPath());
+
+		DTTable tb = op.getJdbcItems(this._UpdateXml.getConfigType().getXmlName());
 		for (int i = 0; i < tb.getCount(); i++) {
 			String xml = tb.getCell(i, "XMLDATA").toString();
 			Node node = UXml.asNode(xml);
@@ -90,17 +90,13 @@ public class UserXmls {
 	/**
 	 * 从文件中加载
 	 * 
-	 * @param xmlPath
 	 * @throws Exception
 	 */
-	public void initXmlFile(String xmlPath) throws Exception {
+	public void initXmlFile() throws Exception {
 		Document doc;
 		_Xmls = new ArrayList<UserXml>();
-		if (xmlPath.indexOf("|") >= 0) {
-			xmlPath = UPath.getScriptPath() + "/" + xmlPath.replace("|", "/");
-		}
 
-		doc = UXml.retDocument(xmlPath);
+		doc = this._UpdateXml.getConfigType().loadConfiguration();
 		NodeList nl = UXml.retNodeList(doc, "EasyWebTemplates/EasyWebTemplate");
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node n = nl.item(i);
@@ -109,17 +105,18 @@ public class UserXmls {
 		}
 	}
 
-	public void InitXml(String xmlPath) {
-		if (JdbcConfig.isJdbcResources()) {
+	public void initXml() {
+		ScriptPath sp = this._UpdateXml.getConfigType().getScriptPath();
+		if (sp.isJdbc()) {
 			try {
-				this.initXmlJdbc(xmlPath);
+				this.initXmlJdbc();
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
 				return;
 			}
 		} else {
 			try {
-				this.initXmlFile(xmlPath);
+				this.initXmlFile();
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
 				return;
@@ -157,12 +154,8 @@ public class UserXmls {
 	/**
 	 * @return the _Xmls
 	 */
-	public ArrayList<UserXml> getXmls() {
+	public List<UserXml> getXmls() {
 		return _Xmls;
 	}
 
-	public ArrayList<UserXml> getXmls(String xmlPath) {
-		this.InitXml(xmlPath);
-		return this._Xmls;
-	}
 }

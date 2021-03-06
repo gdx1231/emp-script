@@ -15,18 +15,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
-import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
-	private static Logger LOGER = LoggerFactory.getLogger(UpdateXmlImpl.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(UpdateXmlImpl.class);
 	private int _BakFilesCount;
 
-	public UpdateXmlImpl(String xmlName) {
-		this._XmlName = xmlName;
+	public UpdateXmlImpl(IConfig configType) {
+		super._XmlName = configType.getXmlName();
+		super.configType = configType;
+
 		_Document = this.getDoc();
 	}
 
@@ -51,11 +53,11 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 		String xmlname = path + "/" + name;
 		xmlname = UserConfig.filterXmlName(xmlname);
 		this._XmlName = xmlname;
-		_XmlFilePath = UPath.getScriptPath() + this._XmlName.replace("|", "/");
+		_XmlFilePath = this.configType.getScriptPath().getPath() + this._XmlName;
 
 		File f0 = new File(_XmlFilePath);
 		if (f0.exists()) {
-			LOGER.error(xmlname + "已经存在");
+			LOGGER.error(xmlname + "已经存在");
 
 			obj.put("RST", false);
 			obj.put("ERR", xmlname + "已经存在");
@@ -66,7 +68,7 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 		File f1 = new File(sourceXmlFilePath);
 
 		if (!f1.exists()) {
-			LOGER.error(sourceXmlFilePath + "找不到");
+			LOGGER.error(sourceXmlFilePath + "找不到");
 
 			obj.put("RST", false);
 			obj.put("ERR", sourceXmlFilePath + "找不到");
@@ -77,19 +79,19 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 		try {
 			doc = UXml.retDocument(f1.getAbsolutePath());
 		} catch (ParserConfigurationException e) {
-			LOGER.error(e.getLocalizedMessage());
+			LOGGER.error(e.getLocalizedMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.getMessage());
 
 			return obj;
 		} catch (SAXException e) {
-			LOGER.error(e.getLocalizedMessage());
+			LOGGER.error(e.getLocalizedMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.getMessage());
 
 			return obj;
 		} catch (IOException e) {
-			LOGER.error(e.getLocalizedMessage());
+			LOGGER.error(e.getLocalizedMessage());
 			obj.put("RST", false);
 			obj.put("ERR", e.getMessage());
 
@@ -110,11 +112,10 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	 * @return
 	 */
 	public int deleteBaks(String xmlname) {
-		xmlname = xmlname.replace("|", "/");
-		String path = UPath.getScriptPath() + xmlname;
+		String path = this.configType.getScriptPath().getPath() + UserConfig.filterXmlName(xmlname);
 
 		if (xmlname.equals("EWA_TREE_ROOT")) { // 根节点
-			path = UPath.getScriptPath();
+			path = this.configType.getScriptPath().getPath();
 		}
 
 		this._BakFilesCount = 0;
@@ -268,21 +269,16 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	}
 
 	private Document getDoc() {
-		if (this._XmlName == null) {
-			return null;
-		}
-
-		_XmlFilePath = UPath.getScriptPath() + this._XmlName.replace("|", "/");
 		Document doc = null;
 		try {
-			doc = UXml.retDocument(_XmlFilePath);
+			doc = this.getConfigType().loadConfiguration();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		}
 		if (doc == null) {
 			doc = UXml.createBlankDocument();
 			Element root = doc.createElement(_RootUri);
-			root.setAttribute("Author", "郭磊");
+			root.setAttribute("Author", "");
 			doc.appendChild(root);
 		}
 		return doc;

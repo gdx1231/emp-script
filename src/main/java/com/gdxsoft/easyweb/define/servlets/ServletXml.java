@@ -29,6 +29,8 @@ import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
 import com.gdxsoft.easyweb.script.servlets.GZipOut;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPaths;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
@@ -42,6 +44,8 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
  */
 public class ServletXml extends HttpServlet {
 
+	private RequestValue rv;
+	private PageValue pvAdmin;
 	private int _BakFilesCount = 0;
 	/**
 	 *
@@ -100,15 +104,16 @@ public class ServletXml extends HttpServlet {
 	}
 
 	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
 		request.setCharacterEncoding("UTF-8");
 		HttpSession session = request.getSession();
 
-		RequestValue rv = new RequestValue(request, session);
+		this.rv = new RequestValue(request, session);
 
 		String oType = rv.getString("TYPE");
 		String mode = rv.getString("MODE");
-
+		if (mode == null) {
+			mode = "";
+		}
 		LOGGER.info("TYPE=" + oType + ", MPDE=" + mode);
 
 		if (oType != null && oType.equalsIgnoreCase("format")) { // 格式化语法
@@ -118,39 +123,17 @@ public class ServletXml extends HttpServlet {
 			return;
 		}
 
-		String modeName = rv.getString("MODE_NAME");
-
-		if (mode == null) {
-			mode = "";
-		}
-
 		String cnt = null;
 
 		if (oType != null && oType.toUpperCase().equals("GUNID")) { // 获取全局编号
-			String num = rv.getString("NUM");
-			int iNum = 1;
-			if (num != null && num.trim().length() > 0) {
-				iNum = Integer.parseInt(num.trim());
-			}
-			if (iNum <= 0 || iNum > 100) {
-				iNum = 1;
-			}
-			StringBuilder s = new StringBuilder();
-			s.append("[");
-			for (int i = 0; i < iNum; i++) {
-				if (i > 0) {
-					s.append(",\r\n");
-				}
-				s.append("\"").append(Utils.getGuid()).append("\"");
-			}
-			s.append("]");
 			this.setOutType(response, "javascript");
-			cnt = s.toString();
+			cnt = this.handleGUNID();
 			this.outContent(request, response, cnt);
 			return;
 		}
 
 		PageValue pv = rv.getPageValues().getPageValue("EWA_ADMIN_ID");
+
 		// not login
 		if (pv == null || (pv.getPVTag() != PageValueTag.SESSION)) {
 			JSONObject rst = new JSONObject();
@@ -159,208 +142,329 @@ public class ServletXml extends HttpServlet {
 			response.getWriter().println(rst);
 			return;
 		}
+
+		pvAdmin = pv;
+
 		if (oType == null) {
-			HtmlCreator hc = new HtmlCreator();
-			try {
-				hc.init(request, session, response);
-				String xml = hc.getConfigItemXml();
-				if (mode.equals("JS")) {
-					this.setOutType(response, "javascript");
-					xml = "window." + modeName + "=\"" + Utils.textToJscript(xml) + "\"";
-				} else {
-					this.setOutType(response, "xml");
-				}
-				cnt = xml;
-			} catch (Exception err) {
-				cnt = err.getMessage();
-			}
+			cnt = this.handleNull(response);
 		} else if (oType.equals("ALL")) {
 			this.setOutType(response, "javascript");
-			MStr s = new MStr();
-			// HtmlCreator hc = new HtmlCreator();
-			String xmlName = rv.getString("XMLNAME").replace("|", "/");
-			String itemName = rv.getString("ITEMNAME");
-			try {
-				// hc.init(request, session, response);
-				// String xml = hc.getConfigItemXml();
-				IUpdateXml up = this.getUpdateXml(xmlName, pv.getStringValue());
-				String xml = up.queryItemXml(itemName);
-				s.a("window._CFG_ITEM=\"");
-				s.a(Utils.textToJscript(xml));
-				s.al("\";");
-
-				xml = this.getCfgXmlJs("EwaGlobal.xml", "_CFG_GLOBAL");
-				s.al(xml);
-
-				xml = this.getCfgXmlJs("EwaConnections.xml", "_CFG_CNN");
-				s.al(xml);
-
-				xml = this.getCfgXmlJs("EwaSkin.xml", "_CFG_SKIN");
-				s.al(xml);
-
-				xml = this.getCfgXmlJs("EwaConfig.xml", "_CFG_MAIN");
-				s.al(xml);
-			} catch (Exception e) {
-				s.a("ERROR:" + rv.getRequest().getQueryString());
-			}
-			cnt = s.toString();
+			cnt = this.handleAll();
 		} else if (oType.equals("SQLS")) {
-			String xmlName = rv.getString("XMLNAME").replace("|", "/");
-			IUpdateXml up = this.getUpdateXml(xmlName, pv.getStringValue());
-			String sqls = up.getSqls();
 			this.setOutType(response, "html");
-			cnt = sqls;
+			cnt = this.handleSqls();
 		} else if (oType.equals("SAVE")) {
-			String xmlName = rv.getString("XMLNAME").replace("|", "/");
-			String itemName = rv.getString("ITEMNAME");
-			String xml = rv.getString("XML");
-			IUpdateXml up = this.getUpdateXml(xmlName, pv.getStringValue());
-			up.updateItem(itemName, xml);
+			this.handleSave();
 			this.setOutType(response, "html");
 			cnt = "alert('ok')";
 		} else if (oType.equals("VIEW")) {
-			String xml = rv.getString("XML");
-			Document doc = UXml.asDocument(xml);
-			UpdateXmlBase.clearDoc(doc);
-
-			String xmlPretty = UXml.asXmlPretty(doc);
-			// this.setOutType(response, "xml");
-			cnt = xmlPretty;
+			cnt = this.handleView();
 		} else if (oType.equals("CFG_XML")) {// 调用配置文件
-			String xmlName = rv.getString("XMLNAME");
-			String name = xmlName.replace("|", "/");
-			String xml = null;
-			if (mode.equals("JS")) {
-				this.setOutType(response, "html");
-				xml = this.getCfgXmlJs(name, modeName);
-			} else {
-				this.setOutType(response, "xml");
-				xml = this.getCfgXml(name);
-			}
-			cnt = xml;
+			cnt = this.handleCfgXml(response);
 		} else if (oType.equals("CFG_DIR")) {
 			UserDirXmls udx = new UserDirXmls();
 			this.setOutType(response, "xml");
 			cnt = udx.getXml();
 		} else if (oType.equals("DELETE")) {
-			String xmlName = rv.getString("XMLNAME").replace("|", "/");
-			String itemName = rv.getString("ITEMNAME");
-			IUpdateXml up = this.getUpdateXml(xmlName, pv.getStringValue());
+			this.handleRemove();
 			this.setOutType(response, "html");
-			up.removeItem(itemName);
 		} else if (oType.equals("PASTE")) {
-			String from = rv.getString("FROM").replace("|", "/");
-			String to = rv.getString("TO").replace("|", "/").split("\\*")[0];
-			String toName = rv.getString("TONAME");
-
-			String[] froms = from.split("\\*");
-			IUpdateXml up = this.getUpdateXml(froms[0], pv.getStringValue());
-			String sourceXml = up.queryItemXml(froms[1]);
-			IUpdateXml up1 = this.getUpdateXml(to, pv.getStringValue());
-			up1.saveXml(toName, sourceXml);
+			this.handlePaste();
 			this.setOutType(response, "html");
 		} else if (oType.equals("DELETE_BAKS")) {// 递归删除备份文件
-			String xmlname = rv.getString("xmlname").replace("|", "/");
-			IUpdateXml up = this.getUpdateXml(xmlname, pv.getStringValue());
-			_BakFilesCount = up.deleteBaks(xmlname);
 			this.setOutType(response, "html");
-			cnt = _BakFilesCount + "";
+			cnt = handleDeleteBaks() + "";
 		} else if (oType.toUpperCase().equals("GUNID")) { // 获取全局编号
-			String num = rv.getString("NUM");
-			int iNum = 1;
-			if (num != null && num.trim().length() > 0) {
-				iNum = Integer.parseInt(num.trim());
-			}
-			if (iNum <= 0 || iNum > 100) {
-				iNum = 1;
-			}
-			StringBuilder s = new StringBuilder();
-			s.append("[");
-			for (int i = 0; i < iNum; i++) {
-				if (i > 0) {
-					s.append(",\r\n");
-				}
-				s.append("\"" + Utils.getGuid() + "\"");
-			}
-			s.append("]");
 			this.setOutType(response, "javascript");
-			cnt = s.toString();
+			cnt = this.handleGUNID();
 		} else if (oType.toUpperCase().equals("CHECK_SQL")) { // 检查SQL语法
 			SqlSyntaxCheck syntaxCheck = new SqlSyntaxCheck(rv);
 			cnt = syntaxCheck.checkSyntax();
-		} else if (oType.toUpperCase().equals("EWA_CONF")) { // 加载本机的ewa_conf.xml
-			String ewa_conf_file = UPath.getRealPath() + "/ewa_conf.xml";
-			JSONObject rst = new JSONObject();
-			rst.put("RST", true);
-			String xml;
-			try {
-				xml = UFile.readFileText(ewa_conf_file);
-				rst.put("XML", xml);
-			} catch (Exception e) {
-				rst.put("RST", false);
-				rst.put("ERR", e.toString());
-			}
-
-			cnt = rst.toString();
+		} else if (oType.toUpperCase().equals("EWA_CONF")) {
+			// 加载本机的ewa_conf.xml
+			cnt = this.handleEwaConf();
 		} else if (oType.toUpperCase().equals("EWAC_DDL_RELOAD")) {
-			// 刷新配置文件中 DropList配置信息
-			ConfigUtils configUtils = new ConfigUtils();
-			JSONObject rst = new JSONObject();
-			int inc;
-			try {
-				inc = configUtils.renewDdls(pv.getStringValue());
-
-				rst.put("RST", true);
-				rst.put("MSG", inc);
-			} catch (Exception e) {
-				rst.put("RST", false);
-				rst.put("MSG", e.getMessage());
-				rst.put("Exception", e);
-			}
-
-			cnt = rst.toString();
+			cnt = this.handleEwacDdlReload();
 		} else if (oType.toUpperCase().equals("EWAC_DDL_READ")) {
 			// 从配置文件中加载DropList配置信息
-			ConfigUtils configUtils = new ConfigUtils();
-			cnt = configUtils.loadDdls();
+			cnt = this.handleEwacDdlRead();
 		} else if (oType.toUpperCase().equals("GET_DOC_XML")) {
 			// 获取整个配置文件
-			String xmlname = rv.getString("xmlname").replace("|", "/");
-			IUpdateXml up = this.getUpdateXml(xmlname, pv.getStringValue());
-			cnt = up.getDocXml();
-
-			String[] names = UserConfig.filterXmlNameByJdbc(xmlname).split("\\|");
-			String name = names[names.length - 1];
-			byte[] buf = cnt.getBytes();
-
-			response.setHeader("Location", name);
-			response.setHeader("Cache-Control", "max-age=30");
-			response.setHeader("Content-Disposition", "attachment; filename=" + name);
-			// filename应该是编码后的(utf-8)
-			response.setContentType("text/xml");
-			response.setContentLength(buf.length);
-			response.getOutputStream().write(buf);
-
+			this.handleGetDocXml(response);
 			return;
 		} else if (oType.toUpperCase().equals("IMPORT_XML")) {
-			String sourceXmlFilePath = UPath.getPATH_UPLOAD() + rv.s("UP_NAME");
-
-			String path = rv.s("path");
-			String xmlname = rv.s("xmlname");
-
-			IUpdateXml up = this.getUpdateXml(null, pv.getStringValue());
-			JSONObject rst = up.importXml(path, xmlname, sourceXmlFilePath);
-
-			cnt = rst.toString();
-
+			cnt = this.handleImportXml();
 			this.setOutType(response, "json");
 		} else if (oType.toUpperCase().equals("SAVE_JAVA")) {// 保存java代码
-
 			JSONObject rst = this.saveJavaCode(rv);
 			cnt = rst.toString();
 			this.setOutType(response, "json");
 		}
 		this.outContent(request, response, cnt);
+	}
+
+	/**
+	 * View the xml's string
+	 * 
+	 * @return
+	 */
+	private String handleView() {
+		String xml = rv.getString("XML");
+		Document doc = UXml.asDocument(xml);
+		UpdateXmlBase.clearDoc(doc);
+
+		String xmlPretty = UXml.asXmlPretty(doc);
+
+		return xmlPretty;
+	}
+
+	/**
+	 * return the xmlname's all sqls
+	 * 
+	 * @return
+	 */
+	private String handleSqls() {
+		String xmlName = rv.getString("XMLNAME");
+		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
+		String sqls = up.getSqls();
+		return sqls;
+	}
+
+	private boolean handleSave() {
+		String xmlName = rv.getString("XMLNAME");
+		String itemName = rv.getString("ITEMNAME");
+		String xml = rv.getString("XML");
+		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
+		return up.updateItem(itemName, xml);
+	}
+
+	private String handleNull(HttpServletResponse response) {
+		String modeName = rv.getString("MODE_NAME");
+		String mode = rv.getString("MODE");
+		if (mode == null) {
+			mode = "";
+		}
+
+		HtmlCreator hc = new HtmlCreator();
+		try {
+			hc.init(rv.getRequest(), rv.getSession(), response);
+			String xml = hc.getConfigItemXml();
+			if (mode.equals("JS")) {
+				this.setOutType(response, "javascript");
+				xml = "window." + modeName + "=\"" + Utils.textToJscript(xml) + "\"";
+			} else {
+				this.setOutType(response, "xml");
+			}
+			return xml;
+		} catch (Exception err) {
+			return err.getMessage();
+		}
+	}
+
+	private String handleAll() {
+		MStr s = new MStr();
+		String xmlName = rv.getString("XMLNAME");
+		String itemName = rv.getString("ITEMNAME");
+		try {
+			IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
+			String xml = up.queryItemXml(itemName);
+			s.a("window._CFG_ITEM=\"");
+			s.a(Utils.textToJscript(xml));
+			s.al("\";");
+
+			xml = this.getCfgXmlJs("EwaGlobal.xml", "_CFG_GLOBAL");
+			s.al(xml);
+
+			xml = this.getCfgXmlJs("EwaConnections.xml", "_CFG_CNN");
+			s.al(xml);
+
+			xml = this.getCfgXmlJs("EwaSkin.xml", "_CFG_SKIN");
+			s.al(xml);
+
+			xml = this.getCfgXmlJs("EwaConfig.xml", "_CFG_MAIN");
+			s.al(xml);
+		} catch (Exception e) {
+			s.a("ERROR:" + rv.getRequest().getQueryString());
+		}
+
+		return s.toString();
+	}
+
+	/**
+	 * CFG_XML
+	 * 
+	 * @return
+	 */
+	private String handleCfgXml(HttpServletResponse response) {
+		String xmlName = rv.getString("XMLNAME");
+		String name = xmlName;
+		String xml = null;
+		String modeName = rv.getString("MODE_NAME");
+		String mode = rv.getString("MODE");
+		if (mode == null) {
+			mode = "";
+		}
+		if (mode.equals("JS")) {
+			this.setOutType(response, "html");
+			xml = this.getCfgXmlJs(name, modeName);
+		} else {
+			this.setOutType(response, "xml");
+			xml = this.getCfgXml(name);
+		}
+
+		return xml;
+	}
+
+	private void handleRemove() {
+		String xmlName = rv.getString("XMLNAME");
+		String itemName = rv.getString("ITEMNAME");
+		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
+		up.removeItem(itemName);
+	}
+
+	private void handlePaste() {
+		// PASTE
+		String from = rv.getString("FROM").replace("|", "/");
+		String to = rv.getString("TO").replace("|", "/").split("\\*")[0];
+		String toName = rv.getString("TONAME");
+
+		String[] froms = from.split("\\*");
+		IUpdateXml up = this.getUpdateXml(froms[0], pvAdmin.getStringValue());
+		String sourceXml = up.queryItemXml(froms[1]);
+		IUpdateXml up1 = this.getUpdateXml(to, pvAdmin.getStringValue());
+		up1.saveXml(toName, sourceXml);
+
+	}
+
+	/**
+	 * remove the configuration's backups
+	 * 
+	 * @return the removes count
+	 */
+	private int handleDeleteBaks() {
+		String xmlname = rv.getString("xmlname");
+		IUpdateXml up = this.getUpdateXml(xmlname, this.pvAdmin.getStringValue());
+		_BakFilesCount = up.deleteBaks(xmlname);
+
+		return _BakFilesCount;
+	}
+
+	private String handleGUNID() {
+		String num = rv.getString("NUM");
+		int iNum = 1;
+		if (num != null && num.trim().length() > 0) {
+			iNum = Integer.parseInt(num.trim());
+		}
+		if (iNum <= 0 || iNum > 100) {
+			iNum = 1;
+		}
+		StringBuilder s = new StringBuilder();
+		s.append("[");
+		for (int i = 0; i < iNum; i++) {
+			if (i > 0) {
+				s.append(",\r\n");
+			}
+			s.append("\"" + Utils.getGuid() + "\"");
+		}
+		s.append("]");
+
+		return s.toString();
+	}
+
+	/**
+	 * return the ewa_conf.xml content
+	 * 
+	 * @return
+	 */
+	private String handleEwaConf() {
+		String ewa_conf_file = UPath.getRealPath() + "/ewa_conf.xml";
+		JSONObject rst = new JSONObject();
+		rst.put("RST", true);
+		String xml;
+		try {
+			xml = UFile.readFileText(ewa_conf_file);
+			rst.put("XML", xml);
+		} catch (Exception e) {
+			rst.put("RST", false);
+			rst.put("ERR", e.toString());
+		}
+
+		return rst.toString();
+	}
+
+	private void handleGetDocXml(HttpServletResponse response) throws IOException {
+		// 获取整个配置文件
+		String xmlname = rv.getString("xmlname");
+		IUpdateXml up = this.getUpdateXml(xmlname, this.pvAdmin.getStringValue());
+		String cnt = up.getDocXml();
+
+		String[] names = UserConfig.filterXmlNameByJdbc(xmlname).split("\\|");
+		String name = names[names.length - 1];
+		byte[] buf = cnt.getBytes();
+
+		response.setHeader("Location", name);
+		response.setHeader("Cache-Control", "max-age=30");
+		response.setHeader("Content-Disposition", "attachment; filename=" + name);
+		// filename应该是编码后的(utf-8)
+		response.setContentType("text/xml");
+		response.setContentLength(buf.length);
+		response.getOutputStream().write(buf);
+	}
+
+	/**
+	 * IMPORT_XML
+	 * 
+	 * @return
+	 */
+	private String handleImportXml() {
+		String sourceXmlFilePath = UPath.getPATH_UPLOAD() + rv.s("UP_NAME");
+
+		String path = rv.s("path");
+		String xmlname = rv.s("xmlname");
+
+		IUpdateXml up = this.getUpdateXml(null, this.pvAdmin.getStringValue());
+		JSONObject rst = up.importXml(path, xmlname, sourceXmlFilePath);
+
+		return rst.toString();
+	}
+
+	/**
+	 * EWAC_DDL_READ
+	 * 
+	 * @return
+	 */
+	private String handleEwacDdlRead() {
+		String ewascriptpath = rv.s("EWA_SCRIPT_PATH");
+		ScriptPath sp = ScriptPaths.getInstance().getScriptPath(ewascriptpath);
+		ConfigUtils configUtils = new ConfigUtils(sp);
+		// 从配置文件中加载DropList配置信息
+		return configUtils.loadDdls();
+	}
+
+	/**
+	 * EWAC_DDL_RELOAD
+	 * 
+	 * @return
+	 */
+	private String handleEwacDdlReload() {
+		String ewascriptpath = rv.s("EWA_SCRIPT_PATH");
+		ScriptPath sp = ScriptPaths.getInstance().getScriptPath(ewascriptpath);
+		// 刷新配置文件中 DropList配置信息
+		ConfigUtils configUtils = new ConfigUtils(sp);
+		JSONObject rst = new JSONObject();
+		int inc;
+		try {
+			inc = configUtils.renewDdls(this.pvAdmin.getStringValue());
+
+			rst.put("RST", true);
+			rst.put("MSG", inc);
+		} catch (Exception e) {
+			rst.put("RST", false);
+			rst.put("MSG", e.getMessage());
+			rst.put("Exception", e);
+		}
+
+		return rst.toString();
 	}
 
 	/**
@@ -450,7 +554,7 @@ public class ServletXml extends HttpServlet {
 		}
 		try {
 			xml = SystemXmlUtils.getSystemConfContent(name);
-			//xml = UXml.asXmlAll(UXml.retDocument(name1));
+			// xml = UXml.asXmlAll(UXml.retDocument(name1));
 		} catch (Exception e) {
 			xml = "GET " + name + " ERROR:" + e.getMessage();
 		}
