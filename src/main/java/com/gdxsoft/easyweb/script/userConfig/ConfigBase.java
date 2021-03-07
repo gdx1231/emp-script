@@ -12,6 +12,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.gdxsoft.easyweb.conf.ScriptPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public abstract class ConfigBase {

@@ -1,7 +1,5 @@
 package com.gdxsoft.easyweb.script;
 
-import static com.gdxsoft.easyweb.script.display.action.ActionBase.COOKIE_NAME_PREFIX;
-
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
@@ -21,12 +19,16 @@ import javax.servlet.http.HttpSession;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.Securities;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.script.display.action.ActionBase;
+import com.gdxsoft.easyweb.utils.IUSymmetricEncyrpt;
 import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UCookies;
-import com.gdxsoft.easyweb.utils.UDes;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UNet;
@@ -45,6 +47,7 @@ import com.gdxsoft.easyweb.utils.msnet.MTable;
  * 
  */
 public class RequestValue implements Cloneable {
+	private static Logger LOGGER = LoggerFactory.getLogger(RequestValue.class);
 	public static String HOST_BASE; // 网站的BASE地址
 	public static String HOST; // 网站的域名
 	public static int HOST_PORT; // 端口
@@ -59,7 +62,6 @@ public class RequestValue implements Cloneable {
 	 * 用于Cache文件用的标记
 	 */
 	private int _ParameterHashCode = 0;
-	private UDes _UDes;
 
 	private Map<String, JSONObject> mapJson_;
 
@@ -778,8 +780,7 @@ public class RequestValue implements Cloneable {
 					pv.setDataType("binary");
 
 				} catch (Exception err) {
-					System.err.println(err.getMessage());
-
+					LOGGER.error(err.getMessage());
 				}
 
 			}
@@ -865,20 +866,16 @@ public class RequestValue implements Cloneable {
 		if (cc == null) {
 			return;
 		}
-		if (_UDes == null) {
-			try {
-				_UDes = new UDes();
-			} catch (Exception e) {
-				System.err.println(e);
-			}
-		}
-		String ckPrefix = COOKIE_NAME_PREFIX;
+
+		IUSymmetricEncyrpt security = Securities.getInstance().getDefaultSymmetric();
+
+		String ckPrefix = ActionBase.COOKIE_NAME_PREFIX;
 		for (int i = 0; i < cc.length; i++) {
 			String key = cc[i].getName().toUpperCase().trim();
 
 			// 过滤掉所有以EWA_开头的cookie,不应存在的数据
 			// 时差可以放到 cookie 里
-			if (key.startsWith("EWA_") && !key.equals("EWA_TIMEDIFF")) {
+			if (key.startsWith("EWA_") && !key.endsWith(ckPrefix) && !key.equals("EWA_TIMEDIFF")) {
 				continue;
 			}
 
@@ -888,18 +885,17 @@ public class RequestValue implements Cloneable {
 			val = UCookies.decodeCookieValue(val);
 
 			// 解密加密的Cookie
-			if (_UDes != null && key.indexOf(ckPrefix) > 0) {
+			if (security != null && key.endsWith(ckPrefix)) {
 				if (val == null || val.trim().length() == 0) {
 					// 值为空白的加密cookie不处理
 					continue;
 				}
 				try {
-
-					val = _UDes.decrypt(val);
+					val = security.decrypt(val);
 					key = key.replace(ckPrefix, "");
 					this._ReqValues.addValue(key, val, PageValueTag.COOKIE_ENCYRPT);
 				} catch (Exception e) {
-					// System.err.println("解密COOKIE，" + e.toString());
+					LOGGER.warn("Decrypte the cookie " + key + "=" + val + ", " + e.getLocalizedMessage());
 				}
 			} else {
 				this._ReqValues.addValue(key, val, PageValueTag.COOKIE);
@@ -1009,7 +1005,7 @@ public class RequestValue implements Cloneable {
 			String url1 = url + "/" + name;
 			return net.downloadData(url1);
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 			return null;
 		}
 

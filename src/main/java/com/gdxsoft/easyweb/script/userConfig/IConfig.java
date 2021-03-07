@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.gdxsoft.easyweb.conf.ScriptPath;
+
 public interface IConfig extends Serializable {
 	String getPath();
 

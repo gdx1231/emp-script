@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
+import com.gdxsoft.easyweb.conf.ScriptPath;
+
 public class ResourceConfig extends ConfigBase implements IConfig, Serializable, Cloneable {
 
 	/**

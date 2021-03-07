@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
+import com.gdxsoft.easyweb.conf.ScriptPath;
 import com.gdxsoft.easyweb.utils.UFile;
 
 public class FileConfig extends ConfigBase implements IConfig, Serializable, Cloneable {

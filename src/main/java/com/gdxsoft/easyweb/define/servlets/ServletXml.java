@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.gdxsoft.easyweb.SystemXmlUtils;
+import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ScriptPaths;
 import com.gdxsoft.easyweb.define.CodeFormat;
 import com.gdxsoft.easyweb.define.ConfigUtils;
 import com.gdxsoft.easyweb.define.IUpdateXml;
@@ -31,8 +33,6 @@ import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
 import com.gdxsoft.easyweb.script.servlets.GZipOut;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
-import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
-import com.gdxsoft.easyweb.script.userConfig.ScriptPaths;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;

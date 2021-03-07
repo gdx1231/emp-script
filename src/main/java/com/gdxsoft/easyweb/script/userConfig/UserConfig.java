@@ -15,6 +15,8 @@ import org.w3c.dom.*;
 import com.gdxsoft.easyweb.cache.ConfigCache;
 import com.gdxsoft.easyweb.cache.ConfigCacheWidthSqlCached; //有问题
 import com.gdxsoft.easyweb.cache.ConfigStatus;
+import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ScriptPaths;
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.script.template.XItemParameter;

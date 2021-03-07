@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ScriptPath;
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.script.project.Project;
-import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFileCheck;
 import com.gdxsoft.easyweb.utils.UPath;

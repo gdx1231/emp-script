@@ -15,6 +15,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.gdxsoft.easyweb.conf.ScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.define.ConfigUtils;

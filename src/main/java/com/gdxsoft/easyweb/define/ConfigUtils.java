@@ -13,11 +13,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ScriptPaths;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
-import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
-import com.gdxsoft.easyweb.script.userConfig.ScriptPaths;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;

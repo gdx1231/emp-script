@@ -17,14 +17,14 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ScriptPaths;
 import com.gdxsoft.easyweb.define.SyncRemote;
 import com.gdxsoft.easyweb.define.SyncRemotes;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
-import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
-import com.gdxsoft.easyweb.script.userConfig.ScriptPaths;
 
 /**
  * Synchronize the local server files to the remote server

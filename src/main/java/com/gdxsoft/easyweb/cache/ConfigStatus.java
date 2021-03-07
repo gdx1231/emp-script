@@ -6,10 +6,10 @@ import java.io.Serializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
-import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFileCheck;
 

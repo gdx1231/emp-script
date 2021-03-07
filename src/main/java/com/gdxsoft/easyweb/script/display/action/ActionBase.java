@@ -28,12 +28,13 @@ import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
-import com.gdxsoft.easyweb.utils.UDes;
+import com.gdxsoft.easyweb.utils.IUSymmetricEncyrpt;
 import com.gdxsoft.easyweb.utils.UMail;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
+import com.gdxsoft.easyweb.conf.Securities;
 import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
@@ -705,7 +706,7 @@ public class ActionBase {
 
 		if (type.equalsIgnoreCase("all") || type.equalsIgnoreCase("cookie")) {
 			String ckName = name + COOKIE_NAME_PREFIX;
-			UDes des = new UDes();
+			IUSymmetricEncyrpt security = Securities.getInstance().getDefaultSymmetric();
 			if (option.equalsIgnoreCase("C") && val != null) { // create
 				int a = 0;
 				try {
@@ -714,7 +715,7 @@ public class ActionBase {
 					a = 0;
 				}
 
-				String cVal = des.encrypt(val);
+				String cVal = security.encrypt(val);
 				cVal = URLEncoder.encode(cVal, "ascii");
 				Cookie cookie = new Cookie(ckName, cVal);
 

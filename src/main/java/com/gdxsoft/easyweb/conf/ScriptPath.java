@@ -1,4 +1,4 @@
-package com.gdxsoft.easyweb.script.userConfig;
+package com.gdxsoft.easyweb.conf;
 
 import java.io.Serializable;
 

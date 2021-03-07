@@ -15,10 +15,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.gdxsoft.easyweb.conf.ScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
-import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
