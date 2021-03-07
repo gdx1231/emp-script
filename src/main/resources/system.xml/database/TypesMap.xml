@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Maps>
+	<EwaMap>
+		<Map Name="VARCHAR" CreateNumber="1" InsertPrefix="'" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="VARCHAR" />
+				<MapTo Name="NVARCHAR" Scale="2" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="VARCHAR2" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="VARCHAR" />
+				<MapTo Name="TINYTEXT" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="VARCHAR" />
+				<MapTo Name="NVARCHAR" Scale="2" />
+			</Database>
+		</Map>
+
+		<Map Name="CHAR" CreateNumber="1" InsertPrefix="'" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="CHAR" />
+				<MapTo Name="NCHAR" Scale="2" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="CHAR" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="CHAR" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="CHAR" />
+			</Database>
+		</Map>
+		<Map Name="TEXT" CreateNumber="0" InsertPrefix="'" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="TEXT" />
+				<MapTo Name="NTEXT" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="CLOB" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="TEXT" />
+				<MapTo Name="MEDIUMTEXT" />
+				<MapTo Name="LONGTEXT" />
+				<MapTo Name="LONG VARCHAR" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="CLOB" />
+			</Database>
+		</Map>
+
+		<Map Name="INT" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="INT" />
+				<MapTo Name="SMALLINT" />
+				<MapTo Name="TINYINT" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="INTEGER" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="INTEGER" />
+				<MapTo Name="INT" />
+				<MapTo Name="SMALLINT" />
+				<MapTo Name="MEDIUMINT" />
+
+				<MapTo Name="MEDIUMINT UNSIGNED" />
+				<MapTo Name="INT UNSIGNED" />
+				<MapTo Name="TINYINT UNSIGNED"></MapTo>
+				<MapTo Name="SMALLINT UNSIGNED" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="INT" />
+			</Database>
+		</Map>
+		<Map Name="BIGINT" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="BIGINT" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="NUMBER" Fixed="38" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="BIGINT" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="BIGINT" />
+			</Database>
+		</Map>
+
+		<Map Name="MONEY" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="MONEY" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="NUMBER" Fixed="38,4" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="NUMERIC" Fixed="17,4" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="NUMERIC" Fixed="17,4" />
+			</Database>
+		</Map>
+
+		<Map Name="FLOAT" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="FLOAT" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="FLOAT" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySql">
+				<MapTo Name="FLOAT" />
+				<MapTo Name="DOUBLE" />
+				<MapTo Name="DOUBLE PRECISION" />
+				<MapTo Name="FLOAT UNSIGNED" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="FLOAT" />
+			</Database>
+		</Map>
+		<Map Name="REAL" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="REAL" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="REAL" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySql">
+				<MapTo Name="REAL" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="REAL" />
+			</Database>
+		</Map>
+
+		<Map Name="NUMERIC" CreateNumber="2" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="NUMERIC" />
+				<MapTo Name="DECIMAL" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="NUMBER" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="NUMERIC" />
+				<MapTo Name="DECIMAL" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="NUMERIC" />
+			</Database>
+		</Map>
+		<Map Name="BINARY" CreateNumber="1" InsertPrefix="" InsertCovert="BIN"
+			Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="BINARY" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="RAW" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="BINARY" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="BINARY" />
+			</Database>
+		</Map>
+		<Map Name="VARBINARY" CreateNumber="1" InsertPrefix=""
+			InsertCovert="BIN" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="VARBINARY" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="RAW" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="VARBINARY" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="VARBINARY" />
+			</Database>
+		</Map>
+		<Map Name="IMAGE" CreateNumber="0" InsertPrefix="" InsertCovert="BIN"
+			Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="IMAGE" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="BLOB" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="LONG VARBINARY" />
+				<MapTo Name="MEDIUMBLOB" />
+				<MapTo Name="LONGBLOB" />
+				<MapTo Name="BLOB" />
+				<MapTo Name="TINYBLOB" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="BLOB" />
+			</Database>
+		</Map>
+
+		<Map Name="DATETIME" CreateNumber="0" InsertCovert="DATE"
+			InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
+				<MapTo Name="SMALLDATETIME" InsertCovert="replace('@val', 'T',' ')" />
+				<MapTo Name="DATE" InsertCovert="replace('@val', 'T',' ')" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="DATE"
+					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+				<MapTo Name="TIME"
+					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
+				<MapTo Name="DATE" InsertCovert="replace('@val', 'T',' ')" />
+				<MapTo Name="TIME" InsertCovert="replace('@val', 'T',' ')" />
+
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
+			</Database>
+		</Map>
+		<Map Name="TIMESTAMP" CreateNumber="0" InsertCovert="DATE"
+			InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="TIMESTAMP" InsertCovert="replace('@val', 'T',' ')" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="TIMESTAMP"
+					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="TIMESTAMP" InsertCovert="replace('@val', 'T',' ')" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="TIMESTAMP" InsertCovert="replace('@val', 'T',' ')" />
+			</Database>
+		</Map>
+		<Map Name="BIT" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="BIT" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="INTEGER" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="BIT" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="BIT" />
+			</Database>
+		</Map>
+
+		<Map Name="uniqueidentifier" CreateNumber="1" InsertPrefix="'"
+			Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="uniqueidentifier" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="VARCHAR2" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="VARCHAR" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="VARCHAR" />
+			</Database>
+		</Map>
+
+		<Map Name="XML" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="XML" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="XML" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="XML" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="XML" />
+			</Database>
+		</Map>
+	</EwaMap>
+	<Functions>
+		<Function Name="[F_DATE_NOW]">
+			<Database Name="MSSQL" Func="getdate()" />
+			<Database Name="MYSQL" Func="now()" />
+			<Database Name="ORACLE" Func="sysdate" />
+		</Function>
+	</Functions>
+	<SqlTemplates des="用于不同数据库的 SQL 模板">
+		<SqlTemplate Name="MSSQL">
+			<PrimaryKey>
+				<![CDATA[
+ALTER TABLE {TABLE_NAME} ADD CONSTRAINT PK_{TABLE_NAME} PRIMARY KEY CLUSTERED(
+	{FIELD_NAMES}
+)
+				]]>
+			</PrimaryKey>
+			<FieldCommentsGet>
+				<![CDATA[
+SELECT objname COLUMN_NAME, convert(varchar(8000),value) REMARKS FROM (
+	SELECT * FROM ::fn_listextendedproperty(NULL, 'user', '{SCHMEA}', 'table', '{TABLE_NAME}', 'column', null) 
+	union 
+	SELECT * FROM ::fn_listextendedproperty(NULL, 'user', '{SCHMEA}', 'view', '{TABLE_NAME}', 'column', null)
+) gggg
+				]]>
+			</FieldCommentsGet>
+			<FieldCommentSet>
+				<![CDATA[
+if exists(SELECT * FROM 
+	::fn_listextendedproperty(NULL, 'user', '{SCHMEA}','table', '{TABLE_NAME}', 'column', '{FIELD_NAME}'))
+  BEGIN
+  	exec sp_updateextendedproperty 'MS_Description', '{COMMENT}', 'user', '{SCHMEA}', 'table', '{TABLE_NAME}' , 'column', '{FIELD_NAME}'
+  END
+ELSE
+  BEGIN
+	exec sp_addextendedproperty 'MS_Description', '{COMMENT}', 'user', '{SCHMEA}', 'table', '{TABLE_NAME}' , 'column', '{FIELD_NAME}'
+  END
+]]>
+			</FieldCommentSet>
+		</SqlTemplate>
+		<SqlTemplate Name="ORACLE">
+			<PrimaryKey>
+				<![CDATA[
+ALTER TABLE {TABLE_NAME} ADD CONSTRAINT PK_{TABLE_NAME} PRIMARY KEY (
+	{FIELD_NAMES}
+) USING INDEX
+
+				]]>
+			</PrimaryKey>
+			<FieldCommentsGet>
+				<![CDATA[
+SELECT A.COLUMN_NAME ,A.data_length Column_SIZE,A.Data_type Type_NAME, 
+		CASE 
+			WHEN a.NULLABLE='Y' THEN 'YES' 
+			ELSE 'NO' 
+		END AS IS_NULLABLE, 
+		C.COMMENTS REMARKS,cc.table_name AS FK_TABLE_NAME, 
+		cc.column_name as FK_COLUMN_NAME  
+FROM dba_tab_columns A 
+ 	left join dba_COL_COMMENTS C ON C.column_name=A.column_name AND A.table_name=C.table_name
+    left join 
+    ( 
+    	select c2.table_name,c3.column_name from dba_constraints c1 
+    		left join dba_constraints c2 on c1.r_constraint_name=c2.constraint_name
+    		left join dba_cons_columns c3 on c3.constraint_name=c1.constraint_name
+    		
+    		where c1.constraint_type='R' and c1.table_name='{TABLE_NAME}' 
+    			and c1.owner='{SCHMEA}'
+    ) cc on cc.column_name=a.COLUMN_NAME
+    WHERE A.TABLE_NAME='{TABLE_NAME}' AND A.OWNER=C.OWNER AND A.OWNER='{SCHMEA}' order by a.COLUMN_ID
+]]></FieldCommentsGet>
+			<FieldCommentSet>
+				<![CDATA[COMMENT ON COLUMN {TABLE_NAME}.{FIELD_NAME} IS '{COMMENT}']]>
+			</FieldCommentSet>
+		</SqlTemplate>
+		<SqlTemplate Name="MYSQL">
+			<PrimaryKey>
+				<![CDATA[ALTER TABLE {TABLE_NAME} ADD PRIMARY KEY ({FIELD_NAMES})]]>
+			</PrimaryKey>
+			<IdentityField des="获取字段是否为自增型">
+				<![CDATA[SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.columns where table_schema='{SCHMEA}' AND 	TABLE_NAME='{TABLE_NAME}' AND EXTRA='auto_increment']]>
+			</IdentityField>
+		</SqlTemplate>
+
+		<SqlTemplate Name="HSQLDB">
+			<FieldCommentSet>
+				<![CDATA[COMMENT ON COLUMN {TABLE_NAME}.{FIELD_NAME} IS '{COMMENT}']]>
+			</FieldCommentSet>
+		</SqlTemplate>
+	</SqlTemplates>
+
+</Maps>

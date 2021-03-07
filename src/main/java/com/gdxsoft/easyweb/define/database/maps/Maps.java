@@ -2,8 +2,7 @@ package com.gdxsoft.easyweb.define.database.maps;
 
 import org.w3c.dom.Document;
 
-import com.gdxsoft.easyweb.utils.UPath;
-import com.gdxsoft.easyweb.utils.UXml;
+import com.gdxsoft.easyweb.SystemXmlUtils;
 
 /**
  * 数据库字段映射主类
@@ -12,7 +11,7 @@ import com.gdxsoft.easyweb.utils.UXml;
  * 
  */
 public class Maps {
-	public static String MAP_XML = "/database/TypesMap.xml";
+	public static final String MAP_XML = "/database/TypesMap.xml";
 
 	private MapFieldTypes _MapFieldTypes;
 	private MapFunctions _MapFunctions;
@@ -31,8 +30,7 @@ public class Maps {
 	}
 
 	private void init() throws Exception {
-		String xmlName = UPath.getConfigPath() + "/" + MAP_XML;
-		Document doc = UXml.retDocument(xmlName);
+		Document doc = SystemXmlUtils.getSystemConfDocument(MAP_XML);
 		_MapFieldTypes = new MapFieldTypes();
 		_MapFieldTypes.initMaps(doc);
 

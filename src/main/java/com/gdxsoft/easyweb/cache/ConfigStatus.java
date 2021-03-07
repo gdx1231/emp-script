@@ -1,6 +1,7 @@
 package com.gdxsoft.easyweb.cache;
 
 import java.io.File;
+import java.io.Serializable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,12 @@ import com.gdxsoft.easyweb.utils.UFileCheck;
  * @author admin
  *
  */
-public class ConfigStatus {
+public class ConfigStatus implements Serializable, Cloneable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2194022825597581140L;
+
 	private static Logger LOGGER = LoggerFactory.getLogger(ConfigStatus.class);
 
 	private boolean jdbc;
@@ -39,10 +45,11 @@ public class ConfigStatus {
 
 	}
 
-	public ConfigStatus(IConfig config) {
-		if (config.getScriptPath().isJdbc()) {
+	public ConfigStatus(IConfig configType) {
+		this.configType = configType;
+		if (configType.getScriptPath().isJdbc()) {
 			this.initByJdbc();
-		} else if (config.getScriptPath().isResources()) {
+		} else if (configType.getScriptPath().isResources()) {
 			this.initByResource();
 		} else {
 			this.initByFile();
@@ -64,10 +71,11 @@ public class ConfigStatus {
 		ScriptPath sp = configType.getScriptPath();
 		JdbcConfigOperation op = new JdbcConfigOperation(sp);
 
-		DTTable tb = op.getXmlMeta(configType.getXmlName(), configType.getItemName());
+		// only the total XML meta
+		DTTable tb = op.getXmlMeta(configType.getXmlName(), null);
 
 		if (tb.getCount() == 0) {
-			LOGGER.error("Not found configure " + configType.getXmlName() + ", " + configType.getItemName());
+			LOGGER.error("Not found configure " + configType.getXmlName());
 			return;
 		}
 
@@ -125,7 +133,7 @@ public class ConfigStatus {
 
 		return rst;
 	}
-	
+
 	public int getFileCode() {
 		return this.fixedXmlName.hashCode();
 	}
@@ -202,5 +210,4 @@ public class ConfigStatus {
 		return md5;
 	}
 
-	 
 }

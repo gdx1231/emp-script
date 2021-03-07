@@ -1,9 +1,11 @@
 package com.gdxsoft.easyweb.script.userConfig;
 
+import java.io.Serializable;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-public interface IConfig {
+public interface IConfig extends Serializable {
 	String getPath();
 
 	/**
@@ -58,5 +60,11 @@ public interface IConfig {
 	String getXmlName();
 
 	String getItemName();
+
+	public void setScriptPath(ScriptPath scriptPath);
+
+	public void setXmlName(String xmlName);
+
+	public void setItemName(String itemName);
 
 }

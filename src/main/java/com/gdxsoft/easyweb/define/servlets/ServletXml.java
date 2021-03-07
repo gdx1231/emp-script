@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +30,13 @@ import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
 import com.gdxsoft.easyweb.script.servlets.GZipOut;
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.ScriptPaths;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
+import com.gdxsoft.easyweb.utils.UUrl;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -187,7 +190,11 @@ public class ServletXml extends HttpServlet {
 			cnt = this.handleEwacDdlReload();
 		} else if (oType.toUpperCase().equals("EWAC_DDL_READ")) {
 			// 从配置文件中加载DropList配置信息
-			cnt = this.handleEwacDdlRead();
+			try {
+				cnt = this.handleEwacDdlRead();
+			} catch (Exception e) {
+				cnt = e.getMessage();
+			}
 		} else if (oType.toUpperCase().equals("GET_DOC_XML")) {
 			// 获取整个配置文件
 			this.handleGetDocXml(response);
@@ -432,10 +439,21 @@ public class ServletXml extends HttpServlet {
 	 * EWAC_DDL_READ
 	 * 
 	 * @return
+	 * @throws Exception
 	 */
-	private String handleEwacDdlRead() {
-		String ewascriptpath = rv.s("EWA_SCRIPT_PATH");
-		ScriptPath sp = ScriptPaths.getInstance().getScriptPath(ewascriptpath);
+	private String handleEwacDdlRead() throws Exception {
+		String ref = this.rv.s("SYS_REMOTE_REFERER");
+		if (StringUtils.isBlank(ref)) {
+			throw new Exception("Need the http referer");
+		}
+		UUrl uref = new UUrl(ref);
+		String D_XMLNAME = uref.getParamter("D_XMLNAME");
+		if (StringUtils.isBlank(D_XMLNAME)) {
+			throw new Exception("Need the parameter D_XMLNAME in the http referer");
+		}
+		IConfig configType = UserConfig.getConfig(D_XMLNAME, null);
+		ScriptPath sp = configType.getScriptPath();
+
 		ConfigUtils configUtils = new ConfigUtils(sp);
 		// 从配置文件中加载DropList配置信息
 		return configUtils.loadDdls();

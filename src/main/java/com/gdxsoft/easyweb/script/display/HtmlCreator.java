@@ -8,6 +8,8 @@ import javax.servlet.http.HttpSession;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.acl.IAcl;
 import com.gdxsoft.easyweb.acl.IAcl2;
@@ -50,6 +52,7 @@ import com.gdxsoft.easyweb.utils.msnet.MList;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class HtmlCreator {
+	private static Logger LOGGER = LoggerFactory.getLogger(HtmlCreator.class);
 	private EwaGlobals _EwaGlobals;
 	private ItemValues _ItemValues;
 
@@ -365,7 +368,7 @@ public class HtmlCreator {
 					this._RequestValue.addValue(key + "_LENGTH", buf.length, PageValueTag.SYSTEM);
 
 				} catch (Exception err1) {
-					System.err.println(err1.getMessage());
+					LOGGER.error(err1.getMessage(), err1);
 				}
 				continue;
 			}
@@ -446,7 +449,7 @@ public class HtmlCreator {
 			} catch (Exception e) {
 				this._SysParas.setIsCached(false);
 				this._SysParas.setCachedSeconds(-1);
-				System.err.println(e.getMessage());
+				LOGGER.error(e.getMessage(), e);
 			}
 		} else {
 			this._SysParas.setIsCached(false);
@@ -497,13 +500,12 @@ public class HtmlCreator {
 
 		this._HtmlClass.setItemValues(this._ItemValues);
 		this._HtmlClass.setSysParas(this._SysParas);
-		
-		
+
 		// 设置Document对象是否为xhtml
 		this._Document.setIsXhtml(this._SysParas.isXhtml());
-		// 传递 HtmlClass对象 
-		this._Document.setHtmlClass( this._HtmlClass );
-		
+		// 传递 HtmlClass对象
+		this._Document.setHtmlClass(this._HtmlClass);
+
 		this._HtmlClass.setDocument(this._Document);
 
 		this._HtmlClass.setEwaGlobals(this._EwaGlobals);
@@ -811,7 +813,7 @@ public class HtmlCreator {
 					} else {// 抛出错误
 						this._ErrOut = true;
 						String _g_user_agent = this.getRequestValue().s("SYS_USER_AGENT");
-						
+
 						// 是否为移动调用
 						boolean isMobile = false;
 						if (_g_user_agent != null) {
@@ -819,7 +821,7 @@ public class HtmlCreator {
 							isMobile = _g_user_agent.indexOf("android") > 0 || _g_user_agent.indexOf("iphone") > 0
 									|| _g_user_agent.indexOf("ipad") > 0;
 						}
-						
+
 						String img_path = this.getRequestValue().getString("rv_remote_ewa_style_path");
 						if (img_path == null || img_path.trim().length() == 0) {
 							img_path = this.getRequestValue().getString("rv_ewa_style_path");
@@ -849,8 +851,9 @@ public class HtmlCreator {
 						}
 						sber.append(Utils.textToInputValue(returnValue));
 						sber.append("</h2></td></tr>");
-						if(isMobile) {
-							sber.append("<tr><td colspan=2><a onclick='EWA_App.back();' class='ewa-err-out-back'></a></td></tr>");
+						if (isMobile) {
+							sber.append(
+									"<tr><td colspan=2><a onclick='EWA_App.back();' class='ewa-err-out-back'></a></td></tr>");
 						}
 						sber.append("</table></div>");
 						if (!isMobile) {
@@ -894,7 +897,8 @@ public class HtmlCreator {
 		} catch (Exception e) {
 			_DebugFrames.setRunTimeException(e);
 			_DebugFrames.addDebug(this, "ERR", "执行中错误：" + e.getMessage());
-			System.err.println(e.getMessage());
+
+			LOGGER.error(e.getMessage(), e);
 			throw e;
 		} finally {
 			// 写如日志系统
@@ -920,7 +924,7 @@ public class HtmlCreator {
 			MsgQueueManager.postMessage(this._RequestValue, this._SysParas.getFrameUnid(),
 					this._SysParas.getActionName(), this._RequestValue.queryToJson());
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage(), e);
 		}
 	}
 
@@ -943,7 +947,7 @@ public class HtmlCreator {
 				cache.getCachedContent(_SysParas.getCachedSeconds());
 				return cache;
 			} catch (Exception e) {
-				System.err.println(e.getMessage());
+				LOGGER.error(e.getMessage(), e);
 			}
 		}
 		return null;
@@ -963,7 +967,7 @@ public class HtmlCreator {
 			cache.writeCache(cnt);
 			return true;
 		} catch (Exception e1) {
-			System.err.println(e1.getMessage());
+			LOGGER.error(e1.getMessage(), e1);
 			return false;
 		}
 	}
@@ -1126,7 +1130,7 @@ public class HtmlCreator {
 			sb.a(", \"PAGEINFO\":");
 			sb.al(f.createJsonPageInfo());
 		}
-		
+
 		sb.a(",\"FRAME_TYPE\":\"");
 		sb.a(this._Frame.getClass().getSimpleName());
 		sb.a("\"");
@@ -1343,7 +1347,7 @@ public class HtmlCreator {
 				htmlInstall = htmlInstall.substring(loc0);
 			}
 			int loc1 = htmlInstall.indexOf("<!--INC_END-->");
-			if(loc1 == -1) {
+			if (loc1 == -1) {
 				loc1 = htmlInstall.indexOf("</body>");
 			}
 			if (loc1 > 0) {
@@ -1681,7 +1685,7 @@ public class HtmlCreator {
 				this._Log.setMsg(msg);
 				this._DebugFrames.addDebug(this, "ACT", "设置日志信息 (" + msg + ")");
 			} catch (Exception e) {
-				System.err.println(e);
+				LOGGER.error(e.getLocalizedMessage(), e);
 			}
 		}
 
@@ -1888,7 +1892,7 @@ public class HtmlCreator {
 		try {
 			logInterface.Write();
 		} catch (Exception e) {
-			System.err.println(e);
+			LOGGER.error(e.getLocalizedMessage(), e);
 		}
 	}
 

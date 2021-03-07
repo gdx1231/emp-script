@@ -1,6 +1,7 @@
 package com.gdxsoft.easyweb.script.userConfig;
 
 import java.io.File;
+import java.io.Serializable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,9 +9,17 @@ import org.w3c.dom.Document;
 
 import com.gdxsoft.easyweb.utils.UFile;
 
-public class FileConfig extends ConfigBase implements IConfig {
+public class FileConfig extends ConfigBase implements IConfig, Serializable, Cloneable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6001786273284276308L;
 	private static Logger LOGER = LoggerFactory.getLogger(FileConfig.class);
 
+	public FileConfig() {
+		super();
+	}
+	
 	public FileConfig(ScriptPath scriptPath, String xmlName, String itemName) {
 		super(scriptPath, xmlName, itemName);
 	}

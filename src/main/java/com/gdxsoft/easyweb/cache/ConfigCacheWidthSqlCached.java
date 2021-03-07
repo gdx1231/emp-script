@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
-import com.gdxsoft.easyweb.utils.UFileCheck;
 
 /**
  *
@@ -64,15 +63,60 @@ public class ConfigCacheWidthSqlCached {
 		itemkey.append(item_key);
 		String key = itemkey.toString();
 
-		SqlCached cached = SqlCached.getInstance();
+		SqlCachedValue userConfigSerialized = SqlCached.getInstance().getBinary(key);
 
-		SqlCachedValue cv = cached.getBinary(key);
-		if (cv == null) {
+		if (userConfigSerialized == null) {
+			return null;
+		}
+		UserConfig uc = getUserConfigFromCache(userConfigSerialized, xmlFileName);
+		if (uc == null) {
+			return uc;
+		}
+		// not overtime
+		if (!userConfigSerialized.checkOvertime(UserConfig.CHECK_CHANG_SPAN_SECONDS)) {
+			return uc;
+		}
+
+		// Get cached XML meta from hsqldb
+		SqlCachedValue cachedXmlMeta = SqlCached.getInstance().getText(file_key);
+		if (cachedXmlMeta == null) { // 没有cached
+			removeUserConfig(xmlFileName);
+			return null;
+		}
+
+		// Get total XML meta from database
+		ConfigStatus currentXmlMeta = uc.getConfigStatus();
+
+		// long fileLastModify = fileStatus.lastModified();
+		// long len = fileStatus.length();
+		// String code = fileLastModify + "," + len + "," + fileStatus.getMd5();
+		// 从数据库返回的整个 XML 文件的 code
+		String code = currentXmlMeta.getStatusCode();
+
+		JSONObject json = new JSONObject(cachedXmlMeta.toString());
+		// 缓存中 整个 XML 文件的 code
+		String old_code = json.optString("code");
+
+		// 检查文件是否被修改
+		if (old_code.equals(code)) {
+			return uc;
+		} else {
+			// 文件变化了，清除本文件下的所有缓存
+			removeUserConfig(xmlFileName);
+			return null;
+		}
+
+	}
+
+	private static UserConfig getUserConfigFromCache(SqlCachedValue userConfigSerialized, String xmlFileName) {
+
+		if (userConfigSerialized == null) {
 			return null;
 		}
 		UserConfig uc = null;
 		try {
-			uc = UserConfig.fromSerialize(cv.getBinary());
+			uc = UserConfig.fromSerialize(userConfigSerialized.getBinary());
+			return uc;
 		} catch (ClassNotFoundException e) {
 			LOOGER.error(e.getMessage());
 			removeUserConfig(xmlFileName);
@@ -82,47 +126,6 @@ public class ConfigCacheWidthSqlCached {
 			removeUserConfig(xmlFileName);
 			return null;
 		}
-
-		int id = key.hashCode();
-		// 是否存在
-		boolean isHave = UFileCheck.isHave(id);
-		// 是否超时
-		boolean isOverTime = UFileCheck.isOverTime(id, UserConfig.CHECK_CHANG_SPAN_SECONDS);
-		if (isHave && !isOverTime) {
-			// 5秒内不重新扫描数据库数据
-			return uc;
-		}
-
-		int fileId = file_key.hashCode();
-		boolean is_file_not_changed = true;
-		if (UFileCheck.isHave(fileId) && !UFileCheck.isOverTime(fileId, UserConfig.CHECK_CHANG_SPAN_SECONDS)) {
-			// 指定的时间内不重复检查
-		} else {
-			// 对于文件保存获取文件的状态
-			ConfigStatus fileStatus = uc.getConfigStatus();
-			SqlCachedValue cvFile = cached.getText(file_key);
-			if (cvFile == null) { // 没有cached
-				return null;
-			}
-			// long fileLastModify = fileStatus.lastModified();
-			// long len = fileStatus.length();
-			// String code = fileLastModify + "," + len + "," + fileStatus.getMd5();
-			// 从数据库返回的整个 XML 文件的 code
-			String code = fileStatus.getStatusCode();
-			JSONObject json = new JSONObject(cvFile.toString());
-			// 缓存中 整个 XML 文件的 code
-			String old_code = json.optString("code");
-			// 检查文件是否被修改
-			is_file_not_changed = old_code.equals(code);
-		}
-		if (is_file_not_changed) {
-			return uc;
-		} else {
-			// 文件变化了，清除本文件下的所有缓存
-			removeUserConfig(xmlFileName);
-			return null;
-		}
-
 	}
 
 	/**
@@ -151,15 +154,13 @@ public class ConfigCacheWidthSqlCached {
 			itemkey.append(item_key);
 			keys[i] = itemkey.toString();
 
-			UFileCheck.remove(keys[i].hashCode());
+			LOOGER.info("CLEAR CAHCE: " + keys[i]);
 		}
 		// 删除和配置文件相关的缓存文件
 		cached.removes(keys, "BIN");
 		cached.remove(file_key, "TEXT");
-		LOOGER.info("CLEAR CAHCES: " + keys);
 		LOOGER.info("CLEAR CAHCES: " + xmlFileName);
 
-		UFileCheck.remove(file_key.hashCode());
 	}
 
 	/**
@@ -185,7 +186,6 @@ public class ConfigCacheWidthSqlCached {
 		itemkey.append(item_key);
 		String key = itemkey.toString();
 		cached.remove(key, "BIN");
-		UFileCheck.remove(key.hashCode());
 
 		JSONObject json = new JSONObject(cvFile.toString());
 		JSONArray arr = json.optJSONArray("itemnames");
@@ -253,7 +253,7 @@ public class ConfigCacheWidthSqlCached {
 			arr.put(itemName.toLowerCase());
 		}
 		// 记录文件信息到缓存
-		cached.add(file_key, configJson.toString());
+		cached.add(file_key, configJson.toString(), xmlFileName);
 
 		String item_key = getConfigItemKey(itemName);
 		StringBuilder itemkey = new StringBuilder(file_key);
@@ -261,10 +261,9 @@ public class ConfigCacheWidthSqlCached {
 		String key = itemkey.toString();
 		try {
 			// 记录配置项信息到缓存
-			cached.add(key, userConfig.toSerialize());
-			UFileCheck.putTimeAndFileCode(key.hashCode(), System.currentTimeMillis(), 0);
+			cached.add(key, userConfig.toSerialize(), xmlFileName + "::" + itemName);
 		} catch (IOException e) {
-			LOOGER.error(e.getMessage());
+			LOOGER.error("", e);
 		}
 
 	}

@@ -16,6 +16,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -28,8 +29,17 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	public UpdateXmlImpl(IConfig configType) {
 		super._XmlName = configType.getXmlName();
 		super.configType = configType;
-
+		super.scriptPath = configType.getScriptPath();
+		
 		_Document = this.getDoc();
+	}
+
+	/**
+	 * for batch update
+	 * @param scriptPath
+	 */
+	public UpdateXmlImpl(ScriptPath scriptPath) {
+		super.scriptPath = scriptPath;
 	}
 
 	/**

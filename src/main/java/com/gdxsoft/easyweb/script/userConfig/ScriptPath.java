@@ -1,6 +1,12 @@
 package com.gdxsoft.easyweb.script.userConfig;
 
-public class ScriptPath {
+import java.io.Serializable;
+
+public class ScriptPath implements Cloneable, Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8615816282487845786L;
 	private String path;
 	private String name;
 
@@ -52,7 +58,7 @@ public class ScriptPath {
 			return resourceRoot;
 		}
 
-		String root = this.path;
+		String root = this.path.replace("resources:", "").trim();
 		root = root.replace("\\", "/");
 		while (root.indexOf("//") > 0) {
 			root = root.replace("//", "/");

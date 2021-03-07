@@ -18,6 +18,7 @@ import org.xml.sax.SAXException;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -38,8 +39,13 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 	public UpdateXmlJdbcImpl(IConfig configType) {
 		super._XmlName = configType.getXmlName();
 		super.configType = configType;
+		super.scriptPath = configType.getScriptPath();
+		op = new JdbcConfigOperation(super.scriptPath);
+	}
 
-		op = new JdbcConfigOperation(super.getConfigType().getScriptPath());
+	public UpdateXmlJdbcImpl(ScriptPath scriptPath) {
+		super.scriptPath = scriptPath;
+		op = new JdbcConfigOperation(scriptPath);
 	}
 
 	/**
@@ -348,7 +354,8 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 			DTTable tbItems = op.getJdbcTable(sql2);
 			String itemNames = tbItems.joinIds("ITEMNAME", false);
 
-			UpdateXmlJdbcImpl ux = new UpdateXmlJdbcImpl(this.getConfigType());
+			UpdateXmlJdbcImpl ux = new UpdateXmlJdbcImpl(this.scriptPath);
+			ux.setXmlName(xmlName);
 			ux.batchUpdate(itemNames, paraName, paraValue);
 
 		}

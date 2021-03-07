@@ -190,4 +190,14 @@ public class SqlCachedRedisImpl implements ISqlCached {
 		}
 	}
 
+	@Override
+	public boolean add(String key, String value, String memo) {
+		return this.add(key, value);
+	}
+
+	@Override
+	public boolean add(String key, byte[] value, String memo) {
+		return this.add(key, value);
+	}
+
 }

@@ -11,6 +11,7 @@ import com.gdxsoft.easyweb.datasource.ConnectionConfig;
 import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MTableStr;
 
 public class SqlCachedHsqldbImpl implements ISqlCached {
@@ -47,70 +48,95 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 	}
 
 	/**
-	 * 添加 文字
+	 * Add a cache
 	 * 
-	 * @param key
-	 * @param value
-	 * @return
+	 * @param key   the cache key
+	 * @param value the cache value
+	 * @return successful
 	 */
 	public boolean add(String key, String value) {
+		return this.add(key, value, null);
+	}
+
+	/**
+	 * Add a cache
+	 * 
+	 * @param key   the cache key
+	 * @param value the cache value
+	 * @param memo  the cache memo
+	 * @return successful
+	 */
+	public boolean add(String key, String value, String memo) {
 		long t0 = DEBUG ? System.currentTimeMillis() : 0;
-		String sqlDelete = "DELETE FROM CACHED WHERE KEY1 = @PARAM_KEY AND VAL_TYPE='TEXT';";
+
+		this.remove(key, "TEXT");
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("INSERT INTO CACHED(KEY1,VAL_TYPE,VAL_TXT,last_time) VALUES(@PARAM_KEY,'TEXT',@PARAM_VAL,");
-		sb.append(System.currentTimeMillis());
-		sb.append(")");
+		sb.append("INSERT INTO CACHED(KEY1,VAL_TYPE,VAL_TXT,last_time, VAL_MEMO)"
+				+ " VALUES(@PARAM_KEY,'TEXT',@PARAM_VAL, @sys_date, @PARAM_MEMO)");
 		String sql = sb.toString();
 
 		RequestValue rv = new RequestValue();
 
-		rv.addValue("PARAM_KEY", key.hashCode());
+		rv.addValue("PARAM_KEY", this.getParameterKey(key));
 		rv.addValue("PARAM_VAL", value, "string", value.length());
-
-		String[] sqls = new String[2];
-		sqls[0] = sqlDelete;
-		sqls[1] = sql;
+		rv.addValue("PARAM_MEMO", memo == null ? null : memo.length() > 200 ? memo.substring(0, 200) : memo);
+		String[] sqls = new String[1];
+		sqls[0] = sql;
 
 		boolean o = this.addToCache(sqls, rv);
 		if (DEBUG) {
 			long t1 = System.currentTimeMillis();
 			LOGGER.info("SQLCACHED-PUT: " + key + " (" + key.hashCode() + " ):" + (t1 - t0) + "ms");
-			LOGGER.info("\t" + sqlDelete);
 			LOGGER.info("\t" + sql);
 		}
 		return o;
 	}
 
 	/**
-	 * 添加 二进制
+	 * return the key md5
 	 * 
 	 * @param key
-	 * @param value
 	 * @return
 	 */
-	public boolean add(String key, byte[] value) {
+	private String getParameterKey(String key) {
+		String paramKey = Utils.md5(key);
+		return paramKey;
+	}
+
+	/**
+	 * Cached a binary data
+	 * 
+	 * @param key   the cached key
+	 * @param value the cached value
+	 * @param memo  the cached memo
+	 * @return successful
+	 */
+	public boolean add(String key, byte[] value, String memo) {
+		String paramKey = getParameterKey(key);
+
 		long t0 = DEBUG ? System.currentTimeMillis() : 0;
-		String sqlDelete = "DELETE FROM CACHED WHERE KEY1=@PARAM_KEY AND VAL_TYPE='BIN';";
+
+		this.remove(key, "BIN");
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("INSERT INTO CACHED(KEY1,VAL_TYPE,VAL_BIN,last_time) VALUES(@PARAM_KEY,'BIN',@PARAM_VAL,");
-		sb.append(System.currentTimeMillis());
-		sb.append(")");
+		sb.append("INSERT INTO CACHED(KEY1,VAL_TYPE,VAL_BIN,last_time, VAL_MEMO)"
+				+ " VALUES (@PARAM_KEY,'BIN', @PARAM_VAL, @sys_date , @PARAM_MEMO)");
 		String sql = sb.toString();
 		RequestValue rv = new RequestValue();
 
-		rv.addValue("PARAM_KEY", key.hashCode());
+		rv.addValue("PARAM_KEY", paramKey);
 		rv.addValue("PARAM_VAL", value, "binary", value.length);
+		rv.addValue("PARAM_MEMO", memo == null ? null : memo.length() > 200 ? memo.substring(0, 200) : memo);
 
-		String[] sqls = new String[2];
-		sqls[0] = sqlDelete;
-		sqls[1] = sql;
+		String[] sqls = new String[1];
+		sqls[0] = sql;
 
 		boolean o = this.addToCache(sqls, rv);
 
 		if (DEBUG) {
 			long t1 = System.currentTimeMillis();
-			LOGGER.info("SQLCACHED-PUT: " + key + " (" + key.hashCode() + " ) :" + (t1 - t0) + "ms");
-			LOGGER.info("\t" + sqlDelete);
+			LOGGER.info("SQLCACHED-PUT: " + key + " (" + key + " ) :" + (t1 - t0) + "ms");
 			LOGGER.info("\t" + sql);
 		}
 
@@ -118,9 +144,20 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 	}
 
 	/**
-	 * 获取二进制
+	 * Cached a binary data
 	 * 
-	 * @param key
+	 * @param key   the cached key
+	 * @param value the cached value
+	 * @return successful
+	 */
+	public boolean add(String key, byte[] value) {
+		return this.add(key, value, null);
+	}
+
+	/**
+	 * Get a binary data
+	 * 
+	 * @param key the cached key
 	 * @return
 	 */
 	public SqlCachedValue getBinary(String key) {
@@ -128,9 +165,9 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 	}
 
 	/**
-	 * 获取文本
+	 * Get a text data
 	 * 
-	 * @param key
+	 * @param key the cached key
 	 * @return
 	 */
 	public SqlCachedValue getText(String key) {
@@ -138,23 +175,27 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 	}
 
 	/**
-	 * 获取对象
+	 * Get a cached object
 	 * 
-	 * @param key
-	 * @param type 类型，bin, text ...
+	 * @param key  the cached key
+	 * @param type the cached type(BIN/ TEXT)
 	 * @return
 	 */
 	public SqlCachedValue get(String key, String type) {
 		long t0 = DEBUG ? System.currentTimeMillis() : 0;
 
+		String paramKey = getParameterKey(key);
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT * FROM CACHED WHERE KEY1=");
-		sb.append(key.hashCode());
-		sb.append(" AND val_type='");
+		sb.append("SELECT * FROM CACHED WHERE KEY1='");
+		sb.append(paramKey);
+		sb.append("' AND val_type='");
 		sb.append(type.replace("'", "''").toUpperCase());
 		sb.append("'");
 		String sql = sb.toString();
+
 		DTTable tb = DTTable.getJdbcTable(sql, CONN_STR);
+
 		if (tb == null || !tb.isOk() || tb.getCount() == 0) {
 			if (DEBUG) {
 				long t1 = System.currentTimeMillis();
@@ -165,8 +206,9 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 		}
 		SqlCachedValue cv = new SqlCachedValue();
 		try {
-			cv.setLastTime(Long.parseLong(tb.getCell(0, "last_time").toString()));
+			cv.setLastTime(tb.getCell(0, "last_time").toTime());
 			cv.setType(tb.getCell(0, "VAL_TYPE").toString());
+			cv.setMemo(tb.getCell(0, "VAL_MEMO").toString());
 
 			if (type.equals("BIN")) {// 二进制
 				cv.setValue(tb.getCell(0, "VAL_BIN").getValue());
@@ -205,15 +247,20 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 	 * @return
 	 */
 	public boolean removes(String[] keys, String type) {
-
 		if (keys == null || keys.length == 0) {
 			return true;
 		}
 		long t0 = System.currentTimeMillis();
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("DELETE FROM CACHED WHERE val_type='" + type.replace("'", "''").toUpperCase() + "' and key1 in(");
 		for (int i = 0; i < keys.length; i++) {
-			sb.append(keys[i].hashCode());
+			if (i > 0) {
+				sb.append(", ");
+			}
+			sb.append("'");
+			sb.append(getParameterKey(keys[i]));
+			sb.append("'");
 		}
 		sb.append(")");
 
@@ -288,8 +335,8 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 		}
 
 		StringBuilder sb1 = new StringBuilder();
-		sb1.append("create table CACHED(key1 int,val_type varchar(100),val_bin LONGVARBINARY");
-		sb1.append(",val_txt longvarchar,last_time bigint, primary key(key1,val_type))");
+		sb1.append("create table CACHED(key1 varchar(32),val_type varchar(5),val_bin LONGVARBINARY");
+		sb1.append(",val_txt longvarchar,last_time datetime, val_memo varchar(200), primary key(key1,val_type))");
 
 		List<String> sqls = new ArrayList<String>();
 		sqls.add(sb1.toString());

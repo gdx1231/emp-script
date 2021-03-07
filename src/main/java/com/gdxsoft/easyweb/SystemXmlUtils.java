@@ -37,6 +37,11 @@ public class SystemXmlUtils {
 		if (StringUtils.isBlank(configPath)) {
 			// read from jar
 			path = "/system.xml/" + confName;
+			path = path.replace("\\", "/");
+
+			while (path.indexOf("//") > 0) {
+				path = path.replace("//", "/");
+			}
 		} else {
 			path = UPath.getConfigPath() + confName;
 		}

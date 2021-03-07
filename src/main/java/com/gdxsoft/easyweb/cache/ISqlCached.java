@@ -28,6 +28,7 @@ public interface ISqlCached {
 	 */
 	boolean add(String key, String value);
 
+	boolean add(String key, String value, String memo);
 	/**
 	 * 添加 二进制
 	 * 
@@ -36,7 +37,8 @@ public interface ISqlCached {
 	 * @return
 	 */
 	boolean add(String key, byte[] value);
-
+	
+	boolean add(String key, byte[] value, String memo);
 	/**
 	 * 获取二进制
 	 * 

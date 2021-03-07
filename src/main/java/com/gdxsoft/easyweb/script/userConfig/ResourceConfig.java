@@ -1,5 +1,6 @@
 package com.gdxsoft.easyweb.script.userConfig;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -8,10 +9,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-public class ResourceConfig extends ConfigBase implements IConfig {
+public class ResourceConfig extends ConfigBase implements IConfig, Serializable, Cloneable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3698905095781681521L;
 	private static Logger LOGER = LoggerFactory.getLogger(ResourceConfig.class);
 
+	public ResourceConfig() {
+		super();
+	}
 	public ResourceConfig(ScriptPath scriptPath, String xmlName, String itemName) {
 		super(scriptPath, xmlName, itemName);
 	} 

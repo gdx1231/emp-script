@@ -2,6 +2,7 @@ package com.gdxsoft.easyweb.script.userConfig;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,12 +24,33 @@ import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 
-public class JdbcConfigOperation {
+public class JdbcConfigOperation implements Serializable, Cloneable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1054775785967204755L;
 	private static Logger LOGER = LoggerFactory.getLogger(JdbcConfigOperation.class);
 	private ScriptPath scriptPath;
 
 	public JdbcConfigOperation(ScriptPath scriptPath) {
 		this.scriptPath = scriptPath;
+	}
+
+	/**
+	 * Check if the xmlPath is in the database
+	 * 
+	 * @param xmlPath
+	 * @return
+	 */
+	public boolean checkPathExists(String xmlPath) {
+		String xmlPath1 = UserConfig.filterXmlNameByJdbc(xmlPath);
+		if (!xmlPath1.endsWith("|")) {
+			xmlPath1 = xmlPath1 + "|";
+		}
+		String sql = "select 1 a from  ewa_cfg_tree where XMLNAME like '" + xmlPath1.replace("'", "''") + "%'";
+		DTTable tb = this.getJdbcTable(sql);
+
+		return tb.getCount() > 0;
 	}
 
 	/**

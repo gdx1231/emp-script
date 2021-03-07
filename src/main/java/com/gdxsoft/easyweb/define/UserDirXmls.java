@@ -15,9 +15,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPaths;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFileCheck;
@@ -32,19 +34,17 @@ public class UserDirXmls {
 	private boolean _IsShowItems = false;
 	private static HashMap<Integer, String> _XmlItems = new HashMap<Integer, String>();
 
-	private ScriptPath scriptPath;
+	private RequestValue rv;
 
-	public UserDirXmls(ScriptPath scriptPath, String group) {
+	public UserDirXmls(String group) {
 		if (group != null && group.trim().equalsIgnoreCase("group")) {
 			this._IsShowItems = false;
 		} else {
 			this._IsShowItems = true;
 		}
 
-		this.scriptPath = scriptPath;
 		_Xml = new StringBuilder();
 		this.initUnIncludes();
-
 		this.createTreeNode();
 	}
 
@@ -89,7 +89,7 @@ public class UserDirXmls {
 		// this.createTreeNode();
 	}
 
-	public Dirs getCfgsByJdbc() {
+	public Dirs getCfgsByJdbc(ScriptPath scriptPath) {
 		JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
 		DTTable tb = op.getJdbcCfgDirs();
 		Dirs dirs = new Dirs();
@@ -123,27 +123,36 @@ public class UserDirXmls {
 	}
 
 	private void createTreeNode() {
-		if (scriptPath.isResources()) {
-			return;
-		}
+		ScriptPaths sps = ScriptPaths.getInstance();
 
 		long t_start = System.currentTimeMillis();
-		Dirs dirs;
-		if (scriptPath.isJdbc()) {
-			dirs = this.getCfgsByJdbc();
-		} else {
-			String scriptPath = UPath.getScriptPath();
-			dirs = new Dirs(scriptPath, true);
-			dirs.initUnIncludes(initUnIncludes());
+		ArrayList<Dir> al = new ArrayList<Dir>();
+		for (int i = 0; i < sps.getLst().size(); i++) {
+			ScriptPath sp = sps.getLst().get(i);
+			Dirs dirs;
+			if (sp.isResources()) {
+				continue;
+			} else if (sp.isJdbc()) { // jdbc
+				dirs = this.getCfgsByJdbc(sp);
+				ArrayList<Dir> a = dirs.getDirs();
+				al.addAll(a);
+			} else { // file
+				String scriptPath = sp.getPath();
+				dirs = new Dirs(scriptPath, true);
+				dirs.initUnIncludes(initUnIncludes());
 
-			String[] filter = { "xml" };
+				String[] filter = { "xml" };
 
-			dirs.setFiletes(filter);
+				dirs.setFiletes(filter);
+				ArrayList<Dir> a = dirs.getDirs();
+				al.addAll(a);
+			}
+
 		}
+
 		// 获取目录和文件
-		ArrayList<Dir> a = dirs.getDirs();
-		Dir[] dirArr = new Dir[a.size()];
-		a.toArray(dirArr);
+		Dir[] dirArr = new Dir[al.size()];
+		al.toArray(dirArr);
 		// 按目录名称排序
 		Arrays.sort(dirArr, new Comparator<Dir>() {
 			@Override
@@ -394,7 +403,7 @@ public class UserDirXmls {
 		UserXmls userXmls = new UserXmls(fileName);
 		userXmls.initXml();
 		List<UserXml> a = userXmls.getXmls();
-		
+
 		String[] xmls = new String[a.size()];
 		HashMap<String, UserXml> ha = new HashMap<String, UserXml>();
 		for (int m = 0; m < a.size(); m++) {
@@ -432,6 +441,15 @@ public class UserDirXmls {
 	 * @return the _Xml
 	 */
 	public String getXml() {
+		
 		return _Xml.toString();
+	}
+
+	public RequestValue getRv() {
+		return rv;
+	}
+
+	public void setRv(RequestValue rv) {
+		this.rv = rv;
 	}
 }

@@ -16,11 +16,16 @@ import com.gdxsoft.easyweb.utils.UXml;
 
 public abstract class ConfigBase {
 	private static Logger LOGER = LoggerFactory.getLogger(ConfigBase.class);
+
 	private ScriptPath scriptPath;
 	private String fixedXmlName;
 
 	private String xmlName;
 	private String itemName;
+
+	public ConfigBase() {
+
+	}
 
 	public ConfigBase(ScriptPath scriptPath, String xmlName, String itemName) {
 		this.scriptPath = scriptPath;
@@ -36,7 +41,7 @@ public abstract class ConfigBase {
 	 * @param itemName the item name
 	 * @throws Exception
 	 */
-	public Node loadItemFromDoc(Document doc ) throws Exception {
+	public Node loadItemFromDoc(Document doc) throws Exception {
 		String itemName1 = itemName.trim();
 
 		NodeList nl = UXml.retNodeList(doc, "EasyWebTemplates/EasyWebTemplate");
@@ -50,7 +55,7 @@ public abstract class ConfigBase {
 	}
 
 	/**
-	 * return the configuration document
+	 * Return the configuration document
 	 * 
 	 * @param xmlContent the configuration XML content
 	 * @return the configuration document
@@ -61,20 +66,15 @@ public abstract class ConfigBase {
 	public Document getDocumentByXmlString(String xmlContent)
 			throws ParserConfigurationException, SAXException, IOException {
 		try {
-			Document doc1 = UXml.retDocument(xmlContent);
+			Document doc1 = UXml.asDocument(xmlContent);
 			return doc1;
-		} catch (ParserConfigurationException e) {
-			LOGER.error(e.getLocalizedMessage());
-			throw e;
-		} catch (SAXException e) {
-			LOGER.error(e.getLocalizedMessage());
-			throw e;
-		} catch (IOException e) {
-			LOGER.error(e.getLocalizedMessage());
+		} catch (Exception e) {
+			LOGER.error("Invaid cast to xml document", e);
 			throw e;
 		}
 
 	}
+
 	/**
 	 * Check if the item in the configuration file
 	 * 
@@ -101,11 +101,11 @@ public abstract class ConfigBase {
 			return false;
 		}
 	}
-	
+
 	public abstract boolean checkConfigurationExists();
 
 	public abstract Document loadConfiguration() throws Exception;
-	
+
 	/**
 	 * return the item from the configuration file
 	 * 
@@ -117,7 +117,6 @@ public abstract class ConfigBase {
 
 		return this.loadItemFromDoc(doc);
 	}
-
 
 	public void setFixedXmlName(String fixedXmlName) {
 		this.fixedXmlName = fixedXmlName;
@@ -137,5 +136,17 @@ public abstract class ConfigBase {
 
 	public String getItemName() {
 		return itemName;
+	}
+
+	public void setScriptPath(ScriptPath scriptPath) {
+		this.scriptPath = scriptPath;
+	}
+
+	public void setXmlName(String xmlName) {
+		this.xmlName = xmlName;
+	}
+
+	public void setItemName(String itemName) {
+		this.itemName = itemName;
 	}
 }

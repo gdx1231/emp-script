@@ -27,7 +27,7 @@ import com.gdxsoft.easyweb.utils.*;
  * @author Administrator
  * 
  */
-public class UserConfig implements Serializable {
+public class UserConfig implements Serializable, Cloneable {
 	private static Logger LOGGER = LoggerFactory.getLogger(UserConfig.class);
 	/**
 	 * 
@@ -58,14 +58,18 @@ public class UserConfig implements Serializable {
 	private IConfig configType;
 
 	public IConfig getConfigType() {
+		if(this.configType !=null && this.configType.getFixedXmlName() == null) {
+			// parse from Serializable, the configType parameters are null value  
+			this.configType = getConfig(this.getXmlName(), this.getItemName());
+		}
 		return configType;
 	}
 
 	/**
 	 * Get a UserConfig instance from all configurations
 	 * 
-	 * @param xmlName the configuration XML file name
-	 * @param itemName the configuration item name
+	 * @param xmlName     the configuration XML file name
+	 * @param itemName    the configuration item name
 	 * @param debugFrames the DebugFrames
 	 * @return
 	 * @throws Exception
@@ -90,22 +94,30 @@ public class UserConfig implements Serializable {
 		o.setDebugFrames(debugFrames);
 		o.loadUserDefined();
 		o.setDebugFrames(null);
-		ConfigCacheWidthSqlCached.setUserConfig(iConfig.getFixedXmlName(), itemName, o);
 
+		if ("sqlcached".equals(UPath.getCfgCacheMethod())) {
+			ConfigCacheWidthSqlCached.setUserConfig(iConfig.getFixedXmlName(), itemName, o);
+		} else {
+			ConfigCache.setUserConfig(iConfig.getFixedXmlName(), itemName, o);
+		}
 		return o;
 	}
 
 	private static synchronized UserConfig getInstanceFromCahced(String xmlName, String itemName) {
 		String fixedXmlName = UserConfig.filterXmlName(xmlName);
 		UserConfig o = null;
-		if (UPath.getCfgCacheMethod() != null && UPath.getCfgCacheMethod().equals("sqlcached")) {
+		if ("sqlcached".equals(UPath.getCfgCacheMethod())) {
 			o = ConfigCacheWidthSqlCached.getUserConfig(fixedXmlName, itemName);
 		} else { // 利用内存模式
+			UserConfig obj = ConfigCache.getUserConfig(fixedXmlName, itemName);
+			if (obj == null) {
+				return null;
+			}
 			try {
-				o = (UserConfig) ConfigCache.getUserConfig(fixedXmlName, itemName).clone();
+				o = (UserConfig) obj.clone();
 			} catch (CloneNotSupportedException e) {
 				ConfigCache.removeUserConfig(fixedXmlName, itemName);
-				LOGGER.error(e.getLocalizedMessage());
+				LOGGER.error(e.getLocalizedMessage(), e);
 			}
 		}
 		return o;
@@ -144,6 +156,31 @@ public class UserConfig implements Serializable {
 		return null;
 	}
 
+	public static IConfig getConfigByPath(String xmlPath) {
+		IConfig ic = null;
+		ScriptPaths sps = ScriptPaths.getInstance();
+		for (int i = 0; i < sps.getLst().size(); i++) {
+			ScriptPath sp = sps.getLst().get(i);
+
+			if (sp.isResources()) {
+				ic = new ResourceConfig(sp, xmlPath, null);
+				if (ic.checkConfigurationExists()) {
+					return ic;
+				}
+			} else if (sp.isJdbc()) {
+				ic = new JdbcConfig(sp, xmlPath, null);
+				if (ic.checkConfigurationExists()) {
+					return ic;
+				}
+			} else { // file
+				ic = new FileConfig(sp, xmlPath, null);
+				if (ic.checkConfigurationExists()) {
+					return ic;
+				}
+			}
+		}
+		return null;
+	}
 	/**
 	 * 从序列化二进制中获取
 	 * 
@@ -217,12 +254,12 @@ public class UserConfig implements Serializable {
 	 * @return
 	 */
 	public ConfigStatus getConfigStatus() {
-		ConfigStatus configStatus = new ConfigStatus(this.configType);
+		ConfigStatus configStatus = new ConfigStatus(this.getConfigType());
 		return configStatus;
 	}
 
 	public void loadUserDefined() throws Exception {
-		this._ItemNode = this.configType.loadItem();
+		this._ItemNode = this.getConfigType().loadItem();
 
 		this.initXItems();
 		this.initPage();

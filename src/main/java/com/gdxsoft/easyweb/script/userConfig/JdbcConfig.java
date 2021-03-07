@@ -1,5 +1,7 @@
 package com.gdxsoft.easyweb.script.userConfig;
 
+import java.io.Serializable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -7,9 +9,17 @@ import org.w3c.dom.Node;
 
 import com.gdxsoft.easyweb.utils.UXml;
 
-public class JdbcConfig extends ConfigBase implements IConfig {
+public class JdbcConfig extends ConfigBase implements IConfig, Serializable, Cloneable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1935997388322977522L;
 	private static Logger LOGER = LoggerFactory.getLogger(JdbcConfig.class);
 	private JdbcConfigOperation op;
+
+	public JdbcConfig() {
+		super();
+	}
 
 	public JdbcConfig(ScriptPath scriptPath, String xmlName, String itemName) {
 		super(scriptPath, xmlName, itemName);
@@ -34,7 +44,7 @@ public class JdbcConfig extends ConfigBase implements IConfig {
 	 */
 	@Override
 	public Node loadItem() throws Exception {
-		String itemXml = op.getJdbcItemXml(getXmlName(), getXmlName());
+		String itemXml = op.getJdbcItemXml(getXmlName(), super.getItemName());
 		if (itemXml == null) {
 			String err = "The jdbc " + super.getXmlName() + ", " + super.getItemName() + " not exists";
 			LOGER.error(err);
@@ -58,7 +68,5 @@ public class JdbcConfig extends ConfigBase implements IConfig {
 		}
 		return super.getDocumentByXmlString(xmlDocument);
 	}
-
-	 
 
 }

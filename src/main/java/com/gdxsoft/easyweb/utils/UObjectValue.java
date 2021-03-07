@@ -258,12 +258,12 @@ public class UObjectValue {
 		String ret;
 		Object[] b = null;
 		String s = method.getReturnType().getName();
-		
+
 //		if (!(s.equals("long") || s.equals("int") || s.equals("boolean") || s.equals("byte") || s.indexOf("String") >= 0
 //				|| s.equals("java.util.Date"))) {
 //			return null;
 //		}
-		
+
 		try {
 			Object a = method.invoke(this._object, b);
 			if (a == null) {
@@ -580,11 +580,21 @@ public class UObjectValue {
 		try {
 			c = Class.forName(className);
 		} catch (Exception e) {
-			System.err.println(e);
+			LOGGER.error("", e);
 			return null;
 		}
 		Constructor<?> constructor = this.getConstructor(c, constructorParameters);
 		if (constructor == null) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Not found constructor " + className);
+			if (constructorParameters != null) {
+				sb.append(", ");
+				for (int i = 0; i < constructorParameters.length; i++) {
+					sb.append(constructorParameters[i]);
+					sb.append(" ");
+				}
+			}
+			LOGGER.error(sb.toString());
 			return null;
 		}
 
@@ -603,16 +613,16 @@ public class UObjectValue {
 			this._LastErrMsg = null;
 			return instance;
 		} catch (IllegalArgumentException e) {
-			System.err.println(e);
+			LOGGER.error("", e);
 			this._LastErrMsg = e.getCause().getMessage();
 		} catch (InstantiationException e) {
-			System.err.println(e);
+			LOGGER.error("", e);
 			this._LastErrMsg = e.getCause().getMessage();
 		} catch (IllegalAccessException e) {
 			// 转到静态方法
 			return c;
 		} catch (InvocationTargetException e) {
-			System.err.println(e);
+			LOGGER.error("", e);
 			this._LastErrMsg = e.getCause().getMessage();
 		}
 		return null;
@@ -889,7 +899,7 @@ public class UObjectValue {
 				try {
 					v[0] = UConvert.ToInt32(str);
 				} catch (Exception err) {
-					LOGGER.error(err.getLocalizedMessage());
+					LOGGER.error(err.getLocalizedMessage(), err);
 					return false;
 				}
 			}
@@ -910,7 +920,7 @@ public class UObjectValue {
 						v[0] = Utils.getDate(t, "yyyy-MM-dd hh:mm:ss.SSS");
 					}
 				} catch (Exception err) {
-					LOGGER.error(err.getLocalizedMessage());
+					LOGGER.error(err.getLocalizedMessage(), err);
 					return false;
 				}
 			}
@@ -922,7 +932,7 @@ public class UObjectValue {
 				try {
 					v[0] = UConvert.ToDouble(str);
 				} catch (Exception err) {
-					LOGGER.error(err.getLocalizedMessage());
+					LOGGER.error(err.getLocalizedMessage(), err);
 					return false;
 				}
 			}

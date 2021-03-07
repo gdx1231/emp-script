@@ -10,6 +10,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -17,6 +18,11 @@ import com.gdxsoft.easyweb.utils.UXml;
 public class UserXmls {
 	private List<UserXml> _Xmls;
 	private IUpdateXml _UpdateXml;
+	private RequestValue rv;
+
+	public UserXmls() {
+
+	}
 
 	public UserXmls(String xmlName) {
 		this._UpdateXml = ConfigUtils.getUpdateXml(xmlName);
@@ -158,4 +164,18 @@ public class UserXmls {
 		return _Xmls;
 	}
 
+	public List<UserXml> getXmls(String xmlPath) {
+
+		this._UpdateXml = ConfigUtils.getUpdateXml(xmlPath);
+		this.initXml();
+		return this._Xmls;
+	}
+
+	public RequestValue getRv() {
+		return rv;
+	}
+
+	public void setRv(RequestValue rv) {
+		this.rv = rv;
+	}
 }

@@ -14,7 +14,6 @@ import com.gdxsoft.easyweb.utils.UPath;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisPoolConfig;
 
-
 public class SqlCached {
 
 	private static SqlCached INSTANCE;
@@ -62,7 +61,6 @@ public class SqlCached {
 				redis = ele.getAttribute("Redis");
 				auth = ele.getAttribute("Auth");
 				hosts = ele.getAttribute("Hosts");
-
 			}
 		}
 		if (cachedMethod.equals("redis") && (hosts == null || hosts.isEmpty())) {
@@ -146,6 +144,10 @@ public class SqlCached {
 		return _cachedImpl.add(key, value);
 	}
 
+	public boolean add(String key, String value, String memo) {
+		return _cachedImpl.add(key, value, memo);
+	}
+
 	/**
 	 * 添加 二进制
 	 * 
@@ -155,6 +157,17 @@ public class SqlCached {
 	 */
 	public boolean add(String key, byte[] value) {
 		return _cachedImpl.add(key, value);
+	}
+
+	/**
+	 * 添加 二进制
+	 * 
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public boolean add(String key, byte[] value, String memo) {
+		return _cachedImpl.add(key, value, memo);
 	}
 
 	/**

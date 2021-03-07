@@ -1,12 +1,15 @@
 package com.gdxsoft.easyweb.define;
 
-
 public class UpdateXml {
 
 	private IUpdateXml ux;
 
 	public UpdateXml(String xmlName) {
 		ux = ConfigUtils.getUpdateXml(xmlName);
+
+		if (ux == null) {
+			ux = ConfigUtils.getUpdateXmlByPath(xmlName);
+		}
 	}
 
 	/**

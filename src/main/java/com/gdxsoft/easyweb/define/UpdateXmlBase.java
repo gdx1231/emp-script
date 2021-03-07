@@ -10,6 +10,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -21,50 +22,19 @@ import com.gdxsoft.easyweb.utils.Utils;
  *
  */
 public class UpdateXmlBase {
-	String _XmlName;
 	String _RootUri = "EasyWebTemplates";
 	String _ItemUri = "EasyWebTemplate";
+
+	String _XmlName;
 	Document _Document;
 	String _FrameType;
 	String _XmlFilePath;
 	String _CreateDate;
 	String _UpdateDate;
 	String _BackUpXmlName;
-	
 	IConfig configType;
-
-	public IConfig getConfigType() {
-		return configType;
-	}
-
-	public void setConfigType(IConfig configType) {
-		this.configType = configType;
-	}
-
+	ScriptPath scriptPath;
 	private String _AdmId; // 管理员
-
-	/**
-	 * 设置管理员
-	 * 
-	 * @param admId
-	 */
-	public void setAdmin(String admId) {
-		_AdmId = admId;
-
-	}
-
-	/**
-	 * 获取管理员
-	 * 
-	 * @return
-	 */
-	public String getAdmin() {
-		return _AdmId;
-	}
-
-	public String getFrameType() {
-		return _FrameType;
-	}
 
 	void updateTime(Node item) {
 		Element ele = (Element) item;
@@ -83,7 +53,7 @@ public class UpdateXmlBase {
 	public String fixXml(String xml, String itemName) {
 		xml = UXml.filterInvalidXMLcharacter(xml);
 		// xml = xml.replaceAll("[\\x00-\\x08\\x0b-\\x0c\\x0e-\\x1f]", "");
-		
+
 		Document doc1 = UXml.asDocument(xml);
 		Element e1 = (Element) doc1.getFirstChild();
 		e1.setAttribute("Name", itemName);
@@ -167,5 +137,52 @@ public class UpdateXmlBase {
 				}
 			}
 		}
+	}
+
+	public String getXmlName() {
+		return _XmlName;
+	}
+
+	public void setXmlName(String xmlName) {
+		this._XmlName = xmlName;
+	}
+
+	public ScriptPath getScriptPath() {
+		return scriptPath;
+	}
+
+	public void setScriptPath(ScriptPath scriptPath) {
+		this.scriptPath = scriptPath;
+	}
+
+	/**
+	 * 设置管理员
+	 * 
+	 * @param admId
+	 */
+	public void setAdmin(String admId) {
+		_AdmId = admId;
+
+	}
+
+	/**
+	 * 获取管理员
+	 * 
+	 * @return
+	 */
+	public String getAdmin() {
+		return _AdmId;
+	}
+
+	public String getFrameType() {
+		return _FrameType;
+	}
+	
+	public IConfig getConfigType() {
+		return configType;
+	}
+
+	public void setConfigType(IConfig configType) {
+		this.configType = configType;
 	}
 }

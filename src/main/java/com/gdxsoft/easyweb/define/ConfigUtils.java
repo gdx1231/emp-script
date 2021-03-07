@@ -17,6 +17,7 @@ import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.script.userConfig.ScriptPath;
+import com.gdxsoft.easyweb.script.userConfig.ScriptPaths;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
@@ -36,6 +37,9 @@ public class ConfigUtils {
 	public static IUpdateXml getUpdateXml(String xmlName) {
 		IUpdateXml up = null;
 		IConfig configType = UserConfig.getConfig(xmlName, null);
+		if (configType == null) {
+			return null;
+		}
 		if (configType.getScriptPath().isJdbc()) {
 			up = new UpdateXmlJdbcImpl(configType);
 		} else if (configType.getScriptPath().isResources()) {
@@ -43,6 +47,40 @@ public class ConfigUtils {
 			up = new UpdateXmlImpl(configType);
 		}
 		return up;
+	}
+
+	/**
+	 * 获取Xml操作对象
+	 * 
+	 * @param xmlName
+	 * @return
+	 */
+	public static IUpdateXml getUpdateXmlByPath(String xmlPath) {
+		ScriptPaths sps = ScriptPaths.getInstance();
+		for (int i = 0; i < sps.getLst().size(); i++) {
+			ScriptPath sp = sps.getLst().get(i);
+			if (sp.isResources()) {
+				continue;
+			} else if (sp.isJdbc()) {
+				JdbcConfigOperation op = new JdbcConfigOperation(sp);
+				if (op.checkPathExists(xmlPath)) {
+					UpdateXmlJdbcImpl o = new UpdateXmlJdbcImpl(sp);
+					o.setXmlName(xmlPath);
+					return o;
+				}
+			} else { // file
+				String xmlPath1 = UserConfig.filterXmlName(xmlPath);
+				String root = (sp.getPath() + xmlPath1);
+				File f = new File(root);
+				if (f.exists()) {
+					UpdateXmlImpl o = new UpdateXmlImpl(sp);
+					o.setXmlName(xmlPath1);
+					return o;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	private ScriptPath scriptPath;
