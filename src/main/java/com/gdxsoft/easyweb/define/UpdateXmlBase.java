@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -28,7 +29,20 @@ public class UpdateXmlBase {
 	String _XmlName;
 	Document _Document;
 	String _FrameType;
-	String _XmlFilePath;
+	private String _XmlFilePath;
+
+	public String getXmlFilePath() {
+		if (StringUtils.isBlank(_XmlFilePath) && configType != null) {
+			String path = configType.getPath();
+			this._XmlFilePath = path;
+		}
+		return this._XmlFilePath;
+	}
+
+	public void setXmlFilePath(String xmlFilePath) {
+		this._XmlFilePath = xmlFilePath;
+	}
+
 	String _CreateDate;
 	String _UpdateDate;
 	String _BackUpXmlName;
@@ -177,7 +191,7 @@ public class UpdateXmlBase {
 	public String getFrameType() {
 		return _FrameType;
 	}
-	
+
 	public IConfig getConfigType() {
 		return configType;
 	}

@@ -30,12 +30,13 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 		super._XmlName = configType.getXmlName();
 		super.configType = configType;
 		super.scriptPath = configType.getScriptPath();
-		
+
 		_Document = this.getDoc();
 	}
 
 	/**
 	 * for batch update
+	 * 
 	 * @param scriptPath
 	 */
 	public UpdateXmlImpl(ScriptPath scriptPath) {
@@ -63,9 +64,11 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 		String xmlname = path + "/" + name;
 		xmlname = UserConfig.filterXmlName(xmlname);
 		this._XmlName = xmlname;
-		_XmlFilePath = this.configType.getScriptPath().getPath() + this._XmlName;
 
-		File f0 = new File(_XmlFilePath);
+		String xmlFilePath = this.configType.getScriptPath().getPath() + this._XmlName;
+		super.setXmlFilePath(xmlFilePath);
+
+		File f0 = new File(xmlFilePath);
 		if (f0.exists()) {
 			LOGGER.error(xmlname + "已经存在");
 
@@ -272,9 +275,9 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	 */
 	@Override
 	public boolean writeXml(Document doc) {
-		boolean rst = UXml.saveDocument(doc, _XmlFilePath);
-		System.out.println("SAVE(" + rst + "): " + this._XmlFilePath);
-
+		String path = super.getXmlFilePath();
+		boolean rst = UXml.saveDocument(doc, path);
+		LOGGER.info("SAVE(" + rst + "): " + path);
 		return rst;
 	}
 
@@ -417,9 +420,10 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	@Override
 	public void saveBackup() {
 		long a = System.currentTimeMillis();
-		String newName = this._XmlFilePath + "." + a + ".bak";
+
+		String newName = this.getXmlFilePath() + "." + a + ".bak";
 		this._BackUpXmlName = newName;
-		File f1 = new File(this._XmlFilePath);
+		File f1 = new File(this.getXmlFilePath());
 		File f2 = new File(newName);
 
 		if (f1.exists() && !f1.isDirectory()) {
@@ -437,7 +441,7 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	 */
 	@Override
 	public void recoverFile() {
-		File f2 = new File(this._XmlFilePath);
+		File f2 = new File(this.getXmlFilePath());
 		File f1 = new File(this._BackUpXmlName);
 		if (f1.exists() && !f1.isDirectory()) {
 			if (f2.exists()) {
