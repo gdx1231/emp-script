@@ -4,6 +4,8 @@ import com.gdxsoft.easyweb.acl.IAcl;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.utils.UUrl;
+import com.gdxsoft.easyweb.utils.Utils;
 
 public class DefineAcl implements IAcl {
 
@@ -13,18 +15,14 @@ public class DefineAcl implements IAcl {
 	private String _GoToUrl; // 验证失败跳转页面
 
 	public boolean canRun() {
-		if (this._RequestValue.getString("EWA.HOST").equals("localhost")) {
-			return true;
-		}
-		PageValue pv = this._RequestValue.getPageValues().getValue(
-				"EWA_ADMIN_ID");
+		PageValue pv = this._RequestValue.getPageValues().getValue("EWA_ADMIN_ID");
 
 		// EWA_ADMIN_ID 不在seesion和系统内部cookie中
-		if (pv == null
-				|| !(pv.getPVTag() == PageValueTag.COOKIE_ENCYRPT || pv
-						.getPVTag() == PageValueTag.SESSION)) {
+		if (pv == null || !(pv.getPVTag() == PageValueTag.COOKIE_ENCYRPT || pv.getPVTag() == PageValueTag.SESSION)) {
+			UUrl url = new UUrl(this._RequestValue.getRequest());
+			String ref = url.getUrl();
 			this._GoToUrl = this._RequestValue.getContextPath()
-					+ "/EWA_STYLE/cgi-bin/?XMLNAME=/ewa/m.xml&ITEMNAME=login";
+					+ "/EWA_STYLE/cgi-bin/?XMLNAME=/ewa/m.xml&ITEMNAME=login&ref=" + Utils.textToUrl(ref);
 			return false;
 		} else {
 			return true;
@@ -48,8 +46,7 @@ public class DefineAcl implements IAcl {
 	}
 
 	/**
-	 * @param xmlName
-	 *            the _XmlName to set
+	 * @param xmlName the _XmlName to set
 	 */
 	public void setXmlName(String xmlName) {
 		_XmlName = xmlName;
@@ -63,8 +60,7 @@ public class DefineAcl implements IAcl {
 	}
 
 	/**
-	 * @param itemName
-	 *            the _ItemName to set
+	 * @param itemName the _ItemName to set
 	 */
 	public void setItemName(String itemName) {
 		_ItemName = itemName;
@@ -87,8 +83,7 @@ public class DefineAcl implements IAcl {
 	}
 
 	/**
-	 * @param goToUrl
-	 *            the _GoToUrl to set
+	 * @param goToUrl the _GoToUrl to set
 	 */
 	public void setGoToUrl(String goToUrl) {
 		_GoToUrl = goToUrl;

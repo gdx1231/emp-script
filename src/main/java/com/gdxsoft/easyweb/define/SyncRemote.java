@@ -646,7 +646,13 @@ public class SyncRemote {
 		try {
 			String code = CFGS.getString("REMOTE_CODE");
 			AES = new UAes();
+			// Compatible with old version
+			AES.setCipherName(UAes.AES_128_CBC);
+			AES.setPaddingMethod(UAes.NoPadding);
+			AES.setUsingBc(false);
+
 			AES.createKey(code.getBytes("utf-8"));
+
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}

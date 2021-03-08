@@ -18,9 +18,6 @@ import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
 /**
- * 没有完成！！！
- * 
- * @author admin
  *
  */
 public class SyncRemotes {

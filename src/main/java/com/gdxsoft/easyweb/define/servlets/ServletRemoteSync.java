@@ -17,7 +17,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
 import com.gdxsoft.easyweb.conf.ScriptPaths;
 import com.gdxsoft.easyweb.define.SyncRemote;
 import com.gdxsoft.easyweb.define.SyncRemotes;
@@ -302,22 +301,21 @@ public class ServletRemoteSync extends HttpServlet {
 	}
 
 	private JSONObject handleGetCfgs(SyncRemote s) {
-		String ewascriptpath = rv.s("EWA_SCRIPT_PATH");
-
-		ScriptPath sp = ScriptPaths.getInstance().getScriptPath(ewascriptpath);
+		ScriptPaths.getInstance().getLst().forEach(sp -> {
+			if (sp.isJdbc()) {
+				JdbcConfigOperation op = new JdbcConfigOperation(sp);
+				// 数据库管理的配置文件，输出到本地cache
+				try {
+					op.exportAll();
+				} catch (Exception e) {
+					LOGGER.error(e.getMessage());
+				}
+			}
+		});
 		// 因为安全原因删除了属性，因此需要克隆配置
 		JSONObject cfg = new JSONObject(s.getCfgs().toString());
 		cfg.remove("REMOTE_CODE");
 		cfg.remove("REMOTE_URL");
-		if (sp.isJdbc()) {
-			JdbcConfigOperation op = new JdbcConfigOperation(sp);
-			// 数据库管理的配置文件，输出到本地cache
-			try {
-				op.exportAll();
-			} catch (Exception e) {
-				LOGGER.error(e.getMessage());
-			}
-		}
 
 		return cfg;
 	}
