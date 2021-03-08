@@ -867,7 +867,11 @@ public class RequestValue implements Cloneable {
 			return;
 		}
 
-		IUSymmetricEncyrpt security = Securities.getInstance().getDefaultSymmetric();
+		IUSymmetricEncyrpt symmetric = null;
+		// defined in ewa_conf securities -> security
+		if (Securities.getInstance().getDefaultSecurity() != null) {
+			symmetric = Securities.getInstance().getDefaultSecurity().createSymmetric();
+		}
 
 		String ckPrefix = ActionBase.COOKIE_NAME_PREFIX;
 		for (int i = 0; i < cc.length; i++) {
@@ -879,28 +883,56 @@ public class RequestValue implements Cloneable {
 				continue;
 			}
 
-			String val = cc[i].getValue();
-
-			// 对cookie值进行UrlDecode操作
-			val = UCookies.decodeCookieValue(val);
-
-			// 解密加密的Cookie
-			if (security != null && key.endsWith(ckPrefix)) {
-				if (val == null || val.trim().length() == 0) {
-					// 值为空白的加密cookie不处理
-					continue;
-				}
-				try {
-					val = security.decrypt(val);
-					key = key.replace(ckPrefix, "");
-					this._ReqValues.addValue(key, val, PageValueTag.COOKIE_ENCYRPT);
-				} catch (Exception e) {
-					LOGGER.warn("Decrypte the cookie " + key + "=" + val + ", " + e.getLocalizedMessage());
-				}
+			if (key.endsWith(ckPrefix)) {
+				this.addEncryptedCookie(cc[i], symmetric);
 			} else {
+				String val = cc[i].getValue();
+				// 对cookie值进行UrlDecode操作
+				val = UCookies.decodeCookieValue(val);
 				this._ReqValues.addValue(key, val, PageValueTag.COOKIE);
 			}
+		}
+	}
 
+	/**
+	 * Decrypt the encryption cookie
+	 * 
+	 * @param ck        the cookie
+	 * @param symmetric
+	 */
+	private void addEncryptedCookie(Cookie ck, IUSymmetricEncyrpt symmetric) {
+		if (symmetric == null) {
+			String err = "No default symmetric defined, in the ewa_conf.xml securities->security";
+			LOGGER.warn(err);
+			return;
+		}
+		String key = ck.getName().toUpperCase().trim();
+		boolean ewaEncrypted = key.endsWith(ActionBase.COOKIE_NAME_PREFIX);
+		// 过滤掉所有以EWA_开头的cookie,不应存在的数据
+		// 时差可以放到 cookie 里
+		if (key.startsWith("EWA_") && !ewaEncrypted && !key.equals("EWA_TIMEDIFF")) {
+			return;
+		}
+
+		String val = ck.getValue();
+		// 解密加密的Cookie
+		if (val == null || val.trim().length() == 0) {
+			// 值为空白的加密cookie不处理
+			return;
+		}
+		
+		// 对cookie值进行UrlDecode操作
+		String decodeVal = UCookies.decodeCookieValue(val);
+		if (!ewaEncrypted) {
+			this._ReqValues.addValue(key, decodeVal, PageValueTag.COOKIE);
+		}
+
+		String fixedKey = key.substring(0, key.length() - ActionBase.COOKIE_NAME_PREFIX.length());
+		try {
+			String plainText  = symmetric.decrypt(decodeVal);
+			this._ReqValues.addValue(fixedKey, plainText, PageValueTag.COOKIE_ENCYRPT);
+		} catch (Exception e) {
+			LOGGER.warn("Decrypte the cookie " + key + "=" + val + ", " + e.getLocalizedMessage());
 		}
 	}
 

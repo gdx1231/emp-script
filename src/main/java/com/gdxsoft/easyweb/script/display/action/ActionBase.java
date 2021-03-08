@@ -1,7 +1,6 @@
 package com.gdxsoft.easyweb.script.display.action;
 
 import java.lang.reflect.Method;
-import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,9 +11,20 @@ import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.Securities;
+import com.gdxsoft.easyweb.data.DTColumn;
+import com.gdxsoft.easyweb.data.DTRow;
+import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.data.HorTable;
+import com.gdxsoft.easyweb.data.XmlData;
+import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.datasource.UpdateChanges;
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
@@ -29,33 +39,23 @@ import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
 import com.gdxsoft.easyweb.utils.IUSymmetricEncyrpt;
+import com.gdxsoft.easyweb.utils.UCookies;
 import com.gdxsoft.easyweb.utils.UMail;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
-import com.gdxsoft.easyweb.conf.Securities;
-import com.gdxsoft.easyweb.data.DTColumn;
-import com.gdxsoft.easyweb.data.DTRow;
-import com.gdxsoft.easyweb.data.DTTable;
-import com.gdxsoft.easyweb.data.HorTable;
-import com.gdxsoft.easyweb.data.XmlData;
-import com.gdxsoft.easyweb.datasource.DataConnection;
-import com.gdxsoft.easyweb.datasource.UpdateChanges;
 
 public class ActionBase {
+	private static Logger LOGGER = LoggerFactory.getLogger(ActionBase.class);
 
 	public static String COOKIE_NAME_PREFIX = "__EWA__"; // cookie加密的名称后缀
-
 	private HttpServletResponse _Response;
-
 	private HtmlClass _HtmlClass;
-
 	// 所有输出的 Cookie
 	private Map<String, Cookie> _OutCookes = new HashMap<String, Cookie>();
 	// 所有输出的 Session
 	private Map<String, Object> _OutSessions = new HashMap<String, Object>();
-
 	private List<UpdateChanges> _LstChanges = new ArrayList<UpdateChanges>();
 
 	/**
@@ -531,13 +531,13 @@ public class ActionBase {
 				this.getDTTables().add(tb);
 			}
 			this._HtmlClass.getDebugFrames().addDebug(this, "ACT", "调用完成，并返回Map对象, " + oo.getClass().toString());
-		}  else if (oo.getClass().equals(DTTable.class)) {
+		} else if (oo.getClass().equals(DTTable.class)) {
 			// 返回表
-			DTTable tb =  (DTTable)oo;
+			DTTable tb = (DTTable) oo;
 			this.getDTTables().add(tb);
-			
+
 			this._HtmlClass.getDebugFrames().addDebug(this, "ACT", "调用完成，并返回Map对象, " + oo.getClass().toString());
-		}else if (oo.getClass().equals(org.json.JSONObject.class)) {// 返回json
+		} else if (oo.getClass().equals(org.json.JSONObject.class)) {// 返回json
 																		// object
 			this.getJSONObjects().add(oo);
 			this._HtmlClass.getDebugFrames().addDebug(this, "ACT", "调用完成，并返回 JSON 对象, " + oo.getClass().toString());
@@ -672,14 +672,65 @@ public class ActionBase {
 	 * gdxsoft .easyweb.script.userConfig.UserXItemValue)
 	 */
 	public void executeSessionCookie(UserXItemValue uxv) throws Exception {
-		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
 
 		// <Set Name="SYS_ADMIN_ID" ParaName="USER_LOGIN_ID"
 		// CSType="all" Life="" Domain="" Option="C" />
 		String type = uxv.getItem("CSType");
+
+		if (type.equalsIgnoreCase("all") || type.equalsIgnoreCase("session")) {
+			this.executeSession(uxv);
+		}
+
+		if (type.equalsIgnoreCase("all") || type.equalsIgnoreCase("cookie")) {
+			this.executeCookie(uxv);
+		}
+	}
+
+	/**
+	 * Output the session
+	 * 
+	 * @param uxv
+	 * @throws Exception
+	 */
+	private void executeSession(UserXItemValue uxv) throws Exception {
+		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
+
+		String name = uxv.getItem("Name").trim().toUpperCase();
+		String option = uxv.getItem("Option");
+		String paraName = uxv.getItem("ParaName");
+		String val = this.getItemValues().getValue(paraName, paraName);
+		if (val == null) {
+			// 空值就删除，避免当使用 redis作为session管理时，出现错误
+			rv.getSession().removeAttribute(name);
+		} else if (option.equalsIgnoreCase("C")) { // create
+			rv.getSession().setAttribute(name, val);
+			// 记录输出的 session
+			this._OutSessions.put(name, val);
+		} else {
+			rv.getSession().removeAttribute(name);
+		}
+	}
+
+	/**
+	 * Output the cookie
+	 * 
+	 * @param uxv
+	 * @throws Exception
+	 */
+	private void executeCookie(UserXItemValue uxv) throws Exception {
+		if (Securities.getInstance().getDefaultSecurity() == null) {
+			String err = "No default symmetric defined, in the ewa_conf.xml securities->security";
+			LOGGER.error(err);
+			throw new Exception(err);
+		}
+		IUSymmetricEncyrpt security = Securities.getInstance().getDefaultSecurity().createSymmetric();
+
+		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
+
 		String name = uxv.getItem("Name").trim().toUpperCase();
 		String option = uxv.getItem("Option");
 		String domain = uxv.getItem("Domain");
+		String life = uxv.getItem("Life");
 
 		// 郭磊 2017-08-24 增加，用于更改cookie的域
 		PageValue pv = rv.getPageValues().getPageValue("EWA_COOKIE_DOMAIN");
@@ -690,60 +741,37 @@ public class ActionBase {
 
 		String paraName = uxv.getItem("ParaName");
 		String val = this.getItemValues().getValue(paraName, paraName);
+		String ckName = name + COOKIE_NAME_PREFIX;
 
-		if (type.equalsIgnoreCase("all") || type.equalsIgnoreCase("session")) {
-			if (val == null) {
-				// 空值就删除，避免当使用 redis作为session管理时，出现错误
-				rv.getSession().removeAttribute(name);
-			} else if (option.equalsIgnoreCase("C")) { // create
-				rv.getSession().setAttribute(name, val);
-				// 记录输出的 session
-				this._OutSessions.put(name, val);
-			} else {
-				rv.getSession().removeAttribute(name);
-			}
-		}
+		String cookieValue = null;
+		int cookieAge = -1;
 
-		if (type.equalsIgnoreCase("all") || type.equalsIgnoreCase("cookie")) {
-			String ckName = name + COOKIE_NAME_PREFIX;
-			IUSymmetricEncyrpt security = Securities.getInstance().getDefaultSymmetric();
-			if (option.equalsIgnoreCase("C") && val != null) { // create
-				int a = 0;
+		if (option.equalsIgnoreCase("C") && val != null) { // create
+			if (StringUtils.isNotBlank(life)) {
 				try {
-					a = Integer.parseInt(uxv.getItem("Life"));
+					cookieAge = Integer.parseInt(life);
 				} catch (Exception e) {
-					a = 0;
+					LOGGER.warn("Invalid cookie life: " + life, e.getLocalizedMessage());
+					cookieAge = -1;
 				}
-
-				String cVal = security.encrypt(val);
-				cVal = URLEncoder.encode(cVal, "ascii");
-				Cookie cookie = new Cookie(ckName, cVal);
-
-				// 默认 a=-1 跟随浏览器session
-				if (a > 0) {
-					cookie.setMaxAge(a); // 单位秒
-				}
-				if (domain.trim().length() > 0) {
-					cookie.setPath(domain);
-				} else {
-					cookie.setPath(rv.getContextPath());
-				}
-				// this._Response.addCookie(cookie);
-				this.addCookie(cookie);
-			} else { // remove cookie
-				Cookie cookie = new Cookie(ckName, null);
-				cookie.setMaxAge(0);
-
-				if (domain.trim().length() > 0) {
-					cookie.setPath(domain);
-				} else {
-					cookie.setPath(rv.getContextPath());
-				}
-
-				// this._Response.addCookie(cookie);
-				this.addCookie(cookie);
 			}
+			String cVal = security.encrypt(val);
+			cookieValue = UCookies.encodeCookieValue(cVal);
+		} else { // remove cookie
+			cookieAge = 0;
 		}
+
+		Cookie cookie = new Cookie(ckName, cookieValue);
+		// 默认 a=-1 跟随浏览器session
+		if (cookieAge >= 0) {
+			cookie.setMaxAge(cookieAge); // 单位秒
+		}
+		if (domain.trim().length() > 0) {
+			cookie.setPath(domain);
+		} else {
+			cookie.setPath(rv.getContextPath());
+		}
+		this.addCookie(cookie);
 	}
 
 	public void addCookie(Cookie cookie) {
@@ -759,7 +787,7 @@ public class ActionBase {
 
 		// 使用标准的输出方法
 		this._Response.addCookie(cookie);
-		
+
 		/*
 		 * MStr s = new MStr(); // Set-Cookie:G_ADM_UNID__EWA__=
 		 * TxcW7fr2HY6WYLEn8hj3Q78IG3lvkSpmymAwL0nJERk8EuvwdyUjxA%3D%3D; // Expires=Tue,

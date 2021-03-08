@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.utils.IUSymmetricEncyrpt;
 import com.gdxsoft.easyweb.utils.UAes;
 import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UDes;
@@ -57,22 +56,24 @@ public class Securities {
 
 			Security sp = new Security();
 			String algorithm = attrs.get("algorithm");
-			String aad = attrs.get("aad");
 			String key = attrs.get("key");
-			String iv = attrs.get("iv");
-			String base64Encoded = attrs.get("base64encoded");
-			String macBitSize = attrs.get("macbitsize");
-			String defaultConf = attrs.get("default");
-
-			if (StringUtils.isBlank(algorithm) || StringUtils.isBlank(key) || StringUtils.isBlank(iv)) {
+			if (StringUtils.isBlank(algorithm) || StringUtils.isBlank(key)) {
 				LOGGER.warn("Invalid cfg: " + UXml.asXml(item));
 				continue;
 			}
-
+			
+			String iv = attrs.get("iv"); // when iv is blank , using auto iv
+			String base64Encoded = attrs.get("base64encoded");
+			String macBitSize = attrs.get("macbitsize");
+			String defaultConf = attrs.get("default");
+			String aad = attrs.get("aad");
+			
 			if (Utils.cvtBool(base64Encoded)) {
 				try {
 					key = new String(UConvert.FromBase64String(key), "UTF-8");
-					iv = new String(UConvert.FromBase64String(iv), "UTF-8");
+					if (StringUtils.isNotBlank(iv)) {
+						iv = new String(UConvert.FromBase64String(iv), "UTF-8");
+					}
 					if (StringUtils.isNotBlank(aad)) {
 						aad = new String(UConvert.FromBase64String(aad), "UTF-8");
 					}
@@ -144,25 +145,4 @@ public class Securities {
 		this.lst = lst;
 	}
 
-	public IUSymmetricEncyrpt getDefaultSymmetric() {
-		Security conf = this.defaultSecurity;
-		if (conf == null) {
-			return null;
-		}
-		if (conf.getAlgorithm().equalsIgnoreCase("des")) {
-			try {
-				return UDes.getInstance();
-			} catch (Exception e) {
-				LOGGER.error(e.getLocalizedMessage());
-				return null;
-			}
-		} else {
-			try {
-				return UAes.getInstance();
-			} catch (Exception e) {
-				LOGGER.error(e.getLocalizedMessage());
-				return null;
-			}
-		}
-	}
 }
