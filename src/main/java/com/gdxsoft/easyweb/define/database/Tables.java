@@ -27,19 +27,22 @@ public class Tables extends HashMap<String, Table> {
 		_InnerDataSource.setConfigName(connectionConfigName);
 		String SchemaName = _InnerDataSource.getSchemaName();
 
+		String databaseType = _InnerDataSource.getDatabaseType();
+		// No effect
+		String catalog = "MYSQL".equalsIgnoreCase(databaseType) ? "def" : null;
+		catalog = null;
 		_TableList = new ArrayList<String>();
 		try {
 			_InnerDataSource.connect();
 			this._dmd = _InnerDataSource.getConnection().getMetaData();
 			String[] filter = { "TABLE", "VIEW" };
-			ResultSet rs = _dmd.getTables(null, SchemaName, null, filter);
+			ResultSet rs = _dmd.getTables(catalog, SchemaName, null, filter);
 
 			while (rs.next()) {
 				String tableName = rs.getString("table_name");
 				String tableType = rs.getString("TABLE_TYPE");
 
-				Table table = new Table(tableName, SchemaName, "  "
-						+ tableType.toUpperCase().trim() + "  ",
+				Table table = new Table(tableName, SchemaName, "  " + tableType.toUpperCase().trim() + "  ",
 						connectionConfigName);
 				super.put(tableName, table);
 				_TableList.add(tableName);
