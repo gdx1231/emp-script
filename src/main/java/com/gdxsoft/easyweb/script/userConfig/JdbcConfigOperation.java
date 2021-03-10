@@ -48,8 +48,11 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		if (!xmlPath1.endsWith("|")) {
 			xmlPath1 = xmlPath1 + "|";
 		}
-		String sql = "select 1 a from  ewa_cfg_tree where XMLNAME like '" + xmlPath1.replace("'", "''") + "%'";
-		DTTable tb = this.getJdbcTable(sql);
+		RequestValue rv = new RequestValue();
+		rv.addValue("XMLNAME_like", xmlPath1 + '%');
+
+		String sql = "select 1 a from  ewa_cfg_tree where XMLNAME like @XMLNAME_like";
+		DTTable tb = this.getJdbcTable(sql, rv);
 
 		return tb.getCount() > 0;
 	}
@@ -112,12 +115,13 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		if (tag == null) {
 			return null;
 		}
+		RequestValue rv = new RequestValue();
+		rv.addValue("OTH_TAG", tag);
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("select * from EWA_CFG_OTH where oth_tag='");
-		sb.append(tag.replace("'", "''"));
-		sb.append("'");
+		sb.append("select * from EWA_CFG_OTH where oth_tag=@OTH_TAG");
 		String sql = sb.toString();
-		DTTable tb = getJdbcTable(sql);
+		DTTable tb = getJdbcTable(sql, rv);
 
 		if (tb.getCount() == 0) {
 			return null;
@@ -144,11 +148,9 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		rv.addValue("ADM_LID", admId);
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("select 1 from EWA_CFG_OTH  where oth_tag='");
-		sb.append(tag.replace("'", "''"));
-		sb.append("'");
+		sb.append("select 1 from EWA_CFG_OTH  where oth_tag=@OTH_TAG");
 		String sql0 = sb.toString();
-		DTTable tb = getJdbcTable(sql0);
+		DTTable tb = getJdbcTable(sql0, rv);
 		String sql;
 
 		if (tb.getCount() == 0) {
@@ -167,21 +169,21 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 * @return
 	 */
 	public int deleteBaks(String xmlname) {
-		String xmlName = UserConfig.filterXmlNameByJdbc(xmlname);
+		String xmlNameJdbc = UserConfig.filterXmlNameByJdbc(xmlname);
+
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("xmlNameJdbcLike", xmlNameJdbc + '%');
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("select count(*) from ewa_cfg_his where xmlname like '");
-		sb.append(xmlName.replace("'", "''"));
-		sb.append("%'");
+		sb.append("select count(*) from ewa_cfg_his where xmlname like @xmlNameJdbcLike");
 		String sql1 = sb.toString();
-		DTTable tb = getJdbcTable(sql1);
+		DTTable tb = getJdbcTable(sql1, rv);
 		int count = tb.getCell(0, 0).toInt();
 		if (count > 0) {
 			StringBuilder sb2 = new StringBuilder();
-			sb2.append("delete from ewa_cfg_his where xmlname like '");
-			sb2.append(xmlName.replace("'", "''"));
-			sb2.append("%'");
+			sb2.append("delete from ewa_cfg_his where xmlname like @xmlNameJdbcLike");
 			String sql2 = sb2.toString();
-			update(sql2, null);
+			update(sql2, rv);
 		}
 		return count;
 	}
@@ -271,9 +273,9 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 * @param newName
 	 */
 	public void renameTree(String path, String newName) {
-		String xmlName = UserConfig.filterXmlNameByJdbc(path);
+		String xmlNameJdbc = UserConfig.filterXmlNameByJdbc(path);
 		StringBuilder newPath = new StringBuilder();
-		String[] olds = xmlName.split("\\|");
+		String[] olds = xmlNameJdbc.split("\\|");
 		for (int i = 1; i < olds.length - 1; i++) {
 			newPath.append("|");
 			newPath.append(olds[i]);
@@ -281,41 +283,36 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		newPath.append("|");
 		newPath.append(newName);
 
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
+		rv.addOrUpdateValue("xmlNameJdbcLike", xmlNameJdbc + '%');
+
 		StringBuilder sbtree = new StringBuilder();
-		sbtree.append("select * from ewa_cfg_tree where xmlName='");
-		sbtree.append(xmlName.replace("'", "''"));
-		sbtree.append("' or xmlName like '");
-		sbtree.append(xmlName.replace("'", "''"));
-		sbtree.append("%'");
+		sbtree.append("select * from ewa_cfg_tree where xmlName=@xmlNameJdbc or xmlName like @xmlNameJdbcLike ");
 		String sqlTree = sbtree.toString();
-		DTTable tb = getJdbcTable(sqlTree);
+		DTTable tb = getJdbcTable(sqlTree, rv);
 
 		List<String> sqls = new ArrayList<String>();
 		for (int i = 0; i < tb.getCount(); i++) {
 			String old_xmlname = tb.getCell(i, 0).toString();
-			String new_xmlname = newPath.toString() + old_xmlname.substring(xmlName.length());
+			String new_xmlname = newPath.toString() + old_xmlname.substring(xmlNameJdbc.length());
+			rv.addOrUpdateValue("old_xmlname_" + i, old_xmlname);
+			rv.addOrUpdateValue("new_xmlname_" + i, new_xmlname);
+
 			StringBuilder sb = new StringBuilder();
-			sb.append("update ewa_cfg_tree set xmlName='");
-			sb.append(new_xmlname.replace("'", "''"));
-			sb.append("' where xmlName='");
-			sb.append(old_xmlname.replace("'", "''"));
-			sb.append("'");
+			sb.append("update ewa_cfg_tree set xmlName=@new_xmlname_" + i + " where xmlName = @old_xmlname_" + i);
 			String sql = sb.toString();
 
 			sqls.add(sql);
 
 			StringBuilder sb1 = new StringBuilder();
-			sb1.append("update ewa_cfg set xmlName='");
-			sb1.append(new_xmlname.replace("'", "''"));
-			sb1.append("' where xmlName='");
-			sb1.append(old_xmlname.replace("'", "''"));
-			sb1.append("'");
+			sb1.append("update ewa_cfg set xmlName=@new_xmlname_" + i + " where xmlName = @old_xmlname_" + i);
 			String sql1 = sb1.toString();
 
 			sqls.add(sql1);
 		}
 
-		updates(sqls, null);
+		updates(sqls, rv);
 	}
 
 	/**
@@ -448,17 +445,17 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 			itemname = "";
 		}
 
-		String xmlName = UserConfig.filterXmlNameByJdbc(xmlname);
+		String xmlNameJdbc = UserConfig.filterXmlNameByJdbc(xmlname);
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
+		rv.addOrUpdateValue("itemname", itemname);
+
 		StringBuilder sb = new StringBuilder();
-		sb.append(
-				"select HASH_CODE, UPDATE_DATE, MD5, DATASOURCE, CLASS_ACL, CLASS_LOG, ADM_LID from EWA_CFG where xmlname='");
-		sb.append(xmlName.replace("'", "''"));
-		sb.append("' and itemname='");
-		sb.append(itemname.replace("'", "''"));
-		sb.append("'");
+		sb.append("select HASH_CODE, UPDATE_DATE, MD5, DATASOURCE, CLASS_ACL, CLASS_LOG, ADM_LID from EWA_CFG ");
+		sb.append(" where xmlname=@xmlNameJdbc and itemname=@itemname ");
 		String sql = sb.toString();
 
-		DTTable tb = getJdbcTable(sql);
+		DTTable tb = getJdbcTable(sql, rv);
 
 		return tb;
 	}
@@ -606,13 +603,17 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 * @return
 	 */
 	public String getDocXml(String xmlname) {
-		String xmlName = UserConfig.filterXmlNameByJdbc(xmlname);
+		String xmlNameJdbc = UserConfig.filterXmlNameByJdbc(xmlname);
+
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
+
 		StringBuilder sb1 = new StringBuilder();
-		sb1.append("select * from EWA_CFG where xmlname='");
-		sb1.append(xmlName.replace("'", "''"));
-		sb1.append("' and itemname!='' order by case when UPDATE_DATE is null then CREATE_DATE else UPDATE_DATE end");
+		sb1.append("select * from EWA_CFG where xmlname=@xmlNameJdbc and itemname!='' ");
+		sb1.append("order by case when UPDATE_DATE is null then CREATE_DATE else UPDATE_DATE end");
 		String sql = sb1.toString();
-		DTTable tb = getJdbcTable(sql);
+
+		DTTable tb = getJdbcTable(sql, rv);
 		if (tb.getCount() == 0) {
 			return null;
 		}
@@ -809,7 +810,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 */
 	public DTTable getAllXmlnames() {
 		String sql = "select XMLNAME, HASH_CODE,CREATE_DATE,UPDATE_DATE,MD5 from EWA_CFG where ITEMNAME='' order by XMLNAME ";
-		DTTable tb = getJdbcTable(sql);
+		DTTable tb = getJdbcTable(sql, null);
 
 		return tb;
 	}
@@ -821,14 +822,14 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 * @return
 	 */
 	public String getXml(String xmlName) {
-		xmlName = UserConfig.filterXmlNameByJdbc(xmlName);
+		String xmlNameJdbc = UserConfig.filterXmlNameByJdbc(xmlName);
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("select XMLDATA from EWA_CFG where ITEMNAME='' and xmlname='");
-		sb.append(xmlName.replace("'", "''"));
-		sb.append("'");
+		sb.append("select XMLDATA from EWA_CFG where ITEMNAME='' and xmlname=@xmlNameJdbc");
 		String sql2 = sb.toString();
-		DTTable tb2 = getJdbcTable(sql2);
+		DTTable tb2 = getJdbcTable(sql2, rv);
 		if (tb2.getCount() == 0) {
 			return null;
 		}
@@ -853,7 +854,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		sb.append(" LEFT JOIN (SELECT XMLNAME, COUNT(*) CNT FROM EWA_CFG GROUP BY XMLNAME) B ");
 		sb.append(" ON A.XMLNAME=B.XMLNAME order by XMLNAME ");
 		String sql = sb.toString();
-		DTTable tb = getJdbcTable(sql);
+		DTTable tb = getJdbcTable(sql, null);
 		return tb;
 	}
 
@@ -864,14 +865,16 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 * @return
 	 */
 	public DTTable getJdbcItems(String xmlname) {
-		String xmlName = UserConfig.filterXmlNameByJdbc(xmlname);
+		String xmlNameJdbc = UserConfig.filterXmlNameByJdbc(xmlname);
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("select itemname,xmldata from EWA_CFG where xmlname='");
-		sb.append(xmlName.replace("'", "''"));
-		sb.append("' and itemname!='' order by itemname ");
+		sb.append(
+				"select itemname,xmldata from EWA_CFG where xmlname=@xmlNameJdbc and itemname!='' order by itemname ");
 		String sql = sb.toString();
 
-		return getJdbcTable(sql);
+		return getJdbcTable(sql, rv);
 
 	}
 
@@ -883,16 +886,17 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 * @return
 	 */
 	public boolean checkExists(String xmlname, String itemname) {
-		String xmlName = UserConfig.filterXmlNameByJdbc(xmlname);
+		String xmlNameJdbc = UserConfig.filterXmlNameByJdbc(xmlname);
 		StringBuilder sb = new StringBuilder();
-		sb.append("select 1 a from EWA_CFG where xmlname='");
-		sb.append(xmlName.replace("'", "''"));
-		sb.append("' and itemname='");
-		sb.append(itemname.replace("'", "''"));
-		sb.append("'");
+
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
+		rv.addOrUpdateValue("itemname", itemname);
+
+		sb.append("select 1 a from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
 		String sql = sb.toString();
 
-		DTTable tb = getJdbcTable(sql);
+		DTTable tb = getJdbcTable(sql, rv);
 
 		return tb.getCount() > 0;
 	}
@@ -905,16 +909,16 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 * @return
 	 */
 	public DTTable getJdbcItem(String xmlname, String itemname) {
-		String xmlName = UserConfig.filterXmlNameByJdbc(xmlname);
+		String xmlNameJdbc = UserConfig.filterXmlNameByJdbc(xmlname);
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
+		rv.addOrUpdateValue("itemname", itemname);
+
 		StringBuilder sb = new StringBuilder();
-		sb.append("select * from EWA_CFG where xmlname='");
-		sb.append(xmlName.replace("'", "''"));
-		sb.append("' and itemname='");
-		sb.append(itemname.replace("'", "''"));
-		sb.append("'");
+		sb.append("select * from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
 		String sql = sb.toString();
 
-		return getJdbcTable(sql);
+		return getJdbcTable(sql, rv);
 	}
 
 	/**
@@ -957,16 +961,6 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	public void update(String sql, RequestValue rv) {
 		String configName = getJdbcConfigName();
 		DataConnection.updateAndClose(sql, configName, rv);
-	}
-
-	/**
-	 * 获取表
-	 * 
-	 * @param sql
-	 * @return
-	 */
-	public DTTable getJdbcTable(String sql) {
-		return getJdbcTable(sql, null);
 	}
 
 	/**

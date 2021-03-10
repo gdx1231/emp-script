@@ -442,13 +442,13 @@ public class UObjectValue {
 			method.invoke(instance, newVals);
 			return null;
 		} catch (IllegalArgumentException e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 			return e.getMessage();
 		} catch (IllegalAccessException e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 			return e.getMessage();
 		} catch (InvocationTargetException e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 			return e.getMessage();
 		}
 	}
@@ -674,7 +674,7 @@ public class UObjectValue {
 		} catch (Exception e) {
 			String msg = e.getCause().getMessage();
 			this._LastErrMsg = msg;
-			System.err.println(msg);
+			LOGGER.error(msg);
 			return null;
 		}
 	}

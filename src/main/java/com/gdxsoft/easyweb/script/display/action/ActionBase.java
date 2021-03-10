@@ -467,7 +467,8 @@ public class ActionBase {
 		}
 		if (ov.getLastErrMsg() != null) {
 			this._HtmlClass.getDebugFrames().addDebug(this, "ACT", "调用CLASS错误，" + ov.getLastErrMsg());
-			this._HtmlClass.getSysParas().getRequestValue().addValue("EWA_CLASS_CALL_EXCEPTION", ov.getLastErrMsg());
+			this._HtmlClass.getSysParas().getRequestValue().addValue("EWA_CLASS_CALL_EXCEPTION",
+					Utils.textToJscript(ov.getLastErrMsg()));
 		} else {
 			if (oo == null) {
 				this._HtmlClass.getDebugFrames().addDebug(this, "ACT", "调用完成，并返回空值");

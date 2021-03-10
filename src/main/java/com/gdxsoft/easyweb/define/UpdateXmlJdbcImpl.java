@@ -17,6 +17,7 @@ import org.xml.sax.SAXException;
 
 import com.gdxsoft.easyweb.conf.ScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
@@ -46,6 +47,43 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 	public UpdateXmlJdbcImpl(ScriptPath scriptPath) {
 		super.scriptPath = scriptPath;
 		op = new JdbcConfigOperation(scriptPath);
+	}
+
+	public String deleteFile(String xmlName) {
+		op.removeItem(xmlName, "");
+		return "";
+	}
+
+	public String createNewXml(String xmlName, String path) {
+		String path1 = UserConfig.filterXmlName(path);
+		String fileName = path1 + "/" + xmlName;
+		if (xmlName.endsWith(".xml")) {
+			op.createXml(fileName, "");
+			// key_out 生成的主键
+			// PARAMETERS_OUT,附加的参数，用","分割,
+			// MENUGROUP_OUT 菜单组
+			// 用于替换页面上的新节点属性
+			String out = "key=" + path + "|" + xmlName + "&type=1";
+			return out;
+		} else {
+			op.createPath(fileName);
+			String out = "key=" + path + "|" + xmlName + "&type=0";
+			return out;
+		}
+	}
+
+	public String copyXmlFile(String fromFileName, String toPath, String toFileName) {
+
+		String from = UserConfig.filterXmlName(fromFileName);
+		String to = UserConfig.filterXmlName(toPath) + "/" + toFileName;
+		op.copyXml(from, to, "");
+
+		// key_out 生成的主键
+		// PARAMETERS_OUT,附加的参数，用","分割,
+		// MENUGROUP_OUT 菜单组
+		// 用于替换页面上的新节点属性
+		String out = "key=" + toPath + "|" + toFileName + "&type=1";
+		return out;
 	}
 
 	/**
@@ -136,12 +174,23 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 
 	@Override
 	public String getSqls() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	public boolean renamePath(String pathName, String newPathNameWithoutPath) {
+		op.renameTree(pathName, newPathNameWithoutPath);
+		return true;
+	}
+
+	public boolean renameXmlFile(String xmlNameAndPath, String newXmlNameWithoutPath) {
+		op.renameTree(xmlNameAndPath, newXmlNameWithoutPath);
+		return true;
+	}
+
 	@Override
-	public boolean rename(String itemName, String newItemName) {
+	public boolean renameItem(String xmlName, String itemName, String newItemName) {
+		this._XmlName = xmlName;
+
 		Node node1 = this.queryItem(newItemName);
 		if (node1 != null) {
 			// 名称重复
@@ -345,13 +394,16 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 	 */
 	public void batchUpdateByDir(String paraName, String paraValue) {
 		String path = UserConfig.filterXmlNameByJdbc(this._XmlName);
-		String sql1 = "select XMLNAME from ewa_cfg ec where XMLNAME like '" + path.replace("'", "")
-				+ "|%' and ITEMNAME ='' order by XMLNAME";
-		DTTable tbXml = op.getJdbcTable(sql1);
+
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("pathlike", path + "|%");
+		String sql1 = "select XMLNAME from ewa_cfg ec where XMLNAME like @pathlike and ITEMNAME ='' order by XMLNAME";
+		DTTable tbXml = op.getJdbcTable(sql1, rv);
 		for (int i = 0; i < tbXml.getCount(); i++) {
 			String xmlName = tbXml.getCell(i, 0).toString();
-			String sql2 = "select ITEMNAME from ewa_cfg ec where XMLNAME = '" + xmlName.replace("'", "") + "'";
-			DTTable tbItems = op.getJdbcTable(sql2);
+			rv.addOrUpdateValue("@xmlname", xmlName);
+			String sql2 = "select ITEMNAME from ewa_cfg ec where XMLNAME = @xmlname ";
+			DTTable tbItems = op.getJdbcTable(sql2, rv);
 			String itemNames = tbItems.joinIds("ITEMNAME", false);
 
 			UpdateXmlJdbcImpl ux = new UpdateXmlJdbcImpl(this.scriptPath);

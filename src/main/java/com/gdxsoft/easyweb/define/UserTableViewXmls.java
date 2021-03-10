@@ -134,7 +134,7 @@ public class UserTableViewXmls {
 		DataConnection cnn = new DataConnection();
 		cnn.setConfigName(configName);
 		if (cnn.getDatabaseType().equalsIgnoreCase("mssql")) {
-			StringBuilder sb=new StringBuilder();
+			StringBuilder sb = new StringBuilder();
 			sb.append("IF not EXISTS(\n");
 			sb.append("	SELECT * from  sys.extended_properties where major_id=OBJECT_ID(@table) and minor_id in (\n");
 			sb.append("		select colid from syscolumns where id=OBJECT_ID(@table) and name=@field\n");
@@ -151,13 +151,13 @@ public class UserTableViewXmls {
 			sb.append("		N'SCHEMA',N'dbo', N'TABLE',\n");
 			sb.append("		@table, N'COLUMN', @field;\n");
 			sb.append("END\n");
-			
-			String sql =  sb.toString();
-			RequestValue rv=new RequestValue();
+
+			String sql = sb.toString();
+			RequestValue rv = new RequestValue();
 			rv.addValue("table", tableName);
 			rv.addValue("field", columnName);
 			rv.addValue("des", des);
-			
+
 			cnn.setRequestValue(rv);
 			cnn.executeUpdate(sql);
 			if (cnn.getErrorMsg() != null) {
@@ -206,6 +206,15 @@ public class UserTableViewXmls {
 
 			cnn.close();
 
+		} else if (cnn.getDatabaseType().equalsIgnoreCase("hsqldb")) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("comment ON column " + tableName + "." + columnName + " is '" + des.replace("'", "''") + "'");
+			String sql = sb.toString();
+			cnn.executeUpdate(sql);
+			if (cnn.getErrorMsg() != null) {
+				LOGGER.error(cnn.getErrorMsg());
+			}
+			cnn.close();
 		}
 	}
 

@@ -1500,8 +1500,9 @@ public class HtmlCreator {
 			String s2 = js.replace(".NewNodeAfter", ".NewNodeAfter" + s1);
 			this._Document.addJs("JsEventsBack", s2, false);
 		} else {
-			this._Document.addJs("JsEventsBack", js, false);
-
+			// To avoid the XSS (Cross Site Scripting) attacks, the others event are
+			// discarded
+			// this._Document.addJs("JsEventsBack", js, false);
 		}
 	}
 

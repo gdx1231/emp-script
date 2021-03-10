@@ -18,6 +18,8 @@ import org.xml.sax.SAXException;
 import com.gdxsoft.easyweb.conf.ScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
+import com.gdxsoft.easyweb.utils.UFile;
+import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -48,6 +50,46 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	 */
 	public String getDocXml() {
 		return UXml.asXml(_Document);
+	}
+
+	public String deleteFile(String xmlName) {
+		String path1 = UPath.getScriptPath() + UserConfig.filterXmlName(xmlName);
+		String pathRecycle = UPath.getScriptPath() + ConfigUtils.RECYCLE_NAME;
+		File file1 = new File(pathRecycle);
+		if (!file1.exists()) {
+			file1.mkdirs();
+		}
+
+		File file = new File(path1);
+		if (file.isFile()) {
+			String path2 = pathRecycle + "/" + file.getName() + "." + System.currentTimeMillis() + ".bak";
+			File file2 = new File(path2);
+			file.renameTo(file2);
+		}
+		return "";
+	}
+
+	public String createNewXml(String xmlName, String path) throws IOException {
+		String path1 = UPath.getScriptPath() + UserConfig.filterXmlName(path);
+		String fileName = path1 + "/" + xmlName;
+
+		if (xmlName.endsWith(".xml")) {
+			String s1 = ConfigUtils.XML_ROOT;
+			UFile.createNewTextFile(fileName, s1);
+
+			// key_out 生成的主键
+			// PARAMETERS_OUT,附加的参数，用","分割,
+			// MENUGROUP_OUT 菜单组
+			// 用于替换页面上的新节点属性
+			String out = "key=" + path + "|" + xmlName + "&type=1";
+			return out;
+		} else {
+			File f = new File(fileName);
+			f.mkdirs();
+
+			String out = "key=" + path + "|" + xmlName + "&type=0";
+			return out;
+		}
 	}
 
 	/**
@@ -183,14 +225,18 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 		return sb.toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.gdxsoft.easyweb.define.IUpdateXml#rename(java.lang.String,
-	 * java.lang.String)
-	 */
-	@Override
-	public boolean rename(String itemName, String newItemName) {
+	public boolean renamePath(String pathName, String newPathNameWithoutPath) {
+		UFile.renameFile(pathName, newPathNameWithoutPath);
+		return true;
+	}
+
+	public boolean renameXmlFile(String xmlNameAndPath, String newXmlNameWithoutPath) {
+		UFile.renameFile(xmlNameAndPath, newXmlNameWithoutPath);
+		return true;
+	}
+
+	public boolean renameItem(String xmlName, String itemName, String newItemName) {
+		this._XmlName = xmlName;
 		Node node = this.queryItem(itemName);
 		if (node == null)
 			return false;
@@ -399,6 +445,20 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 		this.updateTime(newNode);
 		node.getParentNode().appendChild(newNode);
 		return this.writeXml(_Document);
+	}
+
+	public String copyXmlFile(String fromFileName, String toPath, String toFileName) throws IOException {
+
+		String from = UPath.getScriptPath() + fromFileName.replace("|", "/");
+		String to = UPath.getScriptPath() + toPath.replace("|", "/") + "/" + toFileName;
+		UFile.copyFile(from, to);
+
+		// key_out 生成的主键
+		// PARAMETERS_OUT,附加的参数，用","分割,
+		// MENUGROUP_OUT 菜单组
+		// 用于替换页面上的新节点属性
+		String out = "key=" + toPath + "|" + toFileName + "&type=1";
+		return out;
 	}
 
 	/*

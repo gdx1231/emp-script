@@ -44,14 +44,14 @@ public class UserDirXmls {
 		}
 
 		_Xml = new StringBuilder();
-		this.initUnIncludes();
+		this.initExcludes();
 		this.createTreeNode();
 	}
 
 	/**
 	 * 获取过滤的目录
 	 */
-	private String initUnIncludes() {
+	private String initExcludes() {
 		MList lst = new MList();
 		lst.add("CVS");
 		lst.add(ConfigUtils.RECYCLE_NAME);
@@ -72,13 +72,15 @@ public class UserDirXmls {
 			}
 			Element ele = (Element) nl.item(0);
 
-			String unincludes = ele.getAttribute("unincludes");
-			if (unincludes == null || unincludes.trim().length() == 0) {
+			// The unincludes is old version , misspelling
+			String excludes = ele.hasAttribute("excludes") ? ele.getAttribute("excludes")
+					: ele.getAttribute("unincludes");
+			if (excludes == null || excludes.trim().length() == 0) {
 				return lst.join(",");
 			}
-			lst.add(unincludes);
+			lst.add(excludes);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		}
 		return lst.join(",");
 	}
@@ -139,7 +141,7 @@ public class UserDirXmls {
 			} else { // file
 				String scriptPath = sp.getPath();
 				dirs = new Dirs(scriptPath, true);
-				dirs.initUnIncludes(initUnIncludes());
+				dirs.initUnIncludes(this.initExcludes());
 
 				String[] filter = { "xml" };
 
@@ -441,7 +443,7 @@ public class UserDirXmls {
 	 * @return the _Xml
 	 */
 	public String getXml() {
-		
+
 		return _Xml.toString();
 	}
 

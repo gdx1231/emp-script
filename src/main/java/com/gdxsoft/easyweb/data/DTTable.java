@@ -787,7 +787,6 @@ public class DTTable implements Serializable {
 	 * @return
 	 */
 	public Object getCellValueByJson(DTCell cell, String contentpath) {
-
 		Object val = cell.getValue();
 		if (this.getJsonBinaryHandle() == null) {
 			return val;
@@ -804,6 +803,8 @@ public class DTTable implements Serializable {
 					|| objClassName.toUpperCase().indexOf("DATE") >= 0)) {
 				// 返回计算时差后的时间
 				return Utils.getTimeDiffValue(val, this.getTimeDiffMinutes());
+			} else if (objClassName.toUpperCase().indexOf("CLOB") >= 0) {
+				return cell.toString();
 			}
 		}
 		return val;

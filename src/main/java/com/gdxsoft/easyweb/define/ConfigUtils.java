@@ -79,11 +79,14 @@ public class ConfigUtils {
 				}
 			}
 		}
-
 		return null;
 	}
 
 	private ScriptPath scriptPath;
+
+	public ConfigUtils() {
+
+	}
 
 	public ConfigUtils(ScriptPath sp) {
 		scriptPath = sp;
@@ -275,105 +278,75 @@ public class ConfigUtils {
 		}
 	}
 
-	public String rename(String path, String newName) {
-		if (path.indexOf("*") < 0) {
-			if (scriptPath.isJdbc()) {
-				JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
-				op.renameTree(path, newName);
-			} else {
-				UFile.renameFile(path, newName);
-			}
+	public String rename(String path, String newName) throws IOException {
+
+		checkInvalidCharInNameAndThrow(newName);
+		boolean isRenameItem = path.indexOf("*") > 0;
+
+		String sourcePath = isRenameItem ? path.split("\\*")[0] : path;
+		String sourceItemName = isRenameItem ? path.split("\\*")[1] : null;
+		boolean isXml = sourcePath.endsWith(".xml");
+
+		IUpdateXml ux = getUpdateXml(sourcePath);
+		if (ux == null) {
+			ux = getUpdateXmlByPath(sourcePath);
+		}
+
+		if (ux == null) {
+			LOGGER.warn("Not found ScriptPath");
+			throw new IOException("Not found ScriptPath");
+		}
+		if (isRenameItem) {
+			ux.renameItem(sourcePath, sourceItemName, newName);
+		} else if (isXml) {
+			ux.renameXmlFile(sourcePath, newName);
 		} else {
-			path = path.replace("|", "/");
-			String[] paths = path.split("\\*");
-			IUpdateXml ux = getUpdateXml(paths[0]);
-			ux.rename(paths[1], newName);
+			ux.renamePath(sourcePath, newName);
 		}
 		return "";
 	}
 
 	public String copyXmlFile(String fromFileName, String toPath, String toFileName) throws IOException {
-		if (scriptPath.isResources()) {
-			return null;
-		}
-		if (scriptPath.isJdbc()) {
-			JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
-			String from = fromFileName.replace("|", "/");
-			String to = toPath.replace("|", "/") + "/" + toFileName;
-			op.copyXml(from, to, "");
-		} else {
-			String from = UPath.getScriptPath() + fromFileName.replace("|", "/");
-			String to = UPath.getScriptPath() + toPath.replace("|", "/") + "/" + toFileName;
-			UFile.copyFile(from, to);
-		}
+		IUpdateXml ux = getUpdateXml(fromFileName);
+		checkInvalidCharInNameAndThrow(toFileName);
 		// key_out 生成的主键
 		// PARAMETERS_OUT,附加的参数，用","分割,
 		// MENUGROUP_OUT 菜单组
 		// 用于替换页面上的新节点属性
-		String out = "key=" + toPath + "|" + toFileName + "&type=1";
+		String out = ux.copyXmlFile(fromFileName, toPath, toFileName);
 		return out;
 	}
 
 	public String createNewXml(String xmlName, String path) throws IOException {
-		if (scriptPath.isResources()) {
-			return null;
-		}
-		if (xmlName.endsWith(".xml")) {
-			if (scriptPath.isJdbc()) {
-				JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
-				String path1 = path.replace("|", "/");
-				String fileName = path1 + "/" + xmlName;
-				op.createXml(fileName, "");
-			} else {
-				String s1 = XML_ROOT;
-				String path1 = UPath.getScriptPath() + path.replace("|", "/");
-				String fileName = path1 + "/" + xmlName;
-				UFile.createNewTextFile(fileName, s1);
-			}
-			// key_out 生成的主键
-			// PARAMETERS_OUT,附加的参数，用","分割,
-			// MENUGROUP_OUT 菜单组
-			// 用于替换页面上的新节点属性
-			String out = "key=" + path + "|" + xmlName + "&type=1";
-			return out;
-		} else {
-			if (scriptPath.isJdbc()) {
-				JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
-				String path1 = path.replace("|", "/");
-				String fileName = path1 + "/" + xmlName;
-				op.createPath(fileName);
-			} else {
-				String path1 = UPath.getScriptPath() + path.replace("|", "/");
-				String fileName = path1 + "/" + xmlName;
-				File f = new File(fileName);
-				f.mkdirs();
-			}
-			String out = "key=" + path + "|" + xmlName + "&type=0";
-			return out;
+		checkInvalidCharInNameAndThrow(xmlName);
+
+		IUpdateXml ux = getUpdateXmlByPath(path);
+
+		// String out = "key=" + path + "|" + xmlName + "&type=0|1";
+		String out = ux.createNewXml(xmlName, path);
+		return out;
+
+	}
+
+	private void checkInvalidCharInNameAndThrow(String xmlName) throws IOException {
+		if (this.checkInvalidCharInName(xmlName)) {
+			LOGGER.warn("Invalid char in name " + xmlName);
+			throw new IOException("Invalid char in name " + xmlName);
 		}
 	}
 
-	public String deleteFile(String key) {
-		if (scriptPath.isResources()) {
-			return null;
-		} else if (scriptPath.isJdbc()) {
-			JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
-			op.removeItem(key, "");
-		} else {
-			String path1 = UPath.getScriptPath() + key.replace("|", "/");
-			String pathRecycle = UPath.getScriptPath() + RECYCLE_NAME;
-			File file1 = new File(pathRecycle);
-			if (!file1.exists()) {
-				file1.mkdirs();
-			}
+	public boolean checkInvalidCharInName(String xmlName) {
+		if (xmlName.indexOf("|") >= 0 || xmlName.indexOf("/") >= 0 || xmlName.indexOf("\\") >= 0
+				|| xmlName.indexOf("?") >= 0) {
 
-			File file = new File(path1);
-			if (file.isFile()) {
-				String path2 = pathRecycle + "/" + file.getName() + "." + System.currentTimeMillis() + ".bak";
-				File file2 = new File(path2);
-				file.renameTo(file2);
-			}
+			return true;
+		} else {
+			return false;
 		}
-		return "";
+	}
+
+	public String deleteFile(String xmlName) {
+		IUpdateXml ux = getUpdateXml(xmlName);
+		return ux.deleteFile(xmlName);
 	}
 }

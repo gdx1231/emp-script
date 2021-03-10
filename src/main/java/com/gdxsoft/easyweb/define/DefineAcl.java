@@ -17,8 +17,8 @@ public class DefineAcl implements IAcl {
 	public boolean canRun() {
 		PageValue pv = this._RequestValue.getPageValues().getValue("EWA_ADMIN_ID");
 
-		// EWA_ADMIN_ID 不在seesion和系统内部cookie中
-		if (pv == null || !(pv.getPVTag() == PageValueTag.COOKIE_ENCYRPT || pv.getPVTag() == PageValueTag.SESSION)) {
+		// EWA_ADMIN_ID 不在seesion中
+		if (pv == null || pv.getPVTag() != PageValueTag.SESSION) {
 			UUrl url = new UUrl(this._RequestValue.getRequest());
 			String ref = url.getUrl();
 			this._GoToUrl = this._RequestValue.getContextPath()

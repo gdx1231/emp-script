@@ -1,5 +1,7 @@
 package com.gdxsoft.easyweb.define;
 
+import java.io.IOException;
+
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -7,16 +9,20 @@ import org.w3c.dom.Node;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 
 public interface IUpdateXml {
-	IConfig getConfigType(); 
+	String deleteFile(String xmlName);
+
+	String createNewXml(String xmlName, String path) throws IOException;
+
+	String copyXmlFile(String fromFileName, String toPath, String toFileName) throws IOException;
+
+	IConfig getConfigType();
+
 	/**
 	 * 导入xml配置
 	 * 
-	 * @param path
-	 *            路径
-	 * @param name
-	 *            xml名称
-	 * @param sourceXmlFilePath
-	 *            要导入的xml文件
+	 * @param path              路径
+	 * @param name              xml名称
+	 * @param sourceXmlFilePath 要导入的xml文件
 	 * @return
 	 */
 	JSONObject importXml(String path, String name, String sourceXmlFilePath);
@@ -52,7 +58,11 @@ public interface IUpdateXml {
 
 	String getSqls();
 
-	boolean rename(String itemName, String newItemName);
+	boolean renameItem(String xmlName, String itemName, String newItemName);
+
+	boolean renameXmlFile(String xmlNameAndPath, String newXmlNameWithoutPath) ;
+
+	boolean renamePath(String pathName, String newPathNameWithoutPath);
 
 	boolean updateItem(String itemName, String xml);
 
@@ -71,8 +81,7 @@ public interface IUpdateXml {
 	/**
 	 * 获取当前的Item
 	 * 
-	 * @param itemName
-	 *            item名字
+	 * @param itemName item名字
 	 * @return item节点
 	 */
 	Node queryItem(String itemName);
@@ -93,8 +102,7 @@ public interface IUpdateXml {
 	String getFrameType();
 
 	/**
-	 * @param frameType
-	 *            the _FrameType to set
+	 * @param frameType the _FrameType to set
 	 */
 	void setFrameType(String frameType);
 
