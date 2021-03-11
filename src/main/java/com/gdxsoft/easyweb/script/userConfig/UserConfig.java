@@ -15,8 +15,8 @@ import org.w3c.dom.*;
 import com.gdxsoft.easyweb.cache.ConfigCache;
 import com.gdxsoft.easyweb.cache.ConfigCacheWidthSqlCached; //有问题
 import com.gdxsoft.easyweb.cache.ConfigStatus;
-import com.gdxsoft.easyweb.conf.ScriptPath;
-import com.gdxsoft.easyweb.conf.ScriptPaths;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.script.template.XItemParameter;
@@ -134,9 +134,9 @@ public class UserConfig implements Serializable, Cloneable {
 	 */
 	public static IConfig getConfig(String xmlName, String itemName) {
 		IConfig ic = null;
-		ScriptPaths sps = ScriptPaths.getInstance();
+		ConfScriptPaths sps = ConfScriptPaths.getInstance();
 		for (int i = 0; i < sps.getLst().size(); i++) {
-			ScriptPath sp = sps.getLst().get(i);
+			ConfScriptPath sp = sps.getLst().get(i);
 
 			if (sp.isResources()) {
 				ic = new ResourceConfig(sp, xmlName, itemName);
@@ -160,9 +160,9 @@ public class UserConfig implements Serializable, Cloneable {
 
 	public static IConfig getConfigByPath(String xmlPath) {
 		IConfig ic = null;
-		ScriptPaths sps = ScriptPaths.getInstance();
+		ConfScriptPaths sps = ConfScriptPaths.getInstance();
 		for (int i = 0; i < sps.getLst().size(); i++) {
-			ScriptPath sp = sps.getLst().get(i);
+			ConfScriptPath sp = sps.getLst().get(i);
 
 			if (sp.isResources()) {
 				ic = new ResourceConfig(sp, xmlPath, null);

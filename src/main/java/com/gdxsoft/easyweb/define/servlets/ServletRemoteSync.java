@@ -17,7 +17,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.conf.ScriptPaths;
+import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.define.SyncRemote;
 import com.gdxsoft.easyweb.define.SyncRemotes;
 import com.gdxsoft.easyweb.script.PageValue;
@@ -301,7 +301,7 @@ public class ServletRemoteSync extends HttpServlet {
 	}
 
 	private JSONObject handleGetCfgs(SyncRemote s) {
-		ScriptPaths.getInstance().getLst().forEach(sp -> {
+		ConfScriptPaths.getInstance().getLst().forEach(sp -> {
 			if (sp.isJdbc()) {
 				JdbcConfigOperation op = new JdbcConfigOperation(sp);
 				// 数据库管理的配置文件，输出到本地cache

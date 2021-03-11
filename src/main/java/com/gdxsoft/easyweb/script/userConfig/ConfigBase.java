@@ -12,13 +12,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public abstract class ConfigBase {
 	private static Logger LOGER = LoggerFactory.getLogger(ConfigBase.class);
 
-	private ScriptPath scriptPath;
+	private ConfScriptPath scriptPath;
 	private String fixedXmlName;
 
 	private String xmlName;
@@ -28,7 +28,7 @@ public abstract class ConfigBase {
 
 	}
 
-	public ConfigBase(ScriptPath scriptPath, String xmlName, String itemName) {
+	public ConfigBase(ConfScriptPath scriptPath, String xmlName, String itemName) {
 		this.scriptPath = scriptPath;
 		this.xmlName = xmlName;
 		this.fixedXmlName = xmlName == null ? null : UserConfig.filterXmlName(xmlName);
@@ -123,7 +123,7 @@ public abstract class ConfigBase {
 		this.fixedXmlName = fixedXmlName;
 	}
 
-	public ScriptPath getScriptPath() {
+	public ConfScriptPath getScriptPath() {
 		return scriptPath;
 	}
 
@@ -139,7 +139,7 @@ public abstract class ConfigBase {
 		return itemName;
 	}
 
-	public void setScriptPath(ScriptPath scriptPath) {
+	public void setScriptPath(ConfScriptPath scriptPath) {
 		this.scriptPath = scriptPath;
 	}
 

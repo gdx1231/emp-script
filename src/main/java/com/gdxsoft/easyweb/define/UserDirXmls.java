@@ -14,8 +14,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
-import com.gdxsoft.easyweb.conf.ScriptPaths;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
@@ -91,7 +91,7 @@ public class UserDirXmls {
 		// this.createTreeNode();
 	}
 
-	public Dirs getCfgsByJdbc(ScriptPath scriptPath) {
+	public Dirs getCfgsByJdbc(ConfScriptPath scriptPath) {
 		JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
 		DTTable tb = op.getJdbcCfgDirs();
 		Dirs dirs = new Dirs();
@@ -125,12 +125,12 @@ public class UserDirXmls {
 	}
 
 	private void createTreeNode() {
-		ScriptPaths sps = ScriptPaths.getInstance();
+		ConfScriptPaths sps = ConfScriptPaths.getInstance();
 
 		long t_start = System.currentTimeMillis();
 		ArrayList<Dir> al = new ArrayList<Dir>();
 		for (int i = 0; i < sps.getLst().size(); i++) {
-			ScriptPath sp = sps.getLst().get(i);
+			ConfScriptPath sp = sps.getLst().get(i);
 			Dirs dirs;
 			if (sp.isResources()) {
 				continue;

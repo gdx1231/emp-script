@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 
 public interface IConfig extends Serializable {
 	String getPath();
@@ -50,7 +50,7 @@ public interface IConfig extends Serializable {
 	 * 
 	 * @return the ScriptPath class
 	 */
-	ScriptPath getScriptPath();
+	ConfScriptPath getScriptPath();
 
 	/**
 	 * return the fixed XML name
@@ -63,7 +63,7 @@ public interface IConfig extends Serializable {
 
 	String getItemName();
 
-	public void setScriptPath(ScriptPath scriptPath);
+	public void setScriptPath(ConfScriptPath scriptPath);
 
 	public void setXmlName(String xmlName);
 

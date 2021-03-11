@@ -5,11 +5,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.utils.UPath;
+import com.gdxsoft.easyweb.conf.ConfSqlCached;
 
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisPoolConfig;
@@ -28,86 +25,80 @@ public class SqlCached {
 	public static SqlCached getInstance() {
 		if (INSTANCE == null) {
 			// SqlCached.DEBUG = true;
-
-			long t0 = System.currentTimeMillis();
-
-			SqlCached o = new SqlCached();
-			o.init();
-
-			long t1 = System.currentTimeMillis();
-			LOGGER.info("SQLCACHED:init" + ":" + (t1 - t0) + "ms");
-
-			INSTANCE = o;
-			return o;
-		} else {
-			return INSTANCE;
+			INSTANCE = newSqlCached();
 		}
+		return INSTANCE;
+	}
+
+	private synchronized static SqlCached newSqlCached() {
+
+		long t0 = System.currentTimeMillis();
+
+		SqlCached o = new SqlCached();
+		o.init();
+
+		long t1 = System.currentTimeMillis();
+		LOGGER.info("SQLCACHED:init" + ":" + (t1 - t0) + "ms");
+
+		INSTANCE = o;
+		return o;
 	}
 
 	private ISqlCached _cachedImpl;
 
-	private void init() {
-		Document doc = UPath.getCfgXmlDoc();
-		NodeList nl = doc.getElementsByTagName("SqlCached");
-		String cachedMethod = "hsqldb";
-		String redis = null; // single/shared/cluster 单机，分片，集群
-		String auth = null;
-		String hosts = null;
-		if (nl.getLength() > 0) {
-			Element ele = (Element) nl.item(0);
-			String m = ele.getAttribute("CachedMethod");
-			if (m.trim().equalsIgnoreCase("redis")) {
-				cachedMethod = "redis";
-				redis = ele.getAttribute("Redis");
-				auth = ele.getAttribute("Auth");
-				hosts = ele.getAttribute("Hosts");
+	private void initHsqldb() {
+		LOGGER.info("SQLCACHED init: HSQLDB");
+		SqlCachedHsqldbImpl.DEBUG = DEBUG;
+		_cachedImpl = SqlCachedHsqldbImpl.getInstance();
+	}
+
+	private void initRedis(ConfSqlCached conf) {
+		// 池基本配置
+		JedisPoolConfig config = new JedisPoolConfig();
+		// 最大连接个数
+		config.setMaxTotal(50);
+		// 最大空闲连接数
+		config.setMaxIdle(5);
+
+		// 获取连接时的最大等待毫秒数
+		config.setMaxWaitMillis(10001);
+		config.setMaxIdle(10000);
+		// 在空闲时检查有效性,默认false
+
+		config.setTestOnBorrow(false);
+		String[] hosts1 = conf.getConfRedis().getHosts().split(",");
+		Set<HostAndPort> clusterNodes = new HashSet<HostAndPort>();
+		HostAndPort first = null;
+		for (int i = 0; i < hosts1.length; i++) {
+			String[] ipAndPort = hosts1[i].split("\\:");
+			String ip = ipAndPort[0].trim();
+			int port = ipAndPort.length == 1 ? 6379 : Integer.parseInt(ipAndPort[1]);
+			if (i == 0) {
+				first = new HostAndPort(ip, port);
 			}
+			clusterNodes.add(new HostAndPort(ip, port));
+
 		}
-		if (cachedMethod.equals("redis") && (hosts == null || hosts.isEmpty())) {
-			System.out.println(this + ":hosts?");
-			cachedMethod = "hsqldb";
-		}
-		if (cachedMethod.equals("redis")) {
-			// 池基本配置
-			JedisPoolConfig config = new JedisPoolConfig();
-			// 最大连接个数
-			config.setMaxTotal(50);
-			// 最大空闲连接数
-			config.setMaxIdle(5);
-
-			// 获取连接时的最大等待毫秒数
-			config.setMaxWaitMillis(10001);
-			config.setMaxIdle(10000);
-			// 在空闲时检查有效性,默认false
-
-			config.setTestOnBorrow(false);
-			String[] hosts1 = hosts.split(",");
-			Set<HostAndPort> clusterNodes = new HashSet<HostAndPort>();
-			HostAndPort first = null;
-			for (int i = 0; i < hosts1.length; i++) {
-				String[] ipAndPort = hosts1[i].split("\\:");
-				String ip = ipAndPort[0].trim();
-				int port = ipAndPort.length == 1 ? 6379 : Integer.parseInt(ipAndPort[1]);
-				if (i == 0) {
-					first = new HostAndPort(ip, port);
-				}
-				clusterNodes.add(new HostAndPort(ip, port));
-
-			}
-
-			if (redis == null || redis.isEmpty() || redis.equalsIgnoreCase("single")) {
-				LOGGER.info("SQLCACHED init: REDIS SINGLE");
-				SqlCachedRedisSingleImpl.DEBUG = DEBUG;
-				_cachedImpl = SqlCachedRedisSingleImpl.getInstance(first.getHost(), first.getPort(), auth, config);
-			} else {
-				LOGGER.info("SQLCACHED init: REDIS CLUSTER");
-				SqlCachedRedisImpl.DEBUG = DEBUG;
-				_cachedImpl = SqlCachedRedisImpl.getInstance(clusterNodes, config);
-			}
+		String method = conf.getConfRedis().getMethod();
+		String auth = conf.getConfRedis().getAuth();
+		if (method == null || method.isEmpty() || method.equalsIgnoreCase("single")) {
+			LOGGER.info("SQLCACHED init: REDIS SINGLE");
+			SqlCachedRedisSingleImpl.DEBUG = DEBUG;
+			_cachedImpl = SqlCachedRedisSingleImpl.getInstance(first.getHost(), first.getPort(), auth, config);
 		} else {
-			LOGGER.info("SQLCACHED init: HSQLDB");
-			SqlCachedHsqldbImpl.DEBUG = DEBUG;
-			_cachedImpl = SqlCachedHsqldbImpl.getInstance();
+			LOGGER.info("SQLCACHED init: REDIS CLUSTER");
+			SqlCachedRedisImpl.DEBUG = DEBUG;
+			_cachedImpl = SqlCachedRedisImpl.getInstance(clusterNodes, config);
+		}
+	}
+
+	private void init() {
+		ConfSqlCached conf = ConfSqlCached.getInstance();
+		SqlCached.DEBUG = conf.isDebug();
+		if ("redis".equalsIgnoreCase(conf.getCachedMethod())) {
+			this.initRedis(conf);
+		} else {
+			this.initHsqldb();
 		}
 	}
 

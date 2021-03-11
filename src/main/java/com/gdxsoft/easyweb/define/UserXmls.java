@@ -9,7 +9,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
@@ -112,7 +112,7 @@ public class UserXmls {
 	}
 
 	public void initXml() {
-		ScriptPath sp = this._UpdateXml.getConfigType().getScriptPath();
+		ConfScriptPath sp = this._UpdateXml.getConfigType().getScriptPath();
 		if (sp.isJdbc()) {
 			try {
 				this.initXmlJdbc();

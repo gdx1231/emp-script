@@ -17,7 +17,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.conf.Securities;
+import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
@@ -719,12 +719,12 @@ public class ActionBase {
 	 * @throws Exception
 	 */
 	private void executeCookie(UserXItemValue uxv) throws Exception {
-		if (Securities.getInstance().getDefaultSecurity() == null) {
+		if (ConfSecurities.getInstance().getDefaultSecurity() == null) {
 			String err = "No default symmetric defined, in the ewa_conf.xml securities->security";
 			LOGGER.error(err);
 			throw new Exception(err);
 		}
-		IUSymmetricEncyrpt security = Securities.getInstance().getDefaultSecurity().createSymmetric();
+		IUSymmetricEncyrpt security = ConfSecurities.getInstance().getDefaultSecurity().createSymmetric();
 
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
 

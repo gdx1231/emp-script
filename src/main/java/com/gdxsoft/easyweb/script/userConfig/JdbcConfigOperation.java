@@ -15,7 +15,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.define.ConfigUtils;
@@ -31,9 +31,9 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 */
 	private static final long serialVersionUID = -1054775785967204755L;
 	private static Logger LOGER = LoggerFactory.getLogger(JdbcConfigOperation.class);
-	private ScriptPath scriptPath;
+	private ConfScriptPath scriptPath;
 
-	public JdbcConfigOperation(ScriptPath scriptPath) {
+	public JdbcConfigOperation(ConfScriptPath scriptPath) {
 		this.scriptPath = scriptPath;
 	}
 

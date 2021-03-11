@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -47,7 +47,7 @@ public class UpdateXmlBase {
 	String _UpdateDate;
 	String _BackUpXmlName;
 	IConfig configType;
-	ScriptPath scriptPath;
+	ConfScriptPath scriptPath;
 	private String _AdmId; // 管理员
 
 	void updateTime(Node item) {
@@ -161,11 +161,11 @@ public class UpdateXmlBase {
 		this._XmlName = xmlName;
 	}
 
-	public ScriptPath getScriptPath() {
+	public ConfScriptPath getScriptPath() {
 		return scriptPath;
 	}
 
-	public void setScriptPath(ScriptPath scriptPath) {
+	public void setScriptPath(ConfScriptPath scriptPath) {
 		this.scriptPath = scriptPath;
 	}
 

@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.utils.UFile;
 
 public class FileConfig extends ConfigBase implements IConfig, Serializable, Cloneable {
@@ -21,7 +21,7 @@ public class FileConfig extends ConfigBase implements IConfig, Serializable, Clo
 		super();
 	}
 	
-	public FileConfig(ScriptPath scriptPath, String xmlName, String itemName) {
+	public FileConfig(ConfScriptPath scriptPath, String xmlName, String itemName) {
 		super(scriptPath, xmlName, itemName);
 	}
 

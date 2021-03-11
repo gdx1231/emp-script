@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 
 public class ResourceConfig extends ConfigBase implements IConfig, Serializable, Cloneable {
 
@@ -22,7 +22,7 @@ public class ResourceConfig extends ConfigBase implements IConfig, Serializable,
 	public ResourceConfig() {
 		super();
 	}
-	public ResourceConfig(ScriptPath scriptPath, String xmlName, String itemName) {
+	public ResourceConfig(ConfScriptPath scriptPath, String xmlName, String itemName) {
 		super(scriptPath, xmlName, itemName);
 	} 
 

@@ -15,7 +15,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
@@ -41,7 +41,7 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	 * 
 	 * @param scriptPath
 	 */
-	public UpdateXmlImpl(ScriptPath scriptPath) {
+	public UpdateXmlImpl(ConfScriptPath scriptPath) {
 		super.scriptPath = scriptPath;
 	}
 

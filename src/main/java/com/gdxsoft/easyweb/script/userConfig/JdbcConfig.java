@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public class JdbcConfig extends ConfigBase implements IConfig, Serializable, Cloneable {
@@ -22,7 +22,7 @@ public class JdbcConfig extends ConfigBase implements IConfig, Serializable, Clo
 		super();
 	}
 
-	public JdbcConfig(ScriptPath scriptPath, String xmlName, String itemName) {
+	public JdbcConfig(ConfScriptPath scriptPath, String xmlName, String itemName) {
 		super(scriptPath, xmlName, itemName);
 		op = new JdbcConfigOperation(scriptPath);
 	}

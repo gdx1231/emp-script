@@ -22,7 +22,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.conf.Securities;
+import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.display.action.ActionBase;
@@ -869,8 +869,8 @@ public class RequestValue implements Cloneable {
 
 		IUSymmetricEncyrpt symmetric = null;
 		// defined in ewa_conf securities -> security
-		if (Securities.getInstance().getDefaultSecurity() != null) {
-			symmetric = Securities.getInstance().getDefaultSecurity().createSymmetric();
+		if (ConfSecurities.getInstance().getDefaultSecurity() != null) {
+			symmetric = ConfSecurities.getInstance().getDefaultSecurity().createSymmetric();
 		}
 
 		String ckPrefix = ActionBase.COOKIE_NAME_PREFIX;

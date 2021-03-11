@@ -15,7 +15,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
@@ -44,7 +44,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		op = new JdbcConfigOperation(super.scriptPath);
 	}
 
-	public UpdateXmlJdbcImpl(ScriptPath scriptPath) {
+	public UpdateXmlJdbcImpl(ConfScriptPath scriptPath) {
 		super.scriptPath = scriptPath;
 		op = new JdbcConfigOperation(scriptPath);
 	}

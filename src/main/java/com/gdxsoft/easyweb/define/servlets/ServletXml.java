@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.gdxsoft.easyweb.SystemXmlUtils;
-import com.gdxsoft.easyweb.conf.ScriptPath;
-import com.gdxsoft.easyweb.conf.ScriptPaths;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.define.CodeFormat;
 import com.gdxsoft.easyweb.define.ConfigUtils;
 import com.gdxsoft.easyweb.define.IUpdateXml;
@@ -452,7 +452,7 @@ public class ServletXml extends HttpServlet {
 			throw new Exception("Need the parameter D_XMLNAME in the http referer");
 		}
 		IConfig configType = UserConfig.getConfig(D_XMLNAME, null);
-		ScriptPath sp = configType.getScriptPath();
+		ConfScriptPath sp = configType.getScriptPath();
 
 		ConfigUtils configUtils = new ConfigUtils(sp);
 		// 从配置文件中加载DropList配置信息
@@ -466,7 +466,7 @@ public class ServletXml extends HttpServlet {
 	 */
 	private String handleEwacDdlReload() {
 		String ewascriptpath = rv.s("EWA_SCRIPT_PATH");
-		ScriptPath sp = ScriptPaths.getInstance().getScriptPath(ewascriptpath);
+		ConfScriptPath sp = ConfScriptPaths.getInstance().getScriptPath(ewascriptpath);
 		// 刷新配置文件中 DropList配置信息
 		ConfigUtils configUtils = new ConfigUtils(sp);
 		JSONObject rst = new JSONObject();

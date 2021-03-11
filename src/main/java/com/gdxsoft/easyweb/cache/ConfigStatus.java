@@ -6,7 +6,7 @@ import java.io.Serializable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
@@ -68,7 +68,7 @@ public class ConfigStatus implements Serializable, Cloneable {
 
 	private void initByJdbc() {
 		this.jdbc = true;
-		ScriptPath sp = configType.getScriptPath();
+		ConfScriptPath sp = configType.getScriptPath();
 		JdbcConfigOperation op = new JdbcConfigOperation(sp);
 
 		// only the total XML meta

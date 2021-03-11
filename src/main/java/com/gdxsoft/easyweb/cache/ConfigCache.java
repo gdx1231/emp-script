@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.script.project.Project;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
@@ -56,7 +56,7 @@ public class ConfigCache {
 		if (uc == null) {
 			return null;
 		}
-		ScriptPath sp = uc.getConfigType().getScriptPath();
+		ConfScriptPath sp = uc.getConfigType().getScriptPath();
 		// the configuration in the resources, can not be modify
 		if (sp.isResources()) {
 			return uc;

@@ -13,8 +13,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.conf.ScriptPath;
-import com.gdxsoft.easyweb.conf.ScriptPaths;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
@@ -56,9 +56,9 @@ public class ConfigUtils {
 	 * @return
 	 */
 	public static IUpdateXml getUpdateXmlByPath(String xmlPath) {
-		ScriptPaths sps = ScriptPaths.getInstance();
+		ConfScriptPaths sps = ConfScriptPaths.getInstance();
 		for (int i = 0; i < sps.getLst().size(); i++) {
-			ScriptPath sp = sps.getLst().get(i);
+			ConfScriptPath sp = sps.getLst().get(i);
 			if (sp.isResources()) {
 				continue;
 			} else if (sp.isJdbc()) {
@@ -82,13 +82,13 @@ public class ConfigUtils {
 		return null;
 	}
 
-	private ScriptPath scriptPath;
+	private ConfScriptPath scriptPath;
 
 	public ConfigUtils() {
 
 	}
 
-	public ConfigUtils(ScriptPath sp) {
+	public ConfigUtils(ConfScriptPath sp) {
 		scriptPath = sp;
 	}
 
@@ -140,7 +140,7 @@ public class ConfigUtils {
 	 * @throws Exception
 	 */
 	public int renewDdls(String admId) throws Exception {
-		ScriptPath sp = this.scriptPath;
+		ConfScriptPath sp = this.scriptPath;
 		if (sp.isJdbc()) {
 			return this.renewDdlsJdbc(admId);
 		} else if (sp.isJdbc()) {
@@ -153,7 +153,7 @@ public class ConfigUtils {
 	private int renewDdlsFile(String admId) throws Exception {
 		Map<String, JSONObject> map = new HashMap<String, JSONObject>();
 
-		ScriptPath sp = this.scriptPath;
+		ConfScriptPath sp = this.scriptPath;
 		String root = sp.getPath();
 		handleFiles(root, map);
 
@@ -170,7 +170,7 @@ public class ConfigUtils {
 	}
 
 	private int renewDdlsJdbc(String admId) throws Exception {
-		ScriptPath sp = this.scriptPath;
+		ConfScriptPath sp = this.scriptPath;
 		Map<String, JSONObject> map = new HashMap<String, JSONObject>();
 		JdbcConfigOperation op = new JdbcConfigOperation(sp);
 		DTTable tb = op.getAllXmlnames();
