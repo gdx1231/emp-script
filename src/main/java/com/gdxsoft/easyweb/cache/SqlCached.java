@@ -87,7 +87,6 @@ public class SqlCached {
 			_cachedImpl = SqlCachedRedisSingleImpl.getInstance(first.getHost(), first.getPort(), auth, config);
 		} else {
 			LOGGER.info("SQLCACHED init: REDIS CLUSTER");
-			SqlCachedRedisImpl.DEBUG = DEBUG;
 			_cachedImpl = SqlCachedRedisImpl.getInstance(clusterNodes, config);
 		}
 	}

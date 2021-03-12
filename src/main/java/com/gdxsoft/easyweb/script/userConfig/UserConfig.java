@@ -82,13 +82,24 @@ public class UserConfig implements Serializable, Cloneable {
 			LOGGER.error(err);
 			throw new Exception(err);
 		}
+		UserConfig uc = new UserConfig();
 
 		// load instance from cached
-		UserConfig o = getInstanceFromCahced(xmlName, itemName);
+		if(debugFrames != null) {
+			debugFrames.addDebug(uc, "instance", "Start load instance from cached");
+		}
+		UserConfig o = getInstanceFromCahced(xmlName, itemName, debugFrames);
 		if (o != null) {
+			if(debugFrames != null) {
+				debugFrames.addDebug(uc, "instance", "return the cachaed instance");
+			}
 			return o;
 		}
 
+		if(debugFrames != null) {
+			debugFrames.addDebug(uc, "instance", "Not found in the cache, create a new instance");
+		}
+		
 		IConfig iConfig = getConfig(xmlName, itemName);
 
 		o = new UserConfig(xmlName, itemName);
@@ -105,11 +116,11 @@ public class UserConfig implements Serializable, Cloneable {
 		return o;
 	}
 
-	private static synchronized UserConfig getInstanceFromCahced(String xmlName, String itemName) {
+	private static synchronized UserConfig getInstanceFromCahced(String xmlName, String itemName, DebugFrames debugFrames) {
 		String fixedXmlName = UserConfig.filterXmlName(xmlName);
 		UserConfig o = null;
 		if ("sqlcached".equals(UPath.getCfgCacheMethod())) {
-			o = ConfigCacheWidthSqlCached.getUserConfig(fixedXmlName, itemName);
+			o = ConfigCacheWidthSqlCached.getUserConfig(fixedXmlName, itemName, debugFrames);
 		} else { // 利用内存模式
 			UserConfig obj = ConfigCache.getUserConfig(fixedXmlName, itemName);
 			if (obj == null) {

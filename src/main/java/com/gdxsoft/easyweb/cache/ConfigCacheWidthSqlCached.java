@@ -1,12 +1,13 @@
 package com.gdxsoft.easyweb.cache;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 
 /**
@@ -47,6 +48,10 @@ public class ConfigCacheWidthSqlCached {
 		return key;
 	}
 
+	public static UserConfig getUserConfig(String xmlFileName, String itemName) {
+		return getUserConfig(xmlFileName, itemName, null);
+	}
+
 	/**
 	 * 获取UserConfig
 	 * 
@@ -54,7 +59,8 @@ public class ConfigCacheWidthSqlCached {
 	 * @param itemName
 	 * @return
 	 */
-	public static UserConfig getUserConfig(String xmlFileName, String itemName) {
+	public static UserConfig getUserConfig(String xmlFileName, String itemName, DebugFrames debugFrames) {
+		ConfigCacheWidthSqlCached o = new ConfigCacheWidthSqlCached();
 		// 配置文件信息
 		String file_key = getConfigFileKey(xmlFileName);
 		String item_key = getConfigItemKey(itemName);
@@ -63,45 +69,69 @@ public class ConfigCacheWidthSqlCached {
 		itemkey.append(item_key);
 		String key = itemkey.toString();
 
+		if (debugFrames != null) {
+			debugFrames.addDebug(o, "getUserConfig", "Start get binary from cache (" + key + ")");
+		}
 		SqlCachedValue userConfigSerialized = SqlCached.getInstance().getBinary(key);
-
+		if (debugFrames != null) {
+			debugFrames.addDebug(o, "getUserConfig",
+					"End get cache " + (userConfigSerialized == null ? "null" : "not null"));
+		}
 		if (userConfigSerialized == null) {
 			return null;
 		}
+
 		UserConfig uc = getUserConfigFromCache(userConfigSerialized, xmlFileName);
+		if (debugFrames != null) {
+			debugFrames.addDebug(o, "getUserConfig", "Serialized the UserConfig " + (uc == null ? "null" : "not null"));
+		}
 		if (uc == null) {
 			return uc;
 		}
 		// not overtime
 		if (!userConfigSerialized.checkOvertime(UserConfig.CHECK_CHANG_SPAN_SECONDS)) {
+			if (debugFrames != null) {
+				debugFrames.addDebug(o, "getUserConfig", "Not overtime, return the UserConfig ");
+			}
 			return uc;
 		}
-
-		// Get cached XML meta from hsqldb
-		SqlCachedValue cachedXmlMeta = SqlCached.getInstance().getText(file_key);
-		if (cachedXmlMeta == null) { // 没有cached
+		// Get cached XML meta
+		CachedXmlFileMeta meta = ConfigCacheWidthSqlCached.getCachedXmlFileMetaFromCached(xmlFileName);
+		if (debugFrames != null) {
+			debugFrames.addDebug(o, "getUserConfig", "Get the cached XML meta (" + file_key + ")");
+		}
+		if (meta == null) {
 			removeUserConfig(xmlFileName);
+			if (debugFrames != null) {
+				debugFrames.addDebug(o, "getUserConfig", "No meta data, remove the UserConfig ");
+			}
 			return null;
 		}
 
 		// Get total XML meta from database
 		ConfigStatus currentXmlMeta = uc.getConfigStatus();
-
+		if (debugFrames != null) {
+			debugFrames.addDebug(o, "getUserConfig", "Get the current Meta from source (file/db)");
+		}
 		// long fileLastModify = fileStatus.lastModified();
 		// long len = fileStatus.length();
 		// String code = fileLastModify + "," + len + "," + fileStatus.getMd5();
 		// 从数据库返回的整个 XML 文件的 code
 		String code = currentXmlMeta.getStatusCode();
-
-		JSONObject json = new JSONObject(cachedXmlMeta.toString());
 		// 缓存中 整个 XML 文件的 code
-		String old_code = json.optString("code");
+		String old_code = meta.getCode();
 
 		// 检查文件是否被修改
 		if (old_code.equals(code)) {
+			if (debugFrames != null) {
+				debugFrames.addDebug(o, "getUserConfig", "No changed, return the UserConfig ");
+			}
 			return uc;
 		} else {
 			// 文件变化了，清除本文件下的所有缓存
+			if (debugFrames != null) {
+				debugFrames.addDebug(o, "getUserConfig", "The meta data changed, remove the UserConfig ");
+			}
 			removeUserConfig(xmlFileName);
 			return null;
 		}
@@ -109,7 +139,6 @@ public class ConfigCacheWidthSqlCached {
 	}
 
 	private static UserConfig getUserConfigFromCache(SqlCachedValue userConfigSerialized, String xmlFileName) {
-
 		if (userConfigSerialized == null) {
 			return null;
 		}
@@ -129,75 +158,71 @@ public class ConfigCacheWidthSqlCached {
 	}
 
 	/**
-	 * 删除配置文件
-	 * 
-	 * @param xmlFileName
-	 * @param itemName
-	 */
-	public static void removeUserConfig(String xmlFileName) {
-		String file_key = getConfigFileKey(xmlFileName);
-
-		// 配置文件信息
-		SqlCached cached = SqlCached.getInstance();
-		SqlCachedValue cvFile = cached.getText(file_key);
-
-		if (cvFile == null) {
-			return;
-		}
-
-		JSONObject json = new JSONObject(cvFile.toString());
-		JSONArray arr = json.optJSONArray("itemnames");
-		String[] keys = new String[arr.length()];
-		for (int i = 0; i < arr.length(); i++) {
-			String item_key = getConfigItemKey(arr.optString(i));
-			StringBuilder itemkey = new StringBuilder(file_key);
-			itemkey.append(item_key);
-			keys[i] = itemkey.toString();
-
-			LOOGER.info("CLEAR CAHCE: " + keys[i]);
-		}
-		// 删除和配置文件相关的缓存文件
-		cached.removes(keys, "BIN");
-		cached.remove(file_key, "TEXT");
-		LOOGER.info("CLEAR CAHCES: " + xmlFileName);
-
-	}
-
-	/**
 	 * 删除配置项目
 	 * 
 	 * @param xmlFileName
 	 * @param itemName
 	 */
 	public static void removeUserConfig(String xmlFileName, String itemName) {
+		CachedXmlFileMeta meta = getCachedXmlFileMetaFromCached(xmlFileName);
+		removeUserConfig(meta);
+	}
 
-		String file_key = getConfigFileKey(xmlFileName);
-		String item_key = getConfigItemKey(itemName);
-		// 配置文件信息
-		SqlCached cached = SqlCached.getInstance();
-		SqlCachedValue cvFile = cached.getText(file_key);
+	/**
+	 * 删除配置文件
+	 * 
+	 * @param xmlFileName
+	 * @param itemName
+	 */
+	public static void removeUserConfig(String xmlFileName) {
+		CachedXmlFileMeta meta = getCachedXmlFileMetaFromCached(xmlFileName);
+		removeUserConfig(meta);
+	}
 
-		if (cvFile == null) {
+	public static void removeUserConfig(CachedXmlFileMeta meta) {
+		if (meta == null) {
 			return;
 		}
+		SqlCached cached = SqlCached.getInstance();
 
-		// 删除 itemName cache
-		StringBuilder itemkey = new StringBuilder(file_key);
-		itemkey.append(item_key);
-		String key = itemkey.toString();
-		cached.remove(key, "BIN");
-
-		JSONObject json = new JSONObject(cvFile.toString());
-		JSONArray arr = json.optJSONArray("itemnames");
-		for (int i = 0; i < arr.length(); i++) {
-			String name = arr.optString(i);
-			if (name.equals(itemName.toLowerCase())) {
-				arr.remove(i);
-				break;
-			}
+		String file_key = meta.getKey();
+		List<String> keys = new ArrayList<String>();
+		meta.getItemNames().forEach(itemName -> {
+			String item_key = getConfigItemKey(itemName);
+			// 删除 itemName cache
+			StringBuilder itemkey = new StringBuilder(file_key);
+			itemkey.append(item_key);
+			String key = itemkey.toString();
+			keys.add(key);
+		});
+		keys.add(file_key);
+		String[] removeKeys = new String[keys.size()];
+		removeKeys = keys.toArray(removeKeys);
+		for (int i = 0; i < removeKeys.length; i++) {
+			LOOGER.info("Del " + removeKeys[i]);
 		}
-		// 修改配置文件的缓存文件
-		cached.add(file_key, json.toString());
+		cached.removes(removeKeys, "BIN");
+	}
+
+	private static CachedXmlFileMeta getCachedXmlFileMetaFromCached(String xmlFileName) {
+		String file_key = getConfigFileKey(xmlFileName);
+		// 配置文件信息
+		SqlCached cached = SqlCached.getInstance();
+
+		SqlCachedValue cvFile = cached.getBinary(file_key);
+
+		CachedXmlFileMeta meta = null;
+		if (cvFile == null) {
+			return null;
+		}
+		try {
+			meta = CachedXmlFileMeta.fromSerialize(cvFile.getBinary());
+			return meta;
+		} catch (Exception err) {
+			LOOGER.warn("Unabled from serialize", err.getMessage());
+			return null;
+		}
+
 	}
 
 	/**
@@ -218,42 +243,38 @@ public class ConfigCacheWidthSqlCached {
 		// 配置文件信息
 		SqlCached cached = SqlCached.getInstance();
 		String file_key = getConfigFileKey(xmlFileName);
-		SqlCachedValue cvFile = cached.getText(file_key);
-		JSONObject configJson;
-		if (cvFile == null) {
-			configJson = new JSONObject();
-			configJson.put("code", code);
-			configJson.put("file", fileStatus.getFixedXmlName());
-			configJson.put("itemnames", new JSONArray());
-			configJson.put("key", file_key);
-		} else {
-			configJson = new JSONObject(cvFile.toString());
-			// 如果文件不一致，创建新的数据
-			if (!code.equals(configJson.optString("code"))) {
-				// 清除根此文件和所有相关配置
-				removeUserConfig(xmlFileName, itemName);
 
-				configJson = new JSONObject();
-				configJson.put("code", code);
-				configJson.put("file", fileStatus.getFixedXmlName());
-				configJson.put("itemnames", new JSONArray());
-				configJson.put("key", file_key);
+		SqlCachedValue cvFile = cached.getBinary(file_key);
+
+		CachedXmlFileMeta meta = null;
+		if (cvFile != null) {
+			try {
+				meta = CachedXmlFileMeta.fromSerialize(cvFile.getBinary());
+				if (!code.equals(meta.getCode())) {
+					// Clear all items
+					removeUserConfig(meta);
+					meta = null;
+				}
+			} catch (Exception err) {
+				LOOGER.warn("Unabled from serialize", err.getMessage());
 			}
 		}
-		// 文件配置项的信息
-		JSONArray arr = configJson.optJSONArray("itemnames");
-		boolean is_exists = false;
-		for (int i = 0; i < arr.length(); i++) {
-			if (arr.getString(i).equals(itemName.toLowerCase())) {
-				is_exists = true;
-				break;
-			}
+		if (meta == null) {
+			meta = createCachedXmlFileMeta(file_key, fileStatus);
 		}
-		if (!is_exists) {
-			arr.put(itemName.toLowerCase());
+
+		if (!meta.getItemNames().contains(itemName.toLowerCase())) {
+			meta.addItemName(itemName.toLowerCase());
 		}
+
 		// 记录文件信息到缓存
-		cached.add(file_key, configJson.toString(), xmlFileName);
+		try {
+			cached.add(file_key, meta.toSerialize(), xmlFileName);
+			LOOGER.info("Add " + file_key);
+		} catch (IOException e1) {
+			LOOGER.error(e1.getLocalizedMessage());
+			return;
+		}
 
 		String item_key = getConfigItemKey(itemName);
 		StringBuilder itemkey = new StringBuilder(file_key);
@@ -262,10 +283,21 @@ public class ConfigCacheWidthSqlCached {
 		try {
 			// 记录配置项信息到缓存
 			cached.add(key, userConfig.toSerialize(), xmlFileName + "::" + itemName);
+			LOOGER.info("Add " + key);
 		} catch (IOException e) {
 			LOOGER.error("", e);
 		}
+	}
 
+	private static CachedXmlFileMeta createCachedXmlFileMeta(String fileKey, ConfigStatus fileStatus) {
+		CachedXmlFileMeta meta = new CachedXmlFileMeta();
+
+		meta = new CachedXmlFileMeta();
+		meta.setCode(fileStatus.getStatusCode());
+		meta.setFile(fileStatus.getFixedXmlName());
+		meta.setKey(fileKey);
+
+		return meta;
 	}
 
 }
