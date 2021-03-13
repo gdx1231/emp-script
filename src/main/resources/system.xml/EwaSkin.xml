@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" />
 <link rel="stylesheet" rev="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css" type="text/css" />
 
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.min.2.0.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.6.0.min.js'></script>
 <script type="text/javascript" src="@ewa.cp/EWA_STYLE/cgi-bin/_re_/?v=3&la=@EWA_LANG"></script>
 
@@ -32,7 +32,7 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" />
 <link rel="stylesheet" rev="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css" type="text/css" />
 
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.min.2.0.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.6.0.min.js'></script>
 <script type="text/javascript" src="@ewa.cp/EWA_STYLE/cgi-bin/_re_/?v=3&la=@EWA_LANG"></script>
 
@@ -54,7 +54,7 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" />
 <link rel="stylesheet" rev="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css" type="text/css" />
 
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.min.2.0.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.6.0.min.js'></script>
 <script type="text/javascript" src="@ewa.cp/EWA_STYLE/cgi-bin/_re_/?v=3&la=@EWA_LANG"></script>
 
@@ -76,7 +76,7 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css">
 
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.min.2.0.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.5.1.min.js'></script>
 <script type="text/javascript" src="@ewa.cp/EWA_STYLE/cgi-bin/_re_/?v=3&la=@EWA_LANG"></script>
 
@@ -103,7 +103,7 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 <link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/app2/css/app.min.css" />
 <link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/app2/css/app_ewa.min.css" />
 
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.min.2.0.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.4.1.min.js'></script>
 <script type="text/javascript" src="@ewa.cp/EWA_STYLE/cgi-bin/_re_/?v=3&la=@EWA_LANG"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/iscroll-master/build/iscroll-probe.js'></script>
