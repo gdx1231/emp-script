@@ -12,17 +12,19 @@ import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
 
 public class Html2PdfByChrome {
-	private String chromeCmd=null;
-	public void setChromeCmd(String cmd){
-		chromeCmd=cmd;
+	private String chromeCmd = null;
+
+	public void setChromeCmd(String cmd) {
+		chromeCmd = cmd;
 	}
-	
-	public Html2PdfByChrome(){
-		String cmd=UPath.getInitPara("pdf_chrome_exe");
-		if(cmd!=null && cmd.trim().length()>0){
-			this.chromeCmd=cmd;
+
+	public Html2PdfByChrome() {
+		String cmd = UPath.getInitPara("pdf_chrome_exe");
+		if (cmd != null && cmd.trim().length() > 0) {
+			this.chromeCmd = cmd;
 		}
 	}
+
 	/**
 	 * 转换成PDF
 	 * 
@@ -37,19 +39,20 @@ public class Html2PdfByChrome {
 			os = os.toUpperCase();
 		}
 		String cmd = "";
-		if(this.chromeCmd!=null){
-			cmd=this.chromeCmd;
-		}else if (os.indexOf("MAC") >= 0) {
+		if (this.chromeCmd != null) {
+			cmd = this.chromeCmd;
+		} else if (os.indexOf("MAC") >= 0) {
 			cmd = "\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\"";
 		} else if (os.indexOf("WINDOWS") >= 0) {
 			cmd = "chrome";
-			cmd="C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\"+cmd;
+			cmd = "C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\" + cmd;
 		} else {
 			cmd = "chrome";
 		}
-		cmd+=" --headless --disable-gpu --print-to-pdf=\""+pdfFile.toString()+"\" \"file://"+inputFile.getAbsolutePath()+"\" ";
-		
-		//System.out.println(cmd);
+		cmd += " --headless --disable-gpu --print-to-pdf=\"" + pdfFile.toString() + "\" \"file://"
+				+ inputFile.getAbsolutePath() + "\" ";
+
+		// System.out.println(cmd);
 		this.runCvt(cmd);
 	}
 
@@ -66,6 +69,7 @@ public class Html2PdfByChrome {
 	public void convertUrl2PDF(String url, String pdfFile) {
 		this.convertUrl2PDF(url, new File(pdfFile));
 	}
+
 	public void convertUrl2PDF(String url, File pdfFile) {
 		String os = System.getProperty("os.name");
 		if (os == null) {
@@ -74,22 +78,22 @@ public class Html2PdfByChrome {
 			os = os.toUpperCase();
 		}
 		String cmd = "";
-		if(this.chromeCmd!=null){
-			cmd=this.chromeCmd;
-		}else if (os.indexOf("MAC") >= 0) {
+		if (this.chromeCmd != null) {
+			cmd = this.chromeCmd;
+		} else if (os.indexOf("MAC") >= 0) {
 			cmd = "\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\"";
 		} else if (os.indexOf("WINDOWS") >= 0) {
 			cmd = "chrome";
-			cmd="C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\"+cmd;
+			cmd = "C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\Application\\" + cmd;
 		} else {
 			cmd = "chrome";
 		}
-		cmd+=" --headless --disable-gpu --print-to-pdf=\""+pdfFile.toString()+"\" \""+url+"\" ";
-		
-		//System.out.println(cmd);
+		cmd += " --headless --disable-gpu --print-to-pdf=\"" + pdfFile.toString() + "\" \"" + url + "\" ";
+
+		// System.out.println(cmd);
 		this.runCvt(cmd);
 	}
-	
+
 	private boolean runCvt(String line) {
 		System.out.println(line);
 		CommandLine commandLine = CommandLine.parse(line);
