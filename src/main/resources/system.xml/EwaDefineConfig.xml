@@ -18,6 +18,7 @@
 		<Menu mcmd="changeItems('WORKFLOW');" micon="" mid="205" mtext="调整工作流"
 			mtext_enus="Change Workflows" pid="20" />
 		<!-- resources -->
+		<!-- 
 		<Menu micon="fa fa-gift" mid="30"
 			mtext="资源&lt;i class='fa fa-caret-down'>&lt;i>" mtext_enus="Resources &lt;i class='fa fa-caret-down'>&lt;i>"
 			pid="0" />
@@ -28,7 +29,7 @@
 		<Menu mcmd="" micon="" mid="310" mtext="\-" mtext_enus="\-" pid="30" />
 		<Menu mcmd="commonSqls();" micon="" mid="305" mtext="公共数据"
 			mtext_enus="Common Data" pid="30" />
-
+ 		-->
 		<!-- group -->
 		<Menu micon="fa fa-object-group" mid="50"
 			mtext="组件&lt;i class='fa fa-caret-down'>&lt;i>" mtext_enus="Group &lt;i class='fa fa-caret-down'>&lt;i>"

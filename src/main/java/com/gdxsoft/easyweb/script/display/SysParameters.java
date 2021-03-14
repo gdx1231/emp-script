@@ -22,7 +22,7 @@ public class SysParameters {
 	// 是否显示为 doctype XHTML EWA_XHTML = yes
 	private boolean _IsXhtml = false;
 	// 显示为 doctype H5， 参数 EWA_H5=1
-	private boolean _IsH5 = false;
+	private boolean _IsH5 = true;
 	// 显示为手机显示模式， 参数 EWA_MOBILE=1
 	private boolean _IsShowAsMobile = false;
 
@@ -111,21 +111,20 @@ public class SysParameters {
 		} else {
 			this._IsXhtml = false;
 		}
-		// 是否为XHTML输出
+		
+		// Default is h5
 		String isH5 = rv.getString("EWA_H5");
-		if (isH5 != null && isH5.equalsIgnoreCase("yes")) {
-			this._IsH5 = true;
-		} else {
+		if ("no".equalsIgnoreCase(isH5)) {
 			this._IsH5 = false;
 		}
-
+		
 		// 输出为手机显示模式， 参数 EWA_MOBILE=1
 		if (rv.s("EWA_MOBILE") != null) {
 			this._IsShowAsMobile = true;
 		}
-		
+
 		// 输出为VUE格式
-		if(rv.s("EWA_VUE")!=null) {
+		if (rv.s("EWA_VUE") != null) {
 			this._IsVue = true;
 		}
 	}
@@ -633,6 +632,7 @@ public class SysParameters {
 
 	/**
 	 * 显示为 doctype H5， 参数 EWA_H5=1
+	 * 
 	 * @return the _IsH5
 	 */
 	public boolean isH5() {
@@ -641,6 +641,7 @@ public class SysParameters {
 
 	/**
 	 * 显示为 doctype H5， 参数 EWA_H5=1
+	 * 
 	 * @param _IsH5 the _IsH5 to set
 	 */
 	public void setH5(boolean isH5) {
@@ -649,6 +650,7 @@ public class SysParameters {
 
 	/**
 	 * 是否显示为 VUE， 参数 EWA_VUE=1
+	 * 
 	 * @return the _IsVue
 	 */
 	public boolean isVue() {
@@ -656,7 +658,8 @@ public class SysParameters {
 	}
 
 	/**
-	 *  是否显示为 VUE
+	 * 是否显示为 VUE
+	 * 
 	 * @param _IsVue the _IsVue to set
 	 */
 	public void setVue(boolean vue) {
