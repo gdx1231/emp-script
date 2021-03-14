@@ -4,14 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
+import com.gdxsoft.easyweb.utils.Utils;
 
 public class ConfAdmins {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ConfAdmins.class);
 	private static ConfAdmins INST = null;
 
 	private static long PROP_TIME = 0;
@@ -26,7 +29,19 @@ public class ConfAdmins {
 		return INST;
 	}
 
+	/**
+	 * The define admin login
+	 * 
+	 * @param loginId
+	 * @param password
+	 * @return
+	 */
 	public static ConfAdmin login(String loginId, String password) {
+		if (!ConfDefine.isAllowDefine()) {
+			// Deny configuration files management
+			return null;
+		}
+
 		return getInstance().getAdm(loginId, password);
 	}
 
@@ -46,7 +61,7 @@ public class ConfAdmins {
 		NodeList nl = UPath.getCfgXmlDoc().getElementsByTagName("Admins");
 		if (nl.getLength() == 0) {
 			nl = UPath.getCfgXmlDoc().getElementsByTagName("admins");
-			
+
 		}
 		if (nl.getLength() == 0) {
 			return null;
@@ -56,7 +71,7 @@ public class ConfAdmins {
 		if (nlAdm.getLength() == 0) {
 			nlAdm = admins.getElementsByTagName("admin");
 		}
-		
+
 		if (nlAdm.getLength() == 0) {
 			return null;
 		}
@@ -72,10 +87,21 @@ public class ConfAdmins {
 			 * sp.setPassword(vals.get("password"));
 			 */
 			UObjectValue uo = new UObjectValue();
-			
-			
+
 			uo.setObject(sp);
 			uo.setAllValue(item);
+
+			if (StringUtils.isBlank(sp.getLoginId())) {
+				String randomLoginId = Utils.randomStr(8);
+				sp.setLoginId(randomLoginId);
+			}
+
+			if (StringUtils.isBlank(sp.getPassword()) || sp.getPassword().length() < 8) {
+				String randomPassword = Utils.randomStr(16);
+				sp.setPassword(randomPassword);
+				LOGGER.info("管理员：" + sp.getLoginId() + ", 临时密码：" + sp.getPassword());
+				LOGGER.info("Admin: " + sp.getLoginId() + ", temp password is: " + sp.getPassword());
+			}
 
 			sps.lst.add(sp);
 		}

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -57,11 +58,17 @@ public class ConfigUtils {
 	 */
 	public static IUpdateXml getUpdateXmlByPath(String xmlPath) {
 		ConfScriptPaths sps = ConfScriptPaths.getInstance();
+
+		// the blank path means from root build, return the first sp
+		boolean isBlankPath = StringUtils.isBlank(xmlPath);
 		for (int i = 0; i < sps.getLst().size(); i++) {
 			ConfScriptPath sp = sps.getLst().get(i);
 			if (sp.isResources()) {
 				continue;
 			} else if (sp.isJdbc()) {
+				if (isBlankPath) {
+					return new UpdateXmlJdbcImpl(sp);
+				}
 				JdbcConfigOperation op = new JdbcConfigOperation(sp);
 				if (op.checkPathExists(xmlPath)) {
 					UpdateXmlJdbcImpl o = new UpdateXmlJdbcImpl(sp);
@@ -69,6 +76,9 @@ public class ConfigUtils {
 					return o;
 				}
 			} else { // file
+				if (isBlankPath) {
+					return new UpdateXmlImpl(sp);
+				}
 				String xmlPath1 = UserConfig.filterXmlName(xmlPath);
 				String root = (sp.getPath() + xmlPath1);
 				File f = new File(root);
