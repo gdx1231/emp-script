@@ -70,7 +70,7 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	}
 
 	public String createNewXml(String xmlName, String path) throws IOException {
-		String path1 = UPath.getScriptPath() + UserConfig.filterXmlName(path);
+		String path1 = this.scriptPath.getPath() + UserConfig.filterXmlName(path);
 		String fileName = path1 + "/" + xmlName;
 
 		if (xmlName.endsWith(".xml")) {
@@ -226,12 +226,14 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	}
 
 	public boolean renamePath(String pathName, String newPathNameWithoutPath) {
-		UFile.renameFile(pathName, newPathNameWithoutPath);
+		String path = this.configType.getScriptPath().getPath() + UserConfig.filterXmlName(pathName);
+		UFile.renameFile(path, newPathNameWithoutPath);
 		return true;
 	}
 
 	public boolean renameXmlFile(String xmlNameAndPath, String newXmlNameWithoutPath) {
-		UFile.renameFile(xmlNameAndPath, newXmlNameWithoutPath);
+		String path = this.configType.getScriptPath().getPath() + UserConfig.filterXmlName(xmlNameAndPath);
+		UFile.renameFile(path, newXmlNameWithoutPath);
 		return true;
 	}
 

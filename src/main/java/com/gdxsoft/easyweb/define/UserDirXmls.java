@@ -139,7 +139,14 @@ public class UserDirXmls {
 				ArrayList<Dir> a = dirs.getDirs();
 				al.addAll(a);
 			} else { // file
+
 				String scriptPath = sp.getPath();
+				File f = new File(scriptPath);
+				if (!f.exists()) {
+					LOGGER.warn("The conf path not exists, " + f.getAbsolutePath());
+					continue;
+				}
+
 				dirs = new Dirs(scriptPath, true);
 				dirs.initUnIncludes(this.initExcludes());
 
@@ -147,7 +154,9 @@ public class UserDirXmls {
 
 				dirs.setFiletes(filter);
 				ArrayList<Dir> a = dirs.getDirs();
-				al.addAll(a);
+				if (a != null) {
+					al.addAll(a);
+				}
 			}
 
 		}
@@ -285,7 +294,7 @@ public class UserDirXmls {
 				try {
 					ff.delete();
 				} catch (Exception err) {
-					System.err.println(err.getMessage());
+					LOGGER.error("Fail to remove xml-item cache, " + ff.getAbsolutePath() + ", " + err.getMessage());
 				}
 			}
 		}
@@ -293,7 +302,7 @@ public class UserDirXmls {
 		try {
 			UFile.createNewTextFile(name, cnt);
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
+			LOGGER.error("Fail to save xml-item cache, " + e.getMessage());
 		}
 	}
 
@@ -335,17 +344,15 @@ public class UserDirXmls {
 			}
 			sb.append("</FrameData>");
 		} else {
-			String scriptPath = UPath.getScriptPath();
-			String fileName = scriptPath + xmlname.replace("|", "/");
-			// Integer id = Integer.valueOf(fileName.hashCode());
+			String xmlFilePath = ct.getScriptPath().getPath() + xmlname.replace("|", "/");
 
-			String cachedValue = getCntFromFiledCache(fileName);
+			String cachedValue = getCntFromFiledCache(xmlFilePath);
 			if (cachedValue != null && cachedValue.indexOf("<FrameData>") == 0) {
 				// 避免老版本cache错误
 				return cachedValue;
 			}
 
-			UserXmls userXmls = new UserXmls(fileName);
+			UserXmls userXmls = new UserXmls(xmlname);
 			userXmls.initXml();
 			List<UserXml> a = userXmls.getXmls();
 
@@ -375,7 +382,7 @@ public class UserDirXmls {
 				sb.append(xml);
 			}
 			sb.append("</FrameData>");
-			saveCntToCache(fileName, sb.toString());
+			saveCntToCache(xmlFilePath, sb.toString());
 		}
 
 		return sb.toString();
