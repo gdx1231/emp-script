@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.gdxsoft.easyweb.SystemXmlUtils;
+import com.gdxsoft.easyweb.conf.ConfDefine;
 import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.define.CodeFormat;
@@ -107,6 +108,12 @@ public class ServletXml extends HttpServlet {
 	}
 
 	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if (!ConfDefine.isAllowDefine()) {
+			LOGGER.info("Not allow define", request == null ? "?NO request?" : request.getRequestURI());
+			response.setStatus(404);
+			return;
+		}
+
 		request.setCharacterEncoding("UTF-8");
 		HttpSession session = request.getSession();
 

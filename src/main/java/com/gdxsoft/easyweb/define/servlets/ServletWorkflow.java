@@ -12,7 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConfDefine;
 import com.gdxsoft.easyweb.define.UpdateWorkflow;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.Workflow.EwaWfMain;
@@ -24,7 +27,7 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
  * 
  */
 public class ServletWorkflow extends HttpServlet {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ServletWorkflow.class);
 	/**
 	 * 
 	 */
@@ -47,22 +50,22 @@ public class ServletWorkflow extends HttpServlet {
 	 * 
 	 * This method is called when a form has its tag value method equals to get.
 	 * 
-	 * @param request
-	 *            the request send by the client to the server
-	 * @param response
-	 *            the response send by the server to the client
-	 * @throws ServletException
-	 *             if an error occurred
-	 * @throws IOException
-	 *             if an error occurred
+	 * @param request  the request send by the client to the server
+	 * @param response the response send by the server to the client
+	 * @throws ServletException if an error occurred
+	 * @throws IOException      if an error occurred
 	 */
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.show(request, response);
 	}
 
-	private void show(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if (!ConfDefine.isAllowDefine()) {
+			response.setStatus(404);
+			LOGGER.info("Not allow define", request == null ? "NO request?" : request.getRequestURI());
+			return;
+		}
+
 		request.setCharacterEncoding("UTF-8");
 		RequestValue rv = new RequestValue(request, request.getSession());
 		UpdateWorkflow u = new UpdateWorkflow();
@@ -149,20 +152,14 @@ public class ServletWorkflow extends HttpServlet {
 	/**
 	 * The doPost method of the servlet. <br>
 	 * 
-	 * This method is called when a form has its tag value method equals to
-	 * post.
+	 * This method is called when a form has its tag value method equals to post.
 	 * 
-	 * @param request
-	 *            the request send by the client to the server
-	 * @param response
-	 *            the response send by the server to the client
-	 * @throws ServletException
-	 *             if an error occurred
-	 * @throws IOException
-	 *             if an error occurred
+	 * @param request  the request send by the client to the server
+	 * @param response the response send by the server to the client
+	 * @throws ServletException if an error occurred
+	 * @throws IOException      if an error occurred
 	 */
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.show(request, response);
 	}
 
@@ -179,8 +176,7 @@ public class ServletWorkflow extends HttpServlet {
 	/**
 	 * Initialization of the servlet. <br>
 	 * 
-	 * @throws ServletException
-	 *             if an error occurs
+	 * @throws ServletException if an error occurs
 	 */
 	public void init() throws ServletException {
 		// Put your code here

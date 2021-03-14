@@ -10,13 +10,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.gdxsoft.easyweb.conf.ConfDefine;
+
 
 /**
  * @author Administrator
  * 
  */
 public class ServletIndex extends HttpServlet {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ServletIndex.class);
 	/**
 	 * 
 	 */
@@ -49,6 +54,13 @@ public class ServletIndex extends HttpServlet {
 	}
 
 	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		if(!ConfDefine.isAllowDefine()) {
+			response.setStatus(404 );
+			LOGGER.info("Not allow define", request == null ? "?not request?" : request.getRequestURI());
+			return;
+		}
+		
 		request.setCharacterEncoding("UTF-8");
 		// version =3 menus call by EwaDefineMenu
 		String urlDefine = request.getContextPath()

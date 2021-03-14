@@ -12,8 +12,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+import com.gdxsoft.easyweb.conf.ConfDefine;
 import com.gdxsoft.easyweb.datasource.ConnectionConfig;
 import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
 import com.gdxsoft.easyweb.define.group.Exchange;
@@ -26,7 +29,7 @@ import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ServletGroup extends HttpServlet {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ServletGroup.class);
 	/**
 	 * 
 	 */
@@ -55,6 +58,12 @@ public class ServletGroup extends HttpServlet {
 	}
 
 	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if(!ConfDefine.isAllowDefine()) {
+			response.setStatus(404 );
+			LOGGER.info("Not allow define", request == null ? "?not request?" : request.getRequestURI());
+			return;
+		}
+		
 		HttpSession session = request.getSession();
 		RequestValue rv = new RequestValue(request, session);
 		PageValue pv = rv.getPageValues().getPageValue("EWA_ADMIN_ID");

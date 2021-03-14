@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConfDefine;
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.define.SyncRemote;
 import com.gdxsoft.easyweb.define.SyncRemotes;
@@ -43,6 +44,12 @@ public class ServletRemoteSync extends HttpServlet {
 	}
 
 	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		if(!ConfDefine.isAllowDefine()) {
+			response.setStatus(404 );
+			LOGGER.info("Not allow define", request == null ? "NO request?" : request.getRequestURI());
+			return;
+		}
+		
 		this._Request = request;
 		this._Response = response;
 
