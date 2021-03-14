@@ -22,7 +22,7 @@ public class DefineAcl implements IAcl {
 			UUrl url = new UUrl(this._RequestValue.getRequest());
 			String ref = url.getUrl();
 			this._GoToUrl = this._RequestValue.getContextPath()
-					+ "/EWA_STYLE/cgi-bin/?XMLNAME=/ewa/m.xml&ITEMNAME=login&ref=" + Utils.textToUrl(ref);
+					+ "/EWA_STYLE/cgi-bin/?XMLNAME=/ewa/m.xml&ITEMNAME=login&version=3&ref=" + Utils.textToUrl(ref);
 			return false;
 		} else {
 			return true;
