@@ -60,8 +60,8 @@ public class UserConfig implements Serializable, Cloneable {
 	private IConfig configType;
 
 	public IConfig getConfigType() {
-		if(this.configType !=null && this.configType.getFixedXmlName() == null) {
-			// parse from Serializable, the configType parameters are null value  
+		if (this.configType != null && this.configType.getFixedXmlName() == null) {
+			// parse from Serializable, the configType parameters are null value
 			this.configType = getConfig(this.getXmlName(), this.getItemName());
 		}
 		return configType;
@@ -85,21 +85,21 @@ public class UserConfig implements Serializable, Cloneable {
 		UserConfig uc = new UserConfig();
 
 		// load instance from cached
-		if(debugFrames != null) {
+		if (debugFrames != null) {
 			debugFrames.addDebug(uc, "instance", "Start load instance from cached");
 		}
 		UserConfig o = getInstanceFromCahced(xmlName, itemName, debugFrames);
 		if (o != null) {
-			if(debugFrames != null) {
+			if (debugFrames != null) {
 				debugFrames.addDebug(uc, "instance", "return the cachaed instance");
 			}
 			return o;
 		}
 
-		if(debugFrames != null) {
+		if (debugFrames != null) {
 			debugFrames.addDebug(uc, "instance", "Not found in the cache, create a new instance");
 		}
-		
+
 		IConfig iConfig = getConfig(xmlName, itemName);
 
 		o = new UserConfig(xmlName, itemName);
@@ -108,6 +108,13 @@ public class UserConfig implements Serializable, Cloneable {
 		o.loadUserDefined();
 		o.setDebugFrames(null);
 
+		String msg = "Load new instance of [" + iConfig.getFixedXmlName() + ":" + iConfig.getItemName() + "] from ["
+				+ iConfig.getScriptPath().getPath() + "]";
+
+		LOGGER.info(msg);
+		if (debugFrames != null) {
+			debugFrames.addDebug(uc, "instance", msg);
+		}
 		if ("sqlcached".equals(UPath.getCfgCacheMethod())) {
 			ConfigCacheWidthSqlCached.setUserConfig(iConfig.getFixedXmlName(), itemName, o);
 		} else {
@@ -116,7 +123,8 @@ public class UserConfig implements Serializable, Cloneable {
 		return o;
 	}
 
-	private static synchronized UserConfig getInstanceFromCahced(String xmlName, String itemName, DebugFrames debugFrames) {
+	private static synchronized UserConfig getInstanceFromCahced(String xmlName, String itemName,
+			DebugFrames debugFrames) {
 		String fixedXmlName = UserConfig.filterXmlName(xmlName);
 		UserConfig o = null;
 		if ("sqlcached".equals(UPath.getCfgCacheMethod())) {
@@ -194,6 +202,7 @@ public class UserConfig implements Serializable, Cloneable {
 		}
 		return null;
 	}
+
 	/**
 	 * 从序列化二进制中获取
 	 * 

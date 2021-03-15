@@ -3,17 +3,16 @@ package com.gdxsoft.easyweb.conf;
 import java.io.Serializable;
 
 public class ConfScriptPath implements Cloneable, Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -8615816282487845786L;
 	private String path;
 	private String name;
 
 	private String resourceRoot;
 
+	private boolean readOnly;
+
 	/**
-	 * 用户配置信息是在数据库保存
+	 * The configurations in the database
 	 * 
 	 * @return
 	 */
@@ -24,6 +23,11 @@ public class ConfScriptPath implements Cloneable, Serializable {
 		return path.startsWith("jdbc:");
 	}
 
+	/**
+	 * The configurations in the jar
+	 * 
+	 * @return
+	 */
 	public boolean isResources() {
 		if (path == null) {
 			return false;
@@ -32,7 +36,7 @@ public class ConfScriptPath implements Cloneable, Serializable {
 	}
 
 	/**
-	 * 获取用户配置信息的jdbc
+	 * Returns the JDBC connectionString
 	 * 
 	 * @return
 	 */
@@ -70,6 +74,11 @@ public class ConfScriptPath implements Cloneable, Serializable {
 		return resourceRoot;
 	}
 
+	/**
+	 * Returns the root directory path of the configurations
+	 * 
+	 * @return
+	 */
 	public String getPath() {
 		return path;
 	}
@@ -84,6 +93,19 @@ public class ConfScriptPath implements Cloneable, Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * Whether the configuration resource is in read-only mode
+	 * 
+	 * @return true/false
+	 */
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
 
 public class ConfScriptPaths {
@@ -44,12 +45,14 @@ public class ConfScriptPaths {
 
 		for (int i = 0; i < nl.getLength(); i++) {
 			Element item = (Element) nl.item(i);
+			UObjectValue uv = new UObjectValue();
 			ConfScriptPath sp = new ConfScriptPath();
-			String name = item.getAttribute("name");
-			String path = item.getAttribute("path");
-			sp.setName(name);
-			sp.setPath(path);
+			uv.setObject(sp);
+			uv.setAllValue(item);
 
+			if (sp.isResources()) { // force read-only mode
+				sp.setReadOnly(true);
+			}
 			sps.lst.add(sp);
 		}
 

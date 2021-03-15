@@ -132,7 +132,7 @@ public class UserDirXmls {
 		for (int i = 0; i < sps.getLst().size(); i++) {
 			ConfScriptPath sp = sps.getLst().get(i);
 			Dirs dirs;
-			if (sp.isResources()) {
+			if (sp.isReadOnly()) {
 				continue;
 			} else if (sp.isJdbc()) { // jdbc
 				dirs = this.getCfgsByJdbc(sp);
