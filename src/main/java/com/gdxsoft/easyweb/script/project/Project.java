@@ -6,7 +6,7 @@ import java.util.HashMap;
 import com.gdxsoft.easyweb.script.template.Descriptions;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
-
+@Deprecated
 public class Project {
 	private Descriptions _DescriptionSet;
 	private String _Acl;
@@ -21,7 +21,7 @@ public class Project {
 	 * @param resourceName
 	 *            资源名
 	 * @return 文件名
-	 * @throws Exception
+	  * @throws Exception The exception
 	 */
 	public String getResource(String resourceName) throws Exception {
 		if (resourceName == null)

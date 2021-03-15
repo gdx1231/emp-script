@@ -42,7 +42,7 @@ public class DTRow implements Serializable {
 	 * @throws IllegalArgumentException
 	 */
 	public Object parseToClass(Object obj)
-			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			throws  Exception {
 		UObjectValue ov = new UObjectValue();
 		ov.setObject(obj);
 		ov.setDaoValue(this);

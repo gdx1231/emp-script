@@ -1,6 +1,5 @@
 package com.gdxsoft.easyweb.datasource;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,10 +12,8 @@ import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.Utils;
 
 /**
- * 用于ORMAP的基类
- * 
- * @author admin
- *
+ * 用于ORMAP的基类<br>
+ * The ORMAP base class
  */
 public class ClassBase {
 	HashMap<String, Boolean> _MapFieldChanged = new HashMap<String, Boolean>();
@@ -31,10 +28,11 @@ public class ClassBase {
 	}
 
 	/**
-	 * 获取扩展
+	 * 获取扩展<br>
+	 * Return the extend object from the name
 	 * 
-	 * @param name
-	 * @return
+	 * @param name the extend object name
+	 * @return the extend object
 	 */
 	public Object getExt(String name) {
 		String name1 = name.toUpperCase().trim();
@@ -47,10 +45,11 @@ public class ClassBase {
 	}
 
 	/**
-	 * 设置扩展
+	 * 设置扩展<br>
+	 * Set the extend
 	 * 
-	 * @param name
-	 * @param val
+	 * @param name the extend name
+	 * @param val  the extend object
 	 */
 	public void setExt(String name, Object val) {
 		String name1 = name.toUpperCase().trim();
@@ -58,10 +57,10 @@ public class ClassBase {
 	}
 
 	/**
-	 * 是否有扩展
+	 * Whether is have the extend
 	 * 
-	 * @param name
-	 * @return
+	 * @param name the extend name
+	 * @return true: yes/ false: no
 	 */
 	public boolean isExtHave(String name) {
 		String name1 = name.toUpperCase().trim();
@@ -69,18 +68,20 @@ public class ClassBase {
 	}
 
 	/**
-	 * 开始记录变化的字段
+	 * 开始记录变化的字段，清空 MapFieldChanged<br>
+	 * Start to record the changed field, clear the MapFieldChanged
 	 */
 	public void startRecordChanged() {
 		this._MapFieldChanged = new HashMap<String, Boolean>();
 	}
 
 	/**
-	 * 记录字段是否变化
+	 * 记录字段是否变化<br>
+	 * Record the field value changed
 	 * 
-	 * @param field_name
-	 * @param oriValue
-	 * @param newValue
+	 * @param field_name the field name
+	 * @param oriValue   the original value
+	 * @param newValue   the new value
 	 */
 	public void recordChanged(String field_name, Object oriValue, Object newValue) {
 		if (this._MapFieldChanged == null || this._MapFieldChanged.containsKey(field_name)) {
@@ -119,9 +120,10 @@ public class ClassBase {
 	}
 
 	/**
-	 * 根据JSON对象，初始化值
+	 * 根据JSON对象，初始化值<br>
+	 * Initialized the object properties through the JSON object
 	 * 
-	 * @param json
+	 * @param json the JSON object
 	 */
 	public void initValues(JSONObject json) {
 		UObjectValue ov = new UObjectValue();
@@ -134,9 +136,10 @@ public class ClassBase {
 	}
 
 	/**
-	 * 根据 DTRow对象，初始化值
+	 * 根据 DTRow对象，初始化值<br>
+	 * Initialized the object properties through the table row
 	 * 
-	 * @param row
+	 * @param row the table row
 	 */
 	public void initValues(DTRow row) {
 		UObjectValue ov = new UObjectValue();
@@ -149,16 +152,13 @@ public class ClassBase {
 	}
 
 	/**
-	 * 利用 rv 初始化/修改对象
+	 * 利用 rv 初始化/修改对象<br>
+	 * Initialized the class parameters through the RequestValue
 	 * 
-	 * @param rv
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
+	 * @param rv the RequestValue
+	 * @throws Exception the exception
 	 */
-	public void initOrUpdateValues(RequestValue rv)
-			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void initOrUpdateValues(RequestValue rv) throws Exception {
 		UObjectValue ov = new UObjectValue();
 		ov.setObject(this);
 
@@ -168,10 +168,10 @@ public class ClassBase {
 	}
 
 	/**
-	 * 根据JSON对象，初始化值
+	 * 根据JSON对象，初始化值 Initialized the class parameters through the JSON
 	 * 
-	 * @param json
-	 * @param handleJsonBinaryImpl 处理二进制的方法
+	 * @param json                 the JSON
+	 * @param handleJsonBinaryImpl 处理二进制的接口 the interface of the get the JSON binary
 	 */
 	public void initValues(JSONObject json, IHandleJsonBinary handleJsonBinaryImpl) {
 		UObjectValue ov = new UObjectValue();
@@ -184,9 +184,10 @@ public class ClassBase {
 	}
 
 	/**
-	 * 返回JSON对象
+	 * 返回JSON对象<br>
+	 * Return the JSON object
 	 * 
-	 * @return
+	 * @return the JSON object
 	 */
 	public JSONObject toJSON() {
 		JSONObject json = new JSONObject();
@@ -221,7 +222,8 @@ public class ClassBase {
 	}
 
 	/**
-	 * 获取扩展属性
+	 * 获取扩展属性<br>
+	 * Get the extends properties
 	 * 
 	 * @return the _Extends
 	 */
@@ -230,9 +232,10 @@ public class ClassBase {
 	}
 
 	/**
-	 * 获取变化字段的记录表
+	 * 获取变化字段的记录表<br>
+	 * Get the changed fields
 	 * 
-	 * @return
+	 * @return the changed field
 	 */
 	public HashMap<String, Boolean> getMapFieldChanged() {
 		return _MapFieldChanged;

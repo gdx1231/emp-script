@@ -4,7 +4,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,53 +23,225 @@ import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
+/**
+ * Reflect the class by name
+ */
 public class UObjectValue {
 	private static Logger LOGGER = LoggerFactory.getLogger(UObjectValue.class);
 
-	public static Object convert(Class<?> t, Object val) {
-		if (val == null)
+	/**
+	 * Set the target class setRequestValue
+	 * 
+	 * @param instance The targetClass
+	 * @param rv       the RequestValue
+	 * @return true: successful /false: fail
+	 */
+	public static boolean setRequestValue(Object instance, RequestValue rv) {
+		Method[] methods = instance.getClass().getDeclaredMethods();
+		for (int i = 0; i < methods.length; i++) {
+			Method m = methods[i];
+			if (m.getParameterTypes().length != 1) {
+				continue;
+			}
+			String paraClassName = m.getParameterTypes()[0].getName();
+			if (paraClassName.equalsIgnoreCase("com.gdxsoft.easyweb.script.RequestValue")) {
+				Object[] val = new Object[1];
+				val[0] = rv;
+				String rst = setValue(instance, m, val);
+				if (rst == null) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Set the corresponding attributes of the target element through the get
+	 * methods of the source class
+	 * 
+	 * @param targetElement The target element
+	 * @param source        the source class
+	 */
+	public static void writeXmlNodeAtts(Element targetElement, Object source) {
+		UObjectValue o = new UObjectValue();
+		o.setObject(source);
+
+		for (int i = 0; i < o.getGetterMethods().size(); i++) {
+			Method m = o.getGetterMethods().get(i);
+			String name = m.getName();
+			if (name.toUpperCase().indexOf("GET") == 0) {
+				name = name.substring(3);
+			} else if (name.toUpperCase().indexOf("IS") == 0) {
+				name = name.substring(2);
+			}
+			// return the get method value
+			String v = o.getValue(m);
+
+			if (v != null) {
+				targetElement.setAttribute(name, o.getValue(m));
+			}
+		}
+	}
+
+	/**
+	 * Create the corresponding child text nodes of the target element through the
+	 * get methods of the source class
+	 * 
+	 * @param targetElement The target element
+	 * @param source        The source class
+	 */
+	public static void writeXmlNodeTexts(Element targetElement, Object source) {
+		UObjectValue o = new UObjectValue();
+		o.setObject(source);
+
+		for (int i = 0; i < o.getGetterMethods().size(); i++) {
+			Method m = o.getGetterMethods().get(i);
+			String name = m.getName();
+
+			if (name.toUpperCase().indexOf("GET") == 0) {
+				name = name.substring(3);
+			} else if (name.toUpperCase().indexOf("IS") == 0) {
+				name = name.substring(2);
+			}
+			String v = o.getValue(m);
+			if (v != null) {
+				// Create the child node by class method
+				Node n = UXml.retNode(targetElement, name);
+				Element ele;
+				if (n == null) {
+					ele = targetElement.getOwnerDocument().createElement(name);
+				} else {
+					ele = (Element) n;
+				}
+				ele.setTextContent(v);
+				targetElement.appendChild(ele);
+			}
+		}
+	}
+
+	/**
+	 * Set the corresponding parameters of the target class through the children
+	 * text content of the source element
+	 * 
+	 * @param parentNode  the source node
+	 * @param targetClass the target class
+	 */
+	public static void fromXml(Node parentNode, Object targetClass) {
+		fromXml((Element) parentNode, targetClass);
+	}
+
+	/**
+	 * Set the corresponding parameters of the target class through the children
+	 * text content of the source element
+	 * 
+	 * @param parentElement the source element
+	 * @param targetClass   the target class
+	 */
+	public static void fromXmlNodes(Element parentElement, Object targetClass) {
+		UObjectValue o = new UObjectValue();
+		o.setObject(targetClass);
+		for (int i = 0; i < parentElement.getChildNodes().getLength(); i++) {
+			Node n = parentElement.getChildNodes().item(i);
+			if (n.getNodeType() == Node.ELEMENT_NODE) {
+				Element ele = (Element) n;
+				String name = ele.getNodeName();
+				String v = ele.getTextContent();
+				if (o.setValueAccurate("set" + name, v) == null) {
+					o.setValueAccurate("is" + name, v);
+				}
+			}
+		}
+	}
+
+	/**
+	 ** Set the corresponding parameters of the target class through the attributes
+	 * of the source element
+	 * 
+	 * @param ele         the source element
+	 * @param targetClass the target class
+	 */
+	public static void fromXml(Element ele, Object targetClass) {
+		UObjectValue o = new UObjectValue();
+		o.setObject(targetClass);
+		o.setAllValue(ele);
+	}
+
+	/**
+	 * Set the target class parameter base on the method
+	 * 
+	 * @param instance target class
+	 * @param method   the method
+	 * @param para     the set value
+	 * @return the result, when null is successful else is the error message
+	 */
+	public static String setValue(Object instance, Method method, Object[] para) {
+		Object[] newVals = new Object[method.getParameterTypes().length];
+		for (int i = 0; i < method.getParameterTypes().length; i++) {
+			newVals[i] = convert(method.getParameterTypes()[i], para[i]);
+			if (newVals[i] != null && newVals[i].toString().equals("[com.gdxsoft.easyweb.script.RequestValue]")) {
+				newVals[i] = para[i]; // 恢复rv
+			}
+		}
+		try {
+			method.invoke(instance, newVals);
+			return null;
+		} catch (IllegalArgumentException e) {
+			LOGGER.error(e.getMessage());
+			return e.getMessage();
+		} catch (IllegalAccessException e) {
+			LOGGER.error(e.getMessage());
+			return e.getMessage();
+		} catch (InvocationTargetException e) {
+			LOGGER.error(e.getMessage());
+			return e.getMessage();
+		}
+	}
+
+	/**
+	 * Convert to target object
+	 * 
+	 * @param t   the target object class
+	 * @param src the source object
+	 * @return the converted object
+	 */
+	public static Object convert(Class<?> t, Object src) {
+		if (src == null)
 			return null;
 		if (t.isArray()) {
-			if (val.getClass().getName().equals("java.lang.String")) {
-				String[] v1 = val.toString().split(",");
+			if (src.getClass().getName().equals("java.lang.String")) {
+				String[] v1 = src.toString().split(",");
 				for (int i = 0; i < v1.length; i++) {
 					v1[i] = v1[i].trim();
 
 				}
 				return v1;
 			}
-			return val;
+			return src;
 		}
 		String name = t.getName();
 		if (name.equals("com.gdxsoft.easyweb.script.RequestValue")) {
 			return "[com.gdxsoft.easyweb.script.RequestValue]";
 		}
 		if (name.equals("int")) {
-			return Integer.parseInt(val.toString().split("\\.")[0]);
+			return UConvert.ToInt32(src.toString());
 		} else if (name.equals("boolean")) {
-			boolean v = false;
-			// if (val == null)
-			// return v;
-			String v1 = val.toString().toUpperCase().trim();
-			if (v1.equals("0") || v1.equals("FALSE") || v1.equals("否") || v1.equals("NO") || v1.equals("N")) {
-				return v;
-			} else {
-				v = true;
-				return v;
-			}
+			return Utils.cvtBool(src);
 		} else if (name.equals("double")) {
-			return Double.parseDouble(val.toString());
+			return Double.parseDouble(src.toString());
 		} else if (name.equals("long")) {
-			return Long.parseLong(val.toString());
+			return Long.parseLong(src.toString());
 		} else if (name.equals("float")) {
-			return Float.parseFloat(val.toString());
+			return Float.parseFloat(src.toString());
 		} else if (name.equals("byte")) {
-			return Byte.parseByte(val.toString());
+			return Byte.parseByte(src.toString());
 		} else if (name.equals("java.util.Date")) {
-			return Utils.getDate(val.toString());
+			return Utils.getDate(src.toString());
 		}
 		try {
-			Object o = t.cast(val);
+			Object o = t.cast(src);
 			return o;
 		} catch (Exception e) {
 			return e.getMessage();
@@ -94,9 +265,10 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 设置所有属性
+	 * Set the corresponding parameters of the specified class through the
+	 * attributes of the source element
 	 * 
-	 * @param ele XmlNode
+	 * @param ele the source element
 	 */
 	public void setAllValue(Element ele) {
 		for (int i = 0; i < ele.getAttributes().getLength(); i++) {
@@ -109,113 +281,9 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 根据对象属性填充xml node
+	 * Get the specified class all get methods value，String, boolean, int...
 	 * 
-	 * @param ele xmlnode
-	 * @param obj 对象
-	 */
-	public static void writeXmlNodeAtts(Element ele, Object obj) {
-		UObjectValue o = new UObjectValue();
-		o.setObject(obj);
-
-		for (int i = 0; i < o.getGetterMethods().size(); i++) {
-			Method m = o.getGetterMethods().get(i);
-			String name = m.getName();
-			if (name.toUpperCase().indexOf("GET") == 0) {
-				name = name.substring(3);
-			} else if (name.toUpperCase().indexOf("IS") == 0) {
-				name = name.substring(2);
-			}
-			String v = o.getValue(m);
-
-			if (v != null) {
-				ele.setAttribute(name, o.getValue(m));
-			}
-		}
-	}
-
-	/**
-	 * 填充对象为node textcontent，tagName为对象属性名
-	 * 
-	 * @param eleParent
-	 * @param obj
-	 */
-	public static void writeXmlNodeTexts(Element eleParent, Object obj) {
-		UObjectValue o = new UObjectValue();
-		o.setObject(obj);
-
-		for (int i = 0; i < o.getGetterMethods().size(); i++) {
-			Method m = o.getGetterMethods().get(i);
-			String name = m.getName();
-
-			if (name.toUpperCase().indexOf("GET") == 0) {
-				name = name.substring(3);
-			} else if (name.toUpperCase().indexOf("IS") == 0) {
-				name = name.substring(2);
-			}
-			String v = o.getValue(m);
-			if (v != null) {
-				Node n = UXml.retNode(eleParent, name);
-				Element ele;
-				if (n == null) {
-					ele = eleParent.getOwnerDocument().createElement(name);
-				} else {
-					ele = (Element) n;
-				}
-				ele.setTextContent(v);
-				eleParent.appendChild(ele);
-			}
-		}
-	}
-
-	/**
-	 * 从xml属性中恢复对象属性
-	 * 
-	 * @param ele xml node
-	 * @param obj 对象
-	 */
-	public static void fromXml(Node node, Object obj) {
-		fromXml((Element) node, obj);
-	}
-
-	/**
-	 * 从xml的childNodes中恢复属性，获取的是node的textcontent
-	 * 
-	 * @param eleParent
-	 * @param obj
-	 */
-	public static void fromXmlNodes(Element eleParent, Object obj) {
-		UObjectValue o = new UObjectValue();
-		o.setObject(obj);
-		for (int i = 0; i < eleParent.getChildNodes().getLength(); i++) {
-			Node n = eleParent.getChildNodes().item(i);
-			if (n.getNodeType() == Node.ELEMENT_NODE) {
-				Element ele = (Element) n;
-				String name = ele.getNodeName();
-				String v = ele.getTextContent();
-				if (o.setValueAccurate("set" + name, v) == null) {
-					o.setValueAccurate("is" + name, v);
-				}
-			}
-		}
-	}
-
-	/**
-	 * 从xml属性中恢复对象属性
-	 * 
-	 * @param ele xml node
-	 * @param obj 对象
-	 */
-	public static void fromXml(Element ele, Object obj) {
-		UObjectValue o = new UObjectValue();
-		o.setObject(obj);
-		o.setAllValue(ele);
-	}
-
-	/**
-	 * 获取所有对象值，String,boolean,int类型
-	 * 
-	 * @return
+	 * @return the all get methods value
 	 */
 	public ArrayList<String[]> getAllValue() {
 		ArrayList<String[]> al = new ArrayList<String[]>();
@@ -249,20 +317,15 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 根据方法获取值
+	 * Return the get method result
 	 * 
-	 * @param method 方法
-	 * @return
+	 * @param method the get method
+	 * @return the return value
 	 */
 	public String getValue(Method method) {
 		String ret;
 		Object[] b = null;
 		String s = method.getReturnType().getName();
-
-//		if (!(s.equals("long") || s.equals("int") || s.equals("boolean") || s.equals("byte") || s.indexOf("String") >= 0
-//				|| s.equals("java.util.Date"))) {
-//			return null;
-//		}
 
 		try {
 			Object a = method.invoke(this._object, b);
@@ -287,10 +350,10 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 根据方法名称获取值
+	 * Get the value based on LIKE the get-method name
 	 * 
-	 * @param methodName 方法名
-	 * @return
+	 * @param methodName the get-method name
+	 * @return the get-method returns value
 	 */
 	public String getValue(String methodName) {
 		String n1 = methodName.toLowerCase().trim();
@@ -307,6 +370,12 @@ public class UObjectValue {
 		return ret;
 	}
 
+	/**
+	 * Get the value based on the get-method name
+	 * 
+	 * @param methodName the get-method name
+	 * @return the get-method returns value
+	 */
 	public String getValueAccurate(String methodName) {
 		String n1 = methodName.toLowerCase().trim();
 		String ret = "";
@@ -323,10 +392,10 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 获取对象的属性值
+	 * Get the value based on the method name without "get/is"
 	 * 
-	 * @param methodName
-	 * @return
+	 * @param methodName the method name without "get/is"
+	 * @return the get method returns value
 	 */
 	public Object getProperty(String methodName) {
 		String name1 = methodName.toLowerCase().trim().replace("_", "");
@@ -359,11 +428,11 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 设置对象值，按照名称部分符合
+	 * Set the specified class parameter base on LIKE the method name
 	 * 
-	 * @param methodName 方法名称
-	 * @param val        值
-	 * @return 错误信息
+	 * @param methodName the method name
+	 * @param val        the set value
+	 * @return the result, when null is successful else is the error message
 	 */
 	public String setValue(String methodName, String val) {
 		String n1 = methodName.toLowerCase().trim();
@@ -383,19 +452,16 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 设置对象值,按照确定名称
+	 * Set the specified class parameter base on the method name
 	 * 
-	 * @param methodName
-	 * @param val
-	 * @return
+	 * @param methodName the method name
+	 * @param val        the set value
+	 * @return the result, when null is successful else is the error message
 	 */
 	public String setValueAccurate(String methodName, String val) {
 
 		String n1 = methodName.toLowerCase().trim();
-		// if (n1.toLowerCase().indexOf("js") > 0) {
-		// int a = 1;
-		// a++;
-		// }
+
 		Object[] b = new Object[1];
 		b[0] = val;
 		String ret = null;
@@ -412,89 +478,30 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 设置对象值
+	 * Set the specified class parameter base on the method
 	 * 
-	 * @param method 方法
-	 * @param para   数据参数
-	 * @return 错误信息
+	 * @param method the method
+	 * @param para   the set value
+	 * @return the result, when null is successful else is the error message
 	 */
 	private String setValue(Method method, Object[] para) {
-		return this.setValue(this._object, method, para);
+		return setValue(this._object, method, para);
 	}
 
 	/**
-	 * 执行方法
-	 * 
-	 * @param instance 类实例
-	 * @param method   方法
-	 * @param para     参数
-	 * @return 错误信息，null为成功
-	 */
-	public String setValue(Object instance, Method method, Object[] para) {
-		Object[] newVals = new Object[method.getParameterTypes().length];
-		for (int i = 0; i < method.getParameterTypes().length; i++) {
-			newVals[i] = convert(method.getParameterTypes()[i], para[i]);
-			if (newVals[i] != null && newVals[i].toString().equals("[com.gdxsoft.easyweb.script.RequestValue]")) {
-				newVals[i] = para[i]; // 恢复rv
-			}
-		}
-		try {
-			method.invoke(instance, newVals);
-			return null;
-		} catch (IllegalArgumentException e) {
-			LOGGER.error(e.getMessage());
-			return e.getMessage();
-		} catch (IllegalAccessException e) {
-			LOGGER.error(e.getMessage());
-			return e.getMessage();
-		} catch (InvocationTargetException e) {
-			LOGGER.error(e.getMessage());
-			return e.getMessage();
-		}
-	}
-
-	/**
-	 * 设置对象的 RequestValue
-	 * 
-	 * @param rv RequestValue对象
-	 * @return 成功或失败
-	 */
-	public boolean setRequestValue(Object instance, RequestValue rv) {
-		Method[] methods = instance.getClass().getDeclaredMethods();
-		for (int i = 0; i < methods.length; i++) {
-			Method m = methods[i];
-			if (m.getParameterTypes().length != 1) {
-				continue;
-			}
-			String paraClassName = m.getParameterTypes()[0].getName();
-			if (paraClassName.equalsIgnoreCase("com.gdxsoft.easyweb.script.RequestValue")) {
-				Object[] val = new Object[1];
-				val[0] = rv;
-				String rst = this.setValue(instance, m, val);
-				if (rst == null) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * @return the _object
+	 * @return the specified class
 	 */
 	public Object getObject() {
 		return _object;
 	}
 
 	/**
-	 * 设置Class对象
+	 * Set the source class as specified class
 	 * 
-	 * @param _object 设置Class对象
+	 * @param sourceClass the source class
 	 */
-	public void setObject(Object _object) {
-		this._object = _object;
+	public void setObject(Object sourceClass) {
+		this._object = sourceClass;
 		this._Methods = _object.getClass().getDeclaredMethods();
 		Class<?> sup = _object.getClass().getSuperclass();
 		if (sup != null) {
@@ -558,7 +565,7 @@ public class UObjectValue {
 
 		if (instance == null)
 			return false;
-		this.setRequestValue(instance, rv);
+		setRequestValue(instance, rv);
 
 		Object ovl = this.invoke(instance, exeMethodName, methodValues);
 		this._Instance = instance;
@@ -702,21 +709,14 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 通过 jdbc结果集赋值对象
+	 * Set the specified class through the JDBC result and the specified field list
 	 * 
-	 * @param rs
-	 * @param fieldList
-	 * @return
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 * @throws SQLException
-	 * @throws InvocationTargetException
+	 * @param rs        the JDBC result
+	 * @param fieldList the specified field list
+	 * @return the specified class
+	 * @throws Exception The exception
 	 */
-	public Object setDaoValue(ResultSet rs, String[] fieldList) throws InstantiationException, IllegalAccessException,
-			IllegalArgumentException, SecurityException, NoSuchFieldException, SQLException, InvocationTargetException {
+	public Object setDaoValue(ResultSet rs, String[] fieldList) throws Exception {
 		// Object o1 = (Object) _object.getClass().newInstance();
 		Object o1 = _object;
 		String[] objFieldList = fieldList;
@@ -746,33 +746,25 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 通过JSON 赋值
+	 * /** Set the specified class through the JSON object
 	 * 
-	 * @param obj json对象
-	 * @return
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
+	 * @param json the JSON object
+	 * @return the specified class
+	 * @throws Exception The exception
 	 */
-	public Object setDaoValue(JSONObject obj)
-			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		return this.setDaoValue(obj, null);
+	public Object setDaoValue(JSONObject json) throws Exception {
+		return this.setDaoValue(json, null);
 	}
 
 	/**
-	 * 通过JSON 赋值
+	 * Set the specified class through the JSON object
 	 * 
-	 * @param obj               json对象
-	 * @param IHandleJsonBinary 获取二进制的接口
-	 * @return
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
+	 * @param obj              the JSON object
+	 * @param handleJsonBinary The interface of the JSON binary
+	 * @return the specified class
+	 * @throws Exception The exception
 	 */
-	public Object setDaoValue(JSONObject obj, IHandleJsonBinary handleJsonBinary)
-			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public Object setDaoValue(JSONObject obj, IHandleJsonBinary handleJsonBinary) throws Exception {
 		// Object o1 = (Object) _object.getClass().newInstance();
 		Object o1 = _object;
 		List<KeyValuePair<String, Object>> notFinds = new ArrayList<KeyValuePair<String, Object>>();
@@ -792,16 +784,13 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 通过DTRow 赋值
+	 * Set the specified class through the DTRow
 	 * 
-	 * @param row
-	 * @return
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
+	 * @param row the DTRow
+	 * @return the specified class
+	 * @throws Exception The exception
 	 */
-	public Object setDaoValue(DTRow row)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public Object setDaoValue(DTRow row) throws Exception {
 		Object o1 = _object;
 		List<KeyValuePair<String, Object>> notFinds = new ArrayList<KeyValuePair<String, Object>>();
 		for (int i = 0; i < row.getTable().getColumns().getCount(); i++) {
@@ -819,17 +808,13 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 用 rv 赋值
+	 * Set the specified class through the RequestValue
 	 * 
-	 * @param rv
-	 * @return
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
+	 * @param rv the RequestValue
+	 * @return the specified class
+	 * @throws Exception The exception
 	 */
-	public Object setDaoValue(RequestValue rv)
-			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public Object setDaoValue(RequestValue rv) throws Exception {
 		// 未赋值的对象
 		List<KeyValuePair<String, Object>> notFinds = new ArrayList<KeyValuePair<String, Object>>();
 
@@ -863,18 +848,15 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 查找并执行方法
+	 * Find and invoke the method from the specified class
 	 * 
-	 * @param name
-	 * @param val
-	 * @param handleJsonBinary
-	 * @return
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
+	 * @param name             the method
+	 * @param val              the invoke value
+	 * @param handleJsonBinary The interface of the JSON binary
+	 * @return true: successful/false: not found
+	 * @throws Exception The exception
 	 */
-	private boolean invokeMethod(String name, Object val, IHandleJsonBinary handleJsonBinary)
-			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private boolean invokeMethod(String name, Object val, IHandleJsonBinary handleJsonBinary) throws Exception {
 		String methodName = "set" + name.replace("_", "");
 		Method mm = this.getMethod(this._Methods, methodName, 1);
 		if (mm == null) {
@@ -967,6 +949,8 @@ public class UObjectValue {
 	}
 
 	/**
+	 * Returns all get methods
+	 * 
 	 * @return the _getterMethods
 	 */
 	public ArrayList<Method> getGetterMethods() {
@@ -974,7 +958,7 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 获取实例
+	 * Get the loadClass instnace
 	 * 
 	 * @return the _Instance
 	 */
@@ -983,7 +967,7 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 最后执行错误
+	 * Get the last exception message
 	 * 
 	 * @return the _LastErrMsg
 	 */
@@ -992,7 +976,7 @@ public class UObjectValue {
 	}
 
 	/**
-	 * 未找到的方法名称
+	 * Get the not found methods of the setDaoValue
 	 * 
 	 * @return the _NotFinds
 	 */

@@ -79,7 +79,7 @@ public class EwaShortNameManager {
 	 *            配置文件
 	 * @param itemName
 	 *            配置项
-	 * @return
+	 * @return true/false
 	 */
 	synchronized public static boolean register(String shortName,
 			String xmlName, String itemName) {

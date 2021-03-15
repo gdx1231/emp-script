@@ -5,19 +5,15 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 
 /**
- * !!!不建议再用!!!<br>
  * 合并静态文件对象（js/css）
- * 
- * @author admin
- *
  */
+@Deprecated
 public class UCombine {
 
 	/**
 	 * 获取Js实例
-	 * 
-	 * @param context
-	 * @return 实例化js
+	 * @param context the context
+	 * @return js
 	 */
 	public static UCombine instanceOfJs(String context) {
 		UCombine c = new UCombine("JS");
@@ -30,9 +26,8 @@ public class UCombine {
 
 	/**
 	 * 获取Css实例
-	 * 
-	 * @param context
-	 * @return 实例化的css
+	 * @param context the context
+	 * @return css
 	 */
 	public static UCombine instanceOfCss(String context) {
 		UCombine c = new UCombine("CSS");

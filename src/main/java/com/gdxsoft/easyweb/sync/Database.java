@@ -87,8 +87,7 @@ public class Database {
 
 	/**
 	 * 获取所有表数据（包含字段）
-	 * 
-	 * @return
+	 * @return the tables
 	 */
 	public JSONObject getTables() {
 		return tables_;

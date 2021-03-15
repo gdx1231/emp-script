@@ -224,15 +224,11 @@ public class ClassDaoBase<T> {
 	/**
 	 * 从 DTTable返回指定的类对象
 	 * 
-	 * @param tb
-	 * @return
-	 * @throws InstantiationException
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
+	 * @param tb The source table
+	 * @return The target class list
+	 * @throws Exception the exception
 	 */
-	public List<T> parseFromDTTable(DTTable tb)
-			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public List<T> parseFromDTTable(DTTable tb) throws Exception {
 		if (tb == null) {
 			return null;
 		}

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -352,9 +353,6 @@ public class DTTable implements Serializable {
 		return tb;
 	}
 
-	/**
-	 * 构造
-	 */
 	public DTTable() {
 		this._Columns = new DTColumns();
 		this._Rows = new DTRows();
@@ -364,17 +362,14 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 映射到 根据 objectClass 的类
+	 * 映射表数据到 根据 objectClass 的类<br>
+	 * Map the table rows to the target class list
 	 * 
-	 * @param cb
-	 * @param jsonRow
-	 * @throws IllegalAccessException
-	 * @throws InstantiationException
-	 * @throws InvocationTargetException
-	 * @throws IllegalArgumentException
+	 * @param objectClass the target class
+	 * @return the target class list
+	 * @throws Exception the exception
 	 */
-	public List<?> toClasses(Class<?> objectClass)
-			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public List<?> toClasses(Class<?> objectClass) throws Exception {
 		List<Object> al = new ArrayList<Object>();
 		for (int i = 0; i < this.getCount(); i++) {
 			Object obj = objectClass.newInstance();
@@ -385,10 +380,11 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 序列化表
+	 * 序列化表<br>
+	 * Serialize the table
 	 * 
-	 * @return
-	 * @throws IOException
+	 * @return the serialized binary
+	 * @throws IOException the exception
 	 */
 	public byte[] toSerialize() throws IOException {
 		// Serialize
@@ -405,10 +401,13 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据指定的字段初始化字段
+	 * 根据指定的字段初始化字段的XML属性，是否从XML的属性中获取<br>
+	 * Initialize the table columns XML "isAttribute" according to the specified,
+	 * Whether to get the value from the XML element attribute fields
 	 * 
-	 * @param fields
-	 * @param isAttribute 是否从属性中获取
+	 * @param fields      the fields name
+	 * @param isAttribute 是否从XML的属性中获取 <br>
+	 *                    Whether to get the value from the XML element attribute
 	 */
 	public void initXmlColumnsByFields(String[] fields, boolean isAttribute) {
 		for (int i = 0; i < fields.length; i++) {
@@ -423,15 +422,16 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据XML Document 初始化数据
+	 * 根据XML Document 初始化数据<br>
+	 * Initialize the table data from the XML document
 	 * 
-	 * @param doc
-	 * @param dataTag
+	 * @param doc        the XML document
+	 * @param xmlTagName the tag name
 	 */
-	public void initData(Document doc, String dataTag) {
+	public void initData(Document doc, String xmlTagName) {
 		this._Document = doc;
-		this._DataList = UXml.retNodeListByPath(this._Document, dataTag);
-		this._XmlDataTag = dataTag;
+		this._DataList = UXml.retNodeListByPath(this._Document, xmlTagName);
+		this._XmlDataTag = xmlTagName;
 
 		if (this._Columns.getCount() == 0) {
 			initColumnsByXml();
@@ -453,7 +453,7 @@ public class DTTable implements Serializable {
 			// int mmm = 0;
 			// mmm++;
 		} else {
-			String[] tags = dataTag.split("/");
+			String[] tags = xmlTagName.split("/"); // 多级tagName
 			String s = "";
 			Node n1 = this._Document;
 
@@ -487,27 +487,24 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据Xml字符串 初始化数据
+	 * 根据Xml字符串 初始化数据<br>
+	 * Initialize the table data from the XML string
 	 * 
-	 * @param xml
-	 * @param dataTag
+	 * @param xml        the XML string
+	 * @param xmlTagName the XML tag name
 	 */
-	public void initData(String xml, String dataTag) {
-		// 在 "Key" 属性值中找到无效的 XML 字符 (Unicode: 0x8), 并且元素为 "Row"。
-		char unicode8 = (char) 8;
-		StringBuilder sb = new StringBuilder();
-		sb.append(unicode8);
-		String u8 = sb.toString();
-		xml = xml.replace(u8, "");
+	public void initData(String xml, String xmlTagName) {
+		xml = UXml.filterInvalidXMLcharacter(xml);
 		this._Document = UXml.asDocument(xml);
-		this.initData(this._Document, dataTag);
+		this.initData(this._Document, xmlTagName);
 	}
 
 	/**
-	 * 通过节点的子节点的textcontent获取数据
+	 * 通过节点的子节点的textcontent获取数据<br>
+	 * Initialize the table data from specified text node of the XML document
 	 * 
-	 * @param doc
-	 * @param dataTag
+	 * @param doc     the XML document
+	 * @param dataTag the text node tag name
 	 */
 	public void initDataByXmlChildNodes(Document doc, String dataTag) {
 		this._IsXmlChildNode = true;
@@ -515,12 +512,14 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 通过节点的子节点的textcontent获取数据
+	 * 通过节点的子节点的textcontent获取数据<br>
+	 * Initialize the table data from specified text node of the XML document
 	 * 
-	 * @param xml
-	 * @param dataTag
+	 * @param xml     the XML string
+	 * @param dataTag the XML tag name
 	 */
 	public void initDataByXmlChildNodes(String xml, String dataTag) {
+		xml = UXml.filterInvalidXMLcharacter(xml);
 		this._IsXmlChildNode = true;
 		this._Document = UXml.asDocument(xml);
 		this.initData(this._Document, dataTag);
@@ -574,7 +573,7 @@ public class DTTable implements Serializable {
 	 * @param fromTable 需要连接的表
 	 * @param fromKeys  需要连接的表的主键
 	 * @param toKeys    当前表的主键
-	 * @throws Throwable
+	 * @throws Throwable the exception
 	 */
 	public void join(DTTable fromTable, String[] fromKeys, String[] toKeys) throws Throwable {
 		fromTable.getColumns().setKeys(fromKeys);
@@ -647,7 +646,7 @@ public class DTTable implements Serializable {
 	 * @param fields     需要附加的字段
 	 * @param namedField 来源表标记为字段名称的字段 *
 	 * @param valueField 取值用的字段
-	 * @throws Throwable
+	 * @throws Throwable the exception
 	 */
 	public void joinHor(DTTable fromTable, String[] fromKeys, String[] toKeys, String[] fields, String namedField,
 			String valueField) throws Throwable {
@@ -749,8 +748,8 @@ public class DTTable implements Serializable {
 	/**
 	 * 返回JSON对象 含有图片的最多返回50条记录，其它最多1000条数据
 	 * 
-	 * @return
-	 * @throws JSONException
+	 * @return the JSON array
+	 * @throws JSONException the exception
 	 */
 	public JSONArray toJSONArray() throws JSONException {
 		JSONArray json = new JSONArray();
@@ -782,9 +781,9 @@ public class DTTable implements Serializable {
 	/**
 	 * 创建JSON时，获取Cell值的方法
 	 * 
-	 * @param cell
-	 * @param contentpath
-	 * @return
+	 * @param cell        the table cell
+	 * @param contentpath the binary value save to
+	 * @return the value
 	 */
 	public Object getCellValueByJson(DTCell cell, String contentpath) {
 		Object val = cell.getValue();
@@ -814,8 +813,8 @@ public class DTTable implements Serializable {
 	 * 返回JSON对象，二进制数据转换成文件<br>
 	 * 特征码：##BINARY_FILE["+objBinFile.toString()+"]BINARY_FILE##
 	 * 
-	 * @return
-	 * @throws JSONException
+	 * @return the JSON array
+	 * @throws JSONException the exception
 	 */
 	public JSONArray toJSONArrayBinaryToFile(String http) throws JSONException {
 		JSONArray json = new JSONArray();
@@ -859,7 +858,7 @@ public class DTTable implements Serializable {
 	 * 含有图片的最多返回50条记录，其它最多1000条数据
 	 * 
 	 * @param rv 现在没啥用了
-	 * @return
+	 * @return JSONObject
 	 */
 	public String toJson(RequestValue rv) {
 		MStr sb = new MStr();
@@ -940,6 +939,12 @@ public class DTTable implements Serializable {
 		return s;
 	}
 
+	/**
+	 * Convert to the XML String
+	 * 
+	 * @param rv the RequestValue
+	 * @return the XML String
+	 */
 	public String toXml(RequestValue rv) {
 		MStr s = new MStr();
 		s.al("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -971,7 +976,8 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据Xml初始化字段信息
+	 * 根据Xml初始化字段信息<br>
+	 * Initialize the table columns by XML node
 	 */
 	private void initColumnsByXml() {
 		if (this._IsXmlChildNode) {
@@ -1027,19 +1033,20 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据ResultSet初始化数据
+	 * 根据ResultSet初始化数据<br>
+	 * Initialize the table data from the JDBC ResultSet
 	 * 
-	 * @param rs
+	 * @param rs the JDBC ResultSet
 	 */
 	public void initData(ResultSet rs) {
 		this.initData(rs, null);
 	}
 
 	/**
-	 * 根据ResultSet初始化数据
+	 * 根据ResultSet初始化数据 Initialize the table data from the JDBC ResultSet
 	 * 
-	 * @param rs
-	 * @param keys 主键表达式
+	 * @param rs   the JDBC ResultSet
+	 * @param keys 主键表达式 the data keys
 	 */
 	public void initData(ResultSet rs, String[] keys) {
 		this.initColumns(rs);
@@ -1133,11 +1140,12 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据keys值获取数据行
+	 * 根据keys值获取数据行<br>
+	 * Returns the row form the keys
 	 * 
 	 * @param cols keys的字段
 	 * @param vals keys值
-	 * @return
+	 * @return the row
 	 */
 	public DTRow getRowByKeys(DTColumn[] cols, Object vals[]) {
 		MStr keysExp = new MStr();
@@ -1155,12 +1163,13 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据keys值获取数据行
+	 * 根据keys值获取数据行<br>
+	 * Returns the row form the keys
 	 * 
 	 * @param colsNames keys的字段名称
 	 * @param vals      keys值
-	 * @return
-	 * @throws Exception
+	 * @return the row
+	 * @throws Exception the Exception
 	 */
 	public DTRow getRowByKeys(String[] colsNames, Object vals[]) throws Exception {
 		DTColumn[] cols = new DTColumn[colsNames.length];
@@ -1173,7 +1182,8 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 重建索引
+	 * 重建索引<br>
+	 * Rebuild the table index
 	 */
 	public void rebuildIndex() {
 		ArrayList<DTColumn> colsIdx = new ArrayList<DTColumn>();
@@ -1210,11 +1220,12 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据key值获取数据行
+	 * 根据key值获取数据行<br>
+	 * Returns the row form the key
 	 * 
-	 * @param col key的字段
-	 * @param val
-	 * @return
+	 * @param col the key column
+	 * @param val the key value
+	 * @return the row
 	 */
 	public DTRow getRowByKey(DTColumn col, Object val) {
 		DTColumn[] cols = new DTColumn[1];
@@ -1225,11 +1236,14 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据key值获取数据行
+	 * 根据key值获取数据行<br>
+	 * Returns the row form the key
 	 * 
-	 * @param colName 字段名称
-	 * @param val     字段值
-	 * @return
+	 * @param colName 字段名称<br>
+	 *                the key column name
+	 * @param val     字段值<br>
+	 *                the key value
+	 * @return the row
 	 */
 	public DTRow getRowByKey(String colName, Object val) {
 		DTColumn col = null;
@@ -1281,11 +1295,12 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据HashMap类初始化数据
+	 * 根据HashMap类初始化数据<br>
+	 * Initialize the data from the Map data
 	 * 
-	 * @param mapData
+	 * @param mapData the Map data
 	 */
-	public void initData(HashMap<?, ?> mapData) {
+	public void initData(Map<?, ?> mapData) {
 		Iterator<?> it = mapData.keySet().iterator();
 		int m = 0;
 		UObjectValue uo = new UObjectValue();
@@ -1300,7 +1315,6 @@ public class DTTable implements Serializable {
 					col.setName("KEY");
 					col.setTypeName("String");
 					this._Columns.addColumn(col);
-
 				}
 
 				this.initDataRowByClass(uo);
@@ -1319,9 +1333,9 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据List类初始化数据
+	 * 根据List类初始化数据 Initialize the data from the List data
 	 * 
-	 * @param listData
+	 * @param listData the List data
 	 */
 	public void initData(List<?> listData) {
 		UObjectValue uo = new UObjectValue();
@@ -1341,10 +1355,11 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 通过JSONArray创建表
+	 * 通过JSONArray创建表<br>
+	 * Initialize the table data from the JSON array
 	 * 
-	 * @param obj
-	 * @throws Exception
+	 * @param obj the JSON array
+	 * @throws Exception the exception
 	 */
 	public void initData(JSONArray obj) throws Exception {
 		for (int i = 0; i < obj.length(); i++) {
@@ -1412,9 +1427,10 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 根据ResultSet初始化字段信息
+	 * 根据ResultSet初始化字段信息<br>
+	 * Initialize the table columns from the JDBC result
 	 * 
-	 * @param rs
+	 * @param rs the JDBC result
 	 */
 	public void initColumns(ResultSet rs) {
 		boolean isMySql = false;
@@ -1526,7 +1542,7 @@ public class DTTable implements Serializable {
 	/**
 	 * 获取数据行数
 	 * 
-	 * @return
+	 * @return the table rows count
 	 */
 	public int getCount() {
 		if (this._IsOk) {
@@ -1576,7 +1592,7 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * @return the _Indexes
+	 * @return the Indexes
 	 */
 	public DTIndexes getIndexes() {
 		return _Indexes;
@@ -1585,7 +1601,7 @@ public class DTTable implements Serializable {
 	/**
 	 * 获取XML数据的数据节点父节点
 	 * 
-	 * @return
+	 * @return the XmlNodeDataParent
 	 */
 	public Node getXmlNodeDataParent() {
 		return _XmlNodeDataParent;
@@ -1594,7 +1610,7 @@ public class DTTable implements Serializable {
 	/**
 	 * 获取XML数据的节点名称
 	 * 
-	 * @return
+	 * @return the XmlDataNodeName
 	 */
 	public String getXmlDataNodeName() {
 		return _XmlDataNodeName;
@@ -1615,10 +1631,11 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 获取行合计
+	 * 获取行合计<br>
+	 * Sum the field
 	 * 
-	 * @param rowIndex
-	 * @return
+	 * @param rowIndex the field index
+	 * @return the sum result
 	 */
 	public Double getRowSum(int rowIndex) {
 		Pattern pat = Pattern.compile("\\d+\\.*\\d*", Pattern.CASE_INSENSITIVE);
@@ -1652,7 +1669,8 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 获取行平均值
+	 * 获取行平均值<br>
+	 * 
 	 * 
 	 * @param rowIndex
 	 * @return

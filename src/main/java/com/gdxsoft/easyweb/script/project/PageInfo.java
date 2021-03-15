@@ -1,7 +1,7 @@
 package com.gdxsoft.easyweb.script.project;
 
 import com.gdxsoft.easyweb.script.template.Descriptions;
-
+@Deprecated
 public class PageInfo {
 
 	private String _Name;

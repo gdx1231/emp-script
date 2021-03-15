@@ -15,28 +15,16 @@ public interface ILog {
 	 */
 	public abstract void Write();
 
-	/**
-	 * @return the _Log
-	 */
+	 
 	public abstract Log getLog();
 
-	/**
-	 * @param log the _Log to set
-	 */
+	 
 	public abstract void setLog(Log log);
 
-	/**
-	 * 获取创建类
-	 * 
-	 * @return
-	 */
+	 
 	public abstract HtmlCreator getCreator();
 
-	/**
-	 * 设置创建类
-	 * 
-	 * @param creator
-	 */
+	 
 	public abstract void setCreator(HtmlCreator creator);
 
 }

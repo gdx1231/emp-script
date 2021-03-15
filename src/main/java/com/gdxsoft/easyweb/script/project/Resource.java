@@ -1,5 +1,5 @@
 package com.gdxsoft.easyweb.script.project;
-
+@Deprecated
 public class Resource {
 	private String _Name;
 	private String _Encoder;

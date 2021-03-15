@@ -8,7 +8,7 @@ import org.w3c.dom.Node;
 
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UXml;
-
+@Deprecated
 public class ResourceDao {
 
 	public void addResource(String filePath, Document prjDoc) {

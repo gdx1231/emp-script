@@ -12,6 +12,7 @@ import com.gdxsoft.easyweb.script.template.Descriptions;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
+@Deprecated
 public class ProjectDao {
 
 	private String _ProjectName;
@@ -31,28 +32,22 @@ public class ProjectDao {
 	/**
 	 * 新建项目文件
 	 * 
-	 * @param prjName
-	 *            项目名称
-	 * @param dataSources
-	 *            数据源
-	 * @param prjPath
-	 *            项目路径
-	 * @param prjAcl
-	 *            权限
-	 * @param memo
-	 *            项目说明
-	 * @param lang
-	 *            语言
+	 * @param prjName     项目名称
+	 * @param dataSources 数据源
+	 * @param prjPath     项目路径
+	 * @param prjAcl      权限
+	 * @param memo        项目说明
+	 * @param lang        语言
 	 */
-	public void newProject(String prjName, String dataSources, String prjPath,
-			String prjAcl, String memo, String lang) {
-		
-		//生成顺序要遵循dtd文档定义的顺序
+	public void newProject(String prjName, String dataSources, String prjPath, String prjAcl, String memo,
+			String lang) {
+
+		// 生成顺序要遵循dtd文档定义的顺序
 		Document doc = UXml.createBlankDocument("EwaProject.dtd", "EwaProject");
 		Element root = doc.getDocumentElement();
 		root.setAttribute("Name", prjName);
 
-		// 主信息 
+		// 主信息
 		Element mainInfo = doc.createElement("MainInfo");
 		root.appendChild(mainInfo);
 		Element ver = doc.createElement("Version");
@@ -121,7 +116,7 @@ public class ProjectDao {
 	/**
 	 * 增加资源文件
 	 * 
-	 * @param filePath
+	 * @param filePath the resource file path
 	 */
 	public void addResource(String filePath) {
 		File f1 = new File(filePath);
@@ -142,8 +137,7 @@ public class ProjectDao {
 	}
 
 	private void initDocument() throws Exception {
-		String projPath = UPath.getConfigPath() + "/projects/"
-				+ this._ProjectName;
+		String projPath = UPath.getConfigPath() + "/projects/" + this._ProjectName;
 		this._PrjDoc = UXml.retDocument(projPath);
 
 	}
@@ -206,9 +200,8 @@ public class ProjectDao {
 	}
 
 	/**
-	 * @param projectName
-	 *            the _ProjectName to set
-	 * @throws Exception
+	 * @param projectName the _ProjectName to set
+	 * @throws Exception The exception
 	 */
 	public void setProjectName(String projectName) throws Exception {
 		_ProjectName = projectName;
