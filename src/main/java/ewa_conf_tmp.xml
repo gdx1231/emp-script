@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ewa_confs>
+	<admins>
+		<admin createDate="2005-11-01" loginId="admin" password="" userName="SysAdmin" />
+	</admins>
+	<define value="true" />
+	<cfgCacheMethod value="sqlcached"></cfgCacheMethod>
+
+	<!-- CachedMethod: hsqldb/redis -->
+	<sqlCached cachedMethod="hsqldb"></sqlCached>
+	<!-- <sqlCached cachedMethod="redis" redisName="r0" debug="true"></sqlCached> -->
+	<!-- method: single/shared/cluster -->
+	<!-- Auth：redis password -->
+	<!-- Hosts：redis ip:port， multiple ip:port split by comma -->
+	<!--
+		<redises>
+		<redis name="r0" method="single" auth="xxx" hosts="192.168.1.252:16379,192.168.1.252:16377"></redis>
+		</redises>
+	-->
+	<securities>
+		<!-- use for cookie encrypt/decrypt -->
+		<security name="default" default="true" algorithm="aes-192-gcm" iv="" aad="llsdlsd912"
+			key="efsd91290123p9023sdkjvjdkl293048192" />
+		<security name="aes_test" algorithm="aes-256-gcm" iv="" aad="" key="jdii239482903482jsdkjf9203" />
+	</securities>
+
+	<!-- Initialize the global values, put in the RequestValue -->
+	<requestValuesGlobal>
+		<!-- the configurations context path replacement -->
+		<rv name="rv_ewa_style_path" value="/work/EmpScriptV2" />
+		<rv name="__test__" value="Test info" />
+	</requestValuesGlobal>
+
+	<scriptPaths>
+		<!-- System inner configuration ewa.xml, m.xml -->
+		<scriptPath name="ewa" path="resources:/define.xml" />
+		<scriptPath name="aa" path="jdbc:ewa" readOnly="true" />
+		<!-- your project configuration path -->
+		<scriptPath name="my-project" path="d:/ewa/my-project-conf" />
+	</scriptPaths>
+
+	<paths>
+		<!-- 缓存配置 -->
+		<path name="cached_path" value="d:/ewa/cached" />
+		<!-- 图片缩略图保存根路径 -->
+		<path name="img_tmp_path" value="@/Users/admin/java/b2b/b2b_imgs/" />
+		<!-- 图片缩略图保存根路径URL, ！！！需要在Tomcat或Apache或Nginx中配置虚拟路径！！！。 -->
+		<path name="img_tmp_path_url" value="/b2b_imgs/" />
+		<!-- 导入导出目录 -->
+		<path des="导入导出目录" name="group_path" value="d:/ewa/ewa_groups/" />
+
+		<!-- 文件转换 OpenOffice -->
+		<path name="cvt_office_home" value="C:\Program Files (x86)\OpenOffice 4\" />
+		<!-- ImageMagick目录可执行文件路径 -->
+		<path name="cvt_ImageMagick_Home" value="/usr/local/Cellar/imagemagick/7.0.8-12/bin/" />
+	</paths>
+	<!-- 显示debug的ip地址，用","分割不同的ip, excludes 排除的目录，不在DEFINE中列出 -->
+	<debug ips="127.0.0.1,::1" excludes="ewa" />
+
+	<smtps>
+		<smtp name="default" default="true" ip="::1" port="25"></smtp>
+	</smtps>
+
+	<databases>
+		<database name="ewaconfhelp" type="HSQLDB" connectionString="jdbc/ewaconfhelp" schemaName="PUBLIC">
+			<pool username="sa" password="" maxActive="40" maxIdle="120" maxWait="5000"
+				driverClassName="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:11002/ewaconfhelp">
+			</pool>
+		</database>
+		<database name="work" type="MYSQL" connectionString="jdbc/work" schemaName="work">
+			<pool username="user" password="" maxActive="40" maxIdle="120" maxWait="5000"
+				driverClassName="com.mysql.cj.jdbc.Driver"
+				url="jdbc:mysql://localhost:3306/b2b?nullCatalogMeansCurrent=true&amp;serverTimezone=GMT%2B8&amp;useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;useSSL=false">
+			</pool>
+		</database>
+		 
+	</databases>
+	<remote_syncs des="Sync to server" url="https://yourdomain/demo/EWA_DEFINE/cgi-bin/remoteSync/" code="">
+		<remote_sync name="static" id="1" source="d:/project/static" target="/var/www/static"
+			filter="js,css,htm,html,xml,txt,gif,jpg,png,jpeg,jiff" />
+		<remote_sync name="documents" id="2" source="d:/project/documents" target="/var/www/documents" filter="*" />
+	</remote_syncs>
+
+</ewa_confs>
