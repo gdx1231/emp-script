@@ -118,6 +118,11 @@
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/tmp_img_resze.xml&amp;ITEMNAME=_ewa_trace.LF.M',EWA.LastMenuMsg)"
 			micon="" mid="945" mtext="BUG跟踪" mtext_enus="Change Password" pid="94" />
 
+		<!-- code -->
+		<Menu
+			mcmd="EWA.UI.Dialog.OpenWindow('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=ewa_utils')"
+			micon="fa fa-code" mid="1909" mtext="代码" mtext_enus="Code Util" pid="0" />
+			
 		<!-- help -->
 		<Menu micon="fa fa-question-circle" mid="90"
 			mtext="帮助&lt;i class='fa fa-caret-down'>&lt;i>" mtext_enus="Help &lt;i class='fa fa-caret-down'>&lt;i>"
@@ -153,10 +158,7 @@
 			mcmd="EWA.UI.Dialog.OpenWindow('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=about')"
 			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/help.png" mid="909"
 			mtext="关于" mtext_enus="About" pid="90" />
-		<!-- code -->
-		<Menu
-			mcmd="EWA.UI.Dialog.OpenWindow('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=ewa_utils')"
-			micon="fa fa-code" mid="1909" mtext="代码" mtext_enus="Code Util" pid="0" />
+		
 		<!-- exit -->
 		<Menu
 			mcmd="top.location.href='./?xmlname=/ewa/m.xml&amp;itemname=login&amp;out=1'"

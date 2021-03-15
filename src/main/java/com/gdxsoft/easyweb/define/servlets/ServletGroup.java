@@ -9,19 +9,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 import com.gdxsoft.easyweb.conf.ConfDefine;
-import com.gdxsoft.easyweb.datasource.ConnectionConfig;
-import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
+import com.gdxsoft.easyweb.define.DefineAcl;
 import com.gdxsoft.easyweb.define.group.Exchange;
-import com.gdxsoft.easyweb.script.PageValue;
-import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
@@ -58,17 +52,17 @@ public class ServletGroup extends HttpServlet {
 	}
 
 	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		if(!ConfDefine.isAllowDefine()) {
-			response.setStatus(404 );
+		if (!ConfDefine.isAllowDefine()) {
+			response.setStatus(404);
 			LOGGER.info("Not allow define", request == null ? "?not request?" : request.getRequestURI());
 			return;
 		}
-		
-		HttpSession session = request.getSession();
-		RequestValue rv = new RequestValue(request, session);
-		PageValue pv = rv.getPageValues().getPageValue("EWA_ADMIN_ID");
-		// not login
-		if (pv == null || (pv.getPVTag() != PageValueTag.SESSION && pv.getPVTag() != PageValueTag.COOKIE_ENCYRPT)) {
+
+		RequestValue rv = new RequestValue(request);
+		DefineAcl acl = new DefineAcl();
+		acl.setRequestValue(rv);
+
+		if (!acl.canRun()) { // not login
 			response.getWriter().println("deny! request login");
 			return;
 		}
@@ -78,7 +72,7 @@ public class ServletGroup extends HttpServlet {
 			return;
 		}
 
-		if (oType.equalsIgnoreCase("dl")) {
+		if (oType.equalsIgnoreCase("dl")) { // 下载生成的组件
 			String id = request.getParameter("id");
 			String path = UPath.getGroupPath() + "/exports/" + id + ".zip/";
 			FileInputStream fs = new FileInputStream(path);
@@ -100,19 +94,15 @@ public class ServletGroup extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("utf-8");
 
+		String ewaPath = rv.s("rv_ewa_style_path");
 		MStr sbHead = new MStr();
 		sbHead.al("<html>");
 		sbHead.al("<head>");
 		sbHead.al("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
 		sbHead.al("<title></title>");
-		sbHead.al("<link rel=\"stylesheet\" rev=\"stylesheet\"  href=\"" + rv.s("rv_ewa_style_path")
-				+ "/EWA_STYLE/skins/default/css.css\" type=\"text/css\" />");
-		sbHead.al(
-				"<script type='text/javascript' src='" + rv.s("rv_ewa_style_path") + "/EWA_STYLE/js/EWA.js'></script>");
-		sbHead.al("<script type='text/javascript' src='" + rv.s("rv_ewa_style_path")
-				+ "/EWA_STYLE/js/EWA_UI.js'></script>");
-		sbHead.al("<script type='text/javascript' src='" + rv.s("rv_ewa_style_path")
-				+ "/EWA_STYLE/js/EWA_FRAME.js'></script>");
+		sbHead.al("<link rel=\"stylesheet\" rev=\"stylesheet\"  href=\"" + ewaPath
+				+ "/EWA_STYLE/skins/default/css.min.css\" type=\"text/css\" />");
+		sbHead.al("<script type='text/javascript' src='" + ewaPath + "/EWA_STYLE/js/ewa.min.js'></script>");
 		sbHead.al("</head>");
 		sbHead.al("<body style=\"margin: 1px; overflow: auto\" onload='EWA.CP=\"" + request.getContextPath()
 				+ "\";EWA.LANG=\"zhcn\"'>");
@@ -148,97 +138,6 @@ public class ServletGroup extends HttpServlet {
 				sb.al(" <a href='./?TYPE=step1&id=" + name + "'>安装</a></td></tr>");
 			}
 			sb.al("</table>");
-			response.getWriter().println(sb.toString());
-		} else if (oType.equalsIgnoreCase("step1")) {
-			StringBuilder sb1 = new StringBuilder();
-			sb1.append("<option></option>");
-			ConnectionConfigs cfgs;
-			MStr sb = new MStr();
-			try {
-				cfgs = ConnectionConfigs.instance();
-				for (int i = 0; i < cfgs.size(); i++) {
-					ConnectionConfig cfg = cfgs.getConfig(i);
-					sb1.append("<option value='" + cfg.getName() + "'>" + cfg.getName() + "  (" + cfg.getType() + ", "
-							+ cfg.getConnectionString() + ")</option>");
-				}
-				sb.al("<div align=center><h1>设定导入参数</h1></div>");
-				sb.al("<form action=\"./?TYPE=step2\" method=post>");
-				sb.al("<table bgcolor='#cdcdcd' width=600 border=0 cellpadding=1 cellspacing=1 align=center>");
-				sb.al("	<tr bgcolor=white><td>组件Id：</td>");
-				sb.al("<td>" + request.getParameter("id") + "<input type=hidden name=id value=\""
-						+ request.getParameter("id") + "\">");
-				sb.al("</td></tr>");
-				sb.al("<tr bgcolor=white><td>目标数据源：</td><td>");
-
-				sb.al("<select name=datasource>" + sb1.toString() + "</select>");
-				sb.al("</td></tr><tr bgcolor=white><td>保存文件：（采用“|test|abc.xml”格式）</td>");
-				sb.al("<td><input type=text name=xmlfile></td>");
-				sb.al("	</tr>");
-				sb.al("<tr bgcolor=white><td colspan=2>");
-				sb.al("<input type=submit value='确定'>");
-				sb.al("</td></tr></table></form>");
-			} catch (ParserConfigurationException e) {
-				sb.al(e.getMessage());
-			} catch (SAXException e) {
-				sb.al(e.getMessage());
-			}
-			response.getWriter().println(sb.toString());
-		} else if (oType.equalsIgnoreCase("step2")) {
-			MStr sb = new MStr();
-			String datasource = request.getParameter("datasource").trim();
-			String xmlfile = request.getParameter("xmlfile").trim();
-			String id = request.getParameter("id").trim();
-			Exchange g1 = new Exchange(id, datasource);
-
-			try {
-				g1.importGroup();
-				String s = "";
-				s = g1.importTableAndData();
-				sb.al(s);
-				sb.al("<hr>" + g1.importReses());
-				sb.al("<hr>\r\n导入到：" + g1.importCfgs(xmlfile));
-			} catch (Exception e) {
-				sb.al(e.getMessage());
-			}
-			response.getWriter().println("<pre>");
-			response.getWriter().println(sb.toString());
-			response.getWriter().println("</pre>");
-		} else if (oType.equalsIgnoreCase("main")) {
-			MStr sb = new MStr();
-			sb.al("<script>");
-			sb.al("function go(x,i){");
-			sb.al("var u='../../../EWA_STYLE/cgi-bin/?XMLNAME='+x+'&ITEMNAME='+i;");
-			sb.al("	window.frames[0].location.href=u;");
-			sb.al("	}");
-			sb.al("	function makeGroup(){");
-			sb.al("		var u = './?step=make';");
-			sb.al("		window.frames[0].location.href = u;");
-			sb.al("	}");
-			sb.al("	function installGroup(){");
-			sb.al("	var u = './?type=install';");
-			sb.al("		window.frames[0].location.href = u;");
-			sb.al("	}");
-			sb.al("	function res(){");
-			sb.al("var u = './?type=res';");
-			sb.al("	window.frames[0].location.href = u;");
-			sb.al("	}");
-			sb.al("	</script>");
-
-			sb.al("<table border=0 width=100% height=100%>");
-			sb.al("<tr>");
-			sb.al("<td height=25 style='border-bottom:1px solid gray'>&nbsp;");
-			sb.al("<button type=button onclick=\"go('|ewa|group.xml','ui')\">基本信息</button>&nbsp;");
-			sb.al("<button type=button onclick=\"go('|ewa|group.xml','items')\">配置项</button>&nbsp;");
-			sb.al("<button type=button onclick=\"go('|ewa|group.xml','tables')\">数据</button>&nbsp;");
-			sb.al("<button type=button onclick=\"res();\">资源文件</button>&nbsp;");
-			sb.al("<button type=button onclick=\"makeGroup();\">生成组件</button>");
-			sb.al("	</td>");
-			sb.al("	</tr>");
-			sb.al("	<tr>");
-			sb.al("	<td><iframe frameborder=0 width=100% height=100% src=\"\"></iframe></td>");
-			sb.al("	</tr>");
-
-			sb.al("	</table>");
 			response.getWriter().println(sb.toString());
 		} else if (oType.equalsIgnoreCase("make")) {
 			String id = request.getParameter("id");
