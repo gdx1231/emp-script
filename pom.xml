@@ -84,17 +84,27 @@
 				</executions>
 			</plugin>
 
+			 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
 					<encoding>UTF-8</encoding>
 					<charset>UTF-8</charset>
-					<additionalparam>-Xdoclint:none</additionalparam>
+					<additionalOptions>
+						<additionalOption>-Xdoclint:none</additionalOption>
+					</additionalOptions>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
 	<dependencies>

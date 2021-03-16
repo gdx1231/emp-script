@@ -8,7 +8,7 @@ public class HtmlScript {
 	private String _Language;
 
 	/**
-	 * 获取页面的全部脚本表达式，包含<script>标记
+	 * 获取页面的全部脚本表达式，包含script标记
 	 * 
 	 * @return
 	 */

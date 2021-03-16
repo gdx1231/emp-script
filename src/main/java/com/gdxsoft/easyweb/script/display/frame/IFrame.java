@@ -15,31 +15,34 @@ public interface IFrame {
 	public abstract void setHtmlClass(HtmlClass htmlClass);
 
 	/**
-	 * 获取ListFrame分页
+	 * 获取ListFrame分页<br>
+	 * Get the listFrame page split
 	 * 
-	 * @return
+	 * @return the page split
 	 */
 	public abstract PageSplit getPageSplit();
 
 	/**
-	 * 生成页面的JSON数据
-	 * 
-	 * @return
+	 * 生成页面的JSON数据<br>
+	 * Create the JSON String
+	 * @return the JSON String
 	 * @throws Exception
 	 */
 	public String createJsonContent() throws Exception;
 
 	/**
-	 * 获取工作流的js表达式
+	 * 获取工作流的json表达式<br>
+	 * Get the workflow json<br>
 	 * 
-	 * @return the _WorkFlowBut
+	 * @return the WorkFlowBut
 	 */
 	public abstract String getWorkFlowButJson();
 
 	/**
-	 * 配置文件的对象的 JSON表达式(在FrameBase中生成)
+	 * 配置文件的对象的 JSON表达式(在FrameBase中生成)<br>
+	 * JSON expression of the configuration item (generated in FrameBase)
 	 * 
-	 * @return
+	 * @return the JSON expression
 	 * @throws Exception
 	 */
 	public abstract String createJsonFrame() throws Exception;
@@ -47,7 +50,6 @@ public interface IFrame {
 	/**
 	 * item描述XML字符串
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public abstract void createJsFrameXml() throws Exception;
@@ -62,7 +64,6 @@ public interface IFrame {
 	/**
 	 * 页面Js初始化
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public abstract void createJsFramePage() throws Exception;
@@ -70,7 +71,6 @@ public interface IFrame {
 	/**
 	 * 仅生成内容HTML
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public abstract void createContent() throws Exception;
@@ -78,29 +78,24 @@ public interface IFrame {
 	/**
 	 * 生成CSS内容
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public abstract void createCss() throws Exception;
 
 	/**
 	 * 生成头部Js
-	 * 
-	 * @return
 	 */
 	public abstract void createJsTop();
 
 	/**
 	 * 生成底部Js
 	 * 
-	 * @return
 	 */
 	public abstract void createJsBottom();
 
 	/**
 	 * 生成主底部
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public abstract void createSkinBottom() throws Exception;
@@ -108,7 +103,6 @@ public interface IFrame {
 	/**
 	 * 生成主头部
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public void createSkinTop() throws Exception;
@@ -116,7 +110,6 @@ public interface IFrame {
 	/**
 	 * 生成Frame全部HTML
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public abstract void createHtml() throws Exception;
@@ -124,7 +117,7 @@ public interface IFrame {
 	/**
 	 * 生成Frame页头
 	 * 
-	 * @return
+	 * @return Frame页头
 	 * @throws Exception
 	 */
 	public abstract String createFrameHeader() throws Exception;
@@ -132,7 +125,6 @@ public interface IFrame {
 	/**
 	 * 生成Frame内容
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public abstract void createFrameContent() throws Exception;
@@ -140,7 +132,7 @@ public interface IFrame {
 	/**
 	 * 生成页面的所有元素
 	 * 
-	 * @return
+	 * @return 所有元素
 	 * @throws Exception
 	 */
 	public abstract String createItemHtmls() throws Exception;
@@ -148,7 +140,6 @@ public interface IFrame {
 	/**
 	 * 生成Frame页脚
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public abstract void createFrameFooter() throws Exception;

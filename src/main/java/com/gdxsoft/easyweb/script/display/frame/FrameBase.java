@@ -92,7 +92,7 @@ public class FrameBase {
 	/**
 	 * 获取 createJsFramePage 调用已经处理好的title
 	 * 
-	 * @return
+	 * @return title
 	 */
 	public String getPageJsTitle() {
 		// 提前处理title避免出现回车问题
@@ -110,7 +110,7 @@ public class FrameBase {
 	 * 是否 显示标题栏，判断参数EWA_IS_HIDDEN_CAPTION 或Size.HiddenCaption，对于
 	 * ListFrame是第一行的字段描述，对于Frame是第一行标题
 	 * 
-	 * @return
+	 * @return  是否 显示标题栏
 	 */
 	public boolean isHiddenCaption() {
 
@@ -136,7 +136,7 @@ public class FrameBase {
 	/**
 	 * 获取ListFrame分页
 	 * 
-	 * @return
+	 * @return ListFrame分页
 	 */
 	public PageSplit getPageSplit() {
 		return _PageSplit;
@@ -145,7 +145,7 @@ public class FrameBase {
 	/**
 	 * 创建 select 对象的reload事件
 	 * 
-	 * @return
+	 * @return reload事件
 	 * @throws Exception
 	 */
 	public String createSelectReload() throws Exception {
@@ -219,7 +219,7 @@ public class FrameBase {
 	/**
 	 * 配置文件的对象的 JSON表达式(在FrameBase中生成)
 	 * 
-	 * @return
+	 * @return JSON
 	 * @throws Exception
 	 */
 	public String createJsonFrame() throws Exception {
@@ -386,7 +386,6 @@ public class FrameBase {
 	/**
 	 * item描述XML字符串
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public void createJsFrameXml() throws Exception {
@@ -405,7 +404,7 @@ public class FrameBase {
 	/**
 	 * 生成 JsFrameXml 字符串表达式，2020-05-26新增
 	 * 
-	 * @return
+	 * @return JsFrameXml 字符串表达式
 	 * @throws Exception
 	 */
 	public String createJsFrameXmlString() throws Exception {
@@ -463,7 +462,7 @@ public class FrameBase {
 	 * item描述XML字符串
 	 * 
 	 * @param userXItem
-	 * @return
+	 * @return XML
 	 * @throws Exception
 	 */
 	private String createJsFrameXml(UserXItem userXItem) throws Exception {
@@ -494,8 +493,6 @@ public class FrameBase {
 
 	/**
 	 * 生成CSS内容
-	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public void createCss() throws Exception {
@@ -516,8 +513,6 @@ public class FrameBase {
 
 	/**
 	 * 生成头部Js
-	 * 
-	 * @return
 	 */
 	public void createJsTop() {
 		// for tree default action
@@ -557,7 +552,7 @@ public class FrameBase {
 	/**
 	 * 获取页面的URL的JS表达式
 	 * 
-	 * @return
+	 * @return JS
 	 */
 	public String getUrlJs() {
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
@@ -619,28 +614,7 @@ public class FrameBase {
 			sb.append(rv.getContextPath());
 			sb.append(rv.getRequest().getServletPath());
 
-//			if (rv.getRequest().getAttributeNames() != null) {
-//				Enumeration<?> names = rv.getRequest().getAttributeNames();
-//				while (names.hasMoreElements()) {
-//					String key = names.nextElement().toString();
-//					if (key.toUpperCase().indexOf("ORG.APACHE.CATALINA") >= 0) {
-//						continue;
-//					}
-//					Object val = rv.getRequest().getAttribute(key);
-//					if (val != null) {
-//						// System.out.println(val.getClass().getName());
-//						String className = val.getClass().getName();
-//
-//						if (className.indexOf("java.lang.") == 0) {
-//							String v1 = val.toString();
-//							if (v1.length() < 100) {
-//								q += "&" + encodeUrl(key) + "=" + encodeUrl(v1);
-//
-//							}
-//						}
-//					}
-//				}
-//			}
+ 
 			boolean ismark = false;
 			if (q != null) {
 				sb.append("?");
@@ -681,8 +655,6 @@ public class FrameBase {
 
 	/**
 	 * 配置页面定义的底部附加 Js
-	 * 
-	 * @return
 	 */
 	public void createJsBottom() {
 		HtmlDocument doc = this._HtmlClass.getDocument();
@@ -781,7 +753,6 @@ public class FrameBase {
 	/**
 	 * 生成主头部
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public void createSkinTop() throws Exception {
@@ -915,7 +886,6 @@ public class FrameBase {
 	/**
 	 * 生成主底部 AddHtml-Bottom
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	public void createSkinBottom() throws Exception {
@@ -940,7 +910,7 @@ public class FrameBase {
 	 * 生成Item的容器html
 	 * 
 	 * @param uxi
-	 * @return
+	 * @return html
 	 * @throws Exception
 	 */
 	public String createItemParentHtml(UserXItem uxi) throws Exception {
@@ -972,7 +942,7 @@ public class FrameBase {
 	/**
 	 * 生成页面的JSON数据
 	 * 
-	 * @return
+	 * @return JSON
 	 * @throws Exception
 	 */
 	public String createJsonContent() throws Exception {
@@ -982,7 +952,7 @@ public class FrameBase {
 	/**
 	 * 生成页面的JS
 	 * 
-	 * @return
+	 * @return JS
 	 */
 	public String createJsonJs() {
 		String pageAddBottom = this.getPageItemValue("AddScript", "Bottom");

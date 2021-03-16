@@ -34,7 +34,7 @@ public class ConfAdmins {
 	 * 
 	 * @param loginId
 	 * @param password
-	 * @return
+	 * @return the define admin data
 	 */
 	public static ConfAdmin login(String loginId, String password) {
 		if (!ConfDefine.isAllowDefine()) {
@@ -112,10 +112,11 @@ public class ConfAdmins {
 	private List<ConfAdmin> lst = new ArrayList<>();
 
 	/**
-	 * Get the ConfAdmin by the user name
+	 * Get the ConfAdmin by the loginId and password
 	 * 
-	 * @param username the ConfAdmin.Username
-	 * @return ScriptPath
+	 * @param loginId  the ConfAdmin.loginId
+	 * @param password the ConfAdmin.password
+	 * @return ConfAdmin
 	 */
 	public ConfAdmin getAdm(String loginId, String password) {
 		if (StringUtils.isBlank(password) || StringUtils.isBlank(password)) {

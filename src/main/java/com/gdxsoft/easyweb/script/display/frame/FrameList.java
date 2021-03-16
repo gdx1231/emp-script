@@ -42,7 +42,6 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 /**
- * @author Administrator
  * 
  */
 public class FrameList extends FrameBase implements IFrame {
@@ -1422,7 +1421,6 @@ public class FrameList extends FrameBase implements IFrame {
 	/**
 	 * 获取流程应用表
 	 * 
-	 * @return
 	 * @throws Exception
 	 */
 	private void loadWorkFlowApp() throws Exception {
@@ -1563,8 +1561,8 @@ public class FrameList extends FrameBase implements IFrame {
 	/**
 	 * 生成列表的每个单元格数据
 	 * 
-	 * @param uxi
-	 * @return
+	 * @param uxi 配置单元
+	 * @return 每个单元格HTML
 	 * @throws Exception
 	 */
 	private String createItemHtmlCell(UserXItem uxi) throws Exception {

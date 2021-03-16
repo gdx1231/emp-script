@@ -6,6 +6,7 @@ import java.util.HashMap;
 import com.gdxsoft.easyweb.script.template.Descriptions;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
+
 @Deprecated
 public class Project {
 	private Descriptions _DescriptionSet;
@@ -18,10 +19,9 @@ public class Project {
 	/**
 	 * 获取资源
 	 * 
-	 * @param resourceName
-	 *            资源名
+	 * @param resourceName 资源名
 	 * @return 文件名
-	  * @throws Exception The exception
+	 * @throws Exception The exception
 	 */
 	public String getResource(String resourceName) throws Exception {
 		if (resourceName == null)
@@ -38,8 +38,7 @@ public class Project {
 			fileName = UFile.createUnGZipHashFile(r.getInnerValue(), getExt(r), path, false);
 
 		} else {
-			fileName = UFile.createHashTextFile(r.getInnerValue(), getExt(r),
-					path, false);
+			fileName = UFile.createHashTextFile(r.getInnerValue(), getExt(r), path, false);
 		}
 		return fileName;
 	}
@@ -61,8 +60,7 @@ public class Project {
 	}
 
 	/**
-	 * @param descriptionSet
-	 *            the _DescriptionSet to set
+	 * @param descriptionSet the _DescriptionSet to set
 	 */
 	public void setDescriptionSet(Descriptions descriptionSet) {
 		_DescriptionSet = descriptionSet;
@@ -76,8 +74,7 @@ public class Project {
 	}
 
 	/**
-	 * @param acl
-	 *            the _Acl to set
+	 * @param acl the _Acl to set
 	 */
 	public void setAcl(String acl) {
 		_Acl = acl;
@@ -91,8 +88,7 @@ public class Project {
 	}
 
 	/**
-	 * @param projectPath
-	 *            the _ProjectPath to set
+	 * @param projectPath the _ProjectPath to set
 	 */
 	public void setProjectPath(String projectPath) {
 		_ProjectPath = projectPath;
@@ -106,8 +102,7 @@ public class Project {
 	}
 
 	/**
-	 * @param datasources
-	 *            the _Datasources to set
+	 * @param datasources the _Datasources to set
 	 */
 	public void setDatasources(ArrayList<String> datasources) {
 		_Datasources = datasources;
@@ -121,8 +116,7 @@ public class Project {
 	}
 
 	/**
-	 * @param resources
-	 *            the _Resources to set
+	 * @param resources the _Resources to set
 	 */
 	public void setResources(HashMap<String, Resource> resources) {
 		_Resources = resources;
@@ -136,8 +130,7 @@ public class Project {
 	}
 
 	/**
-	 * @param pageInfos
-	 *            the _PageInfos to set
+	 * @param pageInfos the _PageInfos to set
 	 */
 	public void setPageInfos(HashMap<String, PageInfo> pageInfos) {
 		_PageInfos = pageInfos;

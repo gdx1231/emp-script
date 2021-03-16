@@ -56,9 +56,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 			this.createHtmlTraditional();
 		}
 	}
- 
 
-	public void createHtmlTraditional()  throws Exception  {
+	public void createHtmlTraditional() throws Exception {
 		try {
 			super.createSkinTop();
 		} catch (Exception e) {
@@ -66,14 +65,14 @@ public class FrameFrame extends FrameBase implements IFrame {
 			throw e;
 		}
 		super.addDebug(this, "HTML", "createSkinTop");
-		
+
 		try {
 			super.createCss();
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		}
-		
+
 		super.addDebug(this, "HTML", "createCss");
 		super.createJsTop();
 		super.addDebug(this, "HTML", "createJsTop");
@@ -84,7 +83,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		}
-		
+
 		super.addDebug(this, "HTML", "createContent");
 
 		// Frame脚本
@@ -102,16 +101,17 @@ public class FrameFrame extends FrameBase implements IFrame {
 			LOGGER.error(e.getLocalizedMessage());
 			throw e;
 		}
-		
+
 		super.addDebug(this, "HTML", "createSkinBottom");
 
 		super.createJsBottom();
 		super.addDebug(this, "HTML", "createJsBottom");
 	}
+
 	/**
 	 * 生成页面的JSON数据
 	 * 
-	 * @return
+	 * @return 页面的JSON数据
 	 * @throws Exception
 	 */
 	public String createJsonContent() throws Exception {
@@ -170,7 +170,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 	/**
 	 * 获取用户自定义的html
 	 * 
-	 * @return
+	 * @return 用户自定义的html
 	 */
 	public String getUserHtml() {
 		UserConfig uc = this.getHtmlClass().getUserConfig();
@@ -815,7 +815,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 	 * 生成Item的容器html
 	 * 
 	 * @param uxi
-	 * @return
+	 * @return 容器html
 	 * @throws Exception
 	 */
 	public String[] getParentHtml(UserXItem uxi) throws Exception {
@@ -867,7 +867,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 	 * 
 	 * @param uxi
 	 * @param itemHtml
-	 * @return
+	 * @return 去除对象属性
 	 */
 	private String removeAttr(UserXItem uxi, String itemHtml) {
 		if (!uxi.testName("AttributeSet")) {
@@ -910,9 +910,9 @@ public class FrameFrame extends FrameBase implements IFrame {
 	/**
 	 * 页面分组显示处理过程
 	 * 
-	 * @param mapGroup
-	 * @param mapGroupId
-	 * @return
+	 * @param mapGroup   页面分组
+	 * @param mapGroupId 页面分组ID
+	 * @return 页面分组
 	 */
 	private String createGroup(MTable mapGroup, MTable mapGroupId) {
 
@@ -1069,7 +1069,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 	/**
 	 * 显示为3段还是2段
 	 * 
-	 * @return
+	 * @return 显示为3段还是2段
 	 */
 	private int getFrameColSize() {
 		// String frameColSize =
@@ -1105,7 +1105,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 	/**
 	 * 显示为1段时候,是否为单行上下排列
 	 * 
-	 * @return
+	 * @return 显示为1段
 	 */
 	public boolean isC11() {
 		String EWA_FRAME_COLS = super.getHtmlClass().getItemValues().getRequestValue().s("EWA_FRAME_COLS");

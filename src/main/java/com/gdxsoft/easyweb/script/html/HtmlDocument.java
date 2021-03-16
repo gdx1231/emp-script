@@ -29,7 +29,8 @@ public class HtmlDocument {
 	}
 
 	/**
-	 * 合成的frame 的html 没有外部例如 <div id='EWA_FRAME_MAIN ' or <table id='Test1' ...
+	 * 合成的frame 的html 没有外部例如 &lt;div id='EWA_FRAME_MAIN ' or &lt;table id='Test1'
+	 * ...
 	 * 
 	 * @return html
 	 */
@@ -44,10 +45,10 @@ public class HtmlDocument {
 	public String showHeader() {
 		MStr sb = new MStr();
 
-		if(this._htmlClass.getSysParas().isVue() ) {
+		if (this._htmlClass.getSysParas().isVue()) {
 			// 显示为 VUE
 			sb.al(this._htmlClass.getSkin().getHeadVue());
-			
+
 		} else if (this._htmlClass.getSysParas().isShowAsMobile()) {
 			// 移动模式下
 			sb.al(this._htmlClass.getSkin().getHeadMobile());
@@ -101,11 +102,11 @@ public class HtmlDocument {
 
 	/**
 	 * 获取页面含包含部分内容<br>
-	 * [0]对应<!--INC_TOP-->前面的部分<br>
-	 * [1]对应<!--INC_TOP-->到<!--INC_END-->中间的部分<br>
-	 * [0]对应<!--INC_END-->后面的部分
+	 * [0]对应&lt;!--INC_TOP--&gt;前面的部分<br>
+	 * [1]对应&lt;!--INC_TOP--&gt;到&lt;!--INC_END--&gt;中间的部分<br>
+	 * [0]对应&lt;!--INC_END--&gt;后面的部分
 	 * 
-	 * @return
+	 * @return the parts
 	 */
 	public String[] showParts() {
 		String shtml = this.showAll();
@@ -144,7 +145,7 @@ public class HtmlDocument {
 	 * isShowScriptTag=<b>true</b>，显示 script 标签
 	 * 
 	 * @param isShowScriptTag 是否显示script 标签
-	 * @return
+	 * @return js
 	 */
 	public String showJs(boolean isShowScriptTag) {
 		MStr sb = new MStr();
@@ -155,9 +156,10 @@ public class HtmlDocument {
 	}
 
 	/**
-	 * 合成的frame 的html 没有外部例如 <div id='EWA_FRAME_MAIN ' or <table id='Test1' ...
+	 * 合成的frame 的html 没有外部例如 &lt;div id='EWA_FRAME_MAIN ' or &lt;table id='Test1'
+	 * ...
 	 * 
-	 * @param html
+	 * @param html html
 	 */
 	public void addFrameHtml(String html) {
 		this._FrameHtml.a(html);
@@ -197,7 +199,7 @@ public class HtmlDocument {
 	/**
 	 * 增加Header
 	 * 
-	 * @param header
+	 * @param header the header
 	 */
 	public void addHeader(String header) {
 		this._Head.appendLine(header);
@@ -206,7 +208,7 @@ public class HtmlDocument {
 	/**
 	 * 增加css
 	 * 
-	 * @param css
+	 * @param css the css
 	 */
 	public void addCss(String css) {
 		this._Css.appendLine(css);
@@ -236,84 +238,84 @@ public class HtmlDocument {
 	}
 
 	/**
-	 * @return the _Title
+	 * @return the Title
 	 */
 	public String getTitle() {
 		return _Title;
 	}
 
 	/**
-	 * @param title the _Title to set
+	 * @param title the Title to set
 	 */
 	public void setTitle(String title) {
 		_Title = title;
 	}
 
 	/**
-	 * @return the _Doctype
+	 * @return the Doctype
 	 */
 	public HtmlDoctype getDoctype() {
 		return _Doctype;
 	}
 
 	/**
-	 * @return the _Head
+	 * @return the Head
 	 */
 	public MStr getHead() {
 		return _Head;
 	}
 
 	/**
-	 * @return the _JsTop
+	 * @return the JsTop
 	 */
 	public HtmlScripts getJsTop() {
 		return _JsTop;
 	}
 
 	/**
-	 * @return the _JsBottom
+	 * @return the JsBottom
 	 */
 	public HtmlScripts getJsBottom() {
 		return _JsBottom;
 	}
 
 	/**
-	 * @return the _Css
+	 * @return the Css
 	 */
 	public MStr getCss() {
 		return _Css;
 	}
 
 	/**
-	 * @return the _BodyTop
+	 * @return the BodyTop
 	 */
 	public MStr getBodyTop() {
 		return _BodyTop;
 	}
 
 	/**
-	 * @return the _BodyBottom
+	 * @return the BodyBottom
 	 */
 	public MStr getBodyBottom() {
 		return _BodyBottom;
 	}
 
 	/**
-	 * @return the _ScriptHtml
+	 * @return the ScriptHtml
 	 */
 	public MStr getScriptHtml() {
 		return _ScriptHtml;
 	}
 
 	/**
-	 * @return the _htmlClass
+	 * @return the htmlClass
 	 */
 	public HtmlClass getHtmlClass() {
 		return _htmlClass;
 	}
 
 	/**
-	 * @param _htmlClass the _htmlClass to set
+	 * @param htmlClass the _htmlClass to set
 	 */
 	public void setHtmlClass(HtmlClass htmlClass) {
 		this._htmlClass = htmlClass;
@@ -321,7 +323,7 @@ public class HtmlDocument {
 
 	/**
 	 * 
-	 * @return
+	 * @return items
 	 */
 	public HashMap<String, String> getItems() {
 		return _Items;
