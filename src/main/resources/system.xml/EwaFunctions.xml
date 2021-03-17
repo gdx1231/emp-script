@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EwaFunctions>
+	<EwaFunction name="password_hash" className="com.gdxsoft.easyweb.utils.UArgon2" methodName="hashPwd"
+		des="返回Argon2加密密码" desEn="Return Argon2 encryption password" usage="ewa_func.password_hash(@password)">
+	</EwaFunction>
+	
+	<EwaFunction name="password_verify" className="com.gdxsoft.easyweb.utils.UArgon2" methodName="verifyPwd"
+		des="返回Argon2验证密码结果true/false" desEn="Return Argon2 verification password result(true / false)"
+		usage="ewa_func.password_verify(@password, @hashed_password)" />
+	
+	<EwaFunction name="md5" className="com.gdxsoft.easyweb.utils.Utils" methodName="md5" des="md5" desEn="md5"
+		usage="ewa_func.md5(@source)" />
+	
+	<EwaFunction name="sha1" className="com.gdxsoft.easyweb.utils.Utils" methodName="sha1" des="sha1"
+		desEn="sha1" usage="ewa_func.sha1(@source)" />
+		
+	<EwaFunction name="digest" className="com.gdxsoft.easyweb.utils.UDigest" methodName="deigesHex"
+		des="摘要算法( md5, sha1, sha224, sha256, sha384, sha512, sha3, sm3
+	                    , RIPEMD320, RIPEMD256, RIPEMD160, RIPEMD128
+	                    , GOST3411, GOST3411_2012_256, GOST3411_2012_512, Tiger)"
+		desEn="Degist message ( md5, sha1, sha224, sha256, sha384, sha512, sha3, sm3
+	                    , RIPEMD320, RIPEMD256, RIPEMD160, RIPEMD128
+	                    , GOST3411, GOST3411_2012_256, GOST3411_2012_512, Tiger)"
+		usage="ewa_func.digestHex(@source, @algorithm)" />
+
+	<EwaFunction name="http_get" className="com.gdxsoft.easyweb.utils.UNet" methodName="doGet" des="http请求（GET）" desEn="Http Get"
+		usage="ewa_func.http_get().(@url)" />
+
+</EwaFunctions>

@@ -9,6 +9,7 @@ import com.gdxsoft.easyweb.utils.msnet.MListStr;
 
 /**
  * 创建EWA_SPLIT的临时数据
+ * 
  * @author admin
  *
  */
@@ -28,7 +29,9 @@ public class CreateSplitData {
 	}
 
 	public String replaceSplitData(String sql) {
-
+		// insert into a(v1,v2) 
+		// select a.col,b.col from (select * from ewa_split(@s1,',')) a
+		// inner join (select * from ewa_split ( @s2,',')) b on a.idx = b.idx
 		for (int i = 0; i < 50; i++) {
 			String sql1 = this.replaceSplitData1(sql);
 			if (sql1.equals(sql)) {
@@ -40,9 +43,7 @@ public class CreateSplitData {
 	}
 
 	private String replaceSplitData1(String sql) {
-
 		String sql1 = sql.toUpperCase();
-
 		int loc = sql1.indexOf(tag);
 		if (loc == -1) {
 			return sql;
@@ -78,7 +79,7 @@ public class CreateSplitData {
 		if (v1 == null) {
 			return null;
 		}
-		
+
 		int loc0 = para.indexOf(",");
 		int loc1 = para.lastIndexOf(")");
 		String splitStr = para.substring(loc0 + 1, loc1).trim().replace("'", "");
@@ -98,11 +99,7 @@ public class CreateSplitData {
 		// System.out.println(splitStr);
 		String[] vs = v1.split(splitStr);
 
-		String tag = Utils.getGuid().hashCode() + "";
-
-		if (this.rv_.s("JSESSIONID") != null) {
-			tag = tag + "." + this.rv_.s("JSESSIONID").hashCode();
-		}
+		String tag = Utils.getGuid().replace("-", "");
 
 		ArrayList<String> al = new ArrayList<String>();
 		this.tempData_.put(tag, al);
@@ -118,20 +115,6 @@ public class CreateSplitData {
 		}
 
 		return tag;
-	}
-
-	public static void main(String[] args) {
-		RequestValue rv = new RequestValue();
-		rv.addValue("s1", "1,2,3");
-		rv.addValue("s2", "a,b,c");
-
-		CreateSplitData p = new CreateSplitData(rv);
-		String sql = "insert into a(v1,v2)" + " select a.col,b.col from (select * from ewa_split(@s1,',')) a "
-				+ "inner join (select * from ewa_split ( @s2,',')) b on a.idx=b.idx";
-		String rst = p.replaceSplitData(sql);
-
-		System.out.println(rst);
-
 	}
 
 }

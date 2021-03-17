@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -240,8 +241,7 @@ public class RequestValue implements Cloneable {
 	}
 
 	/**
-	 * 获取其它值 EWA.HOST，EWA.HOST_PORT，EWA.HOST_PROTOCOL，EWA.HOST_BASE，EWA.HOST.CONTEXT
-	 * <br>
+	 * 获取其它值 EWA.HOST，EWA.HOST_PORT，EWA.HOST_PROTOCOL，EWA.HOST_BASE，EWA.HOST.CONTEXT <br>
 	 * xxxx.MD5 参数xxxx的md5值 <br>
 	 * xxxx.HASH 参数xxxx的 hashCode
 	 * 
@@ -920,7 +920,7 @@ public class RequestValue implements Cloneable {
 			// 值为空白的加密cookie不处理
 			return;
 		}
-		
+
 		// 对cookie值进行UrlDecode操作
 		String decodeVal = UCookies.decodeCookieValue(val);
 		if (!ewaEncrypted) {
@@ -929,7 +929,7 @@ public class RequestValue implements Cloneable {
 
 		String fixedKey = key.substring(0, key.length() - ActionBase.COOKIE_NAME_PREFIX.length());
 		try {
-			String plainText  = symmetric.decrypt(decodeVal);
+			String plainText = symmetric.decrypt(decodeVal);
 			this._ReqValues.addValue(fixedKey, plainText, PageValueTag.COOKIE_ENCYRPT);
 		} catch (Exception e) {
 			LOGGER.warn("Decrypte the cookie " + key + "=" + val + ", " + e.getLocalizedMessage());
@@ -1266,7 +1266,12 @@ public class RequestValue implements Cloneable {
 				}
 			}
 
-			exp = exp.replaceFirst("@" + paramName, paramValue);
+			String fullName = "@" + paramName;
+			/*
+			 * if (al.size() == 0 && fullName.equals(exp)) { return paramValue; }
+			 */
+
+			exp = exp.replaceFirst(fullName, Matcher.quoteReplacement(paramValue));
 		}
 
 		return exp;

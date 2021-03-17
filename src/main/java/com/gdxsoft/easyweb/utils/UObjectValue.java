@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -27,6 +29,8 @@ import com.gdxsoft.easyweb.utils.msnet.MTable;
  * Reflect the class by name
  */
 public class UObjectValue {
+
+	public static Map<String, Method> GLOBL_CACHED = new ConcurrentHashMap<>();
 	private static Logger LOGGER = LoggerFactory.getLogger(UObjectValue.class);
 
 	/**
@@ -59,8 +63,7 @@ public class UObjectValue {
 	}
 
 	/**
-	 * Set the corresponding attributes of the target element through the get
-	 * methods of the source class
+	 * Set the corresponding attributes of the target element through the get methods of the source class
 	 * 
 	 * @param targetElement The target element
 	 * @param source        the source class
@@ -87,8 +90,7 @@ public class UObjectValue {
 	}
 
 	/**
-	 * Create the corresponding child text nodes of the target element through the
-	 * get methods of the source class
+	 * Create the corresponding child text nodes of the target element through the get methods of the source class
 	 * 
 	 * @param targetElement The target element
 	 * @param source        The source class
@@ -123,8 +125,7 @@ public class UObjectValue {
 	}
 
 	/**
-	 * Set the corresponding parameters of the target class through the children
-	 * text content of the source element
+	 * Set the corresponding parameters of the target class through the children text content of the source element
 	 * 
 	 * @param parentNode  the source node
 	 * @param targetClass the target class
@@ -134,8 +135,7 @@ public class UObjectValue {
 	}
 
 	/**
-	 * Set the corresponding parameters of the target class through the children
-	 * text content of the source element
+	 * Set the corresponding parameters of the target class through the children text content of the source element
 	 * 
 	 * @param parentElement the source element
 	 * @param targetClass   the target class
@@ -157,8 +157,7 @@ public class UObjectValue {
 	}
 
 	/**
-	 ** Set the corresponding parameters of the target class through the attributes
-	 * of the source element
+	 ** Set the corresponding parameters of the target class through the attributes of the source element
 	 * 
 	 * @param ele         the source element
 	 * @param targetClass the target class
@@ -250,7 +249,6 @@ public class UObjectValue {
 
 	private Object _object;
 	private Method[] _Methods;
-	private HashMap<String, Method> _ht;
 	private ArrayList<Method> _GetterMethods;
 	private Object _Instance;
 	private String _LastErrMsg;
@@ -265,8 +263,7 @@ public class UObjectValue {
 	}
 
 	/**
-	 * Set the corresponding parameters of the specified class through the
-	 * attributes of the source element
+	 * Set the corresponding parameters of the specified class through the attributes of the source element
 	 * 
 	 * @param ele the source element
 	 */
@@ -507,7 +504,6 @@ public class UObjectValue {
 		if (sup != null) {
 			this._MethodsSuper = sup.getDeclaredMethods();
 		}
-		_ht = new HashMap<String, Method>();
 		this._GetterMethods = new ArrayList<Method>();
 
 		for (int i = 0; i < this._Methods.length; i++) {
@@ -636,6 +632,32 @@ public class UObjectValue {
 	}
 
 	/**
+	 * Invoke the static method
+	 * 
+	 * @param className    the class name
+	 * @param methodName   the static method name
+	 * @param methodValues the method parameters
+	 * @return the result
+	 * @throws Exception error
+	 */
+	public Object invokeStatic(String className, String methodName, Object[] methodValues) throws Exception {
+		Class<?> c = null;
+		try {
+			c = Class.forName(className);
+		} catch (Exception e) {
+			LOGGER.error("", e);
+			throw e;
+		}
+		Method method = this.getMethodByMatchParams(c.getDeclaredMethods(), methodName, methodValues);
+		if (method == null) {
+			String error = "The method " + methodName + " not found in " + className;
+			LOGGER.error(error);
+			throw new Exception(error);
+		}
+		return this.invoke(c, method, methodValues);
+	}
+
+	/**
 	 * 通过类实例执行方法
 	 * 
 	 * @param instance      类实例
@@ -644,8 +666,8 @@ public class UObjectValue {
 	 * @return 执行后对象
 	 */
 	public Object invoke(Object instance, String exeMethodName, Object[] methodValues) {
-		Method method = this.getMethod(instance.getClass().getDeclaredMethods(), exeMethodName,
-				methodValues == null ? 0 : methodValues.length);
+		Method method = this.getMethodByMatchParams(instance.getClass().getDeclaredMethods(), exeMethodName,
+				methodValues);
 
 		return this.invoke(instance, method, methodValues);
 	}
@@ -660,7 +682,7 @@ public class UObjectValue {
 	 * @return 执行后对象
 	 */
 	public Object invoke(Object instance, Method[] methods, String exeMethodName, Object[] methodValues) {
-		Method method = this.getMethod(methods, exeMethodName, methodValues == null ? 0 : methodValues.length);
+		Method method = this.getMethodByMatchParams(methods, exeMethodName, methodValues);
 
 		return this.invoke(instance, method, methodValues);
 	}
@@ -858,11 +880,11 @@ public class UObjectValue {
 	 */
 	private boolean invokeMethod(String name, Object val, IHandleJsonBinary handleJsonBinary) throws Exception {
 		String methodName = "set" + name.replace("_", "");
-		Method mm = this.getMethod(this._Methods, methodName, 1);
+		Method mm = this.getMethodByMatchParams(this._Methods, methodName, val);
 		if (mm == null) {
 			if (this._MethodsSuper != null) {
 				// 获取super的模式
-				mm = this.getMethod(this._MethodsSuper, methodName, 1);
+				mm = this.getMethodByMatchParams(this._MethodsSuper, methodName, val);
 			}
 			if (mm == null) {// 方法不存在
 				return false;
@@ -930,22 +952,61 @@ public class UObjectValue {
 		return true;
 	}
 
-	private Method getMethod(Method[] methods, String methodName, int parameterLength) {
-		String m1 = methodName.trim().toUpperCase();
-		String key = m1 + "|" + parameterLength;
-		if (this._ht != null && this._ht.containsKey(key)) {
-			return this._ht.get(key);
+	private Method getMethodByMatchParams(Method[] methods, String methodName, Object... params) {
+		if (params == null) {
+			params = new Object[0];
 		}
+
+		String key = methodName.toLowerCase();
+		for (int i = 0; i < params.length; i++) {
+			key += "," + params[i].getClass().getName();
+		}
+		if (GLOBL_CACHED.containsKey(key)) {
+			LOGGER.debug("Found the method '" + methodName + "' from the GLOBL_CACHED.");
+			return GLOBL_CACHED.get(key);
+		}
+
+		List<Method> found = new ArrayList<Method>();
+		String m1 = methodName.trim();
 		for (int i = 0; i < methods.length; i++) {
-			String mm = methods[i].getName().toUpperCase();
-			if (mm.equals(m1) && methods[i].getParameterTypes().length == parameterLength) {
-				if (this._ht != null) {
-					_ht.put(key, methods[i]);
-				}
-				return methods[i];
+			Method method = methods[i];
+			if (method.getName().equalsIgnoreCase(m1) && method.getParameterTypes().length == params.length) {
+				found.add(method);
 			}
 		}
-		return null;
+		if (found.size() == 0) {// not found
+			LOGGER.warn("Not Found the method '" + methodName + "' ");
+			return null;
+		}
+		if (found.size() == 1) {
+			GLOBL_CACHED.put(key, found.get(0));
+			return found.get(0);
+		}
+
+		LOGGER.debug("Found the method '" + methodName + "' " + found.size() + " times.");
+
+		int maxMaaches = -1;
+		Method methodMatched = null;
+		// Overloading methods
+		for (int i = 0; i < found.size(); i++) {
+			Method method = found.get(i);
+			Class<?>[] paraTypes = method.getParameterTypes();
+			int matcheLenth = 0;
+			for (int m = 0; m < paraTypes.length; m++) {
+				if (paraTypes[m].equals(params[m].getClass())) {
+					matcheLenth++;
+				}
+			}
+			if (matcheLenth == paraTypes.length) {
+				GLOBL_CACHED.put(key, method);
+				return method;
+			}
+			if (matcheLenth > maxMaaches) {// the maximum matches
+				methodMatched = method;
+			}
+		}
+		GLOBL_CACHED.put(key, methodMatched);
+		return methodMatched;
 	}
 
 	/**

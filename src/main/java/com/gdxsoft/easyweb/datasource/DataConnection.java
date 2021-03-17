@@ -53,6 +53,8 @@ public class DataConnection {
 
 	private int _TimeDiffMinutes; // 用户和系统的时差
 
+	private EwaSqlFunctions ewaSqlFunctions;
+
 	/**
 	 * 用户和系统的时差(分钟)
 	 * 
@@ -137,6 +139,35 @@ public class DataConnection {
 		String rst = cnn.getErrorMsg();
 		cnn.close();
 		return rst;
+	}
+
+	/**
+	 * 批量执行更新并关闭连接 (Transaction)
+	 * 
+	 * @param sqls       sql列表
+	 * @param configName
+	 * @param rv
+	 * @return 返回是否错误
+	 */
+	public static String updateBatchAndCloseTransaction(List<String> sqls, String configName, RequestValue rv) {
+		DataConnection cnn = new DataConnection(configName, rv);
+		cnn.transBegin();
+		try {
+			int runInc = cnn.executeUpdateBatch(sqls);
+			if (runInc == -1) {
+				cnn.transRollback();
+			} else {
+				cnn.transCommit();
+			}
+			String rst = cnn.getErrorMsg();
+			return rst;
+		} catch (Exception err) {
+			cnn.transRollback();
+			return err.getMessage();
+		} finally {
+			cnn.close();
+		}
+
 	}
 
 	/**
@@ -347,6 +378,7 @@ public class DataConnection {
 		try {
 			_IsTrans = true;
 			_Connection.setAutoCommit(false);
+			LOGGER.debug("Start tansaction");
 			return true;
 		} catch (SQLException e) {
 			_IsTrans = false;
@@ -370,6 +402,7 @@ public class DataConnection {
 	public boolean transCommit() {
 		try {
 			this._Connection.commit();
+			LOGGER.debug("Commit tansaction");
 			return true;
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
@@ -390,6 +423,7 @@ public class DataConnection {
 	public void transRollback() {
 		try {
 			this._Connection.rollback();
+			LOGGER.debug("Rollback tansaction");
 		} catch (SQLException e) {
 			LOGGER.error(e.getLocalizedMessage());
 			this.setError(e, "回滚事务");
@@ -534,6 +568,13 @@ public class DataConnection {
 		this._ResultSetList.add(ds);
 	}
 
+	private void executeEwaFunctions() {
+		if (this.ewaSqlFunctions == null || this.ewaSqlFunctions.getTempData().size() == 0) {
+			return;
+		}
+		this.ewaSqlFunctions.executeEwaFunctions(_RequestValue, this._DebugFrames);
+	}
+
 	/**
 	 * 执行query
 	 * 
@@ -554,15 +595,11 @@ public class DataConnection {
 		String sql1 = rebuildSql(sql);
 
 		this.createEwaSplitTempData(); // guolei 2015-09-08
+		this.executeEwaFunctions(); // guolei 2021-03-16
 
 		// 替换select的参数为实际的值
 		sql1 = this.replaceSqlSelectParameters(sql1);
-		// if (this._DebugFrames != null) {
-		// StringBuilder debuginfo = new StringBuilder();
-		// debuginfo.append("[executeQuery(sql,rv)] 替换SELECT参数. \n\n");
-		// debuginfo.append(sql1);
-		// writeDebug(this, "SQL", debuginfo.toString());
-		// }
+
 		MListStr parameters = Utils.getParameters(sql1, "@");
 		try {
 			if (parameters.size() > 0) {
@@ -619,7 +656,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public boolean executeQuery(String sql) {
-		if (this._RequestValue == null || (sql.indexOf("@") == -1 && sql.indexOf("~") == -1)) {
+		if (this._RequestValue == null) {
 			return this.executeQueryNoParameter(sql);
 		} else {
 			return this.executeQuery(sql, sql);
@@ -697,33 +734,27 @@ public class DataConnection {
 			}
 			/// 20190816
 			/*
-			 * if (sp.getOrderBy().length() > 0) { sqlTmp.append("\r\n ORDER BY " +
-			 * sp.getOrderBy()); } sb.insert(0, "SELECT TOP " + currentPage * pageSize +
-			 * " "); sb.append(sp.getFields()); sb.append("\r\n FROM ");
-			 * sb.append(sp.getTableName()); if (currentPage == 1) { sb.append("\r\n WHERE "
-			 * + sp.getWhere()); sb.append(sqlTmp.toString()); } else { String pk =
-			 * "GGDDXX." + pkFieldName; String pk1 = pkFieldName; if
-			 * (pkFieldName.indexOf(",") > 0) { String[] pks = pkFieldName.split(",");
-			 * String tmp = ""; String tmp1 = ""; for (int i = 0; i < pks.length; i++) { if
-			 * (i > 0) { tmp += " + '~`" + i + "!' + "; tmp1 += " + '~`" + i + "!' + "; }
-			 * String[] filedName = pks[i].trim().split("\\."); String name = "GGDDXX.[" +
-			 * filedName[filedName.length - 1] + "]"; tmp += "ISNULL(CONVERT(VARCHAR(222),"
-			 * + name + "),'--null--')"; tmp1 += "ISNULL(CONVERT(VARCHAR(222), " +
-			 * pks[i].trim() + "),'--null--')"; } pk = tmp; pk1 = tmp1; } else { String[]
-			 * filedName = pkFieldName.trim().split("\\."); pk = "GGDDXX." +
-			 * filedName[filedName.length - 1];
+			 * if (sp.getOrderBy().length() > 0) { sqlTmp.append("\r\n ORDER BY " + sp.getOrderBy()); } sb.insert(0,
+			 * "SELECT TOP " + currentPage * pageSize + " "); sb.append(sp.getFields()); sb.append("\r\n FROM ");
+			 * sb.append(sp.getTableName()); if (currentPage == 1) { sb.append("\r\n WHERE " + sp.getWhere());
+			 * sb.append(sqlTmp.toString()); } else { String pk = "GGDDXX." + pkFieldName; String pk1 = pkFieldName; if
+			 * (pkFieldName.indexOf(",") > 0) { String[] pks = pkFieldName.split(","); String tmp = ""; String tmp1 =
+			 * ""; for (int i = 0; i < pks.length; i++) { if (i > 0) { tmp += " + '~`" + i + "!' + "; tmp1 += " + '~`" +
+			 * i + "!' + "; } String[] filedName = pks[i].trim().split("\\."); String name = "GGDDXX.[" +
+			 * filedName[filedName.length - 1] + "]"; tmp += "ISNULL(CONVERT(VARCHAR(222)," + name + "),'--null--')";
+			 * tmp1 += "ISNULL(CONVERT(VARCHAR(222), " + pks[i].trim() + "),'--null--')"; } pk = tmp; pk1 = tmp1; } else
+			 * { String[] filedName = pkFieldName.trim().split("\\."); pk = "GGDDXX." + filedName[filedName.length - 1];
 			 * 
 			 * }
 			 * 
-			 * StringBuilder where = new StringBuilder(); where.append("SELECT TOP " +
-			 * (currentPage - 1) * pageSize + " "); where.append(pk1 + " FROM ");
-			 * where.append(sp.getTableName()); where.append("\r\n WHERE " + sp.getWhere());
-			 * where.append(sqlTmp.toString());
+			 * StringBuilder where = new StringBuilder(); where.append("SELECT TOP " + (currentPage - 1) * pageSize +
+			 * " "); where.append(pk1 + " FROM "); where.append(sp.getTableName()); where.append("\r\n WHERE " +
+			 * sp.getWhere()); where.append(sqlTmp.toString());
 			 * 
 			 * sb.append(" WHERE " + sp.getWhere()); sb.append(sqlTmp.toString());
 			 * 
-			 * sb.insert(0, "SELECT * FROM(\r\n"); sb.append(") GGDDXX\r\n WHERE NOT " + pk
-			 * + " IN (\r\n\t"); sb.append(where.toString()); sb.append(")"); }
+			 * sb.insert(0, "SELECT * FROM(\r\n"); sb.append(") GGDDXX\r\n WHERE NOT " + pk + " IN (\r\n\t");
+			 * sb.append(where.toString()); sb.append(")"); }
 			 */
 
 		} else if (this._DatabaseType.equals("HSQLDB") || this._DatabaseType.equals("MYSQL")) {
@@ -883,16 +914,44 @@ public class DataConnection {
 			if (sql.length() == 0) { // 空语句
 				continue;
 			}
+
 			boolean isok;
-			if (this._RequestValue == null) {
-				// 无参数执行
-				isok = this.executeUpdateNoParameter(sql);
+			if (checkIsSelect(sql)) {
+				isok = this.executeQuery(sql);
+				if (!isok) {
+					LOGGER.error(sql);
+					return -1;
+				}
+
+				DTTable tb = new DTTable(); // 映射到自定义数据表
+				tb.initData(this.getLastResult().getResultSet());
+				try {
+					this.getLastResult().getResultSet().close();
+				} catch (SQLException e) {
+					LOGGER.warn(sql, e.getMessage());
+				}
+				// 添加到 rv 中
+				if (this._RequestValue != null && tb.isOk()) {
+					if (tb.getCount() == 0) {
+						LOGGER.debug("The table count = 0", sql);
+					} else {
+						LOGGER.debug("Add table count = " + tb.getCount() + " to the rv", sql);
+						this._RequestValue.addValues(tb);
+					}
+				}
 			} else {
-				isok = this.executeUpdate(sql);
+				LOGGER.debug(sql);
+				if (this._RequestValue == null) {
+					// 无参数执行
+					isok = this.executeUpdateNoParameter(sql);
+				} else {
+					isok = this.executeUpdate(sql);
+				}
 			}
 			if (isok) {
 				runInc++;
 			} else {
+				LOGGER.error(sql);
 				return -1;
 			}
 		}
@@ -1002,7 +1061,7 @@ public class DataConnection {
 		sql = sql + "\n\n\n"; // 避免出现被注释掉 -- auto MEMO_ID select SCOPE_IDENTITY() AS GENERATED_KEYS
 		String sql1 = rebuildSql(sql);
 		this.createEwaSplitTempData(); // guolei 2015-09-08
-
+		this.executeEwaFunctions();// guolei 2021-03-16
 		MListStr parameters = Utils.getParameters(sql1, "@");
 		Object autoKey = -1;
 		try {
@@ -1074,6 +1133,7 @@ public class DataConnection {
 
 		String sql1 = rebuildSql(sql);
 		this.createEwaSplitTempData(); // guolei 2015-09-08
+		this.executeEwaFunctions(); // guolei 2021-03-16
 
 		MListStr parameters = Utils.getParameters(sql1, "@");
 		try {
@@ -1124,6 +1184,8 @@ public class DataConnection {
 
 		String sql1 = rebuildSql(sql);
 		this.createEwaSplitTempData(); // guolei 2015-09-08
+		this.executeEwaFunctions();// guolei 2021-03-16
+
 		SqlPart sp = new SqlPart();
 		String sqlDbType = this.getDatabaseType().toLowerCase();
 
@@ -1336,6 +1398,11 @@ public class DataConnection {
 			sql = _CreateSplitData.replaceSplitData(sql1);
 			sql1 = sql;
 		}
+
+		// 提取 EWA定义的 方法，在 EwaFunctions.xml中
+		EwaSqlFunctions esf = new EwaSqlFunctions();
+		sql1 = esf.extractEwaSqlFunctions(sql1);
+		this.ewaSqlFunctions = esf;
 
 		// 替换json表达式， 例如 EWA_JSON(FIELD_NAME,@NAME, @SEX, @AGE, @MOBILE)
 		CreateJsonData createJsonData = new CreateJsonData(this._RequestValue);
@@ -1701,10 +1768,9 @@ public class DataConnection {
 
 	/**
 	 * 设置SQL参数 CallableStatement <br>
-	 * 对象为所有的DBMS 提供了一种以标准形式调用已储存过程的方法。已储 存过程储存在数据库中。对已储存过程的调用是
-	 * CallableStatement对象所含的内容。这种调用是 用一种换码语法来写的，有两种形式：一种形式带结果参，另一种形式不带结果参数。结果参数是
-	 * 一种输出 (OUT) 参数，是已储存过程的返回值。两种形式都可带有数量可变的输入（IN 参数）、 输出（OUT 参数）或输入和输出（INOUT
-	 * 参数）的参数。问号将用作参数的占位符。
+	 * 对象为所有的DBMS 提供了一种以标准形式调用已储存过程的方法。已储 存过程储存在数据库中。对已储存过程的调用是 CallableStatement对象所含的内容。这种调用是
+	 * 用一种换码语法来写的，有两种形式：一种形式带结果参，另一种形式不带结果参数。结果参数是 一种输出 (OUT) 参数，是已储存过程的返回值。两种形式都可带有数量可变的输入（IN 参数）、 输出（OUT
+	 * 参数）或输入和输出（INOUT 参数）的参数。问号将用作参数的占位符。
 	 * 
 	 * @param parameters
 	 * @param cst

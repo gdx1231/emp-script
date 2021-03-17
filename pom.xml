@@ -84,7 +84,7 @@
 				</executions>
 			</plugin>
 
-			 
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -111,16 +111,8 @@
 		<dependency>
 			<groupId>com.gdxsoft.easyweb</groupId>
 			<artifactId>emp-script-utils</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
-		<!-- <dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>2.14.0</version>
-			</dependency> -->
-
 
 		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
 		<dependency>
@@ -201,21 +193,6 @@
 			<version>1.2.5</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.23</version>
-			<scope>test</scope>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
-		<dependency>
-			<groupId>com.microsoft.sqlserver</groupId>
-			<artifactId>mssql-jdbc</artifactId>
-			<version>9.2.0.jre8</version>
-			<scope>test</scope>
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/org.hsqldb/hsqldb -->
 		<dependency>
 			<groupId>org.hsqldb</groupId>
@@ -230,7 +207,6 @@
 			<version>1.11.3</version>
 		</dependency>
 
-
 		<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -238,15 +214,7 @@
 			<version>4.0.1</version>
 			<scope>provided</scope>
 		</dependency>
-
-
-		<!-- https://mvnrepository.com/artifact/org.artofsolving.jodconverter/jodconverter-core -->
-		<!-- <dependency>
-			<groupId>org.artofsolving.jodconverter</groupId>
-			<artifactId>jodconverter-core</artifactId>
-			<version>3.1-xwiki</version>
-			</dependency> -->
-		<!-- https://mvnrepository.com/artifact/org.jodconverter/jodconverter-core -->
+ 
 		<dependency>
 			<groupId>org.jodconverter</groupId>
 			<artifactId>jodconverter-core</artifactId>
@@ -271,6 +239,26 @@
 			<version>2.2.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.7</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.23</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<version>9.2.0.jre8</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<repositories>
