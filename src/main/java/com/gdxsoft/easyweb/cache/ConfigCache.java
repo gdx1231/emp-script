@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.global.EwaGlobals;
-import com.gdxsoft.easyweb.script.project.Project;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFileCheck;
 import com.gdxsoft.easyweb.utils.UPath;
@@ -20,23 +19,7 @@ public class ConfigCache {
 	private static Logger LOGGER = LoggerFactory.getLogger(ConfigCache.class);
 	private static Map<String, Object> _Objects = new ConcurrentHashMap<String, Object>();
 
-	/**
-	 * 获取项目
-	 * 
-	 * @param xmlProjectName 项目文件名称
-	 * @return
-	 */
-	public static Project getProject(String xmlProjectName) {
-		String path = UPath.getProjectPath() + xmlProjectName;
-		String code = createUserConfigCode(path, "$$EWA_PROJECT$$");
-		Object o = getObject(code, path);
-		if (o == null) {
-			return null;
-		} else {
-			return (Project) o;
-		}
-	}
-
+	 
 	/**
 	 * 获取UserConfig
 	 * 
@@ -151,19 +134,6 @@ public class ConfigCache {
 		@SuppressWarnings("unused")
 		Object o = _Objects.remove(code);
 		o = null;
-	}
-
-	/**
-	 * 放置Project缓存
-	 * 
-	 * @param xmlProjectName 项目文件名
-	 * @param project        项目
-	 */
-	public synchronized static void setProject(String xmlProjectName, Project project) {
-		String path = UPath.getProjectPath() + xmlProjectName;
-		String code = createUserConfigCode(path, "$$EWA_PROJECT$$");
-		_Objects.remove(code);
-		_Objects.put(code, project);
 	}
 
 	public synchronized static void setGlobals(EwaGlobals globals) {

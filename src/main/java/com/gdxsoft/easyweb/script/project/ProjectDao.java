@@ -7,7 +7,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.cache.ConfigCache;
 import com.gdxsoft.easyweb.script.template.Descriptions;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -103,13 +102,10 @@ public class ProjectDao {
 
 	public Project builderProject(String projectName) throws Exception {
 		this._ProjectName = projectName;
-		Project p = ConfigCache.getProject(this._ProjectName);
-		if (p == null) {
-			this.initDocument();
-			p = initProject();
-			// 放到缓存中
-			ConfigCache.setProject(this._ProjectName, p);
-		}
+
+		this.initDocument();
+		Project p = initProject();
+
 		return p;
 	}
 

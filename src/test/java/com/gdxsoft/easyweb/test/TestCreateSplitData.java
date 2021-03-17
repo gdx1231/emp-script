@@ -3,7 +3,7 @@ package com.gdxsoft.easyweb.test;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.gdxsoft.easyweb.datasource.CreateSplitData;
 import com.gdxsoft.easyweb.datasource.DataConnection;
