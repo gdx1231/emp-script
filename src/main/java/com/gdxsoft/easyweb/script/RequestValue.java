@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConfRequestValuesGlobal;
 import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
@@ -133,14 +134,18 @@ public class RequestValue implements Cloneable {
 		this._ReqValues.addValue("EWA.REAL.PATH", UPath.getRealPath(), PageValueTag.SYSTEM);
 
 		// 在 ewa_conf中的全局参数,可以被系统调用
-		if (UPath.getRV_GLOBALS() != null) {
-			HashMap<String, String> rvGlobal = UPath.getRV_GLOBALS();
-			for (String key : rvGlobal.keySet()) {
-				String valGlobal = rvGlobal.get(key);
-				this._ReqValues.addValue(key, valGlobal, PageValueTag.SYSTEM);
-			}
-		}
+		//	<requestValuesGlobal>
+		//		<rv name="rv_ewa_style_path" value="/demo/EmpScriptV2" />
+		//	</requestValuesGlobal>
+		ConfRequestValuesGlobal.getInstance().getLst().forEach(v -> {
+			_ReqValues.addValue(v.getName(), v.getValue(), PageValueTag.SYSTEM);
+		});
 
+		/*
+		 * if (UPath.getRV_GLOBALS() != null) { HashMap<String, String> rvGlobal = UPath.getRV_GLOBALS(); for (String
+		 * key : rvGlobal.keySet()) { String valGlobal = rvGlobal.get(key); this._ReqValues.addValue(key, valGlobal,
+		 * PageValueTag.SYSTEM); } }
+		 */
 		this.resetSysUnid();
 
 		this.resetDateTime();

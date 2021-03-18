@@ -755,8 +755,12 @@ public class UObjectValue {
 				continue;
 			}
 			Object val = rs.getObject(fieldIndex);
-			boolean isok = this.invokeMethod(filedName, val, null);
-
+			boolean isok = false;
+			try {
+				isok = this.invokeMethod(filedName, val, null);
+			} catch (Exception err) {
+				LOGGER.warn(filedName, val, err.getMessage());
+			}
 			if (!isok) { // 未找到赋值方法
 				KeyValuePair<String, Object> kv = new KeyValuePair<String, Object>();
 				kv.setPair(filedName, val);
@@ -880,11 +884,15 @@ public class UObjectValue {
 	 */
 	private boolean invokeMethod(String name, Object val, IHandleJsonBinary handleJsonBinary) throws Exception {
 		String methodName = "set" + name.replace("_", "");
-		Method mm = this.getMethodByMatchParams(this._Methods, methodName, val);
+		
+		Object getMethodValue = val == null?new ObjectNull():val;
+		 
+		
+		Method mm = this.getMethodByMatchParams(this._Methods, methodName, getMethodValue);
 		if (mm == null) {
 			if (this._MethodsSuper != null) {
 				// 获取super的模式
-				mm = this.getMethodByMatchParams(this._MethodsSuper, methodName, val);
+				mm = this.getMethodByMatchParams(this._MethodsSuper, methodName, getMethodValue);
 			}
 			if (mm == null) {// 方法不存在
 				return false;
@@ -1043,5 +1051,14 @@ public class UObjectValue {
 	 */
 	public List<KeyValuePair<String, Object>> getNotFinds() {
 		return _NotFinds;
+	}
+}
+class ObjectNull{
+	public ObjectNull() {
+		
+	}
+	
+	public String toString() {
+		return "ObjectNull";
 	}
 }
