@@ -798,12 +798,17 @@ public class UObjectValue {
 		while (it.hasNext()) {
 			String key = it.next().toString();
 			Object val = obj.get(key);
-			boolean isok = this.invokeMethod(key, val, handleJsonBinary);
-			if (!isok) { // 未找到赋值方法
-				KeyValuePair<String, Object> kv = new KeyValuePair<String, Object>();
-				kv.setPair(key, val);
-				notFinds.add(kv);
+			try {
+				boolean isok = this.invokeMethod(key, val, handleJsonBinary);
+				if (!isok) { // 未找到赋值方法
+					KeyValuePair<String, Object> kv = new KeyValuePair<String, Object>();
+					kv.setPair(key, val);
+					notFinds.add(kv);
+				}
+			} catch (Exception err) {
+				LOGGER.warn(key, val, err.getMessage());
 			}
+
 		}
 		this._NotFinds = notFinds;
 		return o1;
@@ -822,11 +827,15 @@ public class UObjectValue {
 		for (int i = 0; i < row.getTable().getColumns().getCount(); i++) {
 			String name = row.getTable().getColumns().getColumn(i).getName();
 			Object val = row.getCell(i).getValue();
-			boolean isok = this.invokeMethod(name, val, null);
-			if (!isok) { // 未找到赋值方法
-				KeyValuePair<String, Object> kv = new KeyValuePair<String, Object>();
-				kv.setPair(name, val);
-				notFinds.add(kv);
+			try {
+				boolean isok = this.invokeMethod(name, val, null);
+				if (!isok) { // 未找到赋值方法
+					KeyValuePair<String, Object> kv = new KeyValuePair<String, Object>();
+					kv.setPair(name, val);
+					notFinds.add(kv);
+				}
+			} catch (Exception err) {
+				LOGGER.warn(name, val, err.getMessage());
 			}
 		}
 		this._NotFinds = notFinds;
@@ -860,12 +869,15 @@ public class UObjectValue {
 
 				PageValue pv = (PageValue) mt.get(key);
 				Object val = pv.getValue();
-				boolean isok = this.invokeMethod(key, val, null);
-
-				if (!isok) { // 未找到赋值方法
-					KeyValuePair<String, Object> kv = new KeyValuePair<String, Object>();
-					kv.setPair(key, val);
-					notFinds.add(kv);
+				try {
+					boolean isok = this.invokeMethod(key, val, null);
+					if (!isok) { // 未找到赋值方法
+						KeyValuePair<String, Object> kv = new KeyValuePair<String, Object>();
+						kv.setPair(key, val);
+						notFinds.add(kv);
+					}
+				} catch (Exception err) {
+					LOGGER.warn(key, val, err.getMessage());
 				}
 			}
 		}
@@ -884,10 +896,9 @@ public class UObjectValue {
 	 */
 	private boolean invokeMethod(String name, Object val, IHandleJsonBinary handleJsonBinary) throws Exception {
 		String methodName = "set" + name.replace("_", "");
-		
-		Object getMethodValue = val == null?new ObjectNull():val;
-		 
-		
+
+		Object getMethodValue = val == null ? new ObjectNull() : val;
+
 		Method mm = this.getMethodByMatchParams(this._Methods, methodName, getMethodValue);
 		if (mm == null) {
 			if (this._MethodsSuper != null) {
@@ -908,12 +919,19 @@ public class UObjectValue {
 			if (str.trim().length() == 0) {
 				v[0] = null;
 			} else {
+				int intval = 0;
 				try {
-					v[0] = UConvert.ToInt32(str);
+					intval = UConvert.ToInt32(str);
+					if (paraType.equals("JAVA.LANG.INTEGER")) {
+						v[0] = Integer.valueOf(intval);
+					} else {
+						v[0] = intval; // int
+					}
 				} catch (Exception err) {
 					LOGGER.error(err.getLocalizedMessage(), err);
 					return false;
 				}
+
 			}
 		} else if (paraType.equals("JAVA.LANG.STRING")) {
 			v[0] = val.toString();
@@ -942,7 +960,12 @@ public class UObjectValue {
 				v[0] = null;
 			} else {
 				try {
-					v[0] = UConvert.ToDouble(str);
+					double dv = UConvert.ToDouble(str);
+					if (paraType.equals("JAVA.LANG.DOUBLE")) {
+						v[0] = Double.valueOf(dv);
+					} else {
+						v[0] = dv;
+					}
 				} catch (Exception err) {
 					LOGGER.error(err.getLocalizedMessage(), err);
 					return false;
@@ -964,16 +987,17 @@ public class UObjectValue {
 		if (params == null) {
 			params = new Object[0];
 		}
-
-		String key = methodName.toLowerCase();
-		for (int i = 0; i < params.length; i++) {
-			key += "," + params[i].getClass().getName();
+		String key = null;
+		if (this._object != null) {
+			key = this._object.getClass().getName() + "," + methodName.toLowerCase();
+			for (int i = 0; i < params.length; i++) {
+				key += "," + params[i].getClass().getName();
+			}
+			if (GLOBL_CACHED.containsKey(key)) {
+				LOGGER.debug("Found the method '" + methodName + "' from the GLOBL_CACHED.");
+				return GLOBL_CACHED.get(key);
+			}
 		}
-		if (GLOBL_CACHED.containsKey(key)) {
-			LOGGER.debug("Found the method '" + methodName + "' from the GLOBL_CACHED.");
-			return GLOBL_CACHED.get(key);
-		}
-
 		List<Method> found = new ArrayList<Method>();
 		String m1 = methodName.trim();
 		for (int i = 0; i < methods.length; i++) {
@@ -987,7 +1011,9 @@ public class UObjectValue {
 			return null;
 		}
 		if (found.size() == 1) {
-			GLOBL_CACHED.put(key, found.get(0));
+			if (key != null) {
+				GLOBL_CACHED.put(key, found.get(0));
+			}
 			return found.get(0);
 		}
 
@@ -1006,14 +1032,18 @@ public class UObjectValue {
 				}
 			}
 			if (matcheLenth == paraTypes.length) {
-				GLOBL_CACHED.put(key, method);
+				if (key != null) {
+					GLOBL_CACHED.put(key, method);
+				}
 				return method;
 			}
 			if (matcheLenth > maxMaaches) {// the maximum matches
 				methodMatched = method;
 			}
 		}
-		GLOBL_CACHED.put(key, methodMatched);
+		if (key != null) {
+			GLOBL_CACHED.put(key, methodMatched);
+		}
 		return methodMatched;
 	}
 
@@ -1053,11 +1083,12 @@ public class UObjectValue {
 		return _NotFinds;
 	}
 }
-class ObjectNull{
+
+class ObjectNull {
 	public ObjectNull() {
-		
+
 	}
-	
+
 	public String toString() {
 		return "ObjectNull";
 	}
