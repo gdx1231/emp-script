@@ -8,11 +8,69 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.gdxsoft.easyweb.EwaWebPage;
+import com.gdxsoft.easyweb.conf.ConfAdmins;
+import com.gdxsoft.easyweb.conf.ConfDefine;
+import com.gdxsoft.easyweb.define.EwaConfHelpHSqlServer;
+import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.template.EwaConfig;
+import com.gdxsoft.easyweb.script.template.Skin;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ServletMain extends HttpServlet {
+	private static Logger LOGGER = LoggerFactory.getLogger(ServletMain.class);
+
+	// web.xml
+	// <servlet>
+	// <servlet-name>EwaMain</servlet-name>
+	// <servlet-class>com.gdxsoft.easyweb.script.servlets.ServletMain</servlet-class>
+	// <load-on-startup>1</load-on-startup>
+	// </servlet>
+	static {
+		// The load-on-startup element indicates that this servlet should be loaded (instantiated and have its init()
+		// called) on the startup of the web application. The optional contents of these element must be an integer
+		// indicating the order in which the servlet should be loaded. If the value is a negative integer, or the
+		// element is not present, the container is free to load the servlet whenever it chooses. If the value is a
+		// positive integer or 0, the container must load and initialize the servlet as the application is deployed. The
+		// container must guarantee that servlets marked with lower integers are loaded before servlets marked with
+		// higher integers. The container may choose the order of loading of servlets with the same load-on-start-up
+		// value.
+		try {
+			EwaConfig.instance();
+			LOGGER.info("EwaConfig instance");
+		} catch (Exception e) {
+			LOGGER.error("EwaConfig instance,", e.getMessage());
+		}
+
+		try {
+			Skin.instance();
+			LOGGER.info("Skin instance");
+		} catch (Exception e1) {
+			LOGGER.error("Skin instance,", e1.getMessage());
+		}
+
+		try {
+			EwaGlobals.instance();
+			LOGGER.info("EwaGlobals instance");
+		} catch (Exception e) {
+			LOGGER.error("EwaGlobals instance,", e.getMessage());
+		}
+
+		try {
+			if (ConfDefine.isAllowDefine()) {
+				// start the EWA_DEFINE instances
+				EwaConfHelpHSqlServer.getInstance();
+				// admins info, random password
+				ConfAdmins.getInstance().getLst();
+			}
+		} catch (Exception err) {
+			LOGGER.error("define ServletIndex static,", err.getMessage());
+		}
+	}
 
 	/**
 	 * 
@@ -58,7 +116,7 @@ public class ServletMain extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("utf-8");
 		response.setHeader("Content-Type", "text/html;charset=UTF-8");
-		response.setHeader("X-EWA-ENGIN", "V2.2;gdxsoft.com;GZIP");
+		response.setHeader("X-EWA-ENGIN", "emp-script");
 		HttpSession session = request.getSession();
 		EwaWebPage p = new EwaWebPage(request, session, response);
 		p.run();
@@ -130,8 +188,8 @@ public class ServletMain extends HttpServlet {
 						"<script type='text/javascript' src='@rv_ewa_style_path/EWA_STYLE/js/source/src/core/EWA_08WebSocket.js'></script>\n");
 
 				sbDebugJs.append(
-						"<script type='text/javascript' src='@rv_ewa_style_path/EWA_STYLE/js/source/src/ui/EWA_00UI.js'></script>\n");				
-				
+						"<script type='text/javascript' src='@rv_ewa_style_path/EWA_STYLE/js/source/src/ui/EWA_00UI.js'></script>\n");
+
 				sbDebugJs.append(
 						"<script type='text/javascript' src='@rv_ewa_style_path/EWA_STYLE/js/source/src/frames/EWA_03FrameClass.js'></script>\n");
 				sbDebugJs.append(
@@ -149,7 +207,7 @@ public class ServletMain extends HttpServlet {
 						"<script type='text/javascript' src='@rv_ewa_style_path/EWA_STYLE/js/source/src/frames/EWA_02FrameResoures.js'></script>\n");
 				sbDebugJs.append(
 						"<script type='text/javascript' src='@rv_ewa_style_path/EWA_STYLE/js/source/src/frames/EWA_06FrameMultiClass.js'></script>\n");
-				
+
 				sbDebugJs.append(
 						"<script type='text/javascript' src='@rv_ewa_style_path/EWA_STYLE/js/source/src/frames/EWA_31Html5TakePhotoClass.js'></script>\n");
 				sbDebugJs.append(
@@ -171,7 +229,6 @@ public class ServletMain extends HttpServlet {
 				sbDebugJs.append(
 						"<script type='text/javascript' src='@rv_ewa_style_path/EWA_STYLE/js/source/src/frames/EWA_30Html5UploadClass.js'></script>\n");
 
-				
 				sbDebugJs.append(
 						"<script type='text/javascript' src='@rv_ewa_style_path/EWA_STYLE/js/source/src/ui/EWA_12UI_PicViewClass.js'></script>\n");
 				sbDebugJs.append(
@@ -229,10 +286,9 @@ public class ServletMain extends HttpServlet {
 				cnt1 = cnt1.replace("ewa.min.js", "fas.js");
 
 				String debugScripts = rv.replaceParameters(sbDebugJs.toString());
-				
+
 				cnt1 = cnt1.replace("</head>", debugScripts);
-				
-				
+
 			}
 
 			cnt.a(cnt1);
@@ -263,8 +319,7 @@ public class ServletMain extends HttpServlet {
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and
-	 * copyright.
+	 * Returns information about the servlet, such as author, version, and copyright.
 	 * 
 	 * @return String information about this servlet
 	 */
@@ -278,7 +333,7 @@ public class ServletMain extends HttpServlet {
 	 * @throws ServletException if an error occurs
 	 */
 	public void init() throws ServletException {
-		// Put your code here
+
 	}
 
 }

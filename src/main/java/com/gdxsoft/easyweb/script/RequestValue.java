@@ -134,9 +134,9 @@ public class RequestValue implements Cloneable {
 		this._ReqValues.addValue("EWA.REAL.PATH", UPath.getRealPath(), PageValueTag.SYSTEM);
 
 		// 在 ewa_conf中的全局参数,可以被系统调用
-		//	<requestValuesGlobal>
-		//		<rv name="rv_ewa_style_path" value="/demo/EmpScriptV2" />
-		//	</requestValuesGlobal>
+		// <requestValuesGlobal>
+		// <rv name="rv_ewa_style_path" value="/demo/EmpScriptV2" />
+		// </requestValuesGlobal>
 		ConfRequestValuesGlobal.getInstance().getLst().forEach(v -> {
 			_ReqValues.addValue(v.getName(), v.getValue(), PageValueTag.SYSTEM);
 		});
@@ -874,7 +874,7 @@ public class RequestValue implements Cloneable {
 
 		IUSymmetricEncyrpt symmetric = null;
 		// defined in ewa_conf securities -> security
-		if (ConfSecurities.getInstance().getDefaultSecurity() != null) {
+		if (ConfSecurities.getInstance() != null && ConfSecurities.getInstance().getDefaultSecurity() != null) {
 			symmetric = ConfSecurities.getInstance().getDefaultSecurity().createSymmetric();
 		}
 

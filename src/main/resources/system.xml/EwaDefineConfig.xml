@@ -50,11 +50,11 @@
 		<Menu
 			mcmd="window.open('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=tabletree&amp;linkType=CLASS')"
 			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/sql.png" mid="601"
-			mtext="类映射(新窗口)" mtext_enus="Class Map (New Window)" pid="60" />
+			mtext="数据库类映射" mtext_enus="Database class map" pid="60" />
 		<Menu
-			mcmd="window.frames[0].frames[1].AddTab('@rv_ewa_style_path/ewa_conf.html', EWA.LastMenuMsg);"
+			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa_conf_help.xml&amp;ITEMNAME=EWA_CONF.LF.design', EWA.LastMenuMsg);"
 			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/sql.png" mid="601"
-			mtext="配置文件创建(ewa_conf.xml)" mtext_enus="Create ewa_confi.xml" pid="60" />
+			mtext="ewa_conf.xml 配置" mtext_enus="Create a ewa_conf.xml" pid="60" />
 
 		<Menu mcmd="" mid="602" mtext="\-" mtext_enus="\-" pid="60" />
 		<Menu

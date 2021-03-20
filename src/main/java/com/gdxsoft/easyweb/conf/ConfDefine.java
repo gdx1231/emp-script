@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.define.EwaConfHelpHSqlServer;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 
@@ -53,7 +52,6 @@ public class ConfDefine {
 		if (!INST.define) {
 			return;
 		}
-		EwaConfHelpHSqlServer.INSTANCE.ping();
 		// the ewa-conf-help hsqldb data path
 		/*
 		 * INST.ewaConfHelpDbPath = item.getAttribute("ewaConfHelpDbPath"); if

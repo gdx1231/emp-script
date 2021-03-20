@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+	id="my_project_id" version="3.1">
+	<display-name>My Project Name</display-name>
+
+	<!-- handle ewa configuration and load on startup -->
+	<servlet>
+		<servlet-name>EwaMain</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.script.servlets.ServletMain</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EwaMain</servlet-name>
+		<url-pattern>/EWA_STYLE/cgi-bin/index.jsp</url-pattern>
+		<url-pattern>/ewa</url-pattern>
+	</servlet-mapping>
+
+	<!-- upload -->
+	<servlet>
+		<servlet-name>EwaUpload</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.script.servlets.ServletUpload</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EwaUpload</servlet-name>
+		<url-pattern>/EWA_STYLE/cgi-bin/_up_/index.jsp</url-pattern>
+	</servlet-mapping>
+
+	<!-- valid code -->
+	<servlet>
+		<servlet-name>EwaCode</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.script.servlets.ServletCode</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EwaCode</servlet-name>
+		<url-pattern>/EWA_STYLE/cgi-bin/_co_/index.jsp</url-pattern>
+	</servlet-mapping>
+
+	<!-- global js/ dhtml editor images ... -->
+	<servlet>
+		<servlet-name>EwaResources</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.script.servlets.ServletResources</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EwaResources</servlet-name>
+		<url-pattern>/EWA_STYLE/cgi-bin/_re_/index.jsp</url-pattern>
+		<url-pattern>/r.ewa</url-pattern>
+		<url-pattern>/r1.ewa</url-pattern>
+	</servlet-mapping>
+
+	<!-- tree status -->
+	<servlet>
+		<servlet-name>EwaStatus</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.script.servlets.ServletStatus</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EwaStatus</servlet-name>
+		<url-pattern>/EWA_STYLE/cgi-bin/_st_/index.jsp</url-pattern>
+	</servlet-mapping>
+
+	<!-- ewa error -->
+	<servlet>
+		<servlet-name>EwaError</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.script.servlets.ServletError</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EwaError</servlet-name>
+		<url-pattern>/EWA_STYLE/cgi-bin/_er_/index.jsp</url-pattern>
+	</servlet-mapping>
+
+	<!-- workflow -->
+	<servlet>
+		<servlet-name>EwaWorkflow</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.script.servlets.ServletWorkflow</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EwaWorkflow</servlet-name>
+		<url-pattern>/EWA_STYLE/cgi-bin/_wf_/index.jsp</url-pattern>
+	</servlet-mapping>
+
+	<!-- static resources -->
+	<servlet>
+		<servlet-name>EwaStaticResources</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.resources.Servlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EwaStaticResources</servlet-name>
+		<url-pattern>/EmpScriptV2/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- DEFINE -->
+	<servlet>
+		<servlet-name>EwaDefineXml</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.define.servlets.ServletXml</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>EwaDefineIndex</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.define.servlets.ServletIndex</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>EwaDefineGroup</servlet-name>
+		<servlet-class>com.gdxsoft.easyweb.define.servlets.ServletGroup</servlet-class>
+	</servlet>
+
+
+	<servlet-mapping>
+		<servlet-name>EwaDefineXml</servlet-name>
+		<url-pattern>/EWA_DEFINE/cgi-bin/xml/index.jsp</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>EwaDefineIndex</servlet-name>
+		<url-pattern>/EWA_DEFINE/index.jsp</url-pattern>
+	</servlet-mapping>
+
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>default.html</welcome-file>
+		<welcome-file>default.htm</welcome-file>
+		<welcome-file>default.jsp</welcome-file>
+	</welcome-file-list>
+</web-app>

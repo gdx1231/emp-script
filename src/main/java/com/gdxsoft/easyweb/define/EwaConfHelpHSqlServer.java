@@ -10,19 +10,20 @@ import com.gdxsoft.easyweb.utils.msnet.MTableStr;
 
 public class EwaConfHelpHSqlServer {
 	private static Logger LOGGER = LoggerFactory.getLogger(EwaConfHelpHSqlServer.class);
-	public static EwaConfHelpHSqlServer INSTANCE;
 
+	private static EwaConfHelpHSqlServer INSTANCE;
 	public static final String CONN_STR = "ewaconfhelp"; // 必须小写
 
-	static {
-		LOGGER.info("start EwaConfHelpHSqlServer INIT");
-
-		INSTANCE = new EwaConfHelpHSqlServer();
-		EwaConfHelpHSqlServer.init();
-
+	public static EwaConfHelpHSqlServer getInstance() {
+		if (INSTANCE != null) {
+			return INSTANCE;
+		}
+		
+		init();
+	
 		int count = INSTANCE.ping();
 		LOGGER.info("EwaConfHelpHSqlServer.EWA_CONF count=" + count);
-
+		return INSTANCE;
 	}
 
 	/**
@@ -57,6 +58,8 @@ public class EwaConfHelpHSqlServer {
 			poolCfg.setPool(poolParams);
 			c1.put(CONN_STR, poolCfg);
 
+			EwaConfHelpHSqlServer o = new EwaConfHelpHSqlServer();
+			INSTANCE = o;
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
 		}
