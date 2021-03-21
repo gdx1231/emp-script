@@ -17,8 +17,9 @@ public class ConfSecurity {
 	private String iv;
 	private String aad;
 	private int macBitSize = 128;
-
+	private boolean defaultConf;
 	private boolean base64Encoded;
+	private String name;
 
 	/**
 	 * Create a new symmetric instance (AES/DES)
@@ -94,6 +95,22 @@ public class ConfSecurity {
 
 	public void setBase64Encoded(boolean base64Encoded) {
 		this.base64Encoded = base64Encoded;
+	}
+
+	public boolean isDefaultConf() {
+		return defaultConf;
+	}
+
+	public void setDefaultConf(boolean defaultConf) {
+		this.defaultConf = defaultConf;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }
