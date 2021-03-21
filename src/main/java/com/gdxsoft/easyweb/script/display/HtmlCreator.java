@@ -827,7 +827,7 @@ public class HtmlCreator {
 							img_path = this.getRequestValue().getString("rv_ewa_style_path");
 						}
 						if (img_path == null || img_path.trim().length() == 0) {
-							img_path = this.getRequestValue().getContextPath();
+							img_path = "/EmpScriptV2"; // the default static url prefix
 						}
 
 						StringBuilder sber = new StringBuilder();

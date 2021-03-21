@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -137,15 +138,17 @@ public class FrameList extends FrameBase implements IFrame {
 		String pageDescription = super.getPageJsTitle();
 
 		MStr sJs = new MStr();
-		sJs.al("EWA.LANG='" + lang.toLowerCase() + "'; //page language");
-		sJs.al("EWA.RV_STATIC_PATH=\"" + rv.s("rv_ewa_style_path") + "\";");
-
+		sJs.al("EWA.LANG='" + lang.toLowerCase() + "';");
+		String ewaPath = rv.s("rv_ewa_style_path");
+		if(StringUtils.isBlank(ewaPath)) {
+			ewaPath = "/EmpScriptV2"; // default static url prefix
+		}
+		sJs.al("EWA.RV_STATIC_PATH = \"" + ewaPath + "\";");
 		// String funName = "EWA_F" + gunid + "()";
 		sJs.al("(function() {");
 		// sJs.al("function "+funName+" {");
 		sJs.al(" var o1 = EWA.F.FOS['" + gunid + "'] = new EWA_ListFrameClass();");
-		sJs.al(" o1._Id = '" + gunid + "';");
-		sJs.al(" o1.Id = '" + gunid + "';");
+		sJs.al(" o1._Id = o1.Id = '" + gunid + "';");
 		sJs.al(" o1.Title = \"" + pageDescription + "\";");
 		sJs.al(" o1.Init(EWA_ITEMS_XML_" + gunid + ");");
 

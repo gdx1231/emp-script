@@ -5,6 +5,8 @@ package com.gdxsoft.easyweb.script.display.items;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.gdxsoft.easyweb.script.template.SkinFrame;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
@@ -106,8 +108,8 @@ public class ItemImage extends ItemBase {
 		if (us.count() == 0) {
 			return null;
 		}
-		
-		//是否后加载
+
+		// 是否后加载
 		boolean isLazyLoad = false;
 		try {
 			if (super.getUserXItem().testName("ImageDefault")) {
@@ -123,33 +125,35 @@ public class ItemImage extends ItemBase {
 		} catch (Exception err) {
 		}
 
-		String p = super.getHtmlClass().getSysParas().getRequestValue().s("RV_EWA_STYLE_PATH");
+		// ewa_conf.xml 自定义的 静态文件前缀 
+		String rvEwaStylePath = super.getHtmlClass().getSysParas().getRequestValue().s("RV_EWA_STYLE_PATH");
+		if (StringUtils.isBlank(rvEwaStylePath)) {
+			rvEwaStylePath = "/EmpScriptV2";
+		}
 		Object a = super.getHtmlClass().getItemValues().getTableValue(super.getUserXItem());
 		if (a == null) {
 			String default_img = getImageDefult();
 			// 替换成默认图
 			html = html.replace(SkinFrame.TAG_VAL, default_img);
-			
-			//后加载先不显示背景图
+
+			// 后加载先不显示背景图
 			String background = isLazyLoad ? "" : "background-image:url('" + default_img + "')";
 			html = html.replace("{__BACKGROUND_IMAGE__}", background);
-			html = html.replace("{__IS_LAZY_LOAD__}", isLazyLoad + ""); 
+			html = html.replace("{__IS_LAZY_LOAD__}", isLazyLoad + "");
 			return html;
 		}
 
-		
 		String t = a.getClass().toString();
 		byte[] test = new byte[1];
 		String image = "";
 		if (t.equalsIgnoreCase(test.getClass().toString())) {// binary
 			try {
 				byte[] images = (byte[]) a;
-				String imgPath = getImage(p, images);
-
+				String imgPath;
 				if (images == null || images.length == 0) {
 					imgPath = this.getImageDefult(); // 默认图
 				} else {
-					imgPath = getImage(p, images);
+					imgPath = getImage(rvEwaStylePath, images);
 				}
 				image = imgPath;
 			} catch (Exception e) {
@@ -158,27 +162,28 @@ public class ItemImage extends ItemBase {
 		} else {
 			String v = "";
 			String a1 = a.toString();
-			if (a1.length() > p.length() && a1.substring(0, p.length()).equals(p)) {
+			if (a1.length() > rvEwaStylePath.length()
+					&& a1.substring(0, rvEwaStylePath.length()).equals(rvEwaStylePath)) {
 				v = a1;
 			} else {
 				if (a1.startsWith("http:") || a1.startsWith("https:")) {
-					v = a1 ;
+					v = a1;
 				} else {
-					a1 = a1.replace("\\", "/"); //替换windows 目录分隔符 2018-02-13
+					a1 = a1.replace("\\", "/"); // 替换windows 目录分隔符 2018-02-13
 					if (UPath.PATH_IMG_CACHE.startsWith("@")) {// 用户定义路径
 						v = a1;
 					} else {
-						v = p + "/" + a1;
+						v = rvEwaStylePath + "/" + a1;
 					}
 				}
 			}
 			image = v;
 		}
 		html = html.replace(SkinFrame.TAG_VAL, image);
-		//后加载先不显示背景图
+		// 后加载先不显示背景图
 		String background = isLazyLoad ? "" : "background-image:url('" + image + "')";
 		html = html.replace("{__BACKGROUND_IMAGE__}", background);
-		html = html.replace("{__IS_LAZY_LOAD__}", isLazyLoad + ""); 
+		html = html.replace("{__IS_LAZY_LOAD__}", isLazyLoad + "");
 
 		return html;
 	}
@@ -190,6 +195,9 @@ public class ItemImage extends ItemBase {
 	 */
 	private String getImageDefult() {
 		String p = super.getHtmlClass().getSysParas().getRequestValue().s("RV_EWA_STYLE_PATH");
+		if (StringUtils.isBlank(p)) {
+			p = "/EmpScriptV2"; // default static url
+		}
 		String path = p + "/EWA_STYLE/images/pic_no.jpg";
 		try {
 			if (super.getUserXItem().testName("ImageDefault")) {

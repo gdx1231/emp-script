@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +96,9 @@ public class ServletGroup extends HttpServlet {
 		response.setCharacterEncoding("utf-8");
 
 		String ewaPath = rv.s("rv_ewa_style_path");
+		if(StringUtils.isBlank(ewaPath)) {
+			ewaPath = "/EmpScriptV2"; // default static url prefix
+		}
 		MStr sbHead = new MStr();
 		sbHead.al("<html>");
 		sbHead.al("<head>");
