@@ -62,6 +62,7 @@ public class ServletMain extends HttpServlet {
 		}
 		try {
 			ConfSecurities inst = ConfSecurities.getInstance();
+			LOGGER.info("ConfSecurities inst");
 			if (inst == null) {
 				LOGGER.warn("The security not defined in ewa_conf.xml");
 			}
