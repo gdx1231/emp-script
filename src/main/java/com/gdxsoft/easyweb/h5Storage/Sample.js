@@ -1,5 +1,5 @@
 var EWA_Res = {
-	storeageName : "COMPETITION2019",
+	storeageName : "APP001",
 	defaultQ : {
 		css : {
 			"default" : {}
