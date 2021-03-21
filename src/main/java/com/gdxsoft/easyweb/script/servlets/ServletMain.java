@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.gdxsoft.easyweb.EwaWebPage;
 import com.gdxsoft.easyweb.conf.ConfAdmins;
 import com.gdxsoft.easyweb.conf.ConfDefine;
+import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.define.EwaConfHelpHSqlServer;
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.script.RequestValue;
@@ -59,7 +60,14 @@ public class ServletMain extends HttpServlet {
 		} catch (Exception e) {
 			LOGGER.error("EwaGlobals instance,", e.getMessage());
 		}
-
+		try {
+			ConfSecurities inst = ConfSecurities.getInstance();
+			if (inst == null) {
+				LOGGER.warn("The security not defined in ewa_conf.xml");
+			}
+		} catch (Exception e) {
+			LOGGER.error("ConfSecurities instance,", e.getMessage());
+		}
 		try {
 			if (ConfDefine.isAllowDefine()) {
 				// start the EWA_DEFINE instances
