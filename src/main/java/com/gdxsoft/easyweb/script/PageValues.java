@@ -2,6 +2,7 @@ package com.gdxsoft.easyweb.script;
 
 import java.util.Iterator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,10 +120,13 @@ public class PageValues {
 	 */
 	public void addValue(PageValue pv) {
 
-		// if(pv.getName().equals("HOM_ROOM_TYPE")){
-		// int aaa=0;
-		// aaa++;
-		// }
+		if ("EWA_MTYPE".equals(pv.getName())) {
+			String val = pv.getStringValue();
+			// 避免非法字符例如，',",< ...
+			if (!StringUtils.isAlpha(val) || val.length() > 1) {
+				val = "";
+			}
+		}
 		MTable mt = (MTable) this._Values.get(pv.getPVTag());
 		pv.setTag(pv.getPVTag().toString());
 
