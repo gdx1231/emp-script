@@ -945,9 +945,9 @@ public class UObjectValue {
 						t += " 00:00:00.000";
 					}
 					if (t.indexOf("/") > 0) {// 美国日期格式
-						v[0] = Utils.getDate(t, "MM/dd/yyyy hh:mm:ss.SSS");
+						v[0] = Utils.getDate(t, "MM/dd/yyyy HH:mm:ss.SSS");
 					} else {
-						v[0] = Utils.getDate(t, "yyyy-MM-dd hh:mm:ss.SSS");
+						v[0] = Utils.getDate(t, "yyyy-MM-dd HH:mm:ss.SSS");
 					}
 				} catch (Exception err) {
 					LOGGER.error(err.getLocalizedMessage(), err);
