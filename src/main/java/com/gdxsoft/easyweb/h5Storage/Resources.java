@@ -1,11 +1,16 @@
 package com.gdxsoft.easyweb.h5Storage;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -14,9 +19,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFileCheck;
 import com.gdxsoft.easyweb.utils.UXml;
+import com.gdxsoft.easyweb.utils.Utils;
 
 /**
  * 利用h5缓存css/js资源
@@ -25,7 +32,7 @@ import com.gdxsoft.easyweb.utils.UXml;
  *
  */
 public class Resources {
-	private static Logger LOOGER = LoggerFactory.getLogger(Resources.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(Resources.class);
 	private static HashMap<String, Resources> INSTS = new HashMap<String, Resources>();
 
 	/**
@@ -41,7 +48,7 @@ public class Resources {
 			if (isCfgFileChanged) {
 				// 配置文件发生变化，重新创建
 				rs = newInstance(cfgFilePath);
-				LOOGER.info("文件变化，新实例" + cfgFilePath);
+				LOGGER.info("文件变化，新实例" + cfgFilePath);
 			} else {
 				rs = INSTS.get(cfgFilePath);
 				// 距离上次扫描时间 15s
@@ -53,7 +60,7 @@ public class Resources {
 		} else {
 			// 创建新实例
 			rs = newInstance(cfgFilePath);
-			LOOGER.info("新实例" + cfgFilePath);
+			LOGGER.info("新实例" + cfgFilePath);
 		}
 		return rs;
 	}
@@ -73,6 +80,8 @@ public class Resources {
 	private String cfgFilePath_; // 资源配置文件物理路径
 	private HashMap<String, Tag> resources_; // 所有资源
 	private long lastScan_; // 上次扫描时间
+
+	private HashMap<String, Resource> mapOfJarResources = new HashMap<>();
 
 	/**
 	 * 对象实例化
@@ -183,18 +192,35 @@ public class Resources {
 	 * @param r
 	 */
 	public Resource scanFile(Resource r) {
-		File f = new File(r.getAllPath());
-		if (!f.exists()) {
-			r.setHash("DELETED");
-			r.setContent("/* 文件被删除了" + r.getPath() + " */");
-			LOOGER.info("文件被删除了" + r.getPath());
-		}
-		String h = this.getFileHash(f);
-		if (r.getHash().equals(h)) {
-			return null;
-		}
-		LOOGER.info("CHANGED: " + r.getAllPath());
+		if (r.isJarResource()) {
+			if (!mapOfJarResources.containsKey(r.getId())) {
+				// notify the client delete this resource
+				r.setHash("DELETED");
+				r.setContent("/* the resource " + r.getPath() + " has been deleted */");
+				LOGGER.info(r.getContent());
+				return r;
+			}
 
+			if (r.getHash().equals(mapOfJarResources.get(r.getId()).getHash())) {
+				return null;
+			}
+
+		} else {
+			File f = new File(r.getAllPath());
+			if (!f.exists()) {
+				// notify the client delete this resource
+				r.setHash("DELETED");
+				r.setContent("/* the file has been deleted. " + r.getPath() + " */");
+				LOGGER.info(r.getContent());
+				return r;
+			}
+
+			String h = this.getFileHash(f);
+			if (r.getHash().equals(h)) {
+				return null;
+			}
+			LOGGER.info("CHANGED: " + r.getAllPath());
+		}
 		// 克隆一个对象
 		Resource r1 = new Resource();
 		r1.setAllPath(r.getAllPath());
@@ -202,11 +228,15 @@ public class Resources {
 		r1.setId(r.getId());
 		r1.setPath(r.getPath());
 		r1.setSource(r.getSource());
+		r1.setJarResource(r.isJarResource());
 
-		r1.setHash(h);
-		String cnt = this.readFileText(r1.getAllPath());
-		r1.setContent(cnt);
-
+		if (r1.isJarResource()) {
+			Resource ref = mapOfJarResources.get(r.getId());
+			r1.setContent(ref.getContent());
+			r1.setHash(ref.getHash());
+		} else {
+			this.loadResourceContent(r1);
+		}
 		return r1;
 	}
 
@@ -217,7 +247,7 @@ public class Resources {
 			cnt = UFile.readFileText(filePath);
 		} catch (Exception err) {
 			cnt = "/* ERROR: " + err.getMessage() + " */";
-			LOOGER.info("ERROR " + err);
+			LOGGER.info("ERROR " + err);
 		}
 
 		return cnt;
@@ -227,7 +257,9 @@ public class Resources {
 	 * 初始化资源
 	 */
 	private void initResources() {
-		resources_ = new HashMap<String, Tag>();
+		resources_ = new HashMap<>();
+		mapOfJarResources = new HashMap<>();
+
 		Document doc;
 		try {
 			doc = UXml.retDocument(this.cfgFilePath_);
@@ -267,28 +299,7 @@ public class Resources {
 			NodeList nls = eleGroup.getElementsByTagName("r");
 			for (int m = 0; m < nls.getLength(); m++) {
 				Element ele = (Element) nls.item(m);
-				String path = ele.getTextContent().trim();
-				String allPath = root + path;
-				String id = ele.getAttribute("id");
-				String cnt;
-				File f1 = new File(allPath);
-				if (f1.exists()) {
-					cnt = this.readFileText(allPath);
-					// 替换字体下载的绝对路径
-					if (id.indexOf("fontawesome") >= 0) {
-						cnt = cnt.replace("url('../", "url('/EmpScriptV2/thrid-party/font-awesome/font-awesome-4.7.0/");
-					}
-
-				} else {
-					cnt = "/* File not exists " + path + " */";
-					LOOGER.info("File not exists. " + allPath);
-				}
-				Resource r = new Resource();
-				r.setId(id);
-				r.setContent(cnt);
-				r.setHash(getFileHash(f1));
-				r.setAllPath(f1.getAbsolutePath());
-
+				Resource r = this.loadContent(root, ele);
 				// 总顺序号
 				r.setIndex(index);
 				index++;
@@ -297,6 +308,80 @@ public class Resources {
 		}
 
 		this.lastScan_ = System.currentTimeMillis();
+	}
+
+	private void loadResourceContent(Resource r) {
+		String cnt;
+		if (r.isJarResource()) {
+			String pathResource = r.getAllPath();
+			URL url = this.getClass().getClassLoader().getResource(pathResource);
+			if (url == null) {
+				cnt = "The resource not exists. " + pathResource;
+				LOGGER.error("The resource not exists. " + pathResource);
+			} else {
+				try {
+					cnt = IOUtils.toString(url, StandardCharsets.UTF_8);
+				} catch (IOException e) {
+					cnt = "/* Invalid read the resource, " + pathResource + e.getMessage() + " */";
+					LOGGER.error(cnt);
+				}
+				r.setContent(cnt);
+			}
+			r.setHash(Utils.md5(cnt));
+
+			// jar 文件中的资源不会变化，一次性读取到缓存中
+			mapOfJarResources.put(r.getId(), r);
+
+		} else {
+			String allPath = r.getAllPath();
+			File f1 = new File(allPath);
+			if (f1.exists()) {
+				cnt = this.readFileText(allPath);
+
+			} else {
+				cnt = "/* File not exists " + r.getPath() + " */";
+				LOGGER.error(cnt);
+			}
+			r.setHash(this.getFileHash(f1));
+			r.setContent(cnt);
+		}
+
+		// 替换字体下载的绝对路径
+		if (r.getId().indexOf("fontawesome") >= 0) {
+			RequestValue rv = new RequestValue();
+			// ewa_conf.xml 自定义的 静态文件前缀
+			String rvEwaStylePath = rv.s("RV_EWA_STYLE_PATH");
+			if (StringUtils.isBlank(rvEwaStylePath)) {
+				rvEwaStylePath = "/EmpScriptV2";
+			}
+			cnt = cnt.replace("url('../", "url('" + rvEwaStylePath + "/third-party/font-awesome/font-awesome-4.7.0/");
+			r.setContent(cnt);
+		}
+	}
+
+	private Resource loadContent(String root, Element ele) {
+		String path = ele.getTextContent().trim();
+		String id = ele.getAttribute("id");
+
+		Resource r = new Resource();
+		r.setId(id);
+		if (root.startsWith("resource:")) {
+			r.setJarResource(true);
+
+			String pathResource = root.substring("resource:".length()) + "/" + path;
+			pathResource = pathResource.replace("\\", "/").replace("//", "/").replace("//", "/");
+			r.setAllPath(pathResource);
+
+			this.loadResourceContent(r);
+		} else {
+			r.setJarResource(false);
+
+			String allPath = root + path;
+			r.setAllPath(allPath);
+			this.loadResourceContent(r);
+		}
+
+		return r;
 	}
 
 	/**

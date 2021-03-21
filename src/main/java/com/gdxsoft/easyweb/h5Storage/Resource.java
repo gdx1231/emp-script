@@ -12,9 +12,11 @@ public class Resource {
 
 	private String allPath_;
 	private String path_;
-	
+
+	private boolean jarResource;
+
 	private int index_;
-	
+
 	public String getId() {
 		return id_;
 	}
@@ -57,6 +59,7 @@ public class Resource {
 
 	/**
 	 * 完整的物理路径
+	 * 
 	 * @return
 	 */
 	public String getAllPath() {
@@ -65,6 +68,7 @@ public class Resource {
 
 	/**
 	 * 完整的物理路径
+	 * 
 	 * @param allPath
 	 */
 	public void setAllPath(String allPath) {
@@ -73,6 +77,7 @@ public class Resource {
 
 	/**
 	 * 相对路径
+	 * 
 	 * @return
 	 */
 	public String getPath() {
@@ -81,6 +86,7 @@ public class Resource {
 
 	/**
 	 * 相对路径
+	 * 
 	 * @param path
 	 */
 	public void setPath(String path) {
@@ -89,6 +95,7 @@ public class Resource {
 
 	/**
 	 * 资源的顺序号
+	 * 
 	 * @return
 	 */
 	public int getIndex() {
@@ -97,6 +104,19 @@ public class Resource {
 
 	public void setIndex(int index) {
 		this.index_ = index;
+	}
+
+	/**
+	 * 是否是资源文件
+	 * 
+	 * @return
+	 */
+	public boolean isJarResource() {
+		return jarResource;
+	}
+
+	public void setJarResource(boolean jarResource) {
+		this.jarResource = jarResource;
 	}
 
 }
