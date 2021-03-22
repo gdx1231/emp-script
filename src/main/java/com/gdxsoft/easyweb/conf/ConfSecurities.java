@@ -48,6 +48,12 @@ public class ConfSecurities {
 
 		NodeList nl = UPath.getCfgXmlDoc().getElementsByTagName("security");
 		if (nl.getLength() == 0) {
+			ConfSecurity compatible = getCompatibleConf();
+			if (compatible != null) {
+				sps.defaultSecurity = compatible;
+				sps.lst.add(compatible);
+				LOGGER.info("Added the security conf -> {}, {} ", compatible.getName(), compatible.getAlgorithm());
+			}
 			return sps;
 		}
 
@@ -56,18 +62,19 @@ public class ConfSecurities {
 
 			ConfSecurity sp = createConfSecurity(item);
 			if (sp == null) {
-				LOGGER.info("Skip the security conf -> " + UXml.asXml(item));
+				LOGGER.info("Skip the security conf -> {} " + UXml.asXml(item));
 				continue;
 			}
 
-			LOGGER.info("Added the security conf -> ", sp.getName(), ",", sp.getAlgorithm());
+			LOGGER.info("Added the security conf -> {}, {} ", sp.getName(), sp.getAlgorithm());
 
 			sps.getLst().add(sp);
 
 			if (sp.isDefaultConf()) {
 				sps.defaultSecurity = sp;
 				initSymmetricalDefault(sp);
-				LOGGER.info("Set the default Symmetrical Security -> ", sps.defaultSecurity.getName(), ",", sps.defaultSecurity.getAlgorithm());
+				LOGGER.info("Set the default Symmetrical Security -> {}, {} ", sps.defaultSecurity.getName(),
+						sps.defaultSecurity.getAlgorithm());
 			}
 
 		}
@@ -76,7 +83,8 @@ public class ConfSecurities {
 			// set the first conf is default
 			sps.defaultSecurity = sps.lst.get(0);
 			initSymmetricalDefault(sps.defaultSecurity);
-			LOGGER.info("Set the default Symmetrical Security -> ", sps.defaultSecurity.getName(), ",", sps.defaultSecurity.getAlgorithm());
+			LOGGER.info("Set the default Symmetrical Security -> {}, {} ", sps.defaultSecurity.getName(),
+					sps.defaultSecurity.getAlgorithm());
 		}
 
 		if (sps.defaultSecurity.getAlgorithm().equalsIgnoreCase("aes")) {
@@ -85,12 +93,35 @@ public class ConfSecurities {
 				ConfSecurity sp = sps.lst.get(i);
 				if (sp.getAlgorithm().equalsIgnoreCase("des")) {
 					initSymmetricalDefault(sp);
-					LOGGER.info("Set the default UDES -> ", sp.getName(), ",", sp.getAlgorithm());
+					LOGGER.info("Set the default UDES -> {}, {} ", sp.getName(), sp.getAlgorithm());
 					break;
 				}
 			}
 		}
 		return sps;
+	}
+
+	private static ConfSecurity getCompatibleConf() {
+		// <!-- Cookie加密解密DES -->
+		// <des desKeyValue="xxxxxxxxxxxxxxxxx" desIvValue="xxxsdskd" />
+		NodeList nl = UPath.getCfgXmlDoc().getElementsByTagName("des");
+		if (nl.getLength() == 0) {
+			return null;
+		}
+
+		Element item = (Element) nl.item(0);
+		String key = item.getAttribute("desKeyValue");
+		String iv = item.getAttribute("xxxsdskd");
+
+		ConfSecurity conf = new ConfSecurity();
+		conf.setAlgorithm("des");
+		conf.setDefaultConf(true);
+		conf.setKey(key);
+		conf.setIv(iv);
+		conf.setName("OLD_CONF_DES should be replacement with AES-GCM");
+		UDes.initDefaultKey(key, iv);
+		return conf;
+
 	}
 
 	private static void initSymmetricalDefault(ConfSecurity sp) {
