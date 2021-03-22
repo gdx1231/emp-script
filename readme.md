@@ -1,5 +1,12 @@
 # Easy Web Application 
 
+
+
 ```
-v1.0.3
+<!-- https://mvnrepository.com/artifact/com.gdxsoft.easyweb/emp-script -->
+<dependency>
+    <groupId>com.gdxsoft.easyweb</groupId>
+    <artifactId>emp-script</artifactId>
+    <version>1.0.3</version>
+</dependency>
 ```
