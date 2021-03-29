@@ -49,7 +49,7 @@ public class SystemXmlUtils {
 
 			URL url = SystemXmlUtils.class.getResource(path);
 			if (url == null) {
-				throw new Exception("The file " + url + " not exists");
+				throw new Exception("The file " + path + " not exists");
 			}
 			return IOUtils.toString(url, StandardCharsets.UTF_8);
 
