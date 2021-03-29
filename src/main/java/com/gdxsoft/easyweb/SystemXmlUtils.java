@@ -47,7 +47,7 @@ public class SystemXmlUtils {
 				path = path.replace("//", "/");
 			}
 
-			URL url = SystemXmlUtils.class.getClassLoader().getResource(path);
+			URL url = SystemXmlUtils.class.getResource(path);
 			if (url == null) {
 				throw new Exception("The file " + url + " not exists");
 			}
