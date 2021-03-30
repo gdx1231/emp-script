@@ -94,6 +94,9 @@ public class UserDirXmls {
 	public Dirs getCfgsByJdbc(ConfScriptPath scriptPath) {
 		JdbcConfigOperation op = new JdbcConfigOperation(scriptPath);
 		DTTable tb = op.getJdbcCfgDirs();
+		if (tb.getCount() == 0) {
+			return null;
+		}
 		Dirs dirs = new Dirs();
 
 		HashMap<String, String> map = new HashMap<String, String>();
@@ -136,8 +139,10 @@ public class UserDirXmls {
 				continue;
 			} else if (sp.isJdbc()) { // jdbc
 				dirs = this.getCfgsByJdbc(sp);
-				ArrayList<Dir> a = dirs.getDirs();
-				al.addAll(a);
+				if (dirs != null) {
+					ArrayList<Dir> a = dirs.getDirs();
+					al.addAll(a);
+				}
 			} else { // file
 
 				String scriptPath = sp.getPath();

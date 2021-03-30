@@ -11,6 +11,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.JSONObject;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -20,16 +21,19 @@ import org.w3c.dom.NodeList;
 import com.gdxsoft.easyweb.datasource.ConnectionConfig;
 import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
 import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UserXml;
 import com.gdxsoft.easyweb.define.UserXmls;
 import com.gdxsoft.easyweb.define.database.Table;
 import com.gdxsoft.easyweb.define.database.maps.MapFunction;
 import com.gdxsoft.easyweb.define.database.maps.MapFunctions;
 import com.gdxsoft.easyweb.define.database.maps.Maps;
+import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
+import com.gdxsoft.easyweb.utils.Utils;
 
 public class Exchange {
 	public static final String XML_CFG = "cfg.xml";
@@ -120,24 +124,28 @@ public class Exchange {
 	 * @return 生成文件的路径
 	 * @throws IOException
 	 */
-	public String importCfgs(String path) throws IOException {
-		String path1 = UPath.getScriptPath() + "/" + path.replace("|", "/");
-		File f = new File(path1);
-		int m = 0;
-		File fRen = new File(path1);
-		while (fRen.exists()) {
-			String f1 = f.getPath() + "." + m + ".bak";
-			fRen = new File(f1);
-			m++;
-			if (m > 100) {
-				break;
+	public String importCfgs(String path, IUpdateXml ux) throws IOException {
+		if (ux.getScriptPath().isJdbc()) {
+		} else {
+			String path1 = ux.getScriptPath().getPath() + UserConfig.filterXmlName(path);
+			File f = new File(path1);
+
+			int m = 0;
+			File fRen = new File(path1);
+			while (fRen.exists()) {
+				String f1 = f.getPath() + "." + m + ".bak";
+				fRen = new File(f1);
+				m++;
+				if (m > 100) {
+					break;
+				}
 			}
-		}
-		if (!fRen.exists()) {
-			f.renameTo(fRen);
+			if (!fRen.exists()) {
+				f.renameTo(fRen);
+			}
+			UFile.buildPaths(f.getParent());
 		}
 
-		UFile.buildPaths(f.getParent());
 		String xml = UXml.asXmlAll(this._DocCfg);
 		xml = xml.replace("{#XMLNAME}", path);
 		this._DocCfg = UXml.asDocument(xml);
@@ -180,8 +188,10 @@ public class Exchange {
 			System.err.println(e.getMessage());
 		}
 		al.clear();
-		UXml.saveDocument(this._DocCfg, f.getPath());
-		return f.getPath();
+		File temp = File.createTempFile(Utils.getGuid(), "xml");
+		UXml.saveDocument(this._DocCfg, temp.getAbsolutePath());
+		JSONObject rst = ux.importXml("", path, temp.getAbsolutePath());
+		return rst.toString();
 	}
 
 	private Document readXmlDoc(String fileName) throws Exception {

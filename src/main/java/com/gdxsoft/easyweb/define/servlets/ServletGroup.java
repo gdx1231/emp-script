@@ -9,18 +9,29 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import com.gdxsoft.easyweb.conf.ConfDefine;
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPaths;
+import com.gdxsoft.easyweb.datasource.ConnectionConfig;
+import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
 import com.gdxsoft.easyweb.define.DefineAcl;
+import com.gdxsoft.easyweb.define.IUpdateXml;
+import com.gdxsoft.easyweb.define.UpdateXmlImpl;
+import com.gdxsoft.easyweb.define.UpdateXmlJdbcImpl;
 import com.gdxsoft.easyweb.define.group.Exchange;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UPath;
+import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ServletGroup extends HttpServlet {
@@ -96,7 +107,7 @@ public class ServletGroup extends HttpServlet {
 		response.setCharacterEncoding("utf-8");
 
 		String ewaPath = rv.s("rv_ewa_style_path");
-		if(StringUtils.isBlank(ewaPath)) {
+		if (StringUtils.isBlank(ewaPath)) {
 			ewaPath = "/EmpScriptV2"; // default static url prefix
 		}
 		MStr sbHead = new MStr();
@@ -160,6 +171,101 @@ public class ServletGroup extends HttpServlet {
 			response.getWriter().println("<h2><a target=_blank href='./?type=dl&id=" + id + "'>");
 			response.getWriter().println(s2);
 			response.getWriter().println("</a></h2>");
+		} else if (oType.equalsIgnoreCase("step1")) {
+			StringBuilder sb1 = new StringBuilder();
+			sb1.append("<option></option>");
+			ConnectionConfigs cfgs;
+			MStr sb = new MStr();
+			try {
+				cfgs = ConnectionConfigs.instance();
+				for (int i = 0; i < cfgs.size(); i++) {
+					ConnectionConfig cfg = cfgs.getConfig(i);
+					sb1.append("<option value='" + cfg.getName() + "'>" + cfg.getName() + "  (" + cfg.getType() + ", "
+							+ cfg.getConnectionString() + ")</option>");
+				}
+
+			} catch (ParserConfigurationException e) {
+				sb.al(e.getMessage());
+			} catch (SAXException e) {
+				sb.al(e.getMessage());
+			}
+
+			ConfScriptPaths sps = ConfScriptPaths.getInstance();
+			StringBuilder sb2 = new StringBuilder();
+			for (int i = 0; i < sps.getLst().size(); i++) {
+				ConfScriptPath sp = sps.getLst().get(i);
+				if (sp.isReadOnly()) {
+					continue;
+				}
+				sb2.append("<option value='" + sp.getName() + "'>" + sp.getName() + "(" + sp.getPath() + ")</option>");
+			}
+			sb2.append("</select>");
+
+			sb.al("<div align=center><h1>设定导入参数</h1></div>");
+			sb.al("<form action=\"./?TYPE=step2\" method=post>");
+			sb.al("<table bgcolor='#cdcdcd' width=600 border=0 cellpadding=1 cellspacing=1 align=center>");
+			sb.al("	<tr bgcolor=white><td>组件Id：</td>");
+			sb.al("<td>" + Utils.textToInputValue(request.getParameter("id")) + "<input type=hidden name=id value=\""
+					+ Utils.textToInputValue(request.getParameter("id")) + "\">");
+			sb.al("</td></tr>");
+			sb.al("<tr bgcolor=white><td>目标数据源：</td><td>");
+
+			sb.al("<select name=datasource>" + sb1.toString() + "</select>");
+			sb.al("</td></tr>");
+
+			sb.al("<tr bgcolor=white><td>选择ScriptPath：</td><td>");
+			sb.al("<select name='script_path'>" + sb2.toString() + "</select>");
+			sb.al("</td></tr>");
+
+			sb.al("<tr bgcolor=white><td>保存文件：（采用“|test|abc.xml”格式）</td>");
+			sb.al("<td><input type=text name=xmlfile></td></tr>");
+
+			sb.al("<tr bgcolor=white><td colspan=2>");
+			sb.al("<input type=submit value='确定'>");
+			sb.al("</td></tr></table></form>");
+			response.getWriter().println(sb.toString());
+		} else if (oType.equalsIgnoreCase("step2")) {
+			MStr sb = new MStr();
+			String script_path = rv.s("script_path").trim();
+			ConfScriptPaths sps = ConfScriptPaths.getInstance();
+			ConfScriptPath sp = sps.getScriptPath(script_path);
+			
+			IUpdateXml ux =null;
+			if(sp.isReadOnly()) {
+				response.getWriter().println( Utils.textToInputValue(script_path) +" is read only!");
+				return;
+			}
+			if(sp.isJdbc()) {
+				ux = new UpdateXmlJdbcImpl(sp);
+			} else if(sp.isResources()) {
+				
+			} else {
+				ux = new UpdateXmlImpl(sp);
+			}
+			
+			if(ux == null) {
+				response.getWriter().println("Null parameter script_path: "+ Utils.textToInputValue(script_path) +"");
+				return;
+			}
+			
+			String datasource = request.getParameter("datasource").trim();
+			String xmlfile = request.getParameter("xmlfile").trim();
+			String id = request.getParameter("id").trim();
+			Exchange g1 = new Exchange(id, datasource);
+
+			try {
+				g1.importGroup();
+				String s = "";
+				s = g1.importTableAndData();
+				sb.al(s);
+				sb.al("<hr>" + g1.importReses());
+				sb.al("<hr>\r\n导入到：" + g1.importCfgs(xmlfile, ux));
+			} catch (Exception e) {
+				sb.al(e.getMessage());
+			}
+			response.getWriter().println("<pre>");
+			response.getWriter().println(sb.toString());
+			response.getWriter().println("</pre>");
 		}
 
 		response.getWriter().println("</body></html>");
@@ -180,8 +286,7 @@ public class ServletGroup extends HttpServlet {
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and
-	 * copyright.
+	 * Returns information about the servlet, such as author, version, and copyright.
 	 * 
 	 * @return String information about this servlet
 	 */

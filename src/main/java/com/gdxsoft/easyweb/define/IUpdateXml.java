@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
+import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 
 public interface IUpdateXml {
@@ -60,7 +61,7 @@ public interface IUpdateXml {
 
 	boolean renameItem(String xmlName, String itemName, String newItemName);
 
-	boolean renameXmlFile(String xmlNameAndPath, String newXmlNameWithoutPath) ;
+	boolean renameXmlFile(String xmlNameAndPath, String newXmlNameWithoutPath);
 
 	boolean renamePath(String pathName, String newPathNameWithoutPath);
 
@@ -114,4 +115,9 @@ public interface IUpdateXml {
 
 	void batchUpdate(String itemNames, String paraName, String paraValue);
 
+	ConfScriptPath getScriptPath();
+
+	void setXmlFilePath(String xmlFilePath);
+
+	String getXmlFilePath();
 }

@@ -17,6 +17,8 @@ import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.datasource.ConnectionConfig;
+import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.define.ConfigUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
@@ -32,16 +34,35 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	private static final long serialVersionUID = -1054775785967204755L;
 	private static Logger LOGER = LoggerFactory.getLogger(JdbcConfigOperation.class);
 	private ConfScriptPath scriptPath;
+	private Boolean hsqlDb = null;
 
 	public JdbcConfigOperation(ConfScriptPath scriptPath) {
 		this.scriptPath = scriptPath;
 	}
 
 	/**
+	 * Check if the database type is HSQLDB
+	 * 
+	 * @return true=HSQLDB/false=not
+	 */
+	public boolean isHsqlDb() {
+		if (hsqlDb == null) {
+			try {
+				ConnectionConfig conf = ConnectionConfigs.instance().get(this.getJdbcConfigName().toLowerCase());
+				hsqlDb = "HSQLDB".equalsIgnoreCase(conf.getType());
+			} catch (Exception e) {
+				hsqlDb = false;
+			}
+		}
+		return hsqlDb.booleanValue();
+
+	}
+
+	/**
 	 * Check if the xmlPath is in the database
 	 * 
 	 * @param xmlPath
-	 * @return
+	 * @return true=in/false=not
 	 */
 	public boolean checkPathExists(String xmlPath) {
 		String xmlPath1 = UserConfig.filterXmlNameByJdbc(xmlPath);
@@ -58,10 +79,10 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	}
 
 	/**
-	 * 导入文件
+	 * Import the XML configuration
 	 * 
-	 * @param xml
-	 * @param xmlname
+	 * @param xml     The XML configuration file
+	 * @param xmlname The imported name
 	 * @throws Exception
 	 */
 	public void importXml(File xml, String xmlname) throws Exception {
@@ -69,12 +90,22 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		Document doc = UXml.asDocument(xmlStr);
 
 		xmlname = UserConfig.filterXmlNameByJdbc(xmlname);
+		RequestValue rv = new RequestValue();
+		rv.addValue("XMLNAME", xmlname);
+		String sql0 = "select 1 from EWA_CFG_TREE where XMLNAME = @xmlname";
+		DTTable tb = this.getJdbcTable(sql0, rv);
 
+		// create tree dir
+		if (tb.getCount() == 0) {
+			String sql = "insert into EWA_CFG_TREE (XMLNAME) values( @XMLNAME)";
+			this.update(sql, rv);
+		}
 		String cdate = Utils.getDateTimeString(new Date(xml.lastModified()));
 
 		importXml(xmlStr, xmlname, cdate, cdate);
 
 		NodeList nl = doc.getElementsByTagName("EasyWebTemplate");
+		this.createXml(xmlStr, cdate);
 		for (int i = 0; i < nl.getLength(); i++) {
 			Element ele = (Element) nl.item(i);
 			importXmlEle(ele, xmlname);
@@ -452,7 +483,11 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("select HASH_CODE, UPDATE_DATE, MD5, DATASOURCE, CLASS_ACL, CLASS_LOG, ADM_LID from EWA_CFG ");
-		sb.append(" where xmlname=@xmlNameJdbc and itemname=@itemname ");
+		if(this.isHsqlDb()) {
+			sb.append(" where xmlname=@xmlNameJdbc and lower(itemname) = lower(@itemname) ");
+		} else {
+			sb.append(" where xmlname=@xmlNameJdbc and itemname=@itemname ");
+		}
 		String sql = sb.toString();
 
 		DTTable tb = getJdbcTable(sql, rv);
@@ -793,10 +828,9 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 					continue;
 				}
 				/*
-				 * ??? int xmlhashCode = xmlData.hashCode(); if (xmlhashCode != hashCode) {
-				 * String sqlup = "update EWA_CFG set HASH_CODE=" + xmlhashCode +
-				 * " where  ITEMNAME='' and xmlname='" + xmlName.replace("'", "''") + "'";
-				 * update(sqlup, null); }
+				 * ??? int xmlhashCode = xmlData.hashCode(); if (xmlhashCode != hashCode) { String sqlup =
+				 * "update EWA_CFG set HASH_CODE=" + xmlhashCode + " where  ITEMNAME='' and xmlname='" +
+				 * xmlName.replace("'", "''") + "'"; update(sqlup, null); }
 				 */
 				saveToCache(xmlName, xmlData, UPDATE_DATE == -1 ? CREATE_DATE : UPDATE_DATE, hashCode, md5);
 			}
@@ -893,7 +927,11 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
 		rv.addOrUpdateValue("itemname", itemname);
 
-		sb.append("select 1 a from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
+		if(this.isHsqlDb()) {
+			sb.append("select 1 a from EWA_CFG where xmlname=@xmlNameJdbc and lower(itemname)=lower(@itemname)");
+		} else {
+			sb.append("select 1 a from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
+		}
 		String sql = sb.toString();
 
 		DTTable tb = getJdbcTable(sql, rv);
@@ -915,7 +953,11 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		rv.addOrUpdateValue("itemname", itemname);
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("select * from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
+		if(this.isHsqlDb()) {
+			sb.append("select * from EWA_CFG where xmlname=@xmlNameJdbc and lower(itemname)= lower(@itemname)");
+		} else {
+			sb.append("select * from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
+		}
 		String sql = sb.toString();
 
 		return getJdbcTable(sql, rv);
@@ -972,6 +1014,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 */
 	public DTTable getJdbcTable(String sql, RequestValue rv) {
 		String configName = getJdbcConfigName();
+
 		DTTable tb = DTTable.getJdbcTable(sql, configName, rv);
 
 		return tb;
