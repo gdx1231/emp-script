@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.gdxsoft.easyweb</groupId>
 	<artifactId>emp-script</artifactId>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 	<name>Easy Web Application Builder</name>
 	<description>Web系统快速成型系统</description>
 
@@ -233,11 +233,11 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.github.spyhunter99/jdbf -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.github.spyhunter99</groupId>
 			<artifactId>jdbf</artifactId>
 			<version>2.2.1</version>
-		</dependency>
+		</dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
 		<dependency>
