@@ -9,10 +9,10 @@
 /.idea/
 /.settings/
 /.project
-/zoom-integrate.iml
 /.factorypath
 /.classpath
 /.vscode
 ewa_conf.xml
 ewa_conf_console.xml
 *.lck
+*.iml
