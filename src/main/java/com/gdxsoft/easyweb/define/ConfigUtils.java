@@ -53,7 +53,7 @@ public class ConfigUtils {
 	/**
 	 * 获取Xml操作对象
 	 * 
-	 * @param xmlName
+	 * @param xmlPath
 	 * @return
 	 */
 	public static IUpdateXml getUpdateXmlByPath(String xmlPath) {

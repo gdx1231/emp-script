@@ -35,9 +35,11 @@
 			<comments>MIT license</comments>
 		</license>
 	</licenses>
+	<!-- The scm url must start with 'scm:' -->
 	<scm>
 		<url>https://github.com/gdx1231/emp-script</url>
-		<connection>https://github.com/gdx1231/emp-script.git</connection>
+		<connection>scm:git:https://github.com/gdx1231/emp-script</connection>
+		<developerConnection>scm:git:git@github.com:gdx1231/emp-script.git</developerConnection>
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -105,7 +107,22 @@
 					</additionalOptions>
 				</configuration>
 			</plugin>
+
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-project-info-reports-plugin</artifactId>
+					<version>2.7</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 	<dependencies>
 		<dependency>
