@@ -30,7 +30,7 @@ import com.gdxsoft.easyweb.utils.msnet.MTable;
  */
 public class UObjectValue {
 
-	public static Map<String, Method> GLOBL_CACHED = new ConcurrentHashMap<>();
+	public static Map<String, Integer> GLOBL_CACHED = new ConcurrentHashMap<>();
 	private static Logger LOGGER = LoggerFactory.getLogger(UObjectValue.class);
 
 	/**
@@ -583,7 +583,7 @@ public class UObjectValue {
 		try {
 			c = Class.forName(className);
 		} catch (Exception e) {
-			LOGGER.error("", e);
+			LOGGER.error("loadClass " + className + ": " + e.getMessage());
 			return null;
 		}
 		Constructor<?> constructor = this.getConstructor(c, constructorParameters);
@@ -616,16 +616,16 @@ public class UObjectValue {
 			this._LastErrMsg = null;
 			return instance;
 		} catch (IllegalArgumentException e) {
-			LOGGER.error("", e);
+			LOGGER.error(e.getMessage());
 			this._LastErrMsg = e.getCause().getMessage();
 		} catch (InstantiationException e) {
-			LOGGER.error("", e);
+			LOGGER.error(e.getMessage());
 			this._LastErrMsg = e.getCause().getMessage();
 		} catch (IllegalAccessException e) {
 			// 转到静态方法
 			return c;
 		} catch (InvocationTargetException e) {
-			LOGGER.error("", e);
+			LOGGER.error(e.getMessage());
 			this._LastErrMsg = e.getCause().getMessage();
 		}
 		return null;
@@ -806,7 +806,7 @@ public class UObjectValue {
 					notFinds.add(kv);
 				}
 			} catch (Exception err) {
-				LOGGER.warn(key, val, err.getMessage());
+				LOGGER.warn(key + "," + val + ": " + err.getMessage());
 			}
 
 		}
@@ -835,7 +835,7 @@ public class UObjectValue {
 					notFinds.add(kv);
 				}
 			} catch (Exception err) {
-				LOGGER.warn(name, val, err.getMessage());
+				LOGGER.warn(name + "," + val + ": " + err.getMessage());
 			}
 		}
 		this._NotFinds = notFinds;
@@ -928,7 +928,7 @@ public class UObjectValue {
 						v[0] = intval; // int
 					}
 				} catch (Exception err) {
-					LOGGER.error(err.getLocalizedMessage(), err);
+					LOGGER.error(err.getLocalizedMessage() + ":" + err);
 					return false;
 				}
 
@@ -995,15 +995,15 @@ public class UObjectValue {
 			}
 			if (GLOBL_CACHED.containsKey(key)) {
 				LOGGER.debug("Found the method '" + methodName + "' from the GLOBL_CACHED.");
-				return GLOBL_CACHED.get(key);
+				return methods[GLOBL_CACHED.get(key)];
 			}
 		}
-		List<Method> found = new ArrayList<Method>();
+		List<Integer> found = new ArrayList<>();
 		String m1 = methodName.trim();
 		for (int i = 0; i < methods.length; i++) {
 			Method method = methods[i];
 			if (method.getName().equalsIgnoreCase(m1) && method.getParameterTypes().length == params.length) {
-				found.add(method);
+				found.add(i);
 			}
 		}
 		if (found.size() == 0) {// not found
@@ -1014,16 +1014,17 @@ public class UObjectValue {
 			if (key != null) {
 				GLOBL_CACHED.put(key, found.get(0));
 			}
-			return found.get(0);
+			return methods[found.get(0)];
 		}
 
 		LOGGER.debug("Found the method '" + methodName + "' " + found.size() + " times.");
 
-		int maxMaaches = -1;
-		Method methodMatched = null;
+		int maxMaches = -1;
+		int methodMatched = -1;
 		// Overloading methods
 		for (int i = 0; i < found.size(); i++) {
-			Method method = found.get(i);
+			int methodIndex = found.get(i);
+			Method method = methods[methodIndex];
 			Class<?>[] paraTypes = method.getParameterTypes();
 			int matcheLenth = 0;
 			for (int m = 0; m < paraTypes.length; m++) {
@@ -1033,18 +1034,22 @@ public class UObjectValue {
 			}
 			if (matcheLenth == paraTypes.length) {
 				if (key != null) {
-					GLOBL_CACHED.put(key, method);
+					GLOBL_CACHED.put(key, methodIndex);
 				}
 				return method;
 			}
-			if (matcheLenth > maxMaaches) {// the maximum matches
-				methodMatched = method;
+			if (matcheLenth > maxMaches) {// the maximum matches
+				methodMatched = methodIndex;
 			}
 		}
-		if (key != null) {
-			GLOBL_CACHED.put(key, methodMatched);
+		if (methodMatched != -1) {
+			if (key != null) {
+				GLOBL_CACHED.put(key, methodMatched);
+			}
+			return methods[methodMatched];
+		} else {
+			return null;
 		}
-		return methodMatched;
 	}
 
 	/**
