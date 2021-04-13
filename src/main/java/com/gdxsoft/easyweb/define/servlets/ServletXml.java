@@ -101,8 +101,12 @@ public class ServletXml extends HttpServlet {
 	 */
 	private IUpdateXml getUpdateXml(String xmlName, String admId) {
 		IUpdateXml o = ConfigUtils.getUpdateXml(xmlName);
-		o.setAdmin(admId);
-
+		if (o == null) {
+			o = ConfigUtils.getUpdateXmlByPath(xmlName);
+		}
+		if (o != null) {
+			o.setAdmin(admId);
+		}
 		return o;
 
 	}
@@ -607,8 +611,7 @@ public class ServletXml extends HttpServlet {
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and
-	 * copyright.
+	 * Returns information about the servlet, such as author, version, and copyright.
 	 *
 	 * @return String information about this servlet
 	 */
