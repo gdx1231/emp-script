@@ -12,6 +12,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import com.gdxsoft.easyweb.utils.UXml;
+import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MTableStr;
 
 /**
@@ -25,7 +26,7 @@ public class ConnectionConfig {
 	private String _ConnectionString;
 	private String _SchemaName;
 	private MTableStr _Pool;
-	private boolean hiddenInDefine; // 在设定中隐含此数据库连接
+	private boolean hiddenInDefine; // 在数据库类映射中隐含此数据库连接
 	public ConnectionConfig(Node node) {
 		this.setObj(node);
 	}
@@ -39,6 +40,9 @@ public class ConnectionConfig {
 		this._Type = params.get("type");
 		this._SchemaName = params.get("schemaname");
 
+		// 2021-04-11 在数据库类映射中隐含此数据库连接
+		this.hiddenInDefine = Utils.cvtBool( params.containsKey("hiddenindefine"));
+		
 		if (StringUtils.isBlank(_Name) || StringUtils.isBlank(_ConnectionString) || StringUtils.isBlank(_Type)
 				|| StringUtils.isBlank(_SchemaName)) {
 			LOGGER.warn("Invalid database cfg -> " + UXml.asXml(node));

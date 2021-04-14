@@ -41,6 +41,10 @@ public class UserTableViewXmls {
 
 		for (String key : this._Cfgs.keySet()) {
 			ConnectionConfig cfg = this._Cfgs.get(key);
+			if (cfg.isHiddenInDefine()) {
+				// 隐含
+				continue;
+			}
 			Element node1 = doc.createElement("Row");
 			node1.setAttribute("Name", cfg.getName() + "|" + cfg.getType());
 			node1.setAttribute("Key", "DATABASE;" + cfg.getName());
@@ -70,13 +74,18 @@ public class UserTableViewXmls {
 	}
 
 	public String getTableXml(String configName, String keyPrefix) {
-		_Schema = new Schema(configName);
-		_Tables = _Schema.getTables();
-
 		Document doc = UXml.createBlankDocument();
 		Element eRoot = doc.createElement("TableViewList");
 		eRoot.setAttribute("DataRow", "Row");
 		doc.appendChild(eRoot);
+
+		ConnectionConfig cfg = this._Cfgs.get(configName);
+		if (cfg == null || cfg.isHiddenInDefine()) {
+			// 隐含
+			UXml.asXmlAll(doc);
+		}
+		_Schema = new Schema(configName);
+		_Tables = _Schema.getTables();
 
 		Element node = doc.createElement("Row");
 		node.setAttribute("Name", "Table");
@@ -116,6 +125,11 @@ public class UserTableViewXmls {
 	}
 
 	public String getFieldsXml(String configName, String tableName) {
+		ConnectionConfig cfg = this._Cfgs.get(configName);
+		if (cfg == null || cfg.isHiddenInDefine()) {
+			// 隐含
+			return "";
+		}
 		_Schema = new Schema(configName);
 		_Tables = _Schema.getTables();
 		Table table = _Tables.get(tableName);
@@ -131,6 +145,11 @@ public class UserTableViewXmls {
 	 * @param des        描述
 	 */
 	public void modifyColumnDescription(String configName, String tableName, String columnName, String des) {
+		ConnectionConfig cfg = this._Cfgs.get(configName);
+		if (cfg == null || cfg.isHiddenInDefine()) {
+			// 隐含
+			return;
+		}
 		DataConnection cnn = new DataConnection();
 		cnn.setConfigName(configName);
 		if (cnn.getDatabaseType().equalsIgnoreCase("mssql")) {
