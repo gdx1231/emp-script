@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConnectionConfig;
+import com.gdxsoft.easyweb.conf.ConnectionConfigs;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.PageValue;

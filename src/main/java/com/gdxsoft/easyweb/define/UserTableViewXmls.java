@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import com.gdxsoft.easyweb.datasource.ConnectionConfig;
-import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
+import com.gdxsoft.easyweb.conf.ConnectionConfig;
+import com.gdxsoft.easyweb.conf.ConnectionConfigs;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.define.database.DataXml;
 import com.gdxsoft.easyweb.define.database.Field;

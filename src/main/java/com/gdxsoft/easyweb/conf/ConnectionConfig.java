@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.gdxsoft.easyweb.datasource;
+package com.gdxsoft.easyweb.conf;
 
 import java.util.Map;
 
@@ -25,7 +25,7 @@ public class ConnectionConfig {
 	private String _ConnectionString;
 	private String _SchemaName;
 	private MTableStr _Pool;
-	
+	private boolean hiddenInDefine; // 在设定中隐含此数据库连接
 	public ConnectionConfig(Node node) {
 		this.setObj(node);
 	}
@@ -120,6 +120,14 @@ public class ConnectionConfig {
 	 */
 	public void setPool(MTableStr pool) {
 		_Pool = pool;
+	}
+
+	public boolean isHiddenInDefine() {
+		return hiddenInDefine;
+	}
+
+	public void setHiddenInDefine(boolean hiddenInDefine) {
+		this.hiddenInDefine = hiddenInDefine;
 	}
 
 }

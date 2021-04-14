@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.gdxsoft.easyweb.conf.ConnectionConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.gdxsoft.easyweb.datasource;
+package com.gdxsoft.easyweb.conf;
 
 import java.io.IOException;
 import java.util.ArrayList;

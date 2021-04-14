@@ -18,8 +18,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.gdxsoft.easyweb.datasource.ConnectionConfig;
-import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
+import com.gdxsoft.easyweb.conf.ConnectionConfig;
+import com.gdxsoft.easyweb.conf.ConnectionConfigs;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UserXml;

@@ -3,9 +3,9 @@ package com.gdxsoft.easyweb.define;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConnectionConfig;
+import com.gdxsoft.easyweb.conf.ConnectionConfigs;
 import com.gdxsoft.easyweb.data.DTTable;
-import com.gdxsoft.easyweb.datasource.ConnectionConfig;
-import com.gdxsoft.easyweb.datasource.ConnectionConfigs;
 import com.gdxsoft.easyweb.utils.msnet.MTableStr;
 
 public class EwaConfHelpHSqlServer {
