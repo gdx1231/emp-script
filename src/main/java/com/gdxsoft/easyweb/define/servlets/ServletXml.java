@@ -395,12 +395,10 @@ public class ServletXml extends HttpServlet {
 	 * @return
 	 */
 	private String handleEwaConf() {
-		String ewa_conf_file = UPath.getRealPath() + "/ewa_conf.xml";
 		JSONObject rst = new JSONObject();
 		rst.put("RST", true);
-		String xml;
 		try {
-			xml = UFile.readFileText(ewa_conf_file);
+			String xml = UXml.asXml(UPath.getCfgXmlDoc());
 			rst.put("XML", xml);
 		} catch (Exception e) {
 			rst.put("RST", false);
