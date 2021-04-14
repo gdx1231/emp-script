@@ -285,7 +285,12 @@ public class ServletXml extends HttpServlet {
 		String itemName = rv.getString("ITEMNAME");
 		try {
 			IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
-			String xml = up.queryItemXml(itemName);
+			String xml;
+			if(up == null) {
+				xml="<root/>";
+			} else {
+				xml = up.queryItemXml(itemName);
+			}
 			s.a("window._CFG_ITEM=\"");
 			s.a(Utils.textToJscript(xml));
 			s.al("\";");
