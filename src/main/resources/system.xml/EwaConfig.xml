@@ -1,80 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <EasyWebConfig>
 	<Frames>
-		<Frame Name="Frame"
-			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameFrame"
+		<Frame Name="Frame" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameFrame"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionFrame">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="输入修改界面" />
 				<Set Lang="enus" Info="Frame" />
 			</DescriptionSet>
 		</Frame>
-		<Frame Name="ListFrame"
-			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameList"
+		<Frame Name="ListFrame" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameList"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionListFrame">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="表格" />
 				<Set Lang="enus" Info="List Show" />
 			</DescriptionSet>
 		</Frame>
-		<Frame Name="Grid"
-			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameGrid"
+		<Frame Name="Grid" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameGrid"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionListFrame">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="网格显示" />
 				<Set Lang="enus" Info="Grid Show" />
 			</DescriptionSet>
 		</Frame>
-		<Frame Name="Tree"
-			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameTree"
+		<Frame Name="Tree" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameTree"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionTree">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="树" />
 				<Set Lang="enus" Info="Tree" />
 			</DescriptionSet>
 		</Frame>
-		<Frame Name="Menu"
-			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameMenu"
+		<Frame Name="Menu" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameMenu"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionFrame">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="菜单" />
 				<Set Lang="enus" Info="Menu" />
 			</DescriptionSet>
 		</Frame>
-		<Frame Name="MultiGrid"
-			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameMultiGrid"
+		<Frame Name="MultiGrid" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameMultiGrid"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionMultiGrid">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="多维表格" />
 				<Set Lang="enus" Info="MultiGrid" />
 			</DescriptionSet>
 		</Frame>
-		<Frame Name="Logic"
-			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameLogic"
+		<Frame Name="Logic" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameLogic"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionFrame">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="逻辑" />
 				<Set Lang="enus" Info="Logic" />
 			</DescriptionSet>
 		</Frame>
-		<Frame Name="Report"
-			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameReport"
+		<Frame Name="Report" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameReport"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionFrame">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="逻辑" />
 				<Set Lang="enus" Info="Logic" />
 			</DescriptionSet>
 		</Frame>
-		<Frame Name="Combine"
-			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameCombine"
+		<Frame Name="Combine" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameCombine"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionCombine">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="组合" />
 				<Set Lang="enus" Info="Combine" />
 			</DescriptionSet>
 		</Frame>
-		<Frame Name="Complex"
-			FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameComplex"
+		<Frame Name="Complex" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameComplex"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionComplex">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="复合页面" />
@@ -102,8 +92,7 @@
 					</DescriptionSet>
 				</UIGroup>
 			</UIGroups>
-			<XItem Name="text" HtmlTag="input$text" BaseType="1"
-				UIGroup="Standard"
+			<XItem Name="text" HtmlTag="input$text" BaseType="1" UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex ,DispEnc, Name, DescriptionSet, AttributeSet,EventSet, Events, DataItem, IsMustInput, 
 				MaxMinLength,MaxMinValue,OrderSearch, InitValue, Valid, Style, ParentStyle,VaildEx">
@@ -116,8 +105,7 @@
 					<Html><![CDATA[<input autocomplete="off" type="text" class="EWA_INPUT" value="{__EWA_VAL__}" !!/>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="textarea" HtmlTag="textarea" BaseType="1"
-				UIGroup="Standard"
+			<XItem Name="textarea" HtmlTag="textarea" BaseType="1" UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DispEnc, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle, IsMustInput, MaxMinLength">
@@ -131,8 +119,7 @@
 ]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="span" HtmlTag="span" BaseType="1"
-				UIGroup="Standard"
+			<XItem Name="span" HtmlTag="span" BaseType="1" UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name,InitValue, DescriptionSet, 
 					Style, ParentStyle, AttributeSet,EventSet,DispEnc,
@@ -145,8 +132,7 @@
 					<Html><![CDATA[<span class="IX_SPAN" !!>{__EWA_VAL__}</span>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="file" HtmlTag="input$file" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="file" HtmlTag="input$file" BaseType="0" Deprecated="1" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet, DataItem,
 			Style, ParentStyle,IsMustInput,Upload">
@@ -167,10 +153,8 @@
 ]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="hidden" HtmlTag="input$hidden" BaseType="1"
-				UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
-				Parameters="DescriptionSet, Name, DataItem, InitValue">
+			<XItem Name="hidden" HtmlTag="input$hidden" BaseType="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase" Parameters="DescriptionSet, Name, DataItem, InitValue">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="隐含内容" />
 					<Set Lang="enus" Info="Hidden" />
@@ -179,8 +163,7 @@
 					<Html><![CDATA[<input type="hidden" value="{__EWA_VAL__}" !!/>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="password" HtmlTag="input$password" BaseType="1"
-				UIGroup="Standard"
+			<XItem Name="password" HtmlTag="input$password" BaseType="1" UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet, Attributes, Events,DataItem, IsMustInput,
 			Style, ParentStyle, MaxMinLength, Valid">
@@ -242,10 +225,8 @@ onclick="EWA.UI.Calendar.PopTime(this);"  value="{__EWA_VAL__}" !!/>
 
 				</Template>
 			</XItem>
-			<XItem Name="combo" HtmlTag="combo" IsRepeat="1"
-				UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
-				BaseType="1"
+			<XItem Name="combo" HtmlTag="combo" IsRepeat="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat" BaseType="1"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle, IsMustInput, InitValue, List">
 				<DescriptionSet>
@@ -370,10 +351,8 @@ $(function(){
 ]]></Repeat>
 				</Template>
 			</XItem>
-			<XItem Name="select" HtmlTag="select" IsRepeat="1"
-				UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
-				BaseType="1"
+			<XItem Name="select" HtmlTag="select" IsRepeat="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat" BaseType="1"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle, IsMustInput, InitValue, List, OrderSearch">
 				<DescriptionSet>
@@ -387,10 +366,8 @@ $(function(){
 ]]></Repeat>
 				</Template>
 			</XItem>
-			<XItem Name="checkbox" HtmlTag="input$checkbox" IsRepeat="1"
-				UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
-				BaseType="1"
+			<XItem Name="checkbox" HtmlTag="input$checkbox" IsRepeat="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat" BaseType="1"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle, IsMustInput, List">
 				<DescriptionSet>
@@ -406,8 +383,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 				</Template>
 			</XItem>
 			<XItem Name="switch" IsRepeat="1" UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
-				BaseType="1"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat" BaseType="1"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
 					Style, ParentStyle, EventSet,DataItem, IsMustInput,OrderSearch,List">
 				<DescriptionSet>
@@ -422,10 +398,8 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 					</Repeat>
 				</Template>
 			</XItem>
-			<XItem Name="radio" HtmlTag="input$radio" IsRepeat="1"
-				UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
-				BaseType="1"
+			<XItem Name="radio" HtmlTag="input$radio" IsRepeat="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat" BaseType="1"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
 					Style, ParentStyle, EventSet,DataItem, IsMustInput,List">
 				<DescriptionSet>
@@ -440,10 +414,8 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 					</Repeat>
 				</Template>
 			</XItem>
-			<XItem Name="checkboxgrid" UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
-				BaseType="1"
-				Parameters="Name, DescriptionSet, AttributeSet, EventSet,DataItem,
+			<XItem Name="checkboxgrid" UIGroup="Standard" ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				BaseType="1" Parameters="Name, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="用于列表的复选框" />
@@ -453,10 +425,8 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 					<Html><![CDATA[<input class="IX_CHECKBOX" type="checkbox" value="{__EWA_VAL__}" !! />]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="radiogrid" HtmlTag="input$radio" IsRepeat="1"
-				UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat"
-				BaseType="1"
+			<XItem Name="radiogrid" HtmlTag="input$radio" IsRepeat="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat" BaseType="1"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
 					Style, ParentStyle, EventSet,DataItem, IsMustInput,List">
 				<DescriptionSet>
@@ -491,8 +461,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 					<Html><![CDATA[<a class="ewa-anchor" href="@aHref" target="@aTarget" !!>{__EWA_VAL__}</a>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="linkButton" HtmlTag="" BaseType=""
-				UIGroup="Standard"
+			<XItem Name="linkButton" HtmlTag="" BaseType="" UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex, Name, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle, LinkButtonParas,OrderSearch, IsHtml,DataRef,XStyle">
@@ -504,8 +473,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 					<Html><![CDATA[<a class="ewa-anchor" href="javascript:void(0)" onclick="$(this).parentsUntil('tbody').find('input[id=@lkbButtonId]').trigger('click')" !!>{__EWA_VAL__}</a>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="droplist" HtmlTag="" BaseType="0"
-				UIGroup="Standard"
+			<XItem Name="droplist" HtmlTag="" BaseType="0" UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,IsMustInput,
 			Style, ParentStyle,Frame, DopListShow">
@@ -523,8 +491,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 ]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="submit" HtmlTag="input$submit" BaseType="1"
-				UIGroup="Standard"
+			<XItem Name="submit" HtmlTag="input$submit" BaseType="1" UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemButton"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet, Style, ParentStyle">
 				<DescriptionSet>
@@ -537,8 +504,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 ]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="button" HtmlTag="input$button" BaseType="1"
-				UIGroup="Standard"
+			<XItem Name="button" HtmlTag="input$button" BaseType="1" UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemButton"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, Style, ParentStyle, EventSet,OpenFrame,CallAction">
 				<DescriptionSet>
@@ -567,7 +533,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 
 
 
-			<XItem Name="dHtml" HtmlTag="" BaseType="0" UIGroup="Extend"
+			<XItem Name="dHtml" HtmlTag="" BaseType="0" UIGroup="Extend" Deprecated="1"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet, DataField, IsMustInput, MaxMinLength,
 				 Style, ParentStyle, Upload">
@@ -583,8 +549,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 ]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="dHtmlNoImages" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="dHtmlNoImages" HtmlTag="" BaseType="0" Deprecated="1" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet, DataField, IsMustInput, MaxMinLength,
 				 Style, ParentStyle">
@@ -632,8 +597,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 	width="100%" height="100%" frameborder="0"></iframe></div>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="h5upload" HtmlTag="input$file" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="h5upload" HtmlTag="input$file" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle,IsMustInput,Upload">
@@ -681,8 +645,7 @@ name="aaa" ref="h5u_@sys_frame_unid$@NAME"><span>{__EWA_DES__}</span></div></div
 ]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="h5TakePhoto" HtmlTag="input$file" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="h5TakePhoto" HtmlTag="input$file" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle,IsMustInput,Upload">
@@ -728,8 +691,7 @@ addEvent(window,'load', _EWA_h5takephoto_@sys_frame_unid$@NAME);
 </div>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="swffile" HtmlTag="input$file" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="swffile" HtmlTag="input$file" BaseType="0" Deprecated="1" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle,IsMustInput,Upload">
@@ -838,7 +800,7 @@ addEvent(window,'load',_EWA_@sys_frame_unid);
 <div id="fsUploadProgress"></div>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="image" HtmlTag="" BaseType="0" UIGroup="Extend"
+			<XItem Name="image" HtmlTag="" BaseType="0" UIGroup="Extend" Deprecated="1"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemImage"
 				Parameters="GroupIndex,Name,DescriptionSet,Attributes,Events,
 				DataItem,Style,ParentStyle,Upload">
@@ -1017,8 +979,7 @@ $(".ewa-valid-code-img").attr("src","@SYS_CONTEXTPATH/EWA_STYLE/cgi-bin/_co_/?xm
 					<Html><![CDATA[<div !!>{__EWA_VAL__}</div>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="userControl" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="userControl" HtmlTag="" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemUserControl"
 				Parameters="GroupIndex,OrderSearch,Name,XStyle,DataItem,UserControl,
 				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,IsMustInput">
@@ -1030,8 +991,7 @@ $(".ewa-valid-code-img").attr("src","@SYS_CONTEXTPATH/EWA_STYLE/cgi-bin/_co_/?xm
 					<Html><![CDATA[{__EWA_VAL__}]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="addressMap" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="addressMap" HtmlTag="" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,OrderSearch,Name,XStyle,DataItem,AddrMapRels,
 				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,IsMustInput">
@@ -1054,8 +1014,7 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 ]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="gridImage" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="gridImage" HtmlTag="" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemImage"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet,ImageDefault, EventSet, Style, ParentStyle, DataItem">
 				<DescriptionSet>
@@ -1067,8 +1026,7 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
   onclick='EWA_Utils.ShowPic(this);' !! />]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="gridBgImage" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="gridBgImage" HtmlTag="" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemImage"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet,ImageDefault, EventSet, Style, ParentStyle, DataItem">
 				<DescriptionSet>
@@ -1083,8 +1041,7 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
  !! href="javascript:void(0)" onclick='EWA_Utils.ShowBgPic(this);'  ></a>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="popselect" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="popselect" HtmlTag="" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="Group,Name, DescriptionSet, Style, ParentStyle, PopFrame">
 				<DescriptionSet>
@@ -1106,8 +1063,7 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 				</Template>
 			</XItem>
 
-			<XItem Name="ewaconfigitem" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="ewaconfigitem" HtmlTag="" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemEwaConfigItem"
 				Parameters="GroupIndex,Name, DescriptionSet, Style, ParentStyle, DefineFrame">
 				<DescriptionSet>
@@ -1119,10 +1075,8 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 					<Html><![CDATA[<DIV !!>{__EWA_VAL__}</DIV>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="MGAddField" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
-				Parameters="Name, DescriptionSet, MGAddField">
+			<XItem Name="MGAddField" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase" Parameters="Name, DescriptionSet, MGAddField">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="多维表格汇总" />
 					<Set Lang="enus" Info="Multi Grid" />
@@ -1131,10 +1085,8 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 					<Html><![CDATA[<DIV !!>{__EWA_VAL__}</DIV>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="LogicItem" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
-				Parameters="Name, DescriptionSet, LogicParas">
+			<XItem Name="LogicItem" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase" Parameters="Name, DescriptionSet, LogicParas">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="复合逻辑条目" />
 					<Set Lang="enus" Info="Logic" />
@@ -1144,10 +1096,8 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 				</Template>
 			</XItem>
 
-			<XItem Name="ReportItem" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
-				Parameters="Name, DescriptionSet, ReportCfg">
+			<XItem Name="ReportItem" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase" Parameters="Name, DescriptionSet, ReportCfg">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="报表" />
 					<Set Lang="enus" Info="Report" />
@@ -1157,8 +1107,7 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 				</Template>
 			</XItem>
 
-			<XItem Name="SwfDoc" HtmlTag="span" BaseType="1"
-				UIGroup="Extend"
+			<XItem Name="SwfDoc" HtmlTag="span" BaseType="1" Deprecated="1" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet,Style, ParentStyle, DataItem">
 				<DescriptionSet>
@@ -1196,8 +1145,7 @@ var fp = new FlexPaperViewer('@RV_EWA_STYLE_PATH/EWA_STYLE/images/flash/swfdoc/F
 ]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="SwfTakePhoto" HtmlTag="span" BaseType="1"
-				UIGroup="Extend"
+			<XItem Name="SwfTakePhoto" HtmlTag="span" BaseType="1" Deprecated="1" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet,Style, ParentStyle, DataItem">
 				<DescriptionSet>
@@ -1244,8 +1192,7 @@ var swfVersionStr = "11.1.0";
 				</Template>
 			</XItem>
 
-			<XItem Name="SqlEditor" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
+			<XItem Name="SqlEditor" HtmlTag="" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,OrderSearch,Name,
 				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,DataItem">
@@ -1360,8 +1307,7 @@ var swfVersionStr = "11.1.0";
 					<Html><![CDATA[<input type="text" class="EWA_INPUT" value="{__EWA_VAL__}" !!/>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="code2dNoImg" HtmlTag="" BaseType="1"
-				UIGroup="Standard"
+			<XItem Name="code2dNoImg" HtmlTag="" BaseType="1" UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex , Name, DescriptionSet, AttributeSet,EventSet, Events, DataItem, IsMustInput, 
 				MaxMinLength,MaxMinValue, InitValue, Valid, Style, ParentStyle,VaildEx">
@@ -1374,10 +1320,8 @@ var swfVersionStr = "11.1.0";
 				</Template>
 			</XItem>
 
-			<XItem Name="CombineItem" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemCombine"
-				Parameters="Name, DescriptionSet, CombineFrame">
+			<XItem Name="CombineItem" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemCombine" Parameters="Name, DescriptionSet, CombineFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="组合配置项目" />
 					<Set Lang="enus" Info="Combine Item" />
@@ -1388,10 +1332,8 @@ var swfVersionStr = "11.1.0";
 	 class='ewa_cb_caption' [$] style='float:left'>@DES</div></div><div class='ewa_cb_left' id='@Name' >{__EWA_VAL__}</div></div>]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="ComplexItem" HtmlTag="" BaseType="0"
-				UIGroup="Extend"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemComplex"
-				Parameters="Name, DescriptionSet, CombineFrame">
+			<XItem Name="ComplexItem" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemComplex" Parameters="Name, DescriptionSet, CombineFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="组合配置项目" />
 					<Set Lang="enus" Info="Combine Item" />
@@ -1439,15 +1381,13 @@ var swfVersionStr = "11.1.0";
 					</DescriptionSet>
 				</UIGroup>
 			</UIGroups>
-			<XItemParameter Name="Tag" IsShow="0" IsSet="0"
-				UIGroup="Main" IsMulti="1">
+			<XItemParameter Name="Tag" IsShow="0" IsSet="0" UIGroup="Main" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="对象类型" />
 					<Set Lang="enus" Info="Object Type" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="Tag" Type="ref"
-						CreateValue="this.Field.GetTag()" Ref="EasyWebConfig/XItems/XItem">
+					<Value Name="Tag" Type="ref" CreateValue="this.Field.GetTag()" Ref="EasyWebConfig/XItems/XItem">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="对象类型" />
 							<Set Lang="enus" Info="Object Type" />
@@ -1480,16 +1420,14 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="Name" IsSet="0" IsShow="1"
-				IsMulti="0" UIGroup="Main" Html=' id="@Name" name="@Name" '
-				IsJsShow="1">
+			<XItemParameter Name="Name" IsSet="0" IsShow="1" IsMulti="0" UIGroup="Main"
+				Html=' id="@Name" name="@Name" ' IsJsShow="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="名称" />
 					<Set Lang="enus" Info="Name" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="string" Name="Name"
-						CreateValue="this.Field.Name">
+					<Value Type="string" Name="Name" CreateValue="this.Field.Name">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="名称" />
 							<Set Lang="enus" Info="Name" />
@@ -1497,8 +1435,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="GroupIndex" IsSet="0" IsShow="1"
-				IsMulti="0" UIGroup="Main" Frames="Frame">
+			<XItemParameter Name="GroupIndex" IsSet="0" IsShow="1" IsMulti="0" UIGroup="Main" Frames="Frame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="分组索引" />
 					<Set Lang="enus" Info="Group Index" />
@@ -1512,8 +1449,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="InitValue" IsSet="0" IsShow="1"
-				UIGroup="Data" IsMulti="0">
+			<XItemParameter Name="InitValue" IsSet="0" IsShow="1" UIGroup="Data" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="初始化值" />
 					<Set Lang="enus" Info="Init Value" />
@@ -1527,22 +1463,19 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DescriptionSet" IsSet="1"
-				IsMulti="1" UIGroup="Main" IsShow="1" IsJsShow="1">
+			<XItemParameter Name="DescriptionSet" IsSet="1" IsMulti="1" UIGroup="Main" IsShow="1" IsJsShow="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="描述" />
 					<Set Lang="enus" Info="Description" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="Lang" Type="group" IsUnique="1"
-						CreateValue="EWA.LANG">
+					<Value Name="Lang" Type="group" IsUnique="1" CreateValue="EWA.LANG">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="国别" />
 							<Set Lang="enus" Info="Lang" />
 						</DescriptionSet>
 					</Value>
-					<Value Name="Info" Type="string"
-						CreateValue="this.Field.Description">
+					<Value Name="Info" Type="string" CreateValue="this.Field.Description">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="信息" />
 							<Set Lang="enus" Info="Info" />
@@ -1556,8 +1489,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="XStyle" IsSet="0" IsShow="1"
-				UIGroup="UI" IsJsShow="1" IsMulti="1">
+			<XItemParameter Name="XStyle" IsSet="0" IsShow="1" UIGroup="UI" IsJsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="标准样式" />
 					<Set Lang="enus" Info="St Style" />
@@ -1614,8 +1546,8 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="Style" IsSet="0" IsShow="1"
-				UIGroup="UI" IsJsShow="0" IsMulti="0" Html='style="@Style"'>
+			<XItemParameter Name="Style" IsSet="0" IsShow="1" UIGroup="UI" IsJsShow="0" IsMulti="0"
+				Html='style="@Style"'>
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="样式" />
 					<Set Lang="enus" Info="Style" />
@@ -1629,15 +1561,14 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="ParentStyle" IsSet="0"
-				IsShow="1" UIGroup="UI" IsMulti="0" Html='style="@ParentStyle"'>
+			<XItemParameter Name="ParentStyle" IsSet="0" IsShow="1" UIGroup="UI" IsMulti="0"
+				Html='style="@ParentStyle"'>
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="父体样式" />
 					<Set Lang="enus" Info="Parent Style" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="ParentStyle" Type="string"
-						CreateValue="this.Field.GetParentStyle()">
+					<Value Name="ParentStyle" Type="string" CreateValue="this.Field.GetParentStyle()">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="父体样式" />
 							<Set Lang="enus" Info="Parent Style" />
@@ -1645,8 +1576,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="AttributeSet" IsShow="1"
-				IsSet="1" UIGroup="Others" IsJsShow="0" IsMulti="1"
+			<XItemParameter Name="AttributeSet" IsShow="1" IsSet="1" UIGroup="Others" IsJsShow="0" IsMulti="1"
 				Html='@AttName="@AttValue"'>
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="属性值" />
@@ -1673,8 +1603,8 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="EventSet" IsSet="1" IsShow="1"
-				UIGroup="Others" IsMulti="1" Html='@EventName="@EventValue"'>
+			<XItemParameter Name="EventSet" IsSet="1" IsShow="1" UIGroup="Others" IsMulti="1"
+				Html='@EventName="@EventValue"'>
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="事件" />
 					<Set Lang="enus" Info="Events" />
@@ -1706,8 +1636,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="IsHtml" IsShow="1" IsSet="0"
-				UIGroup="UI" IsJsShow="0" IsMulti="0">
+			<XItemParameter Name="IsHtml" IsShow="1" IsSet="0" UIGroup="UI" IsJsShow="0" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="是否显示为HTML" />
 					<Set Lang="enus" Info="Is Html" />
@@ -1721,8 +1650,8 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="OrderSearch" IsShow="1"
-				IsSet="0" UIGroup="Data" IsMulti="1" IsJsShow="1" Frames="ListFrame">
+			<XItemParameter Name="OrderSearch" IsShow="1" IsSet="0" UIGroup="Data" IsMulti="1" IsJsShow="1"
+				Frames="ListFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="是否排序" />
 					<Set Lang="enus" Info="Order and Search" />
@@ -1791,18 +1720,14 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="MaxMinLength" IsSet="0"
-				IsShow="1" UIGroup="Valid" IsMulti="1" Html="maxLength='@MaxLength'"
-				IsJsShow="1">
+			<XItemParameter Name="MaxMinLength" IsSet="0" IsShow="1" UIGroup="Valid" IsMulti="1"
+				Html="maxLength='@MaxLength'" IsJsShow="1">
 				<DescriptionSet>
-					<Set Lang="zhcn" Info="最大最小长度"
-						Js="长度应在{MinLength}-{MaxLength}之间 " />
-					<Set Lang="enus" Info="Max &amp; Min length"
-						Js="length must in ({MinLength}-{MaxLength})" />
+					<Set Lang="zhcn" Info="最大最小长度" Js="长度应在{MinLength}-{MaxLength}之间 " />
+					<Set Lang="enus" Info="Max &amp; Min length" Js="length must in ({MinLength}-{MaxLength})" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="number" Name="MaxLength"
-						CreateValue="this.Field.Length">
+					<Value Type="number" Name="MaxLength" CreateValue="this.Field.Length">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="最大长度" />
 							<Set Lang="enus" Info="Max" />
@@ -1816,13 +1741,10 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="MaxMinValue" IsSet="0"
-				IsShow="1" UIGroup="Valid" IsMulti="1" IsJsShow="1">
+			<XItemParameter Name="MaxMinValue" IsSet="0" IsShow="1" UIGroup="Valid" IsMulti="1" IsJsShow="1">
 				<DescriptionSet>
-					<Set Lang="zhcn" Info="最大最小值"
-						Js="值应在({MinValue} - {MaxValue})之间" />
-					<Set Lang="enus" Info="Max &amp; Min Value"
-						Js="Value must in {MinValue} - {MinValue} " />
+					<Set Lang="zhcn" Info="最大最小值" Js="值应在({MinValue} - {MaxValue})之间" />
+					<Set Lang="enus" Info="Max &amp; Min Value" Js="Value must in {MinValue} - {MinValue} " />
 				</DescriptionSet>
 				<Values>
 					<Value Type="number" Name="MaxValue">
@@ -1840,15 +1762,13 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="IsMustInput" IsSet="0"
-				IsShow="1" UIGroup="Valid" IsMulti="0" IsJsShow="1">
+			<XItemParameter Name="IsMustInput" IsSet="0" IsShow="1" UIGroup="Valid" IsMulti="0" IsJsShow="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="必输项" Js="*" />
 					<Set Lang="enus" Info="Must input" Js="*" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="group" Name="IsMustInput"
-						CreateValue="this.Field.MustInput">
+					<Value Type="group" Name="IsMustInput" CreateValue="this.Field.MustInput">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="是否必须输入" />
 							<Set Lang="enus" Info="Must input" />
@@ -1856,22 +1776,19 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DataItem" IsSet="0" IsShow="1"
-				UIGroup="Data" IsMulti="1" IsJsShow="1">
+			<XItemParameter Name="DataItem" IsSet="0" IsShow="1" UIGroup="Data" IsMulti="1" IsJsShow="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="数据项" />
 					<Set Lang="enus" Info="Data Item" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="group" Name="DataType"
-						CreateValue="this.Field.GetType()">
+					<Value Type="group" Name="DataType" CreateValue="this.Field.GetType()">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="数据类型" />
 							<Set Lang="enus" Info="Data Type" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="DataField" IsNotJsShow="1"
-						CreateValue="this.Field.Name">
+					<Value Type="string" Name="DataField" IsNotJsShow="1" CreateValue="this.Field.Name">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="映射字段" />
 							<Set Lang="enus" Info="Data Field" />
@@ -1884,8 +1801,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 							<Set Lang="enus" Info="Translation" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="TransTarget"
-						Ref="EasyWebTemplate/XItems/XItem">
+					<Value Type="ref" Name="TransTarget" Ref="EasyWebTemplate/XItems/XItem">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="翻译到" />
 							<Set Lang="enus" Info="Translation Target" />
@@ -1903,15 +1819,13 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 							<Set Lang="enus" Info="Is Encrypt" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Ref="EwaGlobal.xml|Globals/Valids/Valid"
-						Name="Valid">
+					<Value Type="ref" Ref="EwaGlobal.xml|Globals/Valids/Valid" Name="Valid">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="效验值" />
 							<Set Lang="enus" Info="Valid" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="group" Name="Format"
-						CreateValue="this.Field.GetFormat()">
+					<Value Type="group" Name="Format" CreateValue="this.Field.GetFormat()">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="格式化" />
 							<Set Lang="enus" Info="Format" />
@@ -1941,14 +1855,13 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 							<Set Lang="enus" Info="Icon Loction" />
 						</DescriptionSet>
 					</Value>
-					<!-- <Value Type="ref" Name="MeargeTo" Ref="EasyWebTemplate/XItems/XItem"> 
-						<DescriptionSet> <Set Lang="zhcn" Info="合并到" /> <Set Lang="enus" Info="MeargeTo" 
+					<!-- <Value Type="ref" Name="MeargeTo" Ref="EasyWebTemplate/XItems/XItem">
+						<DescriptionSet> <Set Lang="zhcn" Info="合并到" /> <Set Lang="enus" Info="MeargeTo"
 						/> </DescriptionSet> </Value> -->
 
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DispEnc" IsSet="0" IsMulti="1"
-				IsShow="1" IsJsShow="1">
+			<XItemParameter Name="DispEnc" IsSet="0" IsMulti="1" IsShow="1" IsJsShow="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="加密显示" />
 					<Set Lang="enus" Info="Encryption" />
@@ -2028,29 +1941,25 @@ EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql
 					<Set Lang="enus" Info="List" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="sql" Name="Sql"
-						CreateValue="this.Field.CreateFkSql();">
+					<Value Type="sql" Name="Sql" CreateValue="this.Field.CreateFkSql();">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="Sql数据" />
 							<Set Lang="enus" Info="SQL" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="DisplayField"
-						CreateValue="this.Field.FkColumnName">
+					<Value Type="string" Name="DisplayField" CreateValue="this.Field.FkColumnName">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="显示字段" />
 							<Set Lang="enus" Info="Display Field" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="ValueField"
-						CreateValue="this.Field.FkColumnName">
+					<Value Type="string" Name="ValueField" CreateValue="this.Field.FkColumnName">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="值字段" />
 							<Set Lang="enus" Info="Value Field" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="TitleField"
-						CreateValue="this.Field.FkColumnName">
+					<Value Type="string" Name="TitleField" CreateValue="this.Field.FkColumnName">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="提示字段" />
 							<Set Lang="enus" Info="Title Field" />
@@ -2062,9 +1971,8 @@ EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql
 							<Set Lang="enus" Info="Parent key Field" />
 						</DescriptionSet>
 					</Value>
-					
-					<Value Type="string" Name="GroupField"
-						CreateValue="this.Field.FkColumnName">
+
+					<Value Type="string" Name="GroupField" CreateValue="this.Field.FkColumnName">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="分组字段" />
 							<Set Lang="enus" Info="Group Field" />
@@ -2114,8 +2022,7 @@ EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="UserSet" IsSet="1" IsShow="1"
-				UIGroup="Others" IsMulti="1" IsJsShow="0">
+			<XItemParameter Name="UserSet" IsSet="1" IsShow="1" UIGroup="Others" IsMulti="1" IsJsShow="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="用户自定义" />
 					<Set Lang="enus" Info="User defined" />
@@ -2135,30 +2042,26 @@ EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="CallAction" IsSet="0" IsShow="1"
-				UIGroup="Others" IsMulti="1" IsJsShow="0"
+			<XItemParameter Name="CallAction" IsSet="0" IsShow="1" UIGroup="Others" IsMulti="1" IsJsShow="0"
 				Html="onclick=&quot;EWA.F.FOS['@SYS_FRAME_UNID'].DoAction(this,'@Action','@ConfirmInfo','@AfterTip')&quot;">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="调用Action" />
 					<Set Lang="enus" Info="Action Call" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="ref" Ref="EwaGlobal.xml|Globals/Infos/Info"
-						Name="ConfirmInfo">
+					<Value Type="ref" Ref="EwaGlobal.xml|Globals/Infos/Info" Name="ConfirmInfo">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="执行前的确认信息" />
 							<Set Lang="enus" Info="Confirm Before" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Ref="EwaGlobal.xml|Globals/Infos/Info"
-						Name="AfterTip">
+					<Value Type="ref" Ref="EwaGlobal.xml|Globals/Infos/Info" Name="AfterTip">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="调用后的提示信息" />
 							<Set Lang="enus" Info="Title After" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="Action"
-						Ref="EasyWebTemplate/Action/ActionSet">
+					<Value Type="ref" Name="Action" Ref="EasyWebTemplate/Action/ActionSet">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="执行的Action" />
 							<Set Lang="enus" Info="Action name" />
@@ -2166,8 +2069,7 @@ EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="OpenFrame" IsSet="0" IsShow="1"
-				UIGroup="Others"
+			<XItemParameter Name="OpenFrame" IsSet="0" IsShow="1" UIGroup="Others"
 				OuterButton="
 if(this.id==''){
 	this.id='_WWW_'+Math.random();
@@ -2215,8 +2117,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400)"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="Frame" IsSet="0" IsShow="1"
-				UIGroup="Others"
+			<XItemParameter Name="Frame" IsSet="0" IsShow="1" UIGroup="Others"
 				OuterButton="
 if(this.id==''){
 	this.id='_WWW_'+Math.random();
@@ -2225,8 +2126,7 @@ var id=this.id;
 var u='./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=define_select_xitem&amp;TYPE=Frame&amp;fromId='+id;
 EWA.UI.Dialog.OpenWindow(u, 'selectxitem', 624, 400);
 "
-				IsMulti="1" IsJsShow="0"
-				Html=" xmlName='@CallXmlName' itemName='@CallItemName' paraName='@CallPara'">
+				IsMulti="1" IsJsShow="0" Html=" xmlName='@CallXmlName' itemName='@CallItemName' paraName='@CallPara'">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="相关配置名称" />
 					<Set Lang="enus" Info="Frame" />
@@ -2253,8 +2153,7 @@ EWA.UI.Dialog.OpenWindow(u, 'selectxitem', 624, 400);
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="UserControl" IsSet="0"
-				IsShow="1" UIGroup="Others" IsJsShow="0"
+			<XItemParameter Name="UserControl" IsSet="0" IsShow="1" UIGroup="Others" IsJsShow="0"
 				OuterButton="
 if(this.id==''){
 	this.id='_WWW_'+Math.random();
@@ -2295,8 +2194,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DefineFrame" IsSet="0"
-				IsShow="1" UIGroup="Others" IsJsShow="0"
+			<XItemParameter Name="DefineFrame" IsSet="0" IsShow="1" UIGroup="Others" IsJsShow="0"
 				OuterButton="
 if(this.id==''){
 	this.id='_WWW_'+Math.random();
@@ -2330,8 +2228,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="PopFrame" IsSet="0" IsShow="1"
-				UIGroup="Others" IsJsShow="0"
+			<XItemParameter Name="PopFrame" IsSet="0" IsShow="1" UIGroup="Others" IsJsShow="0"
 				OuterButton="
 if(this.id==''){
 	this.id='_W2GW_'+Math.random();
@@ -2372,8 +2269,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="Upload" IsSet="0" IsShow="1"
-				IsJsShow="0" UIGroup="Others" IsMulti="1" Html="">
+			<XItemParameter Name="Upload" IsSet="0" IsShow="1" IsJsShow="0" UIGroup="Others" IsMulti="1" Html="">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="文件上传配置" />
 					<Set Lang="enus" Info="File Upload" />
@@ -2440,8 +2336,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 					<Value Type="string" Name="UpNewSizes">
 						<DescriptionSet>
-							<Set Lang="zhcn"
-								Info="新的尺寸列表，例如100x50, 200x100,用“x”分割宽和高，用“，”分割不同尺寸" />
+							<Set Lang="zhcn" Info="新的尺寸列表，例如100x50, 200x100,用“x”分割宽和高，用“，”分割不同尺寸" />
 							<Set Lang="enus" Info="New Sizes, Ex: 100x50,200x100" />
 						</DescriptionSet>
 					</Value>
@@ -2493,8 +2388,7 @@ EWA_UP_LOCAL User local file name
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="VaildEx" IsSet="0" IsShow="1"
-				UIGroup="Valid" IsMulti="1"
+			<XItemParameter Name="VaildEx" IsSet="0" IsShow="1" UIGroup="Valid" IsMulti="1"
 				Html="onblur=&quot;EWA.F.FOS['@SYS_FRAME_UNID'].DoValidEx(this,'@VXMode','@VXJs','@VXAction','@VXOk','@VXFail')&quot;">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="高级验证" />
@@ -2513,22 +2407,19 @@ EWA_UP_LOCAL User local file name
 							<Set Lang="enus" Info="Javascript Call" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="VXAction"
-						Ref="EasyWebTemplate/Action/ActionSet">
+					<Value Type="ref" Name="VXAction" Ref="EasyWebTemplate/Action/ActionSet">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="执行的Action" />
 							<Set Lang="enus" Info="Call Action" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="VXOk"
-						Ref="EasyWebTemplate/PageInfos/PageInfo">
+					<Value Type="ref" Name="VXOk" Ref="EasyWebTemplate/PageInfos/PageInfo">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="验证成功信息" />
 							<Set Lang="enus" Info="Infomation of valided ok" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="VXFail"
-						Ref="EasyWebTemplate/PageInfos/PageInfo">
+					<Value Type="ref" Name="VXFail" Ref="EasyWebTemplate/PageInfos/PageInfo">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="验证失败信息" />
 							<Set Lang="enus" Info="Infomation of vailded failure" />
@@ -2536,8 +2427,7 @@ EWA_UP_LOCAL User local file name
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="MGAddField" IsSet="0" IsShow="1"
-				IsJsShow="0" IsMulti="1">
+			<XItemParameter Name="MGAddField" IsSet="0" IsShow="1" IsJsShow="0" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="字段映射" />
 					<Set Lang="enus" Info="Map Fields" />
@@ -2570,8 +2460,7 @@ EWA_UP_LOCAL User local file name
 
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="AnchorParas" IsSet="0"
-				IsShow="1" IsMulti="1">
+			<XItemParameter Name="AnchorParas" IsSet="0" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="连接参数" />
 					<Set Lang="enus" Info="Anchor Paras" />
@@ -2592,8 +2481,7 @@ EWA_UP_LOCAL User local file name
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="LinkButtonParas" IsSet="0"
-				IsShow="1" IsMulti="1">
+			<XItemParameter Name="LinkButtonParas" IsSet="0" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="链接按钮参数" />
 					<Set Lang="enus" Info="Link Button Paras" />
@@ -2607,8 +2495,7 @@ EWA_UP_LOCAL User local file name
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DopListShow" IsSet="0"
-				IsShow="1" UIGroup="Others" IsMulti="1"
+			<XItemParameter Name="DopListShow" IsSet="0" IsShow="1" UIGroup="Others" IsMulti="1"
 				Html=" DlsShow='@DlsShow' DlsAction='@DlsAction' AfterEvent='@DlsAfterEvent' isdlseventload='@isDlsEventLoad'"
 				IsJsShow="0">
 				<DescriptionSet>
@@ -2619,8 +2506,7 @@ EWA_UP_LOCAL User local file name
 
 					<Value Name="DlsAfterEvent" Type="string">
 						<DescriptionSet>
-							<Set Lang="zhcn"
-								Info="数据获取后事件, 只要Js方法名，不带括号，参数为 value, text, hidden对象, textbox对象" />
+							<Set Lang="zhcn" Info="数据获取后事件, 只要Js方法名，不带括号，参数为 value, text, hidden对象, textbox对象" />
 							<Set Lang="enus" Info="After Event" />
 						</DescriptionSet>
 					</Value>
@@ -2645,15 +2531,13 @@ EWA_UP_LOCAL User local file name
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="ReportCfg" IsSet="0" IsShow="1"
-				UIGroup="Others" IsMulti="1" IsJsShow="0">
+			<XItemParameter Name="ReportCfg" IsSet="0" IsShow="1" UIGroup="Others" IsMulti="1" IsJsShow="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="报告定义" />
 					<Set Lang="enus" Info="Report" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="ReportAction" Type="ref"
-						Ref="EasyWebTemplate/Action/ActionSet">
+					<Value Name="ReportAction" Type="ref" Ref="EasyWebTemplate/Action/ActionSet">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="数据源" />
 							<Set Lang="enus" Info="Action Call" />
@@ -2667,16 +2551,13 @@ EWA_UP_LOCAL User local file name
 					</Value>
 					<Value Name="ReportTemplate" Type="html" IsCDATA="1">
 						<DescriptionSet>
-							<Set Lang="zhcn"
-								Info="报告模板，用&lt;!--EWA_REPT_START--&gt;和&lt;!--EWA_REPT_END--&gt;" />
-							<Set Lang="enus"
-								Info="Template using &lt;!--EWA_REPT_START--&gt; and &lt;!--EWA_REPT_END--&gt;" />
+							<Set Lang="zhcn" Info="报告模板，用&lt;!--EWA_REPT_START--&gt;和&lt;!--EWA_REPT_END--&gt;" />
+							<Set Lang="enus" Info="Template using &lt;!--EWA_REPT_START--&gt; and &lt;!--EWA_REPT_END--&gt;" />
 						</DescriptionSet>
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="CombineFrame" IsSet="0"
-				IsShow="1" UIGroup="Others" IsJsShow="0"
+			<XItemParameter Name="CombineFrame" IsSet="0" IsShow="1" UIGroup="Others" IsJsShow="0"
 				OuterButton="
 if(this.id==''){
 	this.id='_WWW_'+Math.random();
@@ -2753,50 +2634,44 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="AddrMapRels" IsSet="0"
-				IsShow="1" UIGroup="Others" IsJsShow="0" IsMulti="1" Html="">
+			<XItemParameter Name="AddrMapRels" IsSet="0" IsShow="1" UIGroup="Others" IsJsShow="0" IsMulti="1"
+				Html="">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="地图关联字段" />
 					<Set Lang="enus" Info="Map relative fields" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="ref" Name="AmrCountry"
-						Ref="EasyWebTemplate/XItems/XItem">
+					<Value Type="ref" Name="AmrCountry" Ref="EasyWebTemplate/XItems/XItem">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="国家" />
 							<Set Lang="enus" Info="Country" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="AmrProvince"
-						Ref="EasyWebTemplate/XItems/XItem">
+					<Value Type="ref" Name="AmrProvince" Ref="EasyWebTemplate/XItems/XItem">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="省" />
 							<Set Lang="enus" Info="Province" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="AmrCity"
-						Ref="EasyWebTemplate/XItems/XItem">
+					<Value Type="ref" Name="AmrCity" Ref="EasyWebTemplate/XItems/XItem">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="城市" />
 							<Set Lang="enus" Info="City" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="AmrZip"
-						Ref="EasyWebTemplate/XItems/XItem">
+					<Value Type="ref" Name="AmrZip" Ref="EasyWebTemplate/XItems/XItem">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="邮政编码" />
 							<Set Lang="enus" Info="Zip" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="AmrLng"
-						Ref="EasyWebTemplate/XItems/XItem">
+					<Value Type="ref" Name="AmrLng" Ref="EasyWebTemplate/XItems/XItem">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="经度" />
 							<Set Lang="enus" Info="Longitute" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="AmrLat"
-						Ref="EasyWebTemplate/XItems/XItem">
+					<Value Type="ref" Name="AmrLat" Ref="EasyWebTemplate/XItems/XItem">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="纬度" />
 							<Set Lang="enus" Info="Latitude" />
@@ -2805,8 +2680,8 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="ImageDefault" IsSet="0"
-				IsShow="1" UIGroup="Others" IsJsShow="0" IsMulti="1" Html="">
+			<XItemParameter Name="ImageDefault" IsSet="0" IsShow="1" UIGroup="Others" IsJsShow="0" IsMulti="1"
+				Html="">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="无图默认的图片" />
 					<Set Lang="enus" Info="Image Default" />
@@ -2838,102 +2713,88 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 		<XGroupValues>
 
-			<XGroupValue Name="EncType" Default=""
-				Values=",all,end3,before3,email,phone">
+			<XGroupValue Name="EncType" Default="" Values=",all,end3,before3,email,phone">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",全部,后三位, 前三位, 邮件, 电话" />
 					<Set Lang="enus" Info=",all,end3,before3,email,phone" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="ImageDefault" Default=""
-				Values="imageDefault,transparent,url">
+			<XGroupValue Name="ImageDefault" Default="" Values="imageDefault,transparent,url">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="默认图片,透明,指定图片" />
 					<Set Lang="enus" Info="Default,Transparent,Url" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="IconLoction" Default="no"
-				Values="left,right">
+			<XGroupValue Name="IconLoction" Default="no" Values="left,right">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="左边,右边" />
 					<Set Lang="enus" Info="Left,Right" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="Translation" Default=""
-				Values=",zh2en,en2zh">
+			<XGroupValue Name="Translation" Default="" Values=",zh2en,en2zh">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",中文-英文,英文-中文" />
 					<Set Lang="enus" Info=",Chinese-English,English-Chinese" />
 				</DescriptionSet>
 			</XGroupValue>
 
-			<XGroupValue Name="SpanShowAs" Default=""
-				Values=",H1,H2,H3,H4,H5,H6,DIV,A,P,SUB,CODE,PRE">
+			<XGroupValue Name="SpanShowAs" Default="" Values=",H1,H2,H3,H4,H5,H6,DIV,A,P,SUB,CODE,PRE">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",H1,H2,H3,H4,H5,H6,DIV,A,P,SUB,CODE,PRE" />
 					<Set Lang="enus" Info=",H1,H2,H3,H4,H5,H6,DIV,A,P,SUB,CODE,PRE" />
 				</DescriptionSet>
 			</XGroupValue>
 
-			<XGroupValue Name="ImageLazyLoad" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="ImageLazyLoad" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="AttatchParas" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="AttatchParas" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
 
-			<XGroupValue Name="RunUpSQLResized" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="RunUpSQLResized" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="DisableOnModify" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="DisableOnModify" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="NewSizesIn" Default="server"
-				Values="server,client">
+			<XGroupValue Name="NewSizesIn" Default="server" Values="server,client">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="服务器,客户端" />
 					<Set Lang="enus" Info="Server,Client" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="ListFilterType" Default="no"
-				Values=",value,text,json">
+			<XGroupValue Name="ListFilterType" Default="no" Values=",value,text,json">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",选项值,选项文字,选项的JSON对象" />
 					<Set Lang="enus" Info=",value,text,json" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="SumBottom" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="SumBottom" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="isDlsEventLoad" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="isDlsEventLoad" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="CbInstall" Default="html"
-				Values="html,js,iframe,iframeLazy,box">
+			<XGroupValue Name="CbInstall" Default="html" Values="html,js,iframe,iframeLazy,box">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="程序内,脚本加载,IFrame,IFrame后加载,显示为盒子" />
 					<Set Lang="enus" Info="html,js,iframe,iframeLazy,box" />
@@ -2952,58 +2813,49 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</DescriptionSet>
 			</XGroupValue>
 
-			<XGroupValue Name="XStyleAlign" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="XStyleAlign" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="XStyleAlign" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="XStyleAlign" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="XStyleVAlign" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="XStyleVAlign" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="XStyleNoWrap" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="XStyleNoWrap" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="XStyleCursor" Default=""
-				Values=",pointer">
+			<XGroupValue Name="XStyleCursor" Default="" Values=",pointer">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="默认,手势" />
 					<Set Lang="enus" Info="Default, Pointer" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="XStyleFixed" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="XStyleFixed" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="XStyleColor" Default="no"
-				Values=",red,blue,green,darkred,darkblue,darkgreen">
+			<XGroupValue Name="XStyleColor" Default="no" Values=",red,blue,green,darkred,darkblue,darkgreen">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",红,蓝色,绿色,暗红,暗蓝,暗绿" />
-					<Set Lang="enus"
-						Info=",red,blue,green,darkred,darkblue,darkgreen" />
+					<Set Lang="enus" Info=",red,blue,green,darkred,darkblue,darkgreen" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="XStyleBold" Default="no"
-				Values="no,yes">
+			<XGroupValue Name="XStyleBold" Default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
@@ -3011,19 +2863,16 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			</XGroupValue>
 
 
-			<XGroupValue Name="ListShowType" Default="0"
-				Values=", Text-Key, Key-Text">
+			<XGroupValue Name="ListShowType" Default="0" Values=", Text-Key, Key-Text">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",文字(Key),Key(文字)" />
 					<Set Lang="enus" Info=", Text-Key, Key-Text" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="RefShowType" Default="0"
-				Values=", Text-Key, Key-Text, Text-Title, Key-Title">
+			<XGroupValue Name="RefShowType" Default="0" Values=", Text-Key, Key-Text, Text-Title, Key-Title">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",文字(Key),Key(文字),文字-提示,Key-提示" />
-					<Set Lang="enus"
-						Info=", Text-Key, Key-Text, Text-Title, Key-Title" />
+					<Set Lang="enus" Info=", Text-Key, Key-Text, Text-Title, Key-Title" />
 				</DescriptionSet>
 			</XGroupValue>
 			<XGroupValue Name="Format" Default="0"
@@ -3041,12 +2890,10 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 						 " />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="NumberScale" Default="0"
-				Values=", 100, 1000, 10000, 100000, 1000000, 10000000">
+			<XGroupValue Name="NumberScale" Default="0" Values=", 100, 1000, 10000, 100000, 1000000, 10000000">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",百,千,万,十万,百万,千万" />
-					<Set Lang="enus"
-						Info=",Hundred,Thousand,Ten thousand, One hundred thousand, Million，Ten million" />
+					<Set Lang="enus" Info=",Hundred,Thousand,Ten thousand, One hundred thousand, Million，Ten million" />
 				</DescriptionSet>
 			</XGroupValue>
 
@@ -3065,8 +2912,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</DescriptionSet>
 			</XGroupValue>
 
-			<XGroupValue Name="UpSaveMethod" Default="0"
-				Values="File,SQL,WithFrame">
+			<XGroupValue Name="UpSaveMethod" Default="0" Values="File,SQL,WithFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="文件保存,SQL保存,当前配置处理" />
 					<Set Lang="enus" Info="File,SQL,WithFrame" />
@@ -3078,8 +2924,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info="AxisX,AxisY" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="MgfComput" Default="0"
-				Values=",Sum,Avg,Max,Min,Count">
+			<XGroupValue Name="MgfComput" Default="0" Values=",Sum,Avg,Max,Min,Count">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="自定义,合计,平均值,最大值,最小值,计数" />
 					<Set Lang="enus" Info="z,Sum,Avg,Max,Min,Count" />
@@ -3089,8 +2934,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				Values=",Tody,Tody-Time,Year-Month,Year,Time,IP,SEQID,GUID,ZERO">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",当前日期,当前日期时间,年月,年,时间,IP地址,序号,全球唯一标识,数字零" />
-					<Set Lang="enus"
-						Info=",Tody,Tody-Time,Year-Month,Year,Time,IP,SEQID,GUID,ZERO" />
+					<Set Lang="enus" Info=",Tody,Tody-Time,Year-Month,Year,Time,IP,SEQID,GUID,ZERO" />
 				</DescriptionSet>
 			</XGroupValue>
 			<XGroupValue Name="Lang" Default="0" Values=",zhcn,enus">
@@ -3099,22 +2943,19 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info=",Chinese(GB),English" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="UpTarget" Default="0"
-				Values="DIR,TABLE">
+			<XGroupValue Name="UpTarget" Default="0" Values="DIR,TABLE">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="目录,数据库" />
 					<Set Lang="enus" Info="Dir, Database" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="DataType" Default="0"
-				Values=",String,Int,Boolen,Number,Date,Binary">
+			<XGroupValue Name="DataType" Default="0" Values=",String,Int,Boolen,Number,Date,Binary">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",字符,整型,逻辑,数字,日期,二进制" />
 					<Set Lang="enus" Info=",String,Int,Boolen,Number,Date,Binary" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="EventType" Default="0"
-				Values="Javascript,Ajax">
+			<XGroupValue Name="EventType" Default="0" Values="Javascript,Ajax">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="脚本,AJAX调用" />
 					<Set Lang="enus" Info="JavaScript,Ajax" />
@@ -3134,16 +2975,14 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</DescriptionSet>
 			</XGroupValue>
 
-			<XGroupValue Name="IsSearchQuick" Default="0"
-				Values="0,1">
+			<XGroupValue Name="IsSearchQuick" Default="0" Values="0,1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
 
-			<XGroupValue Name="IsGroupDefault" Default="0"
-				Values="0,1">
+			<XGroupValue Name="IsGroupDefault" Default="0" Values="0,1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
@@ -3180,37 +3019,32 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info="No,Yes(Double Click),Yes(Click)" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="IsReportRepeat" Default="0"
-				Values="0,1">
+			<XGroupValue Name="IsReportRepeat" Default="0" Values="0,1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="SearchType" Default="0"
-				Values=",text,date,number,fix">
+			<XGroupValue Name="SearchType" Default="0" Values=",text,date,number,fix">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",文字,日期,数字,固定格式" />
 					<Set Lang="enus" Info=",Text,Date,Number,Fix" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="SearchMulti" Default="2"
-				Values="2,1,0">
+			<XGroupValue Name="SearchMulti" Default="2" Values="2,1,0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="SELECT,Checkbox,RADIO" />
 					<Set Lang="enus" Info="Select,Checkbox,Radio" />
 				</DescriptionSet>
 			</XGroupValue>
 
-			<XGroupValue Name="CallMethod" Default="0"
-				Values=",OpenReloadClose,OpenReload">
+			<XGroupValue Name="CallMethod" Default="0" Values=",OpenReloadClose,OpenReload">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",刷新并关闭,刷新" />
 					<Set Lang="enus" Info=",OpenReloadClose,OpenReload" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="VXMode" Default="0"
-				Values=",js,action">
+			<XGroupValue Name="VXMode" Default="0" Values=",js,action">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",脚本调用,执行Action" />
 					<Set Lang="enus" Info=",Js Call,Action Call" />
@@ -3224,15 +3058,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			<Set Lang="enus" Info="Page Information" />
 		</DescriptionSet>
 		<XItemParameters>
-			<XItemParameter Name="Name" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="Name" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="配置名称" />
 					<Set Lang="enus" Info="Item Name" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="string" ReadOnly="1" Step="0" Name="Name"
-						CreateValue="this.Name">
+					<Value Type="string" ReadOnly="1" Step="0" Name="Name" CreateValue="this.Name">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="配置名称" />
 							<Set Lang="enus" Info="Name" />
@@ -3240,15 +3072,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="FrameTag" IsShow="0" IsSet="0"
-				IsMulti="0">
+			<XItemParameter Name="FrameTag" IsShow="0" IsSet="0" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="框架名称" />
 					<Set Lang="enus" Info="Frame Tag" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="FrameTag" Type="string"
-						CreateValue="this.FrameTag">
+					<Value Name="FrameTag" Type="string" CreateValue="this.FrameTag">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="框架名称" />
 							<Set Lang="enus" Info="Frame Tag" />
@@ -3257,8 +3087,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="SkinName" IsSet="0" IsShow="1"
-				IsMulti="1">
+			<XItemParameter Name="SkinName" IsSet="0" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="皮肤" />
 					<Set Lang="enus" Info="Skin" />
@@ -3278,15 +3107,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DataSource" IsShow="1" IsSet="0"
-				IsMulti="0">
+			<XItemParameter Name="DataSource" IsShow="1" IsSet="0" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="数据源" />
 					<Set Lang="enus" Info="Datasource" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="ref" Name="DataSource"
-						CreateValue="this.Fields.CfgName" Ref="EWAD$Connections">
+					<Value Type="ref" Name="DataSource" CreateValue="this.Fields.CfgName" Ref="EWAD$Connections">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="数据源" />
 							<Set Lang="enus" Info="Datasource" />
@@ -3294,8 +3121,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="ConfigMemo" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="ConfigMemo" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="本配置说明" />
 					<Set Lang="enus" Info="This Config Memo" />
@@ -3310,8 +3136,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="Cached" IsShow="0" IsSet="0"
-				IsMulti="1">
+			<XItemParameter Name="Cached" IsShow="0" IsSet="0" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面缓存" />
 					<Set Lang="enus" Info="Page Cache" />
@@ -3332,8 +3157,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="Acl" IsShow="0" IsSet="0"
-				IsMulti="0">
+			<XItemParameter Name="Acl" IsShow="0" IsSet="0" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="权限验证类" />
 					<Set Lang="enus" Info="ACL" />
@@ -3347,8 +3171,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="Log" IsShow="0" IsSet="0"
-				IsMulti="0">
+			<XItemParameter Name="Log" IsShow="0" IsSet="0" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="日志类" />
 					<Set Lang="enus" Info="Class of ACL" />
@@ -3362,22 +3185,19 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DescriptionSet" IsSet="1"
-				IsShow="1" IsMulti="1">
+			<XItemParameter Name="DescriptionSet" IsSet="1" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="描述" />
 					<Set Lang="enus" Info="Description" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="Lang" Type="group" IsUnique="1"
-						CreateValue="EWA.LANG">
+					<Value Name="Lang" Type="group" IsUnique="1" CreateValue="EWA.LANG">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="国别" />
 							<Set Lang="enus" Info="Lang" />
 						</DescriptionSet>
 					</Value>
-					<Value Name="Info" Step="0" Type="string"
-						CreateValue="'{' + this.Fields.TableName + '} 的信息'">
+					<Value Name="Info" Step="0" Type="string" CreateValue="'{' + this.Fields.TableName + '} 的信息'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="信息" />
 							<Set Lang="enus" Info="Info" />
@@ -3391,8 +3211,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="PageAttributeSet" IsSet="1"
-				IsShow="1" IsMulti="1">
+			<XItemParameter Name="PageAttributeSet" IsSet="1" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面属性" />
 					<Set Lang="enus" Info="Page Attrs" />
@@ -3412,8 +3231,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="GroupSet" IsSet="1" IsShow="1"
-				IsMulti="1" FrameTag="Frame">
+			<XItemParameter Name="GroupSet" IsSet="1" IsShow="1" IsMulti="1" FrameTag="Frame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="分组描述" />
 					<Set Lang="enus" Info="Group set" />
@@ -3440,22 +3258,19 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="Size" IsSet="0" IsShow="1"
-				IsMulti="1" FrameTag="">
+			<XItemParameter Name="Size" IsSet="0" IsShow="1" IsMulti="1" FrameTag="">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面尺寸" />
 					<Set Lang="enus" Info="Size" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="HiddenCaption" Type="group"
-						CreateValue="this.HiddenCaption()" Step="1">
+					<Value Name="HiddenCaption" Type="group" CreateValue="this.HiddenCaption()" Step="1">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="显示列头" />
 							<Set Lang="enus" Info="Caption Hidden" />
 						</DescriptionSet>
 					</Value>
-					<Value Name="Width" Type="String" IsUnique="1"
-						CreateValue="this.Width()" Step="1">
+					<Value Name="Width" Type="String" IsUnique="1" CreateValue="this.Width()" Step="1">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="宽度" />
 							<Set Lang="enus" Info="Width" />
@@ -3467,8 +3282,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="enus" Info="Height" />
 						</DescriptionSet>
 					</Value>
-					<Value Name="HAlign" Type="group" Step="1"
-						CreateValue="'center'">
+					<Value Name="HAlign" Type="group" Step="1" CreateValue="'center'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="水平对齐" />
 							<Set Lang="enus" Info="Align" />
@@ -3490,8 +3304,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="AddHtml" IsSet="0" IsShow="1"
-				IsMulti="1">
+			<XItemParameter Name="AddHtml" IsSet="0" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="附加HTML" />
 					<Set Lang="enus" Info="Add Html" />
@@ -3511,8 +3324,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="AddScript" IsSet="0" IsShow="1"
-				IsMulti="1">
+			<XItemParameter Name="AddScript" IsSet="0" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="附加脚本" />
 					<Set Lang="enus" Info="Add Js" />
@@ -3532,8 +3344,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="AddCss" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="AddCss" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="附加样式" />
 					<Set Lang="enus" Info="Css" />
@@ -3548,8 +3359,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="ChartsShow" IsSet="0" IsShow="1"
-				IsMulti="0" FrameTag="ListFrame">
+			<XItemParameter Name="ChartsShow" IsSet="0" IsShow="1" IsMulti="0" FrameTag="ListFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="图表显示方式" />
 					<Set Lang="enus" Info="Charts" />
@@ -3564,8 +3374,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="RedrawJson" IsSet="0" IsShow="1"
-				IsMulti="0" FrameTag="Frame">
+			<XItemParameter Name="RedrawJson" IsSet="0" IsShow="1" IsMulti="0" FrameTag="Frame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="重绘布局" />
 					<Set Lang="enus" Info="Redraw" />
@@ -3579,8 +3388,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="BoxJson" IsSet="0" IsShow="1"
-				IsMulti="0" FrameTag="ListFrame">
+			<XItemParameter Name="BoxJson" IsSet="0" IsShow="1" IsMulti="0" FrameTag="ListFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="BoxJson" />
 					<Set Lang="enus" Info="BoxJson" />
@@ -3594,8 +3402,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="LeftJson" IsSet="0" IsShow="1"
-				IsMulti="0" FrameTag="ListFrame">
+			<XItemParameter Name="LeftJson" IsSet="0" IsShow="1" IsMulti="0" FrameTag="ListFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="LeftJson" />
 					<Set Lang="enus" Info="LeftJson" />
@@ -3609,8 +3416,8 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="FrameHtml" IsSet="0" IsShow="1"
-				IsMulti="0" FrameTag="Frame,Report,ListFrame,Grid">
+			<XItemParameter Name="FrameHtml" IsSet="0" IsShow="1" IsMulti="0"
+				FrameTag="Frame,Report,ListFrame,Grid">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="框架HTML" />
 					<Set Lang="enus" Info="Frame Html" />
@@ -3624,22 +3431,19 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="PageSize" IsSet="0" IsShow="1"
-				IsMulti="1" FrameTag="ListFrame,Grid">
+			<XItemParameter Name="PageSize" IsSet="0" IsShow="1" IsMulti="1" FrameTag="ListFrame,Grid">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="列表分页" />
 					<Set Lang="enus" Info="Split" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="number" Name="PageSize" Step="0"
-						CreateValue="'10'">
+					<Value Type="number" Name="PageSize" Step="0" CreateValue="'10'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="分页数" />
 							<Set Lang="enus" Info="Page Number" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="group" Name="IsSplitPage" Step="0"
-						CreateValue="1">
+					<Value Type="group" Name="IsSplitPage" Step="0" CreateValue="1">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="是否分页" />
 							<Set Lang="enus" Info="Is Split" />
@@ -3655,8 +3459,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 						</DescriptionSet>
 					</Value>
 
-					<Value Type="string" Name="KeyField" Step="0"
-						CreateValue="this.Fields.Pk">
+					<Value Type="string" Name="KeyField" Step="0" CreateValue="this.Fields.Pk">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="主键" />
 							<Set Lang="enus" Info="Key" />
@@ -3676,8 +3479,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 						</DescriptionSet>
 					</Value>
 
-					<Value Type="string" Name="StatusField" IsShow="0"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="StatusField" IsShow="0" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="状态字段" />
 							<Set Lang="enus" Info="Status Field" />
@@ -3685,43 +3487,37 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="ListUI" IsSet="0" IsShow="1"
-				IsMulti="1" FrameTag="ListFrame">
+			<XItemParameter Name="ListUI" IsSet="0" IsShow="1" IsMulti="1" FrameTag="ListFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="列表UI特性" />
 					<Set Lang="enus" Info="List UI" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="group" Name="luButtons" Step="0"
-						CreateValue="'1'">
+					<Value Type="group" Name="luButtons" Step="0" CreateValue="'1'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="重新设置按钮样式" />
 							<Set Lang="enus" Info="Buttons" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="group" Name="luSearch" Step="0"
-						CreateValue="'1'">
+					<Value Type="group" Name="luSearch" Step="0" CreateValue="'1'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="显示检索栏" />
 							<Set Lang="enus" Info="Searchs" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="group" Name="luSelect" Step="0"
-						CreateValue="'S'">
+					<Value Type="group" Name="luSelect" Step="0" CreateValue="'S'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="鼠标选择" />
 							<Set Lang="enus" Info="Selected" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="group" Name="luDblClick" Step="0"
-						CreateValue="'1'">
+					<Value Type="group" Name="luDblClick" Step="0" CreateValue="'1'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="双击事件" />
 							<Set Lang="enus" Info="Dbl Click" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="luDblClickIdx" Step="0"
-						CreateValue="'0'">
+					<Value Type="string" Name="luDblClickIdx" Step="0" CreateValue="'0'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="双击事件按钮顺序" />
 							<Set Lang="enus" Info="Dbl Click Button Index" />
@@ -3742,8 +3538,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="MenuShow" IsSet="0" IsShow="1"
-				IsMulti="1" FrameTag="Menu">
+			<XItemParameter Name="MenuShow" IsSet="0" IsShow="1" IsMulti="1" FrameTag="Menu">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="菜单安装对象Id" />
 				</DescriptionSet>
@@ -3760,8 +3555,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="Menu" IsSet="0" IsShow="1"
-				IsMulti="1" FrameTag="Menu">
+			<XItemParameter Name="Menu" IsSet="0" IsShow="1" IsMulti="1" FrameTag="Menu">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="菜单字段定义" />
 				</DescriptionSet>
@@ -3771,32 +3565,27 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="zhcn" Info="根ID值" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="Key"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="Key" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="主键" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="ParentKey"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="ParentKey" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="父键" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="Text"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="Text" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="显示文字" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="Cmd"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="Cmd" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="脚本" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="Icon"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="Icon" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="图标" />
 						</DescriptionSet>
@@ -3808,8 +3597,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="Tree" IsSet="0" IsShow="1"
-				IsMulti="1" FrameTag="Tree">
+			<XItemParameter Name="Tree" IsSet="0" IsShow="1" IsMulti="1" FrameTag="Tree">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="树字段定义" />
 				</DescriptionSet>
@@ -3819,39 +3607,33 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="zhcn" Info="根ID值" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="Key"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="Key" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="主键" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="ParentKey"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="ParentKey" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="父键" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="Text"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="Text" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="显示" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="Title"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="Title" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="提示" />
 						</DescriptionSet>
 					</Value>
 
-					<Value Type="string" Name="Level"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="Level" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="级别" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="Order"
-						CreateValue="this.Fields.Fields" Step="0" StepUi="group">
+					<Value Type="string" Name="Order" CreateValue="this.Fields.Fields" Step="0" StepUi="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="排序" />
 						</DescriptionSet>
@@ -3884,8 +3666,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="HtmlFrame" IsSet="0" IsShow="1"
-				IsMulti="1" FrameTag="Frame,Tree,ListFrame">
+			<XItemParameter Name="HtmlFrame" IsSet="0" IsShow="1" IsMulti="1" FrameTag="Frame,Tree,ListFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面框架" />
 				</DescriptionSet>
@@ -3912,8 +3693,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="TreeIconSet" IsSet="1"
-				IsShow="1" IsMulti="1" FrameTag="Tree">
+			<XItemParameter Name="TreeIconSet" IsSet="1" IsShow="1" IsMulti="1" FrameTag="Tree">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="自定义图标" />
 				</DescriptionSet>
@@ -3940,20 +3720,17 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="MGAxisX" IsSet="0" IsShow="1"
-				IsMulti="1" FrameTag="MultiGrid">
+			<XItemParameter Name="MGAxisX" IsSet="0" IsShow="1" IsMulti="1" FrameTag="MultiGrid">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="多维表格X轴设置" />
 				</DescriptionSet>
 				<Values>
-					<Value Step="0" Type="string" Name="XAxisField"
-						CreateValue="'Month,Day;Day'">
+					<Value Step="0" Type="string" Name="XAxisField" CreateValue="'Month,Day;Day'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="X轴字段名称，用“,”分割字段，“;”分割显示和对应值字段" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" CreateValue="'X'"
-						Ref="EasyWebTemplate/Action/ActionSet" Name="XAxisAction">
+					<Value Type="ref" CreateValue="'X'" Ref="EasyWebTemplate/Action/ActionSet" Name="XAxisAction">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="X轴Action" />
 						</DescriptionSet>
@@ -3962,68 +3739,56 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 					<Value Type="string" Name="XAxisAttrExp">
 						<DescriptionSet>
-							<Set Lang="zhcn"
-								Info="X附加属性表达式(name1=@f_name name2=@t_name ...)" />
-							<Set Lang="enus"
-								Info="X attr exp (name1=@f_name name2=@t_name ...)" />
+							<Set Lang="zhcn" Info="X附加属性表达式(name1=@f_name name2=@t_name ...)" />
+							<Set Lang="enus" Info="X attr exp (name1=@f_name name2=@t_name ...)" />
 						</DescriptionSet>
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="MGAxisY" IsSet="0" IsShow="1"
-				IsMulti="1" FrameTag="MultiGrid">
+			<XItemParameter Name="MGAxisY" IsSet="0" IsShow="1" IsMulti="1" FrameTag="MultiGrid">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="多维表格Y轴设置" />
 				</DescriptionSet>
 				<Values>
-					<Value Step="0" Type="string" Name="YAxisField"
-						CreateValue="'DepName,UserName;UserId'">
+					<Value Step="0" Type="string" Name="YAxisField" CreateValue="'DepName,UserName;UserId'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="Y轴字段名称，用“,”分割字段，“;”分割显示和对应值字段" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" CreateValue="'Y'"
-						Ref="EasyWebTemplate/Action/ActionSet" Name="YAxisAction">
+					<Value Type="ref" CreateValue="'Y'" Ref="EasyWebTemplate/Action/ActionSet" Name="YAxisAction">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="Y轴Action" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="string" Name="YAxisAttrExp">
 						<DescriptionSet>
-							<Set Lang="zhcn"
-								Info="Y附加属性表达式(name1=@f_name name2=@t_name ...)" />
-							<Set Lang="enus"
-								Info="Y attr exp (name1=@f_name name2=@t_name ...)" />
+							<Set Lang="zhcn" Info="Y附加属性表达式(name1=@f_name name2=@t_name ...)" />
+							<Set Lang="enus" Info="Y attr exp (name1=@f_name name2=@t_name ...)" />
 						</DescriptionSet>
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="MGCell" IsSet="0" IsShow="1"
-				IsMulti="1" FrameTag="MultiGrid">
+			<XItemParameter Name="MGCell" IsSet="0" IsShow="1" IsMulti="1" FrameTag="MultiGrid">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="多维表格数据设置" />
 				</DescriptionSet>
 				<Values>
-					<Value Step="0" Type="string" Name="CellDataField"
-						CreateValue="'字段'">
+					<Value Step="0" Type="string" Name="CellDataField" CreateValue="'字段'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="数据字段，用“,”分割字段，“@”字段表示调用字段名称" />
 						</DescriptionSet>
 					</Value>
-					<Value Step="0" Type="string" Name="CellXField"
-						CreateValue="'对应X轴定义字段'">
+					<Value Step="0" Type="string" Name="CellXField" CreateValue="'对应X轴定义字段'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="映射X轴字段" />
 						</DescriptionSet>
 					</Value>
-					<Value Step="0" Type="string" Name="CellYField"
-						CreateValue="'对应Y轴定义字段'">
+					<Value Step="0" Type="string" Name="CellYField" CreateValue="'对应Y轴定义字段'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="映射Y轴字段" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" CreateValue="'DATA'"
-						Ref="EasyWebTemplate/Action/ActionSet" Name="CellAction">
+					<Value Type="ref" CreateValue="'DATA'" Ref="EasyWebTemplate/Action/ActionSet" Name="CellAction">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="数据Action" />
 						</DescriptionSet>
@@ -4036,8 +3801,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="LogicShow" IsSet="1" IsShow="1"
-				IsMulti="1" FrameTag="ListFrame,Frame,Complex">
+			<XItemParameter Name="LogicShow" IsSet="1" IsShow="1" IsMulti="1" FrameTag="ListFrame,Frame,Complex">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="逻辑显示" />
 				</DescriptionSet>
@@ -4049,8 +3813,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 					<Value Type="string" Name="ParaExp">
 						<DescriptionSet>
-							<Set Lang="zhcn" Info="参数表达式"
-								Memo="采用SQL表达式(@ID>100 AND @NAME LIKE '%S')" />
+							<Set Lang="zhcn" Info="参数表达式" Memo="采用SQL表达式(@ID>100 AND @NAME LIKE '%S')" />
 						</DescriptionSet>
 					</Value>
 					<Value Name="HiddenFields" Type="String">
@@ -4062,8 +3825,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			</XItemParameter>
 		</XItemParameters>
 		<XGroupValues>
-			<XGroupValue Name="FrameCols" default="0"
-				Values="C3,C2,C1,C11">
+			<XGroupValue Name="FrameCols" default="0" Values="C3,C2,C1,C11">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="三栏,两栏,一栏,一栏(上下)" />
 					<Set Lang="enus" Info="Tree,Two,One,One and up down" />
@@ -4072,35 +3834,29 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			<XGroupValue Name="AllowExport" default="0"
 				Values=",XLS|DBF|XML|TXT,XLS|DBF|XML,XLS|TXT,XLS|XML,XLS|DBF,XML|DBF,XLS,DBF,XML,TXT">
 				<DescriptionSet>
-					<Set Lang="zhcn"
-						Info=",XLS|DBF|XML|TXT,XLS|DBF|XML,XLS|TXT,XLS|XML,XLS|DBF,XML|DBF,XLS,DBF,XML,TXT" />
-					<Set Lang="enus"
-						Info=",XLS|DBF|XML|TXT,XLS|DBF|XML,XLS|TXT,XLS|XML,XLS|DBF,XML|DBF,XLS,DBF,XML,TXT" />
+					<Set Lang="zhcn" Info=",XLS|DBF|XML|TXT,XLS|DBF|XML,XLS|TXT,XLS|XML,XLS|DBF,XML|DBF,XLS,DBF,XML,TXT" />
+					<Set Lang="enus" Info=",XLS|DBF|XML|TXT,XLS|DBF|XML,XLS|TXT,XLS|XML,XLS|DBF,XML|DBF,XLS,DBF,XML,TXT" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="MenuType" default="0"
-				Values="TOP,LEFT,METRO">
+			<XGroupValue Name="MenuType" default="0" Values="TOP,LEFT,METRO">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="顶部,左菜单,WIN8" />
 					<Set Lang="enus" Info="Top,Left,Metro" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="GroupShow" default="0"
-				Values="LST,TOP,BOTTOM,GUIDE">
+			<XGroupValue Name="GroupShow" default="0" Values="LST,TOP,BOTTOM,GUIDE">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="列表显示,顶部,尾部,向导模式" />
 					<Set Lang="enus" Info="List,Top,Bottom,Guide" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="CachedType" default="0"
-				Values="none,all,load,action">
+			<XGroupValue Name="CachedType" default="0" Values="none,all,load,action">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="无,全部,加载时,执行过程时" />
 					<Set Lang="enus" Info="None,All,Load,Action" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="HiddenCaption" default="0"
-				Values="0,1">
+			<XGroupValue Name="HiddenCaption" default="0" Values="0,1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
@@ -4142,12 +3898,10 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info=",Single,Multi" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="Test" default="0"
-				Values="Key,ParentKey,Text,P0,P1,P2,MG">
+			<XGroupValue Name="Test" default="0" Values="Key,ParentKey,Text,P0,P1,P2,MG">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="主键,父键,文本,附加参数1,附加参数2,附加参数3,图标组" />
-					<Set Lang="enus"
-						Info="Master,Parent,Text,Add Para1,Add Para2,Add Para3,Meun Group" />
+					<Set Lang="enus" Info="Master,Parent,Text,Add Para1,Add Para2,Add Para3,Meun Group" />
 				</DescriptionSet>
 			</XGroupValue>
 			<XGroupValue Name="LoadByLevel" default="0" Values="0,1">
@@ -4174,37 +3928,31 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info="Chinese(GB),English" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="HAlign" default="0"
-				Values=",center,left,right">
+			<XGroupValue Name="HAlign" default="0" Values=",center,left,right">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",居中,左对齐,右对齐" />
 					<Set Lang="enus" Info=",Center,Left,Right" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="VAlign" default="0"
-				Values=",top,bottom,middle">
+			<XGroupValue Name="VAlign" default="0" Values=",top,bottom,middle">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",顶部,底部,垂直居中" />
 					<Set Lang="enus" Info=",Top,Bottom,Middle" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="FrameType" default="0"
-				Values=",H,V,H5,V5">
+			<XGroupValue Name="FrameType" default="0" Values=",H,V,H5,V5">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",左右,上下,左右(H5),上下(H5)" />
-					<Set Lang="enus"
-						Info=",LeftRigth,TopBottom,LeftRigth(H5),TopBottom(H5)" />
+					<Set Lang="enus" Info=",LeftRigth,TopBottom,LeftRigth(H5),TopBottom(H5)" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="IconType" default="0"
-				Values="Path,Image">
+			<XGroupValue Name="IconType" default="0" Values="Path,Image">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="图片路径,图片数据" />
 					<Set Lang="enus" Info="Image Path, Image Data" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="ChartsShow" default="0"
-				Values="TableChart,Table,Chart">
+			<XGroupValue Name="ChartsShow" default="0" Values="TableChart,Table,Chart">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="图和表,只有表,只有图" />
 					<Set Lang="enus" Info="Table and Charts,Table only,Charts only" />
@@ -4219,8 +3967,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			<Set Lang="enus" Info="Menu items" />
 		</DescriptionSet>
 		<XItemParameters>
-			<XItemParameter Name="Name" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="Name" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="名称" />
 				</DescriptionSet>
@@ -4232,20 +3979,17 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DescriptionSet" IsSet="1"
-				IsShow="1" IsMulti="1">
+			<XItemParameter Name="DescriptionSet" IsSet="1" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="菜单名称" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="Lang" Type="group" IsUnique="1"
-						CreateValue="EWA.LANG">
+					<Value Name="Lang" Type="group" IsUnique="1" CreateValue="EWA.LANG">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="国别" />
 						</DescriptionSet>
 					</Value>
-					<Value Name="Info" Step="0" Type="string"
-						CreateValue="this.Menu.Txt">
+					<Value Name="Info" Step="0" Type="string" CreateValue="this.Menu.Txt">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="信息" />
 						</DescriptionSet>
@@ -4253,22 +3997,19 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="Icon" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="Icon" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="图标" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="string" Step="0" Name="Icon"
-						CreateValue="this.Menu.Icon">
+					<Value Type="string" Step="0" Name="Icon" CreateValue="this.Menu.Icon">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="图标" />
 						</DescriptionSet>
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="Cmd" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="Cmd" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="执行的脚本" />
 				</DescriptionSet>
@@ -4280,8 +4021,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="Group" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="Group" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="菜单组" />
 				</DescriptionSet>
@@ -4312,8 +4052,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			<Set Lang="enus" Info="Charts" />
 		</DescriptionSet>
 		<XItemParameters>
-			<XItemParameter Name="Name" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="Name" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="名称" />
 				</DescriptionSet>
@@ -4325,20 +4064,17 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DescriptionSet" IsSet="1"
-				IsShow="1" IsMulti="1">
+			<XItemParameter Name="DescriptionSet" IsSet="1" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="描述" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="Lang" Type="group" IsUnique="1"
-						CreateValue="EWA.LANG">
+					<Value Name="Lang" Type="group" IsUnique="1" CreateValue="EWA.LANG">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="国别" />
 						</DescriptionSet>
 					</Value>
-					<Value Name="Info" Step="0" Type="string"
-						CreateValue="this.Menu.Txt">
+					<Value Name="Info" Step="0" Type="string" CreateValue="this.Menu.Txt">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="信息" />
 						</DescriptionSet>
@@ -4346,22 +4082,19 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="ChartType" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="ChartType" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="图形" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="group" Step="0" Name="ChartType"
-						CreateValue="this.Menu.Icon">
+					<Value Type="group" Step="0" Name="ChartType" CreateValue="this.Menu.Icon">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="图标" />
 						</DescriptionSet>
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="ChartSize" IsSet="0" IsShow="1"
-				IsMulti="1">
+			<XItemParameter Name="ChartSize" IsSet="0" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="尺寸" />
 				</DescriptionSet>
@@ -4378,26 +4111,22 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DataMap" IsSet="0" IsShow="1"
-				IsMulti="1">
+			<XItemParameter Name="DataMap" IsSet="0" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="数据映射" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="LabelData" Type="ref"
-						Ref="EasyWebTemplate/XItems/XItem" CreateValue="'800'">
+					<Value Name="LabelData" Type="ref" Ref="EasyWebTemplate/XItems/XItem" CreateValue="'800'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="标记" />
 						</DescriptionSet>
 					</Value>
-					<Value Name="SeriesData" Type="ref"
-						Ref="EasyWebTemplate/XItems/XItem" CreateValue="'600'">
+					<Value Name="SeriesData" Type="ref" Ref="EasyWebTemplate/XItems/XItem" CreateValue="'600'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="系列" />
 						</DescriptionSet>
 					</Value>
-					<Value Name="ChartData" Type="ref"
-						Ref="EasyWebTemplate/XItems/XItem" CreateValue="'600'">
+					<Value Name="ChartData" Type="ref" Ref="EasyWebTemplate/XItems/XItem" CreateValue="'600'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="图数据" />
 						</DescriptionSet>
@@ -4416,8 +4145,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			<XGroupValue Name="ChartType" Default="0"
 				Values="LINE,PIE,PIE3D,COLUMN,COLUMN3D,COLUMNSTACKED,COLUMNSTACKED3D,BAR,BAR3D,BARSTACKED,BARSTACKED3D">
 				<DescriptionSet>
-					<Set Lang="zhcn"
-						Info="线图,饼图,饼图3D,柱状图,柱状图3D,柱状堆砌图,柱状堆砌图3D,带状图,带状图3D,带状堆砌图,带状堆砌图3D" />
+					<Set Lang="zhcn" Info="线图,饼图,饼图3D,柱状图,柱状图3D,柱状堆砌图,柱状堆砌图3D,带状图,带状图3D,带状堆砌图,带状堆砌图3D" />
 					<Set Lang="enus"
 						Info="Line, PIE,PIE3D,COLUMN,COLUMN3D,COLUMNSTACKED,COLUMNSTACKED3D,BAR,BAR3D,BARSTACKED,BARSTACKED3D" />
 				</DescriptionSet>
@@ -4431,8 +4159,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			<Set Lang="enus" Info="Informations" />
 		</DescriptionSet>
 		<XItemParameters>
-			<XItemParameter Name="Name" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="Name" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="名称" />
 				</DescriptionSet>
@@ -4444,8 +4171,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DescriptionSet" IsSet="1"
-				IsShow="1" IsMulti="1">
+			<XItemParameter Name="DescriptionSet" IsSet="1" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="菜单名称" />
 				</DescriptionSet>
@@ -4483,14 +4209,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			<Set Lang="enus" Info="Action Items" />
 		</DescriptionSet>
 		<XItemParameters>
-			<XItemParameter Name="ActionSet" IsSet="1" IsShow="1"
-				IsMulti="1" ChildrenParameters="CallSet">
+			<XItemParameter Name="ActionSet" IsSet="1" IsShow="1" IsMulti="1" ChildrenParameters="CallSet">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="事件处理" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="string" Name="Type"
-						CreateValue="this.Action.ActionName">
+					<Value Type="string" Name="Type" CreateValue="this.Action.ActionName">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="事件类型" />
 						</DescriptionSet>
@@ -4510,46 +4234,39 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="SqlSet" IsSet="1" IsShow="1"
-				IsMulti="1" ChildrenParameters="CSSet">
+			<XItemParameter Name="SqlSet" IsSet="1" IsShow="1" IsMulti="1" ChildrenParameters="CSSet">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="SQL语句" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="string" Name="Name" IsUnique="1"
-						CreateValue="this.Action.Name+' SQL'">
+					<Value Type="string" Name="Name" IsUnique="1" CreateValue="this.Action.Name+' SQL'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="名称" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="group" Name="SqlType"
-						CreateValue="this.Action.SqlType">
+					<Value Type="group" Name="SqlType" CreateValue="this.Action.SqlType">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="Sql类型" Memo="查询,更新,存储过程" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="group" Name="TransType" CreateValue="'no'">
 						<DescriptionSet>
-							<Set Lang="zhcn" Info="事务处理方式"
-								Memo="是(yes),否(no),继承(inherit)" />
+							<Set Lang="zhcn" Info="事务处理方式" Memo="是(yes),否(no),继承(inherit)" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="sql" Name="Sql" IsCDATA="1"
-						CreateValue="this.Action.SetSql">
+					<Value Type="sql" Name="Sql" IsCDATA="1" CreateValue="this.Action.SetSql">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="SQL语句" />
 						</DescriptionSet>
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="JSONSet" IsSet="1" IsShow="1"
-				IsMulti="1" ChildrenParameters="CSSet">
+			<XItemParameter Name="JSONSet" IsSet="1" IsShow="1" IsMulti="1" ChildrenParameters="CSSet">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="JSON调用" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="string" Name="Name" IsUnique="1"
-						CreateValue="this.Action.Name+' JSON'">
+					<Value Type="string" Name="Name" IsUnique="1" CreateValue="this.Action.Name+' JSON'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="名称" />
 						</DescriptionSet>
@@ -4561,8 +4278,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="ClassSet" IsSet="1" IsShow="1"
-				IsMulti="1">
+			<XItemParameter Name="ClassSet" IsSet="1" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="数据类调用" />
 				</DescriptionSet>
@@ -4600,8 +4316,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="XmlSet" IsSet="1" IsShow="1"
-				IsMulti="1">
+			<XItemParameter Name="XmlSet" IsSet="1" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="XML数据操作" />
 				</DescriptionSet>
@@ -4611,8 +4326,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="zhcn" Info="名称" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="XmlSetData"
-						Ref="EasyWebTemplate/Action/XmlSetData">
+					<Value Type="ref" Name="XmlSetData" Ref="EasyWebTemplate/Action/XmlSetData">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="XML数据源" />
 						</DescriptionSet>
@@ -4640,8 +4354,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="XmlSetData" IsSet="1" IsShow="1"
-				IsMulti="1">
+			<XItemParameter Name="XmlSetData" IsSet="1" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="XML数据源" />
 				</DescriptionSet>
@@ -4677,8 +4390,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="ScriptSet" IsSet="1" IsShow="1"
-				IsMulti="1" ChildrenParameters="CSSet">
+			<XItemParameter Name="ScriptSet" IsSet="1" IsShow="1" IsMulti="1" ChildrenParameters="CSSet">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="脚本" />
 				</DescriptionSet>
@@ -4700,8 +4412,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="UrlSet" IsSet="1" IsShow="1"
-				IsMulti="1" ChildrenParameters="CSSet">
+			<XItemParameter Name="UrlSet" IsSet="1" IsShow="1" IsMulti="1" ChildrenParameters="CSSet">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="跳转页面" />
 				</DescriptionSet>
@@ -4718,8 +4429,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="CSSet" IsSet="1" IsShow="1"
-				IsChildren="1" IsMulti="1">
+			<XItemParameter Name="CSSet" IsSet="1" IsShow="1" IsChildren="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="数据集合" />
 				</DescriptionSet>
@@ -4759,20 +4469,17 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 
 
-			<XItemParameter Name="CallSet" IsSet="1" IsShow="1"
-				IsChildren="1" IsMulti="1">
+			<XItemParameter Name="CallSet" IsSet="1" IsShow="1" IsChildren="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="事件调用" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="group" Name="CallType" Target="CallName"
-						CreateValue="'SqlSet'">
+					<Value Type="group" Name="CallType" Target="CallName" CreateValue="'SqlSet'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="调用类型" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="CallName"
-						CreateValue="this.Action.Name+' SQL'"
+					<Value Type="ref" Name="CallName" CreateValue="this.Action.Name+' SQL'"
 						Ref="EasyWebTemplate/Action/{CallType}">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="调用名称" />
@@ -4783,8 +4490,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="zhcn" Info="检测" Memo="返回记录含有EWA_ERR_OUT" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="Test"
-						CreateValue='this.Action.Test'>
+					<Value Type="string" Name="Test" CreateValue='this.Action.Test'>
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="逻辑表达式" />
 						</DescriptionSet>
@@ -4800,30 +4506,25 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</DescriptionSet>
 				</XGroupValue>
 
-				<XGroupValue Name="IsPostMsg" default="0"
-					Values="no,yes">
+				<XGroupValue Name="IsPostMsg" default="0" Values="no,yes">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info="否,是" />
 						<Set Lang="enus" Info="No,Yes" />
 					</DescriptionSet>
 				</XGroupValue>
-				<XGroupValue Name="CSType" default="0"
-					Values="session,cookie,all">
+				<XGroupValue Name="CSType" default="0" Values="session,cookie,all">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info="仅Session,仅Cookie,全部" />
 						<Set Lang="enus" Info="Only Session,Only Cookie,All" />
 					</DescriptionSet>
 				</XGroupValue>
-				<XGroupValue Name="CallType" default="0"
-					Values=",SqlSet,JSONSet, ClassSet,XmlSet,ScriptSet,UrlSet">
+				<XGroupValue Name="CallType" default="0" Values=",SqlSet,JSONSet, ClassSet,XmlSet,ScriptSet,UrlSet">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info=",SQL集合,JSON集合,数据类集合,XML数据操作,脚本集合,跳转集合" />
-						<Set Lang="enus"
-							Info=",SqlSet,JSON Set, ClassSet,XmlSet,ScriptSet,UrlSet" />
+						<Set Lang="enus" Info=",SqlSet,JSON Set, ClassSet,XmlSet,ScriptSet,UrlSet" />
 					</DescriptionSet>
 				</XGroupValue>
-				<XGroupValue Name="SqlType" default="0"
-					Values="query,update,procedure">
+				<XGroupValue Name="SqlType" default="0" Values="query,update,procedure">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info="查询,更新,存储过程" />
 						<Set Lang="enus" Info="query,update,procedure" />
@@ -4835,15 +4536,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 						<Set Lang="enus" Info="Create,Remove" />
 					</DescriptionSet>
 				</XGroupValue>
-				<XGroupValue Name="TransType" default="0"
-					Values="yes,no">
+				<XGroupValue Name="TransType" default="0" Values="yes,no">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info="是,否" />
 						<Set Lang="enus" Info="Yes,No" />
 					</DescriptionSet>
 				</XGroupValue>
-				<XGroupValue Name="ScriptType" default="0"
-					Values="javascript,vbscript">
+				<XGroupValue Name="ScriptType" default="0" Values="javascript,vbscript">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info="Js脚本,Vb脚本" />
 						<Set Lang="enus" Info="Js,Vb" />
@@ -4855,16 +4554,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 						<Set Lang="enus" Info="Chinese(GB),English,Jpanese" />
 					</DescriptionSet>
 				</XGroupValue>
-				<XGroupValue Name="XmlAction" default="0"
-					Values=",load,insert,update,inertOrUpdate,deletes">
+				<XGroupValue Name="XmlAction" default="0" Values=",load,insert,update,inertOrUpdate,deletes">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info=",加载数据,新数据,更新数据,新或更新多条数据,删除数据" />
-						<Set Lang="enus"
-							Info=",load,insert,update,inertOrUpdate,deletes" />
+						<Set Lang="enus" Info=",load,insert,update,inertOrUpdate,deletes" />
 					</DescriptionSet>
 				</XGroupValue>
-				<XGroupValue Name="XmlLoadType" default="0"
-					Values="attribute,childnode">
+				<XGroupValue Name="XmlLoadType" default="0" Values="attribute,childnode">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info="属性,子节点" />
 						<Set Lang="enus" Info="Attribute,ChildNode" />
@@ -4879,34 +4575,29 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			<Set Lang="enus" Info="Workflow" />
 		</DescriptionSet>
 		<XItemParameters>
-			<XItemParameter Name="Name" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="Name" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="名称" />
 				</DescriptionSet>
 				<Values>
-					<Value Type="string" Name="Name"
-						CreateValue="this.Workflow.Name">
+					<Value Type="string" Name="Name" CreateValue="this.Workflow.Name">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="名称" />
 						</DescriptionSet>
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="DescriptionSet" IsSet="1"
-				IsShow="1" IsMulti="1">
+			<XItemParameter Name="DescriptionSet" IsSet="1" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="描述" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="Lang" Type="group" IsUnique="1"
-						CreateValue="EWA.LANG">
+					<Value Name="Lang" Type="group" IsUnique="1" CreateValue="EWA.LANG">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="国别" />
 						</DescriptionSet>
 					</Value>
-					<Value Name="Info" Step="0" Type="string"
-						CreateValue="this.Menu.Txt">
+					<Value Name="Info" Step="0" Type="string" CreateValue="this.Menu.Txt">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="信息" />
 						</DescriptionSet>
@@ -4914,8 +4605,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="WfType" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="WfType" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="类型" />
 				</DescriptionSet>
@@ -4927,8 +4617,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="WfLogic" IsSet="0" IsShow="1"
-				IsMulti="0">
+			<XItemParameter Name="WfLogic" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="是否可运行操作的表达式" />
 				</DescriptionSet>
@@ -4940,14 +4629,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="WfAction" IsSet="0" IsShow="1"
-				IsMulti="1">
+			<XItemParameter Name="WfAction" IsSet="0" IsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="调用之前的Action" />
 				</DescriptionSet>
 				<Values>
-					<Value Name="WFABefore" Type="ref"
-						Ref="EasyWebTemplate/Action/ActionSet">
+					<Value Name="WFABefore" Type="ref" Ref="EasyWebTemplate/Action/ActionSet">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="执行前用于检查的Action" Memo="如果有记录表示错误，不能执行" />
 						</DescriptionSet>
@@ -4957,8 +4644,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="zhcn" Info="执行错误消息" />
 						</DescriptionSet>
 					</Value>
-					<Value Name="WFAAfter" Type="ref"
-						Ref="EasyWebTemplate/Action/ActionSet">
+					<Value Name="WFAAfter" Type="ref" Ref="EasyWebTemplate/Action/ActionSet">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="执行的Action" />
 						</DescriptionSet>
@@ -4983,8 +4669,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info=",Chinese(GB),English" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="WfType" Default="0"
-				Values="normal,control,end">
+			<XGroupValue Name="WfType" Default="0" Values="normal,control,end">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="流转,控制,终止" />
 					<Set Lang="enus" Info="normal,control,end" />
