@@ -156,8 +156,9 @@ CREATE TABLE EWA_CFG_TREE (
 );
 ```
 
-##Maven
-```
+
+## Maven
+```xml
 <!-- https://mvnrepository.com/artifact/com.gdxsoft.easyweb/emp-script -->
 <dependency>
     <groupId>com.gdxsoft.easyweb</groupId>
