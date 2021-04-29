@@ -75,6 +75,13 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		String sql = "select 1 a from  ewa_cfg_tree where XMLNAME like @XMLNAME_like";
 		DTTable tb = this.getJdbcTable(sql, rv);
 
+		if (tb.getCount() == 0) {
+			String xmlPath2 = UserConfig.filterXmlNameByJdbc(xmlPath);
+			rv.addValue("XMLNAME", xmlPath2);
+			String sql1 = "select 1 a from  ewa_cfg_tree where XMLNAME = @XMLNAME";
+			tb = this.getJdbcTable(sql1, rv);
+		}
+
 		return tb.getCount() > 0;
 	}
 
@@ -483,7 +490,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("select HASH_CODE, UPDATE_DATE, MD5, DATASOURCE, CLASS_ACL, CLASS_LOG, ADM_LID from EWA_CFG ");
-		if(this.isHsqlDb()) {
+		if (this.isHsqlDb()) {
 			sb.append(" where xmlname=@xmlNameJdbc and lower(itemname) = lower(@itemname) ");
 		} else {
 			sb.append(" where xmlname=@xmlNameJdbc and itemname=@itemname ");
@@ -927,7 +934,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
 		rv.addOrUpdateValue("itemname", itemname);
 
-		if(this.isHsqlDb()) {
+		if (this.isHsqlDb()) {
 			sb.append("select 1 a from EWA_CFG where xmlname=@xmlNameJdbc and lower(itemname)=lower(@itemname)");
 		} else {
 			sb.append("select 1 a from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
@@ -953,7 +960,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		rv.addOrUpdateValue("itemname", itemname);
 
 		StringBuilder sb = new StringBuilder();
-		if(this.isHsqlDb()) {
+		if (this.isHsqlDb()) {
 			sb.append("select * from EWA_CFG where xmlname=@xmlNameJdbc and lower(itemname)= lower(@itemname)");
 		} else {
 			sb.append("select * from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
