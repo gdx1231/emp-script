@@ -319,7 +319,8 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 			poolCfg.setSchemaName("PUBLIC");
 
 			MTableStr poolParams = new MTableStr();
-			poolParams.put("driverClassName", "org.hsqldb.jdbcDriver");
+			//poolParams.put("driverClassName", "org.hsqldb.jdbcDriver");
+			poolParams.put("driverClassName", "org.hsqldb.jdbc.JDBCDriver");
 			poolParams.put("url", CONN_URL);
 			poolParams.put("username", "sa");
 			poolParams.put("password", "");
