@@ -1,5 +1,6 @@
 package com.gdxsoft.easyweb.uploader;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class FileUpload {
@@ -14,8 +15,11 @@ public class FileUpload {
 	private FileUpload _From;
 	private ArrayList<FileUpload> _Subs = new ArrayList<FileUpload>();
 
+	private File uploadedFile;
+
 	/**
 	 * 子文件，解压的文件或新尺寸的图片文件
+	 * 
 	 * @return
 	 */
 	public ArrayList<FileUpload> getSubs() {
@@ -32,8 +36,7 @@ public class FileUpload {
 	}
 
 	/**
-	 * @param userLocalPath
-	 *            the _UserLocalPath to set
+	 * @param userLocalPath the _UserLocalPath to set
 	 */
 	public void setUserLocalPath(String userLocalPath) {
 		_UserLocalPath = userLocalPath;
@@ -47,8 +50,7 @@ public class FileUpload {
 	}
 
 	/**
-	 * @param savePath
-	 *            the _SavePath to set
+	 * @param savePath the _SavePath to set
 	 */
 	public void setSavePath(String savePath) {
 		_SavePath = savePath;
@@ -62,8 +64,7 @@ public class FileUpload {
 	}
 
 	/**
-	 * @param ext
-	 *            the _Ext to set
+	 * @param ext the _Ext to set
 	 */
 	public void setExt(String ext) {
 		_Ext = ext;
@@ -77,8 +78,7 @@ public class FileUpload {
 	}
 
 	/**
-	 * @param saveFileName
-	 *            the _SaveFileName to set
+	 * @param saveFileName the _SaveFileName to set
 	 */
 	public void setSaveFileName(String saveFileName) {
 		_SaveFileName = saveFileName;
@@ -92,8 +92,7 @@ public class FileUpload {
 	}
 
 	/**
-	 * @param fileUrl
-	 *            the _FileUrl to set
+	 * @param fileUrl the _FileUrl to set
 	 */
 	public void setFileUrl(String fileUrl) {
 		_FileUrl = fileUrl;
@@ -111,8 +110,7 @@ public class FileUpload {
 	/**
 	 * 全局编号
 	 * 
-	 * @param unid
-	 *            the _Unid to set
+	 * @param unid the _Unid to set
 	 */
 	public void setUnid(String unid) {
 		_Unid = unid;
@@ -130,8 +128,7 @@ public class FileUpload {
 	/**
 	 * 上传类型
 	 * 
-	 * @param contextType
-	 *            the _ContextType to set
+	 * @param contextType the _ContextType to set
 	 */
 	public void setContextType(String contextType) {
 		_ContextType = contextType;
@@ -145,8 +142,7 @@ public class FileUpload {
 	}
 
 	/**
-	 * @param from
-	 *            the _From to set
+	 * @param from the _From to set
 	 */
 	public void setFrom(FileUpload from) {
 		_From = from;
@@ -160,11 +156,28 @@ public class FileUpload {
 	}
 
 	/**
-	 * @param length
-	 *            the _Length to set
+	 * @param length the _Length to set
 	 */
 	public void setLength(int length) {
 		_Length = length;
+	}
+
+	/**
+	 * The uploaded file
+	 * 
+	 * @return the uploadedFile
+	 */
+	public File getUploadedFile() {
+		return uploadedFile;
+	}
+
+	/**
+	 * The uploaded file
+	 * 
+	 * @param uploadedFile the uploadedFile to set
+	 */
+	public void setUploadedFile(File uploadedFile) {
+		this.uploadedFile = uploadedFile;
 	}
 
 }

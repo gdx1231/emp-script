@@ -160,7 +160,7 @@ public class ItemValues {
 				try {
 					sp.setSql(sql);
 					sql = sp.rebuildSql(null, null, true);
-				}catch(Exception err) {
+				} catch (Exception err) {
 					// 可能没有 where条件
 				}
 			}
@@ -229,26 +229,25 @@ public class ItemValues {
 		double numberScale = 1;
 		if (userXItem.testName("DataItem")) {
 			UserXItemValues us = userXItem.getItem("DataItem");
-			if (us.count() == 0) {
-				return null;
-			}
-			UserXItemValue u = us.getItem(0);
-			if (u.testName("DataField") && u.getItem("DataField").trim().length() > 0) {
-				dataFieldName = u.getItem("DataField");
-			}
-			if (u.testName("DataType")) {
-				dataType = u.getItem("DataType");
-			}
-			if (u.testName("Format")) {
-				format = u.getItem("Format");
-			}
-			if (u.testName("NumberScale")) {
-				String scale = u.getItem("NumberScale");
-				if (scale.trim().length() > 0) {
-					try {
-						numberScale = Double.parseDouble(scale);
-					} catch (Exception err) {
+			if (us.count() > 0) {
+				UserXItemValue u = us.getItem(0);
+				if (u.testName("DataField") && u.getItem("DataField").trim().length() > 0) {
+					dataFieldName = u.getItem("DataField");
+				}
+				if (u.testName("DataType")) {
+					dataType = u.getItem("DataType");
+				}
+				if (u.testName("Format")) {
+					format = u.getItem("Format");
+				}
+				if (u.testName("NumberScale")) {
+					String scale = u.getItem("NumberScale");
+					if (scale.trim().length() > 0) {
+						try {
+							numberScale = Double.parseDouble(scale);
+						} catch (Exception err) {
 
+						}
 					}
 				}
 			}

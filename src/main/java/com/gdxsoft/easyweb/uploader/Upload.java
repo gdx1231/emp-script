@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.fileupload.FileItem;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.PageValue;
@@ -31,6 +33,8 @@ import com.gdxsoft.easyweb.utils.fileConvert.Cvt2Swf;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class Upload {
+	private static Logger LOGGER = LoggerFactory.getLogger(Upload.class);
+
 	public static String DEFAULT_UPLOAD_PATH = "upload_files";
 	static char[] hex = "0123456789ABCDEF".toCharArray();
 
@@ -51,7 +55,7 @@ public class Upload {
 	private String _upDelete;
 	private String _upUnZip;
 	private DataConnection _Conn;
-	private ArrayList<FileUpload> _AlFiles;
+	private List<FileUpload> _AlFiles;
 	private String _uploadName;
 
 	private List<?> _UploadItems;
@@ -81,7 +85,7 @@ public class Upload {
 	 * @param s1
 	 * @return
 	 */
-	private String decode(String s1) {
+	public String decode(String s1) {
 		if (s1 == null || s1.isEmpty()) {
 			return s1;
 		}
@@ -102,8 +106,9 @@ public class Upload {
 	 * @param uploadXmlName  上传文件配置文件
 	 * @param uploadItemName 上传文件配置项
 	 * @param name           配置项的上传参数名称
+	 * @throws Exception
 	 */
-	public void init(String uploadXmlName, String uploadItemName, String name) {
+	public void init(String uploadXmlName, String uploadItemName, String name) throws Exception {
 
 		ItemValues iv = new ItemValues();
 		HtmlClass hc = new HtmlClass();
@@ -116,100 +121,93 @@ public class Upload {
 
 		this._UpExts = new HashMap<String, Boolean>();
 
-		try {
-
-			UserConfig uc = UserConfig.instance(uploadXmlName, uploadItemName, null);
-			if (!uc.getUserXItems().testName(name)) { // 无效
+		UserConfig uc = UserConfig.instance(uploadXmlName, uploadItemName, null);
+		if (!uc.getUserXItems().testName(name)) { // 无效
+			_uploadDir = null;
+			return;
+		}
+		_uploadDir = DEFAULT_UPLOAD_PATH;
+		UserXItem uxi = uc.getUserXItems().getItem(name);
+		if (uxi.testName("Upload")) {
+			_uploadName = uxi.getName();
+			if (uxi.getItem("Upload").count() == 0) {
+				System.err.println(_uploadName + "配置项信息不全，请修改配置文件");
 				_uploadDir = null;
 				return;
 			}
-			_uploadDir = DEFAULT_UPLOAD_PATH;
-			UserXItem uxi = uc.getUserXItems().getItem(name);
-			if (uxi.testName("Upload")) {
-				_uploadName = uxi.getName();
-				if (uxi.getItem("Upload").count() == 0) {
-					System.err.println(_uploadName + "配置项信息不全，请修改配置文件");
-					_uploadDir = null;
-					return;
-				}
-				UserXItemValue u = uxi.getItem("Upload").getItem(0);
-				if (u.testName("UpPath")) {
-					String p = u.getItem("UpPath");
-					if (!p.trim().equals("")) {
-						p = iv.replaceParameters(p, false);
-						if (p.indexOf("..") >= 0) { // 避免出现 ../../../root的风险
-							System.err.println(this + "上传路径出现‘..’，被替换（" + p + "）-->");
-							p = p.replace("..", "");
-							System.err.println(p);
-						}
-						if (p.length() > 255) { // 避免路嘉过长，超过系统限制
-							System.err.println(this + "上传路径长度超过255，被替换（" + p + "）-->");
-							p = DEFAULT_UPLOAD_PATH;
-							System.err.println(p);
-						}
-						_uploadDir = p;
+			UserXItemValue u = uxi.getItem("Upload").getItem(0);
+			if (u.testName("UpPath")) {
+				String p = u.getItem("UpPath");
+				if (!p.trim().equals("")) {
+					p = iv.replaceParameters(p, false);
+					if (p.indexOf("..") >= 0) { // 避免出现 ../../../root的风险
+						System.err.println(this + "上传路径出现‘..’，被替换（" + p + "）-->");
+						p = p.replace("..", "");
+						System.err.println(p);
 					}
-				}
-				if (u.testName("UpSaveMethod")) {
-					// _upSaveMethod = u.getItem("UpSaveMethod");
-				}
-				if (u.testName("UpSql")) {
-					_upSql = u.getItem("UpSql");
-				}
-				if (u.testName("UpNewSizes")) {
-					_upNewSizes = u.getItem("UpNewSizes");
-				}
-				// 是在客户端还是服务器端生成新尺寸图片
-				if (u.testName("NewSizesIn")) {
-					this._NewSizesIn = u.getItem("NewSizesIn");
-				}
-				if (u.testName("Up2Swf")) {
-					_upSwf = u.getItem("Up2Swf");
-					if (_upSwf.equalsIgnoreCase("yes")) {
-						this._UpExts.put("SWF", true);
+					if (p.length() > 255) { // 避免路嘉过长，超过系统限制
+						System.err.println(this + "上传路径长度超过255，被替换（" + p + "）-->");
+						p = DEFAULT_UPLOAD_PATH;
+						System.err.println(p);
 					}
+					_uploadDir = p;
 				}
-				if (u.testName("UpDelete")) {
-					_upDelete = u.getItem("UpDelete");
+			}
+			if (u.testName("UpSaveMethod")) {
+				// _upSaveMethod = u.getItem("UpSaveMethod");
+			}
+			if (u.testName("UpSql")) {
+				_upSql = u.getItem("UpSql");
+			}
+			if (u.testName("UpNewSizes")) {
+				_upNewSizes = u.getItem("UpNewSizes");
+			}
+			// 是在客户端还是服务器端生成新尺寸图片
+			if (u.testName("NewSizesIn")) {
+				this._NewSizesIn = u.getItem("NewSizesIn");
+			}
+			if (u.testName("Up2Swf")) {
+				_upSwf = u.getItem("Up2Swf");
+				if (_upSwf.equalsIgnoreCase("yes")) {
+					this._UpExts.put("SWF", true);
 				}
-				if (u.testName("UpUnZip")) {
-					_upUnZip = u.getItem("UpUnZip");
-				}
+			}
+			if (u.testName("UpDelete")) {
+				_upDelete = u.getItem("UpDelete");
+			}
+			if (u.testName("UpUnZip")) {
+				_upUnZip = u.getItem("UpUnZip");
+			}
 
-				this._IsRunUpSQLResized = false;
-				// _IsRunUpSQLResized
-				if (u.testName("RunUpSQLResized")) {
-					String v = u.getItem("RunUpSQLResized");
-					if (v != null && v.equalsIgnoreCase("yes")) {
-						this._IsRunUpSQLResized = true;
-					}
+			this._IsRunUpSQLResized = false;
+			// _IsRunUpSQLResized
+			if (u.testName("RunUpSQLResized")) {
+				String v = u.getItem("RunUpSQLResized");
+				if (v != null && v.equalsIgnoreCase("yes")) {
+					this._IsRunUpSQLResized = true;
 				}
-				// UpExts
-				if (u.testName("UpExts")) {
-					String up_exts = u.getItem("UpExts");
-					if (up_exts.trim().length() > 0) {
-						String[] exts = up_exts.split(",");
+			}
+			// UpExts
+			if (u.testName("UpExts")) {
+				String up_exts = u.getItem("UpExts");
+				if (up_exts.trim().length() > 0) {
+					String[] exts = up_exts.split(",");
 
-						for (int i = 0; i < exts.length; i++) {
-							String ext = exts[i].trim().toUpperCase();
-							this._UpExts.put(ext, true);
-							if (ext.equals("JPG")) {
-								this._UpExts.put("JPEG", true);
-							}
+					for (int i = 0; i < exts.length; i++) {
+						String ext = exts[i].trim().toUpperCase();
+						this._UpExts.put(ext, true);
+						if (ext.equals("JPG")) {
+							this._UpExts.put("JPEG", true);
 						}
 					}
 				}
 			}
+		}
 
-			if (this._upSql != null && this._upSql.trim().length() > 0) {
-				String ds = uc.getUserPageItem().getSingleValue("DataSource");
-				this._Conn = new DataConnection();
-				this._Conn.setConfigName(ds);
-			}
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			_uploadDir = null;
-			return;
+		if (this._upSql != null && this._upSql.trim().length() > 0) {
+			String ds = uc.getUserPageItem().getSingleValue("DataSource");
+			this._Conn = new DataConnection();
+			this._Conn.setConfigName(ds);
 		}
 
 		// 覆盖新尺寸设定 例如：800x600,400x300
@@ -223,10 +221,8 @@ public class Upload {
 		/*
 		 * 在 ewa_conf.xml中的设定
 		 * 
-		 * <path des="图片缩略图保存根路径" Name="img_tmp_path"
-		 * Value="@/Users/admin/java/img_tmps/" /> <path des=
-		 * "图片缩略图保存根路径URL, ！！！需要在Tomcat或Apache或Nginx中配置虚拟路径！！！。" Name="img_tmp_path_url"
-		 * Value="/img_tmps/" />
+		 * <path des="图片缩略图保存根路径" Name="img_tmp_path" Value="@/Users/admin/java/img_tmps/" /> <path des=
+		 * "图片缩略图保存根路径URL, ！！！需要在Tomcat或Apache或Nginx中配置虚拟路径！！！。" Name="img_tmp_path_url" Value="/img_tmps/" />
 		 */
 		root = UPath.getPATH_UPLOAD();
 
@@ -251,7 +247,7 @@ public class Upload {
 		_AlFiles = new ArrayList<FileUpload>();
 	}
 
-	public void init(HttpServletRequest request) {
+	public void init(HttpServletRequest request) throws Exception {
 		// _request = request;
 		RequestValue rv = this._Rv;
 		// 从tomcat 7.6以上版本，|符号不能之间传递，必须转义，否则抛出400错误
@@ -272,7 +268,7 @@ public class Upload {
 	 * @param fu
 	 * @return
 	 */
-	private boolean checkValidExt(FileUpload fu) {
+	public boolean checkValidExt(FileUpload fu) {
 		if (fu == null || fu.getExt() == null) {
 			return false;
 		}
@@ -303,7 +299,8 @@ public class Upload {
 
 				if (item.isFormField() && item.getFieldName().equals(_uploadName) || !item.isFormField()) {
 					try {
-						FileUpload fu = this.uploadFile(item, m);
+						FileUpload fu = this.takeFileUpload(item, m);
+						handleSubs(fu);
 						if (this.checkValidExt(fu)) {
 							this._AlFiles.add(fu);
 							this.createNewSizeImages(fu);
@@ -320,7 +317,8 @@ public class Upload {
 			}
 		} else {
 			String v = this._Rv.getString(this._uploadName);
-			FileUpload fu = this.uploadFile(v, m);
+			FileUpload fu = this.takeFileUpload(v, m);
+			handleSubs(fu);
 			this._AlFiles.add(fu);
 			this.createNewSizeImages(fu);
 			m++;
@@ -329,13 +327,13 @@ public class Upload {
 		this.handleClientNewSizes();
 
 		// 调用SQL
-		if (this._upSql != null && this._upSql.length() > 0) {
+		if (this._upSql != null && this._upSql.trim().length() > 0) {
 			this.writeToDatabase();
 		}
 		return createJSon();
 	}
 
-	private void handleClientNewSizes() {
+	public void handleClientNewSizes() {
 		if (this._upNewSizes == null || this._upNewSizes.trim().length() == 0) {
 			return;
 		}
@@ -375,7 +373,7 @@ public class Upload {
 	 * @param root
 	 * @param sub
 	 */
-	private void moveClientNewSizesFileToRootPath(FileUpload root) {
+	public void moveClientNewSizesFileToRootPath(FileUpload root) {
 		File uploadedFile = new File(root.getSavePath());
 		String path = uploadedFile.getAbsolutePath() + "$resized";
 		File pathResized = new File(path);
@@ -402,7 +400,7 @@ public class Upload {
 	 * @param zipFile
 	 * @return
 	 */
-	private List<FileUpload> upzipFiles(String zipFile) {
+	public List<FileUpload> upzipFiles(String zipFile) {
 		try {
 			List<FileUpload> fus = new ArrayList<FileUpload>();
 			List<String> files = UFile.unZipFile(zipFile);
@@ -423,7 +421,7 @@ public class Upload {
 		}
 	}
 
-	private String createJSon() {
+	public String createJSon() {
 		MStr sb = new MStr();
 		sb.append("[");
 		for (int i = 0; i < this._AlFiles.size(); i++) {
@@ -463,7 +461,7 @@ public class Upload {
 		return sb.toString();
 	}
 
-	private String unicode(char c) {
+	public String unicode(char c) {
 		MStr sb = new MStr();
 		sb.a("\\u");
 		int n = c;
@@ -475,7 +473,7 @@ public class Upload {
 		return sb.toString();
 	}
 
-	private String createJSon(FileUpload fu) {
+	public String createJSon(FileUpload fu) {
 		JSONObject json = new JSONObject();
 		boolean isReal = UPath.getPATH_UPLOAD_URL() != null;
 		try {
@@ -497,7 +495,7 @@ public class Upload {
 
 	}
 
-	private FileUpload createFileUpload(File f) {
+	public FileUpload createFileUpload(File f) {
 		FileUpload fu = new FileUpload();
 		fu.setSavePath(f.getAbsolutePath());
 		fu.setExt(UFile.getFileExt(f.getName()));
@@ -519,14 +517,12 @@ public class Upload {
 	 * @param f
 	 * @return
 	 */
-	private String createURL(File f) {
+	public String createURL(File f) {
 		/*
 		 * 在 ewa_conf.xml中的设定
 		 * 
-		 * <path des="图片缩略图保存根路径" Name="img_tmp_path"
-		 * Value="@/Users/admin/java/img_tmps/" /> <path des=
-		 * "图片缩略图保存根路径URL, ！！！需要在Tomcat或Apache或Nginx中配置虚拟路径！！！。" Name="img_tmp_path_url"
-		 * Value="/img_tmps/" />
+		 * <path des="图片缩略图保存根路径" Name="img_tmp_path" Value="@/Users/admin/java/img_tmps/" /> <path des=
+		 * "图片缩略图保存根路径URL, ！！！需要在Tomcat或Apache或Nginx中配置虚拟路径！！！。" Name="img_tmp_path_url" Value="/img_tmps/" />
 		 */
 
 		String url;
@@ -539,16 +535,8 @@ public class Upload {
 		return url;
 	}
 
-	private FileUpload uploadFile(String base64, int m) throws Exception {
-		FileUpload fu = this.takeFileUpload(base64, m);
-		File uploadedFile = new File(fu.getSavePath());
-
-		String url = createURL(uploadedFile);
-		fu.setFileUrl(url);
-		fu.setContextType("image/jpg");
-
-		this.writeFile(base64, uploadedFile);
-
+	public void handleSubs(FileUpload fu) {
+		File uploadedFile = fu.getUploadedFile();
 		if (this._upUnZip != null && this._upUnZip.equalsIgnoreCase("yes")) {
 			if (fu.getExt().equalsIgnoreCase("zip")) {
 				List<FileUpload> lst = this.upzipFiles(uploadedFile.getAbsolutePath());
@@ -577,80 +565,9 @@ public class Upload {
 			}
 			this._AlFiles.add(fu);
 		}
-		return fu;
 	}
 
-	private FileUpload uploadFile(FileItem item, int m) throws Exception {
-		FileUpload fu = this.takeFileUpload(item, m);
-		File uploadedFile = new File(fu.getSavePath());
-
-		String url = createURL(uploadedFile);
-		fu.setFileUrl(url);
-		fu.setContextType(item.getContentType());
-
-		// 文件保存
-		// if (!this._upSaveMethod.equalsIgnoreCase("SQL")) {
-		// item.write(uploadedFile);
-		// }
-
-		// item.write(uploadedFile);
-		this.writeFile(item, uploadedFile);
-
-		if (this._upUnZip != null && this._upUnZip.equalsIgnoreCase("yes")) {
-			if (fu.getExt().equalsIgnoreCase("zip")) {
-				List<FileUpload> lst = this.upzipFiles(uploadedFile.getAbsolutePath());
-				for (int i = 0; i < lst.size(); i++) {
-					lst.get(i).setUnid(fu.getUnid());
-					fu.getSubs().add(lst.get(i));
-				}
-			}
-		} else if (_upSwf != null && _upSwf.equalsIgnoreCase("yes")) {
-			Cvt2Swf swf = new Cvt2Swf();
-			String targetPath = UFile.changeFileExt(uploadedFile.getAbsolutePath(), "swf");
-			File target = new File(targetPath);
-			boolean rst = swf.cvt2Swf(uploadedFile.getAbsolutePath(), target.getAbsolutePath());
-			if (rst) {
-				fu.setSaveFileName(target.getName());
-				fu.setSavePath(target.getAbsolutePath());
-				String fileUrl = target.getAbsolutePath().replace(this._rootPath, "/").replace("\\", "/").replace("//",
-						"/");
-				fu.setFileUrl(fileUrl);
-
-				// 删除上传原始文件
-				if (this._upDelete != null && this._upDelete.equalsIgnoreCase("yes")) {
-					swf.deletePdf();
-					swf.deleteSource();
-				}
-			}
-			this._AlFiles.add(fu);
-		}
-		return fu;
-	}
-
-	private void writeFile(Object itemobj, File uploadedFile) throws Exception {
-		if (itemobj instanceof String) {
-			String base64 = itemobj.toString();
-			// "data:image/jpeg;base64,
-			String tag1 = ";base64,";
-			int tagStart = base64.indexOf(tag1);
-			String b64;
-			if (tagStart > 0) {
-				String tag = base64.substring(0, tagStart + tag1.length());
-				System.out.println(tag);
-				b64 = base64.substring(tagStart + tag1.length());
-			} else {
-				b64 = base64;
-			}
-			byte[] buf = UConvert.FromBase64String(b64);
-			UFile.createBinaryFile(uploadedFile.getAbsolutePath(), buf, true);
-
-		} else {
-			FileItem item = (FileItem) itemobj;
-			item.write(uploadedFile);
-		}
-	}
-
-	private void createNewSizeImages(FileUpload fu) {
+	public void createNewSizeImages(FileUpload fu) {
 		if (this._upNewSizes == null || this._upNewSizes.trim().length() == 0) {
 			return;
 		}
@@ -720,7 +637,7 @@ public class Upload {
 		}
 	}
 
-	private void writeToDatabase() {
+	public void writeToDatabase() {
 		HashMap<String, Boolean> map = new HashMap<String, Boolean>();
 		try {
 			for (int i = 0; i < this._AlFiles.size(); i++) {
@@ -746,7 +663,7 @@ public class Upload {
 		}
 	}
 
-	private void writeToDatabase(FileUpload fu) {
+	public void writeToDatabase(FileUpload fu) {
 		File img = new File(fu.getSavePath());
 		byte[] buf;
 		try {
@@ -809,7 +726,7 @@ public class Upload {
 	 * @param unid     文件的unid，用于数据库定位使用
 	 * @param from     来源的UNID
 	 */
-	private void writeToDatabase(byte[] buf, String fileName, String filePath, String fileType, String fileExt,
+	public void writeToDatabase(byte[] buf, String fileName, String filePath, String fileType, String fileExt,
 			String fileUrl, String unid, String from, String userLocalName, int len) {
 		RequestValue rv = this._Rv;
 		// INSERT INTO NWS_IMG(NWS_IMG,NWS_IMG_EXT,NWS_IMG_CDATE,NWS_IMG_MD5)
@@ -918,12 +835,20 @@ public class Upload {
 
 	}
 
-	private FileUpload takeFileUpload(Object itemobj, int index) {
+	/**
+	 * 获取上传文件对象
+	 * 
+	 * @param itemobj
+	 * @param index
+	 * @return
+	 */
+	public FileUpload takeFileUpload(Object itemobj, int index) {
 		FileUpload fu = new FileUpload();
 		String name;
 		if (itemobj instanceof String) {
 			name = (Math.random() + "").replace(".", "_") + ".jpg";
 			fu.setLength(itemobj.toString().length() / 3);
+			fu.setContextType("image/jpg");
 		} else {
 			FileItem item = (FileItem) itemobj;
 			try {
@@ -934,6 +859,7 @@ public class Upload {
 				name = item.getName();
 			}
 			fu.setLength((int) item.getSize());
+			fu.setContextType(item.getContentType());
 		}
 		// 用户本地文件名称
 		fu.setUserLocalPath(name);
@@ -952,7 +878,118 @@ public class Upload {
 		fu.setFileUrl(serverName);
 		fu.setUnid(guid);
 
+		File uploadedFile = new File(fu.getSavePath());
+		String url = createURL(uploadedFile);
+		fu.setFileUrl(url);
+		
+		try {
+			// 保持文件到本地目录
+			this.writeFile(itemobj, uploadedFile);
+			fu.setUploadedFile(uploadedFile);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+		}
 		return fu;
 	}
 
+	/**
+	 * Save the upload file to the local file
+	 * @param itemobj
+	 * @param uploadedFile
+	 * @throws Exception
+	 */
+	public void writeFile(Object itemobj, File uploadedFile) throws Exception {
+		if (itemobj instanceof String) {
+			String base64 = itemobj.toString();
+			// "data:image/jpeg;base64,
+			String tag1 = ";base64,";
+			int tagStart = base64.indexOf(tag1);
+			String b64;
+			if (tagStart > 0) {
+				// String tag = base64.substring(0, tagStart + tag1.length());
+				// System.out.println(tag);
+				b64 = base64.substring(tagStart + tag1.length());
+			} else {
+				b64 = base64;
+			}
+			byte[] buf = UConvert.FromBase64String(b64);
+			UFile.createBinaryFile(uploadedFile.getAbsolutePath(), buf, true);
+
+		} else {
+			FileItem item = (FileItem) itemobj;
+			item.write(uploadedFile);
+		}
+	}
+
+	public String getUploadDir() {
+		return _uploadDir;
+	}
+
+	public void setUploadDir(String uploadDir) {
+		this._uploadDir = uploadDir;
+	}
+
+	public String getUploadRealDir() {
+		return _uploadRealDir;
+	}
+
+	public void setUploadRealDir(String uploadRealDir) {
+		this._uploadRealDir = uploadRealDir;
+	}
+
+	public String getUploadTempDir() {
+		return _uploadTempDir;
+	}
+
+	public void setUploadTempDir(String uploadTempDir) {
+		this._uploadTempDir = uploadTempDir;
+	}
+
+	public String getUpNewSizes() {
+		return _upNewSizes;
+	}
+
+	public void setUpNewSizes(String upNewSizes) {
+		this._upNewSizes = upNewSizes;
+	}
+
+	public HashMap<String, Boolean> getUpExts() {
+		return _UpExts;
+	}
+
+	public String getUpSql() {
+		return _upSql;
+	}
+
+	public void setUpSql(String upSql) {
+		this._upSql = upSql;
+	}
+
+	public String getUpSwf() {
+		return _upSwf;
+	}
+
+	public void setUpSwf(String upSwf) {
+		this._upSwf = upSwf;
+	}
+
+	public String getUpUnZip() {
+		return _upUnZip;
+	}
+
+	public void setUpUnZip(String upUnZip) {
+		this._upUnZip = upUnZip;
+	}
+
+	public String getUploadName() {
+		return _uploadName;
+	}
+
+	public void setUploadName(String uploadName) {
+		this._uploadName = uploadName;
+	}
+
+	public List<FileUpload> getAlFiles() {
+		return _AlFiles;
+	}
 }

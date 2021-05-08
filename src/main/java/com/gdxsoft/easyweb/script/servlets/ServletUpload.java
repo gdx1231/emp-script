@@ -13,15 +13,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.script.RequestValue;
-import com.gdxsoft.easyweb.uploader.PostData;
 import com.gdxsoft.easyweb.uploader.Upload;
-import com.gdxsoft.easyweb.uploader.UploaderPage;
+import com.gdxsoft.easyweb.utils.UJSon;
 import com.gdxsoft.easyweb.utils.UPath;
 
 public class ServletUpload extends HttpServlet {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ServletUpload.class);
 	/**
 	 * 
 	 */
@@ -47,14 +49,10 @@ public class ServletUpload extends HttpServlet {
 	 * 
 	 * This method is called when a form has its tag value method equals to get.
 	 * 
-	 * @param request
-	 *            the request send by the client to the server
-	 * @param response
-	 *            the response send by the server to the client
-	 * @throws ServletException
-	 *             if an error occurred
-	 * @throws IOException
-	 *             if an error occurred
+	 * @param request  the request send by the client to the server
+	 * @param response the response send by the server to the client
+	 * @throws ServletException if an error occurred
+	 * @throws IOException      if an error occurred
 	 */
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.show(request, response);
@@ -64,7 +62,20 @@ public class ServletUpload extends HttpServlet {
 		request.setCharacterEncoding("utf-8");
 		response.setCharacterEncoding("utf-8");
 
+		JSONObject result = new JSONObject();
+
+		PrintWriter out = response.getWriter();
+
 		RequestValue rv = new RequestValue(request, request.getSession());
+		Upload up = new Upload();
+		up.setRv(rv);
+		try {
+			up.init(request);
+		} catch (Exception e1) {
+			UJSon.rstSetFalse(result, e1.getMessage());
+			out.print(result);
+			LOGGER.error(e1.getMessage());
+		}
 
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		// 设置内存缓冲区，超过后写入临时文件
@@ -86,87 +97,46 @@ public class ServletUpload extends HttpServlet {
 				FileItem item = (FileItem) items.get(i);
 				if (item.isFormField()) {
 					rv.addValue(item.getFieldName(), item.getString());
+				} else {
+					// this is a file
 				}
 			}
 		} catch (Exception err) {
-			System.err.println(err.getMessage());
+			UJSon.rstSetFalse(result, err.getMessage());
+			out.print(result);
+			LOGGER.error(err.getMessage());
 		}
-		request.setCharacterEncoding("utf-8");
-		String uploadType = rv.getString("EWA_UP_TYPE");
-		PrintWriter out = response.getWriter();
 
-		if (uploadType != null && uploadType.equals("SWFUPLOAD")) {
-			Upload up = new Upload();
-			up.setRv(rv);
-			up.setUploadItems(items);
-			up.init(request);
+		up.setUploadItems(items);
 
-			try {
-				String s = up.upload();
-				out.println(s);
-				response.setHeader("X-EWA_UP_RET", s);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-		} else {
-			out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
-			out.println("<html>");
-			out.println("<head>");
-			out.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
-			out.println("<title>UPLOAD</title>");
-			out.println("<script type=\"text/javascript\">");
-			out.println("var CONTEXT_PATH=\"" + request.getContextPath() + "\";");
-			out.println("</script>");
-			out.println("</head>");
-			out.println("<body style='margin: 0px; overflow: hidden'>");
-			UploaderPage up = new UploaderPage();
-			try {
-				up.init(rv);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			String upType = request.getParameter("EWA_UP_STATUS");
-			upType = upType == null ? "" : upType.trim().toUpperCase();
-			if (upType.equals("")) {
-				out.println(up.getHtml());
-			} else {
-				PostData pd = new PostData();
-				pd.init(request, response, up.getUpPath());
-				if (upType.equals("CANCEL")) {
-					pd.cancelUpload();
-				} else if (upType.equals("STATUS")) {
-					pd.queryStatus();
-				} else if (upType.equals("UPLOAD")) {
-					pd.doPost();
-				}
-			}
-			out.println("</body></html>");
+		try {
+			String s = up.upload();
+			out.println(s);
+			response.setHeader("X-EWA_UP_RET", s);
+		} catch (Exception e) {
+			UJSon.rstSetFalse(result, e.getMessage());
+			out.print(result);
+			LOGGER.error(e.getMessage());
 		}
+
 	}
 
 	/**
 	 * The doPost method of the servlet. <br>
 	 * 
-	 * This method is called when a form has its tag value method equals to
-	 * post.
+	 * This method is called when a form has its tag value method equals to post.
 	 * 
-	 * @param request
-	 *            the request send by the client to the server
-	 * @param response
-	 *            the response send by the server to the client
-	 * @throws ServletException
-	 *             if an error occurred
-	 * @throws IOException
-	 *             if an error occurred
+	 * @param request  the request send by the client to the server
+	 * @param response the response send by the server to the client
+	 * @throws ServletException if an error occurred
+	 * @throws IOException      if an error occurred
 	 */
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.show(request, response);
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and
-	 * copyright.
+	 * Returns information about the servlet, such as author, version, and copyright.
 	 * 
 	 * @return String information about this servlet
 	 */
@@ -177,8 +147,7 @@ public class ServletUpload extends HttpServlet {
 	/**
 	 * Initialization of the servlet. <br>
 	 * 
-	 * @throws ServletException
-	 *             if an error occurs
+	 * @throws ServletException if an error occurs
 	 */
 	public void init() throws ServletException {
 		// Put your code here
