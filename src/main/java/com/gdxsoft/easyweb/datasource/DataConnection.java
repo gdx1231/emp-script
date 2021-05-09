@@ -1734,7 +1734,7 @@ public class DataConnection {
 				cst.setInt(index, intVal);
 				this.writeDebug(this, "添加参数(INTEGER)" + index, parameterName + "=" + intVal);
 			}
-		} else if (dt.equals("LONG")) {
+		} else if (dt.equals("BIGINT") || dt.equals("LONG")) {
 			Long longVal = this.getParaLong(pv);
 			if (longVal == null) {
 				cst.setNull(index, java.sql.Types.BIGINT);

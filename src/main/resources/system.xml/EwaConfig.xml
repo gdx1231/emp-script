@@ -2949,10 +2949,10 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info="Dir, Database" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="DataType" Default="0" Values=",String,Int,Boolen,Number,Date,Binary">
+			<XGroupValue Name="DataType" Default="0" Values=",String,Int,BigInt,Boolen,Number,Date,Binary">
 				<DescriptionSet>
-					<Set Lang="zhcn" Info=",字符,整型,逻辑,数字,日期,二进制" />
-					<Set Lang="enus" Info=",String,Int,Boolen,Number,Date,Binary" />
+					<Set Lang="zhcn" Info=",字符,整型,长整型,逻辑,数字,日期,二进制" />
+					<Set Lang="enus" Info=",String,Int,BigInt,Boolen,Number,Date,Binary" />
 				</DescriptionSet>
 			</XGroupValue>
 			<XGroupValue Name="EventType" Default="0" Values="Javascript,Ajax">
