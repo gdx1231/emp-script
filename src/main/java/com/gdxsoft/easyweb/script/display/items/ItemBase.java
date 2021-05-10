@@ -422,6 +422,8 @@ public class ItemBase implements IItem {
 	public String createEditSpan(String itemHtmlTemplate, String val, int tagIsLFEdit) {
 		// String js1 = "EWA.F.FOS['" + _HtmlClass.getSysParas().getFrameUnid() +
 		// "'].ShowEdit(this);";
+		
+		String html = itemHtmlTemplate.replace(" id=\"", " edit_id=\"");
 		String js1 = "EWA.F.FOS['@sys_frame_unid'].ShowEdit( this );";
 		// ListFrame的对象可编辑IsLFEdit是运行编辑的
 		MStr sb = new MStr();
@@ -433,7 +435,7 @@ public class ItemBase implements IItem {
 		sb.append("\">");
 		sb.append(val == null ? "&nbsp;" : val.replace("<", "&lt;").replace("\n", "<br>"));
 		sb.append(
-				" </div><div class='EWA_LF_EDIT EWA_LF_EDIT_CTRL' style='display:none'>" + itemHtmlTemplate + "</div>");
+				" </div><div class='EWA_LF_EDIT EWA_LF_EDIT_CTRL' style='display:none'>" + html + "</div>");
 		return sb.toString();
 	}
 
