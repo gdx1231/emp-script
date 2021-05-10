@@ -933,6 +933,24 @@ public class UObjectValue {
 				}
 
 			}
+		} else if (paraType.equals("LONG") || paraType.equals("JAVA.LANG.LONG")) {
+			String str = val.toString();
+			if (str.trim().length() == 0) {
+				v[0] = null;
+			} else {
+				long longValue = 0;
+				try {
+					longValue = Long.parseLong(str);
+					if (paraType.equals("JAVA.LANG.LONG")) {
+						v[0] = Long.valueOf(longValue);
+					} else {
+						v[0] = longValue;
+					}
+				} catch (Exception err) {
+					LOGGER.error(err.getLocalizedMessage() + ":" + err);
+					return false;
+				}
+			}
 		} else if (paraType.equals("JAVA.LANG.STRING")) {
 			v[0] = val.toString();
 		} else if (paraType.equals("JAVA.UTIL.DATE")) {
@@ -978,6 +996,8 @@ public class UObjectValue {
 			} else {
 				v[0] = null; // 不处理
 			}
+		} else {
+			v[0] = val;
 		}
 		mm.invoke(this._object, v);
 		return true;
