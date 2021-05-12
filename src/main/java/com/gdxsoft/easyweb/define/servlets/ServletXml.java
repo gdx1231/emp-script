@@ -443,7 +443,7 @@ public class ServletXml extends HttpServlet {
 		String path = rv.s("path");
 		String xmlname = rv.s("xmlname");
 
-		IUpdateXml up = this.getUpdateXml(null, this.pvAdmin.getStringValue());
+		IUpdateXml up = this.getUpdateXml(path, this.pvAdmin.getStringValue());
 		JSONObject rst = up.importXml(path, xmlname, sourceXmlFilePath);
 
 		return rst.toString();
