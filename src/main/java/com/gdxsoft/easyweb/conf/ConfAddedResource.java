@@ -1,5 +1,7 @@
 package com.gdxsoft.easyweb.conf;
 
+import com.gdxsoft.easyweb.utils.Utils;
+
 /**
  * 附加资源
  * 
@@ -12,33 +14,37 @@ public class ConfAddedResource {
 	private String xml;
 	private boolean last;
 	private boolean defaultConf;
-	
+
 	/**
 	 * 转成JS表达式
+	 * 
 	 * @return
 	 */
 	public String toJs() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<script type='text/javascript' id='ewa_resource_");
-		sb.append(this.name);
-		sb.append("' src='");
-		sb.append(this.src+"'></script>");
-		
+		sb.append("<script type=\"text/javascript\" id=\"ewa_resource_");
+		sb.append(Utils.textToInputValue(this.name));
+		sb.append("\" src=\"");
+		sb.append(Utils.textToInputValue(this.src) + "\"></script>");
+
 		return sb.toString();
 	}
+
 	/**
 	 * 转成CSS表达式
+	 * 
 	 * @return
 	 */
 	public String toCss() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<link rel='stylesheet' id='ewa_resource_");
-		sb.append(this.name);
-		sb.append("' href='");
-		sb.append(this.src+"'>");
-		
+		sb.append("<link rel=\"stylesheet\" id=\"ewa_resource_");
+		sb.append(Utils.textToInputValue(this.name));
+		sb.append("\" href=\"");
+		sb.append(Utils.textToInputValue(this.src) + "\">");
+
 		return sb.toString();
 	}
+
 	/**
 	 * 资源地址，相对或绝对
 	 * 
@@ -77,6 +83,7 @@ public class ConfAddedResource {
 
 	/**
 	 * 配置XML信息
+	 * 
 	 * @return
 	 */
 	public String getXml() {
@@ -86,6 +93,7 @@ public class ConfAddedResource {
 
 	/**
 	 * 配置XML信息
+	 * 
 	 * @param xml
 	 */
 	public void setXml(String xml) {
@@ -95,6 +103,7 @@ public class ConfAddedResource {
 
 	/**
 	 * 是否放到html页面的最后
+	 * 
 	 * @return
 	 */
 	public boolean isLast() {
@@ -103,18 +112,22 @@ public class ConfAddedResource {
 
 	/**
 	 * 是否放到html页面的最后
+	 * 
 	 * @param last
 	 */
 	public void setLast(boolean last) {
 		this.last = last;
 	}
+
 	/**
 	 * 是否为默认附加的资源，当 ewa_added_resources未传递时
+	 * 
 	 * @return
 	 */
 	public boolean isDefaultConf() {
 		return defaultConf;
 	}
+
 	public void setDefaultConf(boolean defaultConf) {
 		this.defaultConf = defaultConf;
 	}
