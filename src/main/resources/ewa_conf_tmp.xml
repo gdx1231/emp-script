@@ -39,6 +39,13 @@
 		<scriptPath name="my-project" path="d:/ewa/my-project-conf" />
 	</scriptPaths>
 
+	<!-- 通过参数 ewa_added_resources=addjs0,addjs1,addcss1 加载 -->
+	<addedResources>
+		<addedResource src="/static/add_0.js" name="addjs0"></addedResource>
+		<addedResource src="/static/add_1.js" name="addjs1" last="true"></addedResource>
+		<addedResource src="/static/add_0.css" name="addcss0"></addedResource>
+		<addedResource src="/static/add_1.css" name="addcss1"></addedResource>
+	</addedResources>
 	<paths>
 		<!-- 缓存配置 -->
 		<path name="cached_path" value="d:/ewa/cached" />
@@ -73,7 +80,7 @@
 				url="jdbc:mysql://localhost:3306/b2b?nullCatalogMeansCurrent=true&amp;serverTimezone=GMT%2B8&amp;useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;useSSL=false">
 			</pool>
 		</database>
-		 
+
 	</databases>
 	<remote_syncs des="Sync to server" url="https://yourdomain/demo/EWA_DEFINE/cgi-bin/remoteSync/" code="">
 		<remote_sync name="static" id="1" source="d:/project/static" target="/var/www/static"

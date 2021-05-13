@@ -2,6 +2,7 @@ package com.gdxsoft.easyweb.script.display.frame;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,6 +12,8 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.gdxsoft.easyweb.conf.ConfAddedResource;
+import com.gdxsoft.easyweb.conf.ConfAddedResources;
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.global.EwaInfo;
@@ -45,8 +48,7 @@ public class FrameBase {
 	public void createHtmlVue() {
 		HtmlDocument doc = this.getHtmlClass().getDocument();
 
-		String title = getHtmlClass().getItemValues()
-				.replaceParameters(getHtmlClass().getSysParas().getTitle(), true);
+		String title = getHtmlClass().getItemValues().replaceParameters(getHtmlClass().getSysParas().getTitle(), true);
 		doc.setTitle(title);
 
 		try {
@@ -63,7 +65,7 @@ public class FrameBase {
 		try {
 			String json = getHtmlClass().getHtmlCreator().createPageJsonExt1();
 			json = json.replace("@", IItem.REP_AT_STR);
-			
+
 			StringBuilder vueJs = new StringBuilder("(function(){var ewacfg=");
 			vueJs.append(json);
 			vueJs.append(";\n");
@@ -88,7 +90,6 @@ public class FrameBase {
 		}
 	}
 
-	
 	/**
 	 * 获取 createJsFramePage 调用已经处理好的title
 	 * 
@@ -107,10 +108,9 @@ public class FrameBase {
 	}
 
 	/**
-	 * 是否 显示标题栏，判断参数EWA_IS_HIDDEN_CAPTION 或Size.HiddenCaption，对于
-	 * ListFrame是第一行的字段描述，对于Frame是第一行标题
+	 * 是否 显示标题栏，判断参数EWA_IS_HIDDEN_CAPTION 或Size.HiddenCaption，对于 ListFrame是第一行的字段描述，对于Frame是第一行标题
 	 * 
-	 * @return  是否 显示标题栏
+	 * @return 是否 显示标题栏
 	 */
 	public boolean isHiddenCaption() {
 
@@ -251,7 +251,7 @@ public class FrameBase {
 				if (us.count() > 0) {
 					UserXItemValue u = us.getItem(0);
 					String isOrder = u.getItem("IsOrder");
-					obj.put("IS_ORDER",  "1".equals(isOrder) );
+					obj.put("IS_ORDER", "1".equals(isOrder));
 				}
 			}
 			if (uxi.testName("DescriptionSet")) {
@@ -493,6 +493,7 @@ public class FrameBase {
 
 	/**
 	 * 生成CSS内容
+	 * 
 	 * @throws Exception
 	 */
 	public void createCss() throws Exception {
@@ -509,6 +510,24 @@ public class FrameBase {
 		HtmlDocument doc = this._HtmlClass.getDocument();
 		String css1 = this._HtmlClass.getItemValues().replaceParameters(sb.toString(), true);
 		doc.addCss(css1);
+
+		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
+
+		String ewa_added_resources = rv.s("ewa_added_resources");
+		List<ConfAddedResource> al = ConfAddedResources.getInstance().getResList(ewa_added_resources, false);
+
+		MStr sbCss = new MStr();
+		MStr sbJs = new MStr();
+		for (int i = 0; i < al.size(); i++) {
+			ConfAddedResource r = al.get(i);
+			if (r.getSrc().toLowerCase().endsWith(".css")) {
+				sbCss.al(r.toCss());
+			} else {
+				sbJs.al(r.toJs());
+			}
+		}
+		doc.addHeader(sbCss.toString());
+		doc.addHeader(sbJs.toString());
 	}
 
 	/**
@@ -614,7 +633,6 @@ public class FrameBase {
 			sb.append(rv.getContextPath());
 			sb.append(rv.getRequest().getServletPath());
 
- 
 			boolean ismark = false;
 			if (q != null) {
 				sb.append("?");
@@ -669,6 +687,25 @@ public class FrameBase {
 			pageAddJsBottom = pageAddJsBottom.replace("@", IItem.REP_AT_STR);
 			doc.addJs("JS_BOTTOM", pageAddJsBottom, false);
 		}
+
+		// 增加附加的资源
+		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
+		String ewa_added_resources = rv.s("ewa_added_resources");
+		List<ConfAddedResource> al = ConfAddedResources.getInstance().getResList(ewa_added_resources, true);
+
+		MStr sbCss = new MStr();
+		MStr sbJs = new MStr();
+		for (int i = 0; i < al.size(); i++) {
+			ConfAddedResource r = al.get(i);
+			if (r.getSrc().toLowerCase().endsWith(".css")) {
+				LOGGER.warn("The css put on bottom, " + r.getSrc());
+				sbCss.al(r.toCss());
+			} else {
+				sbJs.al(r.toJs());
+			}
+		}
+		doc.addBodyHtml(sbCss.toString(), false);
+		doc.addBodyHtml(sbJs.toString(), false);
 	}
 
 	private String[] createH5FrameSet() {
@@ -815,7 +852,7 @@ public class FrameBase {
 		}
 		doc.addBodyHtml(bs, true);
 		doc.addScriptHtml("<div id='EWA_FRAME_MAIN' _s='主框架开始'>", "主框架开始");
-		
+
 		this.createH5FrameSet();
 		if (this._Html5FrameSet != null) {
 			doc.addScriptHtml(_Html5FrameSet[0]);
@@ -1063,8 +1100,7 @@ public class FrameBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IFrame1#setItemParentHtmls(java.util
-	 * .HashMap)
+	 * @see com.gdxsoft.easyweb.script.display.IFrame1#setItemParentHtmls(java.util .HashMap)
 	 */
 	public void setItemParentHtmls(HashMap<String, String> itemParentHtmls) {
 		_ItemParentHtmls = itemParentHtmls;
