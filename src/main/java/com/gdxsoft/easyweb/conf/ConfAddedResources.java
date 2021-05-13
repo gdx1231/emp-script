@@ -76,6 +76,30 @@ public class ConfAddedResources {
 	}
 
 	/**
+	 * 当参数 ewa_added_resources 不存在的时候，获取默认的配置
+	 * 
+	 * @param last 是否在页面的底部，例如js
+	 * @return
+	 */
+	public List<ConfAddedResource> getDefaultResList(boolean last) {
+		String cacheKey = "____________DEFAULT______________" + "," + last;
+		if (CACHES.containsKey(cacheKey)) {
+			return CACHES.get(cacheKey);
+		}
+
+		List<ConfAddedResource> al = new ArrayList<ConfAddedResource>();
+		this.resources.forEach((k, v) -> {
+			if (v.isDefaultConf() && v.isLast() == last) {
+				al.add(v);
+			}
+		});
+
+		CACHES.put(cacheKey, al);
+
+		return al;
+	}
+
+	/**
 	 * 根据名称获取资源清单
 	 * 
 	 * @param namesExp 用,分割的字符串表达式

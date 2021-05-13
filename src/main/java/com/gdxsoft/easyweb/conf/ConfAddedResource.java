@@ -11,6 +11,7 @@ public class ConfAddedResource {
 	private String name;
 	private String xml;
 	private boolean last;
+	private boolean defaultConf;
 	
 	/**
 	 * 转成JS表达式
@@ -106,5 +107,15 @@ public class ConfAddedResource {
 	 */
 	public void setLast(boolean last) {
 		this.last = last;
+	}
+	/**
+	 * 是否为默认附加的资源，当 ewa_added_resources未传递时
+	 * @return
+	 */
+	public boolean isDefaultConf() {
+		return defaultConf;
+	}
+	public void setDefaultConf(boolean defaultConf) {
+		this.defaultConf = defaultConf;
 	}
 }

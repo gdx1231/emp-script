@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -514,20 +515,24 @@ public class FrameBase {
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
 
 		String ewa_added_resources = rv.s("ewa_added_resources");
-		List<ConfAddedResource> al = ConfAddedResources.getInstance().getResList(ewa_added_resources, false);
+		List<ConfAddedResource> al = StringUtils.isBlank(ewa_added_resources)
+				? ConfAddedResources.getInstance().getDefaultResList(false)
+				: ConfAddedResources.getInstance().getResList(ewa_added_resources, false);
 
-		MStr sbCss = new MStr();
-		MStr sbJs = new MStr();
-		for (int i = 0; i < al.size(); i++) {
-			ConfAddedResource r = al.get(i);
-			if (r.getSrc().toLowerCase().endsWith(".css")) {
-				sbCss.al(r.toCss());
-			} else {
-				sbJs.al(r.toJs());
+		if (al.size() > 0) {
+			MStr sbCss = new MStr();
+			MStr sbJs = new MStr();
+			for (int i = 0; i < al.size(); i++) {
+				ConfAddedResource r = al.get(i);
+				if (r.getSrc().toLowerCase().endsWith(".css")) {
+					sbCss.al(r.toCss());
+				} else {
+					sbJs.al(r.toJs());
+				}
 			}
+			doc.addHeader(sbCss.toString());
+			doc.addHeader(sbJs.toString());
 		}
-		doc.addHeader(sbCss.toString());
-		doc.addHeader(sbJs.toString());
 	}
 
 	/**
@@ -691,21 +696,25 @@ public class FrameBase {
 		// 增加附加的资源
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
 		String ewa_added_resources = rv.s("ewa_added_resources");
-		List<ConfAddedResource> al = ConfAddedResources.getInstance().getResList(ewa_added_resources, true);
+		List<ConfAddedResource> al = StringUtils.isBlank(ewa_added_resources)
+				? ConfAddedResources.getInstance().getDefaultResList(true)
+				: ConfAddedResources.getInstance().getResList(ewa_added_resources, true);
 
-		MStr sbCss = new MStr();
-		MStr sbJs = new MStr();
-		for (int i = 0; i < al.size(); i++) {
-			ConfAddedResource r = al.get(i);
-			if (r.getSrc().toLowerCase().endsWith(".css")) {
-				LOGGER.warn("The css put on bottom, " + r.getSrc());
-				sbCss.al(r.toCss());
-			} else {
-				sbJs.al(r.toJs());
+		if (al.size() > 0) {
+			MStr sbCss = new MStr();
+			MStr sbJs = new MStr();
+			for (int i = 0; i < al.size(); i++) {
+				ConfAddedResource r = al.get(i);
+				if (r.getSrc().toLowerCase().endsWith(".css")) {
+					LOGGER.warn("The css put on bottom, " + r.getSrc());
+					sbCss.al(r.toCss());
+				} else {
+					sbJs.al(r.toJs());
+				}
 			}
+			doc.addBodyHtml(sbCss.toString(), false);
+			doc.addBodyHtml(sbJs.toString(), false);
 		}
-		doc.addBodyHtml(sbCss.toString(), false);
-		doc.addBodyHtml(sbJs.toString(), false);
 	}
 
 	private String[] createH5FrameSet() {
