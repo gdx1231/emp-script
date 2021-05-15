@@ -262,9 +262,13 @@ public class FrameFrame extends FrameBase implements IFrame {
 	 */
 	public String createFrameHeader() throws Exception {
 		MStr sb = new MStr();
-		if (!super.isShowHeader()) { // 不显示列头
-			return sb.toString();
+		// 判断参数EWA_HIDDEN_CAPTION或Size.HiddenCaption
+		if (super.isHiddenCaption()) {// 不显示列头
+			return "";
 		}
+		/*
+		 * if (!super.isShowHeader()) { // 不显示列头 return sb.toString(); }
+		 */
 		// header信息
 		String header = super.createSkinFCHeader();
 
@@ -830,8 +834,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 		}
 
 		/*
-		 * <td class="EWA_TD_L">{__EWA_DES__}</td> <td
-		 * class="EWA_TD_M">{__EWA_ITEM__}</td> <td class="EWA_TD_R">{__EWA_MSG__}</td>
+		 * <td class="EWA_TD_L">{__EWA_DES__}</td> <td class="EWA_TD_M">{__EWA_ITEM__}</td> <td
+		 * class="EWA_TD_R">{__EWA_MSG__}</td>
 		 */
 
 		String[] tmps = new String[3];

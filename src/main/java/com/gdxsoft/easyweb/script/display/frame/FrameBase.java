@@ -108,13 +108,13 @@ public class FrameBase {
 		return pageDescription;
 	}
 
+	
 	/**
 	 * 是否 显示标题栏，判断参数EWA_IS_HIDDEN_CAPTION 或Size.HiddenCaption，对于 ListFrame是第一行的字段描述，对于Frame是第一行标题
 	 * 
 	 * @return 是否 显示标题栏
 	 */
 	public boolean isHiddenCaption() {
-
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
 		String paraIsHidden = rv.s("EWA_IS_HIDDEN_CAPTION");
 		if (paraIsHidden != null) {
@@ -1059,15 +1059,6 @@ public class FrameBase {
 	 */
 	String createSkinFCBottom() {
 		return this._HtmlClass.getSkinFrameCurrent().getBottom();
-	}
-
-	boolean isShowHeader() {
-		String a = this.getPageItemValue("Size", "HiddenCaption");
-		if (a != null && a.trim().equals("1")) { // 不显示列头
-			return false;
-		} else {
-			return true;
-		}
 	}
 
 	String getPageItemValue(String itemName, String tagName) {
