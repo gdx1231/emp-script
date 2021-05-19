@@ -7,6 +7,7 @@ import java.util.Map;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.gdxsoft.easyweb.script.userConfig.ResourceConfig;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -59,6 +60,8 @@ public class ConfScriptPaths {
 
 			if (sp.isResources()) { // force read-only mode
 				sp.setReadOnly(true);
+				// 初始化资源，放置到缓存中
+				ResourceConfig.initializeResouces(sp);
 			}
 			sps.lst.add(sp);
 		}

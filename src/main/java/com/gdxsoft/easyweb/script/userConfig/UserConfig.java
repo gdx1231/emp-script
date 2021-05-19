@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +33,10 @@ import com.gdxsoft.easyweb.utils.*;
  */
 public class UserConfig implements Serializable, Cloneable {
 	private static Logger LOGGER = LoggerFactory.getLogger(UserConfig.class);
-	/**
-	 * 
-	 */
+
+	// the cached of the ConfScriptPath instances
+	private static Map<String, ConfScriptPath> UC_MAP = new ConcurrentHashMap<String, ConfScriptPath>();
+
 	private static final long serialVersionUID = 1872059554611340437L;
 
 	/**
@@ -102,6 +105,10 @@ public class UserConfig implements Serializable, Cloneable {
 
 		IConfig iConfig = getConfig(xmlName, itemName);
 
+		if (debugFrames != null) {
+			debugFrames.addDebug(uc, "instance", "Get the IConfig instance from ->" + xmlName + ", " + iConfig);
+		}
+
 		o = new UserConfig(xmlName, itemName);
 		o.configType = iConfig;
 		o.setDebugFrames(debugFrames);
@@ -147,6 +154,16 @@ public class UserConfig implements Serializable, Cloneable {
 	/**
 	 * Get the configuration from all ScriptPaths
 	 * 
+	 * @param xmlPath the configuration name
+	 * @return IConfig
+	 */
+	public static IConfig getConfigByPath(String xmlPath) {
+		return getConfig(xmlPath, null);
+	}
+
+	/**
+	 * Get the configuration from all ScriptPaths
+	 * 
 	 * @param xmlName  the configuration name
 	 * @param itemName the item name
 	 * @return IConfig
@@ -154,53 +171,45 @@ public class UserConfig implements Serializable, Cloneable {
 	public static IConfig getConfig(String xmlName, String itemName) {
 		IConfig ic = null;
 		ConfScriptPaths sps = ConfScriptPaths.getInstance();
-		for (int i = 0; i < sps.getLst().size(); i++) {
-			ConfScriptPath sp = sps.getLst().get(i);
+		String key = UserConfig.filterXmlName(xmlName);
 
-			if (sp.isResources()) {
-				ic = new ResourceConfig(sp, xmlName, itemName);
-				if (ic.checkConfigurationExists()) {
-					return ic;
-				}
-			} else if (sp.isJdbc()) {
-				ic = new JdbcConfig(sp, xmlName, itemName);
-				if (ic.checkConfigurationExists()) {
-					return ic;
-				}
-			} else { // file
-				ic = new FileConfig(sp, xmlName, itemName);
-				if (ic.checkConfigurationExists()) {
-					return ic;
-				}
+		ConfScriptPath sp = null;
+
+		// check exists ConfScriptPath from the cached
+		if (UC_MAP.containsKey(key)) {
+			sp = UC_MAP.get(key);
+			ic = createConfig(sp, xmlName, itemName);
+			return ic;
+		}
+
+		for (int i = 0; i < sps.getLst().size(); i++) {
+			sp = sps.getLst().get(i);
+			ic = createConfig(sp, xmlName, itemName);
+
+			// the ResourceConfig checkConfigurationExists is slowly
+			if (ic.checkConfigurationExists()) {
+				UC_MAP.put(key, sp);
+				return ic;
 			}
+
 		}
 		return null;
 	}
 
-	public static IConfig getConfigByPath(String xmlPath) {
-		IConfig ic = null;
-		ConfScriptPaths sps = ConfScriptPaths.getInstance();
-		for (int i = 0; i < sps.getLst().size(); i++) {
-			ConfScriptPath sp = sps.getLst().get(i);
+	public static IConfig createConfig(ConfScriptPath sp, String xmlName, String itemName) {
+		IConfig ic;
+		if (sp.isResources()) {
+			ic = new ResourceConfig(sp, xmlName, itemName);
 
-			if (sp.isResources()) {
-				ic = new ResourceConfig(sp, xmlPath, null);
-				if (ic.checkConfigurationExists()) {
-					return ic;
-				}
-			} else if (sp.isJdbc()) {
-				ic = new JdbcConfig(sp, xmlPath, null);
-				if (ic.checkConfigurationExists()) {
-					return ic;
-				}
-			} else { // file
-				ic = new FileConfig(sp, xmlPath, null);
-				if (ic.checkConfigurationExists()) {
-					return ic;
-				}
-			}
+		} else if (sp.isJdbc()) {
+			ic = new JdbcConfig(sp, xmlName, itemName);
+
+		} else { // file
+			ic = new FileConfig(sp, xmlName, itemName);
+
 		}
-		return null;
+
+		return ic;
 	}
 
 	/**
@@ -480,6 +489,8 @@ public class UserConfig implements Serializable, Cloneable {
 				ui.addObject(uvs, uvs.getName());
 			}
 		}
+		if (this._DebugFrames != null)
+			this._DebugFrames.addDebug(this, "配置", "Init XItem ->" + ui.getName() + ", " + type);
 	}
 
 	/**
@@ -503,12 +514,11 @@ public class UserConfig implements Serializable, Cloneable {
 		uxvs.setParameter(itemPara);
 		uxvs.setXml(UXml.asXml(node));
 		/*
-		 * String aaa=UXml.asXml(node); if(aaa.indexOf("DescriptionSet")>=0){ int a=1;
-		 * a++; }
+		 * String aaa=UXml.asXml(node); if(aaa.indexOf("DescriptionSet")>=0){ int a=1; a++; }
 		 */
 		/*
-		 * 集合参数，例如: <DescriptionSet> <Set Lang="zh-cn" Value="" Memo="用户名" /> <Set
-		 * Lang="en-us" Value="" Memo="User Name" /> </DescriptionSet>
+		 * 集合参数，例如: <DescriptionSet> <Set Lang="zh-cn" Value="" Memo="用户名" /> <Set Lang="en-us" Value=""
+		 * Memo="User Name" /> </DescriptionSet>
 		 */
 		NodeList childList = node.getChildNodes();
 		// int m = 0;
