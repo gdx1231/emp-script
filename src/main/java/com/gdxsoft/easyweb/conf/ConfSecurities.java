@@ -62,7 +62,7 @@ public class ConfSecurities {
 
 			ConfSecurity sp = createConfSecurity(item);
 			if (sp == null) {
-				LOGGER.info("Skip the security conf -> {} " + UXml.asXml(item));
+				LOGGER.warn("Skip the security conf -> {} " , UXml.asXml(item));
 				continue;
 			}
 
@@ -87,7 +87,7 @@ public class ConfSecurities {
 					sps.defaultSecurity.getAlgorithm());
 		}
 
-		if (sps.defaultSecurity.getAlgorithm().equalsIgnoreCase("aes")) {
+		if (!sps.defaultSecurity.getAlgorithm().equalsIgnoreCase("des")) {
 			// for compatibility, set the default UDes
 			for (int i = 0; i < sps.lst.size(); i++) {
 				ConfSecurity sp = sps.lst.get(i);
