@@ -401,7 +401,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		DTTable tbXml = op.getJdbcTable(sql1, rv);
 		for (int i = 0; i < tbXml.getCount(); i++) {
 			String xmlName = tbXml.getCell(i, 0).toString();
-			rv.addOrUpdateValue("@xmlname", xmlName);
+			rv.addOrUpdateValue("xmlname", xmlName);
 			String sql2 = "select ITEMNAME from ewa_cfg ec where XMLNAME = @xmlname ";
 			DTTable tbItems = op.getJdbcTable(sql2, rv);
 			String itemNames = tbItems.joinIds("ITEMNAME", false);
