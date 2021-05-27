@@ -44,6 +44,7 @@ import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
 import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UFile;
+import com.gdxsoft.easyweb.utils.UJSon;
 import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
@@ -719,16 +720,56 @@ public class HtmlCreator {
 			_DebugFrames.addDebug(this, "HTML", "验证通过");
 			return true;
 
-		} else {
-			_DebugFrames.addDebug(this, "HTML", "验证失败");
-			if (_Acl.getGoToUrl() != null) {
-				String s1 = "document.location.href=\"" + this._Acl.getGoToUrl() + "\";";
-				this._PageHtml = "\r\n<script language=\"javascript\">\r\n" + s1 + "\r\n</script>\r\n";
-			} else {
-				this._PageHtml = "DENY";
-			}
+		}
+
+		String msgCn = "没有权限执行，可能的原因是登录失效或没有授权";
+		String msgEn = "You don't have permission. The possible reason is the login is invalid or NO authorization";
+		String msg = "enus".equals(this._RequestValue.getLang()) ? msgEn : msgCn;
+
+		JSONObject msgJson = UJSon.rstFalse(msg);
+		
+		
+		_DebugFrames.addDebug(this, "HTML", "验证失败");
+		if (_Acl.getGoToUrl() == null) {
+			this._PageHtml = msg;
 			return false;
 		}
+
+		if (!this.isAjaxCall()) {
+			String s1 = "document.location.href=\"" + this._Acl.getGoToUrl() + "\";";
+			this._PageHtml = "\r\n<script language=\"javascript\">\r\n" + s1 + "\r\n</script>\r\n";
+			return false;
+		}
+
+		String ajax = _SysParas.getAjaxCallType();
+
+		if (ajax.equalsIgnoreCase("XML") || ajax.equalsIgnoreCase("XMLDATA")) {
+			this._PageHtml = "<root><error>"+msg+"</error></root>";
+		} else if (ajax.equalsIgnoreCase("HAVE_DATA")) {
+			this._PageHtml = msg;
+		} else if (ajax.equalsIgnoreCase("DOWN_DATA")) { // DOWN_DATA 则表示下载数据
+			this._PageHtml = msg;
+		} else if (ajax.equalsIgnoreCase("TOP_CNT_BOTTOM")) {
+			this._PageHtml = msg;
+		} else if (ajax.equalsIgnoreCase("JSON")) {
+			this._PageHtml = "[" + msgJson + "]";
+		} else if (ajax.equalsIgnoreCase("JSON_EXT") || ajax.equalsIgnoreCase("JSON_EXT1")) {
+			this._PageHtml = msgJson.toString();
+		} else if (ajax.equalsIgnoreCase("JSON_ALL")) {
+			this._PageHtml = "[["+msgJson+"]]";
+		} else if (ajax.equalsIgnoreCase("SELECT_RELOAD")) {
+			this._PageHtml = msgJson.toString();
+		} else if (ajax.equalsIgnoreCase("LF_RELOAD")) {
+			this._PageHtml = msg;
+		} else if (ajax.equalsIgnoreCase("INSTALL")) {
+			this._PageHtml = msg;
+		} else if (ajax.equalsIgnoreCase("WORKFLOW")) {
+			this._PageHtml = msg;
+		} else {
+			this._PageHtml = msg;
+		}
+		return false;
+
 	}
 
 	/**
