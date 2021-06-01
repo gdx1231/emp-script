@@ -4,20 +4,25 @@ import com.gdxsoft.easyweb.conf.ConfShowflake;
 import com.gdxsoft.easyweb.function.Snowflake;
 
 public class USnowflake {
+	private static Snowflake SF;
+
 	/**
 	 * Create a new snowflake instance
 	 * 
 	 * @return
 	 */
-	public static Snowflake newSnowflake() {
-		ConfShowflake conf = ConfShowflake.getInstance();
+	public static synchronized Snowflake getInstance() {
+		if (SF == null) {
+			ConfShowflake conf = ConfShowflake.getInstance();
 
-		if (conf == null) {
-			return null;
+			if (conf == null) {
+				return null;
+			}
+
+			SF = new Snowflake(conf.getWorkId(), conf.getDatacenterId());
 		}
 
-		return new Snowflake(conf.getWorkId(), conf.getDatacenterId());
-
+		return SF;
 	}
 
 	/**
@@ -26,7 +31,7 @@ public class USnowflake {
 	 * @return the next id
 	 */
 	public static long nextId() {
-		Snowflake sf = newSnowflake();
+		Snowflake sf = getInstance();
 		if (sf == null) {
 			return -1;
 		} else {

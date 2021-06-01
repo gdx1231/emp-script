@@ -10,6 +10,13 @@ import com.gdxsoft.easyweb.utils.UObjectValue;
 public class EwaFunctions {
 	private static Logger LOGGER = LoggerFactory.getLogger(EwaFunctions.class);
 
+	/**
+	 * Call the static method from class
+	 * 
+	 * @param functionName
+	 * @param methodParameters
+	 * @return
+	 */
 	public static Object executeStaticFunction(String functionName, Object... methodParameters) {
 		ConfEwaFunction func = ConfEwaFunctions.getInstance().getFunctions().get(functionName.toUpperCase().trim());
 		if (func == null) {
@@ -27,7 +34,15 @@ public class EwaFunctions {
 
 	}
 
-	public static Object executeFunction(String functionName, Object[] construnctParameters,
+	/**
+	 * Call the function method with the construction parameters
+	 * 
+	 * @param functionName
+	 * @param constructParameters
+	 * @param methodParameters
+	 * @return
+	 */
+	public static Object executeFunction(String functionName, Object[] constructParameters,
 			Object... methodParameters) {
 		ConfEwaFunction func = ConfEwaFunctions.getInstance().getFunctions().get(functionName.toUpperCase().trim());
 		if (func == null) {
@@ -36,10 +51,8 @@ public class EwaFunctions {
 		}
 		UObjectValue uv = new UObjectValue();
 
-		Object intance = uv.loadClass(func.getClassName(), construnctParameters);
+		Object intance = uv.loadClass(func.getClassName(), constructParameters);
 		return uv.invoke(intance, func.getMethodName(), methodParameters);
 	}
-
-	 
 
 }

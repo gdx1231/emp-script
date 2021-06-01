@@ -11,11 +11,10 @@ public class TestEwaFunction {
 	}
 
 	public void test() throws Exception {
-
-		EwaFunctions funcs = EwaFunctions.getInstance();
-		funcs.getFunctions().forEach((k, v) -> {
-			// System.out.println(k + ": " + v.getClassName() + "." + v.getMethodName());
-		});
+		for (int i = 0; i < 1000; i++) {
+			Object result6 = EwaFunctions.executeFunction("snowflake", null);
+			System.out.println("snowflake:" + result6);
+		}
 
 		Object result0 = EwaFunctions.executeStaticFunction("password_hash", "aaaa");
 		System.out.println(result0);
@@ -35,16 +34,14 @@ public class TestEwaFunction {
 		Object result31a = EwaFunctions.executeStaticFunction("sha1", "bbb".getBytes());
 		System.out.println("sha1:" + result31a);
 
-		
 		Object result4 = EwaFunctions.executeStaticFunction("md5", "aaa");
 		System.out.println("md5:" + result4);
 
 		Object result4a = EwaFunctions.executeStaticFunction("md5", "aaa".getBytes());
 		System.out.println("md5:" + result4a);
-		
+
 		Object result5 = EwaFunctions.executeFunction("http_get", null, "https://ip.gezz.cn");
 		System.out.println("http_get:" + result5);
-		
 
 	}
 }
