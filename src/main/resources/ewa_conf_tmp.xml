@@ -17,6 +17,8 @@
 		<redis name="r0" method="single" auth="xxx" hosts="192.168.1.252:16379,192.168.1.252:16377"></redis>
 		</redises>
 	-->
+	<!-- twitter snowflake -->
+	<snowflake workId="1" datacenterId="1"></snowflake>
 	<securities>
 		<!-- use for cookie encrypt/decrypt -->
 		<security name="default" default="true" algorithm="aes-192-gcm" iv="" aad="llsdlsd912"

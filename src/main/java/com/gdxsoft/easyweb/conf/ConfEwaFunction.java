@@ -1,6 +1,6 @@
-package com.gdxsoft.easyweb.function;
+package com.gdxsoft.easyweb.conf;
 
-public class EwaFunction {
+public class ConfEwaFunction {
 	private String name; // EWA内部调用的名称
 	private String className; // 类名
 	private String methodName; // 方法名
@@ -9,7 +9,10 @@ public class EwaFunction {
 	private String desEn;
 	private String usage;
 
-	public EwaFunction() {
+	private String xml;
+	private boolean userDefined;
+
+	public ConfEwaFunction() {
 
 	}
 
@@ -59,5 +62,26 @@ public class EwaFunction {
 
 	public void setUsage(String usage) {
 		this.usage = usage;
+	}
+
+	public String getXml() {
+		return xml;
+	}
+
+	public void setXml(String xml) {
+		this.xml = xml;
+	}
+
+	/**
+	 * whether The function in ewa_conf.xml
+	 * 
+	 * @return
+	 */
+	public boolean isUserDefined() {
+		return userDefined;
+	}
+
+	public void setUserDefined(boolean userDefined) {
+		this.userDefined = userDefined;
 	}
 }
