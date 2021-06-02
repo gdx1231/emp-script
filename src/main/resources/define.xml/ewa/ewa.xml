@@ -6613,186 +6613,7 @@ AddEvent(window,'load', init_define_tabs);]]></Bottom></Set></AddScript><AddCss>
     height: 100vh;
 }
 
-]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="admin" CreateDate="2009-02-05 11:35:41" Name="fields" UpdateDate="2021-03-15 10:38:23"><Page><Name><Set Name="fields"/></Name><FrameTag><Set FrameTag="ListFrame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="字段列表" Lang="zhcn" Memo=""/><Set Info="Fields" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="" Height="" HiddenCaption="" VAlign="" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
-<script src="@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/xml/?TYPE=CFG_XML&XMLNAME=EwaDefine.xml&mode=JS&mode_name=_CFG_DEFINE" ></script>
-<script src='@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/xml/?XMLNAME=ewa/ewa.xml&ITEMNAME=fields&MODE=JS&MODE_NAME=_CFG_ITEM&TYPE=ALL'></script>
-<script language="javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CONFIG.js" ></script>
-<script language="javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_DEFINE.js" ></script>
-<script language="javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_SQL.js" ></script>
-<script language="javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_COLOR_MARK.js"></script>
-<div id='divButton' style='display:none' >
-<input type='button' onclick="classCreate();" value='Class'>
-<input type='button' onclick="classDaoCreate();" value='ClassDao'>
-|
-<input type='button' onclick="sqlInsertCreate();" value='INSERT'>
-<input type='button' onclick="sqlSelectCreate();" value='SELECT'>
-<input type='button' onclick="sqlSelectCreate1();" value='SELECT1'>
-<input type='button' onclick="sqlUpdateCreate();" value='UPDATE'>     
-<input type='button' onclick="sqlDeleteCreate();" value='DELETE'>    
-|  
-<input type='button' onclick="opensql();" value='SQL'>    
-
-  <hr />  
-</div>
-					
-          ]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[function opensql(){
-  var u='./?xmlname='+'@xmlname'.toURL() +'&itemname=sql_run_main&db=@cfg&tablename=@tablename';
-  window.parent.parent.AddTab(u,'SQL/@cfg');
-}]]></Top><Bottom><![CDATA[var define;
-var sql;
-var cfg = "@cfg";
-var tablename = "@tablename";
-var userName = "@SYS_ADMIN_NAME";
-var cmclass = new EWA_ColorMark('CLASS');
-
-function sqlSelectCreate() {
-    var s1 = sql.CreateSqlSelect();
-    s1 = cmclass.MarkSql(s1);
-    window.parent.frames[1].document.body.innerHTML = s1;
-}
-
-function sqlSelectCreate1() {
-    var s1 = sql.CreateSqlSelect1();
-    s1 = cmclass.MarkSql(s1);
-    window.parent.frames[1].document.body.innerHTML = s1;
-}
-
-function sqlInsertCreate() {
-    var s1 = sql.CreateSqlInsert();
-    s1 = cmclass.MarkSql(s1);
-    window.parent.frames[1].document.body.innerHTML = s1;
-}
-
-function sqlUpdateCreate() {
-    var s1 = sql.CreateSqlUpdate();
-    s1 = cmclass.MarkSql(s1);
-    window.parent.frames[1].document.body.innerHTML = s1;
-}
-
-function sqlDeleteCreate() {
-    var s1 = sql.CreateSqlDelete();
-    s1 = cmclass.MarkSql(s1);
-    window.parent.frames[1].document.body.innerHTML = s1;
-}
-
-function classCreate() {
-    var s1 = sql.CreateClass();
-    showJava(s1, sql._ClassName);
-}
-
-function classDaoCreate() {
-    var s1 = sql.CreateClassDao();
-    showJava(s1, sql._ClassName + "Dao");
-}
-
-function saveJava(form) {
-    var o = $(form);
-    var name = o.find("input[name=name]").val();
-    var packagename = o.find("input[name=package]").val();
-    var path = o.find("input[name=path]").val();
-    var java = o.find("input[name=java]").val();
-
-    var u = "@EWA.CP/EWA_DEFINE/cgi-bin/xml/";
-    var data = {
-        name: name,
-        packagename: packagename,
-        path: path,
-        java: java,
-        TYPE: "SAVE_JAVA"
-    }
-    $JP(u, data, function(rst) {
-        if (!rst.RST) {
-            alert(rst.ERR);
-        } else {
-            $Tip("Ok");
-        }
-    });
-    return false;
-}
-
-function showJava(code, className) {
-    var s1 = "<div id='a'></div><div  id='b'></div>";
-    var p = $(window.parent.frames[1].document.body);
-    p.html(s1);
-    p.find('#a').html("<form   method='post'>" +
-        "<table cellpadding=1 cellspacing=1 bgcolor='#cdcdcd' width=100%><tr>" +
-        "<td bgcolor=white width=100><button type=submit style='font-size:20px;color:green;width:100px'>Save</button></td>" +
-        "<td bgcolor=white><input required=required type='text' placeholder='Package Name' name='package' style='font-size:20px;width:100%'></td>" +
-        "<td bgcolor=white><input required=required type='text' placeholder='Saved path' name='path' style='font-size:20px;width:100%'></td>" +
-        "</tr></table><input type=hidden name='name'><input type=hidden name=java></form>");
-    p.find('#b').html(cmclass.MarkClass(code));
-    var v = getSetting('EWA_DEFINE_JAVA_SAVED_PATH');
-    p.find('input[name=path]').on('blur', function(e) {
-        setSetting('EWA_DEFINE_JAVA_SAVED_PATH', this.value);
-    }).val(v);
-    var v1 = getSetting('EWA_DEFINE_JAVA_PACKAGE');
-    p.find('input[name=package]').on('blur', function(e) {
-        setSetting('EWA_DEFINE_JAVA_PACKAGE', this.value);
-    }).val(v1);
-    p.find('input[name=name]').val(className);
-    p.find('input[name=java]').val(code);
-    p.find("form").on("submit", function(e) {
-        return saveJava(this);
-    })
-}
-
-function getSetting(tag) {
-    if (window.localStorage && window.localStorage[tag]) {
-        return window.localStorage[tag];
-    }
-}
-
-function setSetting(tag, value) {
-    if (window.localStorage) {
-        window.localStorage[tag] = value;
-    }
-
-}
-
-function onload1() {
-    EWA.CP = "@SYS_CONTEXTPATH";
-    var t1 = tablename;
-    define = new EWA_DefineClass('');
-    var tbs = document.getElementsByTagName('table');
-    var tb;
-    for (var i = 0; i < tbs.length; i++) {
-        if (tbs[i].id.indexOf('EWA_LF_') == 0) {
-            tb = tbs[i];
-            break;
-        }
-    }
-    define._CreateFields(tb);
-    sql = new EWAC_SqlCreator();
-    sql.Init(t1, define.Fields.Fields);
-}
-var linkType = '@linkType';
-if (linkType == 'CLASS') {
-    $X('divButton').style.display = 'block';
-    addEvent(window, 'load', onload1);
-}]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[#col_true{
-						 width:16px;
-						  background-image : url('@rv_ewa_style_path/EWA_DEFINE/images/sql/key_p.gif') ;
-display: block;
-float: left;
-    height:16px;
-
-}
-#col_false{ 
-							width:16px;
-							background-image : url('@rv_ewa_style_path/EWA_DEFINE/images/sql/column.gif');
-display: block;
-float: left;
-    height:16px;
-}
-#fk_false{
-							display:none;
-}
-#columnname{
-    height:16px;
-    line-height:16px;
-}
-          ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="" KeyField="name" PageSize="" Recycle="" StatusField=""/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="1" luDblClick="" luDblClickIdx="" luSearch="" luSelect="S"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="300,*" FrameSubUrl="" FrameType="V"/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnListFrameUpdateCell"><CallSet><Set CallIsChk="" CallName="修改字段描述" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnListFrameUpdateCell" SqlType="update" TransType="no"><Sql><![CDATA[EXEC PR_DES @tablename,@EWA_FIELD_ID,@description]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@cfg,@tablename" MethodName="getFieldsXml" Name="LoadFields" XmlTag="table/fields/field"/><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@cfg, @tablename, @EWA_ACTION_KEY, @EWA_FIELD_val" MethodName="modifyColumnDescription" Name="修改字段描述" XmlTag=""/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Action><XItems><XItem Name="cccc"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="checkbox"/></Tag><Name><Set Name="cccc"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="选择" Lang="zhcn" Memo="a"/><Set Info="Select" Lang="enus" Memo="a"/></DescriptionSet><XStyle/><Style/><ParentStyle><Set ParentStyle="width:20px"/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="name" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="columnname"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="user"/></Tag><Name><Set Name="columnname"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="字段名" Lang="zhcn" Memo=""/><Set Info="Filed Name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="name" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet><Set Lang="zhcn" User="&lt;span id='col_@pk'&gt;&amp;nbsp;&lt;/span&gt; &lt;span&gt;@name&lt;/span&gt;"/></UserSet><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="description"><Tag><Set IsLFEdit="1" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="description"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="描述" Lang="zhcn" Memo=""/><Set Info="Description" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="description" DataType="String" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="DataType"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="DataType"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="DataType" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml><Set IsHtml="0"/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="databasetype" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="ColumnLength"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="ColumnLength"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="长度" Lang="zhcn" Memo=""/><Set Info="Length" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="columnsize" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="IsNull"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="IsNull"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="空值" Lang="zhcn" Memo=""/><Set Info="Null values" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="null" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="identity"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="identity"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="自增" Lang="zhcn" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="identity" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="fk1"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="user"/></Tag><Name><Set Name="fk1"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="外键" Lang="zhcn" Memo=""/><Set Info="Foreign keys" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet><Set Lang="zhcn" User="&lt;span id='FK_fk'&gt; @fktablename.@fkcolumnname &lt;/span&gt;"/></UserSet><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2013-05-22 09:25:25" Name="sql_run_main" UpdateDate="2021-03-15 10:46:33"><Page><Name><Set Name="sql_run_main"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Blue"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="862024" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="SQL" Lang="zhcn" Memo=""/><Set Info="SQL" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="margin" PageAttValue="0px"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2013-05-22 09:25:25" Name="sql_run_main" UpdateDate="2021-03-15 10:46:33"><Page><Name><Set Name="sql_run_main"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Blue"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="862024" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="SQL" Lang="zhcn" Memo=""/><Set Info="SQL" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="margin" PageAttValue="0px"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
 <table border=0 width=100% height=100%>
     <tr>
@@ -7529,4 +7350,214 @@ pre {
     font-family: "Courier New";
     ling-height: 18px;
 }
-                ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>
+                ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-02-05 11:35:41" Name="fields" UpdateDate="2021-06-02 11:24:34"><Page><Name><Set Name="fields"/></Name><FrameTag><Set FrameTag="ListFrame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="字段列表" Lang="zhcn" Memo=""/><Set Info="Fields" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="" Height="" HiddenCaption="" VAlign="" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<script type="text/javascript" src="@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/xml/?TYPE=CFG_XML&XMLNAME=EwaDefine.xml&mode=JS&mode_name=_CFG_DEFINE"></script>
+<script type="text/javascript" src='@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/xml/?XMLNAME=@XMLNAME&ITEMNAME=fields&MODE=JS&MODE_NAME=_CFG_ITEM&TYPE=ALL'></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CONFIG.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_DEFINE.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_SQL.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_COLOR_MARK.js"></script>
+<div id='divButton' style='display:none'>
+    <input type='button' onclick="classCreate();" value='Class'>
+    <input type='button' onclick="classDaoCreate();" value='ClassDao'>
+    <input type='button' id='btnOpenSwaggerAnnotation' onclick="openSwaggerAnnotation(this);" value='SwaggerAnnotation'>
+    |
+    <input type='button' onclick="sqlInsertCreate();" value='INSERT'>
+    <input type='button' onclick="sqlSelectCreate();" value='SELECT'>
+    <input type='button' onclick="sqlSelectCreate1();" value='SELECT1'>
+    <input type='button' onclick="sqlUpdateCreate();" value='UPDATE'>
+    <input type='button' onclick="sqlDeleteCreate();" value='DELETE'>
+    |
+    <input type='button' onclick="opensql();" value='SQL'>
+
+    <hr />
+</div>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[function opensql(){
+  var u='./?xmlname='+'@xmlname'.toURL() +'&itemname=sql_run_main&db=@cfg&tablename=@tablename';
+  window.parent.parent.AddTab(u,'SQL/@cfg');
+}]]></Top><Bottom><![CDATA[var define;
+var sql;
+var cfg = "@cfg";
+var tablename = "@tablename";
+var userName = "@SYS_ADMIN_NAME";
+var cmclass = new EWA_ColorMark('CLASS');
+
+function sqlSelectCreate() {
+    var s1 = sql.CreateSqlSelect();
+    s1 = cmclass.MarkSql(s1);
+    window.parent.frames[1].document.body.innerHTML = s1;
+}
+
+function sqlSelectCreate1() {
+    var s1 = sql.CreateSqlSelect1();
+    s1 = cmclass.MarkSql(s1);
+    window.parent.frames[1].document.body.innerHTML = s1;
+}
+
+function sqlInsertCreate() {
+    var s1 = sql.CreateSqlInsert();
+    s1 = cmclass.MarkSql(s1);
+    window.parent.frames[1].document.body.innerHTML = s1;
+}
+
+function sqlUpdateCreate() {
+    var s1 = sql.CreateSqlUpdate();
+    s1 = cmclass.MarkSql(s1);
+    window.parent.frames[1].document.body.innerHTML = s1;
+}
+
+function sqlDeleteCreate() {
+    var s1 = sql.CreateSqlDelete();
+    s1 = cmclass.MarkSql(s1);
+    window.parent.frames[1].document.body.innerHTML = s1;
+}
+
+function classCreate() {
+    var s1 = sql.CreateClass();
+    showJava(s1, sql._ClassName);
+}
+
+function classDaoCreate() {
+    var s1 = sql.CreateClassDao();
+    showJava(s1, sql._ClassName + "Dao");
+}
+
+function saveJava(form) {
+    var o = $(form);
+    var name = o.find("input[name=name]").val();
+    var packagename = o.find("input[name=package]").val();
+    var path = o.find("input[name=path]").val();
+    var java = o.find("input[name=java]").val();
+
+    var u = "@EWA.CP/EWA_DEFINE/cgi-bin/xml/";
+    var data = {
+        name: name,
+        packagename: packagename,
+        path: path,
+        java: java,
+        TYPE: "SAVE_JAVA"
+    }
+    $JP(u, data, function(rst) {
+        if (!rst.RST) {
+            alert(rst.ERR);
+        } else {
+            $Tip("Ok");
+        }
+    });
+    return false;
+}
+
+function showJava(code, className) {
+    var s1 = "<div id='a'></div><div  id='b'></div>";
+    var p = $(window.parent.frames[1].document.body);
+    p.html(s1);
+    p.find('#a').html("<form   method='post'>" +
+        "<table cellpadding=1 cellspacing=1 bgcolor='#cdcdcd' width=100%><tr>" +
+        "<td bgcolor=white width=100><button type=submit style='font-size:20px;color:green;width:100px'>Save</button></td>" +
+        "<td bgcolor=white><input required=required type='text' placeholder='Package Name' name='package' style='font-size:20px;width:100%'></td>" +
+        "<td bgcolor=white><input required=required type='text' placeholder='Saved path' name='path' style='font-size:20px;width:100%'></td>" +
+        "</tr></table><input type=hidden name='name'><input type=hidden name=java></form>");
+    p.find('#b').html(cmclass.MarkClass(code));
+    var v = getSetting('EWA_DEFINE_JAVA_SAVED_PATH');
+    p.find('input[name=path]').on('blur', function(e) {
+        setSetting('EWA_DEFINE_JAVA_SAVED_PATH', this.value);
+    }).val(v);
+    var v1 = getSetting('EWA_DEFINE_JAVA_PACKAGE');
+    p.find('input[name=package]').on('blur', function(e) {
+        setSetting('EWA_DEFINE_JAVA_PACKAGE', this.value);
+    }).val(v1);
+    p.find('input[name=name]').val(className);
+    p.find('input[name=java]').val(code);
+    p.find("form").on("submit", function(e) {
+        return saveJava(this);
+    })
+}
+
+function getSetting(tag) {
+    if (window.localStorage && window.localStorage[tag]) {
+        return window.localStorage[tag];
+    }
+}
+
+function setSetting(tag, value) {
+    if (window.localStorage) {
+        window.localStorage[tag] = value;
+    }
+}
+
+function openSwaggerAnnotation() {
+    let but = $('[_ewa_event_id="btnOpenSwaggerAnnotation"]');
+    if (sql.isCreateSwaggerAnnotations) { //已经打开
+        sql.isCreateSwaggerAnnotations = false;
+        $Tip('Swagger annotations closed');
+        but.removeClass('opened');
+    } else {
+        sql.isCreateSwaggerAnnotations = true;
+        $Tip('Swagger annotations opened');
+        but.addClass('opened')
+    }
+    setSetting('isCreateSwaggerAnnotations', sql.isCreateSwaggerAnnotations);
+}
+
+function onload1() {
+    EWA.CP = "@SYS_CONTEXTPATH";
+    var t1 = tablename;
+    define = new EWA_DefineClass('');
+    var tbs = document.getElementsByTagName('table');
+    var tb;
+    for (var i = 0; i < tbs.length; i++) {
+        if (tbs[i].id.indexOf('EWA_LF_') == 0) {
+            tb = tbs[i];
+            break;
+        }
+    }
+    define._CreateFields(tb);
+    sql = new EWAC_SqlCreator();
+    sql.Init(t1, define.Fields.Fields);
+    let isCreateSwaggerAnnotations = getSetting('isCreateSwaggerAnnotations');
+    if (isCreateSwaggerAnnotations) {
+        sql.isCreateSwaggerAnnotations = true;
+        $('[_ewa_event_id="btnOpenSwaggerAnnotation"]').addClass('opened');
+    }
+}
+
+
+(function() {
+    var linkType = '@linkType';
+    if (linkType == 'CLASS') {
+        $X('divButton').style.display = 'block';
+    }
+    let t = setInterval(function() {
+        if (window._CFG_DEFINE) {
+            window.clearInterval(t);
+            onload1();
+        }
+    }, 50);
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[#col_true {
+    width: 16px;
+    background-image: url('@rv_ewa_style_path/EWA_DEFINE/images/sql/key_p.gif');
+    display: block;
+    float: left;
+    height: 16px;
+}
+
+#col_false {
+    width: 16px;
+    background-image: url('@rv_ewa_style_path/EWA_DEFINE/images/sql/column.gif');
+    display: block;
+    float: left;
+    height: 16px;
+}
+
+#fk_false {
+    display: none;
+}
+
+#columnname {
+    height: 16px;
+    line-height: 16px;
+}
+.opened::after {
+    content: " \f00c";
+    font-family: fontawesome;
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="" KeyField="name" PageSize="" Recycle="" StatusField=""/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="1" luDblClick="" luDblClickIdx="" luSearch="" luSelect="S"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="300,*" FrameSubUrl="" FrameType="V"/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnListFrameUpdateCell"><CallSet><Set CallIsChk="" CallName="修改字段描述" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnListFrameUpdateCell" SqlType="update" TransType="no"><Sql><![CDATA[EXEC PR_DES @tablename,@EWA_FIELD_ID,@description]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@cfg,@tablename" MethodName="getFieldsXml" Name="LoadFields" XmlTag="table/fields/field"/><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@cfg, @tablename, @EWA_ACTION_KEY, @EWA_FIELD_val" MethodName="modifyColumnDescription" Name="修改字段描述" XmlTag=""/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Action><XItems><XItem Name="cccc"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="checkbox"/></Tag><Name><Set Name="cccc"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="选择" Lang="zhcn" Memo="a"/><Set Info="Select" Lang="enus" Memo="a"/></DescriptionSet><XStyle/><Style/><ParentStyle><Set ParentStyle="width:20px"/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="name" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="columnname"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="user"/></Tag><Name><Set Name="columnname"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="字段名" Lang="zhcn" Memo=""/><Set Info="Filed Name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="name" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet><Set Lang="zhcn" User="&lt;span id='col_@pk'&gt;&amp;nbsp;&lt;/span&gt; &lt;span&gt;@name&lt;/span&gt;"/></UserSet><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="description"><Tag><Set IsLFEdit="1" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="description"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="描述" Lang="zhcn" Memo=""/><Set Info="Description" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="description" DataType="String" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="DataType"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="DataType"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="DataType" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml><Set IsHtml="0"/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="databasetype" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="ColumnLength"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="ColumnLength"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="长度" Lang="zhcn" Memo=""/><Set Info="Length" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="columnsize" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="IsNull"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="IsNull"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="空值" Lang="zhcn" Memo=""/><Set Info="Null values" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="null" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="identity"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="identity"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="自增" Lang="zhcn" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="identity" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="fk1"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="user"/></Tag><Name><Set Name="fk1"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="外键" Lang="zhcn" Memo=""/><Set Info="Foreign keys" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet><Set Lang="zhcn" User="&lt;span id='FK_fk'&gt; @fktablename.@fkcolumnname &lt;/span&gt;"/></UserSet><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>
