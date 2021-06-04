@@ -149,8 +149,7 @@ public class Table {
 			eFields.appendChild(eleField);
 
 			UObjectValue.writeXmlNodeAtts(eleField, f);
-			
-			
+
 		}
 
 		Element ePk = this._Doc.createElement("Pk");
@@ -342,12 +341,12 @@ public class Table {
 	private void initFields(DatabaseMetaData dataMeta) {
 		ResultSet rs = null;
 		boolean isMySql = false;
-		HashMap<String, Integer> fieldsMap=new HashMap<String, Integer> ();
+		HashMap<String, Integer> fieldsMap = new HashMap<String, Integer>();
 		try {
 			rs = dataMeta.getColumns(null, _SchemaName, _Name, null);
 			ResultSetMetaData md = rs.getMetaData();
 			String name1 = md.getClass().getName();
-			if (name1.endsWith("com.mysql.jdbc.ResultSetMetaData")) {
+			if (name1.indexOf("com.mysql") >= 0) {
 				isMySql = true;
 			}
 			for (int i = 1; i <= md.getColumnCount(); i++) {
@@ -376,14 +375,14 @@ public class Table {
 				if (names.length == 2 && names[1].toLowerCase().indexOf("identity") == 0) {
 					f1.setIdentity(true);
 				}
-				if(fieldsMap.containsKey("IS_AUTOINCREMENT")) {
-					String IS_AUTOINCREMENT  = rs.getString("IS_AUTOINCREMENT");
-					
-					if("YES".equals(IS_AUTOINCREMENT)) {
+				if (fieldsMap.containsKey("IS_AUTOINCREMENT")) {
+					String IS_AUTOINCREMENT = rs.getString("IS_AUTOINCREMENT");
+
+					if ("YES".equals(IS_AUTOINCREMENT)) {
 						f1.setIdentity(true);
 					}
 				}
-				
+
 				f1.setDescription(rs.getString("REMARKS"));
 
 				f1.setCharOctetLength(rs.getInt("CHAR_OCTET_LENGTH"));
@@ -514,8 +513,7 @@ public class Table {
 	 * 获取SQL模板，在TypesMap.xml中定义，返回指定名称的SQL模板
 	 * 
 	 * @param conn    数据库连接
-	 * @param tmpName 模板名称{PrimaryKey,FieldCommentsGet,FieldCommentSet,IdentityField
-	 *                ... }
+	 * @param tmpName 模板名称{PrimaryKey,FieldCommentsGet,FieldCommentSet,IdentityField ... }
 	 * @return
 	 */
 	private String getSqlTemplate(DataConnection conn, String tmpName) {
