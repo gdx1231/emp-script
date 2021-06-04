@@ -37,7 +37,10 @@ public class DataConnection {
 	private DataHelper _ds;
 	private CallableStatement _cst;
 	private PreparedStatement _pst;
-	private String _errorMsg;
+
+	private String _errorMsg; // 错误信息和 SQL
+	private String _errorMsgOnly; // 只有错误信息
+
 	private MList _ResultSetList = new MList();
 	private String _DatabaseType;
 	private String _SchemaName;
@@ -1855,23 +1858,44 @@ public class DataConnection {
 
 	}
 
+	/**
+	 * Return the error with SQL
+	 * 
+	 * @return
+	 */
 	public String getErrorMsg() {
 		return _errorMsg;
 	}
 
+	/**
+	 * Clear the error
+	 */
 	public void clearErrorMsg() {
 		this._errorMsg = null;
+		this._errorMsgOnly = null;
 	}
 
+	/**
+	 * Set the error and SQL
+	 * 
+	 * @param e
+	 * @param sql
+	 */
 	private void setError(Exception e, String sql) {
 		this._errorMsg = "SQL: " + sql + "<br>\r\nERROR: " + e.getMessage() + "<br>DATASOURCE: "
 				+ this._CurrentConfig.getName() + "(" + this._ConnectionString + ")";
-		System.err.println(this._errorMsg);
+		this._errorMsgOnly = e.getMessage();
+		// LOGGER.error(this._errorMsg);
 	}
 
+	/**
+	 * Show the debug info when UPath.isDebugSql()
+	 * 
+	 * @param v
+	 */
 	private void showSqlDebug(String v) {
 		if (UPath.isDebugSql()) {
-			System.out.println(v);
+			LOGGER.info(v);
 		}
 	}
 
@@ -2121,5 +2145,14 @@ public class DataConnection {
 	 */
 	public boolean isTrans() {
 		return _IsTrans;
+	}
+
+	/**
+	 * Return the error without sql
+	 * 
+	 * @return
+	 */
+	public String getErrorMsgOnly() {
+		return _errorMsgOnly;
 	}
 }
