@@ -1,6 +1,10 @@
 package com.gdxsoft.easyweb.script;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -66,6 +70,8 @@ public class RequestValue implements Cloneable {
 	private int _ParameterHashCode = 0;
 
 	private Map<String, JSONObject> mapJson_;
+
+	private boolean jsonBodyParameters;
 
 	public RequestValue() {
 		initSysParameters();
@@ -601,6 +607,17 @@ public class RequestValue implements Cloneable {
 	}
 
 	/**
+	 * 初始化参数表 session=req.getSession()
+	 * 
+	 * @param req                Request
+	 * @param jsonBodyParameters 通过body提交的json参数
+	 */
+	public RequestValue(HttpServletRequest req, boolean jsonBodyParameters) {
+		this.jsonBodyParameters = jsonBodyParameters;
+		this.initRequest(req, req.getSession());
+	}
+
+	/**
 	 * 初始化参数表
 	 * 
 	 * @param req     Request
@@ -681,9 +698,14 @@ public class RequestValue implements Cloneable {
 		this._ReqValues.addValue("SYS_REMOTE_URL_ALL", uu.getUrlWithDomain(true), PageValueTag.SYSTEM);
 
 		this.addQueryValues(_Request.getQueryString());
-		// 页面提交的参数
-		this.addParameter(req);
 
+		if (this.jsonBodyParameters) {
+			// 获取通过 body提交的 json 参数
+			this.loadJsonBodyParameters(req);
+		} else {
+			// 页面提交的参数
+			this.addParameter(req);
+		}
 		// ��ȡCookie ֵ
 		this.addCookies(req.getCookies());
 
@@ -735,6 +757,43 @@ public class RequestValue implements Cloneable {
 		HOST_BASE = HOST_PROTOCOL + "://" + HOST + ":" + HOST_PORT + "/";
 		HOST_CONTEXT = req.getContextPath();
 
+	}
+
+	private void loadJsonBodyParameters(HttpServletRequest request) {
+		InputStream inputStream = null;
+		byte[] bytes = new byte[1024];
+		String bodyContent = null;
+		try {
+			inputStream = request.getInputStream();
+			BufferedInputStream byteOutputStream = new BufferedInputStream(inputStream);
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+			int a;
+			while ((a = byteOutputStream.read(bytes)) != -1) {
+				byteArrayOutputStream.write(bytes, 0, a);
+			}
+			bodyContent = byteArrayOutputStream.toString("utf-8");
+		} catch (IOException e) {
+			LOGGER.error(e.getMessage());
+		} finally {
+			if (inputStream != null) {
+				try {
+					inputStream.close();
+				} catch (IOException e) {
+					LOGGER.warn(e.getMessage());
+				}
+			}
+		}
+		if (bodyContent == null) {
+			return;
+		}
+
+		try {
+			JSONObject obj = new JSONObject(bodyContent);
+			this.addValues(obj);
+		} catch (Exception err) {
+			LOGGER.warn(err.getMessage());
+		}
 	}
 
 	private void addParameter(HttpServletRequest req) {
@@ -1322,5 +1381,18 @@ public class RequestValue implements Cloneable {
 
 		return rv;
 
+	}
+
+	/**
+	 * 是否通过body提交的json参数
+	 * 
+	 * @return
+	 */
+	public boolean isJsonBodyParameters() {
+		return jsonBodyParameters;
+	}
+
+	public void setJsonBodyParameters(boolean jsonBodyParameters) {
+		this.jsonBodyParameters = jsonBodyParameters;
 	}
 }
