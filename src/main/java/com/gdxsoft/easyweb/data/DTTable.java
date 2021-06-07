@@ -401,8 +401,8 @@ public class DTTable implements Serializable {
 
 	/**
 	 * 根据指定的字段初始化字段的XML属性，是否从XML的属性中获取<br>
-	 * Initialize the table columns XML "isAttribute" according to the specified,
-	 * Whether to get the value from the XML element attribute fields
+	 * Initialize the table columns XML "isAttribute" according to the specified, Whether to get the value from the XML
+	 * element attribute fields
 	 * 
 	 * @param fields      the fields name
 	 * @param isAttribute 是否从XML的属性中获取 <br>
@@ -802,6 +802,9 @@ public class DTTable implements Serializable {
 				// 返回计算时差后的时间
 				return Utils.getTimeDiffValue(val, this.getTimeDiffMinutes());
 			} else if (objClassName.toUpperCase().indexOf("CLOB") >= 0) {
+				return cell.toString();
+			} else if (objClassName.equals("class java.lang.Long")) {
+				// 避免js的 number无法表达long值，会失去精度
 				return cell.toString();
 			}
 		}

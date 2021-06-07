@@ -810,6 +810,8 @@ public class FrameList extends FrameBase implements IFrame {
 	public JSONObject createJsonPageInfo() {
 		PageSplit ps = new PageSplit(_ListFrameRecordCount, super.getHtmlClass().getItemValues().getRequestValue(),
 				this.getUserSettingPageSize());
+		super._PageSplit = ps;
+		
 		JSONObject json = new JSONObject();
 		json.put("RECORD_COUNT", ps.getRecordCount());
 		json.put("PAGE_CURRENT", ps.getPageCurrent());

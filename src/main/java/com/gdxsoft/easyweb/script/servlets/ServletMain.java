@@ -102,6 +102,16 @@ public class ServletMain extends HttpServlet {
 		// Put your code here
 	}
 
+	@Override
+	public void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String method = req.getMethod();
+		if ("PATCH".equalsIgnoreCase(method)) {
+			this.doPatch(req, resp);
+		} else {
+			super.service(req, resp);
+		}
+	}
+
 	/**
 	 * The doGet method of the servlet. <br>
 	 * 
@@ -112,17 +122,48 @@ public class ServletMain extends HttpServlet {
 	 * @throws ServletException if an error occurred
 	 * @throws IOException      if an error occurred
 	 */
+	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.show(request, response);
 	}
 
-	private void outContent(HttpServletRequest request, HttpServletResponse response, String cnt)
+	/**
+	 * The doPost method of the servlet. <br>
+	 * 
+	 * This method is called when a form has its tag value method equals to post.
+	 * 
+	 * @param request  the request send by the client to the server
+	 * @param response the response send by the server to the client
+	 * @throws ServletException if an error occurred
+	 * @throws IOException      if an error occurred
+	 */
+	@Override
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		this.show(request, response);
+	}
+
+	@Override
+	public void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		this.show(request, response);
+	}
+
+	@Override
+	public void doDelete(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		this.show(request, response);
+	}
+
+	public void doPatch(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		this.show(request, response);
+	}
+
+	public void outContent(HttpServletRequest request, HttpServletResponse response, String cnt)
 			throws ServletException, IOException {
 		GZipOut out = new GZipOut(request, response);
 		out.outContent(cnt);
 	}
 
-	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	public void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("utf-8");
 		response.setHeader("Content-Type", "text/html;charset=UTF-8");
@@ -298,9 +339,9 @@ public class ServletMain extends HttpServlet {
 
 				sbDebugJs.append("</head>");
 				cnt1 = cnt1.replace("ewa.min.js", "fas.js");
-				
+
 				String debugScripts = sbDebugJs.toString();
-				
+
 				cnt1 = cnt1.replace("</head>", debugScripts);
 			}
 
@@ -315,20 +356,6 @@ public class ServletMain extends HttpServlet {
 			}
 		}
 		this.outContent(request, response, cnt.toString());
-	}
-
-	/**
-	 * The doPost method of the servlet. <br>
-	 * 
-	 * This method is called when a form has its tag value method equals to post.
-	 * 
-	 * @param request  the request send by the client to the server
-	 * @param response the response send by the server to the client
-	 * @throws ServletException if an error occurred
-	 * @throws IOException      if an error occurred
-	 */
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		this.show(request, response);
 	}
 
 	/**

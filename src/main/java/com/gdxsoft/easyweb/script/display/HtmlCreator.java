@@ -706,7 +706,7 @@ public class HtmlCreator {
 	 * 
 	 * @return
 	 */
-	private boolean checkAcl() {
+	public boolean checkAcl() {
 		if (this._Acl == null) {
 			return true;
 		}
