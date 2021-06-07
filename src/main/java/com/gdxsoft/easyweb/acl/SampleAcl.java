@@ -7,7 +7,8 @@ public class SampleAcl implements IAcl {
 	private String _XmlName;
 	private String _ItemName;
 	private RequestValue _RequestValue;
-	private String _GoToUrl; //验证失败跳转页面
+	private String _GoToUrl; // 验证失败跳转页面
+
 	public boolean canRun() {
 		return true;
 	}
@@ -21,6 +22,10 @@ public class SampleAcl implements IAcl {
 		this._XmlName = xmlName;
 	}
 
+	public String getDenyMessage() {
+		return null;
+	}
+
 	/**
 	 * @return the _XmlName
 	 */
@@ -29,8 +34,7 @@ public class SampleAcl implements IAcl {
 	}
 
 	/**
-	 * @param xmlName
-	 *            the _XmlName to set
+	 * @param xmlName the _XmlName to set
 	 */
 	public void setXmlName(String xmlName) {
 		_XmlName = xmlName;
@@ -44,8 +48,7 @@ public class SampleAcl implements IAcl {
 	}
 
 	/**
-	 * @param itemName
-	 *            the _ItemName to set
+	 * @param itemName the _ItemName to set
 	 */
 	public void setItemName(String itemName) {
 		_ItemName = itemName;

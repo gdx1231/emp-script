@@ -11,6 +11,8 @@ import com.gdxsoft.easyweb.script.RequestValue;
  */
 public interface IAcl {
 
+	String getDenyMessage();
+	
 	public boolean canRun();
 
 	public String getXmlName();
