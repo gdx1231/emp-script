@@ -314,7 +314,6 @@ public class ServletXml extends HttpServlet {
 	 * @return
 	 */
 	private String handleCfgXml(RequestValue rv, HttpServletResponse response) {
-		LOGGER.info("rv={}", rv);
 		String xmlName = rv.getString("XMLNAME");
 		String name = xmlName;
 		String xml = null;
