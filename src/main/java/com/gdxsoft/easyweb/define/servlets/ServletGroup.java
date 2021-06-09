@@ -27,7 +27,6 @@ import com.gdxsoft.easyweb.define.UpdateXmlImpl;
 import com.gdxsoft.easyweb.define.UpdateXmlJdbcImpl;
 import com.gdxsoft.easyweb.define.group.Exchange;
 import com.gdxsoft.easyweb.script.RequestValue;
-import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UPath;

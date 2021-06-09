@@ -43,14 +43,11 @@ import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 /**
- * @author Administrator
  *
  */
 public class ServletXml extends HttpServlet {
 
-	private RequestValue rv;
-	private PageValue pvAdmin;
-	private int _BakFilesCount = 0;
+	// servlet是线程不安全的 一般不要轻易定成员变量 ，用局部变量吧
 	/**
 	 *
 	 */
@@ -121,7 +118,7 @@ public class ServletXml extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		HttpSession session = request.getSession();
 
-		this.rv = new RequestValue(request, session);
+		RequestValue rv = new RequestValue(request, session);
 
 		String oType = rv.getString("TYPE");
 		String mode = rv.getString("MODE");
@@ -141,15 +138,15 @@ public class ServletXml extends HttpServlet {
 
 		if (oType != null && oType.toUpperCase().equals("GUNID")) { // 获取全局编号
 			this.setOutType(response, "javascript");
-			cnt = this.handleGUNID();
+			cnt = this.handleGUNID(rv);
 			this.outContent(request, response, cnt);
 			return;
 		}
 
-		PageValue pv = rv.getPageValues().getPageValue("EWA_ADMIN_ID");
+		PageValue pvAdmin = rv.getPageValues().getPageValue("EWA_ADMIN_ID");
 
 		// not login
-		if (pv == null || (pv.getPVTag() != PageValueTag.SESSION)) {
+		if (pvAdmin == null || (pvAdmin.getPVTag() != PageValueTag.SESSION)) {
 			JSONObject rst = new JSONObject();
 			rst.put("RST", false);
 			rst.put("ERR", "deny! request login");
@@ -157,40 +154,38 @@ public class ServletXml extends HttpServlet {
 			return;
 		}
 
-		pvAdmin = pv;
-
 		if (oType == null) {
-			cnt = this.handleNull(response);
+			cnt = this.handleNull(rv, response);
 		} else if (oType.equals("ALL")) {
 			this.setOutType(response, "javascript");
-			cnt = this.handleAll();
+			cnt = this.handleAll(rv, pvAdmin);
 		} else if (oType.equals("SQLS")) {
 			this.setOutType(response, "html");
-			cnt = this.handleSqls();
+			cnt = this.handleSqls(rv, pvAdmin);
 		} else if (oType.equals("SAVE")) {
-			this.handleSave();
+			this.handleSave(rv, pvAdmin);
 			this.setOutType(response, "html");
 			cnt = "alert('ok')";
 		} else if (oType.equals("VIEW")) {
-			cnt = this.handleView();
+			cnt = this.handleView(rv);
 		} else if (oType.equals("CFG_XML")) {// 调用配置文件
-			cnt = this.handleCfgXml(response);
+			cnt = this.handleCfgXml(rv, response);
 		} else if (oType.equals("CFG_DIR")) {
 			UserDirXmls udx = new UserDirXmls();
 			this.setOutType(response, "xml");
 			cnt = udx.getXml();
 		} else if (oType.equals("DELETE")) {
-			this.handleRemove();
+			this.handleRemove(rv, pvAdmin);
 			this.setOutType(response, "html");
 		} else if (oType.equals("PASTE")) {
-			this.handlePaste();
+			this.handlePaste(rv, pvAdmin);
 			this.setOutType(response, "html");
 		} else if (oType.equals("DELETE_BAKS")) {// 递归删除备份文件
 			this.setOutType(response, "html");
-			cnt = handleDeleteBaks() + "";
+			cnt = handleDeleteBaks(rv, pvAdmin) + "";
 		} else if (oType.toUpperCase().equals("GUNID")) { // 获取全局编号
 			this.setOutType(response, "javascript");
-			cnt = this.handleGUNID();
+			cnt = this.handleGUNID(rv);
 		} else if (oType.toUpperCase().equals("CHECK_SQL")) { // 检查SQL语法
 			SqlSyntaxCheck syntaxCheck = new SqlSyntaxCheck(rv);
 			cnt = syntaxCheck.checkSyntax();
@@ -198,20 +193,20 @@ public class ServletXml extends HttpServlet {
 			// 加载本机的ewa_conf.xml
 			cnt = this.handleEwaConf();
 		} else if (oType.toUpperCase().equals("EWAC_DDL_RELOAD")) {
-			cnt = this.handleEwacDdlReload();
+			cnt = this.handleEwacDdlReload(rv, pvAdmin);
 		} else if (oType.toUpperCase().equals("EWAC_DDL_READ")) {
 			// 从配置文件中加载DropList配置信息
 			try {
-				cnt = this.handleEwacDdlRead();
+				cnt = this.handleEwacDdlRead(rv);
 			} catch (Exception e) {
 				cnt = e.getMessage();
 			}
 		} else if (oType.toUpperCase().equals("GET_DOC_XML")) {
 			// 获取整个配置文件
-			this.handleGetDocXml(response);
+			this.handleGetDocXml(rv, response, pvAdmin);
 			return;
 		} else if (oType.toUpperCase().equals("IMPORT_XML")) {
-			cnt = this.handleImportXml();
+			cnt = this.handleImportXml(rv, pvAdmin);
 			this.setOutType(response, "json");
 		} else if (oType.toUpperCase().equals("SAVE_JAVA")) {// 保存java代码
 			JSONObject rst = this.saveJavaCode(rv);
@@ -226,7 +221,7 @@ public class ServletXml extends HttpServlet {
 	 * 
 	 * @return
 	 */
-	private String handleView() {
+	private String handleView(RequestValue rv) {
 		String xml = rv.getString("XML");
 		Document doc = UXml.asDocument(xml);
 		UpdateXmlBase.clearDoc(doc);
@@ -241,14 +236,14 @@ public class ServletXml extends HttpServlet {
 	 * 
 	 * @return
 	 */
-	private String handleSqls() {
+	private String handleSqls(RequestValue rv, PageValue pvAdmin) {
 		String xmlName = rv.getString("XMLNAME");
 		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 		String sqls = up.getSqls();
 		return sqls;
 	}
 
-	private boolean handleSave() {
+	private boolean handleSave(RequestValue rv, PageValue pvAdmin) {
 		String xmlName = rv.getString("XMLNAME");
 		String itemName = rv.getString("ITEMNAME");
 		String xml = rv.getString("XML");
@@ -256,7 +251,7 @@ public class ServletXml extends HttpServlet {
 		return up.updateItem(itemName, xml);
 	}
 
-	private String handleNull(HttpServletResponse response) {
+	private String handleNull(RequestValue rv, HttpServletResponse response) {
 		String modeName = rv.getString("MODE_NAME");
 		String mode = rv.getString("MODE");
 		if (mode == null) {
@@ -279,15 +274,15 @@ public class ServletXml extends HttpServlet {
 		}
 	}
 
-	private String handleAll() {
+	private String handleAll(RequestValue rv, PageValue pvAdmin) {
 		MStr s = new MStr();
 		String xmlName = rv.getString("XMLNAME");
 		String itemName = rv.getString("ITEMNAME");
 		try {
 			IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 			String xml;
-			if(up == null) {
-				xml="<root/>";
+			if (up == null) {
+				xml = "<root/>";
 			} else {
 				xml = up.queryItemXml(itemName);
 			}
@@ -318,7 +313,8 @@ public class ServletXml extends HttpServlet {
 	 * 
 	 * @return
 	 */
-	private String handleCfgXml(HttpServletResponse response) {
+	private String handleCfgXml(RequestValue rv, HttpServletResponse response) {
+		LOGGER.info("rv={}", rv);
 		String xmlName = rv.getString("XMLNAME");
 		String name = xmlName;
 		String xml = null;
@@ -327,6 +323,9 @@ public class ServletXml extends HttpServlet {
 		if (mode == null) {
 			mode = "";
 		}
+
+		LOGGER.info("name={}, mode={}, modeName={}", name, mode, modeName);
+
 		if (mode.equals("JS")) {
 			this.setOutType(response, "html");
 			xml = this.getCfgXmlJs(name, modeName);
@@ -338,14 +337,14 @@ public class ServletXml extends HttpServlet {
 		return xml;
 	}
 
-	private void handleRemove() {
+	private void handleRemove(RequestValue rv, PageValue pvAdmin) {
 		String xmlName = rv.getString("XMLNAME");
 		String itemName = rv.getString("ITEMNAME");
 		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 		up.removeItem(itemName);
 	}
 
-	private void handlePaste() {
+	private void handlePaste(RequestValue rv, PageValue pvAdmin) {
 		// PASTE
 		String from = rv.getString("FROM").replace("|", "/");
 		String to = rv.getString("TO").replace("|", "/").split("\\*")[0];
@@ -364,15 +363,15 @@ public class ServletXml extends HttpServlet {
 	 * 
 	 * @return the removes count
 	 */
-	private int handleDeleteBaks() {
+	private int handleDeleteBaks(RequestValue rv, PageValue pvAdmin) {
 		String xmlname = rv.getString("xmlname");
-		IUpdateXml up = this.getUpdateXml(xmlname, this.pvAdmin.getStringValue());
-		_BakFilesCount = up.deleteBaks(xmlname);
+		IUpdateXml up = this.getUpdateXml(xmlname, pvAdmin.getStringValue());
+		int bakFilesCount = up.deleteBaks(xmlname);
 
-		return _BakFilesCount;
+		return bakFilesCount;
 	}
 
-	private String handleGUNID() {
+	private String handleGUNID(RequestValue rv) {
 		String num = rv.getString("NUM");
 		int iNum = 1;
 		if (num != null && num.trim().length() > 0) {
@@ -413,10 +412,10 @@ public class ServletXml extends HttpServlet {
 		return rst.toString();
 	}
 
-	private void handleGetDocXml(HttpServletResponse response) throws IOException {
+	private void handleGetDocXml(RequestValue rv, HttpServletResponse response, PageValue pvAdmin) throws IOException {
 		// 获取整个配置文件
 		String xmlname = rv.getString("xmlname");
-		IUpdateXml up = this.getUpdateXml(xmlname, this.pvAdmin.getStringValue());
+		IUpdateXml up = this.getUpdateXml(xmlname, pvAdmin.getStringValue());
 		String cnt = up.getDocXml();
 
 		String[] names = UserConfig.filterXmlNameByJdbc(xmlname).split("\\|");
@@ -437,13 +436,13 @@ public class ServletXml extends HttpServlet {
 	 * 
 	 * @return
 	 */
-	private String handleImportXml() {
+	private String handleImportXml(RequestValue rv, PageValue pvAdmin) {
 		String sourceXmlFilePath = UPath.getPATH_UPLOAD() + rv.s("UP_NAME");
 
 		String path = rv.s("path");
 		String xmlname = rv.s("xmlname");
 
-		IUpdateXml up = this.getUpdateXml(path, this.pvAdmin.getStringValue());
+		IUpdateXml up = this.getUpdateXml(path, pvAdmin.getStringValue());
 		JSONObject rst = up.importXml(path, xmlname, sourceXmlFilePath);
 
 		return rst.toString();
@@ -455,8 +454,8 @@ public class ServletXml extends HttpServlet {
 	 * @return
 	 * @throws Exception
 	 */
-	private String handleEwacDdlRead() throws Exception {
-		String ref = this.rv.s("SYS_REMOTE_REFERER");
+	private String handleEwacDdlRead(RequestValue rv) throws Exception {
+		String ref = rv.s("SYS_REMOTE_REFERER");
 		if (StringUtils.isBlank(ref)) {
 			throw new Exception("Need the http referer");
 		}
@@ -478,7 +477,7 @@ public class ServletXml extends HttpServlet {
 	 * 
 	 * @return
 	 */
-	private String handleEwacDdlReload() {
+	private String handleEwacDdlReload(RequestValue rv, PageValue pvAdmin) {
 		String ewascriptpath = rv.s("EWA_SCRIPT_PATH");
 		ConfScriptPath sp = ConfScriptPaths.getInstance().getScriptPath(ewascriptpath);
 		// 刷新配置文件中 DropList配置信息
@@ -486,7 +485,7 @@ public class ServletXml extends HttpServlet {
 		JSONObject rst = new JSONObject();
 		int inc;
 		try {
-			inc = configUtils.renewDdls(this.pvAdmin.getStringValue());
+			inc = configUtils.renewDdls(pvAdmin.getStringValue());
 
 			rst.put("RST", true);
 			rst.put("MSG", inc);
