@@ -6,6 +6,7 @@ import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.script.display.HtmlClass;
 
 public interface IFrame {
+
 	public abstract String createJsonJs();
 
 	public abstract String createaXmlData() throws Exception;
@@ -25,6 +26,7 @@ public interface IFrame {
 	/**
 	 * 生成页面的JSON数据<br>
 	 * Create the JSON String
+	 * 
 	 * @return the JSON String
 	 * @throws Exception
 	 */
@@ -150,8 +152,7 @@ public interface IFrame {
 	public abstract HashMap<String, String> getItemParentHtmls();
 
 	/**
-	 * @param itemParentHtmls
-	 *            the _ItemParentHtmls to set
+	 * @param itemParentHtmls the _ItemParentHtmls to set
 	 */
 	public abstract void setItemParentHtmls(HashMap<String, String> itemParentHtmls);
 

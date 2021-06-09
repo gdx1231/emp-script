@@ -29,6 +29,8 @@ public class HtmlControl {
 	private HtmlCreator _HtmlCreator;
 	private DebugInfo _DebugInfo; // 执行过程
 
+	private boolean skipAcl;
+
 	/**
 	 * 获取执行过程
 	 * 
@@ -209,14 +211,14 @@ public class HtmlControl {
 		}
 
 		String debugStr;
-		try {
+		// 权限效验部分，可以按照接口重新定义效验接口
+		if (this.isSkipAcl() || hc.getAcl() == null) {
+			IAcl acl = new SampleAcl();
+			hc.setAcl(acl);
+		}
+		hc.getAcl().setRequestValue(hc.getRequestValue());
 
-			// 权限效验部分，可以按照接口重新定义效验接口
-			if (hc.getAcl() == null) {
-				IAcl acl = new SampleAcl();
-				hc.setAcl(acl);
-			}
-			hc.getAcl().setRequestValue(hc.getRequestValue());
+		try {
 
 			if (hc.getAjaxCallType() == null) {
 				// hc.setAjaxCallType("TOP_CNT_BOTTOM");
@@ -383,6 +385,14 @@ public class HtmlControl {
 
 	public String getAllHtml() {
 		return this.Html;
+	}
+
+	public boolean isSkipAcl() {
+		return skipAcl;
+	}
+
+	public void setSkipAcl(boolean skipAcl) {
+		this.skipAcl = skipAcl;
 	}
 
 }

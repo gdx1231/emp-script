@@ -108,7 +108,7 @@ public class FrameList extends FrameBase implements IFrame {
 
 		// 获取所有记录数，根据执行的最后的select语句获取
 		if (conn != null && conn.getResultSetList().size() > 0) {
-			DataResult ds = (DataResult) conn.getResultSetList().get(0);
+			DataResult ds = (DataResult) conn.getResultSetList().getLast();
 			_ListFrameRecordCount = conn.getRecordCount(ds.getSqlOrigin());
 		}
 

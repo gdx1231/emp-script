@@ -2150,4 +2150,8 @@ public class HtmlCreator {
 		return _ErrOut;
 	}
 
+	public IAction getAction() {
+		return _Action;
+	}
+
 }

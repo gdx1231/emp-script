@@ -158,7 +158,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 				}
 
 			} else if (sqlType.equals("query")) {// 查询
-				if (isSplitSql) {
+				if (sql.toLowerCase().indexOf("ewa_err_out") > 0 || isSplitSql) {
 					super.executeSqlQuery(sql);
 				} else {
 					// 执行分页
@@ -410,11 +410,11 @@ public class ActionListFrame extends ActionBase implements IAction {
 		}
 
 		if (isMySqlOrder) { // mysql utf8 的中文排序
-			if (dt.equalsIgnoreCase("int") || dt.equalsIgnoreCase("number") || dt.equalsIgnoreCase("date")
-					|| dt.equalsIgnoreCase("binary")) {
-
-			} else {
-				s1 = "CONVERT( " + s1 + " USING gbk )";
+			if (!(dt.equalsIgnoreCase("bigint") || dt.equalsIgnoreCase("int") || dt.equalsIgnoreCase("number")
+					|| dt.equalsIgnoreCase("date") || dt.equalsIgnoreCase("binary"))) {
+				if (s1.indexOf("(") == -1) {
+					s1 = "CONVERT( " + s1 + " USING gbk )";
+				}
 			}
 		}
 		if (userOrder.indexOf(" ") > 0) {
@@ -432,10 +432,8 @@ public class ActionListFrame extends ActionBase implements IAction {
 				if (isMySqlOrder && !uc.getUserXItems().testName(f)) {
 					uxi = uc.getUserXItems().getItem(name);
 					dt = uxi.getItem("DataItem").getItem(0).getItem("DataType");
-					if (dt.equalsIgnoreCase("int") || dt.equalsIgnoreCase("number") || dt.equalsIgnoreCase("date")
-							|| dt.equalsIgnoreCase("binary")) {
-						// 无需转换
-					} else {
+					if (!(dt.equalsIgnoreCase("bigint") || dt.equalsIgnoreCase("int") || dt.equalsIgnoreCase("number")
+							|| dt.equalsIgnoreCase("date") || dt.equalsIgnoreCase("binary"))) {
 						String desc = "";
 						if (f.indexOf(" ") > 0) {
 							String[] fs = f.split(" ");

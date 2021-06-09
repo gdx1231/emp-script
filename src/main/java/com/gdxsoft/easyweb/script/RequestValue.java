@@ -1,10 +1,7 @@
 package com.gdxsoft.easyweb.script;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -21,6 +18,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +35,7 @@ import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UCookies;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
+import com.gdxsoft.easyweb.utils.UHtml;
 import com.gdxsoft.easyweb.utils.UNet;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UUrl;
@@ -760,34 +759,21 @@ public class RequestValue implements Cloneable {
 	}
 
 	private void loadJsonBodyParameters(HttpServletRequest request) {
-		InputStream inputStream = null;
-		byte[] bytes = new byte[1024];
 		String bodyContent = null;
+		String charset = request.getCharacterEncoding();
+		if (StringUtils.isBlank(charset)) {
+			charset = "utf8";
+		}
 		try {
-			inputStream = request.getInputStream();
-			BufferedInputStream byteOutputStream = new BufferedInputStream(inputStream);
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-			int a;
-			while ((a = byteOutputStream.read(bytes)) != -1) {
-				byteArrayOutputStream.write(bytes, 0, a);
-			}
-			bodyContent = byteArrayOutputStream.toString("utf-8");
+			bodyContent = UHtml.getHttpBody(request, charset);
 		} catch (IOException e) {
 			LOGGER.error(e.getMessage());
-		} finally {
-			if (inputStream != null) {
-				try {
-					inputStream.close();
-				} catch (IOException e) {
-					LOGGER.warn(e.getMessage());
-				}
-			}
-		}
-		if (bodyContent == null) {
 			return;
 		}
 
+		if (StringUtils.isBlank(bodyContent)) {
+			return;
+		}
 		try {
 			JSONObject obj = new JSONObject(bodyContent);
 			this.addValues(obj);
