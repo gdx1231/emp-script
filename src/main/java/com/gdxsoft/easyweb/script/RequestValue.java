@@ -602,7 +602,7 @@ public class RequestValue implements Cloneable {
 	 * @param session Sessions
 	 */
 	public RequestValue(HttpServletRequest req) {
-		this.initRequest(req, req.getSession());
+		this.initRequest(req, req.getSession(false));
 	}
 
 	/**
@@ -613,7 +613,7 @@ public class RequestValue implements Cloneable {
 	 */
 	public RequestValue(HttpServletRequest req, boolean jsonBodyParameters) {
 		this.jsonBodyParameters = jsonBodyParameters;
-		this.initRequest(req, req.getSession());
+		this.initRequest(req, req.getSession(false));
 	}
 
 	/**

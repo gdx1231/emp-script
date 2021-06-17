@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.RequestValue;
@@ -637,7 +638,7 @@ public class Upload {
 		}
 	}
 
-	public void writeToDatabase() {
+	public void writeToDatabase() throws Exception {
 		HashMap<String, Boolean> map = new HashMap<String, Boolean>();
 		try {
 			for (int i = 0; i < this._AlFiles.size(); i++) {
@@ -657,13 +658,13 @@ public class Upload {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			throw e;
 		} finally {
 			this._Conn.close();
 		}
 	}
 
-	public void writeToDatabase(FileUpload fu) {
+	public void writeToDatabase(FileUpload fu) throws Exception {
 		File img = new File(fu.getSavePath());
 		byte[] buf;
 		try {
@@ -671,34 +672,35 @@ public class Upload {
 				if (img.length() > 1024 * 1024 * 10) {
 					buf = new byte[1];
 					buf[0] = 0;
-					System.err.println("上传文件[" + img.getAbsolutePath() + "]: 超过10M");
+					LOGGER.error("上传文件[" + img.getAbsolutePath() + "]: 超过10M");
 				} else {
 					buf = UFile.readFileBytes(img.getAbsolutePath());
 				}
 			} else {
 				buf = null;
 			}
-			String name = fu.getSaveFileName();
-			String ext = fu.getExt();
-			String type = fu.getContextType();
-			String url = fu.getFileUrl();
-			String path = fu.getSavePath();
-			String unid = fu.getUnid();
-			String from = fu.getFrom() == null ? "" : fu.getFrom().getUnid();
-			this.writeToDatabase(buf, name, path, type, ext, url, unid, from, fu.getUserLocalPath(), fu.getLength());
-
-			if (this._upDelete != null && this._upDelete.equalsIgnoreCase("yes")) {
-				try {
-					img.delete();
-				} catch (Exception err) {
-					System.err.println("删除上传文件[" + img.getAbsolutePath() + "]: " + err.getMessage());
-				}
-			}
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			return;
-		} finally {
+			LOGGER.error(e.getMessage());
+			throw e;
+		}
+		
+		
+		String name = fu.getSaveFileName();
+		String ext = fu.getExt();
+		String type = fu.getContextType();
+		String url = fu.getFileUrl();
+		String path = fu.getSavePath();
+		String unid = fu.getUnid();
+		String from = fu.getFrom() == null ? "" : fu.getFrom().getUnid();
 
+		this.writeToDatabase(buf, name, path, type, ext, url, unid, from, fu.getUserLocalPath(), fu.getLength());
+
+		if (this._upDelete != null && this._upDelete.equalsIgnoreCase("yes")) {
+			try {
+				img.delete();
+			} catch (Exception err) {
+				LOGGER.error("删除上传文件[" + img.getAbsolutePath() + "]: " + err.getMessage());
+			}
 		}
 
 	}
@@ -725,9 +727,10 @@ public class Upload {
 	 * @param fileUrl  http的url
 	 * @param unid     文件的unid，用于数据库定位使用
 	 * @param from     来源的UNID
+	 * @throws Exception
 	 */
 	public void writeToDatabase(byte[] buf, String fileName, String filePath, String fileType, String fileExt,
-			String fileUrl, String unid, String from, String userLocalName, int len) {
+			String fileUrl, String unid, String from, String userLocalName, int len) throws Exception {
 		RequestValue rv = this._Rv;
 		// INSERT INTO NWS_IMG(NWS_IMG,NWS_IMG_EXT,NWS_IMG_CDATE,NWS_IMG_MD5)
 		// VALUES(@UP_FILE,@UP_EXT,@SYS_DATE,@UP_MD5)
@@ -821,6 +824,9 @@ public class Upload {
 				continue;
 			}
 			if (sql.toUpperCase().startsWith("SELECT")) {
+				DTTable tb = DTTable.getJdbcTable(sql, this._Conn);
+				rv.addValues(tb);
+
 				this._Conn.executeQuery(sql);
 			} else if (sql.toUpperCase().startsWith("CALL")) {
 				this._Conn.executeProcdure(sql);
@@ -828,8 +834,8 @@ public class Upload {
 				this._Conn.executeUpdate(sql);
 			}
 			if (this._Conn.getErrorMsg() != null && this._Conn.getErrorMsg().length() > 0) {
-				System.err.println(this._Conn.getErrorMsg());
-				this._Conn.clearErrorMsg();
+				LOGGER.error(this._Conn.getErrorMsg());
+				throw new Exception(this._Conn.getErrorMsg());
 			}
 		}
 
@@ -881,7 +887,7 @@ public class Upload {
 		File uploadedFile = new File(fu.getSavePath());
 		String url = createURL(uploadedFile);
 		fu.setFileUrl(url);
-		
+
 		try {
 			// 保持文件到本地目录
 			this.writeFile(itemobj, uploadedFile);
@@ -894,6 +900,7 @@ public class Upload {
 
 	/**
 	 * Save the upload file to the local file
+	 * 
 	 * @param itemobj
 	 * @param uploadedFile
 	 * @throws Exception

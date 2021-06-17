@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class DTCell implements Serializable{
+public class DTCell implements Serializable {
 
 	/**
 	 * 
@@ -30,19 +30,19 @@ public class DTCell implements Serializable{
 
 	/**
 	 * 判断是否是NULL 郭磊 2017-08-11
+	 * 
 	 * @return
 	 */
-	public boolean isNull(){
+	public boolean isNull() {
 		return _Value == null;
 	}
-	
+
 	public String getString() {
 		return this.toString();
 	}
 
 	/**
-	 * @param value
-	 *            the _Value to set
+	 * @param value the _Value to set
 	 */
 	public void setValue(Object value) {
 		if (value == null && _Value == null) {
@@ -58,8 +58,7 @@ public class DTCell implements Serializable{
 			this.updateNodeRow();
 		}
 
-		if (this.getTable() != null && this.getTable().isBuildIndex()
-				&& this.getTable().getIndexes() != null) {
+		if (this.getTable() != null && this.getTable().isBuildIndex() && this.getTable().getIndexes() != null) {
 			this.getTable().getIndexes().update(this);
 		}
 	}
@@ -97,8 +96,7 @@ public class DTCell implements Serializable{
 						}
 					}
 					if (!isFound) {
-						CDATASection node = ele.getOwnerDocument()
-								.createCDATASection(_Value.toString());
+						CDATASection node = ele.getOwnerDocument().createCDATASection(_Value.toString());
 						ele.appendChild(node);
 					}
 				} else {
@@ -122,12 +120,10 @@ public class DTCell implements Serializable{
 			}
 		}
 		if (node == null && this._Value != null) {
-			Element ele = nodeRow.getOwnerDocument().createElement(
-					this._Column.getName());
+			Element ele = nodeRow.getOwnerDocument().createElement(this._Column.getName());
 			nodeRow.appendChild(ele);
 			if (this._Column.isXmlCData()) {
-				CDATASection sec = nodeRow.getOwnerDocument()
-						.createCDATASection(_Value.toString());
+				CDATASection sec = nodeRow.getOwnerDocument().createCDATASection(_Value.toString());
 				ele.appendChild(sec);
 			} else {
 				ele.setTextContent(_Value.toString());
@@ -139,13 +135,11 @@ public class DTCell implements Serializable{
 				if (this._Column.isXmlCData()) {
 					for (int i = 0; i < node.getChildNodes().getLength(); i++) {
 						if (node.getChildNodes().item(i).getNodeType() == Node.CDATA_SECTION_NODE) {
-							node.getChildNodes().item(i).setTextContent(
-									_Value.toString());
+							node.getChildNodes().item(i).setTextContent(_Value.toString());
 							return;
 						}
 					}
-					CDATASection sec = nodeRow.getOwnerDocument()
-							.createCDATASection(_Value.toString());
+					CDATASection sec = nodeRow.getOwnerDocument().createCDATASection(_Value.toString());
 					node.appendChild(sec);
 				} else {
 					node.setTextContent(_Value.toString());
@@ -162,8 +156,7 @@ public class DTCell implements Serializable{
 	}
 
 	/**
-	 * @param column
-	 *            the _Column to set
+	 * @param column the _Column to set
 	 */
 	public void setColumn(DTColumn column) {
 		_Column = column;
@@ -177,8 +170,7 @@ public class DTCell implements Serializable{
 	}
 
 	/**
-	 * @param row
-	 *            the _Row to set
+	 * @param row the _Row to set
 	 */
 	public void setRow(DTRow row) {
 		_Row = row;
@@ -199,8 +191,19 @@ public class DTCell implements Serializable{
 			return null;
 		}
 		try {
-			int v = Integer.parseInt(this._Value.toString().split("\\.")[0]);
+			int v = Integer.parseInt((this._Value.toString().split("\\.")[0]).replace(",", ""));
+			return v;
+		} catch (Exception err) {
+			return null;
+		}
+	}
 
+	public Long toLong() {
+		if (this._Value == null) {
+			return null;
+		}
+		try {
+			Long v = Long.parseLong((this._Value.toString().split("\\.")[0]).replace(",", ""));
 			return v;
 		} catch (Exception err) {
 			return null;
@@ -221,39 +224,41 @@ public class DTCell implements Serializable{
 
 	/**
 	 * 返回日期
+	 * 
 	 * @return
 	 */
-	public Date toDate(){
+	public Date toDate() {
 		if (this._Value == null) {
 			return null;
 		}
-		try{
-			Date d=(Date)this._Value;
+		try {
+			Date d = (Date) this._Value;
 			return d;
-		}catch(Exception e){
+		} catch (Exception e) {
 			System.err.println(e.getMessage());
 			return null;
-			
+
 		}
 	}
+
 	/**
 	 * 返回毫秒
+	 * 
 	 * @return
 	 */
-	public long toTime(){
-		Date d=this.toDate();
-		if(d==null){
+	public long toTime() {
+		Date d = this.toDate();
+		if (d == null) {
 			return -1;
 		}
 		return d.getTime();
 	}
-	
+
 	public String toString() {
 		if (this._Value == null) {
 			return null;
 		}
-		if (this._Column.getTypeName() != null
-				&& this._Column.getTypeName().toUpperCase().equals("CLOB")) {
+		if (this._Column.getTypeName() != null && this._Column.getTypeName().toUpperCase().equals("CLOB")) {
 			Clob cb = (Clob) this._Value;
 			try {
 				Reader r = cb.getCharacterStream();

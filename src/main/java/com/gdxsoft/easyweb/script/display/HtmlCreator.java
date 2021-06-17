@@ -1,11 +1,13 @@
 package com.gdxsoft.easyweb.script.display;
 
+import java.io.File;
 import java.lang.reflect.Type;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -42,6 +44,7 @@ import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
+import com.gdxsoft.easyweb.script.userConfig.UserXItems;
 import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UJSon;
@@ -727,8 +730,7 @@ public class HtmlCreator {
 		String msg = "enus".equals(this._RequestValue.getLang()) ? msgEn : msgCn;
 
 		JSONObject msgJson = UJSon.rstFalse(msg);
-		
-		
+
 		_DebugFrames.addDebug(this, "HTML", "验证失败");
 		if (_Acl.getGoToUrl() == null) {
 			this._PageHtml = msg;
@@ -744,7 +746,7 @@ public class HtmlCreator {
 		String ajax = _SysParas.getAjaxCallType();
 
 		if (ajax.equalsIgnoreCase("XML") || ajax.equalsIgnoreCase("XMLDATA")) {
-			this._PageHtml = "<root><error>"+msg+"</error></root>";
+			this._PageHtml = "<root><error>" + msg + "</error></root>";
 		} else if (ajax.equalsIgnoreCase("HAVE_DATA")) {
 			this._PageHtml = msg;
 		} else if (ajax.equalsIgnoreCase("DOWN_DATA")) { // DOWN_DATA 则表示下载数据
@@ -756,7 +758,7 @@ public class HtmlCreator {
 		} else if (ajax.equalsIgnoreCase("JSON_EXT") || ajax.equalsIgnoreCase("JSON_EXT1")) {
 			this._PageHtml = msgJson.toString();
 		} else if (ajax.equalsIgnoreCase("JSON_ALL")) {
-			this._PageHtml = "[["+msgJson+"]]";
+			this._PageHtml = "[[" + msgJson + "]]";
 		} else if (ajax.equalsIgnoreCase("SELECT_RELOAD")) {
 			this._PageHtml = msgJson.toString();
 		} else if (ajax.equalsIgnoreCase("LF_RELOAD")) {
@@ -1047,6 +1049,58 @@ public class HtmlCreator {
 		return sb.toString();
 	}
 
+	public String createResponseFrameImage() throws Exception {
+		UserXItems xitems = this._HtmlClass.getUserConfig().getUserXItems();
+		String imageName = null;
+		for (int i = 0; i < xitems.count(); i++) {
+			UserXItem xitem = xitems.getItem(i);
+			String tag = xitem.getSingleValue("Tag");
+			if ("h5upload".equals(tag) || "swffile".equals(tag) || "image".equals(tag)) {
+				imageName = xitem.getName();
+				break;
+			}
+		}
+
+		if (imageName == null) {
+			return null;
+		}
+		File imageFile = getImagePath(this._RequestValue.s(imageName));
+		if (imageFile == null) {
+			imageFile = getImagePath(this._RequestValue.s(imageName + "_path"));
+		}
+		if (imageFile == null) {
+			return null;
+		}
+
+		String resized = this._RequestValue.s("ewa_image_size");
+
+		if (StringUtils.isNotBlank(resized)) {
+			File fileResized = new File(imageFile.getAbsolutePath() + "$resized/" + resized + ".jpg");
+			if (fileResized.exists()) {
+				imageFile = fileResized;
+			}
+		}
+
+		return imageFile.toString();
+	}
+
+	private File getImagePath(String path) {
+		if (path == null || path.length() == 0) {
+			return null;
+		}
+		File f = new File(path);
+		if (f.exists()) {
+			return f;
+		}
+
+		f = new File(UPath.getPATH_UPLOAD() + File.separator + path);
+		if (f.exists()) {
+			return f;
+		}
+		return null;
+
+	}
+
 	/**
 	 * 获取所有的表数据
 	 * 
@@ -1323,7 +1377,9 @@ public class HtmlCreator {
 			this._SysParas.setAjaxCallType("");
 		String ajax = _SysParas.getAjaxCallType();
 
-		if (ajax.equalsIgnoreCase("XML")) {
+		if (ajax.equals("image")) {
+			this._PageHtml = this.createResponseFrameImage();
+		} else if (ajax.equalsIgnoreCase("XML")) {
 			// 显示为XML数据
 			this._PageHtml = this._Frame.createaXmlData();
 		} else if (ajax.equalsIgnoreCase("HAVE_DATA")) {

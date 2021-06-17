@@ -1,5 +1,6 @@
 package com.gdxsoft.easyweb.script.servlets;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -175,7 +176,6 @@ public class ServletMain extends HttpServlet {
 
 		RequestValue rv = p.getHtmlCreator().getRequestValue();
 		if (p.isPageError()) { // 页面执行错误
-
 			// 记录到数据库中
 			p.getDebugInfo().recordToHsql();
 
@@ -196,166 +196,190 @@ public class ServletMain extends HttpServlet {
 				System.err.println(p.getDebugInfo().getExeptionPageText());
 				response.sendRedirect(u);
 			}
-		} else {
-			String debugKey = rv.s("EWA_DEBUG_KEY");
-			String frameUnid = p.getHtmlCreator().getHtmlClass().getSysParas().getFrameUnid();
-			if (frameUnid != null && frameUnid.equals(debugKey)) {
-				p.getDebugInfo().recordToHsql();
-			}
+			this.outContent(request, response, cnt.toString());
+			return;
+		}
 
-			String ct = p.getPageContentType();
-			if (ct != null) {
-				response.setContentType(ct);
-			}
-			// 输出Html页面内容
-			String cnt1 = p.getPageContent();
-//			int loc0=cnt1.toString().indexOf("EWA_ITEMS_XML_");
-//			int loc1=cnt1.toString().indexOf("\";",loc0);
-//			String tmp=cnt1.toString().substring(loc0,loc1);
-//			System.out.println(tmp);
+		String debugKey = rv.s("EWA_DEBUG_KEY");
+		String frameUnid = p.getHtmlCreator().getHtmlClass().getSysParas().getFrameUnid();
+		if (frameUnid != null && frameUnid.equals(debugKey)) {
+			p.getDebugInfo().recordToHsql();
+		}
 
-			String ewaPath = rv.s("rv_ewa_style_path");
-			if (StringUtils.isBlank(ewaPath)) {
-				ewaPath = "/EmpScriptV2"; // default static url prefix
-			}
+		String ct = p.getPageContentType();
+		if (ct != null) {
+			response.setContentType(ct);
+		}
+		// 输出Html页面内容
+		String cnt1 = p.getPageContent();
 
-			if (rv.s("EWA_JS_DEBUG") != null && cnt1.indexOf("<script") > 0 && cnt1.indexOf("ewa.min.js") > 0) {
-				StringBuilder sbDebugJs = new StringBuilder();
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/core/EWA_01AjaxClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/core/EWA_04XmlClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/core/EWA_05UrlClass.js'></script>\n");
+		// 输出图片
+		if ("image".equalsIgnoreCase(rv.s("ewa_ajax"))) {
+			this.outImage(rv, response, p);
+			return;
+		}
 
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/core/EWA_00.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/core/EWA_02JSONClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/core/EWA_03DateClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/core/EWA_07ImageClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/core/EWA_06TransClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/core/EWA_99MqeClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/core/EWA_08WebSocket.js'></script>\n");
+		String ewaPath = rv.s("rv_ewa_style_path");
+		if (StringUtils.isBlank(ewaPath)) {
+			ewaPath = "/EmpScriptV2"; // default static url prefix
+		}
 
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_00UI.js'></script>\n");
+		if (rv.s("EWA_JS_DEBUG") != null && cnt1.indexOf("<script") > 0 && cnt1.indexOf("ewa.min.js") > 0) {
+			cnt1 = cnt1.replace("ewa.min.js", "fas.js");
+			String debugScripts = this.createJsDebug(ewaPath);
+			cnt1 = cnt1.replace("</head>", debugScripts);
+		}
 
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_03FrameClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_00FrameCommonClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_50UI_BoxClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_04FrameListClass.js'></script>\n");
-
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_01FrameCommonItems.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_04FrameListFrameResources.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_02FrameResoures.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_06FrameMultiClass.js'></script>\n");
-
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_31Html5TakePhotoClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_52UI_ComplexClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_99CombineClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_05FrameListFrame_CellResizeClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_53UI_ADListClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_07FrameTreeClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_51UI_LeftClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_03FrameMapToClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_03FrameItemClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/frames/EWA_30Html5UploadClass.js'></script>\n");
-
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_12UI_PicViewClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_03UI_TipClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_071UI_CalendarYear.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_11UI_MapClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_01UI_Move.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_09UI_FlowChartClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_07CalendarClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_04UI_LinkClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_50Behavior.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_08UI_MsgClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_01UI_ExcelClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_10UI_HtmlEditor.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_06UI_DialogNewClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_UI_NewFunc.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_14UI_Dock.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_13UI_H5FrameSet.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_071UI_CalendarYearGroup.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_02UI_MenuClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_06UI_DialogClass.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/ui/EWA_05UI_TabsClass.js'></script>\n");
-
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/misc/EWA_WF.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/misc/EWA_MiscPasteTool.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/misc/html_walker.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/misc/html_walker_odt.js'></script>\n");
-				sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
-						+ "/EWA_STYLE/js/source/src/misc/EWA_UT_TRANS.js'></script>\n");
-
-				sbDebugJs.append("</head>");
-				cnt1 = cnt1.replace("ewa.min.js", "fas.js");
-
-				String debugScripts = sbDebugJs.toString();
-
-				cnt1 = cnt1.replace("</head>", debugScripts);
-			}
-
-			cnt.a(cnt1);
-			if (p.isPageDebug()) {// 是否Debug状态
-				if ((ct != null && ct.equals("text/xml")) || p.getHtmlCreator().getAjaxCallType() != null) {
-					// 不输出
-				} else {
-					// 输出Debug内容
-					cnt.a(p.getPageDeubgInfo());
-				}
+		cnt.a(cnt1);
+		if (p.isPageDebug()) {// 是否Debug状态
+			if ((ct != null && ct.equals("text/xml")) || p.getHtmlCreator().getAjaxCallType() != null) {
+				// 不输出
+			} else {
+				// 输出Debug内容
+				cnt.a(p.getPageDeubgInfo());
 			}
 		}
 		this.outContent(request, response, cnt.toString());
+	}
+
+	private void outImage(RequestValue rv, HttpServletResponse response, EwaWebPage p) {
+		String fileStr = p.getPageContent();
+		File image = new File(fileStr);
+		String resize = rv.s("ewa_image_resize");
+		if (StringUtils.isNotBlank(resize)) {
+			File imgSize = ImageOut.getImageResizedFile(image, resize);
+			if (imgSize.exists()) {
+				image = imgSize;
+			} else {
+				// 404
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			}
+		}
+		long oneWeek = 604800L; // seconds
+		ImageOut.outImage(rv.getRequest(), response, image.getAbsolutePath(), true, oneWeek);
+	}
+
+	private String createJsDebug(String ewaPath) {
+		StringBuilder sbDebugJs = new StringBuilder();
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/core/EWA_01AjaxClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/core/EWA_04XmlClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/core/EWA_05UrlClass.js'></script>\n");
+
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/core/EWA_00.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/core/EWA_02JSONClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/core/EWA_03DateClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/core/EWA_07ImageClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/core/EWA_06TransClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/core/EWA_99MqeClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/core/EWA_08WebSocket.js'></script>\n");
+
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_00UI.js'></script>\n");
+
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_03FrameClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_00FrameCommonClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_50UI_BoxClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_04FrameListClass.js'></script>\n");
+
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_01FrameCommonItems.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_04FrameListFrameResources.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_02FrameResoures.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_06FrameMultiClass.js'></script>\n");
+
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_31Html5TakePhotoClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_52UI_ComplexClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_99CombineClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_05FrameListFrame_CellResizeClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_53UI_ADListClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_07FrameTreeClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_51UI_LeftClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_03FrameMapToClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_03FrameItemClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/frames/EWA_30Html5UploadClass.js'></script>\n");
+
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_12UI_PicViewClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_03UI_TipClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_071UI_CalendarYear.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_11UI_MapClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_01UI_Move.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_09UI_FlowChartClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_07CalendarClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_04UI_LinkClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_50Behavior.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_08UI_MsgClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_01UI_ExcelClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_10UI_HtmlEditor.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_06UI_DialogNewClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_UI_NewFunc.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_14UI_Dock.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_13UI_H5FrameSet.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_071UI_CalendarYearGroup.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_02UI_MenuClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_06UI_DialogClass.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/ui/EWA_05UI_TabsClass.js'></script>\n");
+
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/misc/EWA_WF.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/misc/EWA_MiscPasteTool.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/misc/html_walker.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/misc/html_walker_odt.js'></script>\n");
+		sbDebugJs.append("<script type='text/javascript' src='" + ewaPath
+				+ "/EWA_STYLE/js/source/src/misc/EWA_UT_TRANS.js'></script>\n");
+
+		sbDebugJs.append("</head>");
+
+		return sbDebugJs.toString();
 	}
 
 	/**
