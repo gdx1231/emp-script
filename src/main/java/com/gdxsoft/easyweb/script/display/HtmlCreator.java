@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -1049,42 +1048,81 @@ public class HtmlCreator {
 		return sb.toString();
 	}
 
-	public String createResponseFrameImage() throws Exception {
+	/**
+	 * Create the download file path from the frame configuration
+	 * 
+	 * @return the download file path
+	 * @throws Exception
+	 */
+	public String createResponseFrameDownload() throws Exception {
 		UserXItems xitems = this._HtmlClass.getUserConfig().getUserXItems();
 		String imageName = null;
+		String imageUrl = null;
 		for (int i = 0; i < xitems.count(); i++) {
 			UserXItem xitem = xitems.getItem(i);
 			String tag = xitem.getSingleValue("Tag");
+			// find the upload item
 			if ("h5upload".equals(tag) || "swffile".equals(tag) || "image".equals(tag)) {
 				imageName = xitem.getName();
-				break;
+			} else if ("gridImage".equals(tag) || "gridBgImage".equals(tag)) {
+				// the image view
+				imageUrl = xitem.getName();
 			}
 		}
 
-		if (imageName == null) {
+		if (imageName == null && imageUrl == null) {
 			return null;
 		}
-		File imageFile = getImagePath(this._RequestValue.s(imageName));
-		if (imageFile == null) {
-			imageFile = getImagePath(this._RequestValue.s(imageName + "_path"));
-		}
-		if (imageFile == null) {
-			return null;
-		}
-
-		String resized = this._RequestValue.s("ewa_image_size");
-
-		if (StringUtils.isNotBlank(resized)) {
-			File fileResized = new File(imageFile.getAbsolutePath() + "$resized/" + resized + ".jpg");
-			if (fileResized.exists()) {
-				imageFile = fileResized;
+		File imageFile = null;
+		if (imageName != null) {
+			// 从数据库返回的表中获取地址，不能从 RequestValue中获取，不安全
+			String path = this.getValueFromFrameTables(imageName);
+			imageFile = getUploadedFilePath(path);
+			if (imageFile == null) {
+				path = this.getValueFromFrameTables(imageName + "_path");
+				imageFile = getUploadedFilePath(path);
 			}
+		}
+
+		// Get the image path from imageUrl
+		if (imageFile == null && imageUrl != null) {
+			String url = this.getValueFromFrameTables(imageUrl);
+			if (url != null) {
+				// the url start
+				String start = UPath.getPATH_UPLOAD_URL();
+				if (url.startsWith(start)) {
+					url = url.substring(start.length());
+				}
+				imageFile = getUploadedFilePath(url);
+			}
+		}
+		if (imageFile == null) {
+			return null;
 		}
 
 		return imageFile.toString();
 	}
 
-	private File getImagePath(String path) {
+	/**
+	 * Get the field value from all tables
+	 * 
+	 * @param fieldName the field name
+	 * @return the value
+	 */
+	public String getValueFromFrameTables(String fieldName) {
+		try {
+			Object val = this._ItemValues.getTableValue(fieldName, "");
+			if (val == null) {
+				return null;
+			}
+			return val.toString();
+		} catch (Exception e) {
+			LOGGER.warn("Get the field value from all tables. {}, {}", fieldName, e.getMessage());
+			return null;
+		}
+	}
+
+	private File getUploadedFilePath(String path) {
 		if (path == null || path.length() == 0) {
 			return null;
 		}
@@ -1377,8 +1415,9 @@ public class HtmlCreator {
 			this._SysParas.setAjaxCallType("");
 		String ajax = _SysParas.getAjaxCallType();
 
-		if (ajax.equals("image")) {
-			this._PageHtml = this.createResponseFrameImage();
+		if (ajax.equalsIgnoreCase("DOWNLOAD") || ajax.equalsIgnoreCase("DOWNLOAD-INLINE")) {
+			// 下载保存文件或在线文件（图片、pdf等）
+			this._PageHtml = this.createResponseFrameDownload();
 		} else if (ajax.equalsIgnoreCase("XML")) {
 			// 显示为XML数据
 			this._PageHtml = this._Frame.createaXmlData();

@@ -582,6 +582,13 @@ public class ItemValues {
 		}
 	}
 
+	/**
+	 * Get the field value from the all tables
+	 * @param dataFieldName the field name
+	 * @param dataType the return data type
+	 * @return the value
+	 * @throws Exception
+	 */
 	public Object getTableValue(String dataFieldName, String dataType) throws Exception {
 		Object val = null;
 		if (this._ListFrameTable != null) { // ListFrame

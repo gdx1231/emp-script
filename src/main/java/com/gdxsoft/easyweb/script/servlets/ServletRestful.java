@@ -1,6 +1,5 @@
 package com.gdxsoft.easyweb.script.servlets;
 
-import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -78,6 +77,7 @@ public class ServletRestful extends HttpServlet {
 		RequestValue rv;
 		boolean isUpload = false;
 		boolean isOutImage = false;
+		boolean isDownload = false;
 		if ("GET".equalsIgnoreCase(httpMethod)) {
 			rv = new RequestValue(request);
 		} else if ("POST".equalsIgnoreCase(httpMethod) && contentType != null
@@ -92,9 +92,14 @@ public class ServletRestful extends HttpServlet {
 		}
 
 		ConfRestful conf = ConfRestfuls.getInstance().getConfRestful(path, httpMethod, rv, result);
-		if ("IMAGE".equalsIgnoreCase(rv.s("ewa_ajax")) || (conf.getParameters() != null
-				&& conf.getParameters().toUpperCase().indexOf("EWA_AJAX=IMAGE") >= 0)) {
+		if ("DOWNLOAD-INLINE".equalsIgnoreCase(rv.s("ewa_ajax")) || (conf.getParameters() != null
+				&& conf.getParameters().toUpperCase().indexOf("EWA_AJAX=DOWNLOAD-INLINE") >= 0)) {
+			// output the file bytes e.g. image, pdf
 			isOutImage = true;
+		} else if ("DOWNLOAD".equalsIgnoreCase(rv.s("ewa_ajax")) || (conf.getParameters() != null
+				&& conf.getParameters().toUpperCase().indexOf("EWA_AJAX=DOWNLOAD") >= 0)) {
+			// download the file
+			isDownload = true;
 		}
 		if (conf == null) {
 			response.setContentType("application/json");
@@ -108,6 +113,8 @@ public class ServletRestful extends HttpServlet {
 			} else {
 				return result.toString();
 			}
+		} else if(isDownload) {
+			
 		} else if (isUpload) {
 			response.setContentType("application/json");
 			this.handleUpload(conf, rv, request, result);
@@ -157,6 +164,57 @@ public class ServletRestful extends HttpServlet {
 		return true;
 	}
 
+	public void handleDownload(ConfRestful conf, RequestValue rv, HttpServletResponse response,
+			RestfulResult<Object> result) {
+
+		HtmlControl ht = new HtmlControl();
+
+		String parameters = conf.getParameters();
+
+		ht.init(conf.getXmlName(), conf.getItemName(), parameters, rv, response);
+
+		// request header authorization
+		if (!this.checkAcl(ht, result)) {
+			return;
+		}
+
+		if (!this.checkHtRunError(ht, result)) {
+			return;
+		}
+
+		String fileStr = ht.getHtml();
+		if (fileStr == null) {
+			result.setHttpStatusCode(404);
+			result.setSuccess(false);
+			return;
+		}
+
+		File file = new File(fileStr);
+
+		if (!file.exists()) {
+			result.setHttpStatusCode(404);
+			result.setSuccess(false);
+			return;
+		}
+		
+		// The download saved name's filed name
+		String downloadNameField = rv.s("EWA_DOWNLOAD_FIELD");
+		String downloadFile = null;
+		if (StringUtils.isNotBlank(downloadNameField)) {
+			String name = ht.getHtmlCreator().getValueFromFrameTables(downloadNameField);
+			if (StringUtils.isBlank(name)) {
+				downloadFile = "invalid_parameter";
+			} else {
+				downloadFile = name;
+			}
+		}
+		
+		FileOut fo = new FileOut(rv.getRequest(), response);
+		fo.initFile(file);
+
+		fo.download(downloadFile);
+
+	}
 	public void handleImage(ConfRestful conf, RequestValue rv, HttpServletResponse response,
 			RestfulResult<Object> result) {
 
@@ -191,7 +249,7 @@ public class ServletRestful extends HttpServlet {
 		}
 		String resize = rv.s("ewa_image_resize");
 		if (StringUtils.isNotBlank(resize)) {
-			File imgSize = ImageOut.getImageResizedFile(image, resize);
+			File imgSize = FileOut.getImageResizedFile(image, resize);
 			if (imgSize != null && imgSize.exists()) {
 				image = imgSize;
 			} else {
@@ -200,9 +258,12 @@ public class ServletRestful extends HttpServlet {
 				return;
 			}
 		}
+		
+		FileOut fo = new FileOut(rv.getRequest(), response);
+		fo.initFile(image);
 
 		long oneWeek = 604800L; // seconds
-		ImageOut.outImageRestful(result, rv.getRequest(), response, image.getAbsolutePath(), true, oneWeek);
+		fo.outFileBytesInline(true, oneWeek);
 
 	}
 

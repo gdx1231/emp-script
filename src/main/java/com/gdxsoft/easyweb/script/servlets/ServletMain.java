@@ -213,12 +213,27 @@ public class ServletMain extends HttpServlet {
 		// 输出Html页面内容
 		String cnt1 = p.getPageContent();
 
-		// 输出图片
-		if ("image".equalsIgnoreCase(rv.s("ewa_ajax"))) {
+		// 输出二进制内容，例如图片、pdf文件等
+		if ("download-inline".equalsIgnoreCase(rv.s("ewa_ajax"))) {
 			this.outImage(rv, response, p);
 			return;
 		}
 
+		if ("download".equalsIgnoreCase(rv.s("ewa_ajax"))) {
+			// the download saved file name's field name
+			String downloadNameField = rv.s("EWA_DOWNLOAD_FIELD");
+			String downloadFile = null;
+			if (StringUtils.isNotBlank(downloadNameField)) {
+				String name = p.getHtmlCreator().getValueFromFrameTables(downloadNameField);
+				if (StringUtils.isBlank(name)) {
+					downloadFile = "invalid_parameter";
+				} else {
+					downloadFile = name;
+				}
+			}
+			this.downloadFile(rv, response, p, downloadFile);
+			return;
+		}
 		String ewaPath = rv.s("rv_ewa_style_path");
 		if (StringUtils.isBlank(ewaPath)) {
 			ewaPath = "/EmpScriptV2"; // default static url prefix
@@ -242,12 +257,29 @@ public class ServletMain extends HttpServlet {
 		this.outContent(request, response, cnt.toString());
 	}
 
+	/**
+	 * Download the file from the frame item
+	 * @param rv
+	 * @param response
+	 * @param p
+	 * @param downloadName the saved file name
+	 */
+	private void downloadFile(RequestValue rv, HttpServletResponse response, EwaWebPage p, String downloadName) {
+		String fileStr = p.getPageContent();
+		File image = new File(fileStr);
+
+		FileOut fo = new FileOut(rv.getRequest(), response);
+		fo.initFile(image);
+
+		fo.download(downloadName);
+	}
+
 	private void outImage(RequestValue rv, HttpServletResponse response, EwaWebPage p) {
 		String fileStr = p.getPageContent();
 		File image = new File(fileStr);
 		String resize = rv.s("ewa_image_resize");
 		if (StringUtils.isNotBlank(resize)) {
-			File imgSize = ImageOut.getImageResizedFile(image, resize);
+			File imgSize = FileOut.getImageResizedFile(image, resize);
 			if (imgSize.exists()) {
 				image = imgSize;
 			} else {
@@ -256,7 +288,11 @@ public class ServletMain extends HttpServlet {
 			}
 		}
 		long oneWeek = 604800L; // seconds
-		ImageOut.outImage(rv.getRequest(), response, image.getAbsolutePath(), true, oneWeek);
+
+		FileOut fo = new FileOut(rv.getRequest(), response);
+		fo.initFile(image);
+
+		fo.outFileBytesInline(true, oneWeek);
 	}
 
 	private String createJsDebug(String ewaPath) {

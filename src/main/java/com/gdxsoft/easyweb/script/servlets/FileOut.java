@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.Utils;
 
-public class ImageOut {
+public class FileOut {
 	private static Map<String, String> MAP = new ConcurrentHashMap<String, String>();
 	public static String DEF_DOWNLOAD_TYPE = "application/octet-stream";
 	static {
@@ -335,12 +335,12 @@ public class ImageOut {
 		MAP.put("906", "application/x-906");
 		MAP.put("907", "drawing/907");
 	}
-	private static Logger LOGGER = LoggerFactory.getLogger(ImageOut.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(FileOut.class);
 
 	public static File getImageResizedFile(File image, String resize) {
 
 		// 获取尺寸表达式，同时过滤非法的字符或路径
-		Dimension size = ImageOut.getImageResize(resize);
+		Dimension size = FileOut.getImageResize(resize);
 		if (size == null) {
 			return null;
 		}
@@ -394,7 +394,54 @@ public class ImageOut {
 		}
 	}
 
-	public static void outContetType(File file, HttpServletResponse response) {
+	private HttpServletRequest request;
+	private HttpServletResponse response;
+	private File file;
+	private int httpStatusCode;
+
+	public FileOut(HttpServletRequest request, HttpServletResponse response) {
+		this.request = request;
+		this.response = response;
+	}
+
+	public boolean initFile(String filePath) {
+		if (filePath == null) {
+			httpStatusCode = 404;
+			response.setStatus(404);
+			return false;
+		}
+		File file = new File(filePath);
+
+		return this.initFile(file);
+
+	}
+
+	public boolean initFile(File file) {
+
+		if (!file.exists()) {
+			httpStatusCode = 404;
+			response.setStatus(404);
+			return false;
+		}
+		if (file.isDirectory()) {
+			// Bad Request
+			httpStatusCode = 400;
+			response.setStatus(400);
+			return false;
+		}
+		if (!file.canRead()) {
+			// Forbidden
+			httpStatusCode = 403;
+			response.setStatus(403);
+			return false;
+		}
+		httpStatusCode = 200;
+		this.file = file;
+		return true;
+
+	}
+
+	public void outContetType() {
 		String ext = UFile.getFileExt(file.getName()).toLowerCase();
 		if (MAP.containsKey(ext)) {
 			response.setContentType(MAP.get(ext));
@@ -403,7 +450,7 @@ public class ImageOut {
 		}
 	}
 
-	public static void addCacheControl(Long cacheLife, HttpServletResponse response) {
+	public void addCacheControl(Long cacheLife) {
 		if (cacheLife != null) {
 			response.setHeader("Cache-Control", "" + cacheLife);
 			response.setHeader("Age", "" + cacheLife);
@@ -411,7 +458,7 @@ public class ImageOut {
 		}
 	}
 
-	public static boolean chcekIfNotModified(File file, HttpServletRequest request, HttpServletResponse response) {
+	public boolean chcekIfNotModified() {
 		String lastModified = Utils.getDateGMTString(new Date(file.lastModified()));
 		if (lastModified.equals(request.getHeader("If-Modified-Since"))) {
 			// 资源没有变化，返回 HTTP 304（Not Changed.）
@@ -422,40 +469,122 @@ public class ImageOut {
 		return false;
 	}
 
-	public static void outImageRestful(RestfulResult<Object> result, HttpServletRequest request,
-			HttpServletResponse response, String filePath, boolean checkIfModified, Long cacheLife) {
-		if (filePath == null) {
-			result.setHttpStatusCode(404);
-			result.setSuccess(false);
-			return;
+	/**
+	 * Download the file
+	 * 
+	 * @param downloadName
+	 */
+
+	public int download(String downloadName) {
+		String name = file.getName();
+		String ext = UFile.getFileExt(file.getName());
+		if (ext.length() == 0) {
+			ext = "bin";
+			name = name + "." + ext;
 		}
-		File file = new File(filePath);
-		if (!file.exists()) {
-			result.setHttpStatusCode(404);
+		if (!StringUtils.isBlank(downloadName)) {
+			// \ / : * ? " < > |
+			downloadName = downloadName.replace("/", "_").replace("\\", "_").replace("?", "_").replace("*", "_")
+					.replace("|", "_").replace(":", "_").replace("<", "_").replace(">", "_").replace("\"", "_");
+			
+			String fileNoExit = UFile.getFileNoExt(downloadName);
+			
+			// Keep the file extension consistent 
+			name = fileNoExit + "." + ext; 
+		}
+		name = Utils.textToUrl(name);
+
+		response.setHeader("Location", name);
+		response.setHeader("Cache-Control", "max-age=0");
+		response.setHeader("Content-Disposition", "attachment; filename=" + name);
+
+		response.setContentType("image/oct");
+
+		return this.outFileBytesToClient();
+	}
+
+	/**
+	 * Out file bytes in-line, e.g. image, pdf, and check the header flag If-Modified(304) and output the header
+	 * Cache-control(OneWeek)
+	 * 
+	 * @return The length of the file
+	 */
+	public int outFileBytesInline() {
+		long oneWeek = 604800L; // seconds
+		return this.outFileBytesInline(true, oneWeek);
+	}
+
+	/**
+	 * Out file bytes in-line, e.g. image, pdf
+	 * 
+	 * @param checkIfModified Whether to check the header If-Modified flag (304)
+	 * @param cacheLife       Whether to output the Cache-Control header
+	 * @return The length of the file
+	 */
+	public int outFileBytesInline(boolean checkIfModified, Long cacheLife) {
+
+		// check If-Modified-Since 304
+		if (checkIfModified && chcekIfNotModified()) {
+			return -1;
+		}
+
+		// image type
+		outContetType();
+		// cache-control,age
+		addCacheControl(cacheLife);
+
+		// Out the file's bytes to user client
+		return outFileBytesToClient();
+
+	}
+
+	public int outFileBytesInline(RestfulResult<Object> result, boolean checkIfModified, Long cacheLife) {
+		if (httpStatusCode != 200) {
+			result.setHttpStatusCode(httpStatusCode);
 			result.setSuccess(false);
-			return;
+			return -1;
 		}
 
 		// 检查是否被修改 If-Modified-Since
-		if (checkIfModified && chcekIfNotModified(file, request, response)) {
+		if (checkIfModified && chcekIfNotModified()) {
 			result.setSuccess(true);
 			result.setHttpStatusCode(304); // not modified
-			return;
+			return -1;
 		}
 
-		outContetType(file, response);
-		addCacheControl(cacheLife, response);
+		outContetType();
+		addCacheControl(cacheLife);
 
+		// Out the file's bytes to user client
+		int length = this.outFileBytesToClient();
+		if (length == -1) {
+			result.setCode(500);
+			result.setHttpStatusCode(500);
+			result.setSuccess(false);
+		} else {
+			result.setCode(200);
+			result.setHttpStatusCode(200);
+			result.setSuccess(true);
+		}
+		return length;
+	}
+
+	/**
+	 * Out the file's bytes to user client(response)
+	 * 
+	 * @param file     the file
+	 * @param response HttpServletResponse
+	 * @return out bytes length
+	 */
+	public int outFileBytesToClient() {
 		FileInputStream input = null;
 		try {
 			input = new FileInputStream(file);
-			IOUtils.copy(input, response.getOutputStream());
-
-			result.setSuccess(true);
-			result.setHttpStatusCode(200);
+			return IOUtils.copy(input, response.getOutputStream());
 		} catch (Exception err) {
 			response.setStatus(500);
 			LOGGER.error("out image: {}, {}", file.getAbsolutePath(), err.getMessage());
+			return -1;
 		} finally {
 			if (input != null) {
 				try {
@@ -467,42 +596,19 @@ public class ImageOut {
 		}
 	}
 
-	public static void outImage(HttpServletRequest request, HttpServletResponse response, String filePath,
-			boolean checkIfModified, Long cacheLife) {
-		if (filePath == null) {
-			response.setStatus(404);
-			return;
-		}
-		File file = new File(filePath);
-		if (!file.exists()) {
-			response.setStatus(404);
-			return;
-		}
+	public HttpServletRequest getRequest() {
+		return request;
+	}
 
-		// 检查是否被修改 If-Modified-Since
-		if (checkIfModified && chcekIfNotModified(file, request, response)) {
-			return;
-		}
+	public HttpServletResponse getResponse() {
+		return response;
+	}
 
-		outContetType(file, response);
-		addCacheControl(cacheLife, response);
+	public File getFile() {
+		return file;
+	}
 
-		FileInputStream input = null;
-		try {
-			input = new FileInputStream(file);
-			IOUtils.copy(input, response.getOutputStream());
-		} catch (Exception err) {
-			response.setStatus(500);
-			LOGGER.error("out image: {}, {}", file.getAbsolutePath(), err.getMessage());
-		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (Exception err1) {
-					LOGGER.error("out image, close input: {}, {}", file.getAbsolutePath(), err1.getMessage());
-				}
-			}
-		}
-
+	public int getHttpStatusCode() {
+		return httpStatusCode;
 	}
 }

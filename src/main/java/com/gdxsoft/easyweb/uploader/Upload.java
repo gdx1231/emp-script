@@ -683,8 +683,7 @@ public class Upload {
 			LOGGER.error(e.getMessage());
 			throw e;
 		}
-		
-		
+
 		String name = fu.getSaveFileName();
 		String ext = fu.getExt();
 		String type = fu.getContextType();
@@ -692,6 +691,10 @@ public class Upload {
 		String path = fu.getSavePath();
 		String unid = fu.getUnid();
 		String from = fu.getFrom() == null ? "" : fu.getFrom().getUnid();
+
+		if (fu.getLength() == 0) {
+			fu.setLength((int) img.length());
+		}
 
 		this.writeToDatabase(buf, name, path, type, ext, url, unid, from, fu.getUserLocalPath(), fu.getLength());
 
