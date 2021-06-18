@@ -113,8 +113,8 @@ public class ServletRestful extends HttpServlet {
 			} else {
 				return result.toString();
 			}
-		} else if(isDownload) {
-			
+		} else if (isDownload) {
+			this.handleDownload(conf, rv, response, result);
 		} else if (isUpload) {
 			response.setContentType("application/json");
 			this.handleUpload(conf, rv, request, result);
@@ -170,6 +170,8 @@ public class ServletRestful extends HttpServlet {
 		HtmlControl ht = new HtmlControl();
 
 		String parameters = conf.getParameters();
+		// force ewa_restful is yes
+		rv.addOrUpdateValue("ewa_restful", "1");
 
 		ht.init(conf.getXmlName(), conf.getItemName(), parameters, rv, response);
 
@@ -196,9 +198,9 @@ public class ServletRestful extends HttpServlet {
 			result.setSuccess(false);
 			return;
 		}
-		
+
 		// The download saved name's filed name
-		String downloadNameField = rv.s("EWA_DOWNLOAD_FIELD");
+		String downloadNameField = rv.s("EWA_DOWNLOAD_NAME");
 		String downloadFile = null;
 		if (StringUtils.isNotBlank(downloadNameField)) {
 			String name = ht.getHtmlCreator().getValueFromFrameTables(downloadNameField);
@@ -208,19 +210,22 @@ public class ServletRestful extends HttpServlet {
 				downloadFile = name;
 			}
 		}
-		
+
 		FileOut fo = new FileOut(rv.getRequest(), response);
 		fo.initFile(file);
 
 		fo.download(downloadFile);
 
 	}
+
 	public void handleImage(ConfRestful conf, RequestValue rv, HttpServletResponse response,
 			RestfulResult<Object> result) {
 
 		HtmlControl ht = new HtmlControl();
 
 		String parameters = conf.getParameters();
+		// force ewa_restful is yes
+		rv.addOrUpdateValue("ewa_restful", "1");
 
 		ht.init(conf.getXmlName(), conf.getItemName(), parameters, rv, response);
 
@@ -258,7 +263,7 @@ public class ServletRestful extends HttpServlet {
 				return;
 			}
 		}
-		
+
 		FileOut fo = new FileOut(rv.getRequest(), response);
 		fo.initFile(image);
 

@@ -221,7 +221,7 @@ public class ServletMain extends HttpServlet {
 
 		if ("download".equalsIgnoreCase(rv.s("ewa_ajax"))) {
 			// the download saved file name's field name
-			String downloadNameField = rv.s("EWA_DOWNLOAD_FIELD");
+			String downloadNameField = rv.s("EWA_DOWNLOAD_NAME");
 			String downloadFile = null;
 			if (StringUtils.isNotBlank(downloadNameField)) {
 				String name = p.getHtmlCreator().getValueFromFrameTables(downloadNameField);
