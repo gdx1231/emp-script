@@ -92,6 +92,13 @@ public class ServletRestful extends HttpServlet {
 		}
 
 		ConfRestful conf = ConfRestfuls.getInstance().getConfRestful(path, httpMethod, rv, result);
+
+		if (conf == null) {
+			response.setContentType("application/json");
+			response.setStatus(result.getHttpStatusCode());
+			return result.toString();
+		}
+
 		if ("DOWNLOAD-INLINE".equalsIgnoreCase(rv.s("ewa_ajax")) || (conf.getParameters() != null
 				&& conf.getParameters().toUpperCase().indexOf("EWA_AJAX=DOWNLOAD-INLINE") >= 0)) {
 			// output the file bytes e.g. image, pdf
@@ -101,11 +108,7 @@ public class ServletRestful extends HttpServlet {
 			// download the file
 			isDownload = true;
 		}
-		if (conf == null) {
-			response.setContentType("application/json");
-			response.setStatus(result.getHttpStatusCode());
-			return result.toString();
-		}
+
 		if (isOutImage) {
 			this.handleImage(conf, rv, response, result);
 			if (result.isSuccess()) {
@@ -149,14 +152,25 @@ public class ServletRestful extends HttpServlet {
 	}
 
 	public boolean checkHtRunError(HtmlControl ht, RestfulResult<Object> result) {
+		// 系统执行出现 err_out
+		if (ht.getHtmlCreator().isErrOut()) {
+			result.setHttpStatusCode(HttpServletResponse.SC_FORBIDDEN); // 403
+			result.setSuccess(false);
+			result.setMessage(ht.getHtmlCreator().getErrOutMessage());
+			return false;
+		}
+
+		// exception
 		if (ht.isError()) {
-			result.setHttpStatusCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			result.setHttpStatusCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR); // 500
 			result.setSuccess(false);
 			result.setMessage(ht.getHtmlCreator().getDataConn().getErrorMsgOnly());
 			return false;
 		}
+
+		// sql error
 		if (ht.getHtmlCreator().getAction().getChkErrorMsg() != null) {
-			result.setHttpStatusCode(403);
+			result.setHttpStatusCode(HttpServletResponse.SC_BAD_REQUEST); // 400
 			result.setSuccess(false);
 			result.setMessage(ht.getHtmlCreator().getAction().getChkErrorMsg());
 			return false;
@@ -215,6 +229,9 @@ public class ServletRestful extends HttpServlet {
 		fo.initFile(file);
 
 		fo.download(downloadFile);
+
+		result.setSuccess(true);
+		result.setHttpStatusCode(200);
 
 	}
 

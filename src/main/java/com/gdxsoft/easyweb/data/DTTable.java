@@ -42,6 +42,7 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class DTTable implements Serializable {
+	private static Logger LOGGER = LoggerFactory.getLogger(DTTable.class);
 	/**
 	 * 
 	 */
@@ -158,21 +159,22 @@ public class DTTable implements Serializable {
 		String cachedKey = replaceParameters(sql, cnn.getRequestValue()).toUpperCase();
 		SqlCached ins = SqlCached.getInstance();
 		SqlCachedValue sc = ins.getBinary(cachedKey);
-		if (sc == null || sc.checkOvertime(intLifeSeconds)) {
-			DTTable tb = getJdbcTable(sql, cnn);
-			if (tb.isOk()) {
-				try {
-					ins.add(cachedKey, tb.toSerialize());
-				} catch (Exception err) {
-					System.err.println(err.getMessage());
-				}
-			}
-			return tb;
-		} else {
-			DTTable tb = DTTable.fromSerialize(sc.getBinary());
-
+		DTTable tb;
+		if (sc != null && !sc.checkOvertime(intLifeSeconds)) {
+			tb = DTTable.fromSerialize(sc.getBinary());
 			return tb;
 		}
+
+		tb = getJdbcTable(sql, cnn);
+		if (tb.isOk()) {
+			try {
+				ins.add(cachedKey, tb.toSerialize());
+			} catch (Exception err) {
+				LOGGER.error(err.getMessage());
+			}
+		}
+
+		return tb;
 	}
 
 	/**
@@ -233,8 +235,18 @@ public class DTTable implements Serializable {
 		if (rv != null) {
 			conn.setRequestValue(rv);
 		}
-		DTTable tb = getJdbcTable(sql, conn);
-		conn.close();
+		DTTable tb;
+		try {
+			tb = getJdbcTable(sql, conn);
+		} catch (Exception err) {
+			tb = new DTTable();
+			tb.setOk(false);
+			tb.setErrorInfo(err.getMessage());
+
+			LOGGER.error(err.getMessage());
+		} finally {
+			conn.close();
+		}
 		return tb;
 	}
 
@@ -259,20 +271,24 @@ public class DTTable implements Serializable {
 	 */
 	public static DTTable getJdbcTable(String sql, DataConnection conn) {
 		boolean rst = conn.executeQuery(sql);
+		DTTable tb = new DTTable();
 		if (rst) {
-			DTTable tb = new DTTable();
 			tb.initData(conn.getLastResult().getResultSet());
 			try {
 				conn.getLastResult().getResultSet().close();
 			} catch (Exception eee) {
-				System.err.println(eee.getMessage());
+				LOGGER.warn("Close result. {}", eee.getMessage());
 			}
 			conn.getResultSetList().removeAt(conn.getResultSetList().size() - 1);
-			return tb;
 		} else {
-			System.err.println(conn.getErrorMsg());
-			return null;
+			tb.setOk(false);
+			// 不返回sql
+			tb.setErrorInfo(conn.getErrorMsgOnly());
+
+			LOGGER.error(conn.getErrorMsg());
 		}
+
+		return tb;
 	}
 
 	/**
@@ -1884,5 +1900,13 @@ public class DTTable implements Serializable {
 		}
 
 		return sbIds.toString();
+	}
+
+	public void setOk(boolean isOk) {
+		this._IsOk = isOk;
+	}
+
+	public void setErrorInfo(String errorInfo) {
+		this._ErrorInfo = errorInfo;
 	}
 }

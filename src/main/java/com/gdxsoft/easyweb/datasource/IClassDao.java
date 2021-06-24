@@ -8,6 +8,19 @@ import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.RequestValue;
 
 public interface IClassDao<T> {
+	/**
+	 * 获取数据库名称
+	 * 
+	 * @return
+	 */
+	public abstract String getDatabase();
+
+	/**
+	 * 设置数据库名称，查询/跟新表时带上数据库前缀
+	 * 
+	 * @param database 数据库名称，SQLServer需要用 dbxxx.dbo 表达
+	 */
+	public abstract void setDatabase(String database);
 
 	public abstract String getSqlSelect();
 

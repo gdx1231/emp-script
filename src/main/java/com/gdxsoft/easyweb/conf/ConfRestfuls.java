@@ -172,13 +172,15 @@ public class ConfRestfuls {
 	public ConfRestful getConfRestful(String path, String httpMethod, RequestValue rv, RestfulResult<Object> result) {
 		try {
 			if (this.isJdbc()) {
-
 				return this.getConfRestfulFromJdbc(path, httpMethod, rv, result);
-
 			} else {
 				return this.getConfRestfulFromEwaConf(path, httpMethod, rv, result);
 			}
 		} catch (Exception e) {
+			result.setCode(500);
+			result.setSuccess(false);
+			result.setHttpStatusCode(500);
+			result.setMessage(e.getMessage());
 			LOGGER.error("path: {}, method: {}, error:", path, httpMethod, e.getMessage());
 			return null;
 		}
@@ -197,10 +199,11 @@ public class ConfRestfuls {
 	public ConfRestful getConfRestfulFromJdbc(String path, String httpMethod, RequestValue rv,
 			RestfulResult<Object> result) throws Exception {
 
-		DTRow catalog = this.getJdbcRestfulCatalog(path);
+		DTRow catalog = this.getJdbcRestfulCatalog(path, result);
 		if (catalog == null) {
-			result.setMessage("not found");
+			result.setMessage("The " + path + " not found");
 			result.setHttpStatusCode(404);
+			result.setSuccess(false);
 			return null;
 		}
 
@@ -208,8 +211,9 @@ public class ConfRestfuls {
 
 		if (methodRow == null) {
 			// 找不到对象的模式method
-			result.setMessage(httpMethod + " not implemented");
+			result.setMessage("The " + path + "(" + httpMethod + ") not implemented");
 			result.setHttpStatusCode(501);// Method is not implemented
+			result.setSuccess(false);
 			return null;
 		}
 
@@ -231,7 +235,7 @@ public class ConfRestfuls {
 		return conf;
 	}
 
-	private void addPathParametersToRv(String[] requestPathsDepth, String[] paths, RequestValue rv) {
+	private void addPathParametersToRv(String[] requestPathsDepth, String[] paths, RequestValue rv ) {
 		for (int i = 0; i < requestPathsDepth.length; i++) {
 			String reqPath0 = requestPathsDepth[i];
 			String path0 = paths[i];
@@ -246,11 +250,15 @@ public class ConfRestfuls {
 		}
 	}
 
-	private DTRow getJdbcRestfulCatalog(String path) {
+	private DTRow getJdbcRestfulCatalog(String path, RestfulResult<Object> result) throws Exception {
 		String sql = "select * from ewa_restful_catalog where cat_path_full=@path and cat_status='USED'";
 		RequestValue rv1 = new RequestValue();
 		rv1.addOrUpdateValue("path", path);
 		DTTable tb = DTTable.getJdbcTable(sql, this.getDataSource(), rv1);
+		if(!tb.isOk()) {
+			 throw new Exception(tb.getErrorInfo());
+		}
+		
 		if (tb.getCount() > 0) {
 			return tb.getRow(0);
 		}
@@ -268,6 +276,9 @@ public class ConfRestfuls {
 			sb.append("\n and p" + i + " is null");
 		}
 		tb = DTTable.getJdbcTable(sb.toString(), this.getDataSource(), rv1);
+		if(!tb.isOk()) {
+			 throw new Exception(tb.getErrorInfo());
+		}
 		if (tb.getCount() > 0) {
 			return tb.getRow(0);
 		}

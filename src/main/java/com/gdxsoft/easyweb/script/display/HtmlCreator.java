@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -91,6 +92,7 @@ public class HtmlCreator {
 	private String _PageHtml;
 	private String _ActionReturnValue; // Action执行返回的标志, "SCRIPT", "URL", ""
 	private boolean _ErrOut; // 系统执行出现 errout;
+	private String errOutMessage; // 系统执行出现 errout 的内容;
 
 	public HtmlCreator() {
 		_DebugFrames = new DebugFrames();
@@ -834,26 +836,22 @@ public class HtmlCreator {
 						this._PageHtml = Utils.getJavascript(s);
 					}
 				} else {
+					this._ErrOut = true;
+					this.errOutMessage = returnValue;
+
 					if (_SysParas.isAjaxCall()) {
-						// if(this._Frame.)
 						String fType = this._SysParas.getFrameType();
 						fType = fType == null ? "" : fType;
-						if (fType.equalsIgnoreCase("ListFrame")) {
-							// this._PageHtml = "alert(\""
-							// + Utils.textToJscript(returnValue) + "\");";
-							String msg = Utils.textToJscript(returnValue);
-							String alert = "EWA.UI.Msg.ShowError(\"" + msg + "\",'Error');";
-							this._PageHtml = alert;
-						} else {
-							// this._PageHtml =
-							// Utils.getAlertScript(returnValue);
-							this._PageHtml = "EWA.UI.Msg.ShowError(\"" + Utils.textToJscript(returnValue)
-									+ "\",'Error');";
-							// this._PageHtml = "alert(\""
-							// + Utils.textToJscript(returnValue) + "\");";
-						}
+						String msg = Utils.textToJscript(returnValue);
+						String alert = "EWA.UI.Msg.ShowError(\"" + msg + "\",'Error');";
+
+						// if (fType.equalsIgnoreCase("ListFrame")) {
+						this._PageHtml = alert;
+						// } else {
+						// this._PageHtml = alert;
+						// }
 					} else {// 抛出错误
-						this._ErrOut = true;
+
 						String _g_user_agent = this.getRequestValue().s("SYS_USER_AGENT");
 
 						// 是否为移动调用
@@ -1055,52 +1053,68 @@ public class HtmlCreator {
 	 * @throws Exception
 	 */
 	public String createResponseFrameDownload() throws Exception {
+		File imageFile = null;
 		UserXItems xitems = this._HtmlClass.getUserConfig().getUserXItems();
-		String imageName = null;
-		String imageUrl = null;
+
+		String uploadXItemName = null;
+		// 限定从 有上传文件的配置中获取，避免外部攻击
 		for (int i = 0; i < xitems.count(); i++) {
 			UserXItem xitem = xitems.getItem(i);
 			String tag = xitem.getSingleValue("Tag");
 			// find the upload item
 			if ("h5upload".equals(tag) || "swffile".equals(tag) || "image".equals(tag)) {
-				imageName = xitem.getName();
-			} else if ("gridImage".equals(tag) || "gridBgImage".equals(tag)) {
-				// the image view
-				imageUrl = xitem.getName();
+				uploadXItemName = xitem.getName();
+				break;
 			}
 		}
 
-		if (imageName == null && imageUrl == null) {
-			return null;
-		}
-		File imageFile = null;
-		if (imageName != null) {
-			// 从数据库返回的表中获取地址，不能从 RequestValue中获取，不安全
-			String path = this.getValueFromFrameTables(imageName);
-			imageFile = getUploadedFilePath(path);
-			if (imageFile == null) {
-				path = this.getValueFromFrameTables(imageName + "_path");
-				imageFile = getUploadedFilePath(path);
-			}
-		}
-
-		// Get the image path from imageUrl
-		if (imageFile == null && imageUrl != null) {
-			String url = this.getValueFromFrameTables(imageUrl);
-			if (url != null) {
-				// the url start
-				String start = UPath.getPATH_UPLOAD_URL();
-				if (url.startsWith(start)) {
-					url = url.substring(start.length());
-				}
-				imageFile = getUploadedFilePath(url);
-			}
-		}
-		if (imageFile == null) {
+		if (uploadXItemName == null) {
 			return null;
 		}
 
-		return imageFile.toString();
+		// 第一步检查表中的字段有 EWA_UP_PATH，这是上传文件的保存的物理路径
+		// 从数据库返回的表中获取地址，不能从 RequestValue中获取，不安全
+		String ewaUpPath = this.getValueFromFrameTables("EWA_UP_PATH");
+		if (StringUtils.isNotBlank(ewaUpPath)) {
+			imageFile = this.getUploadedFilePath(ewaUpPath, false);
+			if (imageFile != null) {
+				return imageFile.getAbsolutePath();
+			}
+		}
+
+		// 第2步检查表中的字段有 EWA_UP_PATH_SHORT，这是上传文件的保存的物理路径，去除PATH_UPLOAD部分
+		// 从数据库返回的表中获取地址，不能从 RequestValue中获取，不安全
+		String ewaUpPathShort = this.getValueFromFrameTables("EWA_UP_PATH_SHORT");
+		if (StringUtils.isNotBlank(ewaUpPathShort)) {
+			String path = UPath.getPATH_UPLOAD() + File.separator + ewaUpPathShort;
+			imageFile = this.getUploadedFilePath(path, false);
+			if (imageFile != null) {
+				return imageFile.getAbsolutePath();
+			}
+		}
+
+		// 第3步检查表中的字段有 uploadXItemName
+		// 从数据库返回的表中获取地址，不能从 RequestValue中获取，不安全
+		String uploadPath = this.getValueFromFrameTables(uploadXItemName);
+		if (StringUtils.isNotBlank(uploadPath)) {
+			imageFile = this.getUploadedFilePath(uploadPath, true);
+			if (imageFile != null) {
+				return imageFile.getAbsolutePath();
+			}
+		}
+
+		// 第4步检查表中的字段有 uploadXItemName_path
+		// 从数据库返回的表中获取地址，不能从 RequestValue中获取，不安全
+		String uploadPath1 = this.getValueFromFrameTables(uploadXItemName + "_path");
+		if (StringUtils.isNotBlank(uploadPath1)) {
+			imageFile = getUploadedFilePath(uploadPath1, true);
+			if (imageFile != null) {
+				return imageFile.getAbsolutePath();
+			}
+		}
+
+		return null;
+
 	}
 
 	/**
@@ -1122,18 +1136,35 @@ public class HtmlCreator {
 		}
 	}
 
-	private File getUploadedFilePath(String path) {
+	private File getUploadedFilePath(String path, boolean checkPrefixUploadPath) {
 		if (path == null || path.length() == 0) {
 			return null;
 		}
+		if (path.indexOf("../") >= 0 || path.indexOf("..\\") >= 0) {
+			// 不允许获取上级目录地址
+			LOGGER.warn("Invalid path, include '../' -> {}", path);
+			return null;
+		}
+		String uploadPath = new File(UPath.getPATH_UPLOAD()).getAbsolutePath();
+
 		File f = new File(path);
 		if (f.exists()) {
-			return f;
+			// 限定获取文件的目录在 ewa_conf.xml指定的上传目录之下
+			if (f.getAbsolutePath().startsWith(uploadPath)) {
+				return f;
+			} else {
+				LOGGER.warn("Invalid download path {}, not in upload dir {}", path, uploadPath);
+				return null;
+			}
 		}
 
-		f = new File(UPath.getPATH_UPLOAD() + File.separator + path);
-		if (f.exists()) {
-			return f;
+		// 再次检查前面附加上传目录
+		if (checkPrefixUploadPath) {
+			path = uploadPath + File.separator + path;
+			f = new File(path);
+			if (f.exists()) {
+				return f;
+			}
 		}
 		return null;
 
@@ -2239,10 +2270,19 @@ public class HtmlCreator {
 	/**
 	 * 系统执行出现 err_out
 	 * 
-	 * @return the _ErrorOut
+	 * @return true/false
 	 */
 	public boolean isErrOut() {
 		return _ErrOut;
+	}
+
+	/**
+	 * 系统执行出现 err_out抛出的消息
+	 * 
+	 * @return err_out抛出的消息
+	 */
+	public String getErrOutMessage() {
+		return errOutMessage;
 	}
 
 	public IAction getAction() {

@@ -124,6 +124,8 @@ public class ActionListFrame extends ActionBase implements IAction {
 
 	/**
 	 * 执行SQL，分页只在第一个query中执行，其余的SQL完全执行
+	 * 
+	 * @param name 执行的sqlCall name
 	 */
 	public void executeCallSql(String name) throws Exception {
 		UserXItemValues sqlset = super.getUserConfig().getUserActionItem().getItem("SqlSet");
@@ -212,13 +214,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 							super.getDTTables().add(tb);
 							// 加载Hor数据
 							super.executeExtOpt(sql, tb);
-
-							if (tb.getCount() >= 1 && tb.getColumns().testName("EWA_ERR_OUT")) {
-								String v = tb.getCell(0, "EWA_ERR_OUT").toString();
-								if (v != null && v.trim().length() > 0) {
-									this.setChkErrorMsg(v);
-								}
-							}
+							super.checkActionErrorOutInTable(tb);
 						}
 					}
 				}

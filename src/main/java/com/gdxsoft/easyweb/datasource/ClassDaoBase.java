@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +29,8 @@ public class ClassDaoBase<T> {
 	private String[] fields;
 	private String[] keyFields;
 	private String sqlInsert;
+
+	private String database;
 
 	private static HashMap<String, Boolean> MYSQL_RESERVED;
 	static {
@@ -265,6 +268,13 @@ public class ClassDaoBase<T> {
 			sb.append(" * ");
 		}
 		sb.append(" from ");
+
+		// 增加database前缀
+		if (StringUtils.isNotBlank(this.database)) {
+			sb.append(this.database);
+			sb.append(".");
+		}
+
 		sb.append(tableName);
 		if (where != null && where.trim().length() > 0) {
 			sb.append(" where ");
@@ -274,7 +284,16 @@ public class ClassDaoBase<T> {
 	}
 
 	public String createDeleteSql() {
-		StringBuilder sb = new StringBuilder("DELETE FROM " + this.tableName + " WHERE ");
+		StringBuilder sb = new StringBuilder();
+		sb.append("DELETE FROM ");
+		// 增加database前缀
+		if (StringUtils.isNotBlank(this.database)) {
+			sb.append(this.database);
+			sb.append(".");
+		}
+		sb.append(this.tableName);
+		sb.append(" WHERE ");
+
 		String pk = this.createPkSql();
 		sb.append(pk);
 
@@ -311,8 +330,7 @@ public class ClassDaoBase<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeSequence(java.lang.
-	 * String)
+	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeSequence(java.lang. String)
 	 */
 	public int executeSequence(String seqName) throws SQLException {
 		ConnectToDatabase();
@@ -363,14 +381,36 @@ public class ClassDaoBase<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.gdxsoft.easyweb.datasource.IClassDao#getRecordCount(java.lang.String)
+	 * @see com.gdxsoft.easyweb.datasource.IClassDao#getRecordCount(java.lang.String)
 	 */
 	public int getRecordCount(String sql) {
 		ConnectToDatabase();
 		int m = _Conn.getRecordCount(sql);
 		_Conn.close();
 		return m;
+	}
+
+	/**
+	 * 创建 更新的SQL，排除主键的所有字段
+	 * 
+	 * @return
+	 */
+	public String getSqlUpdate() {
+		Map<String, Boolean> pks = new HashMap<String, Boolean>();
+		for (int i = 0; i < this.keyFields.length; i++) {
+			String pk = this.keyFields[i].trim().toUpperCase();
+			pks.put(pk, true);
+		}
+		Map<String, Boolean> updateFields = new HashMap<String, Boolean>();
+		for (int i = 0; i < this.fields.length; i++) {
+			String key = this.fields[i].trim();
+			if (pks.containsKey(key.toUpperCase())) {
+				continue;
+			}
+			updateFields.put(key, true);
+		}
+		String sql = this.sqlUpdateChanged(this.tableName, this.keyFields, updateFields);
+		return sql;
 	}
 
 	/**
@@ -389,6 +429,11 @@ public class ClassDaoBase<T> {
 		boolean isMysql = "mysql".equalsIgnoreCase(this._Conn.getDatabaseType());
 		StringBuilder sb = new StringBuilder();
 		sb.append("UPDATE ");
+		// 增加database前缀
+		if (StringUtils.isNotBlank(this.database)) {
+			sb.append(this.database);
+			sb.append(".");
+		}
 		sb.append(tableName);
 		sb.append(" SET ");
 		int inc = 0;
@@ -450,6 +495,11 @@ public class ClassDaoBase<T> {
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sb_values = new StringBuilder();
 		sb.append("INSERT INTO ");
+		// 增加database前缀
+		if (StringUtils.isNotBlank(this.database)) {
+			sb.append(this.database);
+			sb.append(".");
+		}
 		sb.append(tableName);
 		sb.append(" ( ");
 		int inc = 0;
@@ -549,8 +599,8 @@ public class ClassDaoBase<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeProcdure(java.lang.
-	 * String, com.gdxsoft.easyweb.script.RequestValue)
+	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeProcdure(java.lang. String,
+	 * com.gdxsoft.easyweb.script.RequestValue)
 	 */
 	public HashMap<String, String> executeProcdure(String procName, RequestValue requestValue) {
 		ConnectToDatabase();
@@ -563,8 +613,7 @@ public class ClassDaoBase<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeQuery(java.lang.String,
-	 * T, java.lang.String[])
+	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeQuery(java.lang.String, T, java.lang.String[])
 	 */
 	public ArrayList<T> executeQuery(String sql, T obj, String[] fieldList) {
 		ConnectToDatabase();
@@ -575,8 +624,8 @@ public class ClassDaoBase<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeQuery(java.lang.String,
-	 * T, java.lang.String[], java.lang.String, int, int)
+	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeQuery(java.lang.String, T, java.lang.String[],
+	 * java.lang.String, int, int)
 	 */
 	public ArrayList<T> executeQuery(String sql, T obj, String[] fieldList, String pkFieldName, int pageSize,
 			int currentPage) {
@@ -755,34 +804,6 @@ public class ClassDaoBase<T> {
 		return stringBuilder.toString();
 	}
 
-	public String getSqlUpdate() {
-		StringBuilder sb = new StringBuilder("UPDATE " + this.tableName + " SET ");
-		Map<String, Boolean> pks = new HashMap<String, Boolean>();
-		for (int i = 0; i < this.keyFields.length; i++) {
-			String pk = this.keyFields[i].trim().toUpperCase();
-			pks.put(pk, true);
-		}
-		int inc = 0;
-		for (int i = 0; i < this.fields.length; i++) {
-			String key = this.fields[i].trim();
-			if (pks.containsKey(key.toUpperCase())) {
-				continue;
-			}
-			if (inc > 0) {
-				sb.append("\n ,");
-			}
-			sb.append(key);
-			sb.append("=@");
-			sb.append(key);
-			inc++;
-		}
-		sb.append(" WHERE ");
-		String pk = this.createPkSql();
-		sb.append(pk);
-
-		return sb.toString();
-	}
-
 	public String getSqlInsert() {
 		return this.sqlInsert;
 	}
@@ -884,6 +905,14 @@ public class ClassDaoBase<T> {
 	 */
 	public void setKeyFields(String[] keyFields) {
 		this.keyFields = keyFields;
+	}
+
+	public String getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(String database) {
+		this.database = database;
 	}
 
 }
