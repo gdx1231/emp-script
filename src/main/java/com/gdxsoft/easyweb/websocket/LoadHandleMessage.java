@@ -24,8 +24,7 @@ public class LoadHandleMessage {
 	 * @return
 	 */
 	public static IHandleMsg getInstance(String methodName, EwaWebSocket webSocket, JSONObject obj) {
-
-		String name1 = methodName.trim().toUpperCase();
+		String name1 = methodName.trim().toLowerCase();
 		Map<String, ConfHandleWebSocketMessage> map = ConfHandleWebSocketMessages.getInstance().getHandles();
 		if (map == null || !map.containsKey(name1)) {
 			return null;

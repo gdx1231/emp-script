@@ -10,6 +10,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.RemoteEndpoint.Async;
 import javax.websocket.Session;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +81,11 @@ public class EwaWebSocket {
 	}
 
 	private void handleMessage(JSONObject obj) {
-		String method = obj.optString("METHOD");
-		if (method == null) {
+		String method = obj.optString("method");
+		if (StringUtils.isBlank(method)) {
+			method = obj.optString("METHOD");
+		}
+		if (StringUtils.isBlank(method)) {
 			return;
 		}
 		IHandleMsg intanceHandleMsg = LoadHandleMessage.getInstance(method, this, obj);

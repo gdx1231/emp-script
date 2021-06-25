@@ -3,9 +3,11 @@ package com.gdxsoft.easyweb.script.servlets;
 import java.util.Iterator;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RestfulResult<T> {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(RestfulResult.class);
 	private boolean success_ = true;
 	private T data_;
 	private Integer code_;
@@ -76,28 +78,36 @@ public class RestfulResult<T> {
 	}
 
 	public void parse(String result) {
-		JSONObject obj = new JSONObject(result);
-		Iterator<String> keys = obj.keys();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			if (key.equals("http_status_code")) {
-				this.setHttpStatusCode(obj.optInt(key));
-			} else if (key.equals("message")) {
-				this.setMessage(obj.optString(key));
-			} else if (key.equals("ewa_page_cur")) {
-				this.setEwaPageCur(obj.optInt(key));
-			} else if (key.equals("ewa_page_size")) {
-				this.setEwaPageSize(obj.optInt(key));
-			} else if (key.equals("record_count")) {
-				this.setRecordCount(obj.optInt(key));
-			} else if (key.equals("page_count")) {
-				this.setPageCount(obj.optInt(key));
-			} else if (key.equals("data")) {
-				this.setRawData(obj.get(key));
-			} else if (key.equals("success")) {
-				this.setSuccess(obj.optBoolean(key));
+		try {
+			JSONObject obj = new JSONObject(result);
+
+			this.rawData = obj;
+			Iterator<String> keys = obj.keys();
+			while (keys.hasNext()) {
+				String key = keys.next();
+				if (key.equals("http_status_code")) {
+					this.setHttpStatusCode(obj.optInt(key));
+				} else if (key.equals("message")) {
+					this.setMessage(obj.optString(key));
+				} else if (key.equals("ewa_page_cur")) {
+					this.setEwaPageCur(obj.optInt(key));
+				} else if (key.equals("ewa_page_size")) {
+					this.setEwaPageSize(obj.optInt(key));
+				} else if (key.equals("record_count")) {
+					this.setRecordCount(obj.optInt(key));
+				} else if (key.equals("page_count")) {
+					this.setPageCount(obj.optInt(key));
+				} else if (key.equals("data")) {
+					this.setRawData(obj.get(key));
+				} else if (key.equals("success")) {
+					this.setSuccess(obj.optBoolean(key));
+				}
 			}
+		} catch (Exception err) {
+			this.rawData = result;
+			LOGGER.warn("Pasre RestfulResult error! source: {}, error: {}", result, err.getMessage());
 		}
+
 	}
 
 	public String toString() {
