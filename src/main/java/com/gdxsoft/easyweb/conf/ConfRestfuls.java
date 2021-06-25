@@ -56,13 +56,17 @@ public class ConfRestfuls {
 		}
 
 		Element item = (Element) nl.item(0);
-		String path = item.getAttribute("path").trim();
+		String path = item.getAttribute("path");
 		if (path == null) {
 			return sps;
 		}
 		path = path.trim();
 		sps.path = path;
 		sps.xml = UXml.asXml(item);
+		
+		//Access-Control-Allow-Origin， CORS policy
+		String cors = item.getAttribute("cors"); 
+		sps.setCors(cors);
 
 		if (path.toLowerCase().startsWith("jdbc:")) {
 			// 配置在数据库中
@@ -398,7 +402,7 @@ public class ConfRestfuls {
 	private String xml;
 	private boolean jdbc;
 	private String dataSource;
-
+	private String cors; //Access-Control-Allow-Origin
 	public String getPath() {
 		return path;
 	}
@@ -429,6 +433,22 @@ public class ConfRestfuls {
 
 	public void setDataSource(String dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	/**
+	 * Access-Control-Allow-Origin
+	 * @return
+	 */
+	public String getCors() {
+		return cors;
+	}
+
+	/**
+	 * Access-Control-Allow-Origin 
+	 * @param cors
+	 */
+	public void setCors(String cors) {
+		this.cors = cors;
 	}
 
 }

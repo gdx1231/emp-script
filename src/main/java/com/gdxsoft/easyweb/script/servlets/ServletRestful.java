@@ -125,7 +125,16 @@ public class ServletRestful extends HttpServlet {
 			response.setContentType("application/json");
 			this.handleConf(conf, rv, response, result);
 		}
+		// CORS policy
+		String cors = ConfRestfuls.getInstance().getCors();
+		if (StringUtils.isNotBlank(cors)) {
+			if (cors.equals("*") && StringUtils.isNotBlank(request.getHeader("origin"))) {
+				cors = request.getHeader("origin");
+			}
+			response.setHeader("Access-Control-Allow-Origin", cors);
+		}
 		response.setStatus(result.getHttpStatusCode());
+
 		return result.toString();
 
 	}
@@ -267,6 +276,7 @@ public class ServletRestful extends HttpServlet {
 		if (!image.exists()) {
 			result.setHttpStatusCode(404);
 			result.setSuccess(false);
+			LOGGER.warn("The download file not found: {}, root: {}", fileStr, UPath.getPATH_UPLOAD());
 			return;
 		}
 		String resize = rv.s("ewa_image_resize");
@@ -277,6 +287,9 @@ public class ServletRestful extends HttpServlet {
 			} else {
 				result.setHttpStatusCode(404);
 				result.setSuccess(false);
+
+				LOGGER.warn("The download file not found: {}, resize: {}, root: {}", fileStr, resize,
+						UPath.getPATH_UPLOAD());
 				return;
 			}
 		}

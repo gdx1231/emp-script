@@ -85,6 +85,40 @@
 		</database>
 
 	</databases>
+	
+	<restfuls path="jdbc:ewa" cors="*"></restfuls>
+	<!-- <restfuls  cors="*" path="/ewa-api/server/v1">
+		<restful path="chatUsers">
+			<get xmlname="/ewa-apps/chat.xml" itemname="chat_user.LF.M" />
+			<post xmlname="/ewa-apps/chat.xml" itemname="chat_user.F.NM" />
+			批量删除
+			<delete xmlname="/ewa-apps/chat.xml" itemname="chat_user.LF.M" />
+			批量恢复
+			<patch xmlname="/ewa-apps/chat.xml" itemname="chat_user.LF.M" />
+		</restful>
+		<restful path="chatUsers/{cht_usr_id}">
+			<get xmlname="/ewa-apps/chat.xml" itemname="chat_user.LF.M" />
+			<put xmlname="/ewa-apps/chat.xml" itemname="chat_user.F.NM" />
+			<delete xmlname="/ewa-apps/chat.xml" itemname="chat_user.LF.M" />
+			回复数据
+			<patch xmlname="/ewa-apps/chat.xml" itemname="chat_user.LF.M" parameters="EWA_ACTION=OnFrameRestore" />
+		</restful>
+		<restful path="chatRooms">
+			<get xmlname="/ewa-apps/chat.xml" itemname="chat_room.LF.M" />
+			新建房间
+			<post xmlname="/ewa-apps/chat.xml" itemname="chat_room.F.NM" parameters="" />
+		</restful>
+		<restful path="chatRooms/{cht_rom_id}">
+			<get xmlname="/ewa-apps/chat.xml" itemname="chat_room.LF.M" />
+			修改房间
+			<patch xmlname="/ewa-apps/chat.xml" itemname="chat_room.F.NM" parameters="" />
+			<delete xmlname="/ewa-apps/chat.xml" itemname="chat_room.LF.M" />
+		</restful>
+		<restful path="chatRooms/{cht_rom_id}/topics">
+			<get xmlname="/ewa-apps/chat.xml" itemname="chat_topic.LF.M" />
+			<post xmlname="/ewa-apps/chat.xml" itemname="chat_topic.F.NM" parameters="" />
+		</restful>
+	</restfuls> -->
 	<remote_syncs des="Sync to server" url="https://yourdomain/demo/EWA_DEFINE/cgi-bin/remoteSync/" code="">
 		<remote_sync name="static" id="1" source="d:/project/static" target="/var/www/static"
 			filter="js,css,htm,html,xml,txt,gif,jpg,png,jpeg,jiff" />
