@@ -22,6 +22,8 @@ public class RestfulResult<T> {
 	private Integer pageCount;
 	private Integer recordCount;
 
+	private String returnResult;
+
 	public boolean isSuccess() {
 		return success_;
 	}
@@ -78,6 +80,7 @@ public class RestfulResult<T> {
 	}
 
 	public void parse(String result) {
+		this.returnResult = result;
 		try {
 			JSONObject obj = new JSONObject(result);
 
@@ -98,13 +101,14 @@ public class RestfulResult<T> {
 				} else if (key.equals("page_count")) {
 					this.setPageCount(obj.optInt(key));
 				} else if (key.equals("data")) {
-					this.setRawData(obj.get(key));
+					Object data = obj.get(key);
+					this.setRawData(data);
+
 				} else if (key.equals("success")) {
 					this.setSuccess(obj.optBoolean(key));
 				}
 			}
 		} catch (Exception err) {
-			this.rawData = result;
 			LOGGER.warn("Pasre RestfulResult error! source: {}, error: {}", result, err.getMessage());
 		}
 
@@ -152,5 +156,13 @@ public class RestfulResult<T> {
 
 	public void setRawData(Object rawData) {
 		this.rawData = rawData;
+	}
+
+	public String getReturnResult() {
+		return returnResult;
+	}
+
+	public void setReturnResult(String returnResult) {
+		this.returnResult = returnResult;
 	}
 }

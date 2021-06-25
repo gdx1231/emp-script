@@ -52,6 +52,11 @@ public class EwaWebSocket {
 
 		EwaWebSocketContainer.add(this);
 
+		// 客户端记录 服务器端的 socket的 unid
+		JSONObject msg = new JSONObject();
+		msg.put("socketId", this.unid_);
+		msg.put("ID", "socketId");
+		this.sendToClient(msg.toString());
 	}
 
 	/**
