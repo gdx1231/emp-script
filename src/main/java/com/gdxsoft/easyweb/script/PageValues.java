@@ -119,56 +119,68 @@ public class PageValues {
 	 * @param pv
 	 */
 	public void addValue(PageValue pv) {
-
 		if ("EWA_MTYPE".equalsIgnoreCase(pv.getName())) {
 			String val = pv.getStringValue();
 			// 避免非法字符例如，',",< ...
 			if (!StringUtils.isAlpha(val) || val.length() > 1) {
+				LOGGER.warn("Invalid EWA_MTYPE value: {}, replaced to blank." + val);
 				val = "";
 				pv.setValue(val);
 			}
+			return;
 		}
+		
 		MTable mt = (MTable) this._Values.get(pv.getPVTag());
 		pv.setTag(pv.getPVTag().toString());
 
 		// 如果pv没有设定类型，根据ewa_conf.xml中定义的数据类型进行设置
 		if (pv.getDataType() == null || pv.getDataType().trim().length() == 0) {
 			String key = pv.getName().toUpperCase();
-			if (UPath.getRvTypes() == null) {
-				LOGGER.warn("UPath.getRvTypes()is null, pv=" + key);
-			} else {
-				if (UPath.getRvTypes().containsKey(key)) {
-					// paramName, paramType
-					String paramType = UPath.getRvTypes().get(key);
-					String paramValue = pv.getStringValue();
-					if (paramValue != null && "int".equals(paramType)) {
-						// 测试整型
-						try {
-							int intVal = Integer.parseInt(paramValue);
-							pv.setValue(intVal);
-							pv.setDataType(paramType);
-						} catch (Exception err) {
-
-						}
-					} else if (paramValue != null && "number".equals(paramType)) {
-						// 测试数字
-						try {
-							double douVal = Double.parseDouble(paramValue);
-							pv.setValue(douVal);
-							pv.setDataType(paramType);
-						} catch (Exception err) {
-
-						}
-					} else {
-						pv.setDataType(paramType);
-					}
-				}
-			}
+			this.changeToDefinedType(key, pv);
 		}
 
 		if (!mt.containsKey(pv.getName())) {
 			mt.add(pv.getName(), pv);
 		}
+	}
+
+	/**
+	 * 根据ewa_conf.xml中定义的数据类型进行设置
+	 * @param key
+	 * @param pv
+	 */
+	private void changeToDefinedType(String key, PageValue pv) {
+		if (UPath.getRvTypes() == null) {
+			return;
+		}
+		if (!UPath.getRvTypes().containsKey(key)) {
+			return;
+		}
+		// paramName, paramType
+		String paramType = UPath.getRvTypes().get(key);
+		String paramValue = pv.getStringValue();
+		if (paramValue != null && "int".equals(paramType)) {
+			// 测试整型
+			try {
+				int intVal = Integer.parseInt(paramValue);
+				pv.setValue(intVal);
+				pv.setDataType(paramType);
+			} catch (Exception err) {
+
+			}
+		} else if (paramValue != null && "number".equals(paramType)) {
+			// 测试数字
+			try {
+				double douVal = Double.parseDouble(paramValue);
+				pv.setValue(douVal);
+				pv.setDataType(paramType);
+			} catch (Exception err) {
+
+			}
+		} else {
+			pv.setDataType(paramType);
+		}
+
 	}
 
 	public PageValue getValue(String name) {

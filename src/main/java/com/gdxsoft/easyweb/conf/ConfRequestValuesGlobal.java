@@ -25,10 +25,11 @@ public class ConfRequestValuesGlobal {
 	private List<ConfNameValuePair> lst = new ArrayList<ConfNameValuePair>();
 
 	private static ConfRequestValuesGlobal createSqlCached() {
-		if (UPath.getCfgXmlDoc() == null) {
-			return null;
-		}
+
 		ConfRequestValuesGlobal cvg = new ConfRequestValuesGlobal();
+		if (UPath.getCfgXmlDoc() == null) {
+			return cvg;
+		}
 
 		// the last modify time of the ewa_conf.xml
 		PROP_TIME = UPath.getPropTime();

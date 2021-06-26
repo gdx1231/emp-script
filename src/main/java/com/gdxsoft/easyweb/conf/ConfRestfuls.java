@@ -43,13 +43,11 @@ public class ConfRestfuls {
 		CONFS = new ConcurrentHashMap<>();
 
 		if (UPath.getCfgXmlDoc() == null) {
-			return null;
+			return sps;
 		}
 		// the last modify time of the ewa_conf.xml
 		PROP_TIME = UPath.getPropTime();
-
 		NodeList nl = UPath.getCfgXmlDoc().getElementsByTagName("restfuls");
-
 		// 没有配置
 		if (nl.getLength() == 0) {
 			return sps;
@@ -63,9 +61,9 @@ public class ConfRestfuls {
 		path = path.trim();
 		sps.path = path;
 		sps.xml = UXml.asXml(item);
-		
-		//Access-Control-Allow-Origin， CORS policy
-		String cors = item.getAttribute("cors"); 
+
+		// Access-Control-Allow-Origin， CORS policy
+		String cors = item.getAttribute("cors");
 		sps.setCors(cors);
 
 		if (path.toLowerCase().startsWith("jdbc:")) {
@@ -239,7 +237,7 @@ public class ConfRestfuls {
 		return conf;
 	}
 
-	private void addPathParametersToRv(String[] requestPathsDepth, String[] paths, RequestValue rv ) {
+	private void addPathParametersToRv(String[] requestPathsDepth, String[] paths, RequestValue rv) {
 		for (int i = 0; i < requestPathsDepth.length; i++) {
 			String reqPath0 = requestPathsDepth[i];
 			String path0 = paths[i];
@@ -259,10 +257,10 @@ public class ConfRestfuls {
 		RequestValue rv1 = new RequestValue();
 		rv1.addOrUpdateValue("path", path);
 		DTTable tb = DTTable.getJdbcTable(sql, this.getDataSource(), rv1);
-		if(!tb.isOk()) {
-			 throw new Exception(tb.getErrorInfo());
+		if (!tb.isOk()) {
+			throw new Exception(tb.getErrorInfo());
 		}
-		
+
 		if (tb.getCount() > 0) {
 			return tb.getRow(0);
 		}
@@ -280,8 +278,8 @@ public class ConfRestfuls {
 			sb.append("\n and p" + i + " is null");
 		}
 		tb = DTTable.getJdbcTable(sb.toString(), this.getDataSource(), rv1);
-		if(!tb.isOk()) {
-			 throw new Exception(tb.getErrorInfo());
+		if (!tb.isOk()) {
+			throw new Exception(tb.getErrorInfo());
 		}
 		if (tb.getCount() > 0) {
 			return tb.getRow(0);
@@ -402,7 +400,8 @@ public class ConfRestfuls {
 	private String xml;
 	private boolean jdbc;
 	private String dataSource;
-	private String cors; //Access-Control-Allow-Origin
+	private String cors; // Access-Control-Allow-Origin
+
 	public String getPath() {
 		return path;
 	}
@@ -437,6 +436,7 @@ public class ConfRestfuls {
 
 	/**
 	 * Access-Control-Allow-Origin
+	 * 
 	 * @return
 	 */
 	public String getCors() {
@@ -444,7 +444,8 @@ public class ConfRestfuls {
 	}
 
 	/**
-	 * Access-Control-Allow-Origin 
+	 * Access-Control-Allow-Origin
+	 * 
 	 * @param cors
 	 */
 	public void setCors(String cors) {
