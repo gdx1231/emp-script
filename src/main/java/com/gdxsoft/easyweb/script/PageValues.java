@@ -119,6 +119,12 @@ public class PageValues {
 	 * @param pv
 	 */
 	public void addValue(PageValue pv) {
+		MTable mt = (MTable) this._Values.get(pv.getPVTag());
+		if (mt.containsKey(pv.getName())) {// 已经存在则不覆盖
+			return;
+		}
+		pv.setTag(pv.getPVTag().toString());
+
 		if ("EWA_MTYPE".equalsIgnoreCase(pv.getName())) {
 			String val = pv.getStringValue();
 			// 避免非法字符例如，',",< ...
@@ -127,25 +133,19 @@ public class PageValues {
 				val = "";
 				pv.setValue(val);
 			}
-			return;
+		} else {
+			// 如果pv没有设定类型，根据ewa_conf.xml中定义的数据类型进行设置
+			if (pv.getDataType() == null || pv.getDataType().trim().length() == 0) {
+				String key = pv.getName().toUpperCase();
+				this.changeToDefinedType(key, pv);
+			}
 		}
-		
-		MTable mt = (MTable) this._Values.get(pv.getPVTag());
-		pv.setTag(pv.getPVTag().toString());
-
-		// 如果pv没有设定类型，根据ewa_conf.xml中定义的数据类型进行设置
-		if (pv.getDataType() == null || pv.getDataType().trim().length() == 0) {
-			String key = pv.getName().toUpperCase();
-			this.changeToDefinedType(key, pv);
-		}
-
-		if (!mt.containsKey(pv.getName())) {
-			mt.add(pv.getName(), pv);
-		}
+		mt.add(pv.getName(), pv);
 	}
 
 	/**
 	 * 根据ewa_conf.xml中定义的数据类型进行设置
+	 * 
 	 * @param key
 	 * @param pv
 	 */
