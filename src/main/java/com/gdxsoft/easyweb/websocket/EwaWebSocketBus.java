@@ -15,12 +15,43 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConfHandleWebSocketMessage;
+import com.gdxsoft.easyweb.conf.ConfHandleWebSocketMessages;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.Utils;
 
 // @ServerEndpoint(value = "/ewa-ws", configurator = EwaWebSocketConfigure.class)
-public class EwaWebSocket {
-	private static Logger LOGGER = LoggerFactory.getLogger(EwaWebSocket.class);
+
+/**
+ * WebSocket 消息总线
+ */
+public class EwaWebSocketBus {
+	private static Logger LOGGER = LoggerFactory.getLogger(EwaWebSocketBus.class);
+
+	/**
+	 * 在程序中提交handler，默认是通过ewa_conf.xml中进行配置
+	 * 
+	 * @param methodName 处理名称
+	 * @param mapClass   对应的类名称
+	 * @return
+	 */
+	public static synchronized boolean registerHandler(String methodName, String mapClass) {
+		String name1 = methodName.trim().toLowerCase();
+		Map<String, ConfHandleWebSocketMessage> map = ConfHandleWebSocketMessages.getInstance().getHandles();
+		if (map.containsKey(name1)) {
+			LOGGER.info("{} 已经存在处理方法：{}", methodName, map.get(name1).getMapClass());
+			return false;
+		}
+
+		ConfHandleWebSocketMessage handlerCfg = new ConfHandleWebSocketMessage();
+		handlerCfg.setMethod(methodName);
+		handlerCfg.setMapClass(mapClass);
+		handlerCfg.setXml("<a>用户自己提交</a>");
+
+		map.put(name1, handlerCfg);
+		LOGGER.info("{} 添加成功：{}", methodName, handlerCfg.getMapClass());
+		return true;
+	}
 
 	// 与某个客户端的连接会话，需要通过它来给客户端发送数据
 	private Session session;

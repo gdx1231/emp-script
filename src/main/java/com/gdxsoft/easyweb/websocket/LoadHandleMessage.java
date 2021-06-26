@@ -23,7 +23,7 @@ public class LoadHandleMessage {
 	 * @param obj        命令对象
 	 * @return
 	 */
-	public static IHandleMsg getInstance(String methodName, EwaWebSocket webSocket, JSONObject obj) {
+	public static IHandleMsg getInstance(String methodName, EwaWebSocketBus webSocket, JSONObject obj) {
 		String name1 = methodName.trim().toLowerCase();
 		Map<String, ConfHandleWebSocketMessage> map = ConfHandleWebSocketMessages.getInstance().getHandles();
 		if (map == null || !map.containsKey(name1)) {

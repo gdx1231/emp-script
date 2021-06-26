@@ -1,22 +1,21 @@
 package com.gdxsoft.easyweb.websocket;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 管理所有 IndexWebSocket的容器
- * 
- * @author admin
+ * 管理所有 EwaWebSocketBus的容器
  *
  */
 public class EwaWebSocketContainer {
 	private static Logger LOGGER = LoggerFactory.getLogger(EwaWebSocketContainer.class);
 	// concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。若要实现服务端与单一客户端通信的话，
 	// 可以使用Map来存放，其中Key可以为用户标识
-	private static ConcurrentHashMap<String, EwaWebSocket> WEB_SOCKETS_MAP = new ConcurrentHashMap<String, EwaWebSocket>();
+	private static Map<String, EwaWebSocketBus> WEB_SOCKETS_MAP = new ConcurrentHashMap<>();
 
 	/**
 	 * 广播消息
@@ -25,7 +24,7 @@ public class EwaWebSocketContainer {
 	 */
 	public static void broadcast(String msg) {
 		for (String key : WEB_SOCKETS_MAP.keySet()) {
-			EwaWebSocket socket = WEB_SOCKETS_MAP.get(key);
+			EwaWebSocketBus socket = WEB_SOCKETS_MAP.get(key);
 			broadcastTo(socket, msg);
 		}
 	}
@@ -37,7 +36,7 @@ public class EwaWebSocketContainer {
 	 * @param msg
 	 * @return
 	 */
-	private static boolean broadcastTo(EwaWebSocket socket, String msg) {
+	private static boolean broadcastTo(EwaWebSocketBus socket, String msg) {
 		try {
 			return socket.sendToClient(msg);
 		} catch (Exception e) {
@@ -57,7 +56,7 @@ public class EwaWebSocketContainer {
 	 * 
 	 * @param socket
 	 */
-	public static void add(EwaWebSocket socket) {
+	public static void add(EwaWebSocketBus socket) {
 		WEB_SOCKETS_MAP.put(socket.getUnid(), socket);
 		LOGGER.debug("JOIN [" + socket.getUnid() + "], total online: " + size());
 	}
@@ -67,7 +66,7 @@ public class EwaWebSocketContainer {
 	 * 
 	 * @param socket
 	 */
-	public static void remove(EwaWebSocket socket) {
+	public static void remove(EwaWebSocketBus socket) {
 		WEB_SOCKETS_MAP.remove(socket.getUnid());
 		LOGGER.debug("CLOSE [" + socket.getUnid() + "], total online:" + size());
 	}
@@ -78,7 +77,7 @@ public class EwaWebSocketContainer {
 	 * @param socketUnid
 	 * @return
 	 */
-	public static EwaWebSocket getSocketByUnid(String socketUnid) {
+	public static EwaWebSocketBus getSocketByUnid(String socketUnid) {
 		return WEB_SOCKETS_MAP.get(socketUnid);
 	}
 
@@ -96,7 +95,7 @@ public class EwaWebSocketContainer {
 	 * 
 	 * @return
 	 */
-	public static ConcurrentHashMap<String, EwaWebSocket> getSockets() {
+	public static Map<String, EwaWebSocketBus> getSockets() {
 		return WEB_SOCKETS_MAP;
 	}
 

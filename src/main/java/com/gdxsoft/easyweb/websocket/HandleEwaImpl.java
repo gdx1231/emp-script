@@ -9,14 +9,11 @@ import com.gdxsoft.easyweb.script.RequestValue;
 
 /**
  * 执行EWA
- * 
- * @author admin
- *
  */
 public class HandleEwaImpl extends Thread implements IHandleMsg {
 	private static Logger LOGGER = LoggerFactory.getLogger(HandleEwaImpl.class);
 	public final static String METHOD = "ewa";
-	private EwaWebSocket socket_;
+	private EwaWebSocketBus socket_;
 	private JSONObject command_;
 	private String itemName_;
 	private String xmlName_;
@@ -28,7 +25,7 @@ public class HandleEwaImpl extends Thread implements IHandleMsg {
 	 * @param socket  IndexWebSocket
 	 * @param command 调用的命令
 	 */
-	public HandleEwaImpl(EwaWebSocket socket, JSONObject command) {
+	public HandleEwaImpl(EwaWebSocketBus socket, JSONObject command) {
 		this.socket_ = socket;
 		this.command_ = command;
 
