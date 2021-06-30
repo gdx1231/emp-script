@@ -24,6 +24,13 @@ public class RestfulResult<T> {
 
 	private String returnResult;
 
+	private Long start; // 执行开始时间
+	private Long end; // 执行结束时间
+
+	public RestfulResult() {
+		this.start = System.currentTimeMillis();
+	}
+
 	public boolean isSuccess() {
 		return success_;
 	}
@@ -75,7 +82,11 @@ public class RestfulResult<T> {
 		obj.put("ewa_page_size", ewaPageSize);
 		obj.put("page_count", this.pageCount);
 		obj.put("record_count", this.recordCount);
-
+		obj.put("start", this.start);
+		obj.put("end", this.end);
+		if (this.end != null) {
+			obj.put("duriation", this.end - this.start);
+		}
 		return obj;
 	}
 
@@ -103,9 +114,12 @@ public class RestfulResult<T> {
 				} else if (key.equals("data")) {
 					Object data = obj.get(key);
 					this.setRawData(data);
-
 				} else if (key.equals("success")) {
 					this.setSuccess(obj.optBoolean(key));
+				} else if (key.equals("start")) {
+					this.setStart(obj.optLong(key));
+				} else if (key.equals("end")) {
+					this.setEnd(obj.optLong(key));
 				}
 			}
 		} catch (Exception err) {
@@ -164,5 +178,21 @@ public class RestfulResult<T> {
 
 	public void setReturnResult(String returnResult) {
 		this.returnResult = returnResult;
+	}
+
+	public Long getStart() {
+		return start;
+	}
+
+	public void setStart(Long start) {
+		this.start = start;
+	}
+
+	public Long getEnd() {
+		return end;
+	}
+
+	public void setEnd(Long end) {
+		this.end = end;
 	}
 }

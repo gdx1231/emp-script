@@ -125,6 +125,10 @@ public class ServletRestful extends HttpServlet {
 			response.setContentType("application/json");
 			this.handleConf(conf, rv, response, result);
 		}
+		
+		// 记录执行结束时间
+		result.setEnd(System.currentTimeMillis());
+
 		// CORS policy
 		String cors = ConfRestfuls.getInstance().getCors();
 		if (StringUtils.isNotBlank(cors)) {
@@ -134,7 +138,7 @@ public class ServletRestful extends HttpServlet {
 			response.setHeader("Access-Control-Allow-Origin", cors);
 		}
 		response.setStatus(result.getHttpStatusCode());
-
+		
 		return result.toString();
 
 	}
@@ -535,6 +539,8 @@ public class ServletRestful extends HttpServlet {
 			result.setSuccess(true);
 			result.setHttpStatusCode(HttpServletResponse.SC_OK);
 			result.setData(data.optJSONArray("DATA"));
+			
+			
 			return;
 		}
 
