@@ -257,6 +257,9 @@ public class ServletXml extends HttpServlet {
 		if (mode == null) {
 			mode = "";
 		}
+		if (StringUtils.isBlank(modeName)) {
+			modeName = "CFG";
+		}
 
 		HtmlCreator hc = new HtmlCreator();
 		try {
@@ -264,7 +267,7 @@ public class ServletXml extends HttpServlet {
 			String xml = hc.getConfigItemXml();
 			if (mode.equals("JS")) {
 				this.setOutType(response, "javascript");
-				xml = "window." + modeName + "=\"" + Utils.textToJscript(xml) + "\"";
+				xml = "window[" + Utils.textToJscript(modeName) + "]=\"" + Utils.textToJscript(xml) + "\"";
 			} else {
 				this.setOutType(response, "xml");
 			}
