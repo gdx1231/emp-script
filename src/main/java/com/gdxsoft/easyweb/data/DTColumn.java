@@ -25,6 +25,12 @@ public class DTColumn implements Serializable {
 
 	private int _Order = -1; // 设置排序 ，对于 ExportExcel有效
 
+	// 2021-07-01
+	private String schemaName; // 架构名称
+	private String catalogName; // 表的目录名称
+	private String tableName; // 表名称
+	private String className; // 此 getColumnClassName 方法是由 java.sql.ResultSetMetaData 接口中的 getColumnClassName 方法指定的。
+
 	/**
 	 * 字段名称
 	 * 
@@ -267,6 +273,44 @@ public class DTColumn implements Serializable {
 	 */
 	public void setOrder(int order) {
 		this._Order = order;
+	}
+
+	public String getCatalogName() {
+		return catalogName;
+	}
+
+	public void setCatalogName(String catalogName) {
+		this.catalogName = catalogName;
+	}
+
+	public String getTableName() {
+		return tableName;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
+	public String getSchemaName() {
+		return schemaName;
+	}
+
+	public void setSchemaName(String schemaName) {
+		this.schemaName = schemaName;
+	}
+
+	/**
+	 * 如果调用 SQLServerResultSet 类的 getObject 方法来从列中检索值，则返回生成其实例的 Java 类的完全限定名称。<br>
+	 * 此 getColumnClassName 方法是由 java.sql.ResultSetMetaData 接口中的 getColumnClassName 方法指定的。
+	 * 
+	 * @return 实例的 Java 类的完全限定名称
+	 */
+	public String getClassName() {
+		return className;
+	}
+
+	public void setClassName(String className) {
+		this.className = className;
 	}
 
 }

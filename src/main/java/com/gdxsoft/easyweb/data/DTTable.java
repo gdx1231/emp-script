@@ -1478,6 +1478,14 @@ public class DTTable implements Serializable {
 				col.setPrecision(md.getPrecision(i));
 				col.setScale(md.getScale(i));
 				col.setTypeName(md.getColumnTypeName(i));
+				
+				// 2021-07-01 
+				col.setCatalogName(md.getCatalogName(i));
+				col.setTableName( md.getTableName(i));
+				col.setSchemaName(md.getSchemaName(i));
+				
+				col.setClassName(md.getColumnClassName(i));
+				
 				this._Columns.addColumn(col);
 
 				// JSON字段
