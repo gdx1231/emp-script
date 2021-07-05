@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 和emp-script-static一致，避免当emp-script-static项目不存在时，EwaStyleController错误
+ * 
  * @author admin
  *
  */
@@ -59,7 +60,9 @@ public class Resources {
 			return r;
 		}
 
-		URL url = Resources.class.getResource(path);
+		String pathWithPrefix = "/EmpScriptV2" + path;
+
+		URL url = Resources.class.getResource(pathWithPrefix);
 		r.setPath(path);
 		if (url == null) {
 			r.setStatus(404);
