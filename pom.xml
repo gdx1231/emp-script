@@ -107,7 +107,28 @@
 					</additionalOptions>
 				</configuration>
 			</plugin>
-
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-lib-src-webapps</id>
+						<phase>package</phase>
+						<configuration>
+							<tasks>
+								<echo>copy ${project.build.finalName}.jar to ${basedir}/../../workspace.newVersion/allclass/lib/</echo>
+								<copy todir="${basedir}/../../workspace.newVersion/allclass/lib/">
+									<fileset dir="${project.build.directory}">
+										<include name="${project.build.finalName}*" />
+									</fileset>
+								</copy>
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -231,7 +252,7 @@
 			<version>4.0.1</version>
 			<scope>provided</scope>
 		</dependency>
- <!-- https://mvnrepository.com/artifact/javax.websocket/javax.websocket-api -->
+		<!-- https://mvnrepository.com/artifact/javax.websocket/javax.websocket-api -->
 		<dependency>
 			<groupId>javax.websocket</groupId>
 			<artifactId>javax.websocket-api</artifactId>
@@ -260,7 +281,7 @@
 			<groupId>com.github.spyhunter99</groupId>
 			<artifactId>jdbf</artifactId>
 			<version>2.2.1</version>
-		</dependency> -->
+			</dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
 		<dependency>
@@ -269,7 +290,7 @@
 			<version>5.7.1</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
 		<dependency>
 			<groupId>mysql</groupId>
