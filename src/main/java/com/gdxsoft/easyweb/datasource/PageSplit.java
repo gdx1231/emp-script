@@ -3,6 +3,7 @@ package com.gdxsoft.easyweb.datasource;
 import org.json.JSONObject;
 
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.utils.IPageSplit;
 
 /**
  * 分页对象
@@ -10,7 +11,7 @@ import com.gdxsoft.easyweb.script.RequestValue;
  * @author admin
  *
  */
-public class PageSplit {
+public class PageSplit implements IPageSplit {
 
 	private int _PageCurrent;
 	private int _PageCount;
