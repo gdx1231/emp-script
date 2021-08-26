@@ -132,6 +132,7 @@ public class SyncRemote {
 				String cnt = UFile.readFileText(path);
 				_HisJson = new JSONObject(cnt);
 			} catch (Exception e) {
+				LOGGER.error(e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -179,12 +180,15 @@ public class SyncRemote {
 			return;
 		}
 		List<File> dirs = new ArrayList<File>();
+
+		// 为了避免 OOM 限制最大文件尺寸
+		int limitedMaxSize = 50 * 1024 * 1024; // 50M
 		for (int i = 0; i < ff.length; i++) {
 			File file = ff[i];
 			// 真实的文件（非ln -s)
 			File realFile = getRealFile(file);
 			if (!realFile.exists()) {
-				System.out.println("NOT_EXISTS :" + file.getAbsolutePath());
+				LOGGER.info("NOT EXISTS :" + file.getAbsolutePath());
 				continue;
 			}
 			if (realFile.isDirectory()) {
@@ -195,11 +199,19 @@ public class SyncRemote {
 				dirs.add(file);
 				continue;
 			}
-			if (realFile.getName().equals("web.xml") || realFile.getName().equals("ewa_conf.xml")) {
+			if (realFile.getName().startsWith("application.") // SpringBoot
+					|| realFile.getName().equals("ewa_conf.xml") // ewa
+			) {
+				LOGGER.info("Skip file: " + realFile.getAbsolutePath());
 				continue;
 			}
 
 			if (!checkExts(realFile)) {
+				continue;
+			}
+
+			if (realFile.length() > limitedMaxSize) {
+				LOGGER.info("Skip BIG file: " + realFile.getAbsolutePath());
 				continue;
 			}
 
@@ -212,7 +224,7 @@ public class SyncRemote {
 				// 生成新的md5
 				String md5source = UFile.createMd5(realFile);
 				addToJson(file, md5source, hash);
-				System.out.println(md5source + ":" + realFile.getAbsolutePath());
+				LOGGER.info(md5source + ":" + realFile.getAbsolutePath());
 			}
 			// System.out.println(ff[i].getAbsolutePath());
 		}
@@ -619,8 +631,7 @@ public class SyncRemote {
 		NodeList nl = syncs.getElementsByTagName("remote_sync");
 
 		/*
-		 * <remote_sync name="用户 XML配置文件" id="1"
-		 * source="/Volumes/work_xml/user.config.xml"
+		 * <remote_sync name="用户 XML配置文件" id="1" source="/Volumes/work_xml/user.config.xml"
 		 * target="d:/java/erp2014/user.config.xml" filter="xml" />
 		 */
 		for (int i = 0; i < nl.getLength(); i++) {
