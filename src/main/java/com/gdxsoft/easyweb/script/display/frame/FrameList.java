@@ -140,7 +140,7 @@ public class FrameList extends FrameBase implements IFrame {
 		MStr sJs = new MStr();
 		sJs.al("EWA.LANG='" + lang.toLowerCase() + "';");
 		String ewaPath = rv.s("rv_ewa_style_path");
-		if(StringUtils.isBlank(ewaPath)) {
+		if (StringUtils.isBlank(ewaPath)) {
 			ewaPath = "/EmpScriptV2"; // default static url prefix
 		}
 		sJs.al("EWA.RV_STATIC_PATH = \"" + ewaPath + "\";");
@@ -811,7 +811,7 @@ public class FrameList extends FrameBase implements IFrame {
 		PageSplit ps = new PageSplit(_ListFrameRecordCount, super.getHtmlClass().getItemValues().getRequestValue(),
 				this.getUserSettingPageSize());
 		super._PageSplit = ps;
-		
+
 		JSONObject json = new JSONObject();
 		json.put("RECORD_COUNT", ps.getRecordCount());
 		json.put("PAGE_CURRENT", ps.getPageCurrent());
@@ -1091,7 +1091,7 @@ public class FrameList extends FrameBase implements IFrame {
 			// 区分中英文
 			String cacheKey = searchSql + " . " + isEn;
 			CachedValue c = CachedValueManager.getValue(cacheKey);
-			if (c == null) { // 不在缓存中
+			if (c == null) {// 不在缓存中
 				MStr s1 = new MStr();
 				DataConnection cnn = super.getHtmlClass().getItemValues().getDataConn();
 
@@ -1138,7 +1138,9 @@ public class FrameList extends FrameBase implements IFrame {
 					inc++;
 					s1.a("[\"" + Utils.textToJscript(t1.trim()) + "\", \"" + Utils.textToJscript(t2.trim()) + "\"]");
 				}
-				CachedValueManager.addValue(cacheKey, s1.toString());
+				if (searchSql.indexOf("@") == -1) { // searchSql 有参数的话不缓存
+					CachedValueManager.addValue(cacheKey, s1.toString());
+				}
 				s.a(s1.toString());
 			} else { // 从缓存中获取
 				s.a(c.getValue().toString());
@@ -1439,8 +1441,7 @@ public class FrameList extends FrameBase implements IFrame {
 		/*
 		 * String APP_REF_TAG = super.getPageItemValue("Workflow", "WfRefTag");
 		 * 
-		 * if (APP_REF_TAG == null || APP_REF_TAG.length() == 0) { throw new
-		 * Exception("WfRefTag在Page未定义"); }
+		 * if (APP_REF_TAG == null || APP_REF_TAG.length() == 0) { throw new Exception("WfRefTag在Page未定义"); }
 		 */
 
 		OrgSqls sqls = OrgSqls.instance();
