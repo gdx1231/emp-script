@@ -45,7 +45,9 @@ public class ConfShowflake {
 
 		NodeList nl = UPath.getCfgXmlDoc().getElementsByTagName("snowflake");
 		if (nl.getLength() == 0) {
+			String debugXml = UXml.asXml(UPath.getCfgXmlDoc());
 			LOGGER.error("NOT found the snowflake conf int the ewa_conf.xml");
+			LOGGER.debug(debugXml);
 			return;
 		}
 
