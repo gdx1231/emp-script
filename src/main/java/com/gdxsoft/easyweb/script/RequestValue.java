@@ -147,8 +147,9 @@ public class RequestValue implements Cloneable {
 		});
 
 		/*
-		 * if (UPath.getRV_GLOBALS() != null) { HashMap<String, String> rvGlobal = UPath.getRV_GLOBALS(); for (String
-		 * key : rvGlobal.keySet()) { String valGlobal = rvGlobal.get(key); this._ReqValues.addValue(key, valGlobal,
+		 * if (UPath.getRV_GLOBALS() != null) { HashMap<String, String> rvGlobal =
+		 * UPath.getRV_GLOBALS(); for (String key : rvGlobal.keySet()) { String
+		 * valGlobal = rvGlobal.get(key); this._ReqValues.addValue(key, valGlobal,
 		 * PageValueTag.SYSTEM); } }
 		 */
 		this.resetSysUnid();
@@ -251,7 +252,8 @@ public class RequestValue implements Cloneable {
 	}
 
 	/**
-	 * 获取其它值 EWA.HOST，EWA.HOST_PORT，EWA.HOST_PROTOCOL，EWA.HOST_BASE，EWA.HOST.CONTEXT <br>
+	 * 获取其它值 EWA.HOST，EWA.HOST_PORT，EWA.HOST_PROTOCOL，EWA.HOST_BASE，EWA.HOST.CONTEXT
+	 * <br>
 	 * xxxx.MD5 参数xxxx的md5值 <br>
 	 * xxxx.HASH 参数xxxx的 hashCode
 	 * 
@@ -420,6 +422,22 @@ public class RequestValue implements Cloneable {
 	}
 
 	/**
+	 * 获取限定长度的字符串
+	 * 
+	 * @param name      参数名称
+	 * @param maxLength 最大长度
+	 * @return 限定长度的字符串
+	 */
+	public String s(String name, int maxLength) {
+		String val = this.getString(name);
+		if (val == null || val.length() <= maxLength) {
+			return val;
+		}
+
+		return val.substring(0, maxLength);
+	}
+
+	/**
 	 * 判断对象是否为null
 	 * 
 	 * @param name 参数名称
@@ -469,10 +487,10 @@ public class RequestValue implements Cloneable {
 	}
 
 	/**
-	 * 获取数值
+	 * 获取整型
 	 * 
-	 * @param name
-	 * @return
+	 * @param name 参数名称
+	 * @return 整型
 	 */
 	public int getInt(String name) {
 		return Integer.parseInt(this.getString(name));
@@ -480,11 +498,21 @@ public class RequestValue implements Cloneable {
 	}
 
 	/**
+	 * 获取长整型
+	 * 
+	 * @param name 参数名称
+	 * @return 长整型
+	 */
+	public long getLong(String name) {
+		return Long.parseLong(this.getString(name));
+	}
+
+	/**
 	 * 获取时间
 	 * 
 	 * @param name 参数名称
 	 * @param lang 语言类型
-	 * @return
+	 * @return 时间
 	 */
 	public Date getDate(String name, String lang) {
 		String s = this.getString(name);
@@ -501,17 +529,17 @@ public class RequestValue implements Cloneable {
 	 * 获取时间(语言类型按照系统值)
 	 * 
 	 * @param name 参数名称
-	 * @return
+	 * @return 时间
 	 */
 	public Date getDate(String name) {
 		return this.getDate(name, this.getLang());
 	}
 
 	/**
-	 * 获取数值
+	 * 获取双精度
 	 * 
 	 * @param name 参数名称
-	 * @return
+	 * @return 双精度
 	 */
 	public Double getDouble(String name) {
 		String s = this.getString(name);

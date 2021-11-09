@@ -419,7 +419,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClass(java.lang .String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClass(java.lang
+	 * .String)
 	 */
 	public void executeCallClass(String name) throws Exception {
 		UserXItemValues sqlset = this.getUserConfig().getUserActionItem().getItem("ClassSet");
@@ -569,7 +570,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClassCreateObjects (java.lang.String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClassCreateObjects
+	 * (java.lang.String)
 	 */
 	public Object[] executeCallClassCreateObjects(String strData) {
 		if (strData == null)
@@ -588,7 +590,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallScript(java.lang .String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallScript(java.lang
+	 * .String)
 	 */
 	public String executeCallScript(String name) throws Exception {
 		// <ScriptSet>
@@ -604,7 +607,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#exceuteCallUrl(java.lang. String )
+	 * @see com.gdxsoft.easyweb.script.display.IAction#exceuteCallUrl(java.lang.
+	 * String )
 	 */
 	public String exceuteCallUrl(String name) throws Exception {
 		// <UrlSet>
@@ -665,8 +669,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeSessionCookie(com. gdxsoft
-	 * .easyweb.script.userConfig.UserXItemValue)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeSessionCookie(com.
+	 * gdxsoft .easyweb.script.userConfig.UserXItemValue)
 	 */
 	public void executeSessionCookie(UserXItemValue uxv) throws Exception {
 
@@ -738,6 +742,76 @@ public class ActionBase {
 
 		String paraName = uxv.getItem("ParaName");
 		String val = this.getItemValues().getValue(paraName, paraName);
+
+		int cookieAge = -1;
+
+		if (option.equalsIgnoreCase("C") && val != null) { // create
+			if (StringUtils.isNotBlank(life)) {
+				try {
+					cookieAge = Integer.parseInt(life);
+				} catch (Exception e) {
+					LOGGER.warn("Invalid cookie life: " + life, e.getLocalizedMessage());
+					cookieAge = -1;
+				}
+			}
+		} else { // remove cookie
+			cookieAge = 0;
+		}
+		UCookies us = new UCookies(security);
+
+		// 默认 a=-1 跟随浏览器session
+		if (cookieAge >= 0) {
+			us.setMaxAgeSeconds(cookieAge); // 单位秒
+		}
+		if (domain.trim().length() > 0) {
+			us.setPath(domain);
+		} else {
+			us.setPath(rv.getContextPath());
+		}
+
+		if ("https".equals(this.getRequestValue().getRequest().getHeader("X-Forwarded-Scheme"))) {
+			us.setSecret(true);
+		} else {
+			us.setSecret(false);
+		}
+		us.setHttpOnly(true);
+
+		Cookie newCookie = us.addCookie(name, val, this._Response);
+
+		// 记录输出的cookie
+		this._OutCookes.put(newCookie.getName(), newCookie);
+	}
+
+	/**
+	 * @deprecated Output the cookie
+	 * 
+	 * @param uxv
+	 * @throws Exception
+	 */
+	void executeCookieold(UserXItemValue uxv) throws Exception {
+		if (ConfSecurities.getInstance().getDefaultSecurity() == null) {
+			String err = "No default symmetric defined, in the ewa_conf.xml securities->security";
+			LOGGER.error(err);
+			throw new Exception(err);
+		}
+		IUSymmetricEncyrpt security = ConfSecurities.getInstance().getDefaultSecurity().createSymmetric();
+
+		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
+
+		String name = uxv.getItem("Name").trim().toUpperCase();
+		String option = uxv.getItem("Option");
+		String domain = uxv.getItem("Domain");
+		String life = uxv.getItem("Life");
+
+		// 郭磊 2017-08-24 增加，用于更改cookie的域
+		PageValue pv = rv.getPageValues().getPageValue("EWA_COOKIE_DOMAIN");
+		if (pv != null && (pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS)) {
+			// 只能用于HtmlControl调用
+			domain = pv.getValue().toString();
+		}
+
+		String paraName = uxv.getItem("ParaName");
+		String val = this.getItemValues().getValue(paraName, paraName);
 		String ckName = name + COOKIE_NAME_PREFIX;
 
 		String cookieValue = null;
@@ -771,6 +845,10 @@ public class ActionBase {
 		this.addCookie(cookie);
 	}
 
+	/**
+	 * @deprecated
+	 * @param cookie
+	 */
 	public void addCookie(Cookie cookie) {
 		if (cookie == null) {
 			return;
@@ -787,19 +865,24 @@ public class ActionBase {
 
 		/*
 		 * MStr s = new MStr(); // Set-Cookie:G_ADM_UNID__EWA__=
-		 * TxcW7fr2HY6WYLEn8hj3Q78IG3lvkSpmymAwL0nJERk8EuvwdyUjxA%3D%3D; // Expires=Tue, 19-Apr-2016 02:05:54 GMT;
-		 * Path=/cm-b2b-ex s.a(cookie.getName()); s.a("="); if (cookie.getValue() != null) { s.a(cookie.getValue()); }
-		 * // Set-Cookie:JSESSIONID=2221EC98D8C089036065E4F31FFB42DF; // Path=/cm-b2b-ex if (cookie.getMaxAge() > 0) {
-		 * Calendar c = Calendar.getInstance(); c.add(Calendar.SECOND, cookie.getMaxAge()); String dt =
-		 * Utils.getDateGMTString(c); s.a("; Expires=" + dt); } else if (cookie.getMaxAge() == 0 ) { // 删除cookie
-		 * Calendar c = Calendar.getInstance(); c.add(Calendar.YEAR, -2); String dt = Utils.getDateGMTString(c);
-		 * s.a("; Expires=" + dt); } if (cookie.getPath() != null && cookie.getPath().trim().length() > 0) {
-		 * s.a("; Path=" + cookie.getPath()); } if (cookie.getSecure()) { s.a("; Secure"); } cookie.setHttpOnly(true);
+		 * TxcW7fr2HY6WYLEn8hj3Q78IG3lvkSpmymAwL0nJERk8EuvwdyUjxA%3D%3D; // Expires=Tue,
+		 * 19-Apr-2016 02:05:54 GMT; Path=/cm-b2b-ex s.a(cookie.getName()); s.a("="); if
+		 * (cookie.getValue() != null) { s.a(cookie.getValue()); } //
+		 * Set-Cookie:JSESSIONID=2221EC98D8C089036065E4F31FFB42DF; // Path=/cm-b2b-ex if
+		 * (cookie.getMaxAge() > 0) { Calendar c = Calendar.getInstance();
+		 * c.add(Calendar.SECOND, cookie.getMaxAge()); String dt =
+		 * Utils.getDateGMTString(c); s.a("; Expires=" + dt); } else if
+		 * (cookie.getMaxAge() == 0 ) { // 删除cookie Calendar c = Calendar.getInstance();
+		 * c.add(Calendar.YEAR, -2); String dt = Utils.getDateGMTString(c);
+		 * s.a("; Expires=" + dt); } if (cookie.getPath() != null &&
+		 * cookie.getPath().trim().length() > 0) { s.a("; Path=" + cookie.getPath()); }
+		 * if (cookie.getSecure()) { s.a("; Secure"); } cookie.setHttpOnly(true);
 		 * s.a("; HttpOnly");
 		 * 
 		 * // 当是https请求时，需要配置 nginx // proxy_set_header X-Forwarded-Scheme $scheme; if
-		 * ("https".equals(this.getRequestValue().getRequest().getHeader( "X-Forwarded-Scheme"))) { s.a("; secure");
-		 * cookie.setSecure(true); } // ; SameSite=Lax 老版本浏览器不支持
+		 * ("https".equals(this.getRequestValue().getRequest().getHeader(
+		 * "X-Forwarded-Scheme"))) { s.a("; secure"); cookie.setSecure(true); } // ;
+		 * SameSite=Lax 老版本浏览器不支持
 		 * 
 		 * this._Response.addHeader("Set-Cookie", s.toString());
 		 */
@@ -808,7 +891,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#getPageItemValue(java.lang .String, java.lang.String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#getPageItemValue(java.lang
+	 * .String, java.lang.String)
 	 */
 	public String getPageItemValue(String itemName, String tagName) {
 		if (this.getUserConfig().getUserPageItem().testName(itemName)) {
@@ -920,9 +1004,9 @@ public class ActionBase {
 		if (!tb.isOk()) {
 			return;
 		}
-		
+
 		this.checkActionErrorOutInTable(tb);
-		
+
 		// 执行SQL的描述
 		this.executeExtOpt(sql, tb);
 		if (tb.getName() != null && tb.getName().equals("!!JOIN_DROP!!")) {
@@ -970,7 +1054,8 @@ public class ActionBase {
 
 	/**
 	 * 执行纵向表转为横向表<br>
-	 * {"TYPE":"HOR", "RUN_TYPE": "U", "FROM_TABLE": "WEB_USER", "UNID":"XX", "WHERE":"A=@AA"}
+	 * {"TYPE":"HOR", "RUN_TYPE": "U", "FROM_TABLE": "WEB_USER", "UNID":"XX",
+	 * "WHERE":"A=@AA"}
 	 * 
 	 * @param opt
 	 * @param fromTable
@@ -1044,8 +1129,8 @@ public class ActionBase {
 
 	/**
 	 * 连接纵向表<br>
-	 * {"TYPE":"JOIN_HOR", "FROM_KEYS": "TAG1,TAG2", "TO_KEYS": "BAS_TAG1,BAS_TAG2", "FIELDS":"A1,A2, A3",
-	 * "NAME_KEY":"DT_NAME", "NAME_KEY":"DT_VAL"}
+	 * {"TYPE":"JOIN_HOR", "FROM_KEYS": "TAG1,TAG2", "TO_KEYS": "BAS_TAG1,BAS_TAG2",
+	 * "FIELDS":"A1,A2, A3", "NAME_KEY":"DT_NAME", "NAME_KEY":"DT_VAL"}
 	 * 
 	 * @param opt
 	 * @param fromTable
@@ -1133,7 +1218,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#setResponse(javax.servlet. http.HttpServletResponse)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#setResponse(javax.servlet.
+	 * http.HttpServletResponse)
 	 */
 	public void setResponse(HttpServletResponse response) {
 		_Response = response;
