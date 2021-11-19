@@ -63,7 +63,8 @@ public class UObjectValue {
 	}
 
 	/**
-	 * Set the corresponding attributes of the target element through the get methods of the source class
+	 * Set the corresponding attributes of the target element through the get
+	 * methods of the source class
 	 * 
 	 * @param targetElement The target element
 	 * @param source        the source class
@@ -90,7 +91,8 @@ public class UObjectValue {
 	}
 
 	/**
-	 * Create the corresponding child text nodes of the target element through the get methods of the source class
+	 * Create the corresponding child text nodes of the target element through the
+	 * get methods of the source class
 	 * 
 	 * @param targetElement The target element
 	 * @param source        The source class
@@ -125,7 +127,8 @@ public class UObjectValue {
 	}
 
 	/**
-	 * Set the corresponding parameters of the target class through the children text content of the source element
+	 * Set the corresponding parameters of the target class through the children
+	 * text content of the source element
 	 * 
 	 * @param parentNode  the source node
 	 * @param targetClass the target class
@@ -135,7 +138,8 @@ public class UObjectValue {
 	}
 
 	/**
-	 * Set the corresponding parameters of the target class through the children text content of the source element
+	 * Set the corresponding parameters of the target class through the children
+	 * text content of the source element
 	 * 
 	 * @param parentElement the source element
 	 * @param targetClass   the target class
@@ -157,7 +161,8 @@ public class UObjectValue {
 	}
 
 	/**
-	 ** Set the corresponding parameters of the target class through the attributes of the source element
+	 ** Set the corresponding parameters of the target class through the attributes
+	 * of the source element
 	 * 
 	 * @param ele         the source element
 	 * @param targetClass the target class
@@ -263,7 +268,8 @@ public class UObjectValue {
 	}
 
 	/**
-	 * Set the corresponding parameters of the specified class through the attributes of the source element
+	 * Set the corresponding parameters of the specified class through the
+	 * attributes of the source element
 	 * 
 	 * @param ele the source element
 	 */
@@ -1014,7 +1020,6 @@ public class UObjectValue {
 				key += "," + params[i].getClass().getName();
 			}
 			if (GLOBL_CACHED.containsKey(key)) {
-				LOGGER.debug("Found the method '" + methodName + "' from the GLOBL_CACHED.");
 				return methods[GLOBL_CACHED.get(key)];
 			}
 		}
@@ -1027,17 +1032,18 @@ public class UObjectValue {
 			}
 		}
 		if (found.size() == 0) {// not found
-			LOGGER.warn("Not Found the method '" + methodName + "' ");
+			LOGGER.warn("Not Found the method '{}'.", methodName);
 			return null;
 		}
 		if (found.size() == 1) {
 			if (key != null) {
 				GLOBL_CACHED.put(key, found.get(0));
 			}
+			LOGGER.debug("Found the method '{}', key={}", methodName, key);
 			return methods[found.get(0)];
 		}
 
-		LOGGER.debug("Found the method '" + methodName + "' " + found.size() + " times.");
+		LOGGER.debug("Found the method '{}'  {} times.", methodName, found.size());
 
 		int maxMaches = -1;
 		int methodMatched = -1;
