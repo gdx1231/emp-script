@@ -1,11 +1,13 @@
 package com.gdxsoft.easyweb.datasource;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
 
 import com.gdxsoft.easyweb.data.DTRow;
+import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.IHandleJsonBinary;
 import com.gdxsoft.easyweb.utils.UObjectValue;
@@ -21,10 +23,31 @@ public class ClassBase {
 	// 扩展属性
 	Map<String, Object> _Extends = new HashMap<String, Object>();
 
-	public Object getField(String filedName) {
-		UObjectValue uv = new UObjectValue();
+	private UObjectValue uv;
+
+	public ClassBase() {
+		uv = new UObjectValue();
 		uv.setObject(this);
+	}
+
+	public Object getField(String filedName) {
 		return uv.getProperty(filedName);
+	}
+
+	public PageValue getFieldPageValue(String filedName) {
+		PageValue pv = new PageValue();
+
+		Method method = uv.getPropertyMethod(filedName);
+
+		if (method == null) { // 404
+			return null;
+		}
+		pv.setName(filedName);
+		pv.setDataType(method.getReturnType().getName());
+		Object value = uv.getProperty(filedName);
+		pv.setValue(value);
+
+		return pv;
 	}
 
 	/**
@@ -110,6 +133,24 @@ public class ClassBase {
 					java.sql.Timestamp oriTime = (java.sql.Timestamp) oriValue;
 					java.util.Date newTime = (java.util.Date) newValue;
 					if (oriTime.getTime() == newTime.getTime()) {
+						return;
+					}
+				}
+			}
+
+			// 二进制比较
+			if (oriType.equals("[B") && newType.equals("[B")) {
+				byte[] from = (byte[]) oriValue;
+				byte[] to = (byte[]) newValue;
+				if (from.length == to.length) {
+					boolean equals = true;
+					for (int i = 0; i < from.length; i++) {
+						if (from[i] != to[i]) { //按字节比较
+							equals = false;
+							break;
+						}
+					}
+					if (equals) {
 						return;
 					}
 				}

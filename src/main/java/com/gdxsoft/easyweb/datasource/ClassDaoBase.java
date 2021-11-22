@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 
@@ -201,24 +201,12 @@ public class ClassDaoBase<T> {
 		ClassBase cb = (ClassBase) para;
 		for (int i = 0; i < this.fields.length; i++) {
 			String field = this.fields[i].trim();
-			Object val = cb.getField(field);
-			if (val == null) {
+			PageValue pv = cb.getFieldPageValue(field);
+			if (pv == null) { // 404
+				LOGGER.warn("The class {} field {} not found", this, field);
 				continue;
 			}
-			if (val instanceof Integer) {
-				rv.addValue(field, val, "Int", 100);
-			} else if (val instanceof Long) {
-				rv.addValue(field, val, "Long", 100);
-			} else if (val instanceof Double) {
-				rv.addValue(field, val, "Number", 100);
-			} else if (val instanceof Date) {
-				rv.addValue(field, val, "date", 100);
-			} else if (val instanceof String) {
-				String str = val.toString();
-				rv.addValue(field, str, "string", str.length());
-			} else {
-				rv.addValue(field, val);
-			}
+			rv.addValue(pv);
 		}
 
 		return rv;
@@ -330,7 +318,8 @@ public class ClassDaoBase<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeSequence(java.lang. String)
+	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeSequence(java.lang.
+	 * String)
 	 */
 	public int executeSequence(String seqName) throws SQLException {
 		ConnectToDatabase();
@@ -381,7 +370,8 @@ public class ClassDaoBase<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.datasource.IClassDao#getRecordCount(java.lang.String)
+	 * @see
+	 * com.gdxsoft.easyweb.datasource.IClassDao#getRecordCount(java.lang.String)
 	 */
 	public int getRecordCount(String sql) {
 		ConnectToDatabase();
@@ -599,8 +589,8 @@ public class ClassDaoBase<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeProcdure(java.lang. String,
-	 * com.gdxsoft.easyweb.script.RequestValue)
+	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeProcdure(java.lang.
+	 * String, com.gdxsoft.easyweb.script.RequestValue)
 	 */
 	public HashMap<String, String> executeProcdure(String procName, RequestValue requestValue) {
 		ConnectToDatabase();
@@ -613,7 +603,8 @@ public class ClassDaoBase<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeQuery(java.lang.String, T, java.lang.String[])
+	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeQuery(java.lang.String,
+	 * T, java.lang.String[])
 	 */
 	public ArrayList<T> executeQuery(String sql, T obj, String[] fieldList) {
 		ConnectToDatabase();
@@ -624,8 +615,8 @@ public class ClassDaoBase<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeQuery(java.lang.String, T, java.lang.String[],
-	 * java.lang.String, int, int)
+	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeQuery(java.lang.String,
+	 * T, java.lang.String[], java.lang.String, int, int)
 	 */
 	public ArrayList<T> executeQuery(String sql, T obj, String[] fieldList, String pkFieldName, int pageSize,
 			int currentPage) {

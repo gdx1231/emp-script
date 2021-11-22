@@ -739,27 +739,33 @@ public class DataConnection {
 			}
 			/// 20190816
 			/*
-			 * if (sp.getOrderBy().length() > 0) { sqlTmp.append("\r\n ORDER BY " + sp.getOrderBy()); } sb.insert(0,
-			 * "SELECT TOP " + currentPage * pageSize + " "); sb.append(sp.getFields()); sb.append("\r\n FROM ");
-			 * sb.append(sp.getTableName()); if (currentPage == 1) { sb.append("\r\n WHERE " + sp.getWhere());
-			 * sb.append(sqlTmp.toString()); } else { String pk = "GGDDXX." + pkFieldName; String pk1 = pkFieldName; if
-			 * (pkFieldName.indexOf(",") > 0) { String[] pks = pkFieldName.split(","); String tmp = ""; String tmp1 =
-			 * ""; for (int i = 0; i < pks.length; i++) { if (i > 0) { tmp += " + '~`" + i + "!' + "; tmp1 += " + '~`" +
-			 * i + "!' + "; } String[] filedName = pks[i].trim().split("\\."); String name = "GGDDXX.[" +
-			 * filedName[filedName.length - 1] + "]"; tmp += "ISNULL(CONVERT(VARCHAR(222)," + name + "),'--null--')";
-			 * tmp1 += "ISNULL(CONVERT(VARCHAR(222), " + pks[i].trim() + "),'--null--')"; } pk = tmp; pk1 = tmp1; } else
-			 * { String[] filedName = pkFieldName.trim().split("\\."); pk = "GGDDXX." + filedName[filedName.length - 1];
+			 * if (sp.getOrderBy().length() > 0) { sqlTmp.append("\r\n ORDER BY " +
+			 * sp.getOrderBy()); } sb.insert(0, "SELECT TOP " + currentPage * pageSize +
+			 * " "); sb.append(sp.getFields()); sb.append("\r\n FROM ");
+			 * sb.append(sp.getTableName()); if (currentPage == 1) { sb.append("\r\n WHERE "
+			 * + sp.getWhere()); sb.append(sqlTmp.toString()); } else { String pk =
+			 * "GGDDXX." + pkFieldName; String pk1 = pkFieldName; if
+			 * (pkFieldName.indexOf(",") > 0) { String[] pks = pkFieldName.split(",");
+			 * String tmp = ""; String tmp1 = ""; for (int i = 0; i < pks.length; i++) { if
+			 * (i > 0) { tmp += " + '~`" + i + "!' + "; tmp1 += " + '~`" + i + "!' + "; }
+			 * String[] filedName = pks[i].trim().split("\\."); String name = "GGDDXX.[" +
+			 * filedName[filedName.length - 1] + "]"; tmp += "ISNULL(CONVERT(VARCHAR(222),"
+			 * + name + "),'--null--')"; tmp1 += "ISNULL(CONVERT(VARCHAR(222), " +
+			 * pks[i].trim() + "),'--null--')"; } pk = tmp; pk1 = tmp1; } else { String[]
+			 * filedName = pkFieldName.trim().split("\\."); pk = "GGDDXX." +
+			 * filedName[filedName.length - 1];
 			 * 
 			 * }
 			 * 
-			 * StringBuilder where = new StringBuilder(); where.append("SELECT TOP " + (currentPage - 1) * pageSize +
-			 * " "); where.append(pk1 + " FROM "); where.append(sp.getTableName()); where.append("\r\n WHERE " +
-			 * sp.getWhere()); where.append(sqlTmp.toString());
+			 * StringBuilder where = new StringBuilder(); where.append("SELECT TOP " +
+			 * (currentPage - 1) * pageSize + " "); where.append(pk1 + " FROM ");
+			 * where.append(sp.getTableName()); where.append("\r\n WHERE " + sp.getWhere());
+			 * where.append(sqlTmp.toString());
 			 * 
 			 * sb.append(" WHERE " + sp.getWhere()); sb.append(sqlTmp.toString());
 			 * 
-			 * sb.insert(0, "SELECT * FROM(\r\n"); sb.append(") GGDDXX\r\n WHERE NOT " + pk + " IN (\r\n\t");
-			 * sb.append(where.toString()); sb.append(")"); }
+			 * sb.insert(0, "SELECT * FROM(\r\n"); sb.append(") GGDDXX\r\n WHERE NOT " + pk
+			 * + " IN (\r\n\t"); sb.append(where.toString()); sb.append(")"); }
 			 */
 
 		} else if (this._DatabaseType.equals("HSQLDB") || this._DatabaseType.equals("MYSQL")) {
@@ -1722,13 +1728,13 @@ public class DataConnection {
 		String dt = pv.getDataType();
 		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
 		String v1 = pv.getStringValue();
-		if (dt.equals("BINARY") || dt.equals("B[") || dt.equals("BYTE[]")) {
+		if (dt.equals("BINARY") || dt.equals("[B") || dt.equals("BYTE[]")) {
 			byte[] b = this.getParaBinary(pv);
 			String des = b == null ? "null" : b.length + "";
 			this.writeDebug(this, "添加参数(byte[])" + index, parameterName + "=(" + des + ")");
 			cst.setBytes(index, b);
 			b = null;
-		} else if (dt.equals("INT") || dt.equals("INTEGER")) {
+		} else if (dt.equals("INT") || dt.equals("INTEGER") || dt.equals("JAVA.LANG.INTEGER")) {
 			Integer intVal = this.getParaInteger(pv);
 			if (intVal == null) {
 				cst.setNull(index, java.sql.Types.INTEGER);
@@ -1737,7 +1743,7 @@ public class DataConnection {
 				cst.setInt(index, intVal);
 				this.writeDebug(this, "添加参数(INTEGER)" + index, parameterName + "=" + intVal);
 			}
-		} else if (dt.equals("BIGINT") || dt.equals("LONG")) {
+		} else if (dt.equals("BIGINT") || dt.equals("LONG") || dt.equals("JAVA.LANG.LONG")) {
 			Long longVal = this.getParaLong(pv);
 			if (longVal == null) {
 				cst.setNull(index, java.sql.Types.BIGINT);
@@ -1746,7 +1752,7 @@ public class DataConnection {
 				cst.setLong(index, longVal);
 				this.writeDebug(this, "添加参数(LONG)" + index, parameterName + "=" + longVal);
 			}
-		} else if (dt.equals("NUMBER") || dt.equals("DOUBLE")) {
+		} else if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("JAVA.LANG.DOUBLE")) {
 			Double dbVal = this.getParaDouble(pv);
 			if (dbVal == null) {
 				cst.setNull(index, java.sql.Types.DOUBLE);
@@ -1755,7 +1761,7 @@ public class DataConnection {
 				cst.setDouble(index, dbVal);
 				this.writeDebug(this, "添加参数(double)" + index, parameterName + "=" + dbVal);
 			}
-		} else if (dt.equals("DATE")) {
+		} else if (dt.equals("DATE") || dt.equals("JAVA.UTIL.DATE") || dt.equals("JAVA.SQL.DATE")) {
 			Timestamp t1 = this.getParaTimestamp(pv);
 			if (t1 == null) {
 				cst.setNull(index, java.sql.Types.TIMESTAMP);
@@ -1773,9 +1779,10 @@ public class DataConnection {
 
 	/**
 	 * 设置SQL参数 CallableStatement <br>
-	 * 对象为所有的DBMS 提供了一种以标准形式调用已储存过程的方法。已储 存过程储存在数据库中。对已储存过程的调用是 CallableStatement对象所含的内容。这种调用是
-	 * 用一种换码语法来写的，有两种形式：一种形式带结果参，另一种形式不带结果参数。结果参数是 一种输出 (OUT) 参数，是已储存过程的返回值。两种形式都可带有数量可变的输入（IN 参数）、 输出（OUT
-	 * 参数）或输入和输出（INOUT 参数）的参数。问号将用作参数的占位符。
+	 * 对象为所有的DBMS 提供了一种以标准形式调用已储存过程的方法。已储 存过程储存在数据库中。对已储存过程的调用是
+	 * CallableStatement对象所含的内容。这种调用是 用一种换码语法来写的，有两种形式：一种形式带结果参，另一种形式不带结果参数。结果参数是
+	 * 一种输出 (OUT) 参数，是已储存过程的返回值。两种形式都可带有数量可变的输入（IN 参数）、 输出（OUT 参数）或输入和输出（INOUT
+	 * 参数）的参数。问号将用作参数的占位符。
 	 * 
 	 * @param parameters
 	 * @param cst

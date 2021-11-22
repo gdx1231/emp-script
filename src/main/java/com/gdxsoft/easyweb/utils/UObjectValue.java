@@ -329,7 +329,6 @@ public class UObjectValue {
 		String ret;
 		Object[] b = null;
 		String s = method.getReturnType().getName();
-
 		try {
 			Object a = method.invoke(this._object, b);
 			if (a == null) {
@@ -401,6 +400,35 @@ public class UObjectValue {
 	 * @return the get method returns value
 	 */
 	public Object getProperty(String methodName) {
+		Method m = this.getPropertyMethod(methodName);
+		if (m == null) {
+			return null;
+		}
+		Object[] methodValues = new Object[0];
+
+		return this.invoke(this.getObject(), m, methodValues);
+	}
+
+	/**
+	 * 获取属性对应的方法
+	 * 
+	 * @param methodName
+	 * @return
+	 */
+	public Method getPropertyMethod(String methodName) {
+		Object[] methodValues = new Object[0];
+		String cachedkey = this.createMethodCachedKey("getPropertyMethod-" + methodName, methodValues);
+		if (GLOBL_CACHED.containsKey(cachedkey)) {
+			return this._Methods[GLOBL_CACHED.get(cachedkey)];
+		}
+
+		// 获取super的模式
+		String cachedkeySupper = this.createMethodCachedKey("getPropertyMethod-from-supper-" + methodName,
+				methodValues);
+		if (this._MethodsSuper != null && GLOBL_CACHED.containsKey(cachedkeySupper)) {
+			return this._MethodsSuper[GLOBL_CACHED.get(cachedkeySupper)];
+		}
+
 		String name1 = methodName.toLowerCase().trim().replace("_", "");
 		for (int i = 0; i < this._Methods.length; i++) {
 			Method m = this._Methods[i];
@@ -411,8 +439,9 @@ public class UObjectValue {
 			if (!(("get" + name1).equals(name) || ("is" + name1).equals(name))) {
 				continue;
 			}
+			GLOBL_CACHED.put(cachedkey, i);
 
-			return this.getValue(m);
+			return m;
 		}
 		if (this._MethodsSuper != null) { // 获取super的模式
 			for (int i = 0; i < this._MethodsSuper.length; i++) {
@@ -424,7 +453,9 @@ public class UObjectValue {
 				if (!(("get" + name1).equals(name) || ("is" + name1).equals(name))) {
 					continue;
 				}
-				return this.getValue(m);
+
+				GLOBL_CACHED.put(cachedkeySupper, i);
+				return m;
 			}
 		}
 		return null;
@@ -1000,7 +1031,7 @@ public class UObjectValue {
 			if (handleJsonBinary != null) {
 				v[0] = handleJsonBinary.getBinary(name, val);
 			} else {
-				v[0] = null; // 不处理
+				v[0] = val; // 不处理
 			}
 		} else {
 			v[0] = val;
@@ -1009,16 +1040,30 @@ public class UObjectValue {
 		return true;
 	}
 
+	/**
+	 * Create the cached key of method and params
+	 * 
+	 * @param methodName
+	 * @param params
+	 * @return
+	 */
+	private String createMethodCachedKey(String methodName, Object... params) {
+		String cachedKey = this._object.getClass().getName() + "," + methodName.toLowerCase();
+		if (params != null) {
+			for (int i = 0; i < params.length; i++) {
+				cachedKey += "," + params[i].getClass().getName();
+			}
+		}
+		return cachedKey;
+	}
+
 	private Method getMethodByMatchParams(Method[] methods, String methodName, Object... params) {
 		if (params == null) {
 			params = new Object[0];
 		}
 		String key = null;
 		if (this._object != null) {
-			key = this._object.getClass().getName() + "," + methodName.toLowerCase();
-			for (int i = 0; i < params.length; i++) {
-				key += "," + params[i].getClass().getName();
-			}
+			key = this.createMethodCachedKey(methodName, params);
 			if (GLOBL_CACHED.containsKey(key)) {
 				return methods[GLOBL_CACHED.get(key)];
 			}
