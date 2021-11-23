@@ -92,6 +92,7 @@ public class Resources {
 		}
 		r.setBinary(binary);
 
+		LOGGER.info("find the resource: {}", url.toString());
 		try {
 			if (binary) {
 				byte[] buf = IOUtils.toByteArray(url);
