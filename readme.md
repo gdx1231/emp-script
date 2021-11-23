@@ -86,7 +86,7 @@ CREATE TABLE `ewa_cfg_rm` (
   `CLASS_LOG` varchar(333) DEFAULT NULL,
   `DESCRIPTION` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`RM_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=861 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- ewa.ewa_cfg_tree definition
@@ -95,6 +95,60 @@ CREATE TABLE `ewa_cfg_tree` (
   `XMLNAME` varchar(200) NOT NULL COMMENT '配置文件',
   `EDIT_STATUS` varchar(10) DEFAULT NULL COMMENT '编辑状态',
   PRIMARY KEY (`XMLNAME`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+## RESTful tables （MYSQL）
+```sql
+-- ewa.ewa_restful definition
+CREATE TABLE `ewa_restful` (
+  `rs_uid` varchar(36) CHARACTER SET latin1 NOT NULL COMMENT '请求编号',
+  `cat_uid` varchar(36) CHARACTER SET latin1 NOT NULL COMMENT '目录编号',
+  `rs_method` varchar(10) NOT NULL COMMENT '请求方式',
+  `rs_name` varchar(200) NOT NULL COMMENT '名称',
+  `rs_name_en` varchar(200) NOT NULL COMMENT '名称英文',
+  `rs_xmlname` varchar(200) NOT NULL COMMENT '配置文件',
+  `rs_itemname` varchar(100) NOT NULL COMMENT '配置项',
+  `rs_parameters` varchar(1000) NOT NULL COMMENT '参数',
+  `rs_memo` longtext COMMENT '说明',
+  `rs_memo_en` longtext COMMENT '英文说明',
+  `rs_status` varchar(20) DEFAULT NULL COMMENT '状态',
+  `rs_ctime` datetime DEFAULT NULL COMMENT '创建时间',
+  `rs_mtime` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`rs_uid`),
+  UNIQUE KEY `ewa_restful_un` (`cat_uid`,`rs_method`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ewa.ewa_restful_catalog definition
+CREATE TABLE `ewa_restful_catalog` (
+  `cat_uid` varchar(36) CHARACTER SET latin1 NOT NULL COMMENT '目录编号',
+  `cat_puid` varchar(36) CHARACTER SET latin1 NOT NULL COMMENT '上级目录',
+  `cat_path` varchar(200) CHARACTER SET latin1 NOT NULL COMMENT '接口地址',
+  `cat_path_full` varchar(1000) CHARACTER SET latin1 DEFAULT NULL COMMENT '完整接口地址',
+  `cat_name` varchar(50) NOT NULL COMMENT '名称',
+  `cat_name_en` varchar(100) DEFAULT NULL COMMENT '英文名称',
+  `cat_memo` longtext COMMENT '说明',
+  `cat_memo_en` longtext COMMENT '英文说明',
+  `cat_lvl` int(11) NOT NULL COMMENT '级别',
+  `cat_ord` int(11) NOT NULL COMMENT '排序',
+  `cat_status` varchar(20) DEFAULT NULL COMMENT '状态',
+  `cat_ctime` datetime DEFAULT NULL COMMENT '创建时间',
+  `cat_mtime` datetime DEFAULT NULL COMMENT '修改时间',
+  `p0` varchar(150) CHARACTER SET latin1 DEFAULT NULL,
+  `p1` varchar(150) CHARACTER SET latin1 DEFAULT NULL,
+  `p2` varchar(150) CHARACTER SET latin1 DEFAULT NULL,
+  `p3` varchar(150) CHARACTER SET latin1 DEFAULT NULL,
+  `p4` varchar(150) CHARACTER SET latin1 DEFAULT NULL,
+  `p5` varchar(150) CHARACTER SET latin1 DEFAULT NULL,
+  `p6` varchar(150) CHARACTER SET latin1 DEFAULT NULL,
+  `p7` varchar(150) CHARACTER SET latin1 DEFAULT NULL,
+  `p8` varchar(150) CHARACTER SET latin1 DEFAULT NULL,
+  `p9` varchar(150) CHARACTER SET latin1 DEFAULT NULL,
+  PRIMARY KEY (`cat_uid`),
+  KEY `idx_ewa_restful_catalog_cat_puid` (`cat_puid`),
+  KEY `ewa_restful_catalog_p0_IDX` (`p0`,`p1`,`p2`,`p3`,`p4`,`p5`,`p6`,`p7`,`p8`,`p9`) USING BTREE,
+  KEY `idx_ewa_restful_catalog` (`cat_status`,`p0`,`p1`,`p2`,`p3`,`p4`,`p5`,`p6`,`p7`,`p8`,`p9`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
