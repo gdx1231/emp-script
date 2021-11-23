@@ -566,6 +566,9 @@ public class ItemValues {
 
 	public String getCacheValue(String name, String dataFieldName) {
 		// ListFrame和Report的Repeat为多记录RecordSet，因此不能使用Cache;
+		if (this._HtmlClass.getSysParas() == null) {
+			return null;
+		}
 		String frameType = this._HtmlClass.getSysParas().getFrameType();
 		if (frameType == null) {
 			return null;
@@ -584,8 +587,9 @@ public class ItemValues {
 
 	/**
 	 * Get the field value from the all tables
+	 * 
 	 * @param dataFieldName the field name
-	 * @param dataType the return data type
+	 * @param dataType      the return data type
 	 * @return the value
 	 * @throws Exception
 	 */
