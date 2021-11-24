@@ -677,6 +677,9 @@ public class ItemValues {
 	}
 
 	public String getRvValue(String name, String dataFieldName) {
+		if(this._HtmlClass.getSysParas() == null || this._HtmlClass.getSysParas().getRequestValue() == null) {
+			return null;
+		}
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
 		if (rv == null) {
 			return null;

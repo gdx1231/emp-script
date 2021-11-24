@@ -477,9 +477,6 @@ public class HtmlCreator {
 		this._ItemValues.setUserClass(this._UserClass);
 		this._ItemValues.setDTTables(this._Tables);
 
-		// 生成页面标题
-		createPageTitle();
-
 		Skin skin = Skin.instance();
 
 		String skinName = this._RequestValue.getString("EWA_SKIN");
@@ -530,6 +527,8 @@ public class HtmlCreator {
 
 		this._Action = this._HtmlClass.getAction();
 
+		// 生成页面标题
+		createPageTitle();
 	}
 
 	/**
