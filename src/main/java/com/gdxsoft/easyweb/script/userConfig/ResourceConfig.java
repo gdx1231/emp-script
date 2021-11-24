@@ -33,7 +33,7 @@ public class ResourceConfig extends ConfigBase implements IConfig, Serializable,
 	 * 
 	 * @param scriptPath
 	 */
-	public static void initializeResouces(ConfScriptPath scriptPath) {
+	public synchronized static void initializeResouces(ConfScriptPath scriptPath) {
 		if (scriptPath.isResources()) {
 			new ResourceConfig(scriptPath, null, null);
 		} else {
@@ -143,37 +143,73 @@ public class ResourceConfig extends ConfigBase implements IConfig, Serializable,
 	 * @return
 	 */
 	private Map<String, String> initResourceByJar(URL url) {
-		LOGGER.info("Load reource: " + url.toString());
-		String jarPath = url.getPath().split("\\!")[0];
 
-		String dir = url.getPath().split("\\!")[1];
-		// remove start with '/'
-		String dirZip = dir.substring(1);
+		String[] jarPaths = url.getPath().split("\\!");
+		Map<String, String> xmlContents = null;
 
-		Map<String, String> xmlContents = new HashMap<>();
+		if (jarPaths.length == 2) {//from jar
+			LOGGER.info("Load reource: {}", url.toString());
+			String jarPath = jarPaths[0];
 
-		try {
-			URL url1 = new URL(jarPath);
-			File f1 = new File(url1.toURI());
+			String dir = jarPaths[1];
+			// remove start with '/'
+			String dirZip = dir.substring(1);
 
-			List<String> lst = UFile.getZipList(f1.getAbsolutePath());
-			lst.forEach(fileName -> {
-				if (!fileName.startsWith(dirZip) || !"xml".equalsIgnoreCase(UFile.getFileExt(fileName))) {
-					return;
-				}
-				try {
-					String content = UFile.readZipText(f1.getAbsolutePath(), fileName);
-					xmlContents.put("/" + fileName, content);
-					LOGGER.debug(" add -> " + fileName);
-				} catch (IOException e) {
-					LOGGER.warn("Read zip content: " + f1.getAbsolutePath() + "->" + fileName + ", " + e.getMessage());
-				}
-			});
+			try {
+				URL url1 = new URL(jarPath);
+				File f1 = new File(url1.toURI());
+				xmlContents = this.readCfg(f1.getAbsolutePath(), dirZip);
 
-		} catch (IOException | URISyntaxException e1) {
-			this.hasError = true;
-			LOGGER.error(e1.getMessage());
+			} catch (IOException | URISyntaxException e1) {
+				this.hasError = true;
+				LOGGER.error(e1.getMessage());
+			}
+		} else if (jarPaths.length == 3) { // from springboot.jar
+			LOGGER.info("Load resource from springboot {}", url.toString());
+			// file:/target/visa-1.0.0.jar!/BOOT-INF/lib/emp-script-1.1.1.jar!/define.xml
+			String bootJar = jarPaths[0];
+
+			String ewaJar = jarPaths[1].substring(1); // 去除前导"/"
+
+			String dir = jarPaths[2];
+			// remove start with '/'
+			String dirZip = dir.substring(1);
+			try {
+				URL url1 = new URL(bootJar);
+				File f1 = new File(url1.toURI());
+
+				byte[] buf = UFile.readZipBytes(f1.getAbsolutePath(), ewaJar);
+
+				File temp = File.createTempFile("emp_script", ".jar");
+				LOGGER.info("Create temp file: {}", temp.getAbsolutePath());
+				UFile.createBinaryFile(temp.getAbsolutePath(), buf, true);
+
+				xmlContents = this.readCfg(temp.getAbsolutePath(), dirZip);
+				
+				UFile.delete(temp.getAbsolutePath());
+			} catch (Exception e1) {
+				this.hasError = true;
+				LOGGER.error(e1.getMessage());
+			}
 		}
+		return xmlContents;
+	}
+
+	private Map<String, String> readCfg(String zipPath, String dirZip) throws IOException {
+		Map<String, String> xmlContents = new HashMap<>();
+		List<String> lst = UFile.getZipList(zipPath);
+		lst.forEach(fileName -> {
+			if (!fileName.startsWith(dirZip) || !"xml".equalsIgnoreCase(UFile.getFileExt(fileName))) {
+				return;
+			}
+			try {
+				String content = UFile.readZipText(zipPath, fileName);
+				xmlContents.put("/" + fileName, content);
+				LOGGER.debug(" add -> " + fileName);
+			} catch (IOException e) {
+				LOGGER.warn("Read zip content: " + zipPath + "->" + fileName + ", " + e.getMessage());
+			}
+		});
 
 		return xmlContents;
 	}
