@@ -2,6 +2,8 @@ package com.gdxsoft.easyweb.define.database.maps;
 
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -9,15 +11,14 @@ import org.w3c.dom.NodeList;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public class MapSqlTemplates {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(MapSqlTemplates.class);
 	private HashMap<String, MapSqlTemplate> _SqlTemplates;
 
 	/**
 	 * 根据数据库类型（ORACLE,MSSQL,MYSQL...）获取目标数据库的备注类<br>
 	 * 如果不存在则返回null
 	 * 
-	 * @param databaseType
-	 *            数据库类型(ORACLE,MSSQL,MYSQL...)
+	 * @param databaseType 数据库类型(ORACLE,MSSQL,MYSQL...)
 	 * @return
 	 */
 	public MapSqlTemplate getSqlTemplate(String databaseType) {
@@ -42,6 +43,7 @@ public class MapSqlTemplates {
 	private void initTemplate(Node node) {
 		MapSqlTemplate d;
 		String name = UXml.retNodeValue(node, "Name").toUpperCase().trim();
+		LOGGER.debug("Initialize the " + name);
 		if (this._SqlTemplates.containsKey(name)) {
 			d = this._SqlTemplates.get(name);
 		} else {
@@ -56,7 +58,9 @@ public class MapSqlTemplates {
 				continue;
 			}
 			String tag = n.getNodeName();
-			String txt = n.getTextContent();
+			String txt = n.getTextContent().trim();
+			LOGGER.debug("\tAdd the template -> {}", tag);
+			// LOGGER.debug(txt);
 			d.addSqlTemplate(tag, txt);
 		}
 	}

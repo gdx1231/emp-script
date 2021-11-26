@@ -1,9 +1,216 @@
 package com.gdxsoft.easyweb.test;
 
+import java.io.IOException;
 import java.util.Random;
 
-public class TestBase {
+import javax.xml.parsers.ParserConfigurationException;
 
+import org.xml.sax.SAXException;
+
+import com.gdxsoft.easyweb.conf.ConnectionConfig;
+import com.gdxsoft.easyweb.conf.ConnectionConfigs;
+import com.gdxsoft.easyweb.utils.UFile;
+import com.gdxsoft.easyweb.utils.msnet.MTableStr;
+
+public class TestBase {
+	
+	public void initConnPools() throws ParserConfigurationException, SAXException, IOException {
+		this.initConnPool();
+		this.initConnPool1();
+		initConnPoolEwa();
+		initConnPoolCm();
+		
+		initConnPoolVisaMainData();
+		initConnPoolVisa();
+		
+		initConnPoolVisaEwa();
+	}
+	
+	public void initConnPool() throws ParserConfigurationException, SAXException, IOException {
+		ConnectionConfigs c1 = ConnectionConfigs.instance();
+		String CONN_STR = "b2b";
+		String CONN_URL = "jdbc:mysql://devmysql/b2b?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&nullNamePatternMatchesAll=true&nullCatalogMeansCurrent=true";
+		ConnectionConfig poolCfg = new ConnectionConfig();
+		poolCfg.setName(CONN_STR);
+		poolCfg.setType("MYSQL");
+		poolCfg.setConnectionString(CONN_STR);
+		poolCfg.setSchemaName("b2b");
+
+		MTableStr poolParams = new MTableStr();
+		poolParams.put("driverClassName", "com.mysql.cj.jdbc.Driver");
+		poolParams.put("url", CONN_URL);
+		poolParams.put("username", "root");
+
+		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		poolParams.put("password", password);
+		poolParams.put("maxActive", 10);
+		poolParams.put("maxIdle", 100);
+
+		poolCfg.setPool(poolParams);
+		c1.put(CONN_STR, poolCfg);
+
+		ConnectionConfig poolCfgEx = new ConnectionConfig();
+		poolCfgEx.setName("ex");
+		poolCfgEx.setType("MYSQL");
+		poolCfgEx.setConnectionString("ex");
+		poolCfgEx.setSchemaName("b2b");
+		poolCfgEx.setPool(poolParams);
+
+		c1.put("ex", poolCfgEx);
+	}
+
+	public void initConnPoolVisaMainData() throws ParserConfigurationException, SAXException, IOException {
+		ConnectionConfigs c1 = ConnectionConfigs.instance();
+		String CONN_STR = "visa_main";
+		String CONN_URL = "jdbc:mysql://devmysql/visa_main_data?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&nullNamePatternMatchesAll=true&nullCatalogMeansCurrent=true";
+		
+		ConnectionConfig poolCfg = new ConnectionConfig();
+		poolCfg.setName(CONN_STR);
+		poolCfg.setType("MYSQL");
+		poolCfg.setConnectionString(CONN_STR);
+		poolCfg.setSchemaName("visa_main_data");
+
+		MTableStr poolParams = new MTableStr();
+		poolParams.put("driverClassName", "com.mysql.cj.jdbc.Driver");
+		poolParams.put("url", CONN_URL);
+		poolParams.put("username", "root");
+
+		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		poolParams.put("password", password);
+		poolParams.put("maxActive", 10);
+		poolParams.put("maxIdle", 100);
+
+		poolCfg.setPool(poolParams);
+		
+		c1.put(CONN_STR, poolCfg);
+	}
+	
+	public void initConnPoolVisa() throws ParserConfigurationException, SAXException, IOException {
+		ConnectionConfigs c1 = ConnectionConfigs.instance();
+		String CONN_STR = "visa";
+		String CONN_URL = "jdbc:mysql://devmysql/visa?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&nullNamePatternMatchesAll=true&nullCatalogMeansCurrent=true";
+		
+		ConnectionConfig poolCfg = new ConnectionConfig();
+		poolCfg.setName(CONN_STR);
+		poolCfg.setType("MYSQL");
+		poolCfg.setConnectionString(CONN_STR);
+		poolCfg.setSchemaName("visa");
+
+		MTableStr poolParams = new MTableStr();
+		poolParams.put("driverClassName", "com.mysql.cj.jdbc.Driver");
+		poolParams.put("url", CONN_URL);
+		poolParams.put("username", "root");
+
+		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		poolParams.put("password", password);
+		poolParams.put("maxActive", 10);
+		poolParams.put("maxIdle", 100);
+
+		poolCfg.setPool(poolParams);
+		
+		c1.put(CONN_STR, poolCfg);
+	}
+	
+	public void initConnPoolCm() throws ParserConfigurationException, SAXException, IOException {
+		ConnectionConfigs c1 = ConnectionConfigs.instance();
+		String CONN_STR = "cm";
+		String CONN_URL = "jdbc:mysql://devmysql/oneworld_main_data?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&nullNamePatternMatchesAll=true&nullCatalogMeansCurrent=true";
+		ConnectionConfig poolCfg = new ConnectionConfig();
+		poolCfg.setName(CONN_STR);
+		poolCfg.setType("MYSQL");
+		poolCfg.setConnectionString(CONN_STR);
+		poolCfg.setSchemaName("oneworld_main_data");
+
+		MTableStr poolParams = new MTableStr();
+		poolParams.put("driverClassName", "com.mysql.cj.jdbc.Driver");
+		poolParams.put("url", CONN_URL);
+		poolParams.put("username", "root");
+
+		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		poolParams.put("password", password);
+		poolParams.put("maxActive", 10);
+		poolParams.put("maxIdle", 100);
+
+		poolCfg.setPool(poolParams);
+		c1.put(CONN_STR, poolCfg);
+
+	}
+
+	public void initConnPoolEwa() throws ParserConfigurationException, SAXException, IOException {
+		ConnectionConfigs c1 = ConnectionConfigs.instance();
+		String CONN_STR = "ewa";
+		String CONN_URL = "jdbc:mysql://devmysql/ewa?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&nullNamePatternMatchesAll=true&nullCatalogMeansCurrent=true";
+		ConnectionConfig poolCfg = new ConnectionConfig();
+		poolCfg.setName(CONN_STR);
+		poolCfg.setType("MYSQL");
+		poolCfg.setConnectionString(CONN_STR);
+		poolCfg.setSchemaName("b2b");
+
+		MTableStr poolParams = new MTableStr();
+		poolParams.put("driverClassName", "com.mysql.cj.jdbc.Driver");
+		poolParams.put("url", CONN_URL);
+		poolParams.put("username", "root");
+
+		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		poolParams.put("password", password);
+		poolParams.put("maxActive", 10);
+		poolParams.put("maxIdle", 100);
+
+		poolCfg.setPool(poolParams);
+		c1.put(CONN_STR, poolCfg);
+
+	}
+
+	public void initConnPoolVisaEwa() throws ParserConfigurationException, SAXException, IOException {
+		ConnectionConfigs c1 = ConnectionConfigs.instance();
+		String CONN_STR = "visa_ewa";
+		String CONN_URL = "jdbc:mysql://devmysql/visa_ewa?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&nullNamePatternMatchesAll=true&nullCatalogMeansCurrent=true";
+		ConnectionConfig poolCfg = new ConnectionConfig();
+		poolCfg.setName(CONN_STR);
+		poolCfg.setType("MYSQL");
+		poolCfg.setConnectionString(CONN_STR);
+		poolCfg.setSchemaName("visa_ewa");
+
+		MTableStr poolParams = new MTableStr();
+		poolParams.put("driverClassName", "com.mysql.cj.jdbc.Driver");
+		poolParams.put("url", CONN_URL);
+		poolParams.put("username", "root");
+
+		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		poolParams.put("password", password);
+		poolParams.put("maxActive", 10);
+		poolParams.put("maxIdle", 100);
+
+		poolCfg.setPool(poolParams);
+		c1.put(CONN_STR, poolCfg);
+
+	}
+
+	
+	private void initConnPool1() throws ParserConfigurationException, SAXException, IOException {
+		ConnectionConfigs c1 = ConnectionConfigs.instance();
+		String CONN_STR = "pf";
+		String CONN_URL = "jdbc:sqlserver://devsqlserver;DatabaseName=OneWorld;applicationName=gdx-pf";
+		ConnectionConfig poolCfg = new ConnectionConfig();
+		poolCfg.setName(CONN_STR);
+		poolCfg.setType("MSSQL");
+		poolCfg.setConnectionString(CONN_STR);
+		poolCfg.setSchemaName("dbo");
+
+		MTableStr poolParams = new MTableStr();
+		poolParams.put("driverClassName", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+		poolParams.put("url", CONN_URL);
+		poolParams.put("username", "sa");
+
+		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		poolParams.put("password", password);
+		poolParams.put("maxActive", 10);
+		poolParams.put("maxIdle", 100);
+
+		poolCfg.setPool(poolParams);
+		c1.put(CONN_STR, poolCfg);
+
+	}
 	public void printCaption(String caption) {
 		int width = 80;
 		int capWidth = this.captionLength(caption);

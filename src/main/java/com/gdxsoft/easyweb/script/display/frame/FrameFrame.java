@@ -564,8 +564,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 	private boolean isRedraw2Col(String tag) {
 		return tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit") || tag.toUpperCase().startsWith("DHTML")
 				|| tag.equalsIgnoreCase("h5upload") || tag.equalsIgnoreCase("textarea") || tag.equals("markDown")
-				|| tag.equalsIgnoreCase("jseditor") || tag.equalsIgnoreCase("sqleditor") || tag.equalsIgnoreCase("user")
-				|| tag.equals("ewaconfigitem");
+				|| tag.equalsIgnoreCase("xmleditor") || tag.equalsIgnoreCase("jseditor")
+				|| tag.equalsIgnoreCase("sqleditor") || tag.equalsIgnoreCase("user") || tag.equals("ewaconfigitem");
 	}
 
 	/**
@@ -834,8 +834,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 		}
 
 		/*
-		 * <td class="EWA_TD_L">{__EWA_DES__}</td> <td class="EWA_TD_M">{__EWA_ITEM__}</td> <td
-		 * class="EWA_TD_R">{__EWA_MSG__}</td>
+		 * <td class="EWA_TD_L">{__EWA_DES__}</td> <td
+		 * class="EWA_TD_M">{__EWA_ITEM__}</td> <td class="EWA_TD_R">{__EWA_MSG__}</td>
 		 */
 
 		String[] tmps = new String[3];

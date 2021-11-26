@@ -51,10 +51,19 @@ public class ConfigUtils {
 	}
 
 	/**
-	 * 获取Xml操作对象
+	 * 返回默认的Xml操作对象（UpdateXmlJdbcImpl 或 UpdateXmlImpl）
 	 * 
-	 * @param xmlPath
-	 * @return
+	 * @return 默认的Xml操作对象（UpdateXmlJdbcImpl 或 UpdateXmlImpl）
+	 */
+	public static IUpdateXml getDefaultUpdateXml() {
+		return getUpdateXmlByPath(null);
+	}
+
+	/**
+	 * 获取Xml操作对象，当 xmlPath为空时返回第一个不是资源的更新对象（UpdateXmlJdbcImpl 或 UpdateXmlImpl）
+	 * 
+	 * @param xmlPath 配置文件路径
+	 * @return Xml操作对象（UpdateXmlJdbcImpl 或 UpdateXmlImpl）
 	 */
 	public static IUpdateXml getUpdateXmlByPath(String xmlPath) {
 		ConfScriptPaths sps = ConfScriptPaths.getInstance();

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	private static Logger LOGER = LoggerFactory.getLogger(JdbcConfigOperation.class);
 	private ConfScriptPath scriptPath;
 	private Boolean hsqlDb = null;
+
+	private boolean isImportMethod = false;
 
 	public JdbcConfigOperation(ConfScriptPath scriptPath) {
 		this.scriptPath = scriptPath;
@@ -93,6 +96,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 * @throws Exception
 	 */
 	public void importXml(File xml, String xmlname) throws Exception {
+		this.isImportMethod = true;
+
 		String xmlStr = UFile.readFileText(xml.getAbsolutePath());
 		Document doc = UXml.asDocument(xmlStr);
 
@@ -107,16 +112,21 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 			String sql = "insert into EWA_CFG_TREE (XMLNAME) values( @XMLNAME)";
 			this.update(sql, rv);
 		}
-		String cdate = Utils.getDateTimeString(new Date(xml.lastModified()));
 
-		importXml(xmlStr, xmlname, cdate, cdate);
+		// String cdate = Utils.getDateTimeString(new Date(xml.lastModified()));
+		// importXml(xmlStr, xmlname, cdate, cdate);
 
 		NodeList nl = doc.getElementsByTagName("EasyWebTemplate");
-		this.createXml(xmlStr, cdate);
+
+		// this.createXml(xmlname, cdate);
 		for (int i = 0; i < nl.getLength(); i++) {
 			Element ele = (Element) nl.item(i);
-			importXmlEle(ele, xmlname);
+			// 导入配置项
+			this.importXmlEle(ele, xmlname);
 		}
+
+		// 将所有配置项合并成一个xml文件，保留到数据库和写到文件缓存中
+		this.combine2OneXml(xmlname);
 	}
 
 	/**
@@ -579,8 +589,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		rv.addValue("XMLNAME", xmlName);
 		rv.addValue("ITEMNAME", itemname);
 
+		Node node = UXml.asNode(xmlStr);
 		if (itemname.length() > 0) {
-			Node node = UXml.asNode(xmlStr);
 			String dataSource = getCfgParam(node, "DataSource");
 			String acl = getCfgParam(node, "Acl");
 			String log = getCfgParam(node, "Log");
@@ -602,7 +612,25 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 			String sql = sb1.toString();
 			update(sql, rv);
 			LOGER.info("NEW: " + xmlName + ", " + itemname + ", " + hashCode + ", " + md5);
-		} else if (tb.getCell(0, 0).toInt() != hashCode) {
+		} else {
+			try {
+				// 检查md5是否发生变化
+				String oldMd5 = tb.getCell(0, "MD5").toString();
+				if (md5.equalsIgnoreCase(oldMd5)) {
+					LOGER.info("NO CHANGE: {}, {}, {}, {}", xmlName, itemname, hashCode, md5);
+					return;
+				}
+				// 检查是否已经存在的更新时间 > 需要导入配置的导出时间
+				if (this.isImportMethod && itemname.length() > 0) {
+					if (this.checkTimeWithExistsAndImport(node, tb)) {
+						// 已经存在的比较新，因此不能导入
+						LOGER.info("CAN'T Import. exists cfg is new than import. {} {} ", xmlName, itemname);
+						return;
+					}
+				}
+			} catch (Exception e) {
+			}
+
 			StringBuilder sb2 = new StringBuilder();
 			sb2.append("update EWA_CFG set ");
 			sb2.append("  XMLDATA		= @XMLDATA");
@@ -623,6 +651,30 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	}
 
 	/**
+	 * 检查是否已经存在的更新时间 > 需要导入配置的导出时间
+	 * 
+	 * @param node
+	 * @param tableMeta
+	 * @return
+	 */
+	private boolean checkTimeWithExistsAndImport(Node node, DTTable tableMeta) {
+		Element ele = (Element) node;
+		String exportTime = ele.getAttribute("ExportTime");
+		if (StringUtils.isNotBlank(exportTime)) {
+			try {
+				Date dtExportTime = Utils.getDate(exportTime);
+				Date dtOldUpdateDate;
+				dtOldUpdateDate = tableMeta.getCell(0, "UPDATE_DATE").toDate();
+				// 数据库保存的配置比导入的新，因此不处理
+				return dtOldUpdateDate.getTime() > dtExportTime.getTime();
+			} catch (Exception e) {
+
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * 更新配置项
 	 * 
 	 * @param xmlname
@@ -630,12 +682,10 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	 * @param xmlStr
 	 * @param adm
 	 */
-	@Deprecated
 	public void updateItem(String xmlname, String itemname, String xmlStr, String adm) {
 		int hashCode = xmlStr.hashCode();
 		String md5 = Utils.md5(xmlStr);
 		updateItem(xmlname, itemname, xmlStr, adm, hashCode, md5);
-
 	}
 
 	/**
@@ -678,7 +728,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	}
 
 	/**
-	 * 合并成一个文件的xml
+	 * 将所有配置项合并成一个xml文件，保留到数据库和写到文件缓存中
 	 * 
 	 * @param xmlname
 	 */
@@ -835,9 +885,10 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 					continue;
 				}
 				/*
-				 * ??? int xmlhashCode = xmlData.hashCode(); if (xmlhashCode != hashCode) { String sqlup =
-				 * "update EWA_CFG set HASH_CODE=" + xmlhashCode + " where  ITEMNAME='' and xmlname='" +
-				 * xmlName.replace("'", "''") + "'"; update(sqlup, null); }
+				 * ??? int xmlhashCode = xmlData.hashCode(); if (xmlhashCode != hashCode) {
+				 * String sqlup = "update EWA_CFG set HASH_CODE=" + xmlhashCode +
+				 * " where  ITEMNAME='' and xmlname='" + xmlName.replace("'", "''") + "'";
+				 * update(sqlup, null); }
 				 */
 				saveToCache(xmlName, xmlData, UPDATE_DATE == -1 ? CREATE_DATE : UPDATE_DATE, hashCode, md5);
 			}

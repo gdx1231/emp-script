@@ -1,5 +1,7 @@
 package com.gdxsoft.easyweb.define.database.maps;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import com.gdxsoft.easyweb.SystemXmlUtils;
@@ -11,6 +13,7 @@ import com.gdxsoft.easyweb.SystemXmlUtils;
  * 
  */
 public class Maps {
+	private static Logger LOGGER = LoggerFactory.getLogger(Maps.class);
 	public static final String MAP_XML = "/database/TypesMap.xml";
 
 	private MapFieldTypes _MapFieldTypes;
@@ -19,7 +22,7 @@ public class Maps {
 
 	private static Maps _MAPS;
 
-	public static Maps instance() throws Exception {
+	public synchronized static Maps instance() throws Exception {
 		if (_MAPS != null) {
 			return _MAPS;
 		} else {
@@ -31,12 +34,15 @@ public class Maps {
 
 	private void init() throws Exception {
 		Document doc = SystemXmlUtils.getSystemConfDocument(MAP_XML);
+		LOGGER.info("Initialize the fields map");
 		_MapFieldTypes = new MapFieldTypes();
 		_MapFieldTypes.initMaps(doc);
 
+		LOGGER.info("Initialize the functions map");
 		this._MapFunctions = new MapFunctions();
 		this._MapFunctions.initMaps(doc);
 
+		LOGGER.info("Initialize the SQL templates map");
 		_MapSqlTemplates = new MapSqlTemplates();
 		_MapSqlTemplates.initTemplates(doc);
 	}

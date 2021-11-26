@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -25,8 +27,19 @@ import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 
 public class Table {
+	/**
+	 * 被替换的DDL的元数据库前缀
+	 */
+	public static final String REPLACE_META_DATABASE_NAME = "{REPLACE_META_DATABASE_NAME}";
+	/**
+	 * 被替换的DDL的工作数据库前缀
+	 */
+	public static final String REPLACE_WORK_DATABASE_NAME = "{REPLACE_WORK_DATABASE_NAME}";
+
+	private static Logger LOGGER = LoggerFactory.getLogger(Table.class);
 	private String _Name;
 	private String _SchemaName;
+	private String _CatalogName;
 	private Fields _Fields;
 	private String _ConnectionConfigName;
 	private String _TableType;
@@ -34,7 +47,8 @@ public class Table {
 	private ArrayList<TableFk> _Fks;
 	private ArrayList<TableIndex> _Indexes;
 	private String _DatabaseType;
-
+	private String replaceMetaDatabaseName;
+	private String replaceWorkDatabaseName;
 	private String _SqlTable; // create table's sql
 	private ArrayList<String> _SqlFks; // create fk sql
 	private ArrayList<String> _SqlIndexes; // create index sql
@@ -42,6 +56,8 @@ public class Table {
 	private Document _Doc;
 
 	private DataConnection _Conn;
+
+	private String refId; // 来源参考
 
 	public Table() {
 
@@ -105,7 +121,7 @@ public class Table {
 				}
 			}
 		} catch (Exception err) {
-			System.err.println(err.getMessage());
+			LOGGER.error(err.getMessage());
 		} finally {
 			conn.close();
 		}
@@ -138,6 +154,7 @@ public class Table {
 		e.setAttribute("Name", this._Name);
 		e.setAttribute("DatabaseType", this._DatabaseType);
 		e.setAttribute("SchamaName", this._SchemaName);
+		e.setAttribute("CatalogName", this._CatalogName);
 		e.setAttribute("TableType", this._TableType);
 
 		Element eFields = this._Doc.createElement("Fields");
@@ -179,6 +196,14 @@ public class Table {
 				UObjectValue.writeXmlNodeAtts(eleIndexField, f);
 			}
 		}
+
+		// 创建表或视图的ddl
+		if (this._SqlTable != null) {
+			Element ddl = this._Doc.createElement("DDL");
+			ddl.setTextContent(_SqlTable);
+			e.appendChild(ddl);
+		}
+
 		return UXml.asXml(e);
 
 	}
@@ -216,6 +241,11 @@ public class Table {
 
 				UObjectValue.fromXml(nlFields.item(m), f);
 			}
+		}
+		NodeList ddlNode = UXml.retNodeList(eleTable, "DDL");
+		if (ddlNode.getLength() > 0) {
+			String ddl = ddlNode.item(0).getTextContent();
+			this._SqlTable = ddl;
 		}
 	}
 
@@ -275,6 +305,9 @@ public class Table {
 		try {
 			conn.connect();
 			DatabaseMetaData dataMeta = conn.getConnection().getMetaData();
+
+			this.initTableInfoFromInformationSchema(conn);
+
 			initFields(dataMeta);
 			initPk(dataMeta);
 			initFk(dataMeta);
@@ -282,16 +315,96 @@ public class Table {
 			initRemarks(conn);
 			initRemarks();
 			initFieldIdentity(conn);
+
+			// 获取创建表或视图的DDL
+			this.initTableOrViewDDL(conn);
 		} catch (SQLException e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		} finally {
 			try {
 				conn.close();
 			} catch (Exception ee) {
-				System.err.println(ee.getMessage());
+				LOGGER.error(ee.getMessage());
 			}
 		}
 
+	}
+
+	private void initTableOrViewDDL(DataConnection conn) {
+		boolean isView = "VIEW".equalsIgnoreCase(this._TableType);
+		String tempName = isView ? "ViewDDL" : "TableDDL";
+		String sql = this.getSqlTemplate(conn, tempName);
+		if (sql == null || sql.trim().length() < 4) {
+			return;
+		}
+		sql = sql.replace("{SCHMEA}", this._SchemaName);
+		sql = sql.replace("{TABLE_NAME}", this._Name);
+		if (!conn.executeQuery(sql)) {
+			LOGGER.error(conn.getErrorMsg());
+			return;
+		}
+
+		DTTable tb = new DTTable();
+		tb.initData(conn.getLastResult().getResultSet());
+		if (tb.getCount() == 0) {
+			return;
+		}
+		String colName = null;
+		if (tb.getColumns().testName("Create View")) { // mysql
+			colName = "Create View";
+		} else if (tb.getColumns().testName("Create Table")) {// mysql
+			colName = "Create Table";
+		} else if (tb.getColumns().testName("text")) {// sqlserver
+			colName = "text";
+		}
+
+		if (colName == null) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < tb.getColumns().getCount(); i++) {
+				if (i > 0) {
+					sb.append(", ");
+				}
+				sb.append(tb.getColumns().getColumn(i).getName());
+			}
+			LOGGER.error("NOT defined the DDL column name from {}", sb.toString());
+		}
+
+		try {
+			String ddl = tb.getCell(0, colName).toString();
+			if (isView) {
+				if (this.replaceMetaDatabaseName != null) {
+					// 替换元数据库的前缀
+					ddl = ddl.replace(replaceMetaDatabaseName, REPLACE_META_DATABASE_NAME);
+				}
+				if (this.replaceWorkDatabaseName != null) {
+					// 替换工作数据库前缀
+					ddl = ddl.replace(replaceWorkDatabaseName, REPLACE_WORK_DATABASE_NAME);
+				}
+			}
+			this.setSqlTable(ddl);
+		} catch (Exception e) {
+		}
+
+	}
+
+	/**
+	 * Initialize the table catalog name
+	 * 
+	 * @param conn Database connection pool
+	 */
+	private void initTableInfoFromInformationSchema(DataConnection conn) {
+		String sql = "select * from information_schema.TABLES t where TABLE_SCHEMA ='"
+				+ this._SchemaName.replace("'", "''") + "' and table_name='" + this._Name.replace("'", "''") + "'";
+		DTTable tb = DTTable.getJdbcTable(sql, conn);
+		if (tb.getCount() == 0) {
+			return;
+		}
+
+		try {
+			this._CatalogName = tb.getCell(0, "TABLE_CATALOG").toString();
+		} catch (Exception e) {
+
+		}
 	}
 
 	public void init(String targetDatabase) {
@@ -316,6 +429,9 @@ public class Table {
 		try {
 			conn.connect();
 			DatabaseMetaData dataMeta = conn.getConnection().getMetaData();
+
+			initTableInfoFromInformationSchema(conn);
+
 			initFields(dataMeta);
 			initPk(dataMeta);
 			initFk(dataMeta);
@@ -324,7 +440,7 @@ public class Table {
 			initRemarks();
 			initFieldIdentity(conn);
 		} catch (SQLException e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		} finally {
 			try {
 				if (thisDatabase.trim().length() > 0) {
@@ -332,7 +448,7 @@ public class Table {
 				}
 				conn.close();
 			} catch (Exception ee) {
-				System.err.println(ee.getMessage());
+				LOGGER.error(ee.getMessage());
 			}
 		}
 
@@ -404,13 +520,13 @@ public class Table {
 				_Fields.getFieldList().add(f1.getName());
 			}
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		} finally {
 			if (rs != null) {
 				try {
 					rs.close();
 				} catch (SQLException e) {
-
+					LOGGER.error(e.getMessage());
 				}
 			}
 		}
@@ -431,7 +547,7 @@ public class Table {
 		sql = sql.replace("{SCHMEA}", this._SchemaName);
 		sql = sql.replace("{TABLE_NAME}", this._Name);
 		if (!conn.executeQuery(sql)) {
-			System.err.println(conn.getErrorMsg());
+			LOGGER.error(conn.getErrorMsg());
 			return;
 		}
 		DTTable tb = new DTTable();
@@ -450,7 +566,7 @@ public class Table {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		}
 	}
 
@@ -488,7 +604,7 @@ public class Table {
 				}
 			}
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		} finally {
 			if (rs != null) {
 				try {
@@ -513,7 +629,8 @@ public class Table {
 	 * 获取SQL模板，在TypesMap.xml中定义，返回指定名称的SQL模板
 	 * 
 	 * @param conn    数据库连接
-	 * @param tmpName 模板名称{PrimaryKey,FieldCommentsGet,FieldCommentSet,IdentityField ... }
+	 * @param tmpName 模板名称{PrimaryKey,FieldCommentsGet,FieldCommentSet,IdentityField
+	 *                ... }
 	 * @return
 	 */
 	private String getSqlTemplate(DataConnection conn, String tmpName) {
@@ -528,11 +645,16 @@ public class Table {
 			return sql;
 
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 			return null;
 		}
 	}
 
+	/**
+	 * 获取字段是否为自增型
+	 * 
+	 * @param conn
+	 */
 	private void initFieldIdentity(DataConnection conn) {
 		String sql = this.getSqlTemplate(conn, "IdentityField");
 		if (sql == null || sql.trim().length() < 4) {
@@ -541,7 +663,7 @@ public class Table {
 		sql = sql.replace("{SCHMEA}", this._SchemaName);
 		sql = sql.replace("{TABLE_NAME}", this._Name);
 		if (!conn.executeQuery(sql)) {
-			System.err.println(conn.getErrorMsg());
+			LOGGER.error(conn.getErrorMsg());
 			return;
 		}
 		DTTable tb = new DTTable();
@@ -554,7 +676,7 @@ public class Table {
 		try {
 			colName = r.getCell("COLUMN_NAME").toString();
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		}
 		if (colName == null) {
 			return;
@@ -586,13 +708,13 @@ public class Table {
 				_Pk.getPkFields().add(f1);
 			}
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		} finally {
 			if (rs != null) {
 				try {
 					rs.close();
 				} catch (SQLException e) {
-					System.out.println(e.getMessage());
+					LOGGER.error(e.getMessage());
 				}
 			}
 		}
@@ -634,13 +756,13 @@ public class Table {
 				fk.getPk().getPkFields().add(f1);
 			}
 		} catch (SQLException e) {
-			System.out.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		} finally {
 			if (rs != null) {
 				try {
 					rs.close();
 				} catch (SQLException e) {
-					System.out.println(e.getMessage());
+					LOGGER.error(e.getMessage());
 				}
 			}
 		}
@@ -789,6 +911,8 @@ public class Table {
 	}
 
 	/**
+	 * DDL
+	 * 
 	 * @return the _SqlTable
 	 */
 	public String getSqlTable() {
@@ -796,6 +920,8 @@ public class Table {
 	}
 
 	/**
+	 * DDL
+	 * 
 	 * @param sqlTable the _SqlTable to set
 	 */
 	public void setSqlTable(String sqlTable) {
@@ -842,6 +968,74 @@ public class Table {
 	 */
 	public void setIndexes(ArrayList<TableIndex> indexes) {
 		_Indexes = indexes;
+	}
+
+	/**
+	 * @return the _CatalogName
+	 */
+	public String getCatalogName() {
+		return _CatalogName;
+	}
+
+	/**
+	 * @param _CatalogName the _CatalogName to set
+	 */
+	public void setCatalogName(String _CatalogName) {
+		this._CatalogName = _CatalogName;
+	}
+
+	/**
+	 * 被替换的DDL的元数据库前缀
+	 * 
+	 * @return the replaceMetaDatabaseName
+	 */
+	public String getReplaceMetaDatabaseName() {
+		return replaceMetaDatabaseName;
+	}
+
+	/**
+	 * 被替换的DDL的元数据库前缀
+	 * 
+	 * @param replaceMetaDatabaseName the replaceMetaDatabaseName to set
+	 */
+	public void setReplaceMetaDatabaseName(String replaceMetaDatabaseName) {
+		this.replaceMetaDatabaseName = replaceMetaDatabaseName;
+	}
+
+	/**
+	 * 被替换的DDL的工作数据库前缀
+	 * 
+	 * @return the replaceWorkDatabaseName
+	 */
+	public String getReplaceWorkDatabaseName() {
+		return replaceWorkDatabaseName;
+	}
+
+	/**
+	 * 被替换的DDL的工作数据库前缀
+	 * 
+	 * @param replaceWorkDatabaseName the replaceWorkDatabaseName to set
+	 */
+	public void setReplaceWorkDatabaseName(String replaceWorkDatabaseName) {
+		this.replaceWorkDatabaseName = replaceWorkDatabaseName;
+	}
+
+	/**
+	 * 来源参考
+	 * 
+	 * @return the refId
+	 */
+	public String getRefId() {
+		return refId;
+	}
+
+	/**
+	 * 来源参考
+	 * 
+	 * @param refId the refId to set
+	 */
+	public void setRefId(String refId) {
+		this.refId = refId;
 	}
 
 }

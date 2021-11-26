@@ -99,16 +99,14 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		String xmlname = path + "|" + name;
 		xmlname = UserConfig.filterXmlNameByJdbc(xmlname);
 
-		DTTable tb = op.getXmlMeta(xmlname);
-		if (tb.getCount() > 0) {
-			LOGER.error(xmlname + "已经存在");
-
-			obj.put("RST", false);
-			obj.put("ERR", xmlname + "已经存在");
-
-			return obj;
-		}
-
+		/*
+		 * DTTable tb = op.getXmlMeta(xmlname); if (tb.getCount() > 0) {
+		 * LOGER.error(xmlname + "已经存在");
+		 * 
+		 * obj.put("RST", false); obj.put("ERR", xmlname + "已经存在");
+		 * 
+		 * return obj; }
+		 */
 		File file = new File(sourceXmlFilePath);
 		if (!file.exists()) {
 			LOGER.error(sourceXmlFilePath + "找不到");

@@ -2,6 +2,8 @@ package com.gdxsoft.easyweb.define.database.maps;
 
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -9,7 +11,7 @@ import org.w3c.dom.NodeList;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public class MapFieldTypes {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(MapFieldTypes.class);
 	private HashMap<String, MapFieldType> _FieldMaps;
 
 	public MapFieldTypes() {
@@ -64,6 +66,7 @@ public class MapFieldTypes {
 
 		this._FieldMaps.put(d.getName(), d);
 
+		LOGGER.debug("Initialize the map {}", name);
 		NodeList nl = UXml.retNodeList(node, "Database");
 		for (int i = 0; i < nl.getLength(); i++) {
 			this.initMapTo(nl.item(i), d);
@@ -72,8 +75,7 @@ public class MapFieldTypes {
 
 	private void initMapTo(Node node, MapFieldType parent) {
 
-		String databaseName = UXml.retNodeValue(node, "Name").toUpperCase()
-				.trim();
+		String databaseName = UXml.retNodeValue(node, "Name").toUpperCase().trim();
 		NodeList nl = UXml.retNodeList(node, "MapTo");
 		MapFieldType[] maps = new MapFieldType[nl.getLength()];
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -85,8 +87,7 @@ public class MapFieldTypes {
 			String fixed = UXml.retNodeValue(n, "Fixed");
 			String insertCovert = UXml.retNodeValue(n, "InsertCovert");
 
-			int s = scale == null || scale.trim().length() == 0 ? 1 : Integer
-					.parseInt(scale);
+			int s = scale == null || scale.trim().length() == 0 ? 1 : Integer.parseInt(scale);
 			s = s == 0 ? 1 : s;
 			maps[i].setName(name);
 			maps[i].setScale(s);
@@ -94,6 +95,8 @@ public class MapFieldTypes {
 			maps[i].setInsertCovert(insertCovert);
 
 			maps[i].setEwa(parent);
+
+			LOGGER.debug("	Map to the database {} -> {}", databaseName, name);
 		}
 
 		HashMap<String, MapFieldType[]> mapTo = parent.getMapTo();

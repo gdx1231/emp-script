@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -26,9 +27,11 @@ import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UpdateXmlImpl;
 import com.gdxsoft.easyweb.define.UpdateXmlJdbcImpl;
 import com.gdxsoft.easyweb.define.group.Exchange;
+import com.gdxsoft.easyweb.define.group.ModuleExport;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
+import com.gdxsoft.easyweb.utils.UJSon;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -62,6 +65,73 @@ public class ServletGroup extends HttpServlet {
 		this.show(request, response);
 	}
 
+	private JSONObject exportModule(RequestValue rv) {
+		JSONObject result = new JSONObject();
+		String moduleCode = rv.s("mod_code"); // "com.gdxsoft.backAdmin.menu";
+		result.put("moduleCode", moduleCode);
+
+		String moduleVersion = rv.s("mod_ver"); // "1.0";
+		result.put("moduleVersion", moduleVersion);
+
+		String ewaConntectionString = rv.s("ewa_conn"); // ewa;
+		result.put("ewaConntectionString", ewaConntectionString);
+
+		ModuleExport moduleExport = new ModuleExport(moduleCode, moduleVersion, ewaConntectionString);
+		int supId = 0;
+		result.put("supId", supId);
+		if (rv.s("g_sup_id") != null) {
+			supId = Integer.parseInt(rv.s("g_sup_id"));
+		}
+		try {
+			result = moduleExport.exportModule(supId);
+		} catch (Exception e) {
+			UJSon.rstSetFalse(result, e.getMessage());
+		}
+
+		return result;
+	}
+
+	/**
+	 * 下载模块， 2021新方法
+	 * @param rv
+	 * @param response
+	 * @throws Exception
+	 */
+	private void downloadExportModule(RequestValue rv, HttpServletResponse response) throws Exception {
+		JSONObject result = new JSONObject();
+		String moduleCode = rv.s("mod_code"); // "com.gdxsoft.backAdmin.menu";
+		result.put("moduleCode", moduleCode);
+
+		String moduleVersion = rv.s("mod_ver"); // "1.0";
+		result.put("moduleVersion", moduleVersion);
+
+		String ewaConntectionString = rv.s("ewa_conn"); // ewa;
+		result.put("ewaConntectionString", ewaConntectionString);
+
+		ModuleExport moduleExport = new ModuleExport(moduleCode, moduleVersion, ewaConntectionString);
+		int supId = 0;
+		result.put("supId", supId);
+		if (rv.s("g_sup_id") != null) {
+			supId = Integer.parseInt(rv.s("g_sup_id"));
+		}
+		byte[] buf = moduleExport.getExportModuleFile(0);
+
+		if (buf == null) {
+			response.setStatus(404);
+		}
+
+		String id = moduleCode + "_" + moduleVersion;
+		response.setHeader("Location", id + ".zip");
+		response.setHeader("Cache-Control", "max-age=0");
+		response.setHeader("Content-Disposition", "attachment; filename=" + id + ".zip");
+		response.setContentType("image/oct");
+		response.setContentLength(buf.length);
+		response.getOutputStream().write(buf);
+
+		response.getOutputStream().close();
+
+	}
+
 	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if (!ConfDefine.isAllowDefine()) {
 			response.setStatus(404);
@@ -70,19 +140,38 @@ public class ServletGroup extends HttpServlet {
 		}
 
 		RequestValue rv = new RequestValue(request);
-		DefineAcl acl = new DefineAcl();
-		acl.setRequestValue(rv);
-
-		if (!acl.canRun()) { // not login
-			response.getWriter().println("deny! request login");
-			return;
-		}
-
 		String oType = rv.getString("TYPE");
 		if (oType == null) {
 			return;
 		}
 
+		DefineAcl acl = new DefineAcl();
+		acl.setRequestValue(rv);
+
+		if (!acl.canRun()) { // not login
+			if (oType.equalsIgnoreCase("export_module")) {
+				response.getWriter().println(UJSon.rstFalse("deny! request login"));
+				return;
+			}
+			response.getWriter().println("deny! request login");
+			return;
+		}
+
+		// 导出模块
+		if (oType.equalsIgnoreCase("export_module")) { // 2021新方法
+			JSONObject result = this.exportModule(rv);
+			response.getWriter().println(result.toString());
+			return;
+		}
+		if (oType.equalsIgnoreCase("export_module_download")) { //下载模块， 2021新方法
+			try {
+				this.downloadExportModule(rv, response);
+			} catch (Exception e) {
+				LOGGER.error(e.getMessage());
+				response.setStatus(404);
+			}
+			return;
+		}
 		if (oType.equalsIgnoreCase("dl")) { // 下载生成的组件
 			String id = request.getParameter("id");
 			String path = UPath.getGroupPath() + "/exports/" + id + ".zip/";
@@ -228,25 +317,25 @@ public class ServletGroup extends HttpServlet {
 			String script_path = rv.s("script_path").trim();
 			ConfScriptPaths sps = ConfScriptPaths.getInstance();
 			ConfScriptPath sp = sps.getScriptPath(script_path);
-			
-			IUpdateXml ux =null;
-			if(sp.isReadOnly()) {
-				response.getWriter().println( Utils.textToInputValue(script_path) +" is read only!");
+
+			IUpdateXml ux = null;
+			if (sp.isReadOnly()) {
+				response.getWriter().println(Utils.textToInputValue(script_path) + " is read only!");
 				return;
 			}
-			if(sp.isJdbc()) {
+			if (sp.isJdbc()) {
 				ux = new UpdateXmlJdbcImpl(sp);
-			} else if(sp.isResources()) {
-				
+			} else if (sp.isResources()) {
+
 			} else {
 				ux = new UpdateXmlImpl(sp);
 			}
-			
-			if(ux == null) {
-				response.getWriter().println("Null parameter script_path: "+ Utils.textToInputValue(script_path) +"");
+
+			if (ux == null) {
+				response.getWriter().println("Null parameter script_path: " + Utils.textToInputValue(script_path) + "");
 				return;
 			}
-			
+
 			String datasource = request.getParameter("datasource").trim();
 			String xmlfile = request.getParameter("xmlfile").trim();
 			String id = request.getParameter("id").trim();
@@ -285,7 +374,8 @@ public class ServletGroup extends HttpServlet {
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and copyright.
+	 * Returns information about the servlet, such as author, version, and
+	 * copyright.
 	 * 
 	 * @return String information about this servlet
 	 */

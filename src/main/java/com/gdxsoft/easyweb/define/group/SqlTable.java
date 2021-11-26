@@ -5,6 +5,10 @@ package com.gdxsoft.easyweb.define.group;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.gdxsoft.easyweb.define.database.Field;
 import com.gdxsoft.easyweb.define.database.IndexField;
 import com.gdxsoft.easyweb.define.database.Table;
@@ -19,7 +23,7 @@ import com.gdxsoft.easyweb.define.database.maps.Maps;
  * 
  */
 public class SqlTable {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(SqlTable.class);
 	private Maps _Maps;
 	private String _Create;
 	private String _Pk;
@@ -40,18 +44,34 @@ public class SqlTable {
 	/**
 	 * 生成创建表
 	 * 
-	 * @param table
-	 *            表
-	 * @param databaseType
-	 *            数据库类型
+	 * @param table        表
+	 * @param databaseType 数据库类型
 	 * @return
 	 * @throws Exception
 	 */
-	public void createSqlTable(Table table, String databaseType)
-			throws Exception {
+	public void createSqlTable(Table table, String databaseType) throws Exception {
 		this.setTable(table);
-		HashMap<String, MapFieldType> alFrom = _Maps.getMapFieldTypes()
-				.getTypes(table.getDatabaseType());
+		boolean sameDatebaseType = databaseType != null && databaseType.equalsIgnoreCase(table.getDatabaseType());
+		LOGGER.info("Create {} {} DDL from {} to {}", table.getTableType(), table.getName(), table.getDatabaseType(),
+				databaseType);
+		// 数据库一致而且带有创建对象的DDL语句
+		if (sameDatebaseType) {
+			if (table.getSqlTable() != null && table.getSqlTable().trim().length() > 0) {
+				LOGGER.info("DatabaseType same as, using the original DDL");
+				this.setCreate(table.getSqlTable());
+				return;
+			}
+		}
+
+		if ("VIEW".equalsIgnoreCase(table.getTableType())) { // 视图
+			if (table.getSqlTable() != null && table.getSqlTable().trim().length() > 0) {
+				LOGGER.info("The view DDL maybe error, you should fixed this");
+				this.setCreate(table.getSqlTable());
+				return;
+			}
+		}
+
+		HashMap<String, MapFieldType> alFrom = _Maps.getMapFieldTypes().getTypes(table.getDatabaseType());
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sbPk = new StringBuilder();
 		String fixCharBefore = "";
@@ -64,11 +84,9 @@ public class SqlTable {
 			fixCharBefore = "[";
 			fixCharAfter = "]";
 		}
-		sb.append("CREATE TABLE " + fixCharBefore + table.getName()
-				+ fixCharAfter + "(\r\n");
+		sb.append("CREATE TABLE " + fixCharBefore + table.getName() + fixCharAfter + "(\r\n");
 		for (int i = 0; i < table.getFields().size(); i++) {
-			Field f = table.getFields().get(
-					table.getFields().getFieldList().get(i));
+			Field f = table.getFields().get(table.getFields().getFieldList().get(i));
 			if (f.isPk()) {
 				if (sbPk.length() > 0) {
 					sbPk.append(", ");
@@ -76,15 +94,9 @@ public class SqlTable {
 				sbPk.append(f.getName());
 			}
 			String fieldType = f.getDatabaseType().toUpperCase();
-			// if (fieldType.equals("INT IDENTITY")) {
-			// fieldType = "INT";
-			// }
-			// if (fieldType.startsWith("INT ")) {
-			// fieldType = "INT";
-			// }
+
 			if (fieldType.endsWith("IDENTITY")) {
-				fieldType = fieldType.replace("IDENTITY", "").replace("(", "")
-						.replace(")", "").trim();
+				fieldType = fieldType.replace("IDENTITY", "").replace("(", "").replace(")", "").trim();
 			}
 			MapFieldType mapTo;
 
@@ -96,23 +108,19 @@ public class SqlTable {
 				// 数据库类型一致的话则保持原始数据类型，不用转换
 				mapTo = mapType;
 			} else {
-				MapFieldType[] b = mapType.getEwa().getMapTo()
-						.get(databaseType);
+				MapFieldType[] b = mapType.getEwa().getMapTo().get(databaseType);
 
 				if (b.length == 0) {
-					throw new Exception("数据类型：" + fieldType + "未找到对应的类型《"
-							+ databaseType + "》！");
+					throw new Exception("数据类型：" + fieldType + "未找到对应的类型《" + databaseType + "》！");
 				}
 				mapTo = b[0];
 			}
 			if (i > 0) {
 				sb.append(",\r\n");
 			}
-			sb.append("\t" + fixCharBefore + f.getName() + fixCharAfter + " "
-					+ mapTo.getName());
+			sb.append("\t" + fixCharBefore + f.getName() + fixCharAfter + " " + mapTo.getName());
 			if (mapTo.getEwa().getCreateNumber() == 1) {
-				int len = f.getColumnSize() * mapType.getScale()
-						/ mapTo.getScale();
+				int len = f.getColumnSize() * mapType.getScale() / mapTo.getScale();
 				String lenDes = len + "";
 				if ((len < 0 || len == 2147483647 || len == 2147483647 / 2)
 						&& table.getDatabaseType().equalsIgnoreCase("MSSQL")) {
@@ -120,8 +128,7 @@ public class SqlTable {
 				}
 				sb.append("(" + lenDes + ")");
 			} else if (mapTo.getEwa().getCreateNumber() == 2) {
-				sb.append("(" + f.getColumnSize() + "," + f.getDecimalDigits()
-						+ ")");
+				sb.append("(" + f.getColumnSize() + "," + f.getDecimalDigits() + ")");
 			}
 			if (f.isIdentity() && databaseType.equalsIgnoreCase("MSSQL")) {
 				sb.append(" IDENTITY(1,1) ");
@@ -129,17 +136,15 @@ public class SqlTable {
 
 			if (!f.isNull() || f.isPk()) {
 				sb.append(" NOT NULL");
-			}else{
+			} else {
 				sb.append(" NULL");
 			}
 			if (f.isIdentity() && databaseType.equalsIgnoreCase("MYSQL")) {
-				sb.append(" AUTO_INCREMENT, PRIMARY KEY(`" + f.getName()
-						+ "`) ");
+				sb.append(" AUTO_INCREMENT, PRIMARY KEY(`" + f.getName() + "`) ");
 			}
 			// 如果是mysql的话，在建表过程中，将注解建好
 			if (databaseType.equalsIgnoreCase("MYSQL")) {
-				sb.append(" COMMENT '" + f.getDescription().replace("'", "''")
-						+ "' ");
+				sb.append(" COMMENT '" + f.getDescription().replace("'", "''") + "' ");
 			}
 		}
 		sb.append(")");
@@ -183,8 +188,8 @@ public class SqlTable {
 		for (int i = 0; i < table.getIndexes().size(); i++) {
 			StringBuilder sb = new StringBuilder();
 			TableIndex idx = table.getIndexes().get(i);
-			sb.append("CREATE " + (idx.isUnique() ? "UNIQUE" : "") + " INDEX "
-					+ idx.getIndexName() + " ON " + table.getName() + "(");
+			sb.append("CREATE " + (idx.isUnique() ? "UNIQUE" : "") + " INDEX " + idx.getIndexName() + " ON "
+					+ table.getName() + "(");
 			for (int m = 0; m < idx.getIndexFields().size(); m++) {
 				if (m > 0) {
 					sb.append(", ");
@@ -215,8 +220,7 @@ public class SqlTable {
 			return;
 		}
 		for (int i = 0; i < table.getFields().size(); i++) {
-			Field f = table.getFields().get(
-					table.getFields().getFieldList().get(i));
+			Field f = table.getFields().get(table.getFields().getFieldList().get(i));
 			if (f.getDescription().equals(f.getName())) {
 				continue;
 			}
@@ -237,8 +241,7 @@ public class SqlTable {
 	}
 
 	/**
-	 * @param create
-	 *            the _Create to set
+	 * @param create the _Create to set
 	 */
 	public void setCreate(String create) {
 		_Create = create;
@@ -252,8 +255,7 @@ public class SqlTable {
 	}
 
 	/**
-	 * @param pk
-	 *            the _Pk to set
+	 * @param pk the _Pk to set
 	 */
 	public void setPk(String pk) {
 		_Pk = pk;
@@ -267,8 +269,7 @@ public class SqlTable {
 	}
 
 	/**
-	 * @param indexes
-	 *            the _Indexes to set
+	 * @param indexes the _Indexes to set
 	 */
 	public void setIndexes(ArrayList<String> indexes) {
 		_Indexes = indexes;
@@ -282,8 +283,7 @@ public class SqlTable {
 	}
 
 	/**
-	 * @param table
-	 *            the _Table to set
+	 * @param table the _Table to set
 	 */
 	public void setTable(Table table) {
 		_Table = table;

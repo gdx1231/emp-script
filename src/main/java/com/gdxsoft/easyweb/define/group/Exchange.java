@@ -4,14 +4,19 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,18 +36,20 @@ import com.gdxsoft.easyweb.define.database.maps.Maps;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UFile;
+import com.gdxsoft.easyweb.utils.UJSon;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 
 public class Exchange {
+	private static Logger LOGGER = LoggerFactory.getLogger(Exchange.class);
 	public static final String XML_CFG = "cfg.xml";
 	public static final String XML_TABLE = "table.xml";
 	public static final String XML_DATA = "data.xml";
 	public static final String XML_RESOURCES = "res.xml";
 	public static final String XML_DES = "des.xml";
 
-	private String _Path;
+	private String _Path; // 导入文件解压目录
 	private Document _DocCfg;
 	private Document _DocTable;
 	private Document _DocData;
@@ -53,6 +60,12 @@ public class Exchange {
 	private String _ConnectionString;
 	private String _Id;
 
+	private String replaceMetaDatabaseName;
+	private String replaceWorkDatabaseName;
+
+	// 导入或导出的表列表
+	private List<Table> tables = new ArrayList<>();
+	
 	public Exchange(String id) {
 		this._Id = id;
 	}
@@ -62,11 +75,41 @@ public class Exchange {
 		_ConnectionString = connectionString;
 	}
 
+	/**
+	 * 导入数据与模块
+	 * 
+	 * @throws Exception
+	 */
 	public void importGroup() throws Exception {
-		String fileName = UPath.getGroupPath() + "/imports/" + _Id + ".zip";
-		List<String> al = UFile.unZipFile(fileName);
+		String fileName = this.getImportPath() + ".zip";
+		this.importGroup(fileName);
+	}
+
+	/**
+	 * 导入数据与模块
+	 * 
+	 * @throws Exception
+	 */
+	public void importGroup(String packageZipPath) throws Exception {
+		LOGGER.info("Import module -> {}", packageZipPath);
+		// 创建临时文件
+		File tempFile = File.createTempFile(packageZipPath, ".zip");
+
+		UFile.copyFile(packageZipPath, tempFile.getAbsolutePath());
+
+		// 解压文件
+		List<String> al = UFile.unZipFile(tempFile.getAbsolutePath());
+		al.forEach(f -> {
+			LOGGER.debug("\tUnpacked file {}", f);
+		});
+
+		// 删除临时文件
+		UFile.delete(tempFile.getAbsolutePath());
+
 		File f = new File(al.get(0));
+		// 导入文件的解压目录
 		this._Path = f.getParent();
+		LOGGER.info("Unpacked file to -> {}", this._Path);
 
 		this._DocCfg = this.readXmlDoc(XML_CFG);
 		this._DocData = this.readXmlDoc(XML_DATA);
@@ -78,9 +121,39 @@ public class Exchange {
 		this._Conn.setConfigName(this._ConnectionString);
 	}
 
+	/**
+	 * Delete the import's unpacked files
+	 */
+	public void removeImportTempFiles() {
+		if (this._Path == null) {
+			return;
+		}
+
+		File path = new File(this._Path);
+		if (!path.exists()) {
+			return;
+		}
+
+		try {
+			FileUtils.deleteDirectory(path);
+		} catch (IOException e) {
+			LOGGER.warn("Delete the path {}, {}", path, e.getMessage());
+		}
+	}
+
+	/**
+	 * 导入表，表数据和视图
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public String importTableAndData() throws Exception {
 		StringBuilder sbErr = new StringBuilder();
 		ImportTables importTables = new ImportTables(this._DocTable, this._DocData, this._Conn);
+
+		importTables.setReplaceMetaDatabaseName(this.replaceMetaDatabaseName);
+		importTables.setReplaceWorkDatabaseName(this.replaceWorkDatabaseName);
+
 		String s = importTables.importTables();
 		sbErr.append(s);
 		s = importTables.importDatas();
@@ -110,7 +183,7 @@ public class Exchange {
 				File f = new File(p);
 				sb.append("\r\n" + f.getPath());
 			} catch (Exception e) {
-				System.err.println(e.getMessage());
+				LOGGER.error(e.getMessage());
 				sb.append(e.getMessage() + "\r\n");
 			}
 		}
@@ -118,7 +191,129 @@ public class Exchange {
 	}
 
 	/**
-	 * 导入配置文件
+	 * 导入根据 ExportDefaultXmlname 自动导入配置到指定目录
+	 * 
+	 * @param ux 导入对象
+	 * @return
+	 */
+	public JSONObject importCfgsAutoPath(IUpdateXml ux) {
+		NodeList nl = this._DocCfg.getElementsByTagName("EasyWebTemplate");
+		Map<String, List<String>> xmlCfgGroup = new HashMap<>();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Element cfg = (Element) nl.item(i);
+
+			String defaultItmename = cfg.getAttribute("ExportDefaultItmename");
+			cfg.setAttribute("ItemName", defaultItmename);
+
+			this.replaceCfgDatasource(cfg);
+			this.replaceCfgSqlFunctions(cfg);
+
+			String cfgXml = UXml.asXml(cfg);
+
+			String defaultXmlName = cfg.getAttribute("ExportDefaultXmlname");
+			defaultXmlName = UserConfig.filterXmlNameByJdbc(defaultXmlName);
+
+			// 按照输出xmlname分组保存
+			if (!xmlCfgGroup.containsKey(defaultXmlName)) {
+				List<String> al = new ArrayList<>();
+				xmlCfgGroup.put(defaultXmlName, al);
+			}
+			xmlCfgGroup.get(defaultXmlName).add(cfgXml);
+		}
+		JSONObject rst = UJSon.rstTrue(null);
+		xmlCfgGroup.forEach((importXmlName, al) -> {
+			StringBuilder sb = new StringBuilder();
+			sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><EasyWebTemplates>");
+			al.forEach(xml -> {
+				sb.append(xml);
+			});
+			sb.append("</EasyWebTemplates>");
+			// 按照 xmlname 分组进行导入
+			JSONObject r = this.importCfgsByXmlContent(ux, importXmlName, sb.toString());
+			rst.put(importXmlName, r);
+		});
+
+		return rst;
+	}
+
+	/**
+	 * 根据xmlName导入配置信息
+	 * 
+	 * @param ux      导入对象
+	 * @param xmlName 导入的配置文件名称
+	 * @param cfgsXml
+	 * @return
+	 */
+	private JSONObject importCfgsByXmlContent(IUpdateXml ux, String importXmlName, String cfgsXml) {
+		try {
+			// 创建临时文件
+			File temp = File.createTempFile("importCfgsByXmlContent_", ".xml");
+			UFile.createNewTextFile(temp.getAbsolutePath(), cfgsXml);
+			LOGGER.info("Import cfg file {}", temp.getAbsolutePath());
+
+			// 导入配置
+			JSONObject rst = ux.importXml("", importXmlName, temp.getAbsolutePath());
+			LOGGER.info("Import result: {}", rst);
+
+			// 删除临时文件
+			UFile.delete(temp.getAbsolutePath());
+
+			return rst;
+		} catch (IOException e) {
+			LOGGER.error(e.getMessage());
+			return UJSon.rstFalse(e.getMessage());
+		}
+
+	}
+
+	private void replaceCfgDatasource(Element parent) {
+		// 替换数据库连接池
+		NodeList nl = parent.getElementsByTagName("DataSource");
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node node = nl.item(i);
+			if (node.getChildNodes().getLength() == 1) {
+				Element ele = (Element) node.getChildNodes().item(0);
+				ele.setAttribute("DataSource", this._ConnectionString);
+			}
+		}
+	}
+
+	private void replaceCfgSqlFunctions(Element parent) {
+		// 提取所有SQL
+		NodeList nl = parent.getElementsByTagName("Sql");
+		ArrayList<CDATASection> al = new ArrayList<CDATASection>();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node node = nl.item(i);
+			for (int mm = 0; mm < node.getChildNodes().getLength(); mm++) {
+				Node nm = node.getChildNodes().item(mm);
+				if (nm.getNodeType() == Node.CDATA_SECTION_NODE) {
+					al.add((CDATASection) nm);
+				}
+			}
+		}
+
+		// 转换不同类型数据库的 SQL function
+		try {
+			MapFunctions funcs = Maps.instance().getMapFunctions();
+			HashMap<String, MapFunction> types = funcs.getTypes(this._Conn.getDatabaseType());
+
+			for (int i = 0; i < al.size(); i++) {
+				CDATASection sec = al.get(i);
+				String sql = sec.getTextContent();
+				Iterator<String> it = types.keySet().iterator();
+				while (it.hasNext()) {
+					MapFunction map = types.get(it.next());
+					sql = sql.replace(map.getEwa().getName(), map.getName());
+				}
+				sec.setTextContent(sql);
+			}
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+		}
+	}
+
+	/**
+	 * @deprecated 导入配置文件
 	 * 
 	 * @param path 文件路径及文件名 例如：|test|oa_master.xml
 	 * @return 生成文件的路径
@@ -149,6 +344,8 @@ public class Exchange {
 		String xml = UXml.asXmlAll(this._DocCfg);
 		xml = xml.replace("{#XMLNAME}", path);
 		this._DocCfg = UXml.asDocument(xml);
+
+		// 替换数据库连接池
 		NodeList nl = this._DocCfg.getElementsByTagName("DataSource");
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
@@ -158,6 +355,7 @@ public class Exchange {
 			}
 		}
 
+		// 提取所有SQL
 		nl = this._DocCfg.getElementsByTagName("Sql");
 		ArrayList<CDATASection> al = new ArrayList<CDATASection>();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -170,6 +368,7 @@ public class Exchange {
 			}
 		}
 
+		// 转换不同类型数据库的 SQL function
 		try {
 			MapFunctions funcs = Maps.instance().getMapFunctions();
 			HashMap<String, MapFunction> types = funcs.getTypes(this._Conn.getDatabaseType());
@@ -185,12 +384,18 @@ public class Exchange {
 				sec.setTextContent(sql);
 			}
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		}
 		al.clear();
+
+		// 创建和临时文件
 		File temp = File.createTempFile(Utils.getGuid(), "xml");
 		UXml.saveDocument(this._DocCfg, temp.getAbsolutePath());
+
+		// 导入配置
 		JSONObject rst = ux.importXml("", path, temp.getAbsolutePath());
+
+		UFile.delete(temp.getAbsolutePath());
 		return rst.toString();
 	}
 
@@ -199,8 +404,14 @@ public class Exchange {
 		return UXml.retDocument(path);
 	}
 
+	/**
+	 * 导出模块Zip文件
+	 * 
+	 * @return 模块Zip文件地址
+	 * @throws Exception
+	 */
 	public String exportGroup() throws Exception {
-		this._Path = UPath.getGroupPath() + "/exports/" + _Id + "/";
+		this._Path = this.getExportPath() + "/";
 		this._DocCfg = this.createDoc(XML_CFG, "EasyWebTemplates");
 		this._DocData = this.createDoc(XML_DATA, "Datas");
 		this._DocTable = this.createDoc(XML_TABLE, "Tables");
@@ -213,12 +424,22 @@ public class Exchange {
 			Node node = nl.item(i);
 			String tableName = UXml.retNodeValue(node, "TableName");
 			String dataSource = UXml.retNodeValue(node, "DataSource");
-			Table table = this.exportTable(tableName, dataSource);
-
+			String tableType = UXml.retNodeValue(node, "TableType");
+			  
+			
+			Table table = this.exportTable(tableName, dataSource, tableType);
+			
+			// 来源参考
+			String refId = UXml.retNodeValue(node, "RefId");
+			table.setRefId(refId);
+			
+			this.tables.add(table);
+			
 			String IsExport = UXml.retNodeValue(node, "IsExport");
 			String where = UXml.retNodeValue(node, "ExportWhere");
 
-			if (IsExport.equals("true")) {
+			// 视图 VIEW 不输出数据
+			if (IsExport.equals("true") && !"VIEW".equals(tableType)) {
 				this.exportData(table, where);
 			}
 		}
@@ -226,10 +447,8 @@ public class Exchange {
 		nl = UXml.retNodeList(this._DocDes, "EasyWebTemplates/EasyWebTemplate");
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
-			String xmlName = UXml.retNodeValue(node, "XmlName");
-			String itemName = UXml.retNodeValue(node, "ItemName");
 
-			this.exportItem(itemName, xmlName);
+			this.exportItem((Element) node);
 		}
 		this.replaceFunctions(); // 替换配置文件中的Sql方法
 
@@ -268,7 +487,7 @@ public class Exchange {
 			this._DocRes.getFirstChild().appendChild(ele);
 
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		}
 
 	}
@@ -280,11 +499,18 @@ public class Exchange {
 	 * @param oriDataSource
 	 * @return
 	 */
-	public Table exportTable(String tableName, String oriDataSource) {
+	public Table exportTable(String tableName, String oriDataSource, String tableType) {
 		Table t = new Table(tableName, oriDataSource);
+		t.setTableType(tableType);
+
+		t.setReplaceMetaDatabaseName(this.replaceMetaDatabaseName);
+		t.setReplaceWorkDatabaseName(this.replaceWorkDatabaseName);
+
 		t.getFields();
 		t.toXml((Element) this._DocTable.getFirstChild());
 
+		
+		
 		return t;
 	}
 
@@ -305,6 +531,51 @@ public class Exchange {
 	/**
 	 * 输出EasyWebTemplate
 	 * 
+	 * @param cfgEle 配置信息
+	 */
+	public void exportItem(Element cfgEle) {
+		String xmlName = UXml.retNodeValue(cfgEle, "XmlName");
+		String itemName = UXml.retNodeValue(cfgEle, "ItemName");
+		String description = UXml.retNodeValue(cfgEle, "Description");
+		// 默认输出目录
+		String exportDefaultXmlname = UXml.retNodeValue(cfgEle, "ExportDefaultXmlname");
+		// 默认输出项名称
+		String exportDefaultItmename = UXml.retNodeValue(cfgEle, "ExportDefaultItmename");
+
+		UserXmls ux = new UserXmls(xmlName);
+		ux.initXml();
+		List<UserXml> al = ux.getXmls();
+		String itemName1 = itemName.trim().toUpperCase();
+		for (int i = 0; i < al.size(); i++) {
+			UserXml u = al.get(i);
+			if (!u.getName().trim().toUpperCase().equals(itemName1)) {
+				continue;
+			}
+
+			LOGGER.info("Export the cfg {} {} {}", xmlName, itemName, description);
+
+			String xml = this.replaceParas(u.getXml(), xmlName);
+
+			Element itemNode = (Element) UXml.asNode(xml);
+
+			itemNode.setAttribute("ExportSourceXmlname", xmlName);
+			itemNode.setAttribute("ExportSourceItemname", itemName);
+			// 默认输出目录
+			itemNode.setAttribute("ExportDefaultXmlname", exportDefaultXmlname);
+			// 默认输出项名称
+			itemNode.setAttribute("ExportDefaultItmename", exportDefaultItmename);
+
+			itemNode.setAttribute("ExportTime", Utils.getDateTimeString(new Date()));
+
+			String xml1 = UXml.asXml(itemNode);
+			this._DocCfg = UXml.appendNode(this._DocCfg, xml1, _DocCfg.getFirstChild().getNodeName());
+			break;
+		}
+	}
+
+	/**
+	 * @deprecated 输出EasyWebTemplate
+	 * 
 	 * @param itemName
 	 * @param xmlName
 	 */
@@ -315,11 +586,14 @@ public class Exchange {
 		String itemName1 = itemName.trim().toUpperCase();
 		for (int i = 0; i < al.size(); i++) {
 			UserXml u = al.get(i);
-			if (u.getName().trim().toUpperCase().equals(itemName1)) {
-				String xml = this.replaceParas(u.getXml(), xmlName);
-				this._DocCfg = UXml.appendNode(this._DocCfg, xml, _DocCfg.getFirstChild().getNodeName());
-				break;
+			if (!u.getName().trim().toUpperCase().equals(itemName1)) {
+				continue;
 			}
+
+			String xml = this.replaceParas(u.getXml(), xmlName);
+
+			this._DocCfg = UXml.appendNode(this._DocCfg, xml, _DocCfg.getFirstChild().getNodeName());
+			break;
 		}
 	}
 
@@ -414,12 +688,13 @@ public class Exchange {
 		return UXml.saveDocument(doc, path);
 	}
 
+	/**
+	 * 导入文件解压目录
+	 * 
+	 * @return
+	 */
 	public String getPath() {
 		return _Path;
-	}
-
-	public void setPath(String path) {
-		_Path = path;
 	}
 
 	public Document getDocCfg() {
@@ -484,6 +759,59 @@ public class Exchange {
 
 	public void setId(String id) {
 		_Id = id;
+	}
+
+	/**
+	 * @return the replaceMetaDatabaseName
+	 */
+	public String getReplaceMetaDatabaseName() {
+		return replaceMetaDatabaseName;
+	}
+
+	/**
+	 * @param replaceMetaDatabaseName the replaceMetaDatabaseName to set
+	 */
+	public void setReplaceMetaDatabaseName(String replaceMetaDatabaseName) {
+		this.replaceMetaDatabaseName = replaceMetaDatabaseName;
+	}
+
+	/**
+	 * @return the replaceWorkDatabaseName
+	 */
+	public String getReplaceWorkDatabaseName() {
+		return replaceWorkDatabaseName;
+	}
+
+	/**
+	 * @param replaceWorkDatabaseName the replaceWorkDatabaseName to set
+	 */
+	public void setReplaceWorkDatabaseName(String replaceWorkDatabaseName) {
+		this.replaceWorkDatabaseName = replaceWorkDatabaseName;
+	}
+
+	/**
+	 * 导出目录
+	 * 
+	 * @return
+	 */
+	public String getExportPath() {
+		return UPath.getGroupPath() + "/exports/" + _Id;
+	}
+
+	/**
+	 * 导入目录
+	 * 
+	 * @return
+	 */
+	public String getImportPath() {
+		return UPath.getGroupPath() + "/imports/" + _Id;
+	}
+
+	/**
+	 * @return the tables
+	 */
+	public List<Table> getTables() {
+		return tables;
 	}
 
 }

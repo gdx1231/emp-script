@@ -33,26 +33,10 @@ public class ImportTables {
 	private HashMap<String, List<Object>> _TablesInsertFix;
 
 	private DataConnection _Conn;
-
 	private String targetDatabase_;
 
-	/**
-	 * 需要转换的数据库, 执行前执行use targetDatabase，执行后 use prevdatabase
-	 * 
-	 * @return
-	 */
-	public String getTargetDatabase() {
-		return targetDatabase_;
-	}
-
-	/**
-	 * 设置需要转换的数据库, 执行前执行use targetDatabase，执行后 use prevdatabase
-	 * 
-	 * @param targetDatabase_
-	 */
-	public void setTargetDatabase(String targetDatabase_) {
-		this.targetDatabase_ = targetDatabase_;
-	}
+	private String replaceMetaDatabaseName; // DDL replace meta database name, e.g. `main_data_db`
+	private String replaceWorkDatabaseName; // DDL replace work database name, e.g. `work_db`
 
 	public ImportTables(Document docTable, Document docData, DataConnection conn) {
 		this._DocTable = docTable;
@@ -71,16 +55,138 @@ public class ImportTables {
 	}
 
 	/**
-	 * 导入表结构
+	 * 替换元数据库和工作库的名称
+	 * @param sourceSql
+	 * @return
+	 */
+	private String replaceMetaOrWorkDatabaseName(String sourceSql) {
+		String s = sourceSql;
+		if (this.replaceMetaDatabaseName != null) {
+			s = s.replace(Table.REPLACE_META_DATABASE_NAME, this.replaceMetaDatabaseName);
+		}
+		if (this.replaceWorkDatabaseName != null) {
+			s = s.replace(Table.REPLACE_WORK_DATABASE_NAME, this.replaceWorkDatabaseName);
+		}
+
+		return s;
+	}
+
+	/**
+	 * Create the tables
+	 * 
+	 * @param maps
+	 * @return
+	 */
+	private String createDatabaseTables(HashMap<String, SqlTable> maps) {
+		Iterator<String> it = maps.keySet().iterator();
+		StringBuilder sb = new StringBuilder();
+
+		while (it.hasNext()) {
+			SqlTable t = maps.get(it.next());
+			if ("VIEW".equalsIgnoreCase(t.getTable().getTableType())) {
+				continue;
+			}
+			String s = t.getCreate();
+
+			s = this.replaceMetaOrWorkDatabaseName(s);
+			
+			LOGGER.info("Create the table {}", t.getTable().getName());
+			// 表结构
+			LOGGER.debug("TABLE DDL -> {}", s);
+			this._Conn.executeUpdateNoParameter(s);
+			if (this._Conn.getErrorMsg() != null) {
+				sb.append(this._Conn.getErrorMsg() + "\n");
+				this._Conn.clearErrorMsg();
+			}
+
+			// 主键
+			String pkSql = t.getPk();
+			if (pkSql != null && pkSql.trim().length() > 0) {
+				pkSql = this.replaceMetaOrWorkDatabaseName(pkSql);
+				LOGGER.debug("TABLE PK -> {}", pkSql);
+				this._Conn.executeUpdateNoParameter(pkSql);
+				if (this._Conn.getErrorMsg() != null) {
+					sb.append(this._Conn.getErrorMsg() + "\n");
+					this._Conn.clearErrorMsg();
+				}
+			}
+
+			// 字段备注
+			ArrayList<String> s2 = t.getComments();
+			for (int i = 0; i < s2.size(); i++) {
+				String sql = s2.get(i);
+				sql = sql.replace("{SCHMEA}", this._Conn.getSchemaName());
+				sql = this.replaceMetaOrWorkDatabaseName(sql);
+				
+				LOGGER.debug("TABLE COMMENT -> {}", sql);
+
+				this._Conn.executeUpdateNoParameter(sql);
+				if (this._Conn.getErrorMsg() != null) {
+					sb.append(this._Conn.getErrorMsg() + "\n");
+					this._Conn.clearErrorMsg();
+				}
+			}
+
+			// 索引
+			ArrayList<String> s1 = t.getIndexes();
+			for (int i = 0; i < s1.size(); i++) {
+				String sqlIndex = s1.get(i);
+				sqlIndex = this.replaceMetaOrWorkDatabaseName(sqlIndex);
+				LOGGER.debug("TABLE INDEX -> {}", sqlIndex);
+				this._Conn.executeUpdateNoParameter(s1.get(i));
+				if (this._Conn.getErrorMsg() != null) {
+					// sb.append(this._Conn.getErrorMsg() + "\n");
+					LOGGER.warn(this._Conn.getErrorMsg());
+					this._Conn.clearErrorMsg();
+				}
+			}
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * Create the views
+	 * 
+	 * @param maps
+	 * @return
+	 */
+	private String createDatabaseViews(HashMap<String, SqlTable> maps) {
+		StringBuilder sb = new StringBuilder();
+		// 处理视图
+		maps.forEach((key, t) -> {
+			if (!"VIEW".equalsIgnoreCase(t.getTable().getTableType())) {
+				return;
+			}
+
+			String ddl = t.getCreate();
+			ddl = ddl.replace("{SCHMEA}", this._Conn.getSchemaName());
+			ddl = this.replaceMetaOrWorkDatabaseName(ddl);
+			
+			LOGGER.info("Create the view {}", t.getTable().getName());
+			LOGGER.debug("VIEW DDL -> {}", ddl);
+
+			this._Conn.executeUpdateNoParameter(ddl);
+			if (this._Conn.getErrorMsg() != null) {
+				sb.append(this._Conn.getErrorMsg() + "\n");
+				this._Conn.clearErrorMsg();
+			}
+		});
+
+		return sb.toString();
+	}
+
+	/**
+	 * Import table or view structures
 	 * 
 	 * @return
 	 * @throws Exception
 	 */
 	public String importTables() throws Exception {
-		readTables();
+		this.readTables();
+
 		String thisDatabase = "";
 		if (targetDatabase_ != null) {
-
 			String sql0 = "select top 1 CATALOG_NAME from INFORMATION_SCHEMA.SCHEMATA";
 			DTTable tb = DTTable.getJdbcTable(sql0);
 
@@ -91,63 +197,29 @@ public class ImportTables {
 		}
 		String databaseType = this._Conn.getDatabaseType();
 		HashMap<String, SqlTable> maps = this.getSqlTables(databaseType);
-		Iterator<String> it = maps.keySet().iterator();
-		StringBuilder sb = new StringBuilder();
 
-		while (it.hasNext()) {
-			SqlTable t = maps.get(it.next());
-			String s = t.getCreate();
-			// 表结构
-			this._Conn.executeUpdateNoParameter(s);
-			if (this._Conn.getErrorMsg() != null) {
-				sb.append(this._Conn.getErrorMsg() + "\r\n");
-				this._Conn.clearErrorMsg();
-			}
+		StringBuilder errors = new StringBuilder();
 
-			// 主键
-			if (t.getPk() != null && t.getPk().trim().length() > 0) {
-				this._Conn.executeUpdateNoParameter(t.getPk());
-				if (this._Conn.getErrorMsg() != null) {
-					sb.append(this._Conn.getErrorMsg() + "\r\n");
-					this._Conn.clearErrorMsg();
-				}
-			}
+		// Create tables
+		String errTables = this.createDatabaseTables(maps);
+		errors.append(errTables);
 
-			// 字段备注
-			ArrayList<String> s2 = t.getComments();
-			for (int i = 0; i < s2.size(); i++) {
-				String sql = s2.get(i);
-				sql = sql.replace("{SCHMEA}", this._Conn.getSchemaName());
-				this._Conn.executeUpdateNoParameter(sql);
-				if (this._Conn.getErrorMsg() != null) {
-					sb.append(this._Conn.getErrorMsg() + "\r\n");
-					this._Conn.clearErrorMsg();
-				}
-			}
+		// Create views
+		String errViews = this.createDatabaseViews(maps);
+		errors.append(errViews);
 
-			// 索引
-			ArrayList<String> s1 = t.getIndexes();
-			for (int i = 0; i < s1.size(); i++) {
-				this._Conn.executeUpdateNoParameter(s1.get(i));
-				if (this._Conn.getErrorMsg() != null) {
-					// sb.append(this._Conn.getErrorMsg() + "\r\n");
-					System.out.println("警告：" + this._Conn.getErrorMsg());
-					this._Conn.clearErrorMsg();
-				}
-			}
-		}
 		if (thisDatabase.trim().length() > 0) {
 			_Conn.executeUpdateNoParameter("use " + thisDatabase);
 		}
 		this._Conn.close();
 
-		return sb.toString();
+		return errors.toString();
 	}
 
 	/**
-	 * 导入数据，返回错误信息
+	 * Import tables data, and return the errors
 	 * 
-	 * @return
+	 * @return the errors
 	 */
 	public String importDatas() {
 		NodeList nl = UXml.retNodeList(this._DocData, "Datas/Data");
@@ -156,7 +228,7 @@ public class ImportTables {
 		if (_TablesInsertFix == null) {
 			_TablesInsertFix = new HashMap<String, List<Object>>();
 		}
-
+		boolean isSqlServer = this._Conn.getDatabaseType().equalsIgnoreCase("MSSQL");
 		try {
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node node = nl.item(i);
@@ -164,7 +236,7 @@ public class ImportTables {
 				Table t = this._SqlTables.get(name).getTable();
 				this.createInsertFix(t);
 
-				if (this._Conn.getDatabaseType().equalsIgnoreCase("MSSQL")) {
+				if (isSqlServer) {
 					String sql = "set IDENTITY_INSERT " + t.getName() + " on";
 					this._Conn.executeUpdateNoParameter(sql);
 				}
@@ -172,7 +244,7 @@ public class ImportTables {
 				String s = this.importTableRows(t, node);
 				sb.append(s);
 
-				if (this._Conn.getDatabaseType().equalsIgnoreCase("MSSQL")) {
+				if (isSqlServer) {
 					String sql = "set IDENTITY_INSERT " + t.getName() + " off";
 					this._Conn.executeUpdateNoParameter(sql);
 				}
@@ -231,8 +303,7 @@ public class ImportTables {
 	/**
 	 * 导入表数据，返回错误信息
 	 * 
-	 * @param t
-	 *            表
+	 * @param t    表
 	 * @param node
 	 * @return
 	 */
@@ -244,6 +315,9 @@ public class ImportTables {
 
 		StringBuilder sbError = new StringBuilder();
 		NodeList nl = UXml.retNodeList(node, "Row");
+
+		LOGGER.info("Import table {} data, {} records", t.getName(), nl.getLength());
+
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node row = nl.item(i);
 			String sql = lst.get(0).toString() + this.createInsertSql(fs, dts, row);
@@ -312,7 +386,7 @@ public class ImportTables {
 			}
 
 			if (covert != null && covert.equals("BIN") && target.getDatabaseName().equalsIgnoreCase("mysql")) {
-				//二进制转换
+				// 二进制转换
 				sb1.a("x'");
 				sb1.a(v1.replace("'", "''"));
 				sb1.a("'");
@@ -374,11 +448,64 @@ public class ImportTables {
 	}
 
 	/**
-	 * @param conn
-	 *            the _Conn to set
+	 * @param conn the _Conn to set
 	 */
 	public void setConn(DataConnection conn) {
 		_Conn = conn;
 	}
 
+
+	/**
+	 * 需要转换的数据库, 执行前执行use targetDatabase，执行后 use prevdatabase
+	 * 
+	 * @return
+	 */
+	public String getTargetDatabase() {
+		return targetDatabase_;
+	}
+
+	/**
+	 * 设置需要转换的数据库, 执行前执行use targetDatabase，执行后 use prevdatabase
+	 * 
+	 * @param targetDatabase_
+	 */
+	public void setTargetDatabase(String targetDatabase_) {
+		this.targetDatabase_ = targetDatabase_;
+	}
+
+	/**
+	 * DDL replace meta database name, e.g. `main_data_db`
+	 * 
+	 * @return the replaceMetaDatabaseName
+	 */
+	public String getReplaceMetaDatabaseName() {
+		return replaceMetaDatabaseName;
+	}
+
+	/**
+	 * DDL replace meta database name, e.g. `main_data_db`
+	 * 
+	 * @param replaceMetaDatabaseName the replaceMetaDatabaseName to set
+	 */
+	public void setReplaceMetaDatabaseName(String replaceMetaDatabaseName) {
+		this.replaceMetaDatabaseName = replaceMetaDatabaseName;
+	}
+
+	/**
+	 * DDL replace work database name, e.g. `work_db`
+	 * 
+	 * @return the replaceWorkDatabaseName
+	 */
+	public String getReplaceWorkDatabaseName() {
+		return replaceWorkDatabaseName;
+	}
+
+	/**
+	 * DDL replace work database name, e.g. `work_db`
+	 * 
+	 * @param replaceWorkDatabaseName the replaceWorkDatabaseName to set
+	 */
+	public void setReplaceWorkDatabaseName(String replaceWorkDatabaseName) {
+		this.replaceWorkDatabaseName = replaceWorkDatabaseName;
+	}
 }
