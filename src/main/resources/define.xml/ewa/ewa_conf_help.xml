@@ -2,6 +2,17 @@
 	var ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
 	//提交后台数据时执行的检查或附加数据处理
 	ewa.DoPostBefore = function(){
+		/*
+		//附加数据处理
+		// ewa.PostAddData = {add1:'a',add2:2};
+
+        // 附加检查合法性
+    	if(getObj('#aaa').val()==''){
+    		return false; //检查不通过
+    	}else{
+    		return true; //检查通过
+    	}
+	    */
 	    return true;
 	};
 	function getObj(exp){
