@@ -937,13 +937,19 @@ addEvent(window, 'load', ewa_load_upload_image);
 					<Html><![CDATA[
 <table class='ewa-valid-box' border="0" width=100% cellspacing="0" cellpadding="0"><tr>
 <td><input autocomplete="off" class="EWA_INPUT ewa-valid-code-input" type="text" !!/></td>
-<td width="63"><img class='ewa-valid-code-img' 
+<td width="63"><img rid='@sys_frame_unid' class='ewa-valid-code-img' 
 	onclick='this.src=this.src.split("&gdx=")[0]+"&gdx="+Math.random()' 
 	style='cursor:pointer' border="0"	
 	onload="var tr=this.parentNode.parentNode;tr.getElementsByTagName('input')[0].style.width=(tr.cells[0].clientWidth-2)+'px';" 
 /></td></tr></table>
 <script>(function(){
-$(".ewa-valid-code-img").attr("src","@SYS_CONTEXTPATH/EWA_STYLE/cgi-bin/_co_/?xmlname="+"@xmlname".toURL()+"&itemname="+"@itemname".toURL()+"&gdx=" );
+	let u = "@SYS_REMOTE_URL_ALL".replace(/amp\;/g,'');
+	if(u.indexOf("?")>0){
+		u = u + "&EWA_AJAX=ValidCode&gdx=";
+	} else {
+		u = u + "?EWA_AJAX=ValidCode&gdx=";
+	}
+	$(".ewa-valid-code-img[rid='@sys_frame_unid']").attr("src", u);
 })();</script>
 ]]></Html>
 				</Template>

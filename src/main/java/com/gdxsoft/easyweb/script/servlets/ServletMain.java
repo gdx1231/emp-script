@@ -1,5 +1,6 @@
 package com.gdxsoft.easyweb.script.servlets;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -160,6 +161,9 @@ public class ServletMain extends HttpServlet {
 
 	public void outContent(HttpServletRequest request, HttpServletResponse response, String cnt)
 			throws ServletException, IOException {
+		if (cnt == null) {
+			return;
+		}
 		GZipOut out = new GZipOut(request, response);
 		out.outContent(cnt);
 	}
@@ -193,7 +197,7 @@ public class ServletMain extends HttpServlet {
 					}
 				}
 				// 输出执行错误的 debug信息
-				System.err.println(p.getDebugInfo().getExeptionPageText());
+				LOGGER.error(p.getDebugInfo().getExeptionPageText());
 				response.sendRedirect(u);
 			}
 			this.outContent(request, response, cnt.toString());
@@ -218,7 +222,10 @@ public class ServletMain extends HttpServlet {
 			this.outImage(rv, response, p);
 			return;
 		}
-
+		if ("validcode".equalsIgnoreCase(rv.s("ewa_ajax"))) { // 输出验证码图片
+			this.outValidCode(p);
+			return;
+		}
 		if ("download".equalsIgnoreCase(rv.s("ewa_ajax"))) {
 			// the download saved file name's field name
 			String downloadNameField = rv.s("EWA_DOWNLOAD_NAME");
@@ -258,7 +265,20 @@ public class ServletMain extends HttpServlet {
 	}
 
 	/**
+	 * Output the validCode image(format: jpeg)
+	 * 
+	 * @param p
+	 * @throws IOException
+	 */
+	private void outValidCode(EwaWebPage p) throws IOException {
+		BufferedImage image = p.getHtmlCreator().getValidCode();
+		FileOut fo = new FileOut(p.getPageRequest(), p.getPageResponse());
+		fo.outBufferedImage(image);
+	}
+
+	/**
 	 * Download the file from the frame item
+	 * 
 	 * @param rv
 	 * @param response
 	 * @param p

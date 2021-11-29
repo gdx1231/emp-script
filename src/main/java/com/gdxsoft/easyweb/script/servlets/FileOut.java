@@ -1,12 +1,16 @@
 package com.gdxsoft.easyweb.script.servlets;
 
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.imageio.ImageIO;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,7 +23,7 @@ import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.Utils;
 
 public class FileOut {
-	private static Map<String, String> MAP = new ConcurrentHashMap<String, String>();
+	public static Map<String, String> MAP = new ConcurrentHashMap<String, String>();
 	public static String DEF_DOWNLOAD_TYPE = "application/octet-stream";
 	static {
 		MAP.put("123", "application/vnd.lotus-1-2-3");
@@ -1115,6 +1119,28 @@ public class FileOut {
 
 	}
 
+	public boolean outBufferedImage(BufferedImage image) {
+		if (image == null) {
+			httpStatusCode = 404;
+			response.setStatus(httpStatusCode);
+			return false;
+		}
+		ServletOutputStream output;
+		String imageFormat = "jpeg";
+		try {
+			this.outContetType(imageFormat);
+			output = response.getOutputStream();
+			ImageIO.write(image, imageFormat, output);
+			httpStatusCode = 200;
+			return true;
+		} catch (IOException e) {
+			httpStatusCode = 500;
+			response.setStatus(httpStatusCode);
+			return false;
+		}
+
+	}
+
 	public boolean initFile(File file) {
 
 		if (!file.exists()) {
@@ -1142,6 +1168,10 @@ public class FileOut {
 
 	public void outContetType() {
 		String ext = UFile.getFileExt(file.getName()).toLowerCase();
+		this.outContetType(ext);
+	}
+
+	public void outContetType(String ext) {
 		if (MAP.containsKey(ext)) {
 			response.setContentType(MAP.get(ext));
 		} else {

@@ -14,6 +14,8 @@ import com.gdxsoft.easyweb.script.*;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 
+// 用 ServletMain 的ewa_ajax=ValidCode进行替换
+@Deprecated 
 public class ServletCode extends HttpServlet {
 
 	/**

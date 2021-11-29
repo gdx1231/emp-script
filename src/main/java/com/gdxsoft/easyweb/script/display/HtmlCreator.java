@@ -1,5 +1,6 @@
 package com.gdxsoft.easyweb.script.display;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Type;
 
@@ -29,6 +30,7 @@ import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.ShortName;
 import com.gdxsoft.easyweb.script.ShortNames;
 import com.gdxsoft.easyweb.script.ValidCode;
+import com.gdxsoft.easyweb.script.ValidCode1;
 import com.gdxsoft.easyweb.script.Workflow.WfRst;
 import com.gdxsoft.easyweb.script.Workflow.WfUnits;
 import com.gdxsoft.easyweb.script.display.action.IAction;
@@ -94,6 +96,8 @@ public class HtmlCreator {
 	private boolean _ErrOut; // 系统执行出现 errout;
 	private String errOutMessage; // 系统执行出现 errout 的内容;
 
+	private BufferedImage validCode;
+	
 	public HtmlCreator() {
 		_DebugFrames = new DebugFrames();
 		_SysParas = new SysParameters();
@@ -1427,6 +1431,66 @@ public class HtmlCreator {
 	}
 
 	/**
+	 * 创建本配置的验证码
+	 * @return
+	 * @throws Exception
+	 */
+	public BufferedImage createValidCode() throws Exception {
+		UserConfig uc = this._UserConfig;
+
+		UserXItem uxi_vc = null;
+		for (int i = 0; i < uc.getUserXItems().count(); i++) {
+			UserXItem uxi = uc.getUserXItems().getItem(i);
+			String tag = uxi.getItem("Tag").getItem(0).getItem(0);
+			if (tag.trim().equalsIgnoreCase("valid")) {
+				uxi_vc = uxi;
+				break;
+			}
+		}
+		
+		if(uxi_vc == null) {
+			return null; // 没有配置验证码
+		}
+
+		int len = 6;
+		String vcType = "string";
+		boolean isNumberCode = false;// 默认是数字验证码
+		if (uxi_vc != null) {
+			if (uxi_vc.testName("MaxMinLength")) {
+				try {
+					len = Integer.parseInt(uxi_vc.getSingleValue("MaxMinLength", "MaxLength"));
+				} catch (Exception err) {
+				}
+			}
+			if (uxi_vc.testName("DataItem")) {
+				vcType = uxi_vc.getSingleValue("DataItem", "DataType");
+			}
+
+			isNumberCode = !vcType.equalsIgnoreCase("string");
+		}
+
+		if (len > 10) {
+			len = 10;
+		} else if (len < 4) {
+			len = 4;
+		}
+
+		ValidCode1 vc = new ValidCode1(len, isNumberCode);
+		BufferedImage image = vc.createCode();
+		String code = vc.getRandomNumber();
+		
+		if(this._RequestValue !=null && this._RequestValue.getSession() !=null ) {
+			HttpSession session = this._RequestValue.getSession();
+			// save to session
+			session.setAttribute(ValidCode.SESSION_NAME, code);
+		}
+		
+
+		this.validCode = image;
+		return image;
+	}
+
+	/**
 	 * 生成AJAX调用<br>
 	 * XML为显示XML；<br>
 	 * HAVE_DATA显示是否有数据;<br>
@@ -1448,6 +1512,8 @@ public class HtmlCreator {
 		if (ajax.equalsIgnoreCase("DOWNLOAD") || ajax.equalsIgnoreCase("DOWNLOAD-INLINE")) {
 			// 下载保存文件或在线文件（图片、pdf等）
 			this._PageHtml = this.createResponseFrameDownload();
+		} else if (ajax.equalsIgnoreCase("VALIDCODE")) { // 输出验证码
+			 this.createValidCode();
 		} else if (ajax.equalsIgnoreCase("XML")) {
 			// 显示为XML数据
 			this._PageHtml = this._Frame.createaXmlData();
@@ -2286,6 +2352,10 @@ public class HtmlCreator {
 
 	public IAction getAction() {
 		return _Action;
+	}
+
+	public BufferedImage getValidCode() {
+		return validCode;
 	}
 
 }

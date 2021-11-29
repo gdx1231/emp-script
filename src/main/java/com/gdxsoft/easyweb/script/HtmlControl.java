@@ -1,5 +1,7 @@
 package com.gdxsoft.easyweb.script;
 
+import java.awt.image.BufferedImage;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -15,6 +17,7 @@ import com.gdxsoft.easyweb.debug.DebugInfo;
 import com.gdxsoft.easyweb.debug.DebugRecord;
 import com.gdxsoft.easyweb.debug.DebugRecords;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
+import com.gdxsoft.easyweb.script.servlets.FileOut;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
 
@@ -218,18 +221,27 @@ public class HtmlControl {
 		}
 		hc.getAcl().setRequestValue(hc.getRequestValue());
 
+		String ajaxType = hc.getAjaxCallType();
 		try {
 
-			if (hc.getAjaxCallType() == null) {
-				// hc.setAjaxCallType("TOP_CNT_BOTTOM");
-				// hc.setIsAjaxCall(true);
-			} else if (hc.getAjaxCallType().equalsIgnoreCase("XML")) {
+			if ("XML".equalsIgnoreCase(ajaxType)) {
 				if (hc.getHtmlClass().getResponse() != null) {
 					hc.getHtmlClass().getResponse().setContentType("text/xml");
 				}
 				isXml = true;
 			}
+
 			hc.createPageHtml();
+
+			// 输出验证码图片
+			if ("ValidCode".equalsIgnoreCase(ajaxType)) {
+				BufferedImage image = hc.getValidCode();
+				FileOut fo = new FileOut(hc.getRequestValue().getRequest(), hc.getHtmlClass().getResponse());
+				fo.outBufferedImage(image);
+
+				return;
+			}
+
 			sb.append(hc.getPageHtml());
 
 			this._Title = hc.getDocument().getTitle();
@@ -317,6 +329,11 @@ public class HtmlControl {
 	public String getHtml() {
 		if (this.isError) {
 			return Utils.textToInputValue(this.Html);
+		}
+ 
+		// 当输出 ValidCode时
+		if (this.Html == null) {
+			return null;
 		}
 
 		int m0 = this.Html.indexOf("<!--INC_TOP-->");
