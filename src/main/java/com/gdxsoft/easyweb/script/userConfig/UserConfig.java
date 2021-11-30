@@ -44,31 +44,7 @@ public class UserConfig implements Serializable, Cloneable {
 	 */
 	public static int CHECK_CHANG_SPAN_SECONDS = 5;
 
-	private DebugFrames _DebugFrames;
-	private UserXItems _UserXItems; // EasyWebTemplates/EasyWebTemplate/Xitems
-	private UserXItem _UserPageItem; // EasyWebTemplates/EasyWebTemplate/Page
-	private UserXItem _UserActionItem; // EasyWebTemplates/EasyWebTemplate/Action
-	private UserXItems _UserMenuItems; // EasyWebTemplates/EasyWebTemplate/Menu
-	private UserXItems _UserPageInfos; // EasyWebTemplates/EasyWebTemplate/PageInfos
-	private UserXItems _UserCharts; // EasyWebTemplates/EasyWebTemplate/Charts
-	private UserXItems _UserWorkflows; // EasyWebTemplates/EasyWebTemplate/Workflows
-
-	private String _XmlName;
-	private String _ItemName;
-	private Node _ItemNode;
-
-	private String _ItemNodeXml;
-	private String _JS_XML; // 配置文件的对象的 JS表达式
-
-	private IConfig configType;
-
-	public IConfig getConfigType() {
-		if (this.configType != null && this.configType.getFixedXmlName() == null) {
-			// parse from Serializable, the configType parameters are null value
-			this.configType = getConfig(this.getXmlName(), this.getItemName());
-		}
-		return configType;
-	}
+	
 
 	/**
 	 * Get a UserConfig instance from all configurations
@@ -130,8 +106,14 @@ public class UserConfig implements Serializable, Cloneable {
 		return o;
 	}
 
-	private static synchronized UserConfig getInstanceFromCahced(String xmlName, String itemName,
-			DebugFrames debugFrames) {
+	/**
+	 * Get the cloned configure from the cached
+	 * @param xmlName
+	 * @param itemName
+	 * @param debugFrames
+	 * @return instance of null
+	 */
+	private static UserConfig getInstanceFromCahced(String xmlName, String itemName, DebugFrames debugFrames) {
 		String fixedXmlName = UserConfig.filterXmlName(xmlName);
 		UserConfig o = null;
 		if ("sqlcached".equals(UPath.getCfgCacheMethod())) {
@@ -271,6 +253,35 @@ public class UserConfig implements Serializable, Cloneable {
 		return xmlFileName;
 	}
 
+	
+	private DebugFrames _DebugFrames;
+	private UserXItems _UserXItems; // EasyWebTemplates/EasyWebTemplate/Xitems
+	private UserXItem _UserPageItem; // EasyWebTemplates/EasyWebTemplate/Page
+	private UserXItem _UserActionItem; // EasyWebTemplates/EasyWebTemplate/Action
+	private UserXItems _UserMenuItems; // EasyWebTemplates/EasyWebTemplate/Menu
+	private UserXItems _UserPageInfos; // EasyWebTemplates/EasyWebTemplate/PageInfos
+	private UserXItems _UserCharts; // EasyWebTemplates/EasyWebTemplate/Charts
+	private UserXItems _UserWorkflows; // EasyWebTemplates/EasyWebTemplate/Workflows
+
+	private String _XmlName;
+	private String _ItemName;
+	private Node _ItemNode;
+
+	private String _ItemNodeXml;
+	private String _JS_XML; // 配置文件的对象的 JS表达式
+
+	private IConfig configType;
+
+	private UserXItem validXItem; // The validCode item
+	
+	public IConfig getConfigType() {
+		if (this.configType != null && this.configType.getFixedXmlName() == null) {
+			// parse from Serializable, the configType parameters are null value
+			this.configType = getConfig(this.getXmlName(), this.getItemName());
+		}
+		return configType;
+	}
+	
 	public UserConfig() {
 	}
 
@@ -387,6 +398,16 @@ public class UserConfig implements Serializable, Cloneable {
 		}
 		if (this._DebugFrames != null)
 			this._DebugFrames.addDebug(this, "配置", "结束加载配 XItems. (" + nl.getLength() + ")");
+		
+		// find the valid code item
+		for (int i = 0; i < this.getUserXItems().count(); i++) {
+			UserXItem uxi = this.getUserXItems().getItem(i);
+			String tag = uxi.getItem("Tag").getItem(0).getItem(0);
+			if (tag.trim().equalsIgnoreCase("valid")) {
+				this.validXItem = uxi;
+				break;
+			}
+		}
 	}
 
 	/**
@@ -736,6 +757,14 @@ public class UserConfig implements Serializable, Cloneable {
 	 */
 	public void setJS_XML(String _js_xml) {
 		_JS_XML = _js_xml;
+	}
+
+	/**
+	 * the valid code item
+	 * @return item or null
+	 */
+	public UserXItem getValidXItem() {
+		return validXItem;
 	}
 
 }

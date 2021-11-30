@@ -97,7 +97,7 @@ public class HtmlCreator {
 	private String errOutMessage; // 系统执行出现 errout 的内容;
 
 	private BufferedImage validCode;
-	
+
 	public HtmlCreator() {
 		_DebugFrames = new DebugFrames();
 		_SysParas = new SysParameters();
@@ -1432,6 +1432,7 @@ public class HtmlCreator {
 
 	/**
 	 * 创建本配置的验证码
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
@@ -1447,8 +1448,8 @@ public class HtmlCreator {
 				break;
 			}
 		}
-		
-		if(uxi_vc == null) {
+
+		if (uxi_vc == null) {
 			return null; // 没有配置验证码
 		}
 
@@ -1478,13 +1479,15 @@ public class HtmlCreator {
 		ValidCode1 vc = new ValidCode1(len, isNumberCode);
 		BufferedImage image = vc.createCode();
 		String code = vc.getRandomNumber();
-		
-		if(this._RequestValue !=null && this._RequestValue.getSession() !=null ) {
-			HttpSession session = this._RequestValue.getSession();
+
+		HttpServletRequest req = this._RequestValue == null ? null : this._RequestValue.getRequest();
+		if (req != null) {
+			HttpSession session = req.getSession() == null ? req.getSession(true) : req.getSession();
 			// save to session
 			session.setAttribute(ValidCode.SESSION_NAME, code);
+		} else {
+			LOGGER.warn("The request is null, can't save the validcode to session");
 		}
-		
 
 		this.validCode = image;
 		return image;
@@ -1513,7 +1516,7 @@ public class HtmlCreator {
 			// 下载保存文件或在线文件（图片、pdf等）
 			this._PageHtml = this.createResponseFrameDownload();
 		} else if (ajax.equalsIgnoreCase("VALIDCODE")) { // 输出验证码
-			 this.createValidCode();
+			this.createValidCode();
 		} else if (ajax.equalsIgnoreCase("XML")) {
 			// 显示为XML数据
 			this._PageHtml = this._Frame.createaXmlData();
@@ -1745,31 +1748,46 @@ public class HtmlCreator {
 	 * @throws Exception
 	 */
 	private boolean checkValidCode() throws Exception {
+		UserXItem uxiValid = this._UserConfig.getValidXItem();
+		if (uxiValid == null) { // 没有验证码定义
+			return true;
+		}
+
 		PageValue pv = this._RequestValue.getPageValues().getPageValue("EWA_VALIDCODE_CHECK");
 		// 不检查验证码，用于手机应用或AJAX调用
 		if (pv != null && pv.getValue() != null && pv.getValue().toString().equals("NOT_CHECK")) {
-			return true;
-		}
-		for (int i = 0; i < this._UserConfig.getUserXItems().count(); i++) {
-			UserXItem uxi = this._UserConfig.getUserXItems().getItem(i);
-			String tag = uxi.getItem("Tag").getItem(0).getItem(0);
-			if (tag.trim().equalsIgnoreCase("valid")) {
-				if (this._RequestValue.getSession().getAttribute(ValidCode.SESSION_NAME) == null) {
-					return false;
-				}
-				String sysValue = this._RequestValue.getString(ValidCode.SESSION_NAME);
-				String userValue = this._RequestValue.getString(uxi.getName());
-				if (sysValue.equalsIgnoreCase(userValue)) {
-					// 去除缓存中的验证码
-					this._RequestValue.getSession().removeAttribute(ValidCode.SESSION_NAME);
-					return true;
-				} else {
-					this._RequestValue.getSession().removeAttribute(ValidCode.SESSION_NAME);
-					return false;
-				}
+			if (pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS || pv.getPVTag() == PageValueTag.SYSTEM
+					|| pv.getPVTag() == PageValueTag.SESSION) {
+				return true;
+			} else {
+				LOGGER.info("Invalid pageValueTag {} to skip validcode", pv.getPVTag());
 			}
 		}
-		return true;
+
+		HttpServletRequest req = this._RequestValue.getRequest();
+		if (req == null) {
+			return false;
+		}
+		HttpSession session = req.getSession();
+		if (session == null) {
+			return false;
+		}
+
+		if (session.getAttribute(ValidCode.SESSION_NAME) == null) {
+			return false;
+		}
+
+		String validCodeInSession = session.getAttribute(ValidCode.SESSION_NAME).toString();
+
+		String userValue = this._RequestValue.getString(uxiValid.getName());
+		if (validCodeInSession.equalsIgnoreCase(userValue)) {
+			// 去除缓存中的验证码
+			session.removeAttribute(ValidCode.SESSION_NAME);
+			return true;
+		} else {
+			session.removeAttribute(ValidCode.SESSION_NAME);
+			return false;
+		}
 	}
 
 	/**
