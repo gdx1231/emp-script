@@ -25,6 +25,10 @@ public class ModuleImport extends ModuleBase {
 	private String importDataConn;
 	private String jdbcConfigName;
 
+	private boolean importTables; // 导入表
+	private boolean importData; // 导入数据
+	private boolean importXItems; // 导入配置项
+
 	public ModuleImport(String moduleCode, String moduleVersion, String importDataConn, String replaceMetaDatabaseName,
 			String replaceWorkDatabaseName) {
 		this.moduleCode = moduleCode;
@@ -62,9 +66,10 @@ public class ModuleImport extends ModuleBase {
 			return UJSon.rstFalse("No data");
 		}
 
-		String sql1="update ewa_mod_download set import_data_conn=@import_data_conn, replace_meta_databaseName=@replace_meta_databaseName, replace_work_databaseName=@replace_work_databaseName where mod_dl_id = " + modDlId;
+		String sql1 = "update ewa_mod_download set import_data_conn=@import_data_conn, replace_meta_databaseName=@replace_meta_databaseName, replace_work_databaseName=@replace_work_databaseName where mod_dl_id = "
+				+ modDlId;
 		DataConnection.updateAndClose(sql1, this.jdbcConfigName, rv);
-		
+
 		File tempFile;
 		try {
 			tempFile = File.createTempFile("importModuleFromDownloadModule", ".zip");
@@ -94,31 +99,47 @@ public class ModuleImport extends ModuleBase {
 			return UJSon.rstFalse("The file " + modulePackageFile + " not exists");
 		}
 
+		JSONObject result = UJSon.rstTrue();
+
 		String id = moduleCode + "_" + moduleVersion;
-
+		result.put(id, id);
+		result.put("replaceMetaDatabaseName", replaceMetaDatabaseName);
+		result.put("replaceWorkDatabaseName", replaceWorkDatabaseName);
+		result.put("modulePackageFile", modulePackageFile);
+		result.put("importXItems", importXItems);
+		result.put("importTables", importTables);
+		result.put("importData", importData);
+		result.put("importDataConn", importDataConn);
+		
 		Exchange ex = new Exchange(id, this.importDataConn);
-		ex.setReplaceMetaDatabaseName("visa_main_data");
-		ex.setReplaceWorkDatabaseName("visa");
-
-		IUpdateXml ux = ConfigUtils.getDefaultUpdateXml();
+		ex.setReplaceMetaDatabaseName(this.replaceMetaDatabaseName);
+		ex.setReplaceWorkDatabaseName(this.replaceWorkDatabaseName);
 
 		try {
 			ex.importGroup(modulePackageFile);
 		} catch (Exception e) {
-			return UJSon.rstFalse(e.getMessage());
+			ex.removeImportTempFiles();
+			UJSon.rstSetFalse(result, e.getMessage());
+			return result;
+		}
+		if (this.importXItems) {
+			IUpdateXml ux = ConfigUtils.getDefaultUpdateXml();
+			JSONObject importResult = ex.importCfgsAutoPath(ux);
+			result.put("cfgs", importResult);
 		}
 
 		try {
-			ex.importTableAndData();
+			String errorMsgs = ex.importTableAndData(this.importTables, this.importData);
+			result.put("importDataOrTableError", errorMsgs);
 		} catch (Exception e) {
-			return UJSon.rstFalse(e.getMessage());
+			ex.removeImportTempFiles();
+			UJSon.rstSetFalse(result, e.getMessage());
+			return result;
 		}
-
-		ex.importCfgsAutoPath(ux);
 
 		ex.removeImportTempFiles();
 
-		return UJSon.rstTrue(modulePackageFile);
+		return result;
 	}
 
 	/**
@@ -137,5 +158,61 @@ public class ModuleImport extends ModuleBase {
 	 */
 	public void setImportDataConn(String importDataConn) {
 		this.importDataConn = importDataConn;
+	}
+
+	/**
+	 * @return the jdbcConfigName
+	 */
+	public String getJdbcConfigName() {
+		return jdbcConfigName;
+	}
+
+	/**
+	 * @param jdbcConfigName the jdbcConfigName to set
+	 */
+	public void setJdbcConfigName(String jdbcConfigName) {
+		this.jdbcConfigName = jdbcConfigName;
+	}
+
+	/**
+	 * @return the importTables
+	 */
+	public boolean isImportTables() {
+		return importTables;
+	}
+
+	/**
+	 * @param importTables the importTables to set
+	 */
+	public void setImportTables(boolean importTables) {
+		this.importTables = importTables;
+	}
+
+	/**
+	 * @return the importData
+	 */
+	public boolean isImportData() {
+		return importData;
+	}
+
+	/**
+	 * @param importData the importData to set
+	 */
+	public void setImportData(boolean importData) {
+		this.importData = importData;
+	}
+
+	/**
+	 * @return the importXItems
+	 */
+	public boolean isImportXItems() {
+		return importXItems;
+	}
+
+	/**
+	 * @param importXItems the importXItems to set
+	 */
+	public void setImportXItems(boolean importXItems) {
+		this.importXItems = importXItems;
 	}
 }

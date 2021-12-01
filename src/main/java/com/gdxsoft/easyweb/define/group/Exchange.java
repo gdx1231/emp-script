@@ -65,7 +65,7 @@ public class Exchange {
 
 	// 导入或导出的表列表
 	private List<Table> tables = new ArrayList<>();
-	
+
 	public Exchange(String id) {
 		this._Id = id;
 	}
@@ -144,21 +144,35 @@ public class Exchange {
 	/**
 	 * 导入表，表数据和视图
 	 * 
-	 * @return
+	 * @return 所有的错误信息
 	 * @throws Exception
 	 */
 	public String importTableAndData() throws Exception {
+		return this.importTableAndData(true, true);
+	}
+
+	/**
+	 * 导入表，表数据和视图
+	 * 
+	 * @param importTbs  是否导入表
+	 * @param importData 是否导入数据
+	 * @return 所有的错误信息
+	 * @throws Exception
+	 */
+	public String importTableAndData(boolean importTbs, boolean importData) throws Exception {
 		StringBuilder sbErr = new StringBuilder();
 		ImportTables importTables = new ImportTables(this._DocTable, this._DocData, this._Conn);
 
 		importTables.setReplaceMetaDatabaseName(this.replaceMetaDatabaseName);
 		importTables.setReplaceWorkDatabaseName(this.replaceWorkDatabaseName);
-
-		String s = importTables.importTables();
-		sbErr.append(s);
-		s = importTables.importDatas();
-		sbErr.append(s);
-
+		if (importTbs) {
+			String s = importTables.importTables();
+			sbErr.append(s);
+		}
+		if (importData) {
+			String s1 = importTables.importDatas();
+			sbErr.append(s1);
+		}
 		return sbErr.toString();
 	}
 
@@ -425,16 +439,15 @@ public class Exchange {
 			String tableName = UXml.retNodeValue(node, "TableName");
 			String dataSource = UXml.retNodeValue(node, "DataSource");
 			String tableType = UXml.retNodeValue(node, "TableType");
-			  
-			
+
 			Table table = this.exportTable(tableName, dataSource, tableType);
-			
+
 			// 来源参考
 			String refId = UXml.retNodeValue(node, "RefId");
 			table.setRefId(refId);
-			
+
 			this.tables.add(table);
-			
+
 			String IsExport = UXml.retNodeValue(node, "IsExport");
 			String where = UXml.retNodeValue(node, "ExportWhere");
 
@@ -509,8 +522,6 @@ public class Exchange {
 		t.getFields();
 		t.toXml((Element) this._DocTable.getFirstChild());
 
-		
-		
 		return t;
 	}
 

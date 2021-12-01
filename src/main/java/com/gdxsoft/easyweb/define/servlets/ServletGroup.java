@@ -23,7 +23,6 @@ import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.conf.ConnectionConfig;
 import com.gdxsoft.easyweb.conf.ConnectionConfigs;
-import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.define.DefineAcl;
 import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UpdateXmlImpl;
@@ -71,6 +70,7 @@ public class ServletGroup extends HttpServlet {
 
 	/**
 	 * 导入已经下载的模块
+	 * 
 	 * @param rv
 	 * @return
 	 */
@@ -80,7 +80,22 @@ public class ServletGroup extends HttpServlet {
 		String replaceMetaDatabaseName = rv.s("replace_meta_databaseName");// "`visa_main_data`";
 		String replaceWorkDatabaseName = rv.s("replace_work_databaseName"); // "`visa`";
 
+		// 导入表/视图结构
+		boolean importTables = "Y".equals(rv.s("IMPORT_TABLE"));
+		// 导入数据
+		boolean importData = "Y".equals(rv.s("IMPORT_DATA"));
+		// 导入配置项目
+		boolean importXitems = "Y".equals(rv.s("IMPORT_CFG"));
+
+		if (!(importTables || importData || importXitems)) {
+			return UJSon.rstFalse("Nothing to do.");
+		}
+
 		ModuleImport moduleImport = new ModuleImport(importDataConn, replaceMetaDatabaseName, replaceWorkDatabaseName);
+		moduleImport.setImportData(importData);
+		moduleImport.setImportTables(importTables);
+		moduleImport.setImportXItems(importXitems);
+
 		int mod_dl_id = rv.getInt("mod_dl_id");
 		JSONObject result = moduleImport.importModuleFromDownloadModule(mod_dl_id, rv);
 		return result;
