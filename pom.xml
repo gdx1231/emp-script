@@ -308,19 +308,19 @@
 	</dependencies>
 
 	<repositories>
-		<repository>
+		<!-- <repository>
 			<id>xwiki-releases</id>
 			<name>XWiki Nexus Releases Repository Proxy</name>
 			<url>http://nexus.xwiki.org/nexus/content/groups/public</url>
 
-		</repository>
+		</repository> -->
 		<repository>
 			<id>openmindonline-releases</id>
 			<name>openmindonline Nexus Releases Repository Proxy</name>
-			<url>http://repository.openmindonline.it</url>
+			<url>https://repository.openmindonline.it</url>
 		</repository>
 	</repositories>
-	<pluginRepositories>
+	<!-- <pluginRepositories>
 		<pluginRepository>
 			<id>xwiki-releases</id>
 			<name>XWiki Nexus Plugin Releases Repository Proxy</name>
@@ -331,7 +331,7 @@
 			<name>openmindonline Nexus Releases Repository Proxy</name>
 			<url>http://repository.openmindonline.it</url>
 		</pluginRepository>
-	</pluginRepositories>
+	</pluginRepositories>  -->
 	<!-- 发布项目 -->
 	<!-- mvn clean deploy -P release -->
 	<!--
