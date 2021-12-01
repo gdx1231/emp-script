@@ -10,6 +10,7 @@ import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.IHandleJsonBinary;
+import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.Utils;
 
@@ -145,7 +146,7 @@ public class ClassBase {
 				if (from.length == to.length) {
 					boolean equals = true;
 					for (int i = 0; i < from.length; i++) {
-						if (from[i] != to[i]) { //按字节比较
+						if (from[i] != to[i]) { // 按字节比较
 							equals = false;
 							break;
 						}
@@ -257,6 +258,10 @@ public class ClassBase {
 			java.util.Date date = (java.util.Date) val;
 			String datestr = Utils.getDateString(date, "yyyy-MM-dd HH:mm:ss.SSS");
 			json.put(key, datestr);
+		} else if ("b[".equals(className)) {// 二进制
+			byte[] buf = (byte[]) val;
+			String base64 = UConvert.ToBase64String(buf);
+			json.put(key, base64);
 		} else {
 			json.put(key, val);
 		}

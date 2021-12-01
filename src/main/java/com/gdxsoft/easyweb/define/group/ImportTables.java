@@ -45,7 +45,7 @@ public class ImportTables {
 		this._Conn = conn;
 	}
 
-	private void readTables() {
+	public void readTables() {
 		NodeList nl = UXml.retNodeList(this._DocTable, "Tables/Table");
 		this._Tables = new Table[nl.getLength()];
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -507,5 +507,9 @@ public class ImportTables {
 	 */
 	public void setReplaceWorkDatabaseName(String replaceWorkDatabaseName) {
 		this.replaceWorkDatabaseName = replaceWorkDatabaseName;
+	}
+
+	public Table[] getTables() {
+		return _Tables;
 	}
 }

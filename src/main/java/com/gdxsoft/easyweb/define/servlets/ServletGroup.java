@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +23,15 @@ import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.conf.ConnectionConfig;
 import com.gdxsoft.easyweb.conf.ConnectionConfigs;
+import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.define.DefineAcl;
 import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UpdateXmlImpl;
 import com.gdxsoft.easyweb.define.UpdateXmlJdbcImpl;
 import com.gdxsoft.easyweb.define.group.Exchange;
 import com.gdxsoft.easyweb.define.group.ModuleExport;
+import com.gdxsoft.easyweb.define.group.ModuleImport;
+import com.gdxsoft.easyweb.define.group.ModulePublish;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
@@ -65,6 +69,29 @@ public class ServletGroup extends HttpServlet {
 		this.show(request, response);
 	}
 
+	/**
+	 * 导入已经下载的模块
+	 * @param rv
+	 * @return
+	 */
+	private JSONObject importDownloadedPublishedModule(RequestValue rv) {
+
+		String importDataConn = rv.s("import_data_conn");// "visa";
+		String replaceMetaDatabaseName = rv.s("replace_meta_databaseName");// "`visa_main_data`";
+		String replaceWorkDatabaseName = rv.s("replace_work_databaseName"); // "`visa`";
+
+		ModuleImport moduleImport = new ModuleImport(importDataConn, replaceMetaDatabaseName, replaceWorkDatabaseName);
+		int mod_dl_id = rv.getInt("mod_dl_id");
+		JSONObject result = moduleImport.importModuleFromDownloadModule(mod_dl_id, rv);
+		return result;
+	}
+
+	/**
+	 * 本地输出模块
+	 * 
+	 * @param rv
+	 * @return
+	 */
 	private JSONObject exportModule(RequestValue rv) {
 		JSONObject result = new JSONObject();
 		String moduleCode = rv.s("mod_code"); // "com.gdxsoft.backAdmin.menu";
@@ -73,17 +100,13 @@ public class ServletGroup extends HttpServlet {
 		String moduleVersion = rv.s("mod_ver"); // "1.0";
 		result.put("moduleVersion", moduleVersion);
 
-		String ewaConntectionString = rv.s("ewa_conn"); // ewa;
-		result.put("ewaConntectionString", ewaConntectionString);
+		String jdbcConfigName = rv.s("ewa_conn"); // ewa;
+		result.put("jdbcConfigName", jdbcConfigName);
 
-		ModuleExport moduleExport = new ModuleExport(moduleCode, moduleVersion, ewaConntectionString);
-		int supId = 0;
-		result.put("supId", supId);
-		if (rv.s("g_sup_id") != null) {
-			supId = Integer.parseInt(rv.s("g_sup_id"));
-		}
+		ModuleExport moduleExport = new ModuleExport(moduleCode, moduleVersion, jdbcConfigName);
+
 		try {
-			result = moduleExport.exportModule(supId);
+			result = moduleExport.exportModule();
 		} catch (Exception e) {
 			UJSon.rstSetFalse(result, e.getMessage());
 		}
@@ -92,7 +115,50 @@ public class ServletGroup extends HttpServlet {
 	}
 
 	/**
-	 * 下载模块， 2021新方法
+	 * 发布模块到远程模块服务器
+	 * 
+	 * @param rv
+	 * @return
+	 */
+	private JSONObject publishModule(RequestValue rv) {
+		JSONObject result = new JSONObject();
+
+		ModulePublish moduleExport = new ModulePublish();
+		long modVerId = 0l;
+
+		try {
+			if (rv.s("mod_ver_id") != null) {
+				modVerId = rv.getLong("mod_ver_id");
+			}
+			result = moduleExport.publishToServer(modVerId);
+		} catch (Exception e) {
+			UJSon.rstSetFalse(result, e.getMessage());
+		}
+
+		return result;
+	}
+
+	/**
+	 * 从远程服务器下载模块到本地数据库
+	 * 
+	 * @param rv
+	 * @return
+	 */
+	private JSONObject downloadPublishedModule(RequestValue rv) {
+		String data = rv.s("data");
+		JSONArray parameters = new JSONArray(data);
+		ModulePublish moduleExport = new ModulePublish();
+		try {
+			return moduleExport.downloadFromPublishServer(parameters);
+		} catch (Exception e) {
+			return UJSon.rstFalse(e.getMessage());
+		}
+
+	}
+
+	/**
+	 * 下载本地模块， 2021新方法
+	 * 
 	 * @param rv
 	 * @param response
 	 * @throws Exception
@@ -109,12 +175,8 @@ public class ServletGroup extends HttpServlet {
 		result.put("ewaConntectionString", ewaConntectionString);
 
 		ModuleExport moduleExport = new ModuleExport(moduleCode, moduleVersion, ewaConntectionString);
-		int supId = 0;
-		result.put("supId", supId);
-		if (rv.s("g_sup_id") != null) {
-			supId = Integer.parseInt(rv.s("g_sup_id"));
-		}
-		byte[] buf = moduleExport.getExportModuleFile(0);
+
+		byte[] buf = moduleExport.getExportModuleFile();
 
 		if (buf == null) {
 			response.setStatus(404);
@@ -156,22 +218,6 @@ public class ServletGroup extends HttpServlet {
 			response.getWriter().println("deny! request login");
 			return;
 		}
-
-		// 导出模块
-		if (oType.equalsIgnoreCase("export_module")) { // 2021新方法
-			JSONObject result = this.exportModule(rv);
-			response.getWriter().println(result.toString());
-			return;
-		}
-		if (oType.equalsIgnoreCase("export_module_download")) { //下载模块， 2021新方法
-			try {
-				this.downloadExportModule(rv, response);
-			} catch (Exception e) {
-				LOGGER.error(e.getMessage());
-				response.setStatus(404);
-			}
-			return;
-		}
 		if (oType.equalsIgnoreCase("dl")) { // 下载生成的组件
 			String id = request.getParameter("id");
 			String path = UPath.getGroupPath() + "/exports/" + id + ".zip/";
@@ -191,8 +237,49 @@ public class ServletGroup extends HttpServlet {
 			response.getOutputStream().close();
 			return;
 		}
+
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("utf-8");
+
+		// 导入已经下载的模块 2021新方法
+		if (oType.equalsIgnoreCase("publish_module_import")) {
+			JSONObject result = this.importDownloadedPublishedModule(rv);
+			response.getWriter().println(result.toString());
+			return;
+		}
+		// 发布模块到模块服务器 2021新方法
+		if (oType.equalsIgnoreCase("publish_module")) {
+
+			JSONObject result = this.publishModule(rv);
+			response.getWriter().println(result.toString());
+			return;
+		}
+		// 从发布模块服务器下载模块 2021新方法
+		if (oType.equalsIgnoreCase("publish_module_download")) {
+			try {
+				JSONObject result = this.downloadPublishedModule(rv);
+				response.getWriter().println(result.toString());
+			} catch (Exception err) {
+				response.getWriter().println(UJSon.rstFalse(err.getMessage()));
+			}
+			return;
+		}
+		// 本地导出模块 2021新方法
+		if (oType.equalsIgnoreCase("export_module")) {
+			JSONObject result = this.exportModule(rv);
+			response.getWriter().println(result.toString());
+			return;
+		}
+		// 本地下载模块， 2021新方法
+		if (oType.equalsIgnoreCase("export_module_download")) {
+			try {
+				this.downloadExportModule(rv, response);
+			} catch (Exception e) {
+				LOGGER.error(e.getMessage());
+				response.setStatus(404);
+			}
+			return;
+		}
 
 		String ewaPath = rv.s("rv_ewa_style_path");
 		if (StringUtils.isBlank(ewaPath)) {

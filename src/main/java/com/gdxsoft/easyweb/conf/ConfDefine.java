@@ -1,6 +1,5 @@
 package com.gdxsoft.easyweb.conf;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -20,15 +19,22 @@ public class ConfDefine {
 	 * @return true:allow, false:deny
 	 */
 	public static boolean isAllowDefine() {
+		return getInstance().isDefine();
+	}
+	/**
+	 * Return the instance of define
+	 * @return
+	 */
+	public static ConfDefine getInstance() {
 		if (INST != null) {
 			if (UPath.getPropTime() == PROP_TIME) {
-				return INST.isDefine();
+				return INST;
 			}
 		}
 		initDefine();
-		return INST.isDefine();
+		return INST ;
 	}
-
+	
 	private synchronized static void initDefine() {
 		// <define value="true" />
 		if (UPath.getCfgXmlDoc() == null) {
@@ -55,14 +61,23 @@ public class ConfDefine {
 		// the ewa-conf-help hsqldb data path
 		/*
 		 * INST.ewaConfHelpDbPath = item.getAttribute("ewaConfHelpDbPath"); if
-		 * (StringUtils.isBlank(INST.ewaConfHelpDbPath)) { INST.ewaConfHelpDbPath = FileUtils.getTempDirectoryPath() +
-		 * File.separatorChar + "ewa_conf_help_db_path"; } LOGGER.info("ConfDefine.ewaConfHelpDbPath=" +
+		 * (StringUtils.isBlank(INST.ewaConfHelpDbPath)) { INST.ewaConfHelpDbPath =
+		 * FileUtils.getTempDirectoryPath() + File.separatorChar +
+		 * "ewa_conf_help_db_path"; } LOGGER.info("ConfDefine.ewaConfHelpDbPath=" +
 		 * INST.ewaConfHelpDbPath);
-		 */	
+		 */
+
+		INST.apiKey = item.getAttribute("apiKey");
+		INST.apiSecert = item.getAttribute("apiSecert");
+		INST.apiServer = item.getAttribute("apiServer");
 	}
 
 	private boolean define;
 	private String ewaConfHelpDbPath;
+
+	private String apiKey;
+	private String apiSecert;
+	private String apiServer;
 
 	public String getEwaConfHelpDbPath() {
 		return ewaConfHelpDbPath;
@@ -78,6 +93,60 @@ public class ConfDefine {
 
 	public void setDefine(boolean define) {
 		this.define = define;
+	}
+
+	/**
+	 * 模块服务器的ApiKey
+	 * 
+	 * @return the apiKey
+	 */
+	public String getApiKey() {
+		return apiKey;
+	}
+
+	/**
+	 * 模块服务器的ApiKey
+	 * 
+	 * @param apiKey the apiKey to set
+	 */
+	public void setApiKey(String apiKey) {
+		this.apiKey = apiKey;
+	}
+
+	/**
+	 * 模块服务器的ApiSecert
+	 * 
+	 * @return the apiSecert
+	 */
+	public String getApiSecert() {
+		return apiSecert;
+	}
+
+	/**
+	 * 模块服务器的ApiSecert
+	 * 
+	 * @param apiSecert the apiSecert to set
+	 */
+	public void setApiSecert(String apiSecert) {
+		this.apiSecert = apiSecert;
+	}
+
+	/**
+	 * 模块服务器的网址
+	 * 
+	 * @return the apiServer
+	 */
+	public String getApiServer() {
+		return apiServer;
+	}
+
+	/**
+	 * 模块服务器的网址
+	 * 
+	 * @param apiServer the apiServer to set
+	 */
+	public void setApiServer(String apiServer) {
+		this.apiServer = apiServer;
 	}
 
 }

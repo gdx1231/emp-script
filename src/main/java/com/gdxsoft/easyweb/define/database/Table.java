@@ -59,6 +59,8 @@ public class Table {
 
 	private String refId; // 来源参考
 
+	private String sourceXml;
+	
 	public Table() {
 
 	}
@@ -208,7 +210,13 @@ public class Table {
 
 	}
 
+	/**
+	 * 从XML对象返回 Table
+	 * @param eleTable
+	 */
 	public void fromXml(Element eleTable) {
+		this.sourceXml = UXml.asXmlPretty(eleTable);
+		
 		NodeList nlFields = UXml.retNodeList(eleTable, "Fields/Field");
 		this.initBlankFrame();
 		UObjectValue.fromXml(eleTable, this);
@@ -247,6 +255,8 @@ public class Table {
 			String ddl = ddlNode.item(0).getTextContent();
 			this._SqlTable = ddl;
 		}
+		
+		
 	}
 
 	public Table(String tableName, String schemaName, String tableType, String connectionConfigName) {
@@ -1036,6 +1046,14 @@ public class Table {
 	 */
 	public void setRefId(String refId) {
 		this.refId = refId;
+	}
+
+	 /**
+	  * 来源的xml内容
+	  * @return
+	  */
+	public String getSourceXml() {
+		return sourceXml;
 	}
 
 }

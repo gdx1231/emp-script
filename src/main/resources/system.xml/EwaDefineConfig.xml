@@ -39,9 +39,10 @@
 			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/export.png" mid="5010"
 			mtext="生成组件(DB)" mtext_enus="Create module(DB)" pid="50" />
 		<Menu
-			mcmd="window.frames[0].frames[1].AddTab('@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/group/?type=install',EWA.LastMenuMsg);"
+			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa_module.xml&amp;ITEMNAME=ewa_mod_download.LF.M',EWA.LastMenuMsg);"
 			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/import.png" mid="5020"
-			mtext="导入组件1" mtext_enus="Group Import" pid="50" />
+			mtext="下载组件" mtext_enus="Group Import" pid="50" />
+		<!-- 
 		<Menu
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/group1.xml&amp;ITEMNAME=main&amp;id=@SYS_UNID',EWA.LastMenuMsg);"
 			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/export.png" mid="501"
@@ -50,6 +51,7 @@
 			mcmd="window.frames[0].frames[1].AddTab('@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/group/?type=install',EWA.LastMenuMsg);"
 			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/import.png" mid="502"
 			mtext="导入组件" mtext_enus="Group Import" pid="50" />
+		 -->	
 		<!-- utils -->
 		<Menu micon="fa fa-plug" mid="60"
 			mtext="工具&lt;i class='fa fa-caret-down'>&lt;i>" mtext_enus="Utils &lt;i class='fa fa-caret-down'>&lt;i>"

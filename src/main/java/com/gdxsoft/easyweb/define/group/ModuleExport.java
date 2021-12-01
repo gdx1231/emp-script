@@ -4,10 +4,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.CDATASection;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
@@ -27,60 +29,154 @@ import com.gdxsoft.easyweb.utils.Utils;
 public class ModuleExport extends ModuleBase {
 	private static Logger LOGGER = LoggerFactory.getLogger(ModuleExport.class);
 
-	String ewaConntectionString; // Get the module's data connection string
+	
+	private String jdbcConfigName; // Get the module's data connection string
 	private Document packageSource;
-
-	public ModuleExport(String moduleCode, String moduleVersion, String ewaConntionString) {
-		this.moduleCode = moduleCode;
-		this.moduleVersion = moduleVersion;
-		this.ewaConntectionString = ewaConntionString;
-
+	private DTTable tbMod;
+	private DTTable tbModVer;
+	private DTTable tbPkg;
+	
+	public ModuleExport(String moduleCode, String moduleVersion) {
+		this.init(moduleCode, moduleVersion, null);
 	}
 	
-	public byte[] getExportModuleFile(int moduleSupId) throws Exception {
-		RequestValue rv = new RequestValue();
-		rv.addOrUpdateValue("moduleSupId", moduleSupId);
-		rv.addOrUpdateValue("moduleCode", moduleCode);
-		rv.addOrUpdateValue("moduleVersion", moduleVersion);
-		
-		String sql2 = "select mod_ver_id from ewa_mod_ver where mod_code=@moduleCode and mod_ver=@moduleVersion and mod_ver_sup_id=@moduleSupId";
-		DTTable tbModVer = DTTable.getJdbcTable(sql2, this.ewaConntectionString, rv);
-		if (tbModVer.getCount() == 0) {
+	public ModuleExport(String moduleCode, String moduleVersion, String jdbcConfigName) {
+		this.init(moduleCode, moduleVersion, jdbcConfigName);
+	}
+
+	
+
+	private void init(String moduleCode, String moduleVersion, String jdbcConfigName) {
+		this.moduleCode = moduleCode;
+		this.moduleVersion = moduleVersion;
+		this.jdbcConfigName = jdbcConfigName;
+
+		ConfScriptPaths.getInstance().getLst().forEach(conf -> {
+			if (this.jdbcConfigName == null && conf.isJdbc()) {
+				// 获取第一个jdbc连接池
+				this.jdbcConfigName = conf.getJdbcConfigName();
+			}
+		});
+	}
+
+	public byte[] getExportModuleFile() throws Exception {
+		JSONObject initResult = this.initData();
+		if (UJSon.checkFalse(initResult)) {
 			return null;
 		}
-
 		long modVerId = tbModVer.getCell(0, "mod_ver_id").toLong();
+		RequestValue rv = new RequestValue();
 		rv.addOrUpdateValue("modVerId", modVerId);
-		
-		String sqlExists = "select * from ewa_mod_package where mod_ver_id=@modVerId ";
-		DTTable tbExistsPkg = DTTable.getJdbcTable(sqlExists, this.ewaConntectionString, rv);
+
+		String sqlExists = "select * from ewa_mod_package a where a.mod_ver_id = @modVerId ";
+		DTTable tbExistsPkg = DTTable.getJdbcTable(sqlExists, this.jdbcConfigName, rv);
 		if (tbExistsPkg.getCount() == 0) {
 			return null;
 		}
-		
+		tbPkg = tbExistsPkg;
 		return (byte[]) tbExistsPkg.getCell(0, "pkg_file").getValue();
+	}
+
+	/**
+	 * 输出元信息
+	 * 
+	 * @param tbMod
+	 * @param tbModVer
+	 * @throws Exception
+	 */
+	private void exportModuleMetaInfo(DTTable tbMod, DTTable tbModVer) throws Exception {
+		// <Description>
+		// <Name>module</Name>
+		// <Version>1</Version>
+		// <Description>modulemodulemodule</Description>
+		// <Website>123</Website>
+		// <Email>123</Email>
+		// <Company>sdfsdf</Company>
+		// <Contact>123</Contact>
+		// <Copyright>12312312</Copyright>
+		// <Telephone>123</Telephone>
+		// <InnerVer>1</InnerVer>
+		// <InnerVerSub0>1</InnerVerSub0>
+		// <InnerVerSub1>1</InnerVerSub1>
+		// </Description>
+		Element root = (Element) this.packageSource.getFirstChild();
+
+		root.setAttribute("Code", this.moduleCode); // = tbMod.getCell(0, "mod_code").toString()
+		root.setAttribute("Version", this.moduleVersion); // = tbModVer.getCell(0, "mod_ver").toString()
+
+		Element eleDes = (Element) this.packageSource.getElementsByTagName("Description").item(0);
+		// 设置版本
+		this.createNode(eleDes, "Code", tbMod.getCell(0, "mod_code").toString());
+		this.createNode(eleDes, "Name", tbMod.getCell(0, "mod_name").toString());
+		this.createNode(eleDes, "NameEn", tbMod.getCell(0, "mod_name_en").toString());
+		this.createNode(eleDes, "Company", tbMod.getCell(0, "mod_company").toString());
+		this.createNode(eleDes, "Contact", tbMod.getCell(0, "mod_contact").toString());
+		this.createNode(eleDes, "Email", tbMod.getCell(0, "mod_email").toString());
+		this.createNode(eleDes, "Website", tbMod.getCell(0, "mod_web").toString());
+		this.createNode(eleDes, "OpenSource", tbMod.getCell(0, "mod_open_source").toString());
+
+		this.createNodeCData(eleDes, "Description", tbMod.getCell(0, "mod_memo").toString());
+		this.createNodeCData(eleDes, "DescriptionEn", tbMod.getCell(0, "mod_memo_en").toString());
+		this.createNodeCData(eleDes, "Copyright", tbMod.getCell(0, "mod_osp").toString());
+
+		this.createNode(eleDes, "Version", tbModVer.getCell(0, "mod_ver").toString());
+		this.createNodeCData(eleDes, "VersionMemo", tbModVer.getCell(0, "mod_ver_memo").toString());
+		this.createNodeCData(eleDes, "VersionMemoEn", tbModVer.getCell(0, "mod_ver_memo_en").toString());
+
+	}
+
+	private void createNode(Element parent, String tagName, String innerText) {
+		if (innerText == null) {
+			return;
+		}
+		Element item = this.packageSource.createElement(tagName);
+		item.setTextContent(innerText);
+
+		parent.appendChild(item);
+	}
+
+	private void createNodeCData(Element parent, String tagName, String innerText) {
+		if (innerText == null) {
+			return;
+		}
+		Element item = this.packageSource.createElement(tagName);
+		CDATASection cdata = this.packageSource.createCDATASection(innerText);
+		item.appendChild(cdata);
+		parent.appendChild(item);
+	}
+
+	public JSONObject initData() {
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("moduleCode", moduleCode);
+		rv.addOrUpdateValue("moduleVersion", moduleVersion);
+
+		String sql1 = "select * from ewa_mod where mod_code=@moduleCode";
+		this.tbMod = DTTable.getJdbcTable(sql1, this.jdbcConfigName, rv);
+		if (tbMod.getCount() == 0) {
+			return UJSon.rstFalse("No data of the class: " + moduleCode);
+		}
+
+		String sql2 = "select * from ewa_mod_ver where mod_code=@moduleCode and mod_ver=@moduleVersion";
+		this.tbModVer = DTTable.getJdbcTable(sql2, this.jdbcConfigName, rv);
+		if (tbModVer.getCount() == 0) {
+			return UJSon.rstFalse("No data of the class: " + moduleCode + " version: " + this.moduleVersion);
+		}
+
+		return UJSon.rstTrue(null);
 	}
 
 	/**
 	 * 导出模块
 	 * 
-	 * @param moduleSupId
 	 * @return
 	 * @throws Exception
 	 */
-	public JSONObject exportModule(int moduleSupId) throws Exception {
-		this.createResXmlDocument();
-
-		RequestValue rv = new RequestValue();
-		rv.addOrUpdateValue("moduleSupId", moduleSupId);
-		rv.addOrUpdateValue("moduleCode", moduleCode);
-		rv.addOrUpdateValue("moduleVersion", moduleVersion);
-
-		String sql1 = "select * from ewa_mod where mod_code=@moduleCode and mod_sup_id=@moduleSupId";
-		DTTable tbMod = DTTable.getJdbcTable(sql1, this.ewaConntectionString, rv);
-		if (tbMod.getCount() == 0) {
-			return UJSon.rstFalse("No data of the class: " + moduleCode);
+	public JSONObject exportModule() throws Exception {
+		JSONObject initResult = this.initData();
+		if (UJSon.checkFalse(initResult)) {
+			return initResult;
 		}
+		this.createResXmlDocument();
 
 		// 元数据库名称
 		String replaceMetaDatabaseName = tbMod.getCell(0, "mod_meta_db_name").toString();
@@ -90,16 +186,15 @@ public class ModuleExport extends ModuleBase {
 		String replaceWorkDatabaseName = tbMod.getCell(0, "mod_work_db_name").toString();
 		super.setReplaceWorkDatabaseName(replaceWorkDatabaseName);
 
-		String sql2 = "select * from ewa_mod_ver where mod_code=@moduleCode and mod_ver=@moduleVersion and mod_ver_sup_id=@moduleSupId";
-		DTTable tbModVer = DTTable.getJdbcTable(sql2, this.ewaConntectionString, rv);
-		if (tbModVer.getCount() == 0) {
-			return UJSon.rstFalse("No data of the class: " + moduleCode + " version: " + this.moduleVersion);
-		}
+		// 输出元信息
+		this.exportModuleMetaInfo(tbMod, tbModVer);
 
 		long modVerId = tbModVer.getCell(0, "mod_ver_id").toLong();
+		RequestValue rv = new RequestValue();
 		rv.addOrUpdateValue("modVerId", modVerId);
+
 		String sql3 = "select * from ewa_mod_ddl where mod_ver_id=@modVerId order by emd_id";
-		DTTable tbModDdl = DTTable.getJdbcTable(sql3, this.ewaConntectionString, rv);
+		DTTable tbModDdl = DTTable.getJdbcTable(sql3, this.jdbcConfigName, rv);
 
 		JSONObject result = UJSon.rstTrue(null);
 
@@ -112,7 +207,7 @@ public class ModuleExport extends ModuleBase {
 		}
 
 		String sql4 = "select * from ewa_mod_cfgs where  mod_ver_id=@modVerId order by xmlname,itemname";
-		DTTable tbModCfg = DTTable.getJdbcTable(sql4, this.ewaConntectionString, rv);
+		DTTable tbModCfg = DTTable.getJdbcTable(sql4, this.jdbcConfigName, rv);
 
 		for (int i = 0; i < tbModCfg.getCount(); i++) {
 			DTRow r = tbModCfg.getRow(i);
@@ -127,37 +222,36 @@ public class ModuleExport extends ModuleBase {
 
 		int len = buf.length;
 		rv.addOrUpdateValue("pkg_len", len);
-		
+
 		String md5 = Utils.md5(buf);
 
 		String sqlExists = "select pkg_md5 from ewa_mod_package where mod_ver_id=@modVerId ";
-		DTTable tbExistsPkg = DTTable.getJdbcTable(sqlExists, this.ewaConntectionString, rv);
+		DTTable tbExistsPkg = DTTable.getJdbcTable(sqlExists, this.jdbcConfigName, rv);
 		if (tbExistsPkg.getCount() > 0) {
 			String existsMd5 = tbExistsPkg.getCell(0, 0).toString();
 			if (md5.equalsIgnoreCase(existsMd5)) { // 包内容没有变化
 				LOGGER.info("The module packaged file has no change, skip store!");
 				return result;
 			}
-			
+
 			// 删除已经存在的包数据
-			String sqlDel = "delete from ewa_mod_package where mod_ver_id=@modVerId and pkg_sup_id = @moduleSupId";
-			DataConnection.updateAndClose(sqlDel, this.ewaConntectionString, rv);
+			String sqlDel = "delete from ewa_mod_package where mod_ver_id=@modVerId ";
+			DataConnection.updateAndClose(sqlDel, this.jdbcConfigName, rv);
 			LOGGER.info("the module packaged file has changed, delete from ewa_mod_package!");
 		}
-
 
 		// 创建新的包数据
 		StringBuilder sbPkg = new StringBuilder();
 		sbPkg.append("INSERT INTO ewa_mod_package (mod_ver_id, pkg_dlv_date, pkg_len, pkg_md5, pkg_sup_id \n");
 		sbPkg.append(", pkg_adm_id, pkg_file) \n");
-		sbPkg.append("VALUES(@modVerId, @sys_date, @pkg_len,@pkg_md5, @moduleSupId \n");
-		sbPkg.append(", case when @g_adm_id is null then 0 else @g_adm_id end, @pkg_file)");
+		sbPkg.append("VALUES(@modVerId, @sys_date, @pkg_len,@pkg_md5, 0 \n");
+		sbPkg.append(", 0, @pkg_file)");
 		String sql5 = sbPkg.toString();
 
 		rv.addOrUpdateValue("pkg_md5", md5);
 		rv.addValue("pkg_file", buf, "binary", buf.length);
 
-		DataConnection.updateAndClose(sql5, this.ewaConntectionString, rv);
+		DataConnection.updateAndClose(sql5, this.jdbcConfigName, rv);
 		LOGGER.info("Put the module packaged to the table ewa_mod_package");
 		return result;
 	}
@@ -282,12 +376,19 @@ public class ModuleExport extends ModuleBase {
 		}
 
 		sql += " where emd_id = @emdId";
-		DataConnection.updateAndClose(sql, this.ewaConntectionString, rv);
+		DataConnection.updateAndClose(sql, this.jdbcConfigName, rv);
 
 	}
 
 	private void createResXmlDocument() {
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><BaseInfo><Tables/><EasyWebTemplates/></BaseInfo>";
+		StringBuilder sb = new StringBuilder();
+		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+		sb.append("<BaseInfo>");
+		sb.append("<Description/>");
+		sb.append("<Tables/>");
+		sb.append("<EasyWebTemplates/>");
+		sb.append("</BaseInfo>");
+		String xml = sb.toString();
 		packageSource = UXml.asDocument(xml);
 	}
 
@@ -299,17 +400,38 @@ public class ModuleExport extends ModuleBase {
 	}
 
 	/**
-	 * @return the ewaConntectionString
+	 * @return the jdbcConfigName
 	 */
-	public String getEwaConntectionString() {
-		return ewaConntectionString;
+	public String getJdbcConfigName() {
+		return jdbcConfigName;
 	}
 
 	/**
-	 * @param ewaConntectionString the ewaConntectionString to set
+	 * @param jdbcConfigName the jdbcConfigName to set
 	 */
-	public void setEwaConntectionString(String ewaConntectionString) {
-		this.ewaConntectionString = ewaConntectionString;
+	public void setJdbcConfigName(String jdbcConfigName) {
+		this.jdbcConfigName = jdbcConfigName;
+	}
+
+	/**
+	 * @return the tbPkg
+	 */
+	public DTTable getTbPkg() {
+		return tbPkg;
+	}
+
+	/**
+	 * @return the tbMod
+	 */
+	public DTTable getTbMod() {
+		return tbMod;
+	}
+
+	/**
+	 * @return the tbModVer
+	 */
+	public DTTable getTbModVer() {
+		return tbModVer;
 	}
 
 }

@@ -65,7 +65,7 @@ public class TestTableExport extends TestBase {
 		String ewaConntectionString = "ewa";
 
 		ModuleExport moduleExport = new ModuleExport(moduleCode, moduleVersion, ewaConntectionString);
-		JSONObject result = moduleExport.exportModule(0);
+		JSONObject result = moduleExport.exportModule();
 		System.out.println(result);
 
 	}
@@ -76,7 +76,7 @@ public class TestTableExport extends TestBase {
 		String ewaConntectionString = "ewa";
 
 		ModuleExport moduleExport = new ModuleExport(moduleCode, moduleVersion, ewaConntectionString);
-		JSONObject result = moduleExport.exportModule(0);
+		JSONObject result = moduleExport.exportModule();
 		System.out.println(result);
 
 	}
