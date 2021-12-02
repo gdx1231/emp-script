@@ -1659,6 +1659,10 @@ public class FrameList extends FrameBase implements IFrame {
 			}
 			String title = " title=\""
 					+ item.getValue().replace("<br />", "\n").replace("\"", "&quot;").replace("<", "&lt;") + "\" ";
+			
+			// 保留@符号
+			title = title.replace("@", IItem.REP_AT_STR);
+			
 			if (s2.indexOf("title=\"") > 0) {
 				title = "";
 			}
