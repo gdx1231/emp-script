@@ -170,6 +170,12 @@ public class Exchange {
 			sbErr.append(s);
 		}
 		if (importData) {
+			if (!importTbs) {
+				// 导入表
+				importTables.readTables();
+				String databaseType = this._Conn.getDatabaseType();
+				importTables.getSqlTables(databaseType);
+			}
 			String s1 = importTables.importDatas();
 			sbErr.append(s1);
 		}

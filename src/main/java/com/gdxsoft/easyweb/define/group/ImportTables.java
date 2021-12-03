@@ -13,6 +13,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.datasource.BatchInsert;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.define.database.Field;
 import com.gdxsoft.easyweb.define.database.Table;
@@ -38,6 +39,8 @@ public class ImportTables {
 	private String replaceMetaDatabaseName; // DDL replace meta database name, e.g. `main_data_db`
 	private String replaceWorkDatabaseName; // DDL replace work database name, e.g. `work_db`
 
+	private int batInsertCount = 100;
+
 	public ImportTables(Document docTable, Document docData, DataConnection conn) {
 		this._DocTable = docTable;
 		this._DocData = docData;
@@ -56,6 +59,7 @@ public class ImportTables {
 
 	/**
 	 * 替换元数据库和工作库的名称
+	 * 
 	 * @param sourceSql
 	 * @return
 	 */
@@ -89,7 +93,7 @@ public class ImportTables {
 			String s = t.getCreate();
 
 			s = this.replaceMetaOrWorkDatabaseName(s);
-			
+
 			LOGGER.info("Create the table {}", t.getTable().getName());
 			// 表结构
 			LOGGER.debug("TABLE DDL -> {}", s);
@@ -117,7 +121,7 @@ public class ImportTables {
 				String sql = s2.get(i);
 				sql = sql.replace("{SCHMEA}", this._Conn.getSchemaName());
 				sql = this.replaceMetaOrWorkDatabaseName(sql);
-				
+
 				LOGGER.debug("TABLE COMMENT -> {}", sql);
 
 				this._Conn.executeUpdateNoParameter(sql);
@@ -162,7 +166,11 @@ public class ImportTables {
 			String ddl = t.getCreate();
 			ddl = ddl.replace("{SCHMEA}", this._Conn.getSchemaName());
 			ddl = this.replaceMetaOrWorkDatabaseName(ddl);
-			
+
+			if ("mysql".equalsIgnoreCase(this._Conn.getDatabaseType())) {
+				ddl = ddl.replace("DEFINER=`root`@`%`", " "); // 删除root标记信息
+			}
+
 			LOGGER.info("Create the view {}", t.getTable().getName());
 			LOGGER.debug("VIEW DDL -> {}", ddl);
 
@@ -291,7 +299,7 @@ public class ImportTables {
 			MapFieldType dt = alFrom.get(dtType);
 			dts[i] = dt;
 		}
-		sb.append(") VALUES(");
+		sb.append(") VALUES ");
 
 		lst.add(sb.toString());
 		lst.add(fs);
@@ -309,52 +317,48 @@ public class ImportTables {
 	 */
 	private String importTableRows(Table t, Node node) {
 		List<Object> lst = this._TablesInsertFix.get(t.getName());
-		// sql
+
+		// insert into tb_a(f_aa, f_bb) values
+		String insertTableSql = lst.get(0).toString();
+		// 字段
 		Field[] fs = (Field[]) lst.get(1);
+		// 数据类型
 		MapFieldType[] dts = (MapFieldType[]) lst.get(2);
 
-		StringBuilder sbError = new StringBuilder();
 		NodeList nl = UXml.retNodeList(node, "Row");
 
-		LOGGER.info("Import table {} data, {} records", t.getName(), nl.getLength());
-
+		LOGGER.info("Start to import table {} data, {} records", t.getName(), nl.getLength());
+		long t0 = System.currentTimeMillis();
+		List<String> values = new ArrayList<>();
 		for (int i = 0; i < nl.getLength(); i++) {
-			Node row = nl.item(i);
-			String sql = lst.get(0).toString() + this.createInsertSql(fs, dts, row);
-			String err = this.execInsert(sql);
-			if (err != null) {
-				sbError.append(err);
-			}
-		}
-		return sbError.toString();
-	}
 
-	/**
-	 * 执行插入
-	 * 
-	 * @param sql
-	 * @return
-	 */
-	private String execInsert(String sql) {
-		this._Conn.executeUpdateNoParameter(sql);
-		String err = null;
-		if (this._Conn.getErrorMsg() != null && this._Conn.getErrorMsg().trim().length() > 0) {
-			err = this._Conn.getErrorMsg();
-			this._Conn.clearErrorMsg();
+			Node row = nl.item(i);
+			// values 表达式，例如：(0, 'a')
+			String sqlValues = this.createInsertSql(fs, dts, row);
+			values.add(sqlValues);
 		}
-		return err;
+		BatchInsert bi = new BatchInsert(this._Conn, false);
+		// 批量插入数据的数量
+		bi.setMaxInsertCount(batInsertCount);
+		String errors = bi.insertBatch(insertTableSql, values);
+
+		LOGGER.info("End import table {} data, {} records, time {}ms", t.getName(), nl.getLength(),
+				System.currentTimeMillis() - t0);
+
+		return errors;
 	}
 
 	/**
 	 * 生成Insert SQL语句
 	 * 
-	 * @param fs
-	 * @param dts
-	 * @param row
+	 * @param fs  字段
+	 * @param dts 类型
+	 * @param row XML数据行
 	 * @return
 	 */
 	private String createInsertSql(Field[] fs, MapFieldType[] dts, Node row) {
 		MStr sb1 = new MStr();
+		sb1.append("(");
 		for (int m = 0; m < fs.length; m++) {
 			Field f = fs[m];
 			MapFieldType dt = dts[m];
@@ -372,9 +376,6 @@ public class ImportTables {
 				continue;
 			}
 
-			// if (v1.equals("true") || v1.equals("false")) {
-			// int zzzzzzzzzzzz = 0;
-			// }
 			String covert = dt.getEwa().getInsertCovert();
 			MapFieldType target = null;
 			String insertCovert = "";
@@ -382,11 +383,12 @@ public class ImportTables {
 				target = dts[m].getEwa().convertTo(this._Conn.getDatabaseType());
 				insertCovert = target.getInsertCovert();
 			} catch (Exception err) {
-
+				LOGGER.warn("The convert {} -> {} error ,{}", this._Conn.getDatabaseType(), dts[m].getDatabaseName(),
+						err.getMessage());
 			}
+			boolean isMysql = target != null && target.getDatabaseName().equalsIgnoreCase("mysql");
 
-			if (covert != null && covert.equals("BIN") && target.getDatabaseName().equalsIgnoreCase("mysql")) {
-				// 二进制转换
+			if (covert != null && covert.equals("BIN") && isMysql) {// 二进制转换
 				sb1.a("x'");
 				sb1.a(v1.replace("'", "''"));
 				sb1.a("'");
@@ -405,7 +407,12 @@ public class ImportTables {
 					sb1.append(v2);
 				}
 			} else {
-				sb1.a(prefix + v1.replace("'", "''") + prefix);
+				String value = v1.replace("'", "''");
+				if (isMysql) {
+					// 替换转义符
+					value = value.replace("\\", "\\\\");
+				}
+				sb1.a(prefix + value + prefix);
 			}
 		}
 		sb1.append(")");
@@ -453,7 +460,6 @@ public class ImportTables {
 	public void setConn(DataConnection conn) {
 		_Conn = conn;
 	}
-
 
 	/**
 	 * 需要转换的数据库, 执行前执行use targetDatabase，执行后 use prevdatabase
@@ -511,5 +517,23 @@ public class ImportTables {
 
 	public Table[] getTables() {
 		return _Tables;
+	}
+
+	/**
+	 * Bulk insert records
+	 * 
+	 * @return
+	 */
+	public int getBatInsertCount() {
+		return batInsertCount;
+	}
+
+	/**
+	 * Bulk insert records
+	 * 
+	 * @param batInsertCount
+	 */
+	public void setBatInsertCount(int batInsertCount) {
+		this.batInsertCount = batInsertCount;
 	}
 }

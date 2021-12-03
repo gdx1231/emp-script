@@ -136,8 +136,9 @@ public class UpdateChanges {
 			} else if (before == null && after != null || before != null && after == null) {
 				uc = this.createChange(col, before, after);
 
-			} else if (col.getTypeName() != null && (col.getTypeName().indexOf("bin") == 0
-					|| col.getTypeName().equalsIgnoreCase("image") || col.getTypeName().equals("blob"))) { // 二进制
+			} else if (col.getTypeName() != null
+					&& (col.getTypeName().indexOf("bin") == 0 || col.getTypeName().equalsIgnoreCase("varbinary")
+							|| col.getTypeName().equalsIgnoreCase("image") || col.getTypeName().indexOf("blob") >= 0)) { // 二进制
 
 				byte[] bufBefore = (byte[]) before;
 				byte[] bufAfter = (byte[]) after;

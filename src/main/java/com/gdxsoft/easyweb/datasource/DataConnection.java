@@ -739,33 +739,27 @@ public class DataConnection {
 			}
 			/// 20190816
 			/*
-			 * if (sp.getOrderBy().length() > 0) { sqlTmp.append("\r\n ORDER BY " +
-			 * sp.getOrderBy()); } sb.insert(0, "SELECT TOP " + currentPage * pageSize +
-			 * " "); sb.append(sp.getFields()); sb.append("\r\n FROM ");
-			 * sb.append(sp.getTableName()); if (currentPage == 1) { sb.append("\r\n WHERE "
-			 * + sp.getWhere()); sb.append(sqlTmp.toString()); } else { String pk =
-			 * "GGDDXX." + pkFieldName; String pk1 = pkFieldName; if
-			 * (pkFieldName.indexOf(",") > 0) { String[] pks = pkFieldName.split(",");
-			 * String tmp = ""; String tmp1 = ""; for (int i = 0; i < pks.length; i++) { if
-			 * (i > 0) { tmp += " + '~`" + i + "!' + "; tmp1 += " + '~`" + i + "!' + "; }
-			 * String[] filedName = pks[i].trim().split("\\."); String name = "GGDDXX.[" +
-			 * filedName[filedName.length - 1] + "]"; tmp += "ISNULL(CONVERT(VARCHAR(222),"
-			 * + name + "),'--null--')"; tmp1 += "ISNULL(CONVERT(VARCHAR(222), " +
-			 * pks[i].trim() + "),'--null--')"; } pk = tmp; pk1 = tmp1; } else { String[]
-			 * filedName = pkFieldName.trim().split("\\."); pk = "GGDDXX." +
-			 * filedName[filedName.length - 1];
+			 * if (sp.getOrderBy().length() > 0) { sqlTmp.append("\r\n ORDER BY " + sp.getOrderBy()); } sb.insert(0,
+			 * "SELECT TOP " + currentPage * pageSize + " "); sb.append(sp.getFields()); sb.append("\r\n FROM ");
+			 * sb.append(sp.getTableName()); if (currentPage == 1) { sb.append("\r\n WHERE " + sp.getWhere());
+			 * sb.append(sqlTmp.toString()); } else { String pk = "GGDDXX." + pkFieldName; String pk1 = pkFieldName; if
+			 * (pkFieldName.indexOf(",") > 0) { String[] pks = pkFieldName.split(","); String tmp = ""; String tmp1 =
+			 * ""; for (int i = 0; i < pks.length; i++) { if (i > 0) { tmp += " + '~`" + i + "!' + "; tmp1 += " + '~`" +
+			 * i + "!' + "; } String[] filedName = pks[i].trim().split("\\."); String name = "GGDDXX.[" +
+			 * filedName[filedName.length - 1] + "]"; tmp += "ISNULL(CONVERT(VARCHAR(222)," + name + "),'--null--')";
+			 * tmp1 += "ISNULL(CONVERT(VARCHAR(222), " + pks[i].trim() + "),'--null--')"; } pk = tmp; pk1 = tmp1; } else
+			 * { String[] filedName = pkFieldName.trim().split("\\."); pk = "GGDDXX." + filedName[filedName.length - 1];
 			 * 
 			 * }
 			 * 
-			 * StringBuilder where = new StringBuilder(); where.append("SELECT TOP " +
-			 * (currentPage - 1) * pageSize + " "); where.append(pk1 + " FROM ");
-			 * where.append(sp.getTableName()); where.append("\r\n WHERE " + sp.getWhere());
-			 * where.append(sqlTmp.toString());
+			 * StringBuilder where = new StringBuilder(); where.append("SELECT TOP " + (currentPage - 1) * pageSize +
+			 * " "); where.append(pk1 + " FROM "); where.append(sp.getTableName()); where.append("\r\n WHERE " +
+			 * sp.getWhere()); where.append(sqlTmp.toString());
 			 * 
 			 * sb.append(" WHERE " + sp.getWhere()); sb.append(sqlTmp.toString());
 			 * 
-			 * sb.insert(0, "SELECT * FROM(\r\n"); sb.append(") GGDDXX\r\n WHERE NOT " + pk
-			 * + " IN (\r\n\t"); sb.append(where.toString()); sb.append(")"); }
+			 * sb.insert(0, "SELECT * FROM(\r\n"); sb.append(") GGDDXX\r\n WHERE NOT " + pk + " IN (\r\n\t");
+			 * sb.append(where.toString()); sb.append(")"); }
 			 */
 
 		} else if (this._DatabaseType.equals("HSQLDB") || this._DatabaseType.equals("MYSQL")) {
@@ -808,8 +802,176 @@ public class DataConnection {
 		this.executeUpdateNoParameter(sqlDelete);
 	}
 
+	public String closeStatment(Statement stmt) {
+		if (stmt == null) {
+			return null;
+		}
+		try {
+			stmt.close();
+			return null;
+		} catch (SQLException e) {
+			String err = e.getLocalizedMessage();
+			LOGGER.error("Close the statment {}", err);
+			this.writeDebug(this, "ERR", err);
+			setError(e, "Close the statment");
+
+			return err;
+		}
+	}
+
+	/**
+	 * 批处理导入数据
+	 * 
+	 * @param sqls
+	 * @param transcation
+	 */
+	public void batchUpdate(List<String> sqls, boolean transcation) {
+		if (sqls == null || sqls.size() == 0) {
+			return;
+		}
+		Statement stmt = null;
+		this.connect();
+		try {
+			stmt = this.getConnection().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		} catch (SQLException e) {
+			LOGGER.error(e.getLocalizedMessage());
+			this.writeDebug(this, "ERR", e.getMessage());
+			setError(e, "Create the batch statement");
+			return;
+		}
+
+		if (transcation) {
+			this.transBegin();
+		}
+
+		boolean haveData = false;
+		for (int i = 0; i < sqls.size(); i++) {
+			String sql = sqls.get(i);
+			if (sql == null || sql.trim().length() == 0) { // 空语句
+				continue;
+			}
+			try {
+				stmt.addBatch(sql);
+				haveData = true;
+			} catch (SQLException e) {
+				LOGGER.error(e.getLocalizedMessage());
+				this.writeDebug(this, "ERR", e.getMessage());
+				setError(e, sql);
+
+				this.closeStatment(stmt);
+				if (transcation) {
+					this.close();
+				}
+
+				return;
+			}
+		}
+
+		try {
+			if (!haveData) { // 有数据
+				stmt.executeBatch();
+				if (transcation) {
+					this.transCommit();
+				} else {
+					if (!this._Connection.getAutoCommit()) {
+						this._Connection.commit();
+					}
+				}
+			}
+		} catch (SQLException e) {
+			if (transcation) {
+				this.transRollback();
+			}
+			LOGGER.error(e.getLocalizedMessage());
+			this.writeDebug(this, "ERR", e.getMessage());
+			setError(e, "");
+		} finally {
+			this.closeStatment(stmt);
+			if (transcation) {
+				this.transClose();
+			}
+		}
+
+	}
+
 	/**
 	 * 将字符串分割成表数据
+	 */
+//	private void createEwaSplitTempData1() {
+//		if (this._CreateSplitData == null) {
+//			return;
+//		}
+//		if (this._CreateSplitData.getTempData() == null) {
+//			return;
+//		}
+//		if (this._CreateSplitData.getTempData().size() == 0) {
+//			return;
+//		}
+//		this.connect();
+//		this.getConnection();
+//		boolean isMysql = this.getDatabaseType().equals("MYSQL");
+//		Statement stmt = null;
+//		try {
+//			stmt = _Connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+//
+//			for (String key : this._CreateSplitData.getTempData().keySet()) {
+//				ArrayList<String> al = this._CreateSplitData.getTempData().get(key);
+//				if (isMysql) {
+//					// mysql 批量更新
+//					StringBuilder sb = new StringBuilder();
+//					sb.append("insert into _EWA_SPT_DATA(idx,col,tag) values\n");
+//					for (int i = 0; i < al.size(); i++) {
+//						if (i > 0) {
+//							sb.append(",\n");
+//						}
+//						sb.append("(");
+//						sb.append(i);
+//						sb.append(",'");
+//						sb.append(al.get(i).replace("'", "''"));
+//						sb.append("','");
+//						sb.append(key.replace("'", "''"));
+//						sb.append("')");
+//					}
+//					String sql1 = sb.toString();
+//					stmt.addBatch(sql1);
+//				} else {
+//					for (int i = 0; i < al.size(); i++) {
+//						StringBuilder sb = new StringBuilder();
+//						sb.append("insert into _EWA_SPT_DATA(idx,col,tag) values(");
+//						sb.append(i);
+//						sb.append(",'");
+//						sb.append(al.get(i).replace("'", "''"));
+//						sb.append("','");
+//						sb.append(key.replace("'", "''"));
+//						sb.append("')");
+//						String sql1 = sb.toString();
+//
+//						// System.out.println(sql1);
+//
+//						stmt.addBatch(sql1);
+//					}
+//				}
+//			}
+//			stmt.executeBatch();
+//			if (!this._Connection.getAutoCommit()) {
+//				this._Connection.commit();
+//			}
+//		} catch (SQLException e) {
+//			LOGGER.error(e.getLocalizedMessage());
+//		} finally {
+//			if (stmt != null) {
+//				try {
+//					stmt.close();
+//				} catch (SQLException e) {
+//					LOGGER.error(e.getLocalizedMessage());
+//				}
+//			}
+//		}
+//
+//	}
+
+	/**
+	 * 将字符串分割成表数据，字符串限制长度1000
 	 */
 	private void createEwaSplitTempData() {
 		if (this._CreateSplitData == null) {
@@ -821,67 +983,41 @@ public class DataConnection {
 		if (this._CreateSplitData.getTempData().size() == 0) {
 			return;
 		}
-		this.connect();
-		this.getConnection();
-		boolean isMysql = this.getDatabaseType().equals("MYSQL");
-		Statement stmt = null;
-		try {
-			stmt = _Connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
 
-			for (String key : this._CreateSplitData.getTempData().keySet()) {
-				ArrayList<String> al = this._CreateSplitData.getTempData().get(key);
+		String insertHeader = "insert into _EWA_SPT_DATA(idx, col, tag) values ";
+		List<String> values = new ArrayList<String>();
+		for (String key : this._CreateSplitData.getTempData().keySet()) {
+			ArrayList<String> al = this._CreateSplitData.getTempData().get(key);
+			for (int i = 0; i < al.size(); i++) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("(");
+				sb.append(i);
+				sb.append(",'");
+				String col = al.get(i);
+				if (col.length() > 1000) {
+					col = col.substring(0, 1000);
+					LOGGER.warn("EwaSplitTempData col size > 1000, truncation");
+				}
+				col = col.replace("'", "''");
 				if (isMysql) {
-					// mysql 批量更新
-					StringBuilder sb = new StringBuilder();
-					sb.append("insert into _EWA_SPT_DATA(idx,col,tag) values\n");
-					for (int i = 0; i < al.size(); i++) {
-						if (i > 0) {
-							sb.append(",\n");
-						}
-						sb.append("(");
-						sb.append(i);
-						sb.append(",'");
-						sb.append(al.get(i).replace("'", "''"));
-						sb.append("','");
-						sb.append(key.replace("'", "''"));
-						sb.append("')");
-					}
-					String sql1 = sb.toString();
-					stmt.addBatch(sql1);
-				} else {
-					for (int i = 0; i < al.size(); i++) {
-						StringBuilder sb = new StringBuilder();
-						sb.append("insert into _EWA_SPT_DATA(idx,col,tag) values(");
-						sb.append(i);
-						sb.append(",'");
-						sb.append(al.get(i).replace("'", "''"));
-						sb.append("','");
-						sb.append(key.replace("'", "''"));
-						sb.append("')");
-						String sql1 = sb.toString();
-
-						// System.out.println(sql1);
-
-						stmt.addBatch(sql1);
-					}
+					// MySql字符转义符 反斜线(‘\’)开始，
+					col = col.replace("\\", "\\\\");
 				}
+				sb.append(col);
+				sb.append("','");
+				sb.append(key.replace("'", "''"));
+				sb.append("')");
+				values.add(sb.toString());
 			}
-			stmt.executeBatch();
-			if (!this._Connection.getAutoCommit()) {
-				this._Connection.commit();
-			}
-		} catch (SQLException e) {
-			LOGGER.error(e.getLocalizedMessage());
-		} finally {
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					LOGGER.error(e.getLocalizedMessage());
-				}
-			}
+
 		}
+		BatchInsert bi = new BatchInsert(this, false);
 
+		String result = bi.insertBatch(insertHeader, values);
+		if (result != null) {
+			LOGGER.error(result);
+		}
 	}
 
 	/**
@@ -1487,6 +1623,7 @@ public class DataConnection {
 	private String replaceSqlSelectParameters(String sql) {
 		String sql1 = sql;
 		MListStr al = Utils.getParameters(sql, "@");
+
 		for (int i = 0; i < al.size(); i++) {
 			String paramName = al.get(i);
 			String paramValue = null;
@@ -1532,6 +1669,8 @@ public class DataConnection {
 				return sb.toString();
 			}
 		}
+		boolean isMysql = "mysql".equalsIgnoreCase(this.getDatabaseType());
+
 		String dt = pv.getDataType();
 		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
 		String v1 = pv.getStringValue();
@@ -1553,6 +1692,10 @@ public class DataConnection {
 		} else if (dt.equals("DATE")) {
 			return null;
 		} else {
+			if (isMysql) { // 替换转义符
+				v1 = v1.replace("\\", "\\\\");
+			}
+
 			StringBuilder sb = new StringBuilder();
 			sb.append("'");
 			sb.append(v1.replace("'", "''").replace("@", "{@}"));
@@ -1779,10 +1922,9 @@ public class DataConnection {
 
 	/**
 	 * 设置SQL参数 CallableStatement <br>
-	 * 对象为所有的DBMS 提供了一种以标准形式调用已储存过程的方法。已储 存过程储存在数据库中。对已储存过程的调用是
-	 * CallableStatement对象所含的内容。这种调用是 用一种换码语法来写的，有两种形式：一种形式带结果参，另一种形式不带结果参数。结果参数是
-	 * 一种输出 (OUT) 参数，是已储存过程的返回值。两种形式都可带有数量可变的输入（IN 参数）、 输出（OUT 参数）或输入和输出（INOUT
-	 * 参数）的参数。问号将用作参数的占位符。
+	 * 对象为所有的DBMS 提供了一种以标准形式调用已储存过程的方法。已储 存过程储存在数据库中。对已储存过程的调用是 CallableStatement对象所含的内容。这种调用是
+	 * 用一种换码语法来写的，有两种形式：一种形式带结果参，另一种形式不带结果参数。结果参数是 一种输出 (OUT) 参数，是已储存过程的返回值。两种形式都可带有数量可变的输入（IN 参数）、 输出（OUT
+	 * 参数）或输入和输出（INOUT 参数）的参数。问号将用作参数的占位符。
 	 * 
 	 * @param parameters
 	 * @param cst
