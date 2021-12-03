@@ -5,6 +5,7 @@ package com.gdxsoft.easyweb.define.servlets;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -422,13 +423,13 @@ public class ServletXml extends HttpServlet {
 
 		String[] names = UserConfig.filterXmlNameByJdbc(xmlname).split("\\|");
 		String name = names[names.length - 1];
-		byte[] buf = cnt.getBytes();
-
 		response.setHeader("Location", name);
 		response.setHeader("Cache-Control", "max-age=30");
 		response.setHeader("Content-Disposition", "attachment; filename=" + name);
 		// filename应该是编码后的(utf-8)
 		response.setContentType("text/xml");
+		
+		byte[] buf = cnt.getBytes(StandardCharsets.UTF_8);
 		response.setContentLength(buf.length);
 		response.getOutputStream().write(buf);
 	}

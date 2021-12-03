@@ -255,13 +255,17 @@ create table ewa_mod_index_field (
 ) engine=innodb default charset=utf8mb4 comment='表索引的字段';
 
 create table ewa_mod_package (
-  mod_ver_id bigint not null comment '版本号',
+  mod_ver_id bigint(20) not null comment '版本号',
   pkg_dlv_date datetime not null comment '发布时间',
-  pkg_len int not null comment '包长度',
+  pkg_len int(11) not null comment '包长度',
   pkg_md5 varchar(32) not null comment '包md5',
-  pkg_sup_id int not null comment '商户',
-  pkg_adm_id int not null comment '员工',
+  pkg_sup_id int(11) not null comment '商户',
+  pkg_adm_id int(11) not null comment '员工',
   pkg_file longblob comment '包数据',
+  pkg_publish_time datetime default null comment '发布时间',
+  pkg_publish_url varchar(400) default null comment '发布网址',
+  pkg_publish_result text comment '发布结果',
+  pkg_publish_status varchar(10) default null comment '发布状态',
   primary key (mod_ver_id)
 ) engine=innodb default charset=utf8mb4 comment='模块包数据-zip';
 
