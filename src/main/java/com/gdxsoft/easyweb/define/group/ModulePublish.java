@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.gdxsoft.easyweb.conf.ConfDefine;
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.define.group.dao.EwaModDownload;
 import com.gdxsoft.easyweb.define.group.dao.EwaModDownloadDao;
 import com.gdxsoft.easyweb.script.RequestValue;
@@ -180,6 +181,7 @@ public class ModulePublish extends ModuleBase {
 
 		String md5 = this.tbPkg.getCell(0, "pkg_md5").toString();
 
+		// 从服务器获取上传文件使用的 token
 		JSONObject uploadToken = this.getUploadTokenFromRemote(md5);
 		if (UJSon.checkFalse(uploadToken)) {
 			return uploadToken;
@@ -197,16 +199,52 @@ public class ModulePublish extends ModuleBase {
 		String sign = USign.signSha1(parameters, "secert", apiSecert, true);
 		parameters.put("sign", sign);
 		parameters.put("api_version", "1");
+		
 		// 加密文件
 		UAes aes = new UAes(this.apiSecert, null, UAes.AES_256_GCM);
 		byte encryptionPackage[] = aes.encryptBytes(packageBuffer);
+		// 转换为base64上传
 		parameters.put("package", UConvert.ToBase64String(encryptionPackage));
 
 		UNet net = this.createNet();
 		String url = apiServer + "/module/upload";
+		// 提交上传信息(POST)
 		String postResult = net.doPost(url, parameters);
 
-		return new JSONObject(postResult);
+		RequestValue rv = new RequestValue();
+		rv.addOrUpdateValue("mod_ver_id", moduleVerId);
+		rv.addOrUpdateValue("pkg_publish_url", url);
+		rv.addOrUpdateValue("pkg_publish_result", postResult);
+		
+		// 记录发布的结果
+		StringBuilder sb = new StringBuilder();
+		sb.append("update ewa_mod_package set pkg_publish_time = @sys_date \n");
+		sb.append(", pkg_publish_url = @pkg_publish_url \n");
+		sb.append(", pkg_publish_result = @pkg_publish_result \n");
+		sb.append(" where mod_ver_id = @mod_ver_id");
+
+		DataConnection.updateAndClose(sb.toString(), jdbcConfigName, rv);
+
+		sb = new StringBuilder();
+		sb.append("update ewa_mod_package set \n");
+		sb.append(" pkg_publish_status = @pkg_publish_status \n");
+		sb.append(" where mod_ver_id = @mod_ver_id");
+
+		try {
+			// 更新发布的状态
+			JSONObject jsonObject = result = new JSONObject(postResult);
+			rv.addOrUpdateValue("pkg_publish_status", jsonObject.optBoolean("RST") ? "successful" : "failure");
+			DataConnection.updateAndClose(sb.toString(), jdbcConfigName, rv);
+
+			return jsonObject;
+		} catch (Exception err) {
+			// 更新发布的状态 exception
+			rv.addOrUpdateValue("pkg_publish_status", "exception");
+			DataConnection.updateAndClose(sb.toString(), jdbcConfigName, rv);
+			
+			return UJSon.rstFalse(err.getMessage()).put("result", postResult);
+		}
+
 	}
 
 	private JSONObject getUploadTokenFromRemote(String md5) {
