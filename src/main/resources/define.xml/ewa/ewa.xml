@@ -5566,446 +5566,7 @@ body {
 	overflow: hidde;
 	margin: 0px;
 	background-color: #333
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-01-07 17:01:20" Name="define_right" UpdateDate="2021-03-14 17:48:20"><Page><Name><Set Name="define_right"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="设计XML" Lang="zhcn" Memo=""/><Set Info="Design XML" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CONFIG.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_SKIN.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_DDL.js"></script>
-<script type="text/javascript" src="@EWA.CP/EWA_DEFINE/cgi-bin/xml/?TYPE=EWAC_DDL_READ"></script>
-<script>
-    document.write("<scr" + "ipt src='@EWA.CP/EWA_DEFINE/cgi-bin/xml/?XMLNAME=" +
-        "@D_XMlNAME".toURL() +
-        "&ITEMNAME=@D_ITEMNAME&MODE=JS&MODE_NAME=_CFG_ITEM&TYPE=ALL'></sc" + "ript>")
-</script>
-
-<script src="@rv_ewa_style_path/EWA_STYLE/js/fas.js"></script>
-
-<table width="100%" style="height:100vh" cellpadding="0" cellspacing="0" border="0">
-    <tr>
-        <td>
-            <table width=100% height=100% cellpadding=0 cellspacing=0>
-                 <tr>
-                    <td height=25 id='TABS' onselectstart="return false;" valign=top>
-                        <span id="S_PAGE" class=but1 onclick="switch_page(this)">
-                            视图
-                        </span>
-                        <span id="S_CODE" class=but0 onclick="switch_page(this)">
-                            代码
-                        </span>
-                        <span id="S_RES" class=but0 onclick="switch_page(this)">
-                            资源
-                        </span>
-                        <span id="S_DRAW" class=but0 onclick="switch_page(this)">
-                            重绘
-                        </span>
-                        <span id="S_BOX" class=but0 onclick="switch_page(this)">
-                            BOX
-                        </span>
-                        <span id="S_LMENU" class=but0 onclick="switch_page(this)">
-                            左引导
-                        </span>
-                        <span id="S_GEN" class=but0 onclick="openTest()">
-                            打开测试
-                        </span>
-                        <span id="S_XML" class=but0 onclick="switch_page(this)">
-                            XML
-                        </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td id="I_PAGE">
-                        <iframe id='F_PAGE' frameborder="0" width="100%" src='./?XMLNAME=@xmlname&ITEMNAME=define' height="100%">
-                        </iframe>
-                    </td>
-                    <td id="I_XML" style="display: none">
-                        <iframe id='F_XML' name="XML" src1='@rv_ewa_style_path/EWA_DEFINE/js/CodeMirror/index.html' frameborder="0" width="100%" height="100%"></iframe>
-                    </td>
-                    <td id="I_RES" style="display: none">
-                        <iframe id='F_RES' frameborder="0" width="100%" height="100%" src1="./?XMLNAME=@xmlname&ITEMNAME=define_res"></iframe>
-                    </td>
-                    <td id="I_CODE" style="display: none">
-                        <iframe id='F_CODE' frameborder="0" width="100%" height="100%" src='./?XMLNAME=@xmlname&ITEMNAME=define_code'>
-                        </iframe>
-                    </td>
-                    <td id="I_DRAW" style="display: none">
-                        <iframe frameborder="0" width="100%" height="100%" src1='./?XMLNAME=@xmlname&ITEMNAME=define_redraw'>
-                        </iframe>
-                    </td>
-                    <td id="I_BOX" style="display: none">
-                        <iframe frameborder="0" width="100%" height="100%" src1='./?XMLNAME=@xmlname&ITEMNAME=define_box&@EWA_QUERY'>
-                        </iframe>
-                    </td>
-                    <td id="I_LMENU" style="display: none">
-                        <iframe frameborder="0" width="100%" height="100%" src1='./?XMLNAME=@xmlname&ITEMNAME=define_left_menu&@EWA_QUERY'>
-                        </iframe>
-                    </td>
-                </tr>
-               
-            </table>
-        </td>
-        <td width=260 id='props'>
-            <table width=100% height=100% cellpadding=0 cellspacing=0 border=0>
-                <tr>
-                    <td height=20 width=100% style="padding: 3px;">
-                        <select>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan=2 id=bb style="position:relative">
-                        <div style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y: scroll" id=aa>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-<div style='display: none'>
-    <form action="@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/xml/" method=post target=XML>
-        <input name="TYPE" value="VIEW">
-        <textarea name="XML">
-        </textarea>
-    </form>
-</div>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow = 'hidden';
-var ajax;
-var xmlName = "@D_XMLNAME";
-var itemName = "@D_ITEMNAME";
-var ewa_res_root = "@RV_EWA_STYLE_PATH";
-
-function saveXml(a) { //保存xml
-    var t1 = (new Date()).getTime();
-    if (window.timer_save) {
-        //避免点击多次保存按钮
-        var span = t1 - window.timer_save;
-        if (span < 1000) {
-            console.log(span);
-            window.timer_save = t1;
-            return;
-        }
-    }
-
-    window.timer_save = t1;
-    var xml = createXml();
-    EWAC.SaveXml(xmlName.toURL(), itemName.toURL(), xml);
-}
-//---------------------------------------
-function showXml() {
-    var s1 = createXml();
-    window.__TYPE__ = 'xml';
-
-    var u = '../../EWA_DEFINE/cgi-bin/xml/?TYPE=VIEW';
-    $.post(u, {
-            XML: s1
-        },
-        function(result) {
-            window.__VAL__ = result;
-            if (!window.frames[1].editor) {
-                window.frames[1].aa()
-            } else {
-                window.frames[1].editor.setValue(result);
-            }
-        });
-
-}
-//-----------------------------------
-function updateView() {
-    var w = window.frames[0];
-    //"<style>" + _EWAC_UISkin.CreateStyle() + "</style>" +
-    var s = _EWAC_UISkin.CreateHtml();
-    // 	w.location = "about:blank";
-    // 	w.document.open();
-    // 	w.document.write(s);
-    // 	w.document.close();
-    w.document.body.innerHTML = s;
-}
-
-function createXml() {
-    return _EWAC_User.CreateXml();
-}
-
-function changeItems(tag) {
-    _EWAC_UI.ChangeItems(tag);
-}
-var curId = 'S_PAGE';
-
-function switch_page(obj) {
-    var id = obj.id;
-    if (id == curId) {
-        return;
-    }
-    $X('props').style.display = '';
-
-    document.getElementById(curId).className = 'but0';
-    obj.className = 'but1';
-    var pageOld = get_frame(curId);
-    pageOld.style.display = 'none';
-    var pageNew = get_frame(id);
-    pageNew.style.display = '';
-    curId = id;
-    $('#props').show();
-    if (id == 'S_GEN' || id == 'S_GEN.NET') {
-        if (IsNew == 1) {
-            if (window.confirm('需要保存文件，执行么？')) {
-                saveXml();
-            }
-        } else {
-            var url;
-            if (id == 'S_GEN') {
-                url = './?XMLNAME=@D_XMLNAME&ITEMNAME=@D_ITEMNAME';
-                window.frames[2].location = url;
-            } else {
-                url = "./?XMLNAME=@D_XMLNAME&ITEMNAME=@D_ITEMNAME";
-                window.frames[3].location = url;
-            }
-        }
-    }
-    if (id == 'S_XML') {
-        var if_res = getIframeFromWindow(window.frames[1]);
-        if ($(if_res).attr('src1')) {
-            var src1 = $(if_res).attr('src1').replace(/\|/ig,'%7c');
-            $(if_res).attr('src', src1).attr('src1', null);
-            ifameLoaded(if_res, function(iframe, w1){
-                w1.parent.showXml();
-            });
-        } else {
-            window.showXml();
-        }
-        $('#props').hide();
-    } else if (id == 'S_RES') {
-        var s1 = _EWAC_UI.CreateResList();
-        var if_res = getIframeFromWindow(window.frames[2]);
-        if ($(if_res).attr('src1')) {
-            var src1 = $(if_res).attr('src1');
-            $(if_res).attr('src', src1).attr('src1', null);
-            ifameLoaded(if_res, function(iframe, w1){
-                w1.document.forms[0].innerHTML = s1;
-            });
-        } else {
-            window.frames[2].document.forms[0].innerHTML = s1;
-        }
-        $('#props').hide();
-    } else if (id == 'S_CODE') {
-        var if_res = getIframeFromWindow(window.frames[3]);
-        if ($(if_res).attr('src1')) {
-            var src1 = $(if_res).attr('src1').replace(/\|/ig,'%7c');
-            $(if_res).attr('src', src1).attr('src1', null);
-            ifameLoaded(if_res, function(iframe, w1){
-                w1.aa();
-            });
-        } else {
-             window.frames[3].aa();
-        }
-       
-        $('#props').show();
-    } else if (id == 'S_DRAW') {
-        var if_res = getIframeFromWindow(window.frames[4]);
-        if ($(if_res).attr('src1')) {
-            var src1 = $(if_res).attr('src1');
-            $(if_res).attr('src', src1).attr('src1', null);
-            ifameLoaded(if_res, function(iframe, w1){
-                w1.load_frame(xmlName, itemName, $X('PAGE$RedrawJson$RedrawJson').value);
-            });
-        } else {
-             window.frames[4].load_frame(xmlName, itemName, $X('PAGE$RedrawJson$RedrawJson').value);
-        }
-        
-        $('#props').hide();
-    } else if (id == 'S_BOX') {
-        var if_res = getIframeFromWindow(window.frames[5]);
-        if ($(if_res).attr('src1')) {
-            var src1 = $(if_res).attr('src1').replace(/\|/ig,'%7c');
-            $(if_res).attr('src', src1).attr('src1', null);
-            ifameLoaded(if_res, function(iframe, w1){
-                
-            });
-        }  
-        //window.frames[4].load_frame(xmlName,itemName, $X('PAGE$RedrawJson$RedrawJson').value); 
-        $('#props').hide();
-    } else if (id == 'S_LMENU') {
-        var if_res = getIframeFromWindow(window.frames[6]);
-        if ($(if_res).attr('src1')) {
-            var src1 = $(if_res).attr('src1').replace(/\|/ig,'%7c');
-            $(if_res).attr('src', src1).attr('src1', null);
-            ifameLoaded(if_res, function(iframe, w1){
-                w1.add_paras();
-            });
-        } else {
-            window.frames[6].add_paras();
-        }
-        
-        $('#props').hide();
-    }
-    pageOld = pageNew = null;
-}
-
-function ifameLoaded(chkIframe, func) {
-    if (chkIframe.contentWindow.location != "about:blank" &&
-        chkIframe.contentWindow.document &&
-        chkIframe.contentWindow.document.readyState == 'complete'
-    ) {
-        func(chkIframe, chkIframe.contentWindow);
-    } else {
-        setTimeout(function() {
-            ifameLoaded(chkIframe, func);
-        }, 300);
-    }
-}
-
-function getIframeFromWindow(w) {
-    var w1 = null;
-    $('iframe').each(function() {
-        if (this.contentWindow == w) {
-            w1 = this;
-        }
-    });
-    return w1;
-}
-
-function openTest() {
-    //saveXml();
-    var u1 = new EWA_UrlClass();
-
-    window.open("./?XMLNAME=" + xmlName.replace(/\|/g,'/') + "&ITEMNAME=" + itemName.toURL());
-}
-
-function get_frame(id) {
-    var id1 = "I_" + id.split('_')[1];
-    return document.getElementById(id1);
-}
-
-function copyRes(obj) {
-    var win = window.frames[3];
-    var s1 = _EWAC_UI.CreateResList();
-    var doc = win.document;
-    doc.body.innerHTML = s1;
-    var inputs = doc.getElementsByTagName('input');
-    var topWin = window.parent.parent.parent; //define_main.jsp
-    topWin.EWA_RES_COPY = new Object();
-    var o = topWin.EWA_RES_COPY;
-    for (var i = 0; i < inputs.length; i++) {
-        var o1 = inputs[i];
-        o[o1.id] = o1.value;
-    }
-    obj.title = '复制了' + inputs.length + '信息';
-}
-
-function pasteRes(res) {
-    var win = window.frames[3];
-    var s1 = _EWAC_UI.CreateResList();
-    var doc = win.document;
-    doc.body.innerHTML = s1;
-    var inputs = doc.getElementsByTagName('input');
-    for (var i = 0; i < inputs.length; i++) {
-        var o1 = inputs[i];
-        if (res[o1.id] != null) {
-            o1.value = res[o1.id];
-            o1.onblur();
-        }
-    }
-}]]></Top><Bottom><![CDATA[var IsNew = "@NEW";
-var _EWAC_User, _EWAC_UI, _EWAC_UISkin;
-var viewChangeTimer;
-
-function onload1() {
-    if (IsNew == "1") {
-        return;
-    }
-    _EWAC_User = new EWAC_UserClass();
-    _EWAC_User = new EWAC_UserClass();
-    _EWAC_User.Load();
-
-    _EWAC_UI = new EWAC_UIClass(document.getElementById('aa'), _EWAC_User);
-    _EWAC_UI.ShowPageParameters();
-    _EWAC_UISkin = new EWAC_UISkinClass(_EWAC_User);
-
-    var s1 = _EWAC_UISkin.CreateHtml();
-    var s2 = _EWAC_UISkin.CreateStyle();
-    var doc = window.frames[0].document;
-    //   doc.open();
-    //   doc.write('<html><head><style>'+s2+'</style></head>');
-    //   doc.write('<body>'+s1+'</body></html>');
-    //   doc.close();
-    //console.log(s1)
-    doc.body.innerHTML = s1;
-    viewChangeTimer = window.setInterval(viewChangeMointer, 212);
-
-    var frameTag = $X('PAGE$FrameTag$FrameTag').value.toLowerCase();
-
-    $('#S_DRAW').hide();
-    $('#S_BOX').hide();
-    $('#S_LMENU').hide();
-
-    if (frameTag == 'listframe') {
-        $('#S_BOX').show();
-        $('#S_LMENU').show();
-    } else if (frameTag == 'frame') {
-        $('#S_DRAW').show();
-    }
-
-}
-
-function setSize() {
-    //var size=EWA.UI.Utils.GetDocSize(window);
-    //$X('aa').style.height=size.H-30+'px';
-
-
-}
-
-function viewChangeMointer() {
-    if (_EWAC_UI.IsChanged) {
-        window.clearInterval(viewChangeTimer);
-        _EWAC_UI.IsChanged = false;
-        updateView();
-        viewChangeTimer = window.setInterval(viewChangeMointer, 212);
-    }
-}
-
-function loadNew(xmlItem, itemCfg) {
-    _EWAC_User = new EWAC_UserClass();
-    _EWAC_User.Load(xmlItem, itemCfg);
-
-    _EWAC_UI = new EWAC_UIClass($X('aa'), _EWAC_User);
-    _EWAC_UI.ShowPageParameters();
-    _EWAC_UISkin = new EWAC_UISkinClass(_EWAC_User);
-
-    var s1 = _EWAC_UISkin.CreateHtml();
-    var s2 = _EWAC_UISkin.CreateStyle();
-    var doc = window.frames[0].document;
-    doc.open();
-    doc.write('<html><head><style>' + s2 + '</style></head>');
-    doc.write('<body>' + s1 + '</body></html>');
-    doc.close();
-    viewChangeTimer = window.setInterval(viewChangeMointer, 212);
-
-    var frameTag = $X('PAGE$FrameTag$FrameTag').value.toLowerCase();
-    $('#S_DRAW').hide();
-    $('#S_BOX').hide();
-
-    if (frameTag == 'listframe') {
-        $('#S_BOX').show();
-    } else if (frameTag == 'frame') {
-        $('#S_DRAW').show();
-    }
-}
-
-//onload1();
-AddEvent(window, 'load', function() {
-    EWAC_DDL.init();
-    setSize();
-    if (IsNew == "1") {
-        return;
-    }
-    var names = EWA.F.FOS["@SYS_FRAME_UNID"].Resources.names.GetInfo().split(',');
-    var spans = $X('TABS').getElementsByTagName('span');
-    for (var i = 0; i < names.length; i++) {
-        spans[i].innerHTML = names[i];
-    }
-    onload1();
-    fas.loadFaIcons();
-});]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[table#Test1{
-    table-layout: fixed;
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos><PageInfo Name="names"><Name><Set Name="names"/></Name><DescriptionSet><Set Info="视图,代码,资源,重绘,BOX,左引导,打开测试,XML" Lang="zhcn" Memo=""/><Set Info="View, Code, Resources, Redraw, BOX, left , Test, XML" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2013-05-21 18:06:50" Name="sql_run" UpdateDate="2021-03-14 18:18:05"><Page><Name><Set Name="sql_run"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Blue"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="SQL" Lang="zhcn" Memo=""/><Set Info="SQL" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<div style='width:100%;height:100%' id='tdContent'></div>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[function run(){
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2013-05-21 18:06:50" Name="sql_run" UpdateDate="2021-03-14 18:18:05"><Page><Name><Set Name="sql_run"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Blue"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="SQL" Lang="zhcn" Memo=""/><Set Info="SQL" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<div style='width:100%;height:100%' id='tdContent'></div>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[function run(){
   var sql= window.frames[0].editor.getValue();
   var u= window.location.href+'&ewa_action=run&ewa_ajax=json';
   var ajax=new EWA_AjaxClass();
@@ -6496,53 +6057,7 @@ function loadOp() {
     EWA.F.FOS["@SYS_FRAME_UNID"].ShowNode(v);
     //EWA.F.GetFOSOne().ShowNode(v);
 }
-addEvent(window, 'load', loadOp);]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize/><ListUI/><MenuShow/><Menu/><Tree><Set AddPara1="Type" AddPara2="" AddPara3="" Key="key" Level="" LoadByLevel="1" MenuGroup="Type" Order="" ParentKey="ParentKey" RootId="" Text="name" Title="des"/></Tree><HtmlFrame><Set FrameBorder="1" FrameSize="230,*" FrameSubUrl="" FrameType="H"/></HtmlFrame><TreeIconSet><Set Close="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHdSURBVDjLjZNPaxNBGIdrLwURLznWgkcvIrQhRw9FGgy01IY0TVsQ0q6GFkT0kwjJId9AP4AHP4Q9FO2hJ7El2+yf7OzMbja7Sf0578QdNybFLjwszLu/Z2femZkDMEfI54FkRVL4Dw8l8zqXEawMBgM2HA6vR6MRZiHraDabH7KSrKBA4SAIEIahxvd9eJ6HbrerJKZpotVqaUkavkMC+iCKIsRxrN6EEAKMMViWpQT9fh/0k3a7PZZkBUPmqXAKCSjAOYdt21NLUj1JBYW7C6vi6BC8vKWKQXUXQcNA5Nh6KY7jqJl0Op1JwY/Hi7mLp/lT/uoA/OX2WLC3C9FoQBwfILKulIRmQv1wXfevwHmyuMPXS5Fv1MHrFSTmhSomnUvw/Spo3C+vg3/+pJZDPSGRFvilNV+8PUZvoziKvn+d3LZvJ/BelMDevIZXK2EQCiUhtMDM53bY5rOIGXtwjU3EVz/HM5Az8eplqPFKEfzLR91cOg8TPTgr3MudFx+d9owK7KMNVfQOtyQ1OO9qiHsWkiRRUHhKQLuwfH9+1XpfhVVfU0V3//k4zFwdzjIlSA/Sv8jTOZObBL9uugczuNaCP5K8bFBIhduE5bdC3d6MYIkkt7jOKXT1l34DkIu9e0agZjoAAAAASUVORK5CYII=" Filter="1" Open="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHdSURBVDjLjZNPaxNBGIdrLwURLznWgkcvIrQhRw9FGgy01IY0TVsQ0q6GFkT0kwjJId9AP4AHP4Q9FO2hJ7El2+yf7OzMbja7Sf0578QdNybFLjwszLu/Z2femZkDMEfI54FkRVL4Dw8l8zqXEawMBgM2HA6vR6MRZiHraDabH7KSrKBA4SAIEIahxvd9eJ6HbrerJKZpotVqaUkavkMC+iCKIsRxrN6EEAKMMViWpQT9fh/0k3a7PZZkBUPmqXAKCSjAOYdt21NLUj1JBYW7C6vi6BC8vKWKQXUXQcNA5Nh6KY7jqJl0Op1JwY/Hi7mLp/lT/uoA/OX2WLC3C9FoQBwfILKulIRmQv1wXfevwHmyuMPXS5Fv1MHrFSTmhSomnUvw/Spo3C+vg3/+pJZDPSGRFvilNV+8PUZvoziKvn+d3LZvJ/BelMDevIZXK2EQCiUhtMDM53bY5rOIGXtwjU3EVz/HM5Az8eplqPFKEfzLR91cOg8TPTgr3MudFx+d9owK7KMNVfQOtyQ1OO9qiHsWkiRRUHhKQLuwfH9+1XpfhVVfU0V3//k4zFwdzjIlSA/Sv8jTOZObBL9uugczuNaCP5K8bFBIhduE5bdC3d6MYIkkt7jOKXT1l34DkIu9e0agZjoAAAAASUVORK5CYII=" Test="P0"/><Set Close="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHtSURBVDjLjZM9T9tQFIYpQ5eOMBKlW6eWIQipa8RfQKQghEAKqZgKFQgmFn5AWyVDCipVQZC2EqBWlEqdO2RCpAssQBRsx1+1ndix8wFvfW6wcUhQsfTI0j33PD7n+N4uAF2E+/S5RFwG/8Njl24/LyCIOI6j1+v1y0ajgU64cSSTybdBSVAwSMmmacKyLB/DMKBpGkRRZBJBEJBKpXyJl/yABLTBtm1Uq1X2JsrlMnRdhyRJTFCpVEAfSafTTUlQoFs1luxBAkoolUqQZbmtJTYTT/AoHInOfpcwtVtkwcSBgrkDGYph+60oisIq4Xm+VfB0+U/P0Lvj3NwPGfHPTcHMvoyFXwpe7UmQtAqTUCU0D1VVbwTPVk5jY19Fe3ZfQny7CE51WJDXqpjeEUHr45ki9rIqa4dmQiJfMLItGEs/FcQ2ucbRmdnSYy5vYWyLx/w3EaMfLmBaDpMQvuDJ65PY8Dpnz3wpYmLtApzcrIAqmfrEgdZH1grY/a36w6Xz0DKD8ES25/niYS6+wWE8mWfByY8cXmYEJFYLkHUHtVqNQcltAvoLD3v7o/FUHsNvzlnwxfsCEukC/ho3yUHaBN5Buo17Ojtyl+DqrnvQgUtfcC0ZcAdkUeA+ye7eMru9AUGIJPe4zh509UP/AAfNypi8oj/mAAAAAElFTkSuQmCC" Filter="3" Open="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHtSURBVDjLjZM9T9tQFIYpQ5eOMBKlW6eWIQipa8RfQKQghEAKqZgKFQgmFn5AWyVDCipVQZC2EqBWlEqdO2RCpAssQBRsx1+1ndix8wFvfW6wcUhQsfTI0j33PD7n+N4uAF2E+/S5RFwG/8Njl24/LyCIOI6j1+v1y0ajgU64cSSTybdBSVAwSMmmacKyLB/DMKBpGkRRZBJBEJBKpXyJl/yABLTBtm1Uq1X2JsrlMnRdhyRJTFCpVEAfSafTTUlQoFs1luxBAkoolUqQZbmtJTYTT/AoHInOfpcwtVtkwcSBgrkDGYph+60oisIq4Xm+VfB0+U/P0Lvj3NwPGfHPTcHMvoyFXwpe7UmQtAqTUCU0D1VVbwTPVk5jY19Fe3ZfQny7CE51WJDXqpjeEUHr45ki9rIqa4dmQiJfMLItGEs/FcQ2ucbRmdnSYy5vYWyLx/w3EaMfLmBaDpMQvuDJ65PY8Dpnz3wpYmLtApzcrIAqmfrEgdZH1grY/a36w6Xz0DKD8ES25/niYS6+wWE8mWfByY8cXmYEJFYLkHUHtVqNQcltAvoLD3v7o/FUHsNvzlnwxfsCEukC/ho3yUHaBN5Buo17Ojtyl+DqrnvQgUtfcC0ZcAdkUeA+ye7eMru9AUGIJPe4zh509UP/AAfNypi8oj/mAAAAAElFTkSuQmCC" Test="P0"/></TreeIconSet><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeNew"><CallSet><Set CallIsChk="" CallName="生成XML文件" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeDelete"><CallSet><Set CallIsChk="" CallName="删除" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="复制XML文件"><CallSet><Set CallIsChk="" CallName="复制XML文件" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeRename"><CallSet><Set CallIsChk="" CallName="修改文件名称" CallType="ClassSet" Test=""/><Set CallIsChk="" CallName="RenameAfter" CallType="ScriptSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeMore"><CallSet><Set CallIsChk="" CallName="调用配置文件配置项" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserDirXmls" ConData="@linktype" MethodData="" MethodName="getxml" Name="读取XML文件数据" XmlTag="FrameData/Row"/><Set ClassName="com.gdxsoft.easyweb.define.ConfigUtils" ConData="" MethodData="@name,@ParentKey" MethodName="createNewXml" Name="生成XML文件" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.ConfigUtils" ConData="" MethodData="@key" MethodName="deleteFile" Name="删除" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.ConfigUtils" ConData="" MethodData="@COPY_FROM_XML,@EWA_TREE_PARENT_KEY,@EWA_TREE_TEXT" MethodName="copyXmlFile" Name="复制XML文件" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.ConfigUtils" ConData="" MethodData="@key, @name" MethodName="rename" Name="修改文件名称" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.UserDirXmls" ConData="" MethodData="@EWA_TREE_KEY" MethodName="loadXmlItems" Name="调用配置文件配置项" XmlTag="FrameData/Row"/></ClassSet><XmlSet/><XmlSetData/><ScriptSet><Set Name="RenameAfter" ScriptType="javascript"><Script><![CDATA[RenameAfter("@EWA_CLASS_CALL_EXCEPTION")]]></Script><CSSet/></Set></ScriptSet><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Action><XItems/><Menus><Menu Name="renameXml"><Name><Set Name="renameXml"/></Name><DescriptionSet><Set Info="重命名" Lang="zhcn"/><Set Info="Rename" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="Rename()"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="ItemPaste"><Name><Set Name="ItemPaste"/></Name><DescriptionSet><Set Info="粘贴配置项目" Lang="zhcn"/><Set Info="Paste" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd="PasteFrame();"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="Item4"><Name><Set Name="Item4"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd=""/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newFrame"><Name><Set Name="newFrame"/></Name><DescriptionSet><Set Info="新建表单" Lang="zhcn"/><Set Info="New Frame" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/item.gif"/></Icon><Cmd><Set Cmd="NewFrameFromTree('Frame');"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newListFrame"><Name><Set Name="newListFrame"/></Name><DescriptionSet><Set Info="新建列表" Lang="zhcn"/><Set Info="New ListFrame" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/item.gif"/></Icon><Cmd><Set Cmd="NewFrameFromTree('ListFrame');"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newTree"><Name><Set Name="newTree"/></Name><DescriptionSet><Set Info="新建树" Lang="zhcn"/><Set Info="New Tree" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/item.gif"/></Icon><Cmd><Set Cmd="NewFrameFromTree('Tree');"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newMenu"><Name><Set Name="newMenu"/></Name><DescriptionSet><Set Info="新建菜单" Lang="zhcn"/><Set Info="New Menu" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/item.gif"/></Icon><Cmd><Set Cmd="NewFrameFromTree('Menu');"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newMultiGrid"><Name><Set Name="newMultiGrid"/></Name><DescriptionSet><Set Info="新建多维表格" Lang="zhcn"/><Set Info="New Multi Grid" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/item.gif"/></Icon><Cmd><Set Cmd="NewFrameFromTree('MultiGrid');"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newFrame1"><Name><Set Name="newFrame1"/></Name><DescriptionSet><Set Info="从HTML新建表单" Lang="zhcn"/><Set Info="New Frame from HTML" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="NewFrame1();"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="itemhr1_1"><Name><Set Name="itemhr1_1"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd=""/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="copyXml"><Name><Set Name="copyXml"/></Name><DescriptionSet><Set Info="复制配置文件" Lang="zhcn"/><Set Info="Copy Xml File" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/copy.gif"/></Icon><Cmd><Set Cmd="CopyXml()"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="export_xml"><Name><Set Name="export_xml"/></Name><DescriptionSet><Set Info="导出XML文件" Lang="zhcn"/><Set Info="Export XML file" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="ExportXml()"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="itemhr1_2"><Name><Set Name="itemhr1_2"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd=""/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="deleteXml"><Name><Set Name="deleteXml"/></Name><DescriptionSet><Set Info="删除配置文件" Lang="zhcn"/><Set Info="Delete Config File" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_STYLE/images/defined/del.gif"/></Icon><Cmd><Set Cmd="DelXml()"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="renameitem"><Name><Set Name="renameitem"/></Name><DescriptionSet><Set Info="重命名" Lang="zhcn"/><Set Info="Rename" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd="Rename()"/></Cmd><Group><Set Group="3"/></Group></Menu><Menu Name="ItemCopy"><Name><Set Name="ItemCopy"/></Name><DescriptionSet><Set Info="复制" Lang="zhcn"/><Set Info="Copy" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/copy.gif"/></Icon><Cmd><Set Cmd="CopyFrame();"/></Cmd><Group><Set Group="3"/></Group></Menu><Menu Name="Item41"><Name><Set Name="Item41"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd=""/></Cmd><Group><Set Group="3"/></Group></Menu><Menu Name="Item5"><Name><Set Name="Item5"/></Name><DescriptionSet><Set Info="删除" Lang="zhcn"/><Set Info="Delete Item" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_STYLE/images/defined/del.gif"/></Icon><Cmd><Set Cmd="DeleteFrame();"/></Cmd><Group><Set Group="3"/></Group></Menu><Menu Name="renamePath"><Name><Set Name="renamePath"/></Name><DescriptionSet><Set Info="重命名" Lang="zhcn"/><Set Info="Rename" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd="Rename()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="batChangeParam"><Name><Set Name="batChangeParam"/></Name><DescriptionSet><Set Info="批量修改参数" Lang="zhcn"/><Set Info="Modify the parameters in bulk" Lang="enus"/></DescriptionSet><Icon><Set Icon=" "/></Icon><Cmd><Set Cmd="batchChangeParam()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="hr0"><Name><Set Name="hr0"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd=""/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="newXml"><Name><Set Name="newXml"/></Name><DescriptionSet><Set Info="" Lang=""/><Set Info="新建配置文件" Lang="zhcn"/><Set Info="New Config File" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/cl.gif"/></Icon><Cmd><Set Cmd="NewXml()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="newPath"><Name><Set Name="newPath"/></Name><DescriptionSet><Set Info="新建目录" Lang="zhcn"/><Set Info="New Dir" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/clo.gif"/></Icon><Cmd><Set Cmd="NewPath()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="pasteXml"><Name><Set Name="pasteXml"/></Name><DescriptionSet><Set Info="粘贴配置文件" Lang="zhcn"/><Set Info="Paste XML File" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="PasteXml()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="hhhrrr"><Name><Set Name="hhhrrr"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd=""/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="deletebaks"><Name><Set Name="deletebaks"/></Name><DescriptionSet><Set Info="清除Bak文件" Lang="zhcn"/><Set Info="Clear backups" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="DeleteBaks()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="import_xml"><Name><Set Name="import_xml"/></Name><DescriptionSet><Set Info="导入XML配置文件" Lang="zhcn"/><Set Info="Import the XML profile" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="ImportXmlFile()"/></Cmd><Group><Set Group="0"/></Group></Menu></Menus><Charts/><PageInfos><PageInfo Name="DEL_CFG_FILE"><Name><Set Name="DEL_CFG_FILE"/></Name><DescriptionSet><Set Info="你确定要删除改文件么" Lang="zhcn" Memo=""/><Set Info="Are you realy?" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="DEL_ITEM"><Name><Set Name="DEL_ITEM"/></Name><DescriptionSet><Set Info="你确定要删除么？" Lang="zhcn" Memo=""/><Set Info="Are you realy?" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="DEL_DIR"><Name><Set Name="DEL_DIR"/></Name><DescriptionSet><Set Info="你确定要删除改目录么？" Lang="zhcn" Memo=""/><Set Info="Are you realy?" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="DEL_BAK_CONFIRM"><Name><Set Name="DEL_BAK_CONFIRM"/></Name><DescriptionSet><Set Info="你确定要清除[A]的备份文件么？" Lang="zhcn" Memo=""/><Set Info="Are you sure remove [A] all backups?" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="DEL_BAK_MSG"><Name><Set Name="DEL_BAK_MSG"/></Name><DescriptionSet><Set Info="清除完毕,共[A]个文件" Lang="zhcn" Memo=""/><Set Info="Remove End,Total [A] files" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate Author="admin" CreateDate="2009-01-07 17:01:20" Name="define_tabs" UpdateDate="2021-03-15 10:37:04"><Page><Name><Set Name="define_tabs"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="862024" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="tabls" Lang="zhcn" Memo=""/><Set Info="tabls" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
-<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
-<table width=100% height=100% border=0 cellspacing=0 cellpadding=0>
-    <tr>
-        <td id='TD1' height=30  valign=bottom>
-        </td>
-    </tr>
-    <tr>
-        <td id='TD2'>
-        </td>
-    </tr>
-</table>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[var mm;
-function init_define_tabs() {
-    document.body.style.overflow = 'hidden';
-
-    mm = new EWA_UI_TabsClass('mm');
-    mm.Init($X('TD1'), $X('TD2'));
-
-    //loadOp();
-}
-
-function AddTab(url, caption) {
-    mm.CreateTab(url, caption);
-}
-
-function loadOp() {
-    if (!top.op) {
-        return;
-    }
-    var u = './?' + top.op;
-    $X('TD2').innerHTML = u;
-    u = GetInnerText($X('TD2'));
-    $X('TD2').innerHTML = '';
-    console.log(u);
-    //AddTab(u, 'xx');
-    top.op = null;
-    var u1 = new EWA_UrlClass();
-    u1.SetUrl(u);
-    var v = u1.GetParameter('D_XMLNAME') + '*' + u1.GetParameter('D_ITEMNAME');
-    window.parent.frames[0].EWA.F.EWA.F.GetFOSOne().ShowNode(v);
-}
-
-AddEvent(window,'load', init_define_tabs);]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[#EWA_FRAME_MAIN {
-    height: 100vh;
-}
-
-]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2013-05-22 09:25:25" Name="sql_run_main" UpdateDate="2021-03-15 10:46:33"><Page><Name><Set Name="sql_run_main"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Blue"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="862024" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="SQL" Lang="zhcn" Memo=""/><Set Info="SQL" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="margin" PageAttValue="0px"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+addEvent(window, 'load', loadOp);]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize/><ListUI/><MenuShow/><Menu/><Tree><Set AddPara1="Type" AddPara2="" AddPara3="" Key="key" Level="" LoadByLevel="1" MenuGroup="Type" Order="" ParentKey="ParentKey" RootId="" Text="name" Title="des"/></Tree><HtmlFrame><Set FrameBorder="1" FrameSize="230,*" FrameSubUrl="" FrameType="H"/></HtmlFrame><TreeIconSet><Set Close="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHdSURBVDjLjZNPaxNBGIdrLwURLznWgkcvIrQhRw9FGgy01IY0TVsQ0q6GFkT0kwjJId9AP4AHP4Q9FO2hJ7El2+yf7OzMbja7Sf0578QdNybFLjwszLu/Z2femZkDMEfI54FkRVL4Dw8l8zqXEawMBgM2HA6vR6MRZiHraDabH7KSrKBA4SAIEIahxvd9eJ6HbrerJKZpotVqaUkavkMC+iCKIsRxrN6EEAKMMViWpQT9fh/0k3a7PZZkBUPmqXAKCSjAOYdt21NLUj1JBYW7C6vi6BC8vKWKQXUXQcNA5Nh6KY7jqJl0Op1JwY/Hi7mLp/lT/uoA/OX2WLC3C9FoQBwfILKulIRmQv1wXfevwHmyuMPXS5Fv1MHrFSTmhSomnUvw/Spo3C+vg3/+pJZDPSGRFvilNV+8PUZvoziKvn+d3LZvJ/BelMDevIZXK2EQCiUhtMDM53bY5rOIGXtwjU3EVz/HM5Az8eplqPFKEfzLR91cOg8TPTgr3MudFx+d9owK7KMNVfQOtyQ1OO9qiHsWkiRRUHhKQLuwfH9+1XpfhVVfU0V3//k4zFwdzjIlSA/Sv8jTOZObBL9uugczuNaCP5K8bFBIhduE5bdC3d6MYIkkt7jOKXT1l34DkIu9e0agZjoAAAAASUVORK5CYII=" Filter="1" Open="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHdSURBVDjLjZNPaxNBGIdrLwURLznWgkcvIrQhRw9FGgy01IY0TVsQ0q6GFkT0kwjJId9AP4AHP4Q9FO2hJ7El2+yf7OzMbja7Sf0578QdNybFLjwszLu/Z2femZkDMEfI54FkRVL4Dw8l8zqXEawMBgM2HA6vR6MRZiHraDabH7KSrKBA4SAIEIahxvd9eJ6HbrerJKZpotVqaUkavkMC+iCKIsRxrN6EEAKMMViWpQT9fh/0k3a7PZZkBUPmqXAKCSjAOYdt21NLUj1JBYW7C6vi6BC8vKWKQXUXQcNA5Nh6KY7jqJl0Op1JwY/Hi7mLp/lT/uoA/OX2WLC3C9FoQBwfILKulIRmQv1wXfevwHmyuMPXS5Fv1MHrFSTmhSomnUvw/Spo3C+vg3/+pJZDPSGRFvilNV+8PUZvoziKvn+d3LZvJ/BelMDevIZXK2EQCiUhtMDM53bY5rOIGXtwjU3EVz/HM5Az8eplqPFKEfzLR91cOg8TPTgr3MudFx+d9owK7KMNVfQOtyQ1OO9qiHsWkiRRUHhKQLuwfH9+1XpfhVVfU0V3//k4zFwdzjIlSA/Sv8jTOZObBL9uugczuNaCP5K8bFBIhduE5bdC3d6MYIkkt7jOKXT1l34DkIu9e0agZjoAAAAASUVORK5CYII=" Test="P0"/><Set Close="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHtSURBVDjLjZM9T9tQFIYpQ5eOMBKlW6eWIQipa8RfQKQghEAKqZgKFQgmFn5AWyVDCipVQZC2EqBWlEqdO2RCpAssQBRsx1+1ndix8wFvfW6wcUhQsfTI0j33PD7n+N4uAF2E+/S5RFwG/8Njl24/LyCIOI6j1+v1y0ajgU64cSSTybdBSVAwSMmmacKyLB/DMKBpGkRRZBJBEJBKpXyJl/yABLTBtm1Uq1X2JsrlMnRdhyRJTFCpVEAfSafTTUlQoFs1luxBAkoolUqQZbmtJTYTT/AoHInOfpcwtVtkwcSBgrkDGYph+60oisIq4Xm+VfB0+U/P0Lvj3NwPGfHPTcHMvoyFXwpe7UmQtAqTUCU0D1VVbwTPVk5jY19Fe3ZfQny7CE51WJDXqpjeEUHr45ki9rIqa4dmQiJfMLItGEs/FcQ2ucbRmdnSYy5vYWyLx/w3EaMfLmBaDpMQvuDJ65PY8Dpnz3wpYmLtApzcrIAqmfrEgdZH1grY/a36w6Xz0DKD8ES25/niYS6+wWE8mWfByY8cXmYEJFYLkHUHtVqNQcltAvoLD3v7o/FUHsNvzlnwxfsCEukC/ho3yUHaBN5Buo17Ojtyl+DqrnvQgUtfcC0ZcAdkUeA+ye7eMru9AUGIJPe4zh509UP/AAfNypi8oj/mAAAAAElFTkSuQmCC" Filter="3" Open="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHtSURBVDjLjZM9T9tQFIYpQ5eOMBKlW6eWIQipa8RfQKQghEAKqZgKFQgmFn5AWyVDCipVQZC2EqBWlEqdO2RCpAssQBRsx1+1ndix8wFvfW6wcUhQsfTI0j33PD7n+N4uAF2E+/S5RFwG/8Njl24/LyCIOI6j1+v1y0ajgU64cSSTybdBSVAwSMmmacKyLB/DMKBpGkRRZBJBEJBKpXyJl/yABLTBtm1Uq1X2JsrlMnRdhyRJTFCpVEAfSafTTUlQoFs1luxBAkoolUqQZbmtJTYTT/AoHInOfpcwtVtkwcSBgrkDGYph+60oisIq4Xm+VfB0+U/P0Lvj3NwPGfHPTcHMvoyFXwpe7UmQtAqTUCU0D1VVbwTPVk5jY19Fe3ZfQny7CE51WJDXqpjeEUHr45ki9rIqa4dmQiJfMLItGEs/FcQ2ucbRmdnSYy5vYWyLx/w3EaMfLmBaDpMQvuDJ65PY8Dpnz3wpYmLtApzcrIAqmfrEgdZH1grY/a36w6Xz0DKD8ES25/niYS6+wWE8mWfByY8cXmYEJFYLkHUHtVqNQcltAvoLD3v7o/FUHsNvzlnwxfsCEukC/ho3yUHaBN5Buo17Ojtyl+DqrnvQgUtfcC0ZcAdkUeA+ye7eMru9AUGIJPe4zh509UP/AAfNypi8oj/mAAAAAElFTkSuQmCC" Test="P0"/></TreeIconSet><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeNew"><CallSet><Set CallIsChk="" CallName="生成XML文件" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeDelete"><CallSet><Set CallIsChk="" CallName="删除" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="复制XML文件"><CallSet><Set CallIsChk="" CallName="复制XML文件" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeRename"><CallSet><Set CallIsChk="" CallName="修改文件名称" CallType="ClassSet" Test=""/><Set CallIsChk="" CallName="RenameAfter" CallType="ScriptSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnTreeNodeMore"><CallSet><Set CallIsChk="" CallName="调用配置文件配置项" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserDirXmls" ConData="@linktype" MethodData="" MethodName="getxml" Name="读取XML文件数据" XmlTag="FrameData/Row"/><Set ClassName="com.gdxsoft.easyweb.define.ConfigUtils" ConData="" MethodData="@name,@ParentKey" MethodName="createNewXml" Name="生成XML文件" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.ConfigUtils" ConData="" MethodData="@key" MethodName="deleteFile" Name="删除" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.ConfigUtils" ConData="" MethodData="@COPY_FROM_XML,@EWA_TREE_PARENT_KEY,@EWA_TREE_TEXT" MethodName="copyXmlFile" Name="复制XML文件" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.ConfigUtils" ConData="" MethodData="@key, @name" MethodName="rename" Name="修改文件名称" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.UserDirXmls" ConData="" MethodData="@EWA_TREE_KEY" MethodName="loadXmlItems" Name="调用配置文件配置项" XmlTag="FrameData/Row"/></ClassSet><XmlSet/><XmlSetData/><ScriptSet><Set Name="RenameAfter" ScriptType="javascript"><Script><![CDATA[RenameAfter("@EWA_CLASS_CALL_EXCEPTION")]]></Script><CSSet/></Set></ScriptSet><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Action><XItems/><Menus><Menu Name="renameXml"><Name><Set Name="renameXml"/></Name><DescriptionSet><Set Info="重命名" Lang="zhcn"/><Set Info="Rename" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="Rename()"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="ItemPaste"><Name><Set Name="ItemPaste"/></Name><DescriptionSet><Set Info="粘贴配置项目" Lang="zhcn"/><Set Info="Paste" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd="PasteFrame();"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="Item4"><Name><Set Name="Item4"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd=""/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newFrame"><Name><Set Name="newFrame"/></Name><DescriptionSet><Set Info="新建表单" Lang="zhcn"/><Set Info="New Frame" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/item.gif"/></Icon><Cmd><Set Cmd="NewFrameFromTree('Frame');"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newListFrame"><Name><Set Name="newListFrame"/></Name><DescriptionSet><Set Info="新建列表" Lang="zhcn"/><Set Info="New ListFrame" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/item.gif"/></Icon><Cmd><Set Cmd="NewFrameFromTree('ListFrame');"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newTree"><Name><Set Name="newTree"/></Name><DescriptionSet><Set Info="新建树" Lang="zhcn"/><Set Info="New Tree" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/item.gif"/></Icon><Cmd><Set Cmd="NewFrameFromTree('Tree');"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newMenu"><Name><Set Name="newMenu"/></Name><DescriptionSet><Set Info="新建菜单" Lang="zhcn"/><Set Info="New Menu" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/item.gif"/></Icon><Cmd><Set Cmd="NewFrameFromTree('Menu');"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newMultiGrid"><Name><Set Name="newMultiGrid"/></Name><DescriptionSet><Set Info="新建多维表格" Lang="zhcn"/><Set Info="New Multi Grid" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/item.gif"/></Icon><Cmd><Set Cmd="NewFrameFromTree('MultiGrid');"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="newFrame1"><Name><Set Name="newFrame1"/></Name><DescriptionSet><Set Info="从HTML新建表单" Lang="zhcn"/><Set Info="New Frame from HTML" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="NewFrame1();"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="itemhr1_1"><Name><Set Name="itemhr1_1"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd=""/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="copyXml"><Name><Set Name="copyXml"/></Name><DescriptionSet><Set Info="复制配置文件" Lang="zhcn"/><Set Info="Copy Xml File" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/copy.gif"/></Icon><Cmd><Set Cmd="CopyXml()"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="export_xml"><Name><Set Name="export_xml"/></Name><DescriptionSet><Set Info="导出XML文件" Lang="zhcn"/><Set Info="Export XML file" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="ExportXml()"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="itemhr1_2"><Name><Set Name="itemhr1_2"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd=""/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="deleteXml"><Name><Set Name="deleteXml"/></Name><DescriptionSet><Set Info="删除配置文件" Lang="zhcn"/><Set Info="Delete Config File" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_STYLE/images/defined/del.gif"/></Icon><Cmd><Set Cmd="DelXml()"/></Cmd><Group><Set Group="1"/></Group></Menu><Menu Name="renameitem"><Name><Set Name="renameitem"/></Name><DescriptionSet><Set Info="重命名" Lang="zhcn"/><Set Info="Rename" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd="Rename()"/></Cmd><Group><Set Group="3"/></Group></Menu><Menu Name="ItemCopy"><Name><Set Name="ItemCopy"/></Name><DescriptionSet><Set Info="复制" Lang="zhcn"/><Set Info="Copy" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/copy.gif"/></Icon><Cmd><Set Cmd="CopyFrame();"/></Cmd><Group><Set Group="3"/></Group></Menu><Menu Name="Item41"><Name><Set Name="Item41"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd=""/></Cmd><Group><Set Group="3"/></Group></Menu><Menu Name="Item5"><Name><Set Name="Item5"/></Name><DescriptionSet><Set Info="删除" Lang="zhcn"/><Set Info="Delete Item" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_STYLE/images/defined/del.gif"/></Icon><Cmd><Set Cmd="DeleteFrame();"/></Cmd><Group><Set Group="3"/></Group></Menu><Menu Name="renamePath"><Name><Set Name="renamePath"/></Name><DescriptionSet><Set Info="重命名" Lang="zhcn"/><Set Info="Rename" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd="Rename()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="batChangeParam"><Name><Set Name="batChangeParam"/></Name><DescriptionSet><Set Info="批量修改参数" Lang="zhcn"/><Set Info="Modify the parameters in bulk" Lang="enus"/></DescriptionSet><Icon><Set Icon=" "/></Icon><Cmd><Set Cmd="batchChangeParam()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="hr0"><Name><Set Name="hr0"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon><Set Icon=""/></Icon><Cmd><Set Cmd=""/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="newXml"><Name><Set Name="newXml"/></Name><DescriptionSet><Set Info="" Lang=""/><Set Info="新建配置文件" Lang="zhcn"/><Set Info="New Config File" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/cl.gif"/></Icon><Cmd><Set Cmd="NewXml()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="newPath"><Name><Set Name="newPath"/></Name><DescriptionSet><Set Info="新建目录" Lang="zhcn"/><Set Info="New Dir" Lang="enus"/></DescriptionSet><Icon><Set Icon="@rv_ewa_style_path/EWA_DEFINE/images/xml/clo.gif"/></Icon><Cmd><Set Cmd="NewPath()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="pasteXml"><Name><Set Name="pasteXml"/></Name><DescriptionSet><Set Info="粘贴配置文件" Lang="zhcn"/><Set Info="Paste XML File" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="PasteXml()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="hhhrrr"><Name><Set Name="hhhrrr"/></Name><DescriptionSet><Set Info="&lt;hr&gt;" Lang="zhcn"/><Set Info="&lt;hr&gt;" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd=""/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="deletebaks"><Name><Set Name="deletebaks"/></Name><DescriptionSet><Set Info="清除Bak文件" Lang="zhcn"/><Set Info="Clear backups" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="DeleteBaks()"/></Cmd><Group><Set Group="0"/></Group></Menu><Menu Name="import_xml"><Name><Set Name="import_xml"/></Name><DescriptionSet><Set Info="导入XML配置文件" Lang="zhcn"/><Set Info="Import the XML profile" Lang="enus"/></DescriptionSet><Icon/><Cmd><Set Cmd="ImportXmlFile()"/></Cmd><Group><Set Group="0"/></Group></Menu></Menus><Charts/><PageInfos><PageInfo Name="DEL_CFG_FILE"><Name><Set Name="DEL_CFG_FILE"/></Name><DescriptionSet><Set Info="你确定要删除改文件么" Lang="zhcn" Memo=""/><Set Info="Are you realy?" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="DEL_ITEM"><Name><Set Name="DEL_ITEM"/></Name><DescriptionSet><Set Info="你确定要删除么？" Lang="zhcn" Memo=""/><Set Info="Are you realy?" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="DEL_DIR"><Name><Set Name="DEL_DIR"/></Name><DescriptionSet><Set Info="你确定要删除改目录么？" Lang="zhcn" Memo=""/><Set Info="Are you realy?" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="DEL_BAK_CONFIRM"><Name><Set Name="DEL_BAK_CONFIRM"/></Name><DescriptionSet><Set Info="你确定要清除[A]的备份文件么？" Lang="zhcn" Memo=""/><Set Info="Are you sure remove [A] all backups?" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="DEL_BAK_MSG"><Name><Set Name="DEL_BAK_MSG"/></Name><DescriptionSet><Set Info="清除完毕,共[A]个文件" Lang="zhcn" Memo=""/><Set Info="Remove End,Total [A] files" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2013-05-22 09:25:25" Name="sql_run_main" UpdateDate="2021-03-15 10:46:33"><Page><Name><Set Name="sql_run_main"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Blue"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="862024" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="SQL" Lang="zhcn" Memo=""/><Set Info="SQL" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="margin" PageAttValue="0px"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
 <table border=0 width=100% height=100%>
     <tr>
@@ -6560,524 +6075,7 @@ document.body.style.margin='0px';
 document.body.style.overflow='hidden';
 ]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[ #EWA_FRAME_MAIN {
     height: 100vh;
-} ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="1" FrameSize="50%,*" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-05-06 17:48:10" Name="define_code" UpdateDate="2021-03-15 13:22:50"><Page><Name><Set Name="define_code"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="code editor!" Lang="zhcn" Memo=""/><Set Info="code editor!" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.css">
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_FUNCTIONS.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CM.js"></script>
-
-
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.js"></script>
-
-<table border=0 width=100% style="height:100vh">
-    <tr>
-        <td class='btns-code' height=20 style='border-bottom:1px solid black'>
-            <select id=code onchange="bb(this)"></select>
-            <input class='js' type=button id='butJs' onclick='formatCode()' value='格式化JS' />
-
-            <button class='js' onclick='EWAC_FUNCTIONS.showFunctions();'>代码片段</button>
-            <span class="js">Action:
-                <select id=selAction onchange="EWAC_FUNCTIONS.setAction(this.value)">
-                    <option></option>
-                </select>
-            </span>
-            <input class='sql' type=button id='butSql' onclick='formatCodeSQL()' value='格式化SQL' />
-            <input class='sql' type=button id='butChkSql' onclick='checkSQL()' value='检查SQL语法' />
-            <input class='html' type=button id='butHtml' onclick='formatCodeHtml()' value='格式化Html' />
-            <button class='html' onclick='ConvertHtml();'>转换自定义框架</button>
-            <button class='html' onclick='AddDownHead();'>下载数据头</button>
-            字体： <select id='editor_font_size' onclick="change_editor_font_size()">
-                <option value='9px'>9px</option>
-                <option value='10px'>10px</option>
-                <option value='11px'>11px</option>
-                <option value='12px' selected>12px</option>
-                <option value='13px'>13px</option>
-                <option value='14px'>14px</option>
-                <option value='15px'>15px</option>
-                <option value='16px'>16px</option>
-            </select>
-
-            | <span id=msg></span>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <iframe frameborder=0 width=100% height=100% src='./?xmlname=@xmlname&ITEMNAME=define_edit_value&max=1'></iframe>
-        </td>
-    </tr>
-</table>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[$('body').css('background', 'transparent').css('margin', 0);
-
-
-document.body.style.overflow = 'hidden';
-
-var inputs = [];
-
-function aa() {
-    var w = window.frames[0];
-    var tb = w.$X('Test1');
-    inputs = [];
-    selectedIndex = null;
-
-    tb.style.width = '100%';
-    tb.style.height = '100%';
-
-    var tb1 = tb.getElementsByTagName('table')[0];
-    tb1.style.width = '100%';
-    tb1.style.height = '100%';
-    tb1.rows[3].style.display = 'none';
-
-    var s = $X('code');
-    s.innerHTML = "";
-
-    //js
-    aa0(window.parent.$X('PAGE$AddScript$Bottom'));
-    aa0(window.parent.$X('PAGE$AddScript$Top'));
-
-    //html
-    aa0(window.parent.$X('PAGE$AddHtml$Top'));
-    aa0(window.parent.$X('PAGE$AddHtml$Bottom'));
-
-    //css
-    aa0(window.parent.$X('PAGE$AddCss$AddCss'));
-
-    // sql
-    aa1();
-
-    //this config memo
-    aa0(window.parent.$X('PAGE$ConfigMemo$ConfigMemo'));
-
-    bb(s);
-}
-
-function aa0(obj) {
-    //PAGE$AddHtml$Top
-    var id = obj.id;
-    var o = obj;
-    var t = o.tagName.toUpperCase() == 'INPUT' ? o.getAttribute('EWA_COLOR_TYPE') : o['EWA_COLOR_TYPE'];
-    var txt = o.tagName.toUpperCase() == 'INPUT' ? o.getAttribute('EWA_VALUE') : o['EWA_VALUE'];
-
-    var s = document.getElementById('code');
-    s.options[s.options.length] = new Option(id + ' (' + t + ')', '');
-    var oo = s.options[s.options.length - 1];
-    if (t == 'jscript') {
-        oo.style.color = 'darkblue';
-    } else if (t == 'html') {
-        oo.style.color = 'red';
-        oo.fontWeight = 'bold';
-    }
-    if (s.options.length == 1) {
-        oo.selected = true;
-    }
-    inputs.push(o);
-}
-
-function aa1() {
-    var t = window.parent._EWAC_UI._UserClass.ActionTables.Tables.GetItem('SQLSET');
-    for (var i = 0; i < t.Rows.length; i++) {
-        var row = t.Rows[i];
-        var o = {};
-        o.getAttribute = function(name) {
-            return this[name];
-        }
-        o.setAttribute = function(name, val) {
-            this[name] = val;
-        }
-        o.id = 'SQL$' + row.Fields[0];
-        o.EWA_VALUE = row.Fields[3];
-        o.EWA_COLOR_TYPE = 'sql';
-        o.tagName = 'SQL';
-        o.row = row;
-        aa0(o);
-    }
-}
-var selectedIndex;
-
-function loadEWAFunction(a) {
-    if (window.EWA_FUN != null) {
-        return;
-    }
-    
-    EWAC_FUNCTIONS.setJs = function(v) {
-        window.frames[0].frames[0].setText('\n' + v);
-        formatCode();
-    };
-    
-    window.$Tip1 = $Tip; //避免出现“验证码错误提示” at this.ValidCodeError
-    $Tip = function(a) {
-        console.log(a);
-    };
-    
-    window.EWA_FUN = new EWA_Function();
-    EWA_FUN.AddTopObject(EWA, "EWA");
-    EWA_FUN.LoadFunctions();
-    var tagName = a[4]._UserClass.PageTables.Tables.GetItem('FrameTag').GetSingleValue();
-    EWA_FUN.LoadResources(a[4]._UserClass.PageInfosTablesSet, tagName);
-    var dataTable = a[4]._UserClass.ActionTables.Tables.GetItem("ActionSet");
-
-    function loadAction(dataTable) {
-        var sel = $X('selAction');
-        var typeIndex = dataTable.Columns.GetIndex("Type");
-        for (var i = 0; i < dataTable.Rows.length; i += 1) {
-            var v = dataTable.Rows[i].Fields[typeIndex];
-            sel.options[sel.options.length] = new Option(v, v);
-        }
-    }
-    loadAction(dataTable);
-
-    $Tip = $Tip1;
-}
-
-function bb(selectObj) {
-    if (selectedIndex != null) {
-        var txt = window.frames[0].frames[0].getText();
-        inputs[selectedIndex].setAttribute('EWA_VALUE', txt);
-    }
-    selectedIndex = selectObj.selectedIndex;
-    var obj = inputs[selectedIndex];
-
-    var a = [];
-    a[0] = obj;
-    a[1] = obj;
-    a[3] = obj.getAttribute('EWA_COLOR_TYPE');
-
-
-
-    $('.btns-code').removeClass('js').removeClass('sql').removeClass('html');
-    if (a[3] == 'jscript') {
-        $('.btns-code').addClass('js');
-    } else if (a[3] == 'sql') {
-        $('.btns-code').addClass('sql');
-    } else if (a[3] == 'html') {
-        $('.btns-code').addClass('html');
-    } else {
-        $('#butJs').hide();
-        $('#butSql').hide();
-        $('#butHtml').hide();
-        $('#butChkSql').hide();
-    }
-    a[4] = window.parent._EWAC_UI;
-    window.frames[0].init(a);
-
-    console.log(a);
-    try {
-        loadEWAFunction(a);
-    } catch (e) {
-        console.error(e);
-    }
-}
-var pp = [];
-
-function showCode(opt) {
-    pp[3] = t;
-    pp[1] = opt;
-}
-
-function save() {
-    try {
-        window.parent.$X('EWAC_SELECT_TYPE').value = 'Page';
-        window.parent._EWAC_UI.ChangeType('Page');
-    } catch (e) {}
-    var txt = window.frames[0].frames[0].getText();
-    inputs[selectedIndex].setAttribute('EWA_VALUE', txt);
-
-    var s = document.getElementById('code');
-    for (var i = 0; i < inputs.length; i++) {
-        var ipt = inputs[i];
-        if (!saveToXml(ipt)) {
-            $X('msg').innerHTML = '<font color=red>请切换到Page页面,然后保存</font>';
-            return;
-        }
-    }
-    $X('msg').innerHTML = '保存完毕！'
-}
-
-function saveToXml(ipt) {
-    var txt = ipt.getAttribute('EWA_VALUE');
-    if (ipt.tagName == 'INPUT') {
-        if (ipt.parentNode.parentNode.parentNode.parentNode.style.display == 'none') {
-            alert('请切换到Page页面,然后再保存');
-            return false;
-        }
-        ipt.title = txt;
-        ipt.value = txt;
-        ipt.setAttribute("EWA_OLD_VALUE", ipt.value);
-        ipt.onblur();
-    } else {
-        ipt.row.Fields[3] = txt;
-    }
-    return true;
-}]]></Top><Bottom><![CDATA[function formatCode() {
-    window.frames[0].frames[0].beautify_code(); //defined in EWA_DEFINE/js/CodeMirror/index.html
-}
-
-function formatCodeSQL() {
-    window.frames[0].frames[0].beautify_code();
-}
-
-function formatCodeHtml() {
-    window.frames[0].frames[0].beautify_code();
-
-}
-
-function checkSQL() {
-    window.frames[0].frames[0].checkSQL();
-}
-
-function AddDownHead() {
-    let ss = [];
-    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('XLS')\" value=\"导出XLS文件\">");
-    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('DBF')\" value=\"导出DBF文件\">");
-    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('TXT')\" value=\"导出TXT文件\">");
-    window.frames[0].frames[0].setText(ss.join('\n'));
-    formatCodeHtml();
-}
-
-function ConvertHtml() {
-    var win = window._EWA_DialogWnd ? _EWA_DialogWnd._OpenerWindow : window.parent;
-    console.log(win.location.href);
-    var s1 = win._EWAC_UISkin.CreateFrameHtml();
-    window.frames[0].frames[0].setText(s1);
-    formatCodeHtml();
-}
-//更改编辑器文字的大小
-function change_editor_font_size() {
-    var fontsize = $('#editor_font_size').val();
-    window.frames[0].frames[0].editor.setOption('fontSize', fontsize);
-    window.localStorage.EWA_CODE_FONTSIZE = fontsize;
-}
-
-
-//更改编辑器文字的大小
-(function() {
-    document.body.style.overflow = 'hidden';
-    if (window.localStorage.EWA_CODE_FONTSIZE) {
-        $('#editor_font_size').val(window.localStorage.EWA_CODE_FONTSIZE);
-    }
-})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.btns-code .js,
-.btns-code .html,
-.btns-code .sql {
-    display: none;
-}
-
-.btns-code.js .js {
-    display: inline-block;
-}
-
-.btns-code.html .html {
-    display: inline-block;
-}
-
-.btns-code.sql .sql {
-    display: inline-block;
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-01-07 17:01:20" Name="define_edit_value" UpdateDate="2021-03-29 16:21:04"><Page><Name><Set Name="define_edit_value"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo><![CDATA[
-                    ## 用于EWA的代码编辑
-
-### 1、根据传递的参数（jscript, html, json, sql, md5）来确定加载的编辑器类型
-### 2、编辑器调用 EWA_CONFIG/js/CodeMirror/index.html文件，编辑器采用ACE模式。
-
-
-                ]]></ConfigMemo></Set></ConfigMemo><Cached><Set CachedSeconds="862024" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="内容编辑" Lang="zhcn" Memo=""/><Set Info="Content editor" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="400" HiddenCaption="1" VAlign="top" Width="810"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.css">
-
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CM.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_FUNCTIONS.js"></script>
-
-<table border="0" cellspacing="0" cellpadding="0" style="min-width:1000px" width="100%" height="520" id=tbMain>
-    <tr style='display:none'></tr>
-    <tr id='trEwaFunc'>
-        <td height=30><input type=text placeholder="EWA" id=func style='width:100%' /></td>
-    </tr>
-    <tr>
-        <td id="tdContent">
-            <textarea id=content style="width: 100%; height: 100%"></textarea>
-        </td>
-    </tr>
-    <tr>
-        <td height=20 style="padding: 5px; border-top: 1px solid #ccc" align="right">
-            <button type=button id=butOk onclick="ok();">确定</button>
-            <button type=button>关闭</button>
-        </td>
-    </tr>
-</table>]]></Top><Bottom><![CDATA[
-                     
-                ]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[(function() {
-    document.body.style.overflow = 'hidden';
-    $('body').css('background', 'transparent');
-
-    var u1 = new EWA_UrlClass();
-    if (u1.GetParameter("max")) {
-        document.writeln("<style>#Test1{width:100%!important;height:100vh!important;}</style>");
-    }
-})();]]></Top><Bottom><![CDATA[var EWA_FUN;
-var parentCmd;
-var timerInit;
-var cmEditor;
-var AAA;
-
-
-var cm;
-
-function init(a) {
-    //console.log(a);
-    if (a[3] == "jscript") {
-        $X('trEwaFunc').style.display = '';
-    } else {
-        $X('trEwaFunc').style.display = 'none';
-        $('#trFuncHtml').show();
-    }
-    var table = $X('tbMain');
-    if (a[3] == "html" || a[3] == "jscript" || a[3] == "sql" ||
-        a[3] == "css" || a[3] == "json" || a[3] == "md") {
-        //window.clearInterval(timerInit);
-        __VAL__ = a[1].getAttribute("EWA_VALUE");
-        __TYPE__ = a[3];
-        if (a[3] == 'json' && !__VAL__) {
-            __VAL__ = '[{"url":"http://xxx/bb/cc.jsp?a=1", "method": "query/update", "data":{"id": "@' + 'id","name": "@' + 'name"}},{}]';
-        }
-        if (window.frames.length == 0) {
-            var u = '<iframe src="@ewa.cp/EWA_STYLE/cgi-bin/?XMLNAME=@XMLNAME&itemname=define_code_editor"' +
-                ' width=100% height=100% scrolling=no scroll=no frameborder=0></iframe>';
-            $X('tdContent').innerHTML = u;
-
-
-            loadEWAFunction(a);
-            cm = new EWA_ColorMark2($X('func'), EWA_FUN);
-            cm.Init();
-        } else {
-            window.frames[0].aa();
-        }
-        setSize();
-    } else {
-        $X("content").value = a[1].getAttribute("EWA_VALUE");
-    }
-}
-var h = -10;
-var w = -10;
-var idx = 0;
-
-function setSize() {
-    try {
-        if (document.body.offsetHeight != h) {
-            h = document.body.offsetHeight;
-            idx = 0;
-            window.setTimeout(setSize, 150);
-        } else {
-            idx++;
-            if (idx < 5) {
-                window.setTimeout(setSize, 50);
-                return;
-            }
-            var h2 = $X('tdContent').offsetHeight;
-            var o = window.frames[0].document.getElementById('code').nextSibling;
-            o.style.height = h2 + 'px';
-            o.childNodes[1].style.height = h2 + 'px';
-
-        }
-    } catch (ee) {
-        //$X('butOk').value=ee;
-    }
-}
-
-function loadEWAFunction(a) {
-    //console.log(a);
-    //move to define_code
-
-    if (EWA_FUN != null) {
-        return;
-    }
-    console.log('loadEWAFunction')
-    window.$Tip1 = $Tip; //避免出现“验证码错误提示” at this.ValidCodeError
-    $Tip = function(a) {
-        console.log(a);
-    };
-    EWA_FUN = new EWA_Function();
-    EWA_FUN.AddTopObject(EWA, "EWA");
-    EWA_FUN.LoadFunctions();
-    var tagName = a[4]._UserClass.PageTables.Tables.GetItem('FrameTag').GetSingleValue();
-    EWA_FUN.LoadResources(a[4]._UserClass.PageInfosTablesSet, tagName);
-    var dataTable = a[4]._UserClass.ActionTables.Tables.GetItem("ActionSet");
-    loadAction(dataTable);
-
-    $Tip = $Tip1;
-    delete $Tip1;
-}
-
-function loadAction(dataTable) {
-    let t = setInterval(function() {
-        if (window.frames[0].$X && window.frames[0].$X('selAction')) {
-            window.clearInterval(t);
-
-            var sel = window.frames[0].$X('selAction');
-            var typeIndex = dataTable.Columns.GetIndex("Type");
-            for (var i = 0; i < dataTable.Rows.length; i += 1) {
-                var v = dataTable.Rows[i].Fields[typeIndex];
-                sel.options[sel.options.length] = new Option(v, v);
-            }
-        }
-    }, 100)
-}
-
-function ok() {
-    if (typeof EWA_FUN != "undefined") {
-        EWA_FUN.Dispose();
-    }
-    var cmd = window._EWA_DialogWnd.GetReturnBack();
-    var val = "";
-    if (window.frames.length == 0) {
-        val = $X('content').value;
-    } else {
-        val = window.frames[0].editor.getValue();
-    }
-    cmd.CmdArgus[0].value = val;
-    cmd.CmdArgus[0].title = val;
-    cmd.CmdArgus[0].setAttribute("EWA_VALUE", val);
-    cmd.CmdArgus[0].setAttribute("EWA_OLD_VALUE", cmd.CmdArgus[0].value);
-    cmd.CmdArgus[0].focus();
-    window._EWA_DialogWnd.CloseWindow();
-}
-
-function openDialog(url) {
-    if (url == null || url.length == 0) return;
-    var returnBackCommand = new _EWA_DialogWnd._OpenerWindow.EWA.UI.Dialog.CMD();
-    returnBackCommand.CmdArgus[0] = window.frames[0].window;
-    _EWA_DialogWnd._OpenerWindow.EWA.UI.Dialog.OpenWindow(url, 'openurl', 624, 400, false, null, returnBackCommand);
-}
-
-function init_define_set_value() {
-    EWAC_FUNCTIONS.setJs = function(v) {
-        window.frames[0].setText('\n' + v);
-    };
-    if ('@SQL_XMLNAME' != '') {
-        console.log('@SQL_XMLNAME');
-        var ajax = new EWA_AjaxClass();
-        var u = EWA.CP + '/EWA_DEFINE/cgi-bin/xml/?TYPE=SQLS&XMLNAME=@SQL_XMLNAME';
-        ajax.Get(u,
-            function() {
-                if (!ajax.IsRunEnd()) {
-                    return;
-                }
-                var rst = ajax.GetRst();
-                var aa = [];
-                aa[3] = 'sql';
-                aa[1] = document.createElement('div');
-                aa[1].setAttribute('EWA_VALUE', rst);
-                init(aa);
-            });
-    }
-}
-addEvent(window, 'load', init_define_set_value);]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[
-                    p {
-    margin: 0px;
-}
-
-*,
-span,
-pre {
-    font-size: 13px;
-    font-family: "Courier New";
-    ling-height: 18px;
-}
-                ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-02-05 11:35:41" Name="fields" UpdateDate="2021-06-02 11:24:34"><Page><Name><Set Name="fields"/></Name><FrameTag><Set FrameTag="ListFrame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="字段列表" Lang="zhcn" Memo=""/><Set Info="Fields" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="" Height="" HiddenCaption="" VAlign="" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+} ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="1" FrameSize="50%,*" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-02-05 11:35:41" Name="fields" UpdateDate="2021-06-02 11:24:34"><Page><Name><Set Name="fields"/></Name><FrameTag><Set FrameTag="ListFrame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="字段列表" Lang="zhcn" Memo=""/><Set Info="Fields" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="" Height="" HiddenCaption="" VAlign="" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
 <script type="text/javascript" src="@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/xml/?TYPE=CFG_XML&XMLNAME=EwaDefine.xml&mode=JS&mode_name=_CFG_DEFINE"></script>
 <script type="text/javascript" src='@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/xml/?XMLNAME=@XMLNAME&ITEMNAME=fields&MODE=JS&MODE_NAME=_CFG_ITEM&TYPE=ALL'></script>
@@ -7568,4 +6566,1005 @@ EWA.F.FOS["@sys_frame_unid"].link = function(id) {
         var u = './?xmlname=@xmlname&itemname=define_tabs&a=gdx';
         window.parent.frames[1].location = u;
     }
-})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize/><ListUI/><MenuShow/><Menu/><Tree><Set AddPara1="" AddPara2="" AddPara3="" Key="key" Level="" LoadByLevel="1" MenuGroup="" Order="" ParentKey="ParentKey" RootId="" Text="name" Title=""/></Tree><HtmlFrame><Set FrameBorder="" FrameSize="200,*" FrameSubUrl="" FrameType="H"/></HtmlFrame><TreeIconSet><Set Close="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Filter=".doc\b" Open="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Test="Key"/><Set Close="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Filter=".doc\b" Open="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Test="Key"/></TreeIconSet><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnTreeNodeMore"><CallSet><Set CallIsChk="" CallName="获取子节点" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="" MethodName="getCfgsXml" Name="读取XML文件数据" XmlTag="TableViewList/Row"/><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@key,@linkType" MethodName="getMoreXml1" Name="获取子节点" XmlTag="TableViewList/Row"/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize/><ListUI/><MenuShow/><Menu/><Tree><Set AddPara1="" AddPara2="" AddPara3="" Key="key" Level="" LoadByLevel="1" MenuGroup="" Order="" ParentKey="ParentKey" RootId="" Text="name" Title=""/></Tree><HtmlFrame><Set FrameBorder="" FrameSize="200,*" FrameSubUrl="" FrameType="H"/></HtmlFrame><TreeIconSet><Set Close="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Filter=".doc\b" Open="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Test="Key"/><Set Close="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Filter=".doc\b" Open="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Test="Key"/></TreeIconSet><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnTreeNodeMore"><CallSet><Set CallIsChk="" CallName="获取子节点" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="" MethodName="getCfgsXml" Name="读取XML文件数据" XmlTag="TableViewList/Row"/><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@key,@linkType" MethodName="getMoreXml1" Name="获取子节点" XmlTag="TableViewList/Row"/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-01-07 17:01:20" Name="define_right" UpdateDate="2021-12-06 10:27:09"><Page><Name><Set Name="define_right"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="设计XML" Lang="zhcn" Memo=""/><Set Info="Design XML" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CONFIG.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_SKIN.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_DDL.js"></script>
+<script type="text/javascript" src="@EWA.CP/EWA_DEFINE/cgi-bin/xml/?TYPE=EWAC_DDL_READ"></script>
+<script>
+    document.write("<scr" + "ipt src='@EWA.CP/EWA_DEFINE/cgi-bin/xml/?XMLNAME=" +
+        "@D_XMlNAME".toURL() +
+        "&ITEMNAME=@D_ITEMNAME&MODE=JS&MODE_NAME=_CFG_ITEM&TYPE=ALL'></sc" + "ript>")
+</script>
+
+<script src="@rv_ewa_style_path/EWA_STYLE/js/fas.js"></script>
+
+<table width="100%" style="height:100vh" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td>
+            <table width=100% height=100% cellpadding=0 cellspacing=0>
+                 <tr>
+                    <td height=25 id='TABS' onselectstart="return false;" valign=top>
+                        <span id="S_PAGE" class=but1 onclick="switch_page(this)">
+                            视图
+                        </span>
+                        <span id="S_CODE" class=but0 onclick="switch_page(this)">
+                            代码
+                        </span>
+                        <span id="S_RES" class=but0 onclick="switch_page(this)">
+                            资源
+                        </span>
+                        <span id="S_DRAW" class=but0 onclick="switch_page(this)">
+                            重绘
+                        </span>
+                        <span id="S_BOX" class=but0 onclick="switch_page(this)">
+                            BOX
+                        </span>
+                        <span id="S_LMENU" class=but0 onclick="switch_page(this)">
+                            左引导
+                        </span>
+                        <span id="S_GEN" class=but0 onclick="openTest()">
+                            打开测试
+                        </span>
+                        <span id="S_XML" class=but0 onclick="switch_page(this)">
+                            XML
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td id="I_PAGE" height="100%">
+                        <iframe id='F_PAGE' frameborder="0" width="100%" src='./?XMLNAME=@xmlname&ITEMNAME=define' height="100%">
+                        </iframe>
+                    </td>
+                    <td id="I_XML" style="display: none">
+                        <iframe id='F_XML' name="XML" src1='@rv_ewa_style_path/EWA_DEFINE/js/CodeMirror/index.html' frameborder="0" width="100%" height="100%"></iframe>
+                    </td>
+                    <td id="I_RES" style="display: none">
+                        <iframe id='F_RES' frameborder="0" width="100%" height="100%" src1="./?XMLNAME=@xmlname&ITEMNAME=define_res"></iframe>
+                    </td>
+                    <td id="I_CODE" style="display: none">
+                        <iframe id='F_CODE' frameborder="0" width="100%" height="100%" src='./?XMLNAME=@xmlname&ITEMNAME=define_code'>
+                        </iframe>
+                    </td>
+                    <td id="I_DRAW" style="display: none">
+                        <iframe frameborder="0" width="100%" height="100%" src1='./?XMLNAME=@xmlname&ITEMNAME=define_redraw'>
+                        </iframe>
+                    </td>
+                    <td id="I_BOX" style="display: none">
+                        <iframe frameborder="0" width="100%" height="100%" src1='./?XMLNAME=@xmlname&ITEMNAME=define_box&@EWA_QUERY'>
+                        </iframe>
+                    </td>
+                    <td id="I_LMENU" style="display: none">
+                        <iframe frameborder="0" width="100%" height="100%" src1='./?XMLNAME=@xmlname&ITEMNAME=define_left_menu&@EWA_QUERY'>
+                        </iframe>
+                    </td>
+                </tr>
+               
+            </table>
+        </td>
+        <td width=260 id='props'>
+            <table width=100% height=100% cellpadding=0 cellspacing=0 border=0>
+                <tr>
+                    <td height=20 width=100% style="padding: 3px;">
+                        <select>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=2 id=bb style="position:relative">
+                        <div style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y: scroll" id=aa>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<div style='display: none'>
+    <form action="@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/xml/" method=post target=XML>
+        <input name="TYPE" value="VIEW">
+        <textarea name="XML">
+        </textarea>
+    </form>
+</div>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow = 'hidden';
+var ajax;
+var xmlName = "@D_XMLNAME";
+var itemName = "@D_ITEMNAME";
+var ewa_res_root = "@RV_EWA_STYLE_PATH";
+
+function saveXml(a) { //保存xml
+    var t1 = (new Date()).getTime();
+    if (window.timer_save) {
+        //避免点击多次保存按钮
+        var span = t1 - window.timer_save;
+        if (span < 1000) {
+            console.log(span);
+            window.timer_save = t1;
+            return;
+        }
+    }
+
+    window.timer_save = t1;
+    var xml = createXml();
+    EWAC.SaveXml(xmlName.toURL(), itemName.toURL(), xml);
+}
+//---------------------------------------
+function showXml() {
+    var s1 = createXml();
+    window.__TYPE__ = 'xml';
+
+    var u = '../../EWA_DEFINE/cgi-bin/xml/?TYPE=VIEW';
+    $.post(u, {
+            XML: s1
+        },
+        function(result) {
+            window.__VAL__ = result;
+            if (!window.frames[1].editor) {
+                window.frames[1].aa()
+            } else {
+                window.frames[1].editor.setValue(result);
+            }
+        });
+
+}
+//-----------------------------------
+function updateView() {
+    var w = window.frames[0];
+    //"<style>" + _EWAC_UISkin.CreateStyle() + "</style>" +
+    var s = _EWAC_UISkin.CreateHtml();
+    // 	w.location = "about:blank";
+    // 	w.document.open();
+    // 	w.document.write(s);
+    // 	w.document.close();
+    w.document.body.innerHTML = s;
+}
+
+function createXml() {
+    return _EWAC_User.CreateXml();
+}
+
+function changeItems(tag) {
+    _EWAC_UI.ChangeItems(tag);
+}
+var curId = 'S_PAGE';
+
+function switch_page(obj) {
+    var id = obj.id;
+    if (id == curId) {
+        return;
+    }
+    $X('props').style.display = '';
+
+    document.getElementById(curId).className = 'but0';
+    obj.className = 'but1';
+    var pageOld = get_frame(curId);
+    pageOld.style.display = 'none';
+    var pageNew = get_frame(id);
+    pageNew.style.display = '';
+    curId = id;
+    $('#props').show();
+    if (id == 'S_GEN' || id == 'S_GEN.NET') {
+        if (IsNew == 1) {
+            if (window.confirm('需要保存文件，执行么？')) {
+                saveXml();
+            }
+        } else {
+            var url;
+            if (id == 'S_GEN') {
+                url = './?XMLNAME=@D_XMLNAME&ITEMNAME=@D_ITEMNAME';
+                window.frames[2].location = url;
+            } else {
+                url = "./?XMLNAME=@D_XMLNAME&ITEMNAME=@D_ITEMNAME";
+                window.frames[3].location = url;
+            }
+        }
+    }
+    if (id == 'S_XML') {
+        var if_res = getIframeFromWindow(window.frames[1]);
+        if ($(if_res).attr('src1')) {
+            var src1 = $(if_res).attr('src1').replace(/\|/ig,'%7c');
+            $(if_res).attr('src', src1).attr('src1', null);
+            ifameLoaded(if_res, function(iframe, w1){
+                w1.parent.showXml();
+            });
+        } else {
+            window.showXml();
+        }
+        $('#props').hide();
+    } else if (id == 'S_RES') {
+        var s1 = _EWAC_UI.CreateResList();
+        var if_res = getIframeFromWindow(window.frames[2]);
+        if ($(if_res).attr('src1')) {
+            var src1 = $(if_res).attr('src1');
+            $(if_res).attr('src', src1).attr('src1', null);
+            ifameLoaded(if_res, function(iframe, w1){
+                w1.document.forms[0].innerHTML = s1;
+            });
+        } else {
+            window.frames[2].document.forms[0].innerHTML = s1;
+        }
+        $('#props').hide();
+    } else if (id == 'S_CODE') {
+        var if_res = getIframeFromWindow(window.frames[3]);
+        if ($(if_res).attr('src1')) {
+            var src1 = $(if_res).attr('src1').replace(/\|/ig,'%7c');
+            $(if_res).attr('src', src1).attr('src1', null);
+            ifameLoaded(if_res, function(iframe, w1){
+                w1.aa();
+            });
+        } else {
+             window.frames[3].aa();
+        }
+       
+        $('#props').show();
+    } else if (id == 'S_DRAW') {
+        var if_res = getIframeFromWindow(window.frames[4]);
+        if ($(if_res).attr('src1')) {
+            var src1 = $(if_res).attr('src1');
+            $(if_res).attr('src', src1).attr('src1', null);
+            ifameLoaded(if_res, function(iframe, w1){
+                w1.load_frame(xmlName, itemName, $X('PAGE$RedrawJson$RedrawJson').value);
+            });
+        } else {
+             window.frames[4].load_frame(xmlName, itemName, $X('PAGE$RedrawJson$RedrawJson').value);
+        }
+        
+        $('#props').hide();
+    } else if (id == 'S_BOX') {
+        var if_res = getIframeFromWindow(window.frames[5]);
+        if ($(if_res).attr('src1')) {
+            var src1 = $(if_res).attr('src1').replace(/\|/ig,'%7c');
+            $(if_res).attr('src', src1).attr('src1', null);
+            ifameLoaded(if_res, function(iframe, w1){
+                
+            });
+        }  
+        //window.frames[4].load_frame(xmlName,itemName, $X('PAGE$RedrawJson$RedrawJson').value); 
+        $('#props').hide();
+    } else if (id == 'S_LMENU') {
+        var if_res = getIframeFromWindow(window.frames[6]);
+        if ($(if_res).attr('src1')) {
+            var src1 = $(if_res).attr('src1').replace(/\|/ig,'%7c');
+            $(if_res).attr('src', src1).attr('src1', null);
+            ifameLoaded(if_res, function(iframe, w1){
+                w1.add_paras();
+            });
+        } else {
+            window.frames[6].add_paras();
+        }
+        
+        $('#props').hide();
+    }
+    pageOld = pageNew = null;
+}
+
+function ifameLoaded(chkIframe, func) {
+    if (chkIframe.contentWindow.location != "about:blank" &&
+        chkIframe.contentWindow.document &&
+        chkIframe.contentWindow.document.readyState == 'complete'
+    ) {
+        func(chkIframe, chkIframe.contentWindow);
+    } else {
+        setTimeout(function() {
+            ifameLoaded(chkIframe, func);
+        }, 300);
+    }
+}
+
+function getIframeFromWindow(w) {
+    var w1 = null;
+    $('iframe').each(function() {
+        if (this.contentWindow == w) {
+            w1 = this;
+        }
+    });
+    return w1;
+}
+
+function openTest() {
+    //saveXml();
+    var u1 = new EWA_UrlClass();
+
+    window.open("./?XMLNAME=" + xmlName.replace(/\|/g,'/') + "&ITEMNAME=" + itemName.toURL());
+}
+
+function get_frame(id) {
+    var id1 = "I_" + id.split('_')[1];
+    return document.getElementById(id1);
+}
+
+function copyRes(obj) {
+    var win = window.frames[3];
+    var s1 = _EWAC_UI.CreateResList();
+    var doc = win.document;
+    doc.body.innerHTML = s1;
+    var inputs = doc.getElementsByTagName('input');
+    var topWin = window.parent.parent.parent; //define_main.jsp
+    topWin.EWA_RES_COPY = new Object();
+    var o = topWin.EWA_RES_COPY;
+    for (var i = 0; i < inputs.length; i++) {
+        var o1 = inputs[i];
+        o[o1.id] = o1.value;
+    }
+    obj.title = '复制了' + inputs.length + '信息';
+}
+
+function pasteRes(res) {
+    var win = window.frames[3];
+    var s1 = _EWAC_UI.CreateResList();
+    var doc = win.document;
+    doc.body.innerHTML = s1;
+    var inputs = doc.getElementsByTagName('input');
+    for (var i = 0; i < inputs.length; i++) {
+        var o1 = inputs[i];
+        if (res[o1.id] != null) {
+            o1.value = res[o1.id];
+            o1.onblur();
+        }
+    }
+}]]></Top><Bottom><![CDATA[var IsNew = "@NEW";
+var _EWAC_User, _EWAC_UI, _EWAC_UISkin;
+var viewChangeTimer;
+
+function onload1() {
+    if (IsNew == "1") {
+        return;
+    }
+    _EWAC_User = new EWAC_UserClass();
+    _EWAC_User = new EWAC_UserClass();
+    _EWAC_User.Load();
+
+    _EWAC_UI = new EWAC_UIClass(document.getElementById('aa'), _EWAC_User);
+    _EWAC_UI.ShowPageParameters();
+    _EWAC_UISkin = new EWAC_UISkinClass(_EWAC_User);
+
+    var s1 = _EWAC_UISkin.CreateHtml();
+    var s2 = _EWAC_UISkin.CreateStyle();
+    var doc = window.frames[0].document;
+    //   doc.open();
+    //   doc.write('<html><head><style>'+s2+'</style></head>');
+    //   doc.write('<body>'+s1+'</body></html>');
+    //   doc.close();
+    //console.log(s1)
+    doc.body.innerHTML = s1;
+    viewChangeTimer = window.setInterval(viewChangeMointer, 212);
+
+    var frameTag = $X('PAGE$FrameTag$FrameTag').value.toLowerCase();
+
+    $('#S_DRAW').hide();
+    $('#S_BOX').hide();
+    $('#S_LMENU').hide();
+
+    if (frameTag == 'listframe') {
+        $('#S_BOX').show();
+        $('#S_LMENU').show();
+    } else if (frameTag == 'frame') {
+        $('#S_DRAW').show();
+    }
+
+}
+
+function setSize() {
+    //var size=EWA.UI.Utils.GetDocSize(window);
+    //$X('aa').style.height=size.H-30+'px';
+
+
+}
+
+function viewChangeMointer() {
+    if (_EWAC_UI.IsChanged) {
+        window.clearInterval(viewChangeTimer);
+        _EWAC_UI.IsChanged = false;
+        updateView();
+        viewChangeTimer = window.setInterval(viewChangeMointer, 212);
+    }
+}
+
+function loadNew(xmlItem, itemCfg) {
+    _EWAC_User = new EWAC_UserClass();
+    _EWAC_User.Load(xmlItem, itemCfg);
+
+    _EWAC_UI = new EWAC_UIClass($X('aa'), _EWAC_User);
+    _EWAC_UI.ShowPageParameters();
+    _EWAC_UISkin = new EWAC_UISkinClass(_EWAC_User);
+
+    var s1 = _EWAC_UISkin.CreateHtml();
+    var s2 = _EWAC_UISkin.CreateStyle();
+    var doc = window.frames[0].document;
+    doc.open();
+    doc.write('<html><head><style>' + s2 + '</style></head>');
+    doc.write('<body>' + s1 + '</body></html>');
+    doc.close();
+    viewChangeTimer = window.setInterval(viewChangeMointer, 212);
+
+    var frameTag = $X('PAGE$FrameTag$FrameTag').value.toLowerCase();
+    $('#S_DRAW').hide();
+    $('#S_BOX').hide();
+
+    if (frameTag == 'listframe') {
+        $('#S_BOX').show();
+    } else if (frameTag == 'frame') {
+        $('#S_DRAW').show();
+    }
+}
+
+//onload1();
+AddEvent(window, 'load', function() {
+    EWAC_DDL.init();
+    setSize();
+    if (IsNew == "1") {
+        return;
+    }
+    var names = EWA.F.FOS["@SYS_FRAME_UNID"].Resources.names.GetInfo().split(',');
+    var spans = $X('TABS').getElementsByTagName('span');
+    for (var i = 0; i < names.length; i++) {
+        spans[i].innerHTML = names[i];
+    }
+    onload1();
+    fas.loadFaIcons();
+});]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[table#Test1{
+    table-layout: fixed;
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos><PageInfo Name="names"><Name><Set Name="names"/></Name><DescriptionSet><Set Info="视图,代码,资源,重绘,BOX,左引导,打开测试,XML" Lang="zhcn" Memo=""/><Set Info="View, Code, Resources, Redraw, BOX, left , Test, XML" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-01-07 17:01:20" Name="define_tabs" UpdateDate="2021-12-06 10:31:57"><Page><Name><Set Name="define_tabs"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="862024" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="tabls" Lang="zhcn" Memo=""/><Set Info="tabls" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+<table width=100% height=100% border=0 cellspacing=0 cellpadding=0>
+    <tr>
+        <td id='TD1' height=30  valign=bottom>
+        </td>
+    </tr>
+    <tr>
+        <td id='TD2' height="100%">
+        </td>
+    </tr>
+</table>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[var mm;
+function init_define_tabs() {
+    document.body.style.overflow = 'hidden';
+
+    mm = new EWA_UI_TabsClass('mm');
+    mm.Init($X('TD1'), $X('TD2'));
+
+    //loadOp();
+}
+
+function AddTab(url, caption) {
+    mm.CreateTab(url, caption);
+}
+
+function loadOp() {
+    if (!top.op) {
+        return;
+    }
+    var u = './?' + top.op;
+    $X('TD2').innerHTML = u;
+    u = GetInnerText($X('TD2'));
+    $X('TD2').innerHTML = '';
+    console.log(u);
+    //AddTab(u, 'xx');
+    top.op = null;
+    var u1 = new EWA_UrlClass();
+    u1.SetUrl(u);
+    var v = u1.GetParameter('D_XMLNAME') + '*' + u1.GetParameter('D_ITEMNAME');
+    window.parent.frames[0].EWA.F.EWA.F.GetFOSOne().ShowNode(v);
+}
+
+AddEvent(window,'load', init_define_tabs);]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[#EWA_FRAME_MAIN {
+    height: 100vh;
+}
+
+]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-05-06 17:48:10" Name="define_code" UpdateDate="2021-12-06 10:36:10"><Page><Name><Set Name="define_code"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="code editor!" Lang="zhcn" Memo=""/><Set Info="code editor!" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.css">
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_FUNCTIONS.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CM.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.js"></script>
+<table border=0 width=100% style="height:100vh">
+    <tr>
+        <td class='btns-code' height=20 style='border-bottom:1px solid black'>
+            <select id=code onchange="bb(this)"></select>
+            <input class='js' type=button id='butJs' onclick='formatCode()' value='格式化JS' />
+            <button class='js' onclick='EWAC_FUNCTIONS.showFunctions();'>代码片段</button>
+            <span class="js">Action:
+                <select id=selAction onchange="EWAC_FUNCTIONS.setAction(this.value)">
+                    <option></option>
+                </select>
+            </span>
+            <input class='sql' type=button id='butSql' onclick='formatCodeSQL()' value='格式化SQL' />
+            <input class='sql' type=button id='butChkSql' onclick='checkSQL()' value='检查SQL语法' />
+            <input class='html' type=button id='butHtml' onclick='formatCodeHtml()' value='格式化Html' />
+            <button class='html' onclick='ConvertHtml();'>转换自定义框架</button>
+            <button class='html' onclick='AddDownHead();'>下载数据头</button>
+            字体： <select id='editor_font_size' onclick="change_editor_font_size()">
+                <option value='9px'>9px</option>
+                <option value='10px'>10px</option>
+                <option value='11px'>11px</option>
+                <option value='12px' selected>12px</option>
+                <option value='13px'>13px</option>
+                <option value='14px'>14px</option>
+                <option value='15px'>15px</option>
+                <option value='16px'>16px</option>
+                <option value='17px'>17px</option>
+                <option value='18px'>18px</option>
+                <option value='19px'>19px</option>
+                <option value='20px'>20px</option>
+            </select>
+            | <span id=msg></span>
+        </td>
+    </tr>
+    <tr>
+        <td height='100%'>
+            <iframe name="define_edit_value" frameborder=0 width=100% height=100% src='./?xmlname=@xmlname&ITEMNAME=define_edit_value&max=1'></iframe>
+        </td>
+    </tr>
+</table>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[$('body').css('background', 'transparent').css('margin', 0);
+
+
+document.body.style.overflow = 'hidden';
+
+var inputs = [];
+
+function aa() {
+    var w = window.frames[0];
+    var tb = w.$X('Test1');
+    inputs = [];
+    selectedIndex = null;
+
+    tb.style.width = '100%';
+    tb.style.height = '100%';
+
+    var tb1 = tb.getElementsByTagName('table')[0];
+    tb1.style.width = '100%';
+    tb1.style.height = '100%';
+    tb1.rows[3].style.display = 'none';
+
+    var s = $X('code');
+    s.innerHTML = "";
+
+    //js
+    aa0(window.parent.$X('PAGE$AddScript$Bottom'));
+    aa0(window.parent.$X('PAGE$AddScript$Top'));
+
+    //html
+    aa0(window.parent.$X('PAGE$AddHtml$Top'));
+    aa0(window.parent.$X('PAGE$AddHtml$Bottom'));
+
+    //css
+    aa0(window.parent.$X('PAGE$AddCss$AddCss'));
+
+    // sql
+    aa1();
+
+    //this config memo
+    aa0(window.parent.$X('PAGE$ConfigMemo$ConfigMemo'));
+
+    bb(s);
+}
+
+function aa0(obj) {
+    //PAGE$AddHtml$Top
+    var id = obj.id;
+    var o = obj;
+    var t = o.tagName.toUpperCase() == 'INPUT' ? o.getAttribute('EWA_COLOR_TYPE') : o['EWA_COLOR_TYPE'];
+    var txt = o.tagName.toUpperCase() == 'INPUT' ? o.getAttribute('EWA_VALUE') : o['EWA_VALUE'];
+
+    var s = document.getElementById('code');
+    s.options[s.options.length] = new Option(id + ' (' + t + ')', '');
+    var oo = s.options[s.options.length - 1];
+    if (t == 'jscript') {
+        oo.style.color = 'darkblue';
+    } else if (t == 'html') {
+        oo.style.color = 'red';
+        oo.fontWeight = 'bold';
+    }
+    if (s.options.length == 1) {
+        oo.selected = true;
+    }
+    inputs.push(o);
+}
+
+function aa1() {
+    var t = window.parent._EWAC_UI._UserClass.ActionTables.Tables.GetItem('SQLSET');
+    for (var i = 0; i < t.Rows.length; i++) {
+        var row = t.Rows[i];
+        var o = {};
+        o.getAttribute = function(name) {
+            return this[name];
+        }
+        o.setAttribute = function(name, val) {
+            this[name] = val;
+        }
+        o.id = 'SQL$' + row.Fields[0];
+        o.EWA_VALUE = row.Fields[3];
+        o.EWA_COLOR_TYPE = 'sql';
+        o.tagName = 'SQL';
+        o.row = row;
+        aa0(o);
+    }
+}
+var selectedIndex;
+
+function loadEWAFunction(a) {
+    if (window.EWA_FUN != null) {
+        return;
+    }
+    
+    EWAC_FUNCTIONS.setJs = function(v) {
+        window.frames[0].frames[0].setText('\n' + v);
+        formatCode();
+    };
+    
+    window.$Tip1 = $Tip; //避免出现“验证码错误提示” at this.ValidCodeError
+    $Tip = function(a) {
+        console.log(a);
+    };
+    
+    window.EWA_FUN = new EWA_Function();
+    EWA_FUN.AddTopObject(EWA, "EWA");
+    EWA_FUN.LoadFunctions();
+    var tagName = a[4]._UserClass.PageTables.Tables.GetItem('FrameTag').GetSingleValue();
+    EWA_FUN.LoadResources(a[4]._UserClass.PageInfosTablesSet, tagName);
+    var dataTable = a[4]._UserClass.ActionTables.Tables.GetItem("ActionSet");
+
+    function loadAction(dataTable) {
+        var sel = $X('selAction');
+        var typeIndex = dataTable.Columns.GetIndex("Type");
+        for (var i = 0; i < dataTable.Rows.length; i += 1) {
+            var v = dataTable.Rows[i].Fields[typeIndex];
+            sel.options[sel.options.length] = new Option(v, v);
+        }
+    }
+    loadAction(dataTable);
+
+    $Tip = $Tip1;
+}
+
+function bb(selectObj) {
+    if (selectedIndex != null) {
+        var txt = window.frames[0].frames[0].getText();
+        inputs[selectedIndex].setAttribute('EWA_VALUE', txt);
+    }
+    selectedIndex = selectObj.selectedIndex;
+    var obj = inputs[selectedIndex];
+
+    var a = [];
+    a[0] = obj;
+    a[1] = obj;
+    a[3] = obj.getAttribute('EWA_COLOR_TYPE');
+
+
+
+    $('.btns-code').removeClass('js').removeClass('sql').removeClass('html');
+    if (a[3] == 'jscript') {
+        $('.btns-code').addClass('js');
+    } else if (a[3] == 'sql') {
+        $('.btns-code').addClass('sql');
+    } else if (a[3] == 'html') {
+        $('.btns-code').addClass('html');
+    } else {
+        $('#butJs').hide();
+        $('#butSql').hide();
+        $('#butHtml').hide();
+        $('#butChkSql').hide();
+    }
+    a[4] = window.parent._EWAC_UI;
+    window.frames[0].init(a);
+
+    console.log(a);
+    try {
+        loadEWAFunction(a);
+    } catch (e) {
+        console.error(e);
+    }
+}
+var pp = [];
+
+function showCode(opt) {
+    pp[3] = t;
+    pp[1] = opt;
+}
+
+function save() {
+    try {
+        window.parent.$X('EWAC_SELECT_TYPE').value = 'Page';
+        window.parent._EWAC_UI.ChangeType('Page');
+    } catch (e) {}
+    var txt = window.frames[0].frames[0].getText();
+    inputs[selectedIndex].setAttribute('EWA_VALUE', txt);
+
+    var s = document.getElementById('code');
+    for (var i = 0; i < inputs.length; i++) {
+        var ipt = inputs[i];
+        if (!saveToXml(ipt)) {
+            $X('msg').innerHTML = '<font color=red>请切换到Page页面,然后保存</font>';
+            return;
+        }
+    }
+    $X('msg').innerHTML = '保存完毕！'
+}
+
+function saveToXml(ipt) {
+    var txt = ipt.getAttribute('EWA_VALUE');
+    if (ipt.tagName == 'INPUT') {
+        if (ipt.parentNode.parentNode.parentNode.parentNode.style.display == 'none') {
+            alert('请切换到Page页面,然后再保存');
+            return false;
+        }
+        ipt.title = txt;
+        ipt.value = txt;
+        ipt.setAttribute("EWA_OLD_VALUE", ipt.value);
+        ipt.onblur();
+    } else {
+        ipt.row.Fields[3] = txt;
+    }
+    return true;
+}]]></Top><Bottom><![CDATA[function formatCode() {
+    window.frames[0].frames[0].beautify_code(); //defined in EWA_DEFINE/js/CodeMirror/index.html
+}
+
+function formatCodeSQL() {
+    window.frames[0].frames[0].beautify_code();
+}
+
+function formatCodeHtml() {
+    window.frames[0].frames[0].beautify_code();
+
+}
+
+function checkSQL() {
+    window.frames[0].frames[0].checkSQL();
+}
+
+function AddDownHead() {
+    let ss = [];
+    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('XLS')\" value=\"导出XLS文件\">");
+    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('DBF')\" value=\"导出DBF文件\">");
+    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('TXT')\" value=\"导出TXT文件\">");
+    window.frames[0].frames[0].setText(ss.join('\n'));
+    formatCodeHtml();
+}
+
+function ConvertHtml() {
+    var win = window._EWA_DialogWnd ? _EWA_DialogWnd._OpenerWindow : window.parent;
+    console.log(win.location.href);
+    var s1 = win._EWAC_UISkin.CreateFrameHtml();
+    window.frames[0].frames[0].setText(s1);
+    formatCodeHtml();
+}
+//更改编辑器文字的大小
+function change_editor_font_size() {
+    var fontsize = $('#editor_font_size').val();
+    window.frames[0].frames[0].editor.setOption('fontSize', fontsize);
+    window.localStorage.EWA_CODE_FONTSIZE = fontsize;
+}
+
+
+//更改编辑器文字的大小
+(function() {
+    document.body.style.overflow = 'hidden';
+    if (window.localStorage.EWA_CODE_FONTSIZE) {
+        $('#editor_font_size').val(window.localStorage.EWA_CODE_FONTSIZE);
+    }
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.btns-code .js,
+.btns-code .html,
+.btns-code .sql {
+    display: none;
+}
+
+.btns-code.js .js {
+    display: inline-block;
+}
+
+.btns-code.html .html {
+    display: inline-block;
+}
+
+.btns-code.sql .sql {
+    display: inline-block;
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-01-07 17:01:20" Name="define_edit_value" UpdateDate="2021-12-06 10:41:16"><Page><Name><Set Name="define_edit_value"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo><![CDATA[
+                    ## 用于EWA的代码编辑
+
+### 1、根据传递的参数（jscript, html, json, sql, md5）来确定加载的编辑器类型
+### 2、编辑器调用 EWA_CONFIG/js/CodeMirror/index.html文件，编辑器采用ACE模式。
+
+
+                ]]></ConfigMemo></Set></ConfigMemo><Cached><Set CachedSeconds="862024" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="内容编辑" Lang="zhcn" Memo=""/><Set Info="Content editor" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="400" HiddenCaption="1" VAlign="top" Width="810"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.css">
+
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CM.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_FUNCTIONS.js"></script>
+
+<table border="0" cellspacing="0" cellpadding="0" style="min-width: 411px" width="100%" height="520" id=tbMain>
+    <tr style='display:none'></tr>
+    <tr id='trEwaFunc'>
+        <td height=30><input type=text placeholder="EWA" id=func style='width:100%' /></td>
+    </tr>
+    <tr>
+        <td id="tdContent" height='100%'>
+            <textarea id=content style="width: 100%; height: 100%"></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td height=20 style="padding: 5px; border-top: 1px solid #ccc" align="right">
+            <button type=button id=butOk onclick="ok();">确定</button>
+            <button type=button>关闭</button>
+        </td>
+    </tr>
+</table>]]></Top><Bottom><![CDATA[
+                     
+                ]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[(function() {
+    document.body.style.overflow = 'hidden';
+    $('body').css('background', 'transparent');
+
+    var u1 = new EWA_UrlClass();
+    if (u1.GetParameter("max")) {
+        document.writeln("<style>#Test1{width:100%!important;height:100vh!important;}</style>");
+    }
+})();]]></Top><Bottom><![CDATA[var EWA_FUN;
+var parentCmd;
+var timerInit;
+var cmEditor;
+var AAA;
+
+
+var cm;
+
+function init(a) {
+    //console.log(a);
+    if (a[3] == "jscript") {
+        $X('trEwaFunc').style.display = '';
+    } else {
+        $X('trEwaFunc').style.display = 'none';
+        $('#trFuncHtml').show();
+    }
+    var table = $X('tbMain');
+    if (a[3] == "html" || a[3] == "jscript" || a[3] == "sql" ||
+        a[3] == "css" || a[3] == "json" || a[3] == "md") {
+        //window.clearInterval(timerInit);
+        __VAL__ = a[1].getAttribute("EWA_VALUE");
+        __TYPE__ = a[3];
+        if (a[3] == 'json' && !__VAL__) {
+            __VAL__ = '[{"url":"http://xxx/bb/cc.jsp?a=1", "method": "query/update", "data":{"id": "@' + 'id","name": "@' + 'name"}},{}]';
+        }
+        if (window.frames.length == 0) {
+            var u = '<iframe src="@ewa.cp/EWA_STYLE/cgi-bin/?XMLNAME=@XMLNAME&itemname=define_code_editor"' +
+                ' width=100% height=100% scrolling=no scroll=no frameborder=0></iframe>';
+            $X('tdContent').innerHTML = u;
+
+
+            loadEWAFunction(a);
+            cm = new EWA_ColorMark2($X('func'), EWA_FUN);
+            cm.Init();
+        } else {
+            window.frames[0].aa();
+        }
+        setSize();
+    } else {
+        $X("content").value = a[1].getAttribute("EWA_VALUE");
+    }
+}
+var h = -10;
+var w = -10;
+var idx = 0;
+
+function setSize() {
+    try {
+        if (document.body.offsetHeight != h) {
+            h = document.body.offsetHeight;
+            idx = 0;
+            window.setTimeout(setSize, 150);
+        } else {
+            idx++;
+            if (idx < 5) {
+                window.setTimeout(setSize, 50);
+                return;
+            }
+            var h2 = $X('tdContent').offsetHeight;
+            var o = window.frames[0].document.getElementById('code').nextSibling;
+            o.style.height = h2 + 'px';
+            o.childNodes[1].style.height = h2 + 'px';
+
+        }
+    } catch (ee) {
+        //$X('butOk').value=ee;
+    }
+}
+
+function loadEWAFunction(a) {
+    //console.log(a);
+    //move to define_code
+
+    if (EWA_FUN != null) {
+        return;
+    }
+    console.log('loadEWAFunction')
+    window.$Tip1 = $Tip; //避免出现“验证码错误提示” at this.ValidCodeError
+    $Tip = function(a) {
+        console.log(a);
+    };
+    EWA_FUN = new EWA_Function();
+    EWA_FUN.AddTopObject(EWA, "EWA");
+    EWA_FUN.LoadFunctions();
+    var tagName = a[4]._UserClass.PageTables.Tables.GetItem('FrameTag').GetSingleValue();
+    EWA_FUN.LoadResources(a[4]._UserClass.PageInfosTablesSet, tagName);
+    var dataTable = a[4]._UserClass.ActionTables.Tables.GetItem("ActionSet");
+    loadAction(dataTable);
+
+    $Tip = $Tip1;
+    delete $Tip1;
+}
+
+function loadAction(dataTable) {
+    let t = setInterval(function() {
+        if (window.frames[0].$X && window.frames[0].$X('selAction')) {
+            window.clearInterval(t);
+
+            var sel = window.frames[0].$X('selAction');
+            var typeIndex = dataTable.Columns.GetIndex("Type");
+            for (var i = 0; i < dataTable.Rows.length; i += 1) {
+                var v = dataTable.Rows[i].Fields[typeIndex];
+                sel.options[sel.options.length] = new Option(v, v);
+            }
+        }
+    }, 100)
+}
+
+function ok() {
+    if (typeof EWA_FUN != "undefined") {
+        EWA_FUN.Dispose();
+    }
+    var cmd = window._EWA_DialogWnd.GetReturnBack();
+    var val = "";
+    if (window.frames.length == 0) {
+        val = $X('content').value;
+    } else {
+        val = window.frames[0].editor.getValue();
+    }
+    cmd.CmdArgus[0].value = val;
+    cmd.CmdArgus[0].title = val;
+    cmd.CmdArgus[0].setAttribute("EWA_VALUE", val);
+    cmd.CmdArgus[0].setAttribute("EWA_OLD_VALUE", cmd.CmdArgus[0].value);
+    cmd.CmdArgus[0].focus();
+    window._EWA_DialogWnd.CloseWindow();
+}
+
+function openDialog(url) {
+    if (url == null || url.length == 0) return;
+    var returnBackCommand = new _EWA_DialogWnd._OpenerWindow.EWA.UI.Dialog.CMD();
+    returnBackCommand.CmdArgus[0] = window.frames[0].window;
+    _EWA_DialogWnd._OpenerWindow.EWA.UI.Dialog.OpenWindow(url, 'openurl', 624, 400, false, null, returnBackCommand);
+}
+
+function init_define_set_value() {
+    EWAC_FUNCTIONS.setJs = function(v) {
+        window.frames[0].setText('\n' + v);
+    };
+    if ('@SQL_XMLNAME' != '') {
+        console.log('@SQL_XMLNAME');
+        var ajax = new EWA_AjaxClass();
+        var u = EWA.CP + '/EWA_DEFINE/cgi-bin/xml/?TYPE=SQLS&XMLNAME=@SQL_XMLNAME';
+        ajax.Get(u,
+            function() {
+                if (!ajax.IsRunEnd()) {
+                    return;
+                }
+                var rst = ajax.GetRst();
+                var aa = [];
+                aa[3] = 'sql';
+                aa[1] = document.createElement('div');
+                aa[1].setAttribute('EWA_VALUE', rst);
+                init(aa);
+            });
+    }
+}
+addEvent(window, 'load', init_define_set_value);]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[
+                    p {
+    margin: 0px;
+}
+
+*,
+span,
+pre {
+    font-size: 13px;
+    font-family: "Courier New";
+    ling-height: 18px;
+}
+                ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>
