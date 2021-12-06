@@ -221,7 +221,15 @@ public class ActionListFrame extends ActionBase implements IAction {
 			} else if (sqlType.equals("procedure")) {// 存储过程
 				super.executeSqlProcdure(sql);
 			} else {// 更新
-				super.executeSqlUpdate(sql);
+				if (DataConnection.checkIsSelect(sql)) {
+					super.executeSqlQuery(sql);
+					DTTable dt = (DTTable) super.getDTTables().getLast();
+					if (dt.getCount() == 1) {
+						super.addDTTableToRequestValue(dt);
+					}
+				} else {
+					super.executeSqlUpdate(sql);
+				}
 			}
 			if (conn.getErrorMsg() != null && conn.getErrorMsg().length() > 0) {
 				if (isTrans) {
