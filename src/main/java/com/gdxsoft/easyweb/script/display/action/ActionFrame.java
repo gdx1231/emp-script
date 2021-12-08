@@ -5,12 +5,9 @@ import java.io.File;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.gdxsoft.easyweb.data.DTTable;
-import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
-import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
 import com.gdxsoft.easyweb.uploader.Upload;
 import com.gdxsoft.easyweb.utils.UFile;
@@ -72,52 +69,7 @@ public class ActionFrame extends ActionBase implements IAction {
 		this.initUploadParas();
 		this.createUploadsParas();
 
-		UserXItemValues sqlset = super.getUserConfig().getUserActionItem().getItem("SqlSet");
-		UserXItemValue sqlItem = sqlset.getItem(name);
-		String sqlExp = sqlItem.getItem("Sql");
-		String[] sqlArray = sqlExp.split(";");
-
-		this.setChkErrorMsg(null);
-
-		String transType = sqlItem.getItem("TransType");
-		boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
-		DataConnection cnn = super.getItemValues().getSysParas().getDataConn();
-		if (isTrans) {
-			// 事务处理
-			cnn.transBegin();
-		}
-		int runInc = 0; // 执行次数
-		for (int i = 0; i < sqlArray.length; i++) {
-			String sql = sqlArray[i].trim();
-			if (sql.length() == 0) { // 空语句
-				continue;
-			}
-			String sqlType = sqlItem.getItem("SqlType");
-			boolean isNotActionErrorOut = this.executeSql(runInc, sql, sqlType, name);
-			if (cnn.getErrorMsg() != null && cnn.getErrorMsg().length() > 0) {
-				if (isTrans) {
-					// 事务回滚
-					cnn.transRollback();
-				}
-				cnn.close();
-				throw new Exception(cnn.getErrorMsg());
-			}
-			runInc++;
-			if (isNotActionErrorOut == false) { // 检查执行提交时返回的错误判断
-				if (isTrans) {
-					// 事务回滚
-					cnn.transRollback();
-				}
-				cnn.close();
-				return;
-			}
-		}
-		if (isTrans) {
-			// 提交事务
-			cnn.transCommit();
-		}
-
-		this.executeSessionsCookies(sqlItem);
+		 super.executeCallSql(name);
 	}
 
 	/**
@@ -290,46 +242,5 @@ public class ActionFrame extends ActionBase implements IAction {
 			}
 		}
 	}
-
-	/**
-	 * 执行sql语句
-	 * 
-	 * @param runInc
-	 * @param sql
-	 * @param sqlType
-	 * @param name
-	 * @return false = 检查执行提交时返回的错误判断
-	 */
-	boolean executeSql(int runInc, String sql, String sqlType, String name) {
-		if ((runInc > 0 || sqlType.equals("update")) &&  DataConnection.checkIsSelect(sql)) {
-			// 执行过程中有其它Select过程
-			super.executeSqlQuery(sql);
-			DTTable dt = (DTTable) super.getDTTables().getLast();
-			if (dt.getCount() == 1) {
-				super.addDTTableToRequestValue(dt);
-			}
-			dt.setName(name);
-		} else if (sqlType.equals("query")) {// 查询
-			super.executeSqlQuery(sql);
-			DTTable dt = (DTTable) super.getDTTables().get(super.getDTTables().size() - 1);
-			dt.setName(name);
-			if (dt.getCount() == 1) {
-				super.addDTTableToRequestValue(dt);
-			}
-			// 检查执行提交时返回的错误判断
-			if (super.checkActionErrorOutInTable(dt)) {
-				return false;
-			}
-		} else if (sqlType.equals("procedure")) {// 存储过程
-			super.executeSqlProcdure(sql);
-			// 检查执行提交时返回的错误判断
-			if (super.checkActionErrorOutInProcdure()) {
-				return false;
-			}
-		} else {// 更新
-			super.executeSqlUpdate(sql);
-		}
-
-		return true;
-	}
+	 
 }

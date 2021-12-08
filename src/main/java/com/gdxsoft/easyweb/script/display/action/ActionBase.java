@@ -419,8 +419,7 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClass(java.lang
-	 * .String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClass(java.lang .String)
 	 */
 	public void executeCallClass(String name) throws Exception {
 		UserXItemValues sqlset = this.getUserConfig().getUserActionItem().getItem("ClassSet");
@@ -570,8 +569,7 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClassCreateObjects
-	 * (java.lang.String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClassCreateObjects (java.lang.String)
 	 */
 	public Object[] executeCallClassCreateObjects(String strData) {
 		if (strData == null)
@@ -590,8 +588,7 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallScript(java.lang
-	 * .String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallScript(java.lang .String)
 	 */
 	public String executeCallScript(String name) throws Exception {
 		// <ScriptSet>
@@ -604,11 +601,131 @@ public class ActionBase {
 		return s1;
 	}
 
+	/**
+	 * 执行sql语句
+	 * 
+	 * @param runInc
+	 * @param sql
+	 * @param sqlType
+	 * @param name
+	 * @return false = 检查执行提交时返回的错误判断
+	 */
+	boolean executeSql(int runInc, String sql, String sqlType, String name) {
+		boolean isSelect = DataConnection.checkIsSelect(sql);
+		if (sqlType.equals("procedure")) {
+			this.executeSqlProcdure(sql);
+			// 检查执行提交时返回的错误判断
+			return !this.checkActionErrorOutInProcdure();
+		} else if (isSelect) { //不再判断 sqlType = query or update
+			// 查询
+			this.executeSqlQuery(sql);
+			DTTable dt = (DTTable) this.getDTTables().getLast();
+			if (dt.getCount() == 1) {
+				this.addDTTableToRequestValue(dt);
+			}
+			dt.setName(name);
+			
+			// 检查执行提交时返回的错误判断
+			return !this.checkActionErrorOutInTable(dt);
+		} else {// 更新
+			this.executeSqlUpdate(sql);
+			return true;
+		}
+		
+//		if (sqlType.equals("update") && isSelect) {
+//			// 执行过程中有其它Select过程
+//			this.executeSqlQuery(sql);
+//			DTTable dt = (DTTable) this.getDTTables().getLast();
+//			if (dt.getCount() == 1) {
+//				this.addDTTableToRequestValue(dt);
+//			}
+//			dt.setName(name);
+//		} else if (sqlType.equals("query")) {// 查询
+//			this.executeSqlQuery(sql);
+//			DTTable dt = (DTTable) this.getDTTables().get(this.getDTTables().size() - 1);
+//			dt.setName(name);
+//			if (dt.getCount() == 1) {
+//				this.addDTTableToRequestValue(dt);
+//			}
+//			// 检查执行提交时返回的错误判断
+//			if (this.checkActionErrorOutInTable(dt)) {
+//				return false;
+//			}
+//		} else if (sqlType.equals("procedure")) {// 存储过程
+//			this.executeSqlProcdure(sql);
+//			// 检查执行提交时返回的错误判断
+//			if (this.checkActionErrorOutInProcdure()) {
+//				return false;
+//			}
+//		} else {// 更新
+//			this.executeSqlUpdate(sql);
+//		}
+
+//		return true;
+	}
+
+	/**
+	 * 执行SQL语句
+	 * @param name SqlSet名称
+	 * @throws Exception
+	 */
+	public void executeCallSql(String name) throws Exception {
+		ActionSqlSetItem sqlItem = this.retActionSqlSetItem(name);
+		String[] sqlArray = sqlItem.getSqlArray();
+		String transType = sqlItem.getTransType();
+		boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
+		DataConnection cnn = this.getItemValues().getSysParas().getDataConn();
+
+		if (isTrans) {
+			cnn.transBegin();
+		}
+		int runInc = 0; // 执行次数
+		for (int i = 0; i < sqlArray.length; i++) {
+			String sql = sqlArray[i].trim();
+			if (sql.length() == 0 ) {// 空语句
+				continue;
+			}
+			String sqlType = sqlItem.getSqlType();
+			boolean isSuccessful = this.executeSql(runInc, sql, sqlType, name);
+			if (cnn.getErrorMsg() != null && cnn.getErrorMsg().length() > 0) {
+				if (isTrans) {
+					cnn.transRollback();
+				}
+				cnn.close();
+				throw new Exception(cnn.getErrorMsg());
+			}
+			this.setChkErrorMsg(null);
+
+			if (!isSuccessful) { // 检查执行提交时返回的错误判断
+				if (isTrans) {	// 事务回滚
+					cnn.transRollback();
+				}
+				cnn.close();
+				return;
+			}
+			runInc++;
+		}
+		if (isTrans) {
+			cnn.transCommit();
+		}
+		this.executeSessionsCookies(sqlItem.getUserXItemValue());
+	}
+
+	/**
+	 * 需要的话，替换此方法
+	 * 
+	 * @param sql
+	 * @return
+	 * @throws Exception
+	 */
+	public String createSql(String sql) throws Exception {
+		return sql;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#exceuteCallUrl(java.lang.
-	 * String )
+	 * @see com.gdxsoft.easyweb.script.display.IAction#exceuteCallUrl(java.lang. String )
 	 */
 	public String exceuteCallUrl(String name) throws Exception {
 		// <UrlSet>
@@ -669,8 +786,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeSessionCookie(com.
-	 * gdxsoft .easyweb.script.userConfig.UserXItemValue)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeSessionCookie(com. gdxsoft
+	 * .easyweb.script.userConfig.UserXItemValue)
 	 */
 	public void executeSessionCookie(UserXItemValue uxv) throws Exception {
 
@@ -865,24 +982,19 @@ public class ActionBase {
 
 		/*
 		 * MStr s = new MStr(); // Set-Cookie:G_ADM_UNID__EWA__=
-		 * TxcW7fr2HY6WYLEn8hj3Q78IG3lvkSpmymAwL0nJERk8EuvwdyUjxA%3D%3D; // Expires=Tue,
-		 * 19-Apr-2016 02:05:54 GMT; Path=/cm-b2b-ex s.a(cookie.getName()); s.a("="); if
-		 * (cookie.getValue() != null) { s.a(cookie.getValue()); } //
-		 * Set-Cookie:JSESSIONID=2221EC98D8C089036065E4F31FFB42DF; // Path=/cm-b2b-ex if
-		 * (cookie.getMaxAge() > 0) { Calendar c = Calendar.getInstance();
-		 * c.add(Calendar.SECOND, cookie.getMaxAge()); String dt =
-		 * Utils.getDateGMTString(c); s.a("; Expires=" + dt); } else if
-		 * (cookie.getMaxAge() == 0 ) { // 删除cookie Calendar c = Calendar.getInstance();
-		 * c.add(Calendar.YEAR, -2); String dt = Utils.getDateGMTString(c);
-		 * s.a("; Expires=" + dt); } if (cookie.getPath() != null &&
-		 * cookie.getPath().trim().length() > 0) { s.a("; Path=" + cookie.getPath()); }
-		 * if (cookie.getSecure()) { s.a("; Secure"); } cookie.setHttpOnly(true);
+		 * TxcW7fr2HY6WYLEn8hj3Q78IG3lvkSpmymAwL0nJERk8EuvwdyUjxA%3D%3D; // Expires=Tue, 19-Apr-2016 02:05:54 GMT;
+		 * Path=/cm-b2b-ex s.a(cookie.getName()); s.a("="); if (cookie.getValue() != null) { s.a(cookie.getValue()); }
+		 * // Set-Cookie:JSESSIONID=2221EC98D8C089036065E4F31FFB42DF; // Path=/cm-b2b-ex if (cookie.getMaxAge() > 0) {
+		 * Calendar c = Calendar.getInstance(); c.add(Calendar.SECOND, cookie.getMaxAge()); String dt =
+		 * Utils.getDateGMTString(c); s.a("; Expires=" + dt); } else if (cookie.getMaxAge() == 0 ) { // 删除cookie
+		 * Calendar c = Calendar.getInstance(); c.add(Calendar.YEAR, -2); String dt = Utils.getDateGMTString(c);
+		 * s.a("; Expires=" + dt); } if (cookie.getPath() != null && cookie.getPath().trim().length() > 0) {
+		 * s.a("; Path=" + cookie.getPath()); } if (cookie.getSecure()) { s.a("; Secure"); } cookie.setHttpOnly(true);
 		 * s.a("; HttpOnly");
 		 * 
 		 * // 当是https请求时，需要配置 nginx // proxy_set_header X-Forwarded-Scheme $scheme; if
-		 * ("https".equals(this.getRequestValue().getRequest().getHeader(
-		 * "X-Forwarded-Scheme"))) { s.a("; secure"); cookie.setSecure(true); } // ;
-		 * SameSite=Lax 老版本浏览器不支持
+		 * ("https".equals(this.getRequestValue().getRequest().getHeader( "X-Forwarded-Scheme"))) { s.a("; secure");
+		 * cookie.setSecure(true); } // ; SameSite=Lax 老版本浏览器不支持
 		 * 
 		 * this._Response.addHeader("Set-Cookie", s.toString());
 		 */
@@ -891,8 +1003,7 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#getPageItemValue(java.lang
-	 * .String, java.lang.String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#getPageItemValue(java.lang .String, java.lang.String)
 	 */
 	public String getPageItemValue(String itemName, String tagName) {
 		if (this.getUserConfig().getUserPageItem().testName(itemName)) {
@@ -1054,8 +1165,7 @@ public class ActionBase {
 
 	/**
 	 * 执行纵向表转为横向表<br>
-	 * {"TYPE":"HOR", "RUN_TYPE": "U", "FROM_TABLE": "WEB_USER", "UNID":"XX",
-	 * "WHERE":"A=@AA"}
+	 * {"TYPE":"HOR", "RUN_TYPE": "U", "FROM_TABLE": "WEB_USER", "UNID":"XX", "WHERE":"A=@AA"}
 	 * 
 	 * @param opt
 	 * @param fromTable
@@ -1129,8 +1239,8 @@ public class ActionBase {
 
 	/**
 	 * 连接纵向表<br>
-	 * {"TYPE":"JOIN_HOR", "FROM_KEYS": "TAG1,TAG2", "TO_KEYS": "BAS_TAG1,BAS_TAG2",
-	 * "FIELDS":"A1,A2, A3", "NAME_KEY":"DT_NAME", "NAME_KEY":"DT_VAL"}
+	 * {"TYPE":"JOIN_HOR", "FROM_KEYS": "TAG1,TAG2", "TO_KEYS": "BAS_TAG1,BAS_TAG2", "FIELDS":"A1,A2, A3",
+	 * "NAME_KEY":"DT_NAME", "NAME_KEY":"DT_VAL"}
 	 * 
 	 * @param opt
 	 * @param fromTable
@@ -1218,8 +1328,7 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#setResponse(javax.servlet.
-	 * http.HttpServletResponse)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#setResponse(javax.servlet. http.HttpServletResponse)
 	 */
 	public void setResponse(HttpServletResponse response) {
 		_Response = response;

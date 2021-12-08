@@ -4,98 +4,13 @@ import java.util.ArrayList;
 
 import com.gdxsoft.easyweb.data.DTCell;
 import com.gdxsoft.easyweb.data.DTTable;
-import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.SqlPart;
-import com.gdxsoft.easyweb.script.PageValue;
-import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
-import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class ActionTree extends ActionBase implements IAction {
-
-	public void executeCallSql(String name) throws Exception {
-		ActionSqlSetItem sqlItem = super.retActionSqlSetItem(name);
-		String[] sqlArray = sqlItem.getSqlArray();
-		String transType = sqlItem.getTransType();
-		boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
-		DataConnection cnn=super.getItemValues().getSysParas().getDataConn();
-		
-		if (isTrans) {
-			cnn.transBegin();
-		}
-		int runInc = 0; // 执行次数
-		for (int i = 0; i < sqlArray.length; i++) {
-			String sql = sqlArray[i].trim();
-			if (sql.length() == 0) {
-				// 空语句
-				continue;
-			}
-			String sqlType = sqlItem.getSqlType();
-			if (runInc > 0 &&  DataConnection.checkIsSelect(sql)) {
-				// 执行过程中有其它Select过程
-
-				cnn.executeQuery(sql);
-				DTTable tb = new DTTable(); // 映射到自定义数据表
-				tb.initData(cnn.getLastResult().getResultSet());
-				if (tb.isOk()) {
-					super.getDTTables().add(tb);
-					//放到全局参数中
-					if (tb.getCount() == 1) {
-						super.addDTTableToRequestValue(tb);
-					}
-				}
-			} else if (sqlType.equals("query")) {// 查询
-				// 获取不同类型SQL
-				sql = this.createSql(sqlArray[i]);
-				if (!(sql == null || sql.length() == 0)) {
-					cnn.executeQuery(sql);
-					DTTable tb = new DTTable(); // 映射到自定义数据表
-					tb.initData(cnn.getLastResult().getResultSet());
-					if (tb.isOk()) {
-						super.getDTTables().add(tb);
-						//放到全局参数中
-						if (tb.getCount() == 1) {
-							super.addDTTableToRequestValue(tb);
-						}
-					}
-				}
-			} else if (sqlType.equals("procedure")) {// 存储过程
-				super.executeSqlProcdure(sql);
-			} else {// 更新
-				super.executeSqlUpdate(sql);
-			}
-			if (cnn.getErrorMsg() != null
-					&& cnn.getErrorMsg().length() > 0) {
-				if (isTrans) {
-					cnn.transRollback();
-				}
-				cnn.close();
-				throw new Exception(cnn.getErrorMsg());
-			}
-			this.setChkErrorMsg(null);
-
-			MTable pvs = super.getRequestValue().getPageValues().getTagValues(PageValueTag.DTTABLE);
-			Object o = pvs.get("EWA_ERR_OUT");
-			if (o != null) {
-				PageValue pv = (PageValue) o;
-				if (pv.getValue() != null) {
-					String v = pv.getValue().toString();
-					if (v != null && v.trim().length() > 0) {
-						this.setChkErrorMsg(v);
-					}
-				}
-			}
-			runInc++;
-		}
-		if (isTrans) {
-			cnn.transCommit();
-		}
-		super.executeSessionsCookies(sqlItem.getUserXItemValue());
-	}
-
 	/**
 	 * 生成分级加载SQL
 	 * 
@@ -218,7 +133,7 @@ public class ActionTree extends ActionBase implements IAction {
 	 * @return
 	 * @throws Exception
 	 */
-	private String createSql(String sql) throws Exception {
+	public String createSql(String sql) throws Exception {
 		UserConfig uc = super.getUserConfig();
 		UserXItemValues u = uc.getUserPageItem().getItem("Tree");
 		RequestValue rv = super.getRequestValue();
