@@ -75,6 +75,67 @@ public class ImportTables {
 		return s;
 	}
 
+	private String replaceMysql8Collates(String sourceSql) {
+		String s = sourceSql;
+		int inc = 0;
+		while (true) {
+			String snew = this.replaceMysql8Collate(s);
+			if (snew.equals(s)) {
+				return snew;
+			}
+			s = snew;
+			inc++;
+			if (inc > 9000) {
+				LOGGER.error("Too much matches, over {} {}", inc, sourceSql);
+				break;
+			}
+		}
+
+		return s;
+	}
+
+	private String replaceMysql8Collate(String sourceSql) {
+//		CREATE TABLE `adm_racl_tag` (
+//			  `RACL_TAG` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'RACL_TAG',
+//			  `RACL_NAME` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'RACL_NAME',
+//			  PRIMARY KEY (`RACL_TAG`)
+//		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+		String s = sourceSql;
+		String su = s.toUpperCase();
+		int loc0 = su.indexOf("COLLATE ");
+		int skip = 8;
+		boolean findMethod2 = false;
+		if (loc0 == -1) {
+			loc0 = su.indexOf("AUTO_INCREMENT=");
+			skip = "AUTO_INCREMENT=".length();
+			findMethod2 = true;
+		}
+		if (loc0 == -1) {
+			loc0 = su.indexOf("COLLATE=");
+			findMethod2 = true;
+			skip = 8;
+		}
+		if (loc0 > 0) {
+			int loc1 = -1;
+			for (int i = loc0 + skip; i < su.length(); i++) {
+				String c = su.substring(i, i + 1);
+				if (c.equals(" ") || c.equals("\t") || c.equals("\n") || c.equals("\r")) {
+					loc1 = i - 1;
+					break;
+				}
+				if (findMethod2 && i == su.length() - 1) {
+					loc1 = i; // 最后一个字符了
+				}
+			}
+			if (loc1 > loc0) {
+				String tag = s.substring(loc0, loc1 + 1);
+				s = s.replace(tag, "/* DEL " + tag.substring(7) + " */ ");
+			}
+		}
+
+		return s;
+	}
+
 	/**
 	 * Create the tables
 	 * 
@@ -93,6 +154,11 @@ public class ImportTables {
 			String s = t.getCreate();
 
 			s = this.replaceMetaOrWorkDatabaseName(s);
+
+			if (this._Conn.getDatabaseType().equalsIgnoreCase("mysql")) {
+				// 删除mysql8带有的 COLLATE
+				s = this.replaceMysql8Collates(s);
+			}
 
 			LOGGER.info("Create the table {}", t.getTable().getName());
 			// 表结构

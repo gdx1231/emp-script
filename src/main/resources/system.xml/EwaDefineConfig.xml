@@ -1,80 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EwaDefine>
 	<Menus>
-		<Menu mcmd="saveXml();" micon="fa fa-save" mid="10" mtext="保存"
-			mtext_enus="Save" pid="0" />
+		<Menu mcmd="saveXml();" micon="fa fa-save" mid="10" mtext="保存" mtext_enus="Save" pid="0" />
 		<!-- edit -->
-		<Menu micon="fa fa-edit" mid="20"
-			mtext="调整信息&lt;i class='fa fa-caret-down'>&lt;i>" mtext_enus="Modify Infos &lt;i class='fa fa-caret-down'>&lt;i>"
-			pid="0" />
-		<Menu mcmd="changeItems('ITEMS');" micon="" mid="201" mtext="调整条目"
-			mtext_enus="Change Items" pid="20" />
-		<Menu mcmd="changeItems('MENU');" micon="" mid="202" mtext="调整菜单"
-			mtext_enus="Change Menu" pid="20" />
-		<Menu mcmd="changeItems('PAGEINFOS');" micon="" mid="203" mtext="调整信息"
-			mtext_enus="Change Infos" pid="20" />
-		<Menu mcmd="changeItems('CHART');" micon="" mid="204" mtext="调整图表"
-			mtext_enus="Change Charts" pid="20" />
-		<Menu mcmd="changeItems('WORKFLOW');" micon="" mid="205" mtext="调整工作流"
-			mtext_enus="Change Workflows" pid="20" />
+		<Menu micon="fa fa-edit" mid="20" mtext="调整信息&lt;i class='fa fa-caret-down'>&lt;i>"
+			mtext_enus="Modify Infos &lt;i class='fa fa-caret-down'>&lt;i>" pid="0" />
+		<Menu mcmd="changeItems('ITEMS');" micon="" mid="201" mtext="调整条目" mtext_enus="Change Items" pid="20" />
+		<Menu mcmd="changeItems('MENU');" micon="" mid="202" mtext="调整菜单" mtext_enus="Change Menu" pid="20" />
+		<Menu mcmd="changeItems('PAGEINFOS');" micon="" mid="203" mtext="调整信息" mtext_enus="Change Infos" pid="20" />
+		<Menu mcmd="changeItems('CHART');" micon="" mid="204" mtext="调整图表" mtext_enus="Change Charts" pid="20" />
+		<Menu mcmd="changeItems('WORKFLOW');" micon="" mid="205" mtext="调整工作流" mtext_enus="Change Workflows" pid="20" />
 		<!-- resources -->
-		<!-- 
-		<Menu micon="fa fa-gift" mid="30"
+		<!--
+			<Menu micon="fa fa-gift" mid="30"
 			mtext="资源&lt;i class='fa fa-caret-down'>&lt;i>" mtext_enus="Resources &lt;i class='fa fa-caret-down'>&lt;i>"
 			pid="0" />
-		<Menu mcmd="copyRes();" micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/copy.png"
+			<Menu mcmd="copyRes();" micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/copy.png"
 			mid="301" mtext="复制资源" mtext_enus="Copy Res" pid="30" />
-		<Menu mcmd="pasteRes();" micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/paste.png"
+			<Menu mcmd="pasteRes();" micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/paste.png"
 			mid="305" mtext="粘贴资源" mtext_enus="Paste Res" pid="30" />
-		<Menu mcmd="" micon="" mid="310" mtext="\-" mtext_enus="\-" pid="30" />
-		<Menu mcmd="commonSqls();" micon="" mid="305" mtext="公共数据"
+			<Menu mcmd="" micon="" mid="310" mtext="\-" mtext_enus="\-" pid="30" />
+			<Menu mcmd="commonSqls();" micon="" mid="305" mtext="公共数据"
 			mtext_enus="Common Data" pid="30" />
- 		-->
+		-->
 		<!-- group -->
-		<Menu micon="fa fa-object-group" mid="50"
-			mtext="组件&lt;i class='fa fa-caret-down'>&lt;i>" mtext_enus="Group &lt;i class='fa fa-caret-down'>&lt;i>"
-			pid="0" />
-		<Menu
+		<Menu micon="fa fa-object-group" mid="50" mtext="组件&lt;i class='fa fa-caret-down'>&lt;i>"
+			mtext_enus="Group &lt;i class='fa fa-caret-down'>&lt;i>" pid="0" />
+		<Menu mid="5010" mtext="创建和发布组件" mtext_enus="Create and publish modules" pid="50"
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa_module.xml&amp;ITEMNAME=ewa_mod.LF.M',EWA.LastMenuMsg);"
-			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/export.png" mid="5010"
-			mtext="生成组件(DB)" mtext_enus="Create module(DB)" pid="50" />
-		<Menu
+			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/export.png" />
+		<Menu mid="5020" mtext="下载和导入组件" mtext_enus="Download and import moodules" pid="50"
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa_module.xml&amp;ITEMNAME=ewa_mod_download.LF.M',EWA.LastMenuMsg);"
-			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/import.png" mid="5020"
-			mtext="下载组件" mtext_enus="Group Import" pid="50" />
-		<!-- 
-		<Menu
+			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/import.png" />
+		<Menu mid="5030" mtext="组件交换中心（网站）" mtext_enus="Module exchange centre (web)" pid="50"
+			mcmd="window.open('@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/group/?type=goto_export_module_site',EWA.LastMenuMsg);"
+			micon="" />
+		<!--
+			<Menu
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/group1.xml&amp;ITEMNAME=main&amp;id=@SYS_UNID',EWA.LastMenuMsg);"
 			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/export.png" mid="501"
 			mtext="生成组件" mtext_enus="Group Create" pid="50" />
-		<Menu
+			<Menu
 			mcmd="window.frames[0].frames[1].AddTab('@SYS_CONTEXTPATH/EWA_DEFINE/cgi-bin/group/?type=install',EWA.LastMenuMsg);"
 			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/import.png" mid="502"
 			mtext="导入组件" mtext_enus="Group Import" pid="50" />
-		 -->	
+		-->
 		<!-- utils -->
-		<Menu micon="fa fa-plug" mid="60"
-			mtext="工具&lt;i class='fa fa-caret-down'>&lt;i>" mtext_enus="Utils &lt;i class='fa fa-caret-down'>&lt;i>"
-			pid="0" />
+		<Menu micon="fa fa-plug" mid="60" mtext="工具&lt;i class='fa fa-caret-down'>&lt;i>"
+			mtext_enus="Utils &lt;i class='fa fa-caret-down'>&lt;i>" pid="0" />
 
-		<Menu
-			mcmd="window.open('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=tabletree&amp;linkType=CLASS')"
-			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/sql.png" mid="601"
-			mtext="数据库类映射" mtext_enus="Database class map" pid="60" />
+		<Menu mcmd="window.open('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=tabletree&amp;linkType=CLASS')"
+			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/sql.png" mid="601" mtext="数据库类映射" mtext_enus="Database class map"
+			pid="60" />
 		<Menu
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa_conf_help.xml&amp;ITEMNAME=EWA_CONF.LF.design', EWA.LastMenuMsg);"
-			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/sql.png" mid="601"
-			mtext="ewa_conf.xml 配置" mtext_enus="Create a ewa_conf.xml" pid="60" />
+			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/sql.png" mid="601" mtext="ewa_conf.xml 配置"
+			mtext_enus="Create a ewa_conf.xml" pid="60" />
 
 		<Menu mcmd="" mid="602" mtext="\-" mtext_enus="\-" pid="60" />
 		<Menu
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=cache_list&amp;EWA_DEBUG_NO=1', EWA.LastMenuMsg);"
-			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/cache.png" mid="603"
-			mtext="查看缓存" mtext_enus="Caches" pid="60" />
+			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/cache.png" mid="603" mtext="查看缓存" mtext_enus="Caches" pid="60" />
 		<Menu
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=trace&amp;EWA_DEBUG_NO=1', EWA.LastMenuMsg);"
-			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/trace.png" mid="604"
-			mtext="跟踪..." mtext_enus="Trace ..." pid="60" />
+			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/trace.png" mid="604" mtext="跟踪..." mtext_enus="Trace ..." pid="60" />
 
 		<Menu pid="60" mid="604" mtext="HSQL缓存..." mtext_enus="HSQL Cache ..."
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=CACHED.LF.M&amp;EWA_DEBUG_NO=1', EWA.LastMenuMsg);"
@@ -82,10 +71,9 @@
 		<Menu pid="60" mid="1604" mtext="Frame Debug" mtext_enus="Frame Debug"
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=FRAME_DEBUG.LF.M&amp;EWA_DEBUG_NO=1', EWA.LastMenuMsg);"
 			micon="fa fa-bug" />
-			
+
 		<Menu mcmd="" mid="610" mtext="\-" mtext_enus="\-" pid="60" />
-		<Menu
-			mcmd="window.open('./?XMLNAME=/ewa/data_hor.xml&amp;ITEMNAME=INDEX&amp;EWA_DEBUG_NO=1', EWA.LastMenuMsg);"
+		<Menu mcmd="window.open('./?XMLNAME=/ewa/data_hor.xml&amp;ITEMNAME=INDEX&amp;EWA_DEBUG_NO=1', EWA.LastMenuMsg);"
 			micon="" mid="614" mtext="垂直表" mtext_enus="Hor Table" pid="60" />
 		<Menu
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa_wf.xml&amp;ITEMNAME=wf_ref_ids&amp;EWA_DEBUG_NO=1', EWA.LastMenuMsg);"
@@ -94,84 +82,70 @@
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/ewa_wf.xml&amp;ITEMNAME=_EWA_WF_APP.ListFrame.Modify&amp;EWA_DEBUG_NO=1', EWA.LastMenuMsg);"
 			micon="" mid="6214" mtext="流程应用" mtext_enus="Workflow Apply" pid="60" />
 		<Menu mcmd="" mid="61110" mtext="\-" mtext_enus="\-" pid="60" />
-		<!-- <Menu mcmd="window.open('./?XMLNAME=ewa/database.xml&amp;ITEMNAME=tables_same');" 
-			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/trace.png" mid="6014" mtext="数据库比较" 
+		<!-- <Menu mcmd="window.open('./?XMLNAME=ewa/database.xml&amp;ITEMNAME=tables_same');"
+			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/trace.png" mid="6014" mtext="数据库比较"
 			mtext_enus="Database Compare" pid="60" /> -->
 
 		<Menu mtext="文件同步" mtext_enus="File Sync" pid="60"
-			mcmd="window.open('./?XMLNAME=ewa/ewa.xml&amp;ITEMNAME=remote_sync');"
-			micon="fa fa-refresh" mid="60141" />
+			mcmd="window.open('./?XMLNAME=ewa/ewa.xml&amp;ITEMNAME=remote_sync');" micon="fa fa-refresh" mid="60141" />
 
 		<Menu mtext="获取项目DropList" mtext_enus="Get Project DropList" pid="60"
 			mcmd="window.frames[0].frames[1].AddTab('./../../EWA_DEFINE/cgi-bin/xml/?type=EWAC_DDL_RELOAD', EWA.LastMenuMsg);"
 			micon="fa fa-refresh" mid="60142" />
-		
+
 		<Menu mcmd="" mid="611101" mtext="\-" mtext_enus="\-" pid="60" />
 
 		<Menu
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/app_cfg.xml&amp;ITEMNAME=_EWA_APP_CFG.Tree.Modify&amp;EWA_DEBUG_NO=1', EWA.LastMenuMsg);"
-			micon="@rv_ewa_style_path/EWA_DEFINE/images/sql/table.gif" mid="6014"
-			mtext="移动应用设计" mtext_enus="APP Design" pid="60" />
+			micon="@rv_ewa_style_path/EWA_DEFINE/images/sql/table.gif" mid="6014" mtext="移动应用设计" mtext_enus="APP Design" pid="60" />
 
 		<!-- admin -->
-		<Menu micon="fa fa-key" mid="94"
-			mtext="用户&lt;i class='fa fa-caret-down'>&lt;i>" mtext_enus="Admins &lt;i class='fa fa-caret-down'>&lt;i>"
-			pid="0" />
-		<Menu
-			mcmd="window.frames[0].frames[1].AddTab('./?xmlname=/ewa/m.xml&amp;itemname=admlist',EWA.LastMenuMsg)"
+		<Menu micon="fa fa-key" mid="94" mtext="用户&lt;i class='fa fa-caret-down'>&lt;i>"
+			mtext_enus="Admins &lt;i class='fa fa-caret-down'>&lt;i>" pid="0" />
+		<Menu mcmd="window.frames[0].frames[1].AddTab('./?xmlname=/ewa/m.xml&amp;itemname=admlist',EWA.LastMenuMsg)"
 			micon="" mid="941" mtext="用户列表" mtext_enus="Admins List" pid="94" />
-		<Menu
-			mcmd="EWA.UI.Dialog.OpenWindow('./?xmlname=/ewa/m.xml&amp;itemname=ChangePWD&amp;EWA_DEBUG_NO=1')"
-			micon="" mid="943" mtext="更改我的密码" mtext_enus="Change Password" pid="94" />
+		<Menu mcmd="EWA.UI.Dialog.OpenWindow('./?xmlname=/ewa/m.xml&amp;itemname=ChangePWD&amp;EWA_DEBUG_NO=1')" micon=""
+			mid="943" mtext="更改我的密码" mtext_enus="Change Password" pid="94" />
 
 		<Menu
 			mcmd="window.frames[0].frames[1].AddTab('./?XMLNAME=/ewa/tmp_img_resze.xml&amp;ITEMNAME=_ewa_trace.LF.M',EWA.LastMenuMsg)"
 			micon="" mid="945" mtext="BUG跟踪" mtext_enus="Change Password" pid="94" />
 
 		<!-- code -->
-		<Menu
-			mcmd="EWA.UI.Dialog.OpenWindow('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=ewa_utils')"
-			micon="fa fa-code" mid="1909" mtext="代码" mtext_enus="Code Util" pid="0" />
-			
+		<Menu mcmd="EWA.UI.Dialog.OpenWindow('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=ewa_utils')" micon="fa fa-code"
+			mid="1909" mtext="代码" mtext_enus="Code Util" pid="0" />
+
 		<!-- help -->
-		<Menu micon="fa fa-question-circle" mid="90"
-			mtext="帮助&lt;i class='fa fa-caret-down'>&lt;i>" mtext_enus="Help &lt;i class='fa fa-caret-down'>&lt;i>"
-			pid="0" />
+		<Menu micon="fa fa-question-circle" mid="90" mtext="帮助&lt;i class='fa fa-caret-down'>&lt;i>"
+			mtext_enus="Help &lt;i class='fa fa-caret-down'>&lt;i>" pid="0" />
 
 		<Menu micon="fa fa-file-text" mid="904a" mtext="日志" mtext_enus="Js" pid="90"
 			mcmd="window.open('https://gdxsoft.com/EmpScriptHelp/editor.jsp')" />
 		<Menu mcmd="" mid="908a" mtext="\-" mtext_enus="\-" pid="90" />
+		<!-- 
 		<Menu
 			mcmd="window.frames[0].frames[1].AddTab('@rv_ewa_style_path/EWA_DEFINE/help/system-memo.htm',EWA.LastMenuMsg)"
 			micon="" mid="901" mtext="系统说明" mtext_enus="Specify" pid="90" />
-		<Menu
-			mcmd="window.frames[0].frames[1].AddTab('@rv_ewa_style_path/EWA_DEFINE/help/using.htm',EWA.LastMenuMsg)"
+		<Menu mcmd="window.frames[0].frames[1].AddTab('@rv_ewa_style_path/EWA_DEFINE/help/using.htm',EWA.LastMenuMsg)"
 			micon="" mid="902" mtext="使用要点" mtext_enus="Using" pid="90" />
 		<Menu
 			mcmd="window.frames[0].frames[1].AddTab('@rv_ewa_style_path/EWA_DEFINE/help/parameters.htm',EWA.LastMenuMsg)"
 			micon="" mid="903" mtext="参数说明" mtext_enus="Parameters" pid="90" />
-		<Menu
-			mcmd="window.frames[0].frames[1].AddTab('@rv_ewa_style_path/EWA_DEFINE/help/js.htm',EWA.LastMenuMsg)"
+		<Menu mcmd="window.frames[0].frames[1].AddTab('@rv_ewa_style_path/EWA_DEFINE/help/js.htm',EWA.LastMenuMsg)"
 			micon="" mid="904" mtext="Js说明" mtext_enus="Js" pid="90" />
 
 
-		<Menu
-			mcmd="window.frames[0].frames[1].AddTab('@rv_ewa_style_path/EWA_DEFINE/help/acl_log.htm',EWA.LastMenuMsg)"
+		<Menu mcmd="window.frames[0].frames[1].AddTab('@rv_ewa_style_path/EWA_DEFINE/help/acl_log.htm',EWA.LastMenuMsg)"
 			micon="" mid="905" mtext="权限和日志" mtext_enus="Acl and Log" pid="90" />
-
+		-->
 		<Menu mcmd="" mid="908" mtext="\-" mtext_enus="\-" pid="90" />
-		<Menu mcmd="change_theme('dark')" micon="" mid="9051" mtext="黑暗系"
-			mtext_enus="Dark" pid="90" />
-		<Menu mcmd="change_theme('light')" micon="" mid="9052" mtext="光明系"
-			mtext_enus="Light" pid="90" />
-		<Menu
-			mcmd="EWA.UI.Dialog.OpenWindow('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=about')"
-			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/help.png" mid="909"
-			mtext="关于" mtext_enus="About" pid="90" />
-		
+		<Menu mcmd="change_theme('dark')" micon="" mid="9051" mtext="黑暗系" mtext_enus="Dark" pid="90" />
+		<Menu mcmd="change_theme('light')" micon="" mid="9052" mtext="光明系" mtext_enus="Light" pid="90" />
+		<Menu mcmd="EWA.UI.Dialog.OpenWindow('./?XMLNAME=/ewa/ewa.xml&amp;ITEMNAME=about')"
+			micon="@rv_ewa_style_path/EWA_DEFINE/images/menu/help.png" mid="909" mtext="关于" mtext_enus="About" pid="90" />
+ 	
 		<!-- exit -->
-		<Menu
-			mcmd="top.location.href='./?xmlname=/ewa/m.xml&amp;itemname=login&amp;out=1'"
-			micon="fa fa-power-off" mid="99" mtext="退出" mtext_enus="Exit" pid="0" />
+		<Menu mcmd="top.location.href='./?xmlname=/ewa/m.xml&amp;itemname=login&amp;out=1'" micon="fa fa-power-off"
+			mid="99" mtext="退出" mtext_enus="Exit" pid="0" />
 	</Menus>
 </EwaDefine>

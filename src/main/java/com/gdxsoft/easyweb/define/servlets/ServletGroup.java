@@ -36,6 +36,7 @@ import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UJSon;
 import com.gdxsoft.easyweb.utils.UPath;
+import com.gdxsoft.easyweb.utils.UUrl;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
@@ -295,6 +296,27 @@ public class ServletGroup extends HttpServlet {
 			}
 			return;
 		}
+		// 跳转到导出模块的网址
+		if (oType.equalsIgnoreCase("goto_export_module_site")) {
+			String url = ConfDefine.getInstance().getApiServer();
+			response.sendRedirect(url);
+
+			return;
+		}
+
+		// 跳转到查看模块的网址
+		if (oType.equalsIgnoreCase("goto_export_module")) {
+			String url = ConfDefine.getInstance().getApiServer();
+			url += "/module";
+			UUrl uu = new UUrl(url);
+			uu.add("mod_ver", rv.s("mod_ver"));
+			uu.add("mod_code", rv.s("mod_code"));
+
+			String u1 = uu.getUrlWithDomain();
+			response.sendRedirect(u1);
+
+			return;
+		}
 
 		String ewaPath = rv.s("rv_ewa_style_path");
 		if (StringUtils.isBlank(ewaPath)) {
@@ -476,8 +498,7 @@ public class ServletGroup extends HttpServlet {
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and
-	 * copyright.
+	 * Returns information about the servlet, such as author, version, and copyright.
 	 * 
 	 * @return String information about this servlet
 	 */
