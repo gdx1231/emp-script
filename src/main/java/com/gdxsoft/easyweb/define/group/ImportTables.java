@@ -94,6 +94,34 @@ public class ImportTables {
 		return s;
 	}
 
+	/**
+	 * CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW
+	 * 
+	 * @return
+	 */
+	private String replaceMysqlDefiner(String sourceSql) {
+		String s = sourceSql;
+		String su = s.toUpperCase();
+		int loc0 = su.indexOf("DEFINER=");
+		int skip = 8;
+		if (loc0 > 0) {
+			int loc1 = -1;
+			for (int i = loc0 + skip; i < su.length(); i++) {
+				String c = su.substring(i, i + 1);
+				if (c.equals(" ") || c.equals("\t") || c.equals("\n") || c.equals("\r")) {
+					loc1 = i - 1;
+					break;
+				}
+			}
+			if (loc1 > loc0) {
+				String tag = s.substring(loc0, loc1 + 1);
+				s = s.replace(tag, "/* DEL " + tag.substring(7) + " */ ");
+			}
+		}
+
+		return s;
+	}
+
 	private String replaceMysql8Collate(String sourceSql) {
 //		CREATE TABLE `adm_racl_tag` (
 //			  `RACL_TAG` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'RACL_TAG',
@@ -234,7 +262,8 @@ public class ImportTables {
 			ddl = this.replaceMetaOrWorkDatabaseName(ddl);
 
 			if ("mysql".equalsIgnoreCase(this._Conn.getDatabaseType())) {
-				ddl = ddl.replace("DEFINER=`root`@`%`", " "); // 删除root标记信息
+				// CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW
+				ddl = this.replaceMysqlDefiner(ddl); // 删除root标记信息
 			}
 
 			LOGGER.info("Create the view {}", t.getTable().getName());
