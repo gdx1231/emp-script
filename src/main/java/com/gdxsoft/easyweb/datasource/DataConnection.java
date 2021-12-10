@@ -544,8 +544,10 @@ public class DataConnection {
 		debuginfo.append("[executeQuery(sql)] Start excute query. \n\n");
 		debuginfo.append(sql);
 		writeDebug(this, "SQL", debuginfo.toString());
-		sql = this.rebuildSql(sql);
+
 		try {
+			sql = this.rebuildSql(sql);
+
 			_ds.connect();
 			ResultSet rs = _ds.getStatement().executeQuery(sql);
 			this.addResult(rs, sql, sql);
@@ -597,8 +599,15 @@ public class DataConnection {
 			debuginfo.append(sql);
 			this._DebugFrames.addDebug(this, "SQL", debuginfo.toString());
 		}
-		String sql1 = rebuildSql(sql);
-
+		String sql1;
+		try {
+			sql1 = rebuildSql(sql);
+		} catch (Exception e) {
+			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
+			LOGGER.error(e.getLocalizedMessage());
+			setError(e, sql);
+			return false;
+		}
 		this.createEwaSplitTempData(); // guolei 2015-09-08
 		this.executeEwaFunctions(); // guolei 2021-03-16
 
@@ -1206,7 +1215,16 @@ public class DataConnection {
 			this._DebugFrames.addDebug(this, "SQL", "[executeUpdate(sql,rv)] Prepare update. (" + sql + ")");
 		}
 		sql = sql + "\n\n\n"; // 避免出现被注释掉 -- auto MEMO_ID select SCOPE_IDENTITY() AS GENERATED_KEYS
-		String sql1 = rebuildSql(sql);
+		String sql1;
+		try {
+			sql1 = rebuildSql(sql);
+		} catch (Exception e) {
+			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
+			LOGGER.error(e.getLocalizedMessage());
+			setError(e, sql);
+			return false;
+		}
+
 		this.createEwaSplitTempData(); // guolei 2015-09-08
 		this.executeEwaFunctions();// guolei 2021-03-16
 		MListStr parameters = Utils.getParameters(sql1, "@");
@@ -1278,7 +1296,16 @@ public class DataConnection {
 			this._DebugFrames.addDebug(this, "SQL", "[executeUpdate(sql,rv)] Prepare update. (" + sql + ")");
 		}
 
-		String sql1 = rebuildSql(sql);
+		String sql1;
+		try {
+			sql1 = rebuildSql(sql);
+		} catch (Exception e) {
+			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
+			LOGGER.error(e.getLocalizedMessage());
+			setError(e, sql);
+			return false;
+		}
+
 		this.createEwaSplitTempData(); // guolei 2015-09-08
 		this.executeEwaFunctions(); // guolei 2021-03-16
 
@@ -1329,7 +1356,16 @@ public class DataConnection {
 			this._DebugFrames.addDebug(this, "SQL", "[executeUpdate(sql,rv)] Prepare update. (" + sql + ")");
 		}
 
-		String sql1 = rebuildSql(sql);
+		String sql1;
+		try {
+			sql1 = rebuildSql(sql);
+		} catch (Exception e) {
+			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
+			LOGGER.error(e.getLocalizedMessage());
+			setError(e, sql);
+			return null;
+		}
+
 		this.createEwaSplitTempData(); // guolei 2015-09-08
 		this.executeEwaFunctions();// guolei 2021-03-16
 
@@ -1523,18 +1559,31 @@ public class DataConnection {
 	 * @param sql
 	 * @param requestValue
 	 * @return
+	 * @throws Exception
 	 */
-	public String rebuildSql(String sql) {
+	public String rebuildSql(String sql) throws Exception {
 		String sql1 = sql;
 		// SQL语句预替换，即在SQL语句执行前，替换SQL语句本身的参数
 		// 例如 SELECT * FROM ~TB, 如参数TB是 USERS 则替换成 SELECT * FROM USERS
 		MListStr preReplaces = Utils.getParameters(sql, "~");
 		for (int i = 0; i < preReplaces.size(); i++) {
 			String para = preReplaces.get(i);
-			String v1 = this._RequestValue.getString(para.toUpperCase());
+			PageValue pv = this._RequestValue.getPageValues().getValue(para);
+			String v1 = pv.getStringValue();
+			if (v1 == null || v1.trim().length() == 0) {
+				LOGGER.error(this + ".rebuildSql, 参数" + para + "不存在");
+				throw new Exception("The param (~" + para + ") not exists");
+			}
 
-			if (v1 == null) {
-				System.out.println(this + ".rebuildSql, 参数" + para + "不存在");
+			if (!(pv.getPVTag() == PageValueTag.SESSION || pv.getPVTag() == PageValueTag.SYSTEM
+					|| pv.getPVTag() == PageValueTag.DTTABLE || pv.getPVTag() == PageValueTag.OTHER)) {
+				// form or query传递
+				if (!v1.matches("[a-zA-Z0-9_.\\-]*")) {
+					if (v1.indexOf("--") >= 0) {
+						LOGGER.error(this + ".rebuildSql, 参数" + para + "非法字符：" + v1);
+						throw new Exception("Invalid param (~" + para + ") -> " + v1);
+					}
+				}
 			}
 
 			sql1 = sql1.replace("~" + para, v1);
@@ -2100,10 +2149,20 @@ public class DataConnection {
 		sql = this.repaireProcdureSqlBrackets(sql);
 
 		this.writeDebug(this, "开始执行", sql);
-		sql = this.rebuildSql(sql);
+		String sql1;
+		try {
+			sql1 = rebuildSql(sql);
+		} catch (Exception e) {
+			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
+			LOGGER.error(e.getLocalizedMessage());
+			setError(e, sql);
+			return null;
+		}
+
 		MListStr al = Utils.getParameters(sql, "@");
 		HashMap<String, String> outValues = null;
-		String sql1 = this.replaceSqlParameters(sql);
+
+		sql1 = this.replaceSqlParameters(sql);
 		this.writeDebug(this, "开始执行", sql1);
 		try {
 			CallableStatement cst = this._ds.getCallableStatement(sql1);
