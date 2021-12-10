@@ -6,6 +6,7 @@ package com.gdxsoft.easyweb.define.servlets;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -428,7 +429,7 @@ public class ServletXml extends HttpServlet {
 		response.setHeader("Content-Disposition", "attachment; filename=" + name);
 		// filename应该是编码后的(utf-8)
 		response.setContentType("text/xml");
-		
+
 		byte[] buf = cnt.getBytes(StandardCharsets.UTF_8);
 		response.setContentLength(buf.length);
 		response.getOutputStream().write(buf);
@@ -483,6 +484,18 @@ public class ServletXml extends HttpServlet {
 	private String handleEwacDdlReload(RequestValue rv, PageValue pvAdmin) {
 		String ewascriptpath = rv.s("EWA_SCRIPT_PATH");
 		ConfScriptPath sp = ConfScriptPaths.getInstance().getScriptPath(ewascriptpath);
+
+		if (sp == null) {
+			// 查找第一个不是资源(jar文件）的配置
+			List<ConfScriptPath> al = ConfScriptPaths.getInstance().getLst();
+			for (int i = 0; i < al.size(); i++) {
+				ConfScriptPath sp1 = al.get(i);
+				if (!sp1.isResources()) {
+					sp = sp1;
+					break;
+				}
+			}
+		}
 		// 刷新配置文件中 DropList配置信息
 		ConfigUtils configUtils = new ConfigUtils(sp);
 		JSONObject rst = new JSONObject();
