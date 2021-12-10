@@ -686,7 +686,16 @@ public class ActionBase {
 				continue;
 			}
 			String sqlType = sqlItem.getSqlType();
+			
 			boolean isSuccessful = this.executeSql(runInc, sql, sqlType, name);
+			if (!isSuccessful) { // 检查执行提交时返回的错误判断
+				if (isTrans) {	// 事务回滚
+					cnn.transRollback();
+				}
+				cnn.close();
+				return;
+			}
+			
 			if (cnn.getErrorMsg() != null && cnn.getErrorMsg().length() > 0) {
 				if (isTrans) {
 					cnn.transRollback();
@@ -696,13 +705,7 @@ public class ActionBase {
 			}
 			this.setChkErrorMsg(null);
 
-			if (!isSuccessful) { // 检查执行提交时返回的错误判断
-				if (isTrans) {	// 事务回滚
-					cnn.transRollback();
-				}
-				cnn.close();
-				return;
-			}
+			
 			runInc++;
 		}
 		if (isTrans) {
@@ -1115,8 +1118,6 @@ public class ActionBase {
 		if (!tb.isOk()) {
 			return;
 		}
-
-		this.checkActionErrorOutInTable(tb);
 
 		// 执行SQL的描述
 		this.executeExtOpt(sql, tb);
