@@ -3860,7 +3860,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="LogicShow" IsSet="1" IsShow="1" IsMulti="1" FrameTag="ListFrame,Frame,Complex">
+			<XItemParameter Name="LogicShow" IsSet="1" IsShow="1" IsMulti="1" FrameTag="ListFrame,Grid,Frame,Complex">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="逻辑显示" />
 				</DescriptionSet>

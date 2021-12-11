@@ -108,7 +108,6 @@ public class FrameBase {
 		return pageDescription;
 	}
 
-	
 	/**
 	 * 是否 显示标题栏，判断参数EWA_IS_HIDDEN_CAPTION 或Size.HiddenCaption，对于 ListFrame是第一行的字段描述，对于Frame是第一行标题
 	 * 
@@ -633,11 +632,12 @@ public class FrameBase {
 			q = sb.toString();
 			url = rv.getContextPath() + "/EWA_STYLE/cgi-bin/?" + Utils.textToJscript(q);
 		} else {
-			q = rv.getRequest().getQueryString();
+			q = rv.getRequest() == null ? null : rv.getRequest().getQueryString();
 			StringBuilder sb = new StringBuilder();
-			sb.append(rv.getContextPath());
-			sb.append(rv.getRequest().getServletPath());
-
+			if (rv.getRequest() != null) {
+				sb.append(rv.getContextPath());
+				sb.append(rv.getRequest().getServletPath());
+			}
 			boolean ismark = false;
 			if (q != null) {
 				sb.append("?");

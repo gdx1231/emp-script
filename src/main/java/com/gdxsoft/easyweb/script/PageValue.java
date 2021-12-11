@@ -172,6 +172,8 @@ public class PageValue {
 
 	public PageValue clone() {
 		PageValue pv = new PageValue();
+		pv.setTag(this.getTag());
+
 		pv.setDataType(this._DataType);
 		pv.setLength(this._Length);
 		pv.setPVTag(this._PVTag);

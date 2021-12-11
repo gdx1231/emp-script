@@ -120,7 +120,9 @@ public class SqlPart {
 				|| fieldName.endsWith("NUM") || fieldName.endsWith("DAY") || fieldName.endsWith("TIME")
 				|| fieldName.endsWith("INC") || fieldName.indexOf("MOENY") >= 0 || fieldName.indexOf("PRICE") >= 0
 				|| fieldName.indexOf("STAR") >= 0 || fieldName.indexOf("SCORE") >= 0 || fieldName.indexOf("COUNT") >= 0
-				|| fieldName.indexOf("SIZE") >= 0 || fieldName.indexOf("UNID") >= 0 || fieldName.indexOf("AGE") >= 0) {
+				|| fieldName.indexOf("SIZE") >= 0 || fieldName.indexOf("UNID") >= 0 || fieldName.indexOf("AGE") >= 0
+				|| fieldName.endsWith("LVL") 
+				) {
 			return false;
 		}
 		return true;

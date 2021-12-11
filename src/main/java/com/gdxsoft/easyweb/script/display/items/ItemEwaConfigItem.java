@@ -26,8 +26,9 @@ public class ItemEwaConfigItem extends ItemBase {
 		UserXItem userXItem = super.getUserXItem();
 		SysParameters sysParas = super.getHtmlClass().getSysParas();
 		RequestValue rv1 = sysParas.getRequestValue();
-		RequestValue rv = new RequestValue(rv1.getRequest(), rv1.getSession());
-
+		//RequestValue rv = new RequestValue(rv1.getRequest(), rv1.getSession());
+		RequestValue rv = rv1.clone();
+		
 		if (sysParas.getFrameType().equalsIgnoreCase("listFrame")) {
 			DTTable tb = super.getHtmlClass().getItemValues().getListFrameTable();
 			DTRow row = tb.getCurRow();
@@ -63,20 +64,21 @@ public class ItemEwaConfigItem extends ItemBase {
 				}
 			}
 		}
+		rv.addOrUpdateValue("EWA_AJAX", "TOP_CNT_BOTTOM");
+		// 调用模式，用于判断使用
+		rv.addOrUpdateValue("EWA_CALL_METHOD", "INNER_CALL");
 
+		// 移除EWA_P_BEHAVIOR 脚本，由父窗体带入
+		rv.getPageValues().remove("EWA_P_BEHAVIOR");
+
+		rv.addOrUpdateValue("XMLNAME", xmlName);
+		rv.addOrUpdateValue("itemName", itemName);
+		
 		try {
-
-			rv.addValue("EWA_AJAX", "TOP_CNT_BOTTOM");
-			// 调用模式，用于判断使用
-			rv.addValue("EWA_CALL_METHOD", "INNER_CALL");
-
-			// 移除EWA_P_BEHAVIOR 脚本，由父窗体带入
-			rv.getPageValues().remove("EWA_P_BEHAVIOR");
-
-			rv.addValue("XMLNAME", xmlName);
-			rv.addValue("itemName", itemName);
+			
 			HtmlCreator hc = new HtmlCreator();
 			hc.setDebugFrames(super.getHtmlClass().getDebugFrames());
+			
 			hc.init(rv, super.getResponse());
 			hc.createPageHtml();
 			val = hc.getPageHtml();
