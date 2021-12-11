@@ -1,7 +1,9 @@
 package com.gdxsoft.easyweb.test;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Random;
+import java.util.logging.LogManager;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -13,7 +15,17 @@ import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.msnet.MTableStr;
 
 public class TestBase {
-	
+	static {
+	      InputStream stream = TestBase.class.getClassLoader().
+	              getResourceAsStream("logging.properties");
+	      try {
+	          LogManager.getLogManager().readConfiguration(stream);
+
+	      } catch (IOException e) {
+	          e.printStackTrace();
+	      }
+	  }
+
 	public void initConnPools() throws ParserConfigurationException, SAXException, IOException {
 		this.initConnPool();
 		this.initConnPool1();

@@ -2,7 +2,7 @@ package com.gdxsoft.easyweb.test;
 
 import com.gdxsoft.easyweb.function.EwaFunctions;
 
-public class TestEwaFunction {
+public class TestEwaFunction extends TestBase{
 
 	public static void main(String... strings) throws Exception {
 
