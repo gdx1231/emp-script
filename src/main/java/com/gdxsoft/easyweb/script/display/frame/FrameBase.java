@@ -505,7 +505,13 @@ public class FrameBase {
 
 		// 用户定义CSS
 		String css = this.getPageItemValue("AddCss", "AddCss");
-		sb.append(css == null ? "" : css);
+		if (css != null) {
+			// 保留 @media @keyframes @import标签
+			css = css.replace("@media", IItem.REP_AT_STR + "media")
+					.replace("@keyframes", IItem.REP_AT_STR + "keyframes")
+					.replace("@import", IItem.REP_AT_STR + "import");
+			sb.append(css);
+		}
 
 		HtmlDocument doc = this._HtmlClass.getDocument();
 		String css1 = this._HtmlClass.getItemValues().replaceParameters(sb.toString(), true);
