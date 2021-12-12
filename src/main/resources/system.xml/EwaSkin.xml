@@ -3,10 +3,10 @@
 	<MainSkin name="MainSkin">
 		<Head>
 			<![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
+<html  class="@ewa_lang">
 <head> 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="Version" content="2.5">
+<meta name="version" content="2021.12.12 h4">
 <link rel="preload" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" />
 <link rel="stylesheet" rev="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css" type="text/css" />
@@ -25,9 +25,9 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 		</Head>
 		<HeadXHtml>
 			<![CDATA[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml"  class="@ewa_lang">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="Version" content="2.5" />
+<meta name="Version" content="2021.12.12 xhtml" />
 <link rel="preload" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" />
 <link rel="stylesheet" rev="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css" type="text/css" />
@@ -46,10 +46,12 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 		</HeadXHtml>
 		<HeadH5>
 			<![CDATA[<!DOCTYPE html>
-<html>
+<html class="@ewa_lang">
 <head> 
 <meta charset="UTF-8">
-<meta name="Version" content="2020.07.22">
+<meta name="version" content="2021.12.12 h5">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
 <link rel="preload" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" />
 <link rel="stylesheet" rev="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css" type="text/css" />
@@ -68,10 +70,12 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 		</HeadH5>
 		<HeadVue>
 			<![CDATA[<!DOCTYPE html>
-<html>
+<html class="@ewa_lang">
 <head> 
 <meta charset="UTF-8">
-<meta name="Version" content="2020.07.22">
+<meta name="version" content="2021.12.12 vue">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
 <link rel="preload" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css">
