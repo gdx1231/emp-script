@@ -415,14 +415,13 @@ public class ItemBase implements IItem {
 	 * 
 	 * @param itemHtmlTemplate
 	 * @param val
-	 * @param tagIsLFEdit
-	 *            可编辑的鼠标点击方式（1=双击还是2=单击）
+	 * @param tagIsLFEdit      可编辑的鼠标点击方式（1=双击还是2=单击）
 	 * @return
 	 */
 	public String createEditSpan(String itemHtmlTemplate, String val, int tagIsLFEdit) {
 		// String js1 = "EWA.F.FOS['" + _HtmlClass.getSysParas().getFrameUnid() +
 		// "'].ShowEdit(this);";
-		
+
 		String html = itemHtmlTemplate.replace(" id=\"", " edit_id=\"");
 		String js1 = "EWA.F.FOS['@sys_frame_unid'].ShowEdit( this );";
 		// ListFrame的对象可编辑IsLFEdit是运行编辑的
@@ -434,8 +433,7 @@ public class ItemBase implements IItem {
 		sb.append(js1);
 		sb.append("\">");
 		sb.append(val == null ? "&nbsp;" : val.replace("<", "&lt;").replace("\n", "<br>"));
-		sb.append(
-				" </div><div class='EWA_LF_EDIT EWA_LF_EDIT_CTRL' style='display:none'>" + html + "</div>");
+		sb.append(" </div><div class='EWA_LF_EDIT EWA_LF_EDIT_CTRL' style='display:none'>" + html + "</div>");
 		return sb.toString();
 	}
 
@@ -578,45 +576,45 @@ public class ItemBase implements IItem {
 			s1 = h1;
 		}
 		String tag = xItem.getName().trim().toLowerCase();
+		if (tag.equals("select")) {
+			// 避免当xmlname不一致时，sys_frame_unid会被缓存的bug;
+			// guolei 2017-04-01
+			String event = "EWA.F.FOS['@sys_frame_unid'].CheckValid(this);";
+			sb.append(" onblur=\"" + event + "\"");
 
-		if (!(tag.equalsIgnoreCase("user") || tag.equalsIgnoreCase("ewaconfigitem") || tag.equalsIgnoreCase("hidden")
-				|| tag.equalsIgnoreCase("anchor") || tag.equalsIgnoreCase("anchor2")
-				|| tag.equalsIgnoreCase("gridBgImage") || tag.equalsIgnoreCase("gridImage")
-				|| tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit") || tag.equalsIgnoreCase("span"))) {
-			if (tag.equals("select")) {
-				// 避免当xmlname不一致时，sys_frame_unid会被缓存的bug;
-				// guolei 2017-04-01
-				String event = "EWA.F.FOS['@sys_frame_unid'].CheckValid(this);";
-				sb.append(" onblur=\"" + event + "\"");
-
-				if (this._UserXItem.testName("List") && this._UserXItem.getItem("List").count() > 0) {
-					UserXItemValue listXItem = this._UserXItem.getItem("List").getItem(0);
-					if (listXItem.testName("ListFilterType")) {
-						String ListFilterType = listXItem.getItem("ListFilterType");
-						String ListFilterField = listXItem.getItem("ListFilterField");
-						if (ListFilterType.trim().length() > 0) {
-							sb.append(" _ListFilterType=\"" + ListFilterType + "\"");
-							sb.append(" _ListFilterField=\"" + ListFilterField + "\"");
-						}
+			if (this._UserXItem.testName("List") && this._UserXItem.getItem("List").count() > 0) {
+				UserXItemValue listXItem = this._UserXItem.getItem("List").getItem(0);
+				if (listXItem.testName("ListFilterType")) {
+					String ListFilterType = listXItem.getItem("ListFilterType");
+					String ListFilterField = listXItem.getItem("ListFilterField");
+					if (ListFilterType.trim().length() > 0) {
+						sb.append(" _ListFilterType=\"" + ListFilterType + "\"");
+						sb.append(" _ListFilterField=\"" + ListFilterField + "\"");
 					}
 				}
-				// 从数据库显示列表信息
-
-			} else {
-				// String event = "EWA.F.FOS['" +
-				// this._HtmlClass.getSysParas().getFrameUnid() +
-				// "'].CheckValid(this);";
-
-				// 避免当xmlname不一致时，sys_frame_unid会被缓存的bug;
-				// guolei 2016-11-18
-				String event = "EWA.F.FOS['@sys_frame_unid'].CheckValid(this);";
-				sb.append(" onkeyup=\"" + event + "\"");
-				sb.append(" onmousedown=\"" + event + "\"");
 			}
+			// 从数据库显示列表信息
+
+		} else if ("valid".equals(tag)) {
+			String event = "EWA.F.FOS['@sys_frame_unid'].CheckValid(this);";
+			sb.append(" onchange=\"" + event + "\"");
+			sb.append(" onfocus='if(window.EWA_FrameRemoveAlert){EWA_FrameRemoveAlert(this)}' ");
+		} else if (!(tag.equalsIgnoreCase("user") || tag.equalsIgnoreCase("ewaconfigitem")
+				|| tag.equalsIgnoreCase("hidden") || tag.equalsIgnoreCase("anchor") || tag.equalsIgnoreCase("anchor2")
+				|| tag.equalsIgnoreCase("span") || tag.equalsIgnoreCase("gridBgImage")
+				|| tag.equalsIgnoreCase("gridImage") || tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit")
+				|| tag.equalsIgnoreCase("span"))) {
+
+			// String event = "EWA.F.FOS['" +
+			// this._HtmlClass.getSysParas().getFrameUnid() +
+			// "'].CheckValid(this);";
+
+			// 避免当xmlname不一致时，sys_frame_unid会被缓存的bug;
+			// guolei 2016-11-18
+			String event = "EWA.F.FOS['@sys_frame_unid'].CheckValid(this);";
+			sb.append(" oninput=\"" + event + "\"");
+			sb.append(" onmousedown=\"" + event + "\"");
 		}
-		// if (tag.equalsIgnoreCase("span")) {
-		//
-		// }
 		MStr ss = new MStr(s1);
 
 		// 检查是否带图标
@@ -762,9 +760,7 @@ public class ItemBase implements IItem {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.gdxsoft.easyweb.script.display.IItem#setUserXItem(com.gdxsoft.easyweb
-	 * .script.userConfig.UserXItem)
+	 * @see com.gdxsoft.easyweb.script.display.IItem#setUserXItem(com.gdxsoft.easyweb .script.userConfig.UserXItem)
 	 */
 	public void setUserXItem(UserXItem userXItem) {
 		_UserXItem = userXItem;
@@ -782,8 +778,7 @@ public class ItemBase implements IItem {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IItem#setInitValues(com.gdxsoft.
-	 * easyweb .script.InitValues)
+	 * @see com.gdxsoft.easyweb.script.display.IItem#setInitValues(com.gdxsoft. easyweb .script.InitValues)
 	 */
 	public void setInitValues(InitValues initValues) {
 		_InitValues = initValues;
@@ -801,8 +796,7 @@ public class ItemBase implements IItem {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IItem#setResponse(javax.servlet.http
-	 * .HttpServletResponse)
+	 * @see com.gdxsoft.easyweb.script.display.IItem#setResponse(javax.servlet.http .HttpServletResponse)
 	 */
 	public void setResponse(HttpServletResponse response) {
 		_Response = response;
@@ -816,8 +810,7 @@ public class ItemBase implements IItem {
 	}
 
 	/**
-	 * @param htmlClass
-	 *            the _HtmlClass to set
+	 * @param htmlClass the _HtmlClass to set
 	 */
 	public void setHtmlClass(HtmlClass htmlClass) {
 		_HtmlClass = htmlClass;
