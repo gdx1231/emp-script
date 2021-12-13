@@ -172,7 +172,32 @@
 					<Set Lang="enus" Info="Password" />
 				</DescriptionSet>
 				<Template>
-					<Html><![CDATA[<input autocomplete="off" type="password" class="EWA_INPUT" value="{__EWA_VAL__}" !!/>]]></Html>
+					<Html><![CDATA[
+<input autocomplete="off" type="password" class="EWA_INPUT" value="{__EWA_VAL__}" !! />
+					]]></Html>
+				</Template>
+			</XItem>
+			<XItem Name="passwordWithEye" HtmlTag="input$password" BaseType="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="GroupIndex,Name, DescriptionSet, Attributes, Events,DataItem, IsMustInput,
+			Style, ParentStyle, MaxMinLength, Valid">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="可查看密码" />
+					<Set Lang="enus" Info="Password with view" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<div class="ewa-input-password-with-eye" style='position:relative'>					
+<input autocomplete="off" type="password" class="EWA_INPUT" value="{__EWA_VAL__}" !! /><a onclick='
+	if(!this.getAttribute("open")){
+	    this.setAttribute("open", 1);
+	    $(this).parent().find("input").attr("type", "text");
+	} else {
+	    this.removeAttribute("open");
+	    $(this).parent().find("input").attr("type", "password");
+	}'></a>
+</div>
+					]]></Html>
 				</Template>
 			</XItem>
 			<XItem Name="date" HtmlTag="" BaseType="0" UIGroup="Extend"
