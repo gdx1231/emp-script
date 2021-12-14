@@ -3112,7 +3112,32 @@ document.body.onload = function() {
 							display:none;
 }
 					
-          ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="0" KeyField="" PageSize=""/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="1" luDblClick="" luDblClickIdx="" luSearch="1" luSelect="S"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="310,*" FrameSubUrl="" FrameType="V"/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="clear"><CallSet><Set CallIsChk="" CallName="clear" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.debug.DebugRecords" ConData="" MethodData="" MethodName="getRecords" Name="LoadFields" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.debug.DebugRecords" ConData="" MethodData="" MethodName="clear" Name="clear" XmlTag=""/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Action><XItems><XItem Name="getName"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="radio"/></Tag><Name><Set Name="getName"/></Name><GroupIndex/><DescriptionSet><Set Info="选择" Lang="zhcn" Memo="a"/><Set Info="Select" Lang="enus" Memo="a"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:27px"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="o" AttValue="@getAll"/></AttributeSet><EventSet><Set EventLogic="" EventName="onclick" EventType="Javascript" EventValue="a(this)"/></EventSet><IsMustInput/><DataItem><Set DataField="getName" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List/></XItem><XItem Name="getDate"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="getDate"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="时间" Lang="zhcn" Memo=""/><Set Info="Time" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:120px;"/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="getDate" DataType="Date" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="getRunTime"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="getRunTime"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="执行时间(ms)" Lang="zhcn" Memo=""/><Set Info="Run Time (ms)" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="getRunTime" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="getXmlName"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="getXmlName"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="配置文件" Lang="zhcn" Memo=""/><Set Info="XmlName" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="getXmlName" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="getItemName"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="getItemName"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="配置项" Lang="zhcn" Memo=""/><Set Info="ItemName" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="getItemName" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="isError"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="isError"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="状态" Lang="zhcn" Memo=""/><Set Info="Error" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="isError" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="getParameters"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="user"/></Tag><Name><Set Name="getParameters"/></Name><GroupIndex/><DescriptionSet><Set Info="参数" Lang="zhcn" Memo=""/><Set Info="Parameters" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:400px"/></ParentStyle><AttributeSet/><EventSet/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="getParameters" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><UserSet><Set Lang="zhcn" User="&lt;div style='width:400px;overflow:hidden' title=&quot;@getParameters&quot;&gt;&lt;nobr&gt;@getParameters&lt;/nobr&gt;&lt;/div&gt;"/></UserSet></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2016-05-24 12:08:15" Name="CACHED.F.NM" UpdateDate="2016-05-24 12:16:58"><Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="CACHED.F.NM"/></Name><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="____ewa_cached_hsqldb__"/></DataSource><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="系统缓存" Lang="zhcn" Memo=""/><Set Info="System cache" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet><Size><Set FrameCols="C3" HAlign="center" Height="" HiddenCaption="1" VAlign="top" Width="700"/></Size><AddHtml><Set><Top/><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[
+          ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="0" KeyField="" PageSize=""/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="1" luDblClick="" luDblClickIdx="" luSearch="1" luSelect="S"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="310,*" FrameSubUrl="" FrameType="V"/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="clear"><CallSet><Set CallIsChk="" CallName="clear" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.debug.DebugRecords" ConData="" MethodData="" MethodName="getRecords" Name="LoadFields" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.debug.DebugRecords" ConData="" MethodData="" MethodName="clear" Name="clear" XmlTag=""/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Action><XItems><XItem Name="getName"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="radio"/></Tag><Name><Set Name="getName"/></Name><GroupIndex/><DescriptionSet><Set Info="选择" Lang="zhcn" Memo="a"/><Set Info="Select" Lang="enus" Memo="a"/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:27px"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="o" AttValue="@getAll"/></AttributeSet><EventSet><Set EventLogic="" EventName="onclick" EventType="Javascript" EventValue="a(this)"/></EventSet><IsMustInput/><DataItem><Set DataField="getName" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><List/></XItem><XItem Name="getDate"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="getDate"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="时间" Lang="zhcn" Memo=""/><Set Info="Time" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:120px;"/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="getDate" DataType="Date" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="getRunTime"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="getRunTime"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="执行时间(ms)" Lang="zhcn" Memo=""/><Set Info="Run Time (ms)" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="getRunTime" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="getXmlName"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="getXmlName"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="配置文件" Lang="zhcn" Memo=""/><Set Info="XmlName" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="getXmlName" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="getItemName"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="getItemName"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="配置项" Lang="zhcn" Memo=""/><Set Info="ItemName" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="getItemName" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="isError"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="isError"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="状态" Lang="zhcn" Memo=""/><Set Info="Error" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="isError" DataType="" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="getParameters"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="user"/></Tag><Name><Set Name="getParameters"/></Name><GroupIndex/><DescriptionSet><Set Info="参数" Lang="zhcn" Memo=""/><Set Info="Parameters" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:400px"/></ParentStyle><AttributeSet/><EventSet/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="getParameters" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><UserSet><Set Lang="zhcn" User="&lt;div style='width:400px;overflow:hidden' title=&quot;@getParameters&quot;&gt;&lt;nobr&gt;@getParameters&lt;/nobr&gt;&lt;/div&gt;"/></UserSet></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2016-05-24 12:08:10" Name="CACHED.LF.M" UpdateDate="2016-05-24 12:16:58"><Page><FrameTag><Set FrameTag="ListFrame"/></FrameTag><Name><Set Name="CACHED.LF.M"/></Name><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="____ewa_cached_hsqldb__"/></DataSource><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="系统缓存管理" Lang="zhcn" Memo=""/><Set Info="System cache management" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet/><Size><Set FrameCols="C3" HAlign="center" Height="" HiddenCaption="0" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[
+				]]></Top><Bottom><![CDATA[
+				]]></Bottom></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[//CACHED.LF.M
+function addNew_CACHED(){
+	var refParas = UrlParas();
+	var paras = 'EWA_MTYPE=N';
+	if(refParas !=''){
+		paras += '&' + refParas;
+	}
+	EWA.UI.Dialog.OpenReloadClose('@SYS_FRAME_UNID',
+		'@xmlName', 'CACHED.F.NM', false, paras);
+}
+
+// 执行刷新后事件
+function init_CACHED_modify(){
+	var ewa = EWA.F.FOS['@sys_frame_unid'];
+	ewa.ReloadAfter = function(){
+		// 执行刷新后事件
+	};
+	// ewa.Merge('fromId','toId'); //合并单元格
+	// var exp="@@aa <h1>@@bb</h1> <div>@@cc</div>";
+	// ewa.MergeExp(exp,'toId'); //合并多个单元格
+}
+addEvent(window,'load', init_CACHED_modify);
+]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow><Set ChartsShow=""/></ChartsShow><RedrawJson/><BoxJson><Set><BoxJson/></Set></BoxJson><LeftJson><Set><LeftJson/></Set></LeftJson><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="1" KeyField="KEY1,VAL_TYPE" PageSize="10"/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="1" luDblClick="1" luDblClickIdx="0" luSearch="1" luSelect="S"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnFrameDelete"><CallSet><Set CallIsChk="" CallName="OnFrameDelete SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct0"><CallSet><Set CallIsChk="" CallName="SAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct1"><CallSet><Set CallIsChk="" CallName="SAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct2"><CallSet><Set CallIsChk="" CallName="SAct2 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct0"><CallSet><Set CallIsChk="" CallName="UAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct1"><CallSet><Set CallIsChk="" CallName="UAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct2"><CallSet><Set CallIsChk="" CallName="UAct2 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="CheckError"><CallSet><Set CallIsChk="" CallName="CheckError SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM CACHED WHERE 1=1]]></Sql><CSSet/></Set><Set Name="OnFrameDelete SQL" SqlType="update" TransType="no"><Sql><![CDATA[delete from CACHED  WHERE KEY1 = @KEY1
+	AND VAL_TYPE = @VAL_TYPE]]></Sql><CSSet/></Set><Set Name="SAct0 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="SAct1 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="SAct2 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="UAct0 SQL" SqlType="update" TransType="no"><Sql><![CDATA[delete from CACHED]]></Sql><CSSet/></Set><Set Name="UAct1 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="UAct2 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="CheckError SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- select 不能执行/javascript_func() as EWA_ERR_OUT FROM xxx where 1=2]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="KEY1"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="KEY1"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="主键" Lang="zhcn" Memo=""/><Set Info="Primary key" Lang="enus" Memo=""/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="KEY1" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="VAL_TYPE"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="VAL_TYPE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="Type" Lang="enus" Memo=""/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="VAL_TYPE" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="LAST_TIME"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="LAST_TIME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="创建时间" Lang="zhcn" Memo=""/><Set Info="Creation time" Lang="enus" Memo=""/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="LAST_TIME" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="butModify"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butModify"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="查看" Lang="zhcn" Memo=""/><Set Info="Modify" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set CallItemName="CACHED.F.NM" CallMethod="OpenReloadClose" CallParas="EWA_MTYPE=M&amp;KEY1=@KEY1&amp;VAL_TYPE=@VAL_TYPE" CallXmlName="@xmlname"/></OpenFrame></XItem><XItem Name="butDelete"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butDelete"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="删除" Lang="zhcn" Memo=""/><Set Info="Delete" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><CallAction><Set Action="OnFrameDelete" AfterTip="" ConfirmInfo="DeleteBefore"/></CallAction><OpenFrame><Set CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame></XItem><XItem Name="butClear"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butClear"/></Name><GroupIndex/><DescriptionSet><Set Info="清除" Lang="zhcn" Memo=""/><Set Info="Clear" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><CallAction><Set Action="UAct0" AfterTip="" ConfirmInfo="DeleteBefore"/></CallAction><OpenFrame/></XItem></XItems><Menus/><Charts/><PageInfos><PageInfo Name="msg0"><Name><Set Name="msg0"/></Name><DescriptionSet><Set Info="消息0" Lang="zhcn" Memo=""/><Set Info="Msg0" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg1"><Name><Set Name="msg1"/></Name><DescriptionSet><Set Info="消息1" Lang="zhcn" Memo=""/><Set Info="Msg1" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg2"><Name><Set Name="msg2"/></Name><DescriptionSet><Set Info="消息2" Lang="zhcn" Memo=""/><Set Info="Msg2" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2016-05-24 12:08:15" Name="CACHED.F.NM" UpdateDate="2016-05-24 12:16:58"><Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="CACHED.F.NM"/></Name><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="____ewa_cached_hsqldb__"/></DataSource><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="系统缓存" Lang="zhcn" Memo=""/><Set Info="System cache" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet><Size><Set FrameCols="C3" HAlign="center" Height="" HiddenCaption="1" VAlign="top" Width="700"/></Size><AddHtml><Set><Top/><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[
 //提交后台数据时执行的检查或附加数据处理
 function do_pos_before_CACHED(){
 	/*附加数据处理
@@ -3146,32 +3171,7 @@ function init_CACHED_modify(){
 }
 addEvent(window,'load', init_CACHED_modify);
 				]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.EWA_TD_M{width:400px;}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson><Set><RedrawJson/></Set></RedrawJson><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="OnNew SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='N' or '@EWA_MTYPE'='C'"/><Set CallIsChk="" CallName="OnModify SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M'"/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct0"><CallSet><Set CallIsChk="" CallName="UAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct1"><CallSet><Set CallIsChk="" CallName="UAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct0"><CallSet><Set CallIsChk="" CallName="SAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct1"><CallSet><Set CallIsChk="" CallName="SAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="CheckError"><CallSet><Set CallIsChk="" CallName="CheckError SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM CACHED WHERE KEY1 = @KEY1
-	AND VAL_TYPE = @VAL_TYPE]]></Sql><CSSet/></Set><Set Name="OnNew SQL" SqlType="update" TransType="no"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="OnModify SQL" SqlType="update" TransType="no"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="UAct0 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- write your sql]]></Sql><CSSet/></Set><Set Name="UAct1 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- write your sql]]></Sql><CSSet/></Set><Set Name="SAct0 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- SELECT ...]]></Sql><CSSet/></Set><Set Name="SAct1 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- SELECT ...]]></Sql><CSSet/></Set><Set Name="CheckError SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"/></CallSet></Action><XItems><XItem Name="KEY1"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="KEY1"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="主键" Lang="zhcn" Memo=""/><Set Info="Primary key" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="KEY1" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="VAL_TYPE"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="VAL_TYPE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="Type" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="VAL_TYPE" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="VAL_BIN"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="VAL_BIN"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="二进制" Lang="zhcn" Memo=""/><Set Info="Binary" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><DataItem><Set DataField="VAL_BIN" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="VAL_TXT"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="textarea"/></Tag><Name><Set Name="VAL_TXT"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="文字" Lang="zhcn" Memo=""/><Set Info="Text" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="16777216" MinLength=""/></MaxMinLength><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="VAL_TXT" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem></XItem><XItem Name="LAST_TIME"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="LAST_TIME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="创建时间" Lang="zhcn" Memo=""/><Set Info="Creation time" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="LAST_TIME" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="butClose"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butClose"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="关闭" Lang="zhcn" Memo=""/><Set Info="Cancel" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame></XItem></XItems><Menus/><Charts/><PageInfos><PageInfo Name="msg0"><Name><Set Name="msg0"/></Name><DescriptionSet><Set Info="消息0" Lang="zhcn" Memo=""/><Set Info="Msg0" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg1"><Name><Set Name="msg1"/></Name><DescriptionSet><Set Info="消息1" Lang="zhcn" Memo=""/><Set Info="Msg1" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg2"><Name><Set Name="msg2"/></Name><DescriptionSet><Set Info="消息2" Lang="zhcn" Memo=""/><Set Info="Msg2" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2016-05-24 12:08:10" Name="CACHED.LF.M" UpdateDate="2016-05-24 12:16:58"><Page><FrameTag><Set FrameTag="ListFrame"/></FrameTag><Name><Set Name="CACHED.LF.M"/></Name><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="____ewa_cached_hsqldb__"/></DataSource><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="系统缓存管理" Lang="zhcn" Memo=""/><Set Info="System cache management" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><GroupSet/><Size><Set FrameCols="C3" HAlign="center" Height="" HiddenCaption="0" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[
-				]]></Top><Bottom><![CDATA[
-				]]></Bottom></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[//CACHED.LF.M
-function addNew_CACHED(){
-	var refParas = UrlParas();
-	var paras = 'EWA_MTYPE=N';
-	if(refParas !=''){
-		paras += '&' + refParas;
-	}
-	EWA.UI.Dialog.OpenReloadClose('@SYS_FRAME_UNID',
-		'@xmlName', 'CACHED.F.NM', false, paras);
-}
-
-// 执行刷新后事件
-function init_CACHED_modify(){
-	var ewa = EWA.F.FOS['@sys_frame_unid'];
-	ewa.ReloadAfter = function(){
-		// 执行刷新后事件
-	};
-	// ewa.Merge('fromId','toId'); //合并单元格
-	// var exp="@@aa <h1>@@bb</h1> <div>@@cc</div>";
-	// ewa.MergeExp(exp,'toId'); //合并多个单元格
-}
-addEvent(window,'load', init_CACHED_modify);
-]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow><Set ChartsShow=""/></ChartsShow><RedrawJson/><BoxJson><Set><BoxJson/></Set></BoxJson><LeftJson><Set><LeftJson/></Set></LeftJson><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="1" KeyField="KEY1,VAL_TYPE" PageSize="10"/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="1" luDblClick="1" luDblClickIdx="0" luSearch="1" luSelect="S"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnFrameDelete"><CallSet><Set CallIsChk="" CallName="OnFrameDelete SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct0"><CallSet><Set CallIsChk="" CallName="SAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct1"><CallSet><Set CallIsChk="" CallName="SAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct2"><CallSet><Set CallIsChk="" CallName="SAct2 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct0"><CallSet><Set CallIsChk="" CallName="UAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct1"><CallSet><Set CallIsChk="" CallName="UAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct2"><CallSet><Set CallIsChk="" CallName="UAct2 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="CheckError"><CallSet><Set CallIsChk="" CallName="CheckError SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[SELECT * FROM CACHED WHERE 1=1]]></Sql><CSSet/></Set><Set Name="OnFrameDelete SQL" SqlType="update" TransType="no"><Sql><![CDATA[delete from CACHED  WHERE KEY1 = @KEY1
-	AND VAL_TYPE = @VAL_TYPE]]></Sql><CSSet/></Set><Set Name="SAct0 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="SAct1 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="SAct2 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="UAct0 SQL" SqlType="update" TransType="no"><Sql><![CDATA[delete from CACHED]]></Sql><CSSet/></Set><Set Name="UAct1 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="UAct2 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="CheckError SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- select 不能执行/javascript_func() as EWA_ERR_OUT FROM xxx where 1=2]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="KEY1"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="KEY1"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="主键" Lang="zhcn" Memo=""/><Set Info="Primary key" Lang="enus" Memo=""/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="KEY1" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="VAL_TYPE"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="VAL_TYPE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="Type" Lang="enus" Memo=""/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="VAL_TYPE" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="LAST_TIME"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="LAST_TIME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="创建时间" Lang="zhcn" Memo=""/><Set Info="Creation time" Lang="enus" Memo=""/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="LAST_TIME" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef><Set RefKey="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef></XItem><XItem Name="butModify"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butModify"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="查看" Lang="zhcn" Memo=""/><Set Info="Modify" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set CallItemName="CACHED.F.NM" CallMethod="OpenReloadClose" CallParas="EWA_MTYPE=M&amp;KEY1=@KEY1&amp;VAL_TYPE=@VAL_TYPE" CallXmlName="@xmlname"/></OpenFrame></XItem><XItem Name="butDelete"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butDelete"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="删除" Lang="zhcn" Memo=""/><Set Info="Delete" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><CallAction><Set Action="OnFrameDelete" AfterTip="" ConfirmInfo="DeleteBefore"/></CallAction><OpenFrame><Set CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame></XItem><XItem Name="butClear"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butClear"/></Name><GroupIndex/><DescriptionSet><Set Info="清除" Lang="zhcn" Memo=""/><Set Info="Clear" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle/><AttributeSet/><EventSet/><CallAction><Set Action="UAct0" AfterTip="" ConfirmInfo="DeleteBefore"/></CallAction><OpenFrame/></XItem></XItems><Menus/><Charts/><PageInfos><PageInfo Name="msg0"><Name><Set Name="msg0"/></Name><DescriptionSet><Set Info="消息0" Lang="zhcn" Memo=""/><Set Info="Msg0" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg1"><Name><Set Name="msg1"/></Name><DescriptionSet><Set Info="消息1" Lang="zhcn" Memo=""/><Set Info="Msg1" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg2"><Name><Set Name="msg2"/></Name><DescriptionSet><Set Info="消息2" Lang="zhcn" Memo=""/><Set Info="Msg2" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2009-01-07 17:01:20" Name="define_select_xitem" UpdateDate="2016-11-28 16:38:54"><Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="define_select_xitem"/></Name><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><Cached><Set CachedSeconds="862024" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="选择连接" Lang="zhcn" Memo=""/><Set Info="links" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="400" HiddenCaption="1" VAlign="top" Width="700"/></Size><AddHtml><Set><Top><![CDATA[<script type='text/javascript'>//for tomcat 7.60+ error 400
+	AND VAL_TYPE = @VAL_TYPE]]></Sql><CSSet/></Set><Set Name="OnNew SQL" SqlType="update" TransType="no"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="OnModify SQL" SqlType="update" TransType="no"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="UAct0 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- write your sql]]></Sql><CSSet/></Set><Set Name="UAct1 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- write your sql]]></Sql><CSSet/></Set><Set Name="SAct0 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- SELECT ...]]></Sql><CSSet/></Set><Set Name="SAct1 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- SELECT ...]]></Sql><CSSet/></Set><Set Name="CheckError SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2]]></Sql><CSSet/></Set></SqlSet><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"/></CallSet></Action><XItems><XItem Name="KEY1"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="KEY1"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="主键" Lang="zhcn" Memo=""/><Set Info="Primary key" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="KEY1" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="VAL_TYPE"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="VAL_TYPE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="Type" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="VAL_TYPE" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="VAL_BIN"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="VAL_BIN"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="二进制" Lang="zhcn" Memo=""/><Set Info="Binary" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><DataItem><Set DataField="VAL_BIN" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="VAL_TXT"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="textarea"/></Tag><Name><Set Name="VAL_TXT"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="文字" Lang="zhcn" Memo=""/><Set Info="Text" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><MaxMinLength><Set MaxLength="16777216" MinLength=""/></MaxMinLength><IsMustInput><Set IsMustInput="0"/></IsMustInput><DataItem><Set DataField="VAL_TXT" DataType="String" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem></XItem><XItem Name="LAST_TIME"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="LAST_TIME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="创建时间" Lang="zhcn" Memo=""/><Set Info="Creation time" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="LAST_TIME" DataType="Int" DisableOnModify="" Format="" IsEncrypt="" SumBottom="" Valid=""/></DataItem><DataRef/></XItem><XItem Name="butClose"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butClose"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><DescriptionSet><Set Info="关闭" Lang="zhcn" Memo=""/><Set Info="Cancel" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame></XItem></XItems><Menus/><Charts/><PageInfos><PageInfo Name="msg0"><Name><Set Name="msg0"/></Name><DescriptionSet><Set Info="消息0" Lang="zhcn" Memo=""/><Set Info="Msg0" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg1"><Name><Set Name="msg1"/></Name><DescriptionSet><Set Info="消息1" Lang="zhcn" Memo=""/><Set Info="Msg1" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg2"><Name><Set Name="msg2"/></Name><DescriptionSet><Set Info="消息2" Lang="zhcn" Memo=""/><Set Info="Msg2" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate CreateDate="2009-01-07 17:01:20" Name="define_select_xitem" UpdateDate="2016-11-28 16:38:54"><Page><FrameTag><Set FrameTag="Frame"/></FrameTag><Name><Set Name="define_select_xitem"/></Name><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><Cached><Set CachedSeconds="862024" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="选择连接" Lang="zhcn" Memo=""/><Set Info="links" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="400" HiddenCaption="1" VAlign="top" Width="700"/></Size><AddHtml><Set><Top><![CDATA[<script type='text/javascript'>//for tomcat 7.60+ error 400
     document.write("<scr" + "ipt src='../../EWA_DEFINE/cgi-bin/xml/?XMLNAME=" +
         "@xmlname".toURL() + "&ITEMNAME=@itemname&MODE=JS&MODE_NAME=_CFG_ITEM&TYPE=ALL'></scr" + "ipt>");
 </script>
@@ -4633,38 +4633,7 @@ body {
 } /* 滑轨两头的监听按钮颜色 */
 ::-webkit-scrollbar-corner {
 	background-color: rgba(77, 77, 77, 0.4);
-} /* 横向滚动条和纵向滚动条相交处尖角的颜色 */]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="admin" CreateDate="2010-04-07 16:11:41" Name="about" UpdateDate="2021-03-13 20:19:44"><Page><Name><Set Name="about"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl=""/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="关于开发者" Lang="zhcn" Memo=""/><Set Info="About us" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="C1" HAlign="center" Height="" HiddenCaption="1" VAlign="top" Width="300"/></Size><AddHtml><Set><Top><![CDATA[<div style='margin:10px;width:100%'>
-    <p>
-        项目发起者：
-    </p>
-    <p>
-        &nbsp;&nbsp;&nbsp; 郭磊
-        <img width="100" src='@rv_ewa_style_path/EWA_DEFINE/images/menu/guolei.gif'>
-    </p>
-    <p>
-        项目参与者：
-    </p>
-    <p>
-        &nbsp;&nbsp;&nbsp; 靳朝鹏
-    </p>
-    <p>
-        &nbsp;&nbsp;&nbsp;
-    </p>
-    <p>
-        项目地址：</p>
-    <div><a href='https://www.gdxsoft.com' target="_blank">
-            www.gdxsoft.com
-        </a></div>
-    <div>
-        <a href='https://github.com/gdx1231' target="_blank">
-            github.com/gdx1231
-        </a>
-    </div>
-
-</div>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow  = 'hidden';]]></Top><Bottom/></Set></AddScript><AddCss><Set><AddCss><![CDATA[p {
-    margin: 0px;
-    font-size: 14.8px;
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2014-12-03 21:08:13" Name="define_box" UpdateDate="2021-03-14 16:54:27"><Page><Name><Set Name="define_box"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="862024" CachedType="all"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="tabls" Lang="zhcn" Memo=""/><Set Info="tabls" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<script type="text/javascript" src="@rv_ewa_style_path/third-party/cP_v0.91/colorPicker.js"></script>
+} /* 横向滚动条和纵向滚动条相交处尖角的颜色 */]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2014-12-03 21:08:13" Name="define_box" UpdateDate="2021-03-14 16:54:27"><Page><Name><Set Name="define_box"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="862024" CachedType="all"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="tabls" Lang="zhcn" Memo=""/><Set Info="tabls" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<script type="text/javascript" src="@rv_ewa_style_path/third-party/cP_v0.91/colorPicker.js"></script>
 <script type="text/javascript" src="@rv_ewa_style_path/third-party/js-beautify/v1.13.0/lib/beautify.js"></script>
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
 <div class='split-para'>
@@ -6224,209 +6193,7 @@ function onload1() {
 .opened::after {
     content: " \f00c";
     font-family: fontawesome;
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="" KeyField="name" PageSize="" Recycle="" StatusField=""/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="1" luDblClick="" luDblClickIdx="" luSearch="" luSelect="S"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="300,*" FrameSubUrl="" FrameType="V"/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnListFrameUpdateCell"><CallSet><Set CallIsChk="" CallName="修改字段描述" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnListFrameUpdateCell" SqlType="update" TransType="no"><Sql><![CDATA[EXEC PR_DES @tablename,@EWA_FIELD_ID,@description]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@cfg,@tablename" MethodName="getFieldsXml" Name="LoadFields" XmlTag="table/fields/field"/><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@cfg, @tablename, @EWA_ACTION_KEY, @EWA_FIELD_val" MethodName="modifyColumnDescription" Name="修改字段描述" XmlTag=""/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Action><XItems><XItem Name="cccc"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="checkbox"/></Tag><Name><Set Name="cccc"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="选择" Lang="zhcn" Memo="a"/><Set Info="Select" Lang="enus" Memo="a"/></DescriptionSet><XStyle/><Style/><ParentStyle><Set ParentStyle="width:20px"/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="name" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="columnname"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="user"/></Tag><Name><Set Name="columnname"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="字段名" Lang="zhcn" Memo=""/><Set Info="Filed Name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="name" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet><Set Lang="zhcn" User="&lt;span id='col_@pk'&gt;&amp;nbsp;&lt;/span&gt; &lt;span&gt;@name&lt;/span&gt;"/></UserSet><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="description"><Tag><Set IsLFEdit="1" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="description"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="描述" Lang="zhcn" Memo=""/><Set Info="Description" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="description" DataType="String" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="DataType"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="DataType"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="DataType" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml><Set IsHtml="0"/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="databasetype" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="ColumnLength"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="ColumnLength"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="长度" Lang="zhcn" Memo=""/><Set Info="Length" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="columnsize" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="IsNull"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="IsNull"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="空值" Lang="zhcn" Memo=""/><Set Info="Null values" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="null" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="identity"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="identity"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="自增" Lang="zhcn" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="identity" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="fk1"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="user"/></Tag><Name><Set Name="fk1"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="外键" Lang="zhcn" Memo=""/><Set Info="Foreign keys" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet><Set Lang="zhcn" User="&lt;span id='FK_fk'&gt; @fktablename.@fkcolumnname &lt;/span&gt;"/></UserSet><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="jzp" CreateDate="2010-04-07 15:02:57" Name="index" UpdateDate="2021-11-01 14:14:07"><Page><Name><Set Name="index"/></Name><FrameTag><Set FrameTag="Menu"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="GdxSoft EWA(v2.0b) IDE" Lang="zhcn" Memo="GdxSoft EWA(v2.0b) IDE"/><Set Info="GdxSoft EWA(v2.0b) IDE" Lang="enus" Memo="GdxSoft EWA(v2.0b) IDE"/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[
-
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
-<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
-<div id="header">
-    <div class='EWA_MENU1'>
-        <div id='EWA_MENU' style='float:left'></div>
-        <div style='float:right;cursor:hand' >
-            <a id='switch_language' onclick="switchLanguage()"></a>
-            <a onclick='relogin()' title='重新登录'>Hi, @EWA_ADMIN_NAME</a>
-        </div>
-    </div>
-</div>
-<div id='xmls'></div>
-<div id='split'></div>
-<div id='tabsmain'></div>
-<div id='split_cover'></div>
-
-
-]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[(function() {
-    var lk = document.createElement('link');
-    lk.type = 'image/x-icon';
-    lk.rel = 'shortcut icon';
-    lk.href = '@rv_ewa_style_path/EWA_DEFINE/images/icons/icon-144.png';
-    document.getElementsByTagName('head')[0].appendChild(lk);
-
-    var lk1 = document.createElement('link');
-    lk1.rel = 'manifest';
-    lk1.href = '@rv_ewa_style_path/EWA_DEFINE/manifest.webmanifest.json';
-    document.getElementsByTagName('head')[0].appendChild(lk1);
-    
-    if ('@SYS_REMOTEIP' == '127.0.0.1') {
-        window.setInterval(function() {
-            var u = window.location.href + "&ewa_ajax=json";
-            $J1(u, function() {
-                //console.log('ping');
-            });
-        }, 1000 * 60 * 10); //10分钟
-    }
-
-    var u1 = new EWA_UrlClass();
-    if (u1.GetParameter("theme") == 'dark') {
-        document.body.className = 'dark';
-    } else if (u1.GetParameter("theme") == 'light') {
-        document.body.className = 'light';
-    }
-})();
-
-function link(u) {
-    window.frames[0].location = './?' + u;
-}
-
-function change_theme(theme) {
-    EWAC.Theme.change_theme(theme); //defined in EWAC.js;
-}
-
-function commonSqls() {
-    var u = './?xmlname=|ewa|ewa.xml&itemname=commmon_sqls';
-    window.frames[0].frames[1].AddTab(u, '公共数据');
-}
-
-function openit() {
-
-}
-
-function relogin() {
-    EWA.UI.Dialog.OpenFrame('@SYS_FRAME_UNID', '|ewa|m.xml', 'login', true,
-        'DIA_LOGIN=1&version=3', '', '');
-}]]></Top><Bottom><![CDATA[document.body.style.overflow = 'hidden';
-
-function newProject() {
-    var url = "./?XMLNAME=|ewa|ewa.xml&ITEMNAME=newProject";
-    EWA.UI.Dialog.OpenWindow(url, 'newproject', 500, 300);
-}
-
-function showXml() {
-    var w = GetShowWin();
-    if (w == null) return;
-    w.showXml();
-}
-
-function updateView() {
-    var w = GetShowWin();
-    if (w == null) return;
-    w.updateView();
-}
-
-function GetShowWin() {
-    //var w = window.frames[0].frames[1];
-    var w = window;
-    return w.mm.CurrentWindow;
-}
-
-function saveXml() {
-    var w = GetShowWin();
-    if (w == null) return;
-    w.saveXml();
-}
-
-function changeItems(tag) {
-    var w = GetShowWin();
-    if (w == null) return;
-    w.changeItems(tag);
-}
-var LastView;
-
-function ShowView(id) {
-    if (LastView != null) {
-        LastView.style.display = 'none';
-        LastView = null;
-    }
-    LastView = document.getElementById(id);
-    LastView.style.display = '';
-}
-//新建Frame
-function NewFrame(xml, xmlName, itemName) {
-    EWAC.SaveXml(xmlName, itemName, xml, true);
-}
-
-function aa() {
-    var w = GetShowWin();
-    if (w.document.readyState != 'complete') {
-        return;
-    }
-    window.clearInterval(aa1);
-    w.loadNew(axml);
-}
-
-function copyRes() {
-    var w = GetShowWin();
-    var a = document.getElementById('cp_res');
-    w.copyRes(a);
-    alert(a.title);
-}
-
-function pasteRes() {
-    if (typeof EWA_RES_COPY == 'undefined') {
-        alert('请先复制资源');
-        return;
-    }
-    var w = GetShowWin();
-    w.pasteRes(EWA_RES_COPY);
-}
-
-function switchLanguage() {
-    let u = new EWA_UrlClass(EWA.F.FOS["@sys_frame_unid"].Url);
-    u.AddParameter("ewa_lang", EWA.LANG == 'enus' ? 'zhcn' : 'enus');
-    $('#switch_language').attr('href', u.GetUrl());
-}
-
-(function init_index() {
-
-    $('#switch_language').text(EWA.LANG == 'enus' ? '中文' : 'English');
-
-    var u = "@EWA.CPF?xmlname=" + "@xmlname".toURL() + "&itemname=define_tabs"
-    $Install(u, 'tabsmain', function() {
-        var u = "@EWA.CPF?xmlname=" + "@xmlname".toURL() + "&itemname=cfgtree&EWA_FRAMESET_NO=1";
-        $Install(u, 'xmls', function() {});
-    });
-    mv1 = new EWA.UI.Move();
-    mv1.Init(mv1);
-    mv1.IsMoveY = false;
-
-    var obj = $X('split');
-
-    mv1.AddMoveObject(obj, obj, function(a) {
-        $('#split_cover').hide();
-        $('#split').css('z-index', 1);
-        $('body').removeClass('unselect');
-    }, document.body, function(a, b) {
-        var left = $(a).css('left').replace('px', '') * 1;
-        $('#xmls').css('width', left);
-        $('#tabsmain').css('left', left + 1);
-        window.localStorage['ewa_define_left'] = left;
-    }, function() {
-        $('#split_cover').show();
-        $('body').addClass('unselect');
-    });
-
-
-    $('.ewa_menu_m').each(function() {
-        var cmd = $(this).attr('EWA_CMD');
-        if (cmd.indexOf('window.frames[0].frames[1].') == 0) {
-            var cmd1 = cmd.replace('window.frames[0].frames[1].', '');
-            $(this).attr('EWA_CMD', cmd1);
-        }
-    });
-
-    if (window.localStorage['ewa_define_left']) {
-        var left = window.localStorage['ewa_define_left'] * 1;
-        $('#xmls').css('width', left);
-        $('#tabsmain').css('left', left + 1);
-        $('#split').css('left', left);
-    }
-
-    //防止页面后退
-    history.pushState(null, null, document.URL);
-    window.addEventListener('popstate', function() {
-        history.pushState(null, null, document.URL);
-    });
-})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[#xmls #EWA_FRAME_MAIN {
-    height: auto;
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize/><ListUI/><MenuShow><Set MenuShow="EWA_MENU" MenuType=""/></MenuShow><Menu><Set Cmd="mcmd" Icon="micon" IconType="" Key="mid" ParentKey="pid" RootId="0" Text="mtext"/></Menu><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="EwaDefineMenu" CallType="ClassSet" Test="'@version'='3'"/><Set CallIsChk="" CallName="menu1" CallType="XmlSet" Test="'@version'=''"/></CallSet></Set></ActionSet><SqlSet/><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.EwaDefineMenu" ConData="" MethodData="" MethodName="getMenus" Name="EwaDefineMenu" XmlTag=""/></ClassSet><XmlSet><Set Name="menu1" XmlAction="load" XmlData="" XmlFields="" XmlSetData="menu" XmlWhere=""/></XmlSet><XmlSetData><Set Name="menu" XmlFields="mid,mtext,pid,micon,mcmd,mtext_enus" XmlLoadType="attribute" XmlName="@EWA.CONFIG.PATH/EwaDefineConfig.xml" XmlTagPath="Menus/Menu"/></XmlSetData><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="EwaDefineMenu" CallType="ClassSet" Test="'@version'='3'"/><Set CallIsChk="" CallName="menu1" CallType="XmlSet" Test="'@version'=''"/></CallSet></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-02-05 11:20:31" Name="tabletree" UpdateDate="2021-11-25 09:33:49"><Page><Name><Set Name="tabletree"/></Name><FrameTag><Set FrameTag="tree"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="数据库" Lang="zhcn" Memo=""/><Set Info="Database" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size/><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="" KeyField="name" PageSize="" Recycle="" StatusField=""/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="1" luDblClick="" luDblClickIdx="" luSearch="" luSelect="S"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="300,*" FrameSubUrl="" FrameType="V"/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="no" LogMsg="" Type="OnListFrameUpdateCell"><CallSet><Set CallIsChk="" CallName="修改字段描述" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnListFrameUpdateCell" SqlType="update" TransType="no"><Sql><![CDATA[EXEC PR_DES @tablename,@EWA_FIELD_ID,@description]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@cfg,@tablename" MethodName="getFieldsXml" Name="LoadFields" XmlTag="table/fields/field"/><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@cfg, @tablename, @EWA_ACTION_KEY, @EWA_FIELD_val" MethodName="modifyColumnDescription" Name="修改字段描述" XmlTag=""/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="LoadFields" CallType="ClassSet" Test=""/></CallSet></Action><XItems><XItem Name="cccc"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="checkbox"/></Tag><Name><Set Name="cccc"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="选择" Lang="zhcn" Memo="a"/><Set Info="Select" Lang="enus" Memo="a"/></DescriptionSet><XStyle/><Style/><ParentStyle><Set ParentStyle="width:20px"/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="name" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="columnname"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="user"/></Tag><Name><Set Name="columnname"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="字段名" Lang="zhcn" Memo=""/><Set Info="Filed Name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="name" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet><Set Lang="zhcn" User="&lt;span id='col_@pk'&gt;&amp;nbsp;&lt;/span&gt; &lt;span&gt;@name&lt;/span&gt;"/></UserSet><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="description"><Tag><Set IsLFEdit="1" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="description"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="描述" Lang="zhcn" Memo=""/><Set Info="Description" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="description" DataType="String" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="DataType"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="DataType"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="DataType" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml><Set IsHtml="0"/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="databasetype" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="ColumnLength"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="ColumnLength"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="长度" Lang="zhcn" Memo=""/><Set Info="Length" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="columnsize" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="IsNull"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="IsNull"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="空值" Lang="zhcn" Memo=""/><Set Info="Null values" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="null" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="identity"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="identity"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="自增" Lang="zhcn" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="identity" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="fk1"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="user"/></Tag><Name><Set Name="fk1"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="外键" Lang="zhcn" Memo=""/><Set Info="Foreign keys" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><DataItem><Set DataField="" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet><Set Lang="zhcn" User="&lt;span id='FK_fk'&gt; @fktablename.@fkcolumnname &lt;/span&gt;"/></UserSet><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-02-05 11:20:31" Name="tabletree" UpdateDate="2021-11-25 09:33:49"><Page><Name><Set Name="tabletree"/></Name><FrameTag><Set FrameTag="tree"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="数据库" Lang="zhcn" Memo=""/><Set Info="Database" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size/><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
 <div style='margin: 2px 4px;'><b class='fa fa-search' style='margin-right: 2px;'></b>
     <input type=text placeholder="过滤" id='filter' onblur='do_filter(this)'>
@@ -7582,4 +7349,235 @@ function change_editor_font_size() {
 
 .btns-code.sql .sql {
     display: inline-block;
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-04-07 15:02:57" Name="index" UpdateDate="2021-12-14 15:03:58"><Page><Name><Set Name="index"/></Name><FrameTag><Set FrameTag="Menu"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="GdxSoft EWA(v2.0b) IDE" Lang="zhcn" Memo="GdxSoft EWA(v2.0b) IDE"/><Set Info="GdxSoft EWA(v2.0b) IDE" Lang="enus" Memo="GdxSoft EWA(v2.0b) IDE"/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[
+
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+<div id="header">
+    <div class='EWA_MENU1'>
+        <div id='EWA_MENU' style='float:left'></div>
+        <div style='float:right;cursor:hand' >
+            <a id='switch_language' onclick="switchLanguage()"></a>
+            <a onclick='relogin()' title='重新登录'>Hi, @EWA_ADMIN_NAME</a>
+        </div>
+    </div>
+</div>
+<div id='xmls'></div>
+<div id='split'></div>
+<div id='tabsmain'></div>
+<div id='split_cover'></div>
+
+
+]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[(function() {
+    var lk = document.createElement('link');
+    lk.type = 'image/x-icon';
+    lk.rel = 'shortcut icon';
+    lk.href = '@rv_ewa_style_path/EWA_DEFINE/images/icons/icon-144.png';
+    document.getElementsByTagName('head')[0].appendChild(lk);
+
+    var lk1 = document.createElement('link');
+    lk1.rel = 'manifest';
+    lk1.href = '@rv_ewa_style_path/EWA_DEFINE/manifest.webmanifest.json';
+    document.getElementsByTagName('head')[0].appendChild(lk1);
+    
+    if ('@SYS_REMOTEIP' == '127.0.0.1') {
+        window.setInterval(function() {
+            var u = window.location.href + "&ewa_ajax=json";
+            $J1(u, function() {
+                //console.log('ping');
+            });
+        }, 1000 * 60 * 10); //10分钟
+    }
+
+    var u1 = new EWA_UrlClass();
+    if (u1.GetParameter("theme") == 'dark') {
+        document.body.className = 'dark';
+    } else if (u1.GetParameter("theme") == 'light') {
+        document.body.className = 'light';
+    }
+})();
+
+function link(u) {
+    window.frames[0].location = './?' + u;
+}
+
+function change_theme(theme) {
+    EWAC.Theme.change_theme(theme); //defined in EWAC.js;
+}
+
+function commonSqls() {
+    var u = './?xmlname=|ewa|ewa.xml&itemname=commmon_sqls';
+    window.frames[0].frames[1].AddTab(u, '公共数据');
+}
+
+function openit() {
+
+}
+
+function relogin() {
+    EWA.UI.Dialog.OpenFrame('@SYS_FRAME_UNID', '|ewa|m.xml', 'login', true,
+        'DIA_LOGIN=1&version=3', '', '');
+}]]></Top><Bottom><![CDATA[document.body.style.overflow = 'hidden';
+
+function newProject() {
+    var url = "./?XMLNAME=|ewa|ewa.xml&ITEMNAME=newProject";
+    EWA.UI.Dialog.OpenWindow(url, 'newproject', 500, 300);
+}
+
+function showXml() {
+    var w = GetShowWin();
+    if (w == null) return;
+    w.showXml();
+}
+
+function updateView() {
+    var w = GetShowWin();
+    if (w == null) return;
+    w.updateView();
+}
+
+function GetShowWin() {
+    //var w = window.frames[0].frames[1];
+    var w = window;
+    return w.mm.CurrentWindow;
+}
+
+function saveXml() {
+    var w = GetShowWin();
+    if (w == null) return;
+    w.saveXml();
+}
+
+function changeItems(tag) {
+    var w = GetShowWin();
+    if (w == null) return;
+    w.changeItems(tag);
+}
+var LastView;
+
+function ShowView(id) {
+    if (LastView != null) {
+        LastView.style.display = 'none';
+        LastView = null;
+    }
+    LastView = document.getElementById(id);
+    LastView.style.display = '';
+}
+//新建Frame
+function NewFrame(xml, xmlName, itemName) {
+    EWAC.SaveXml(xmlName, itemName, xml, true);
+}
+
+function aa() {
+    var w = GetShowWin();
+    if (w.document.readyState != 'complete') {
+        return;
+    }
+    window.clearInterval(aa1);
+    w.loadNew(axml);
+}
+
+function copyRes() {
+    var w = GetShowWin();
+    var a = document.getElementById('cp_res');
+    w.copyRes(a);
+    alert(a.title);
+}
+
+function pasteRes() {
+    if (typeof EWA_RES_COPY == 'undefined') {
+        alert('请先复制资源');
+        return;
+    }
+    var w = GetShowWin();
+    w.pasteRes(EWA_RES_COPY);
+}
+
+function switchLanguage() {
+    let u = new EWA_UrlClass(EWA.F.FOS["@sys_frame_unid"].Url);
+    u.AddParameter("ewa_lang", EWA.LANG == 'enus' ? 'zhcn' : 'enus');
+    $('#switch_language').attr('href', u.GetUrl());
+}
+
+(function init_index() {
+
+    $('#switch_language').text(EWA.LANG == 'enus' ? '中文' : 'English');
+
+    var u = "@EWA.CPF?xmlname=" + "@xmlname".toURL() + "&itemname=define_tabs"
+    $Install(u, 'tabsmain', function() {
+        var u = "@EWA.CPF?xmlname=" + "@xmlname".toURL() + "&itemname=cfgtree&EWA_FRAMESET_NO=1";
+        $Install(u, 'xmls', function() {});
+    });
+    mv1 = new EWA.UI.Move();
+    mv1.Init(mv1);
+    mv1.IsMoveY = false;
+
+    var obj = $X('split');
+
+    mv1.AddMoveObject(obj, obj, function(a) {
+        $('#split_cover').hide();
+        $('#split').css('z-index', 1);
+        $('body').removeClass('unselect');
+    }, document.body, function(a, b) {
+        var left = $(a).css('left').replace('px', '') * 1;
+        $('#xmls').css('width', left);
+        $('#tabsmain').css('left', left + 1);
+        window.localStorage['ewa_define_left'] = left;
+    }, function() {
+        $('#split_cover').show();
+        $('body').addClass('unselect');
+    });
+
+
+    $('.ewa_menu_m').each(function() {
+        var cmd = $(this).attr('EWA_CMD');
+        if (cmd.indexOf('window.frames[0].frames[1].') == 0) {
+            var cmd1 = cmd.replace('window.frames[0].frames[1].', '');
+            $(this).attr('EWA_CMD', cmd1);
+        }
+    });
+
+    if (window.localStorage['ewa_define_left']) {
+        var left = window.localStorage['ewa_define_left'] * 1;
+        $('#xmls').css('width', left);
+        $('#tabsmain').css('left', left + 1);
+        $('#split').css('left', left);
+    }
+
+    //防止页面后退
+    history.pushState(null, null, document.URL);
+    window.addEventListener('popstate', function() {
+        history.pushState(null, null, document.URL);
+    });
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[#xmls #EWA_FRAME_MAIN {
+    height: auto;
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize/><ListUI/><MenuShow><Set MenuShow="EWA_MENU" MenuType=""/></MenuShow><Menu><Set Cmd="mcmd" Icon="micon" IconType="" Key="mid" ParentKey="pid" RootId="0" Text="mtext"/></Menu><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="no" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="EwaDefineMenu" CallType="ClassSet" Test="'@version'=''"/><Set CallIsChk="" CallName="menu1" CallType="XmlSet" Test="'@version'='old'"/></CallSet></Set></ActionSet><SqlSet/><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.EwaDefineMenu" ConData="" MethodData="" MethodName="getMenus" Name="EwaDefineMenu" XmlTag=""/></ClassSet><XmlSet><Set Name="menu1" XmlAction="load" XmlData="" XmlFields="" XmlSetData="menu" XmlWhere=""/></XmlSet><XmlSetData><Set Name="menu" XmlFields="mid,mtext,pid,micon,mcmd,mtext_enus" XmlLoadType="attribute" XmlName="@EWA.CONFIG.PATH/EwaDefineConfig.xml" XmlTagPath="Menus/Menu"/></XmlSetData><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="EwaDefineMenu" CallType="ClassSet" Test="'@version'='3'"/><Set CallIsChk="" CallName="menu1" CallType="XmlSet" Test="'@version'=''"/></CallSet></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-04-07 16:11:41" Name="about" UpdateDate="2021-12-14 15:12:21"><Page><Name><Set Name="about"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl=""/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="关于开发者" Lang="zhcn" Memo=""/><Set Info="About us" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="C1" HAlign="center" Height="" HiddenCaption="1" VAlign="top" Width="300"/></Size><AddHtml><Set><Top><![CDATA[<div style='margin:10px;width:100%'>
+    <p>
+        项目发起者：
+    </p>
+    <p>
+        &nbsp;&nbsp;&nbsp; 郭磊
+        <img width="100" src='@rv_ewa_style_path/EWA_DEFINE/images/menu/guolei.gif'>
+    </p>
+    <p>
+        项目参与者：
+    </p>
+    <p>
+        &nbsp;&nbsp;&nbsp; 靳朝鹏
+    </p>
+    <p>
+        &nbsp;&nbsp;&nbsp;
+    </p>
+    <p>
+        项目地址：</p>
+    <div>
+        <a href='https://www.gdxsoft.com' target="_blank"> www.gdxsoft.com </a>
+    </div>
+    <div>
+        <a href='https://github.com/gdx1231' target="_blank"> github.com/gdx1231 </a>
+    </div>
+
+</div>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow  = 'hidden';]]></Top><Bottom/></Set></AddScript><AddCss><Set><AddCss><![CDATA[p {
+    margin: 0px;
+    font-size: 14.8px;
 }]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>
