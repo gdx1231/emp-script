@@ -866,73 +866,123 @@ public class FrameBase {
 			bs = bs.replace("!!>", sbPageAttr.toString() + ">");
 		}
 		doc.addBodyHtml(bs, true);
-		doc.addScriptHtml("<div id='EWA_FRAME_MAIN' _s='主框架开始'>", "主框架开始");
-
+		if (this.isUseTest1Table()) {
+			doc.addScriptHtml("<div id='EWA_FRAME_MAIN' _s='主框架开始'>", "主框架开始");
+		}
 		this.createH5FrameSet();
 		if (this._Html5FrameSet != null) {
 			doc.addScriptHtml(_Html5FrameSet[0]);
 		}
-		if (this._HtmlClass.getSysParas().isPc() && !this._HtmlClass.getUserConfig().getUserPageItem()
-				.getSingleValue("FrameTag").equalsIgnoreCase("Complex")) {
-
-			// 页面的方向
-			String sizeStyle = "<table id='" + skinName + "' border='0' cellspacing='0' cellpadding='0' style='";
-			String sizeW = this.getPageItemValue("Size", "Width");
-			String sizeH = this.getPageItemValue("Size", "Height");
-			String sizeVAlign = this.getPageItemValue("Size", "VAlign");
-			String sizeHAlign = this.getPageItemValue("Size", "HAlign");
-			String tdH = "";
-			String mainWidth = null;
-
-			// 用户参数指定宽度
-			if (rv.s("EWA_WIDTH") != null) {
-				sizeW = rv.s("EWA_WIDTH").replace("'", "").replace("\"", "").replace(">", "").replace("<", "");
-			}
-			// 用户参数指定的高度
-			if (rv.s("EWA_HEIGHT") != null) {
-				sizeH = rv.s("EWA_HEIGHT").replace("'", "").replace("\"", "").replace(">", "").replace("<", "");
-			}
-			if (sizeW != null && sizeW.trim().length() > 0) {
-				try {
-					int w = Integer.parseInt(sizeW);
-					mainWidth = "width:" + w + "px; ";
-					sizeStyle += "width:" + w + "px; ";
-				} catch (Exception e) {
-					mainWidth = "width:" + sizeW + "; ";
-					sizeStyle += "width:" + sizeW + "; ";
-				}
-				String ft = this._HtmlClass.getSysParas().getFrameType();
-				if (ft.equals("COMBINE")) {
-					doc.addCss(".ewa_cb_box{" + mainWidth + "}");
-				}
-			} else {
-				sizeStyle += "width:100%; ";
-			}
-			if (sizeH != null && sizeH.trim().length() > 0) {
-				try {
-					int h = Integer.parseInt(sizeH);
-					sizeStyle += "height: " + h + "px; ";
-				} catch (Exception e) {
-					sizeStyle += "height: " + sizeH + "; ";
-				}
-				tdH = " height='100%' ";
-			}
-			sizeStyle += "' ";
-			if (sizeHAlign != null && sizeHAlign.trim().length() > 0) {
-				sizeStyle += "align='" + sizeHAlign + "'";
-			}
-			sizeStyle += ">\r\n<tr>\r\n<td " + tdH;
-			if (sizeVAlign != null && sizeVAlign.trim().length() > 0) {
-				sizeStyle += " vAlign='" + sizeVAlign + "'";
-			} else {
-				sizeStyle += " vAlign='top'";
-			}
-			sizeStyle += ">";
-			doc.addScriptHtml(sizeStyle);
+		if (this.isUseTest1Table()) {
+			this.createTest1Table(doc, skinName);
 		}
 		doc.addScriptHtml(this._HtmlClass.getSkinFrameAll().getTop());
 		// sb.append("<div _s='内容窗体开始'>");
 
+	}
+
+	/**
+	 * 是否使用 Test1的table，ewa_skip_test1 =1可以跳过
+	 * 
+	 * @return
+	 */
+	public boolean isUseTest1Table() {
+		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
+		if (rv.s("ewa_skip_test1") != null) {
+			return false;
+		}
+		if (!this._HtmlClass.getSysParas().isPc()) {
+			return false;
+		}
+		String frameTag = this._HtmlClass.getUserConfig().getUserPageItem().getSingleValue("FrameTag");
+		if (!frameTag.equalsIgnoreCase("Complex")) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 创建页面的style，宽、高、水平和垂直对齐方式
+	 * 
+	 * @param doc
+	 * @return
+	 */
+	public String createFrameStyle(HtmlDocument doc) {
+		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
+
+		StringBuilder sb = new StringBuilder();
+
+		String sizeW = this.getPageItemValue("Size", "Width");
+		String sizeH = this.getPageItemValue("Size", "Height");
+		String sizeVAlign = this.getPageItemValue("Size", "VAlign");
+		String sizeHAlign = this.getPageItemValue("Size", "HAlign");
+		String mainWidth = null;
+
+		// 用户参数指定宽度
+		if (rv.s("EWA_WIDTH") != null) {
+			sizeW = rv.s("EWA_WIDTH").replace("'", "").replace("\"", "").replace(">", "").replace("<", "");
+		}
+		// 用户参数指定的高度
+		if (rv.s("EWA_HEIGHT") != null) {
+			sizeH = rv.s("EWA_HEIGHT").replace("'", "").replace("\"", "").replace(">", "").replace("<", "");
+		}
+		if (sizeW != null && sizeW.trim().length() > 0) {
+			try {
+				int w = Integer.parseInt(sizeW);
+				mainWidth = "width: " + w + "px; ";
+				sb.append("width: " + w + "px; ");
+			} catch (Exception e) {
+				mainWidth = "width: " + sizeW + "; ";
+				sb.append("width: " + sizeW + "; ");
+			}
+			String ft = this._HtmlClass.getSysParas().getFrameType();
+			if (ft.equals("COMBINE")) {
+				doc.addCss(".ewa_cb_box{" + mainWidth + "}");
+			}
+		} else {
+			sb.append("width:100%; ");
+		}
+		if (sizeH != null && sizeH.trim().length() > 0) {
+			try {
+				int h = Integer.parseInt(sizeH);
+				sb.append("height: " + h + "px; ");
+			} catch (Exception e) {
+				sb.append("height: " + sizeH + "; ");
+			}
+		}
+		if (sizeHAlign != null && sizeHAlign.trim().length() > 0) {
+			if ("center".equals(sizeHAlign)) {
+				sb.append("margin: auto; ");
+			} else if ("left".equals(sizeHAlign)) {
+				sb.append("margin-right: auto; ");
+			} else if ("right".equals(sizeHAlign)) {
+				sb.append("margin-left: auto; ");
+			}
+		}
+		if (sizeVAlign != null && sizeVAlign.trim().length() > 0) {
+			sb.append("vertical-align: " + sizeVAlign + "; ");
+		}
+
+		return sb.toString();
+	}
+
+	private void createTest1Table(HtmlDocument doc, String skinName) {
+		String style = this.createFrameStyle(doc);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("<table id='");
+		sb.append(skinName);
+		sb.append("' border='0' cellspacing='0' cellpadding='0' style=\"");
+		sb.append(style);
+		sb.append("\">");
+
+		String sizeVAlign = this.getPageItemValue("Size", "VAlign");
+		if (sizeVAlign == null || sizeVAlign.trim().length() == 0) {
+			sizeVAlign = "top";
+		}
+		sb.append("\n<tr>\n<td height='100%' vAlign='" + sizeVAlign + "'>");
+
+		doc.addScriptHtml(sb.toString());
 	}
 
 	/**
@@ -946,14 +996,15 @@ public class FrameBase {
 			this._HtmlClass.getDocument().addScriptHtml(pageAddBottom);
 			this._HtmlClass.getDocument().addFrameHtml(pageAddBottom);
 		}
-		if (this._HtmlClass.getSysParas().isPc() && !this._HtmlClass.getUserConfig().getUserPageItem()
-				.getSingleValue("FrameTag").equalsIgnoreCase("Complex")) {
+		if (this.isUseTest1Table()) {
 			this._HtmlClass.getDocument().addScriptHtml("</td></tr></table><!--浮动表结束-->");
 		}
 		if (this._Html5FrameSet != null) {
 			this._HtmlClass.getDocument().addScriptHtml(_Html5FrameSet[1]);
 		}
-		this._HtmlClass.getDocument().addScriptHtml("</div><!-- 主框架结束 -->");
+		if (this.isUseTest1Table()) {
+			this._HtmlClass.getDocument().addScriptHtml("</div><!-- 主框架结束 -->");
+		}
 		// this._HtmlClass.getDocument().addScriptHtml(
 		// this._HtmlClass.getSkin().getBodyEnd());
 	}
