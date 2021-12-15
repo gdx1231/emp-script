@@ -3,8 +3,8 @@
 	<EwaMap>
 		<Map Name="VARCHAR" CreateNumber="1" InsertPrefix="'" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
-				<MapTo Name="VARCHAR" />
 				<MapTo Name="NVARCHAR" Scale="2" />
+				<MapTo Name="VARCHAR" />
 			</Database>
 			<Database Name="ORACLE" Desc="ORACLE">
 				<MapTo Name="VARCHAR2" />
@@ -75,6 +75,20 @@
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="INT" />
+			</Database>
+		</Map>
+		<Map Name="BIGINT UNSIGNED" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="BIGINT" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="NUMBER" Fixed="38" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="BIGINT UNSIGNED" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="BIGINT" />
 			</Database>
 		</Map>
 		<Map Name="BIGINT" CreateNumber="0" InsertPrefix="" Desc="">
