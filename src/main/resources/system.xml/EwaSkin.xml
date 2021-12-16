@@ -675,7 +675,7 @@ EWA_App.showFrameAsMobile(EWA.F.FOS["@sys_frame_unid"] );
 			</Script>
 			<Style><![CDATA[]]>
 			</Style>
-			<Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/complex.css?v=1" />
+			<Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/complex.css">
 <div id='work_area'>]]></Top>
 			<Bottom><![CDATA[</div>
 <div id="dock" onselectstart='return false'>

@@ -36,12 +36,12 @@ public class ItemComplex extends ItemBase {
 		String id = userXItem.getName();
 		String xmlName = userXItem.getSingleValue("CombineFrame", "CbXmlName");
 		xmlName = super.getHtmlClass().getItemValues().replaceJsParameters(xmlName);
-		
+
 		String itemName = userXItem.getSingleValue("CombineFrame", "CbItemName");
-		
+
 		String refParas = userXItem.getSingleValue("CombineFrame", "CbPara");
 		refParas = super.getHtmlClass().getItemValues().replaceJsParameters(refParas);
-		
+
 		String install = userXItem.getSingleValue("CombineFrame", "CbInstall");
 
 		String js = userXItem.getSingleValue("CombineFrame", "CbJs");
@@ -79,10 +79,10 @@ public class ItemComplex extends ItemBase {
 
 		} else if (install.equals("box")) {
 			String p1 = p + "&EWA_BOX=1";
-			String html = this.createJs(id, x, i, p1, des);
+			String html = this.createJs(id, x, i, p1, js);
 			s1 = s1.replace(">" + SkinFrame.TAG_VAL, html + " >");
 		} else { // js
-			String html = this.createJs(id, x, i, p, des);
+			String html = this.createJs(id, x, i, p, js);
 
 			s1 = s1.replace(">" + SkinFrame.TAG_VAL, html + " >");
 		}
@@ -94,16 +94,18 @@ public class ItemComplex extends ItemBase {
 		return s1.trim();
 	}
 
-	private String createJs(String id, String x, String i, String p, String des) throws JSONException {
+	private String createJs(String id, String x, String i, String p, String js) throws JSONException {
 
 		String params = replaceParameters(p);
 
 		MStr s = new MStr();
 
-		s.a("x=\"" + Utils.textToJscript(x) + "\"");
-		s.a("i=\"" + Utils.textToJscript(i) + "\"");
-		s.a("p=\"" + Utils.textToJscript(params) + "\"");
-
+		s.a(" x=\"" + Utils.textToJscript(x) + "\"");
+		s.a(" i=\"" + Utils.textToJscript(i) + "\"");
+		s.a(" p=\"" + Utils.textToJscript(params) + "\"");
+		if (js != null && js.toUpperCase().trim().length() > 0) {
+			s.a("js=\"" + Utils.textToJscript(js) + "\"");
+		}
 		return s.toString();
 	}
 
@@ -158,8 +160,6 @@ public class ItemComplex extends ItemBase {
 
 		return html;
 	}
-
-	  
 
 	private String replaceParameters(String s) {
 		return super.getHtmlClass().getItemValues().replaceParameters(s, false);
