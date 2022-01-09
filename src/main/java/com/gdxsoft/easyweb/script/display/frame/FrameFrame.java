@@ -591,6 +591,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 			return; // 在CreateFooter中
 		}
 
+		// Frame单独一行
+		boolean oneCell =false;
 		// 合并对象
 		if (uxi.testName("DataItem")) {
 			String mt = uxi.getSingleValue("DataItem", "MeargeTo");
@@ -601,7 +603,12 @@ public class FrameFrame extends FrameBase implements IFrame {
 				meargeMap.get(mt).add(uxi.getName());
 
 			}
-
+			
+			// Frame单独一行
+			String paraOneCell = uxi.getSingleValue("DataItem", "FrameOneCell");
+			if("yes".equalsIgnoreCase(paraOneCell) ) {
+				oneCell = true;
+			}
 		}
 		if (uxi.testName("List")) {
 			UserXItemValues di = uxi.getItem("List");
@@ -648,6 +655,24 @@ public class FrameFrame extends FrameBase implements IFrame {
 			stringBuilder.append("'");
 			stringBuilder.append(disp);
 			stringBuilder.append("><td colspan='");
+			stringBuilder.append(colSpan);
+			stringBuilder.append("'>");
+			stringBuilder.append(SkinFrame.TAG_ITEM);
+			stringBuilder.append("</td></tr>");
+
+			s1.append(stringBuilder.toString());
+			parentHtml = s1.toString();
+		} else if(oneCell) {// Frame单独一行，参数：DataItem.FrameOneCell 2020-01-08
+			MStr s1 = new MStr();
+
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("\n<tr SHOW_MSG='1' class='ewa-frame-one-cell ");
+			stringBuilder.append(trClass);
+			stringBuilder.append("' id='");
+			stringBuilder.append(trId);
+			stringBuilder.append("'");
+			stringBuilder.append(disp);
+			stringBuilder.append("><td class='EWA_TD_1' colspan='");
 			stringBuilder.append(colSpan);
 			stringBuilder.append("'>");
 			stringBuilder.append(SkinFrame.TAG_ITEM);

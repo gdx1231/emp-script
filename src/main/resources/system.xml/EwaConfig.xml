@@ -1326,8 +1326,8 @@ var swfVersionStr = "11.1.0";
 					]]></Html>
 				</Template>
 			</XItem>
-			
-						<XItem Name="XMLEditor" HtmlTag="" BaseType="0" UIGroup="Extend"
+
+			<XItem Name="XMLEditor" HtmlTag="" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,OrderSearch,Name,
 				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,DataItem">
@@ -1939,10 +1939,14 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 							<Set Lang="enus" Info="Icon Loction" />
 						</DescriptionSet>
 					</Value>
-					<!-- <Value Type="ref" Name="MeargeTo" Ref="EasyWebTemplate/XItems/XItem">
-						<DescriptionSet> <Set Lang="zhcn" Info="合并到" /> <Set Lang="enus" Info="MeargeTo"
-						/> </DescriptionSet> </Value> -->
-
+					<!-- <Value Type="ref" Name="MeargeTo" Ref="EasyWebTemplate/XItems/XItem"> <DescriptionSet> <Set Lang="zhcn" Info="合并到" 
+						/> <Set Lang="enus" Info="MeargeTo" /> </DescriptionSet> </Value> -->
+					<Value Type="group" Name="FrameOneCell">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="Frame单独一行" />
+							<Set Lang="enus" Info="Frame One Cell" />
+						</DescriptionSet>
+					</Value>
 				</Values>
 			</XItemParameter>
 			<XItemParameter Name="DispEnc" IsSet="0" IsMulti="1" IsShow="1" IsJsShow="1">
@@ -2796,7 +2800,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 
 		<XGroupValues>
-
+			<XGroupValue Name="FrameOneCell" Default="" Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
 			<XGroupValue Name="EncType" Default="" Values=",all,end3,before3,email,phone">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",全部,后三位, 前三位, 邮件, 电话" />
@@ -2964,8 +2973,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				, ShortDateTime, Week, Age, Int, Money,  Fixed2, Percent, LeastMoney, LeastDecimal
 				 ">
 				<DescriptionSet>
-					<Set Lang="zhcn"
-						Info=",日期,短日期,时间,短时间,日期和时间,日期和短时间
+					<Set Lang="zhcn" Info=",日期,短日期,时间,短时间,日期和时间,日期和短时间
 						,短日期和时间,周几,年龄, 整型,货币,保留2位小数,百分比,最短货币(千位分隔),最短小数
 						 " />
 					<Set Lang="enus"
@@ -3014,8 +3022,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info="z,Sum,Avg,Max,Min,Count" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="InitValue" Default="0"
-				Values=",Tody,Tody-Time,Year-Month,Year,Time,IP,SEQID,GUID,ZERO">
+			<XGroupValue Name="InitValue" Default="0" Values=",Tody,Tody-Time,Year-Month,Year,Time,IP,SEQID,GUID,ZERO">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",当前日期,当前日期时间,年月,年,时间,IP地址,序号,全球唯一标识,数字零" />
 					<Set Lang="enus" Info=",Tody,Tody-Time,Year-Month,Year,Time,IP,SEQID,GUID,ZERO" />
@@ -3500,8 +3507,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-			<XItemParameter Name="FrameHtml" IsSet="0" IsShow="1" IsMulti="0"
-				FrameTag="Frame,Report,ListFrame,Grid">
+			<XItemParameter Name="FrameHtml" IsSet="0" IsShow="1" IsMulti="0" FrameTag="Frame,Report,ListFrame,Grid">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="框架HTML" />
 					<Set Lang="enus" Info="Frame Html" />
@@ -3535,8 +3541,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 					<Value Type="number" Name="ColSize">
 						<DescriptionSet>
-							<Set Lang="zhcn"
-								Info="分栏数，填写数值,&#x0D;&#x0A;
+							<Set Lang="zhcn" Info="分栏数，填写数值,&#x0D;&#x0A;
 							如果LfShowType是列表，则是分割栏数，&#x0D;&#x0A;
 							如果是网格则是每行显示的数量" />
 							<Set Lang="enus" Info="Cols" />
@@ -3885,7 +3890,8 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</Values>
 			</XItemParameter>
 
-			<XItemParameter Name="LogicShow" IsSet="1" IsShow="1" IsMulti="1" FrameTag="ListFrame,Grid,Frame,Complex">
+			<XItemParameter Name="LogicShow" IsSet="1" IsShow="1" IsMulti="1"
+				FrameTag="ListFrame,Grid,Frame,Complex">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="逻辑显示" />
 				</DescriptionSet>
@@ -4563,8 +4569,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="zhcn" Info="调用类型" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="ref" Name="CallName" CreateValue="this.Action.Name+' SQL'"
-						Ref="EasyWebTemplate/Action/{CallType}">
+					<Value Type="ref" Name="CallName" CreateValue="this.Action.Name+' SQL'" Ref="EasyWebTemplate/Action/{CallType}">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="调用名称" />
 						</DescriptionSet>
