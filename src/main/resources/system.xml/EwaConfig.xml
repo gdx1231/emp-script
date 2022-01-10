@@ -638,31 +638,36 @@ title="{__EWA_MSG__}" class="ewa_htm5_upload_box"><div class="ewa_app_upload_for
 name="aaa" ref="h5u_@sys_frame_unid$@NAME"><span>{__EWA_DES__}</span></div></div>
 <script type="text/javascript">
 (function () {
-	var name = "h5uinput_" + "@sys_frame_unid"+"_1_2_3_4_5_"+"@NAME";
-	var js_name = "h5u_" + "@sys_frame_unid"+"$"+"@NAME";
-	var exts="@UpExts".split(',');
-	var exts1=[];
-	for(var i=0;i<exts.length;i++){
-		exts1.push('.'+exts[i].toLowerCase().trim());
+	var name = "h5uinput_" + "@sys_frame_unid" + "_1_2_3_4_5_" + "@NAME";
+	var js_name = "h5u_" + "@sys_frame_unid"+"$" + "@NAME";
+	var exts = "@UpExts".split(',');
+	var exts1 = [];
+	for(var i=0; i < exts.length; i++){
+		exts1.push('.' + exts[i].toLowerCase().trim());
 	}
-	var up1 = new EWA_Html5UploadClass();
-	up1.POST_XMLNAME = "@XMLNAME".toURL();
-	up1.POST_ITEMNAME = "@ITEMNAME".toURL();
-	up1.POST_NAME = "@NAME";
-	up1.POST_REF = "@SYS_UNID";
-	up1.UpNewSizes = "@UpNewSizes";
-	up1.NewSizesIn = "@NewSizesIn";
-	up1.UpMulti = "@UpMulti"; 
-	up1.SYS_FRAME_UNID = "@sys_frame_unid";
 	var iput = document.getElementById("h5uinput_@sys_frame_unid$@NAME");
 	iput.id = name;
 	if(exts1.length > 0){
 		iput.setAttribute('accept',exts1.join(','));
 	}
+	
+	var up1 			= new EWA_Html5UploadClass();
+	up1.POST_XMLNAME 	= "@XMLNAME".toURL();
+	up1.POST_ITEMNAME 	= "@ITEMNAME".toURL();
+	up1.POST_NAME 		= "@NAME";
+	up1.POST_REF 		= "@SYS_UNID";
+	up1.UpNewSizes 		= "@UpNewSizes";
+	up1.NewSizesIn 		= "@NewSizesIn";
+	up1.UpMulti 		= "@UpMulti"; 
+	up1.UpLimit 		= "@UpLimit"; 
+	up1.SYS_FRAME_UNID	= "@sys_frame_unid";
+	up1.INPUT_FILE_ID	= iput.id;
+	up1._name			= js_name;
+	
 	if(up1.UpMulti != 'yes'){
 		iput.removeAttribute('multiple');
 	}
-	up1._name= js_name;
+	
 	window[js_name] = up1;
 	up1.showPreviewExists();
 })();
@@ -2382,12 +2387,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="enus" Info="Multi" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="UpType">
+					<!--<Value Type="string" Name="UpType">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="上传类型，SWF上传无效" />
 							<Set Lang="enus" Info="Upload Type" />
 						</DescriptionSet>
-					</Value>
+					</Value>-->
 
 					<Value Type="string" Name="UpExts">
 						<DescriptionSet>
@@ -2395,18 +2400,25 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="enus" Info="Exts, Split by ','" />
 						</DescriptionSet>
 					</Value>
+					<Value Type="string" Name="UpLimit">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="上传文件限制(例如：100k, 12m)" />
+							<Set Lang="enus" Info="Upload file limit(e.g. 100k, 12m)" />
+						</DescriptionSet>
+					</Value>
+					
 					<Value Type="group" Name="UpUnZip">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="解压压缩文件" />
 							<Set Lang="enus" Info="UnPack Zip File" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="group" Name="Up2Swf">
+					<!--<Value Type="group" Name="Up2Swf">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="自动转换成Swf文件" />
 							<Set Lang="enus" Info="Convert To Flash" />
 						</DescriptionSet>
-					</Value>
+					</Value>-->
 
 					<Value Type="string" Name="UpPath">
 						<DescriptionSet>
