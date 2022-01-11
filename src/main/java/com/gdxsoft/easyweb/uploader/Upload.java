@@ -63,6 +63,9 @@ public class Upload {
 
 	private RequestValue _Rv;
 
+	private String upLimit = "10M"; // 上传大小限制，默认10M
+	private long limitBytes = 1024 * 1024 * 10L; // 10m bytes
+
 	public RequestValue getRv() {
 		return _Rv;
 	}
@@ -129,77 +132,85 @@ public class Upload {
 		}
 		_uploadDir = DEFAULT_UPLOAD_PATH;
 		UserXItem uxi = uc.getUserXItems().getItem(name);
-		if (uxi.testName("Upload")) {
-			_uploadName = uxi.getName();
-			if (uxi.getItem("Upload").count() == 0) {
-				System.err.println(_uploadName + "配置项信息不全，请修改配置文件");
-				_uploadDir = null;
-				return;
-			}
-			UserXItemValue u = uxi.getItem("Upload").getItem(0);
-			if (u.testName("UpPath")) {
-				String p = u.getItem("UpPath");
-				if (!p.trim().equals("")) {
-					p = iv.replaceParameters(p, false);
-					if (p.indexOf("..") >= 0) { // 避免出现 ../../../root的风险
-						System.err.println(this + "上传路径出现‘..’，被替换（" + p + "）-->");
-						p = p.replace("..", "");
-						System.err.println(p);
-					}
-					if (p.length() > 255) { // 避免路嘉过长，超过系统限制
-						System.err.println(this + "上传路径长度超过255，被替换（" + p + "）-->");
-						p = DEFAULT_UPLOAD_PATH;
-						System.err.println(p);
-					}
-					_uploadDir = p;
+		if (!uxi.testName("Upload")) {
+			LOGGER.error("Invalid cfg {},{},{}", uploadXmlName, uploadItemName, name);
+			throw new Exception(_uploadName + " Invalid cfg");
+		}
+		_uploadName = uxi.getName();
+		if (uxi.getItem("Upload").count() == 0) {
+			LOGGER.error("Invalid cfg {},{},{}", uploadXmlName, uploadItemName, name);
+			throw new Exception(_uploadName + " Invalid cfg");
+		}
+		UserXItemValue u = uxi.getItem("Upload").getItem(0);
+		if (u.testName("UpPath")) {
+			String p = u.getItem("UpPath");
+			if (!p.trim().equals("")) {
+				p = iv.replaceParameters(p, false);
+				if (p.indexOf("..") >= 0) { // 避免出现 ../../../root的风险
+					LOGGER.warn(this + "上传路径出现‘..’，被替换（" + p + "）-->");
+					p = p.replace("..", "");
+					LOGGER.warn(p);
 				}
-			}
-			if (u.testName("UpSaveMethod")) {
-				// _upSaveMethod = u.getItem("UpSaveMethod");
-			}
-			if (u.testName("UpSql")) {
-				_upSql = u.getItem("UpSql");
-			}
-			if (u.testName("UpNewSizes")) {
-				_upNewSizes = u.getItem("UpNewSizes");
-			}
-			// 是在客户端还是服务器端生成新尺寸图片
-			if (u.testName("NewSizesIn")) {
-				this._NewSizesIn = u.getItem("NewSizesIn");
-			}
-			if (u.testName("Up2Swf")) {
-				_upSwf = u.getItem("Up2Swf");
-				if (_upSwf.equalsIgnoreCase("yes")) {
-					this._UpExts.put("SWF", true);
+				if (p.length() > 255) { // 避免路嘉过长，超过系统限制
+					LOGGER.warn(this + "上传路径长度超过255，被替换（" + p + "）-->");
+					p = DEFAULT_UPLOAD_PATH;
+					LOGGER.warn(p);
 				}
+				_uploadDir = p;
 			}
-			if (u.testName("UpDelete")) {
-				_upDelete = u.getItem("UpDelete");
+		}
+		if (u.testName("UpSaveMethod")) {
+			// _upSaveMethod = u.getItem("UpSaveMethod");
+		}
+		if (u.testName("UpSql")) {
+			_upSql = u.getItem("UpSql");
+		}
+		if (u.testName("UpNewSizes")) {
+			_upNewSizes = u.getItem("UpNewSizes");
+		}
+		// 是在客户端还是服务器端生成新尺寸图片
+		if (u.testName("NewSizesIn")) {
+			this._NewSizesIn = u.getItem("NewSizesIn");
+		}
+		if (u.testName("Up2Swf")) {
+			_upSwf = u.getItem("Up2Swf");
+			if (_upSwf.equalsIgnoreCase("yes")) {
+				this._UpExts.put("SWF", true);
 			}
-			if (u.testName("UpUnZip")) {
-				_upUnZip = u.getItem("UpUnZip");
-			}
+		}
+		if (u.testName("UpDelete")) {
+			_upDelete = u.getItem("UpDelete");
+		}
+		if (u.testName("UpUnZip")) {
+			_upUnZip = u.getItem("UpUnZip");
+		}
 
-			this._IsRunUpSQLResized = false;
-			// _IsRunUpSQLResized
-			if (u.testName("RunUpSQLResized")) {
-				String v = u.getItem("RunUpSQLResized");
-				if (v != null && v.equalsIgnoreCase("yes")) {
-					this._IsRunUpSQLResized = true;
-				}
+		// 上传文件大小限制
+		if (u.testName("UpLimit")) {
+			String limit = u.getItem("UpLimit").trim();
+			if (limit.length() > 0) {
+				this.initLimitBytes(limit);
 			}
-			// UpExts
-			if (u.testName("UpExts")) {
-				String up_exts = u.getItem("UpExts");
-				if (up_exts.trim().length() > 0) {
-					String[] exts = up_exts.split(",");
+		}
 
-					for (int i = 0; i < exts.length; i++) {
-						String ext = exts[i].trim().toUpperCase();
-						this._UpExts.put(ext, true);
-						if (ext.equals("JPG")) {
-							this._UpExts.put("JPEG", true);
-						}
+		this._IsRunUpSQLResized = false;
+		// _IsRunUpSQLResized
+		if (u.testName("RunUpSQLResized")) {
+			String v = u.getItem("RunUpSQLResized");
+			if (v != null && v.equalsIgnoreCase("yes")) {
+				this._IsRunUpSQLResized = true;
+			}
+		}
+		// UpExts
+		if (u.testName("UpExts")) {
+			String up_exts = u.getItem("UpExts");
+			if (up_exts.trim().length() > 0) {
+				String[] exts = up_exts.split(",");
+				for (int i = 0; i < exts.length; i++) {
+					String ext = exts[i].trim().toUpperCase();
+					this._UpExts.put(ext, true);
+					if (ext.equals("JPG")) {
+						this._UpExts.put("JPEG", true);
 					}
 				}
 			}
@@ -222,8 +233,10 @@ public class Upload {
 		/*
 		 * 在 ewa_conf.xml中的设定
 		 * 
-		 * <path des="图片缩略图保存根路径" Name="img_tmp_path" Value="@/Users/admin/java/img_tmps/" /> <path des=
-		 * "图片缩略图保存根路径URL, ！！！需要在Tomcat或Apache或Nginx中配置虚拟路径！！！。" Name="img_tmp_path_url" Value="/img_tmps/" />
+		 * <path des="图片缩略图保存根路径" Name="img_tmp_path"
+		 * Value="@/Users/admin/java/img_tmps/" /> <path des=
+		 * "图片缩略图保存根路径URL, ！！！需要在Tomcat或Apache或Nginx中配置虚拟路径！！！。" Name="img_tmp_path_url"
+		 * Value="/img_tmps/" />
 		 */
 		root = UPath.getPATH_UPLOAD();
 
@@ -246,6 +259,40 @@ public class Upload {
 		}
 
 		_AlFiles = new ArrayList<FileUpload>();
+	}
+
+	/**
+	 * 根据上传参数初始化上传文件大小bytes
+	 * 
+	 * @param limit 512k or 12m or 1024
+	 * @throws Exception
+	 */
+	private void initLimitBytes(String limit) throws Exception {
+		String limit1 = limit.trim().toUpperCase().replace(",", "").replace(" ", "");
+		if (limit1.endsWith("M") || limit1.endsWith("K")) {
+			String num0Str = limit1.substring(0, limit1.length() - 1);
+			long num0;
+			try {
+				num0 = Long.parseLong(num0Str);
+			} catch (Exception err) {
+				throw new Exception("Invalid parameter UpLimit ->" + limit);
+			}
+
+			if (limit1.endsWith("M")) {
+				this.limitBytes = num0 * 1024 * 1024; // 1MByte=1024KByte（M是英文Million的缩写，百万。）
+			} else if (limit1.endsWith("K")) {
+				this.limitBytes = num0 * 1024; // 1KByte=1024Byte（K是英文Kilo的缩写，千。）
+			}
+
+		} else {
+			try {
+				long v = Long.parseLong(limit);
+				this.limitBytes = v;
+			} catch (Exception err) {
+				throw new Exception("Invalid parameter UpLimit ->" + limit);
+			}
+		}
+		this.upLimit = limit;
 	}
 
 	public void init(HttpServletRequest request) throws Exception {
@@ -282,39 +329,51 @@ public class Upload {
 	}
 
 	/**
+	 * 检查文件大小限制
+	 * 
+	 * @param fu
+	 * @return
+	 */
+	private boolean checkSizeLimit(FileUpload fu) {
+		if (fu == null) {
+			return false;
+		}
+
+		return fu.getLength() <= this.limitBytes;
+	}
+
+	/**
 	 * 处理文件上传
 	 * 
 	 * @throws Exception
 	 */
 	public String upload() throws Exception {
 		if (_uploadDir == null) {
-			return "fail";
+			throw new Exception("The upload dir not defined ");
 		}
 
 		int m = 0;
-
-		if (this._UploadItems != null) {
-			// 处理文件上传
+		if (this._UploadItems != null) { // 处理文件上传
 			for (int i = 0; i < this._UploadItems.size(); i++) {
 				FileItem item = (FileItem) this._UploadItems.get(i);
-
 				if (item.isFormField() && item.getFieldName().equals(_uploadName) || !item.isFormField()) {
-					try {
-						FileUpload fu = this.takeFileUpload(item, m);
-						handleSubs(fu);
-						if (this.checkValidExt(fu)) {
-							this._AlFiles.add(fu);
-							this.createNewSizeImages(fu);
-							m++;
-						} else {
-							System.out.println("upload:" + item.getName() + ", 非法扩展名");
-						}
-					} catch (Exception err) {
-						System.out.println("upload:" + item.getName());
-						System.out.println(err.getMessage());
+					FileUpload fu = this.takeFileUpload(item, m);
+					handleSubs(fu);
+					if (!this.checkSizeLimit(fu)) {
+						String msg = "the file size limit exceeded " + item.getName() + " " + fu.getLength() + " > "
+								+ this.upLimit;
+						LOGGER.error(msg);
+						throw new Exception(msg);
 					}
+					if (!this.checkValidExt(fu)) {
+						String msg = "the upload file ext " + item.getName()+" is invalid";
+						LOGGER.error(msg);
+						throw new Exception(msg);
+					}
+					this._AlFiles.add(fu);
+					this.createNewSizeImages(fu);
+					m++;
 				}
-
 			}
 		} else {
 			String v = this._Rv.getString(this._uploadName);
@@ -417,7 +476,7 @@ public class Upload {
 			}
 			return fus;
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 			return null;
 		}
 	}
@@ -522,8 +581,10 @@ public class Upload {
 		/*
 		 * 在 ewa_conf.xml中的设定
 		 * 
-		 * <path des="图片缩略图保存根路径" Name="img_tmp_path" Value="@/Users/admin/java/img_tmps/" /> <path des=
-		 * "图片缩略图保存根路径URL, ！！！需要在Tomcat或Apache或Nginx中配置虚拟路径！！！。" Name="img_tmp_path_url" Value="/img_tmps/" />
+		 * <path des="图片缩略图保存根路径" Name="img_tmp_path"
+		 * Value="@/Users/admin/java/img_tmps/" /> <path des=
+		 * "图片缩略图保存根路径URL, ！！！需要在Tomcat或Apache或Nginx中配置虚拟路径！！！。" Name="img_tmp_path_url"
+		 * Value="/img_tmps/" />
 		 */
 
 		String url;
@@ -1001,5 +1062,19 @@ public class Upload {
 
 	public List<FileUpload> getAlFiles() {
 		return _AlFiles;
+	}
+
+	/**
+	 * @return the upLimit
+	 */
+	public String getUpLimit() {
+		return upLimit;
+	}
+
+	/**
+	 * @param upLimit the upLimit to set
+	 */
+	public void setUpLimit(String upLimit) {
+		this.upLimit = upLimit;
 	}
 }

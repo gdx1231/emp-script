@@ -105,6 +105,7 @@ public class ServletUpload extends HttpServlet {
 			UJSon.rstSetFalse(result, err.getMessage());
 			out.print(result);
 			LOGGER.error(err.getMessage());
+			return;
 		}
 
 		up.setUploadItems(items);
