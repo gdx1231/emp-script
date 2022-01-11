@@ -4,28 +4,33 @@ import java.io.File;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
 import com.gdxsoft.easyweb.uploader.Upload;
+import com.gdxsoft.easyweb.utils.UAes;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
-import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class ActionFrame extends ActionBase implements IAction {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ActionFrame.class);
 	private MTable _Uploads;
 
 	public ActionFrame() {
 
 	}
 
-	private void initUploadParas() {
+	/**
+	 * Initialize upload files parameters
+	 */
+	private boolean initUploadParas() {
 		if (super.getHtmlClass() == null) {
-			return;
+			return false;
 		}
 		UserXItems items = super.getHtmlClass().getUserConfig().getUserXItems();
 		_Uploads = new MTable();
@@ -40,12 +45,7 @@ public class ActionFrame extends ActionBase implements IAction {
 				if (!item.testName("Upload")) {
 					continue;
 				}
-				// String dataType = item.getSingleValue("DataItem",
-				// "DataType");
-				// if (dataType == null || !dataType.equalsIgnoreCase("binary"))
-				// {
-				// continue;
-				// }
+
 				UserXItemValue u = item.getItem("Upload").getItem(0);
 				if (u.testName("UpSaveMethod")) {
 					String upSaveMethod = u.getItem("UpSaveMethod");
@@ -54,8 +54,10 @@ public class ActionFrame extends ActionBase implements IAction {
 					}
 				}
 			}
+			return true;
 		} catch (Exception e) {
-			System.err.println(this + ": " + e.getMessage());
+			LOGGER.error("Init upload parametes error: {}", e.getMessage());
+			return false;
 		}
 	}
 
@@ -66,10 +68,10 @@ public class ActionFrame extends ActionBase implements IAction {
 	 * String )
 	 */
 	public void executeCallSql(String name) throws Exception {
-		this.initUploadParas();
-		this.createUploadsParas();
-
-		 super.executeCallSql(name);
+		if (this.initUploadParas()) {
+			this.createUploadsParas();
+		}
+		super.executeCallSql(name);
 	}
 
 	/**
@@ -86,7 +88,8 @@ public class ActionFrame extends ActionBase implements IAction {
 				this.createUploadPara(item);
 			} catch (Exception err) {
 				removeUpload(item);
-				System.err.println(this + ":" + err.getMessage());
+				LOGGER.warn("Create upload parameters err: {}", err.getMessage());
+				return;
 			}
 		}
 	}
@@ -133,14 +136,29 @@ public class ActionFrame extends ActionBase implements IAction {
 				return;
 			}
 			if (json.trim().startsWith("[")) {// json表达式
-				arr = new JSONArray(json);
+				JSONArray arrEncrypted = new JSONArray(json);
+				if (arrEncrypted.length() == 0) {
+					removeUpload(item);
+					return;
+				}
+				arr = new JSONArray();
+				for (int i = 0; i < arrEncrypted.length(); i++) {
+					JSONObject encryptUploadJson = arrEncrypted.getJSONObject(i);
+					if (encryptUploadJson.has("UP")) {
+						// AES 解密 json数据
+						String decrypt = UAes.getInstance().decrypt(encryptUploadJson.getString("UP"));
+						JSONObject decryptedJson = new JSONObject(decrypt);
+						arr.put(decryptedJson);
+					}
+				}
 				if (arr.length() == 0) {
 					removeUpload(item);
 					return;
 				}
 				// [{"ISREAL":true,"UP_SIZE":731,"UP_URL":"/img_tmps//GRP_FIN_MAIN/c8a1b3da-4622-4841-9fff-6b43970d72f0_0.png","CT":"/img_tmps/","UP_NAME":"c8a1b3da-4622-4841-9fff-6b43970d72f0_0.png","UP_LOCAL_NAME":"bg.png","UP_UNID":"c8a1b3da-4622-4841-9fff-6b43970d72f0"}]
-
 				// 由于上传可能返回多个文件属性,因此取第一个JSON
+
+				// 如果是同时上传多个文件，此信息无效
 				item1 = arr.getJSONObject(0);
 				if (item1.has("UP_NAME")) {
 					upName = item1.getString("UP_NAME");
@@ -156,7 +174,6 @@ public class ActionFrame extends ActionBase implements IAction {
 				// 当ht5upload 单个上传时候 如果取的是地址本身, 表示没有修改， 不需要映射文件对象;
 				return;
 			}
-
 		}
 		if (upName == null) {
 			removeUpload(item);
@@ -164,7 +181,7 @@ public class ActionFrame extends ActionBase implements IAction {
 		}
 
 		if (upName.indexOf("./") >= 0 || upName.indexOf(".\\") >= 0) { // 非法路径字符
-			System.out.println("InValid upName:" + upName);
+			LOGGER.warn("InValid upName:" + upName);
 			removeUpload(item);
 			return;
 
@@ -181,66 +198,73 @@ public class ActionFrame extends ActionBase implements IAction {
 
 		// 添加增加标识
 		rv.addValue("____createUploadPara____", "ADDED");
-		if (f.exists() && f.isFile() && f.canRead()) {
-			byte[] buf = UFile.readFileBytes(f.getAbsolutePath());
+		
+		if (!(f.exists() && f.isFile() && f.canRead())) {
+			// 文件被删除- 配置项指定了 删除文件
+			// 保留上传的json参数
+			if (arr != null) {
+				rv.addValue(uploadName + "_JSON", arr.toString());
+			}
+			return;
+		}
 
-			if (dataType != null && dataType.equalsIgnoreCase("binary")) {
+		if (dataType != null && dataType.equalsIgnoreCase("binary")) {
+			long m10 = 1024 * 1024 * 10; // 10M
+			if (f.length() <= m10) {// 读取文件，为了避免OOM，因此只读取10M一下文件内容
+				byte[] buf = UFile.readFileBytes(f.getAbsolutePath());
 				// 替换参数，转换成文件二进制
 				if (rv.getPageValues().getValue(uploadName) == null) {
 					rv.addValue(uploadName, buf, "binary", buf.length);
 				} else {
 					rv.changeValue(uploadName, buf, "binary", buf.length);
 				}
-
-			} else {
-				if (item1 != null) {
-					// html5upload
-					// 字符串类型表示存储url地址
-					String file_url = item1.getString("UP_URL");
-					if (rv.getPageValues().getValue(uploadName) == null) {
-						rv.addValue(uploadName, file_url);
-					} else {
-						rv.changeValue(uploadName, file_url, "string", file_url.length());
-					}
-				} else {
-					// swfupload
-				}
 			}
-
-			// 文件md5
-			rv.addValue(uploadName + "_MD5", Utils.md5(buf));
-
-			// 文件保存名称
-			rv.addValue(uploadName + "_NAME", f.getName());
-
-			// 文件物理地址( 完整路径)
-			rv.addValue(uploadName + "_PATH", f.getAbsolutePath());
-
-			// 去除UPath.getPATH_UPLOAD() 的路径
-			rv.addValue(uploadName + "_PATH_SHORT", shortPath);
-			// 文件字节
-			rv.addValue(uploadName + "_SIZE", f.length());
-			// 文件字节
-			rv.addValue(uploadName + "_LENGTH", f.length());
-			// 文件扩展名
-			rv.addValue(uploadName + "_EXT", UFile.getFileExt(f.getName()));
-
+		} else {
 			if (item1 != null) {
-				// 上传文件(1或多个)的UNID
-				rv.addValue(uploadName + "_UP_UNID", item1.getString("UP_UNID"));
-				// 上传文件(1或多个)的UNID
-				rv.addValue(uploadName + "_JSON", arr.toString());
-				// 文件URL
-				rv.addValue(uploadName + "_URL", item1.getString("UP_URL"));
-
-				// 上传文件的Url前缀
-				rv.addValue(uploadName + "_CT", item1.getString("CT"));
-
-				// 上传文件的本地名称
-				rv.addValue(uploadName + "_LOCAL_NAME", item1.getString("UP_LOCAL_NAME"));
-
+				// html5upload
+				// 字符串类型表示存储url地址
+				String file_url = item1.getString("UP_URL");
+				if (rv.getPageValues().getValue(uploadName) == null) {
+					rv.addValue(uploadName, file_url);
+				} else {
+					rv.changeValue(uploadName, file_url, "string", file_url.length());
+				}
+			} else {
+				// swfupload
 			}
 		}
+		if (arr != null) {
+			// 上传文件(1或多个)的JSON
+			rv.addValue(uploadName + "_JSON", arr.toString());
+		}
+		
+		/* ------------ 以下仅对单个文件上传有意义 ----------------- */
+
+		// 文件md5
+		rv.addValue(uploadName + "_MD5", UFile.md5(f));
+		// 文件保存名称
+		rv.addValue(uploadName + "_NAME", f.getName());
+		// 文件物理地址( 完整路径)
+		rv.addValue(uploadName + "_PATH", f.getAbsolutePath());
+		// 去除UPath.getPATH_UPLOAD() 的路径
+		rv.addValue(uploadName + "_PATH_SHORT", shortPath);
+		// 文件字节
+		rv.addValue(uploadName + "_SIZE", f.length());
+		// 文件字节
+		rv.addValue(uploadName + "_LENGTH", f.length());
+		// 文件扩展名
+		rv.addValue(uploadName + "_EXT", UFile.getFileExt(f.getName()));
+
+		if (item1 != null) {
+			// 上传文件(1或多个)的UNID
+			rv.addValue(uploadName + "_UP_UNID", item1.getString("UP_UNID"));
+			// 文件URL
+			rv.addValue(uploadName + "_URL", item1.getString("UP_URL"));
+			// 上传文件的Url前缀
+			rv.addValue(uploadName + "_CT", item1.getString("CT"));
+			// 上传文件的本地名称
+			rv.addValue(uploadName + "_LOCAL_NAME", item1.getString("UP_LOCAL_NAME"));
+		}
 	}
-	 
+
 }

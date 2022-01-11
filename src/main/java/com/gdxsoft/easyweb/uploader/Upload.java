@@ -25,6 +25,7 @@ import com.gdxsoft.easyweb.script.display.SysParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
+import com.gdxsoft.easyweb.utils.UAes;
 import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UImages;
@@ -548,7 +549,11 @@ public class Upload {
 			if (isReal) {
 				json.put("CT", UPath.getPATH_UPLOAD_URL());
 			}
-			return json.toString();
+			String encrypt = UAes.getInstance().encrypt(json.toString());
+			JSONObject json1 = new JSONObject();
+			json1.put("UP", encrypt);
+			
+			return json1.toString();
 		} catch (Exception err) {
 			return "{\"RST\":false, \"ERR\":\"" + Utils.textToJscript(err.getMessage()) + "\"}";
 		}
