@@ -273,13 +273,13 @@
 			</Database>
 		</Map>
 
-		<Map Name="uniqueidentifier" CreateNumber="1" InsertPrefix="'"
+		<Map Name="uniqueidentifier" CreateNumber="0" InsertPrefix="'"
 			Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="uniqueidentifier" />
 			</Database>
 			<Database Name="ORACLE" Desc="ORACLE">
-				<MapTo Name="VARCHAR2" />
+				<MapTo Name="VARCHAR" />
 			</Database>
 			<Database Name="MYSQL" Desc="MySQL">
 				<MapTo Name="VARCHAR" />

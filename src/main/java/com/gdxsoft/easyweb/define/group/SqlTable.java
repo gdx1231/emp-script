@@ -188,6 +188,12 @@ public class SqlTable {
 		for (int i = 0; i < table.getIndexes().size(); i++) {
 			StringBuilder sb = new StringBuilder();
 			TableIndex idx = table.getIndexes().get(i);
+			if (idx.isUnique() && idx.getIndexName().toLowerCase().startsWith("pk_")
+					|| idx.getIndexName().toLowerCase().endsWith("_pk")) {
+				// 主键已经创建
+				continue;
+			}
+
 			sb.append("CREATE " + (idx.isUnique() ? "UNIQUE" : "") + " INDEX " + idx.getIndexName() + " ON "
 					+ table.getName() + "(");
 			for (int m = 0; m < idx.getIndexFields().size(); m++) {
