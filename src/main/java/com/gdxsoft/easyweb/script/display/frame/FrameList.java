@@ -40,7 +40,6 @@ import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
-import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 /**
  * 
@@ -52,7 +51,6 @@ public class FrameList extends FrameBase implements IFrame {
 
 	private UserXItem _GroupUserXItem;
 	private MStr _SearchExp = new MStr();
-	private MTable _HiddenFields = null;
 	private boolean _IsLuButtons;
 	private boolean _IsLuSearch;
 	private String _LuSelect = "";
@@ -858,48 +856,7 @@ public class FrameList extends FrameBase implements IFrame {
 		return sb.toString();
 	}
 
-	/**
-	 * 检查是否为隐含字段，在Page的LogicShow中定义
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public boolean isHiddenField(String name) {
-		if (_HiddenFields == null) {
-			UserXItem page = super.getHtmlClass().getUserConfig().getUserPageItem();
-			this._HiddenFields = new MTable();
-			try {
-				if (page.testName("LogicShow")) {
-					UserXItemValues logicShows = page.getItem("LogicShow");
-					for (int i = 0; i < logicShows.count(); i++) {
-						UserXItemValue logicShow = logicShows.getItem(i);
-						// String name = logicShow.getItem("Name");
-						String paraExp = logicShow.getItem("ParaExp");
-						paraExp = super.getHtmlClass().getItemValues().replaceParameters(paraExp, false);
-						if (!ULogic.runLogic(paraExp)) {
-							continue;
-						}
-						String hiddenFields = logicShow.getItem("HiddenFields");
-						String[] fields = hiddenFields.split(",");
-						for (int k = 0; k < fields.length; k++) {
-							String n = fields[k].trim().toUpperCase();
-							if (!this._HiddenFields.containsKey(n)) {
-								this._HiddenFields.add(n, true);
-							}
-						}
-						// break;
-					}
-				}
-			} catch (Exception e) {
-				System.err.println(e.getMessage());
-			}
-		}
-		if (this._HiddenFields.getCount() == 0) {
-			return false;
-		}
-		String name1 = name.trim().toUpperCase();
-		return this._HiddenFields.containsKey(name1);
-	}
+	
 
 	/**
 	 * 生成列表的标头的每个单元格
@@ -1737,4 +1694,6 @@ public class FrameList extends FrameBase implements IFrame {
 			return e.getMessage();
 		}
 	}
+
+	
 }

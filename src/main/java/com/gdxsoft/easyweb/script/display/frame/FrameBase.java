@@ -33,6 +33,7 @@ import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
+import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -45,6 +46,51 @@ public class FrameBase {
 
 	protected PageSplit _PageSplit;
 	private String[] _Html5FrameSet;
+	// 需要隐藏的字段集合
+	private MTable _HiddenFields = null;
+
+	/**
+	 * 检查是否为隐含字段，在Page的LogicShow中定义
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public boolean isHiddenField(String name) {
+		if (_HiddenFields == null) {
+			UserXItem page = this.getHtmlClass().getUserConfig().getUserPageItem();
+			this._HiddenFields = new MTable();
+			try {
+				if (page.testName("LogicShow")) {
+					UserXItemValues logicShows = page.getItem("LogicShow");
+					for (int i = 0; i < logicShows.count(); i++) {
+						UserXItemValue logicShow = logicShows.getItem(i);
+						// String name = logicShow.getItem("Name");
+						String paraExp = logicShow.getItem("ParaExp");
+						paraExp = this.getHtmlClass().getItemValues().replaceParameters(paraExp, false);
+						if (!ULogic.runLogic(paraExp)) {
+							continue;
+						}
+						String hiddenFields = logicShow.getItem("HiddenFields");
+						String[] fields = hiddenFields.split(",");
+						for (int k = 0; k < fields.length; k++) {
+							String n = fields[k].trim().toUpperCase();
+							if (!this._HiddenFields.containsKey(n)) {
+								this._HiddenFields.add(n, true);
+							}
+						}
+						// break;
+					}
+				}
+			} catch (Exception e) {
+				LOGGER.error("initial the hidden fields error: {}", e.getMessage());
+			}
+		}
+		if (this._HiddenFields.getCount() == 0) {
+			return false;
+		}
+		String name1 = name.trim().toUpperCase();
+		return this._HiddenFields.containsKey(name1);
+	}
 
 	public void createHtmlVue() {
 		HtmlDocument doc = this.getHtmlClass().getDocument();
@@ -109,7 +155,8 @@ public class FrameBase {
 	}
 
 	/**
-	 * 是否 显示标题栏，判断参数EWA_IS_HIDDEN_CAPTION 或Size.HiddenCaption，对于 ListFrame是第一行的字段描述，对于Frame是第一行标题
+	 * 是否 显示标题栏，判断参数EWA_IS_HIDDEN_CAPTION 或Size.HiddenCaption，对于
+	 * ListFrame是第一行的字段描述，对于Frame是第一行标题
 	 * 
 	 * @return 是否 显示标题栏
 	 */
@@ -1157,7 +1204,8 @@ public class FrameBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IFrame1#setItemParentHtmls(java.util .HashMap)
+	 * @see com.gdxsoft.easyweb.script.display.IFrame1#setItemParentHtmls(java.util
+	 * .HashMap)
 	 */
 	public void setItemParentHtmls(HashMap<String, String> itemParentHtmls) {
 		_ItemParentHtmls = itemParentHtmls;
@@ -1185,5 +1233,23 @@ public class FrameBase {
 	 */
 	public String getWorkFlowButJson() {
 		return null;
-	};
+	}
+
+	/**
+	 * 需要隐藏的字段集合
+	 * 
+	 * @return the _HiddenFields
+	 */
+	public MTable getHiddenFields() {
+		return _HiddenFields;
+	}
+
+	/**
+	 * 需要隐藏的字段集合
+	 * 
+	 * @param hiddenFields the 需要隐藏的字段集合 to set
+	 */
+	public void setHiddenFields(MTable hiddenFields) {
+		this._HiddenFields = hiddenFields;
+	}
 }

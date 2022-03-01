@@ -561,8 +561,16 @@ public class HtmlCreator {
 				String name = oAcl.toString();
 				if (name.equals("interface com.gdxsoft.easyweb.acl.IAcl")) { // 权限控制版本1
 					this._Acl = (IAcl) o;
+					this._Acl.setXmlName(this._UserConfig.getXmlName());
+					this._Acl.setItemName(this._UserConfig.getItemName());
+					this._Acl.setHtmlCreator(this);
+					this._Acl.setRequestValue(this.getRequestValue());
 				} else { // 权限控制版本2
 					this._Acl2 = (IAcl2) o;
+					this._Acl2.setXmlName(this._UserConfig.getXmlName());
+					this._Acl2.setItemName(this._UserConfig.getItemName());
+					this._Acl.setRequestValue(this.getRequestValue());
+					this._Acl2.setHtmlCreator(this);
 				}
 				_DebugFrames.addDebug(this, "INIT", "加载了权限控制(" + o.getClass().getName() + ")");
 			} catch (Exception e) {
@@ -717,11 +725,13 @@ public class HtmlCreator {
 		if (this._Acl == null) {
 			return true;
 		}
-		_Acl.setRequestValue(this._RequestValue);
-
-		_Acl.setItemName(this._RequestValue.getString("ITEMNAME"));
-		_Acl.setXmlName(this._RequestValue.getString("XMLNAME"));
-		_Acl.setRequestValue(this._RequestValue);
+		/* initial this parameters in the function initAcl
+		 * _Acl.setRequestValue(this._RequestValue);
+		 * 
+		 * _Acl.setItemName(this._RequestValue.getString("ITEMNAME"));
+		 * _Acl.setXmlName(this._RequestValue.getString("XMLNAME"));
+		 * _Acl.setRequestValue(this._RequestValue); _Acl.setHtmlCreator(this);
+		 */
 		_DebugFrames.addDebug(this, "HTML", "开始验证权限");
 		if (_Acl.canRun()) {
 			_DebugFrames.addDebug(this, "HTML", "验证通过");

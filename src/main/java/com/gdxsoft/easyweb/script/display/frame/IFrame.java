@@ -4,9 +4,23 @@ import java.util.HashMap;
 
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.script.display.HtmlClass;
+import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public interface IFrame {
+	/**
+	 * 需要隐藏的字段集合
+	 * 
+	 * @return the _HiddenFields
+	 */
+	public abstract MTable getHiddenFields();
 
+	/**
+	 * 需要隐藏的字段集合
+	 * 
+	 * @param hiddenFields the 需要隐藏的字段集合 to set
+	 */
+	public abstract void setHiddenFields(MTable hiddenFields);
+	
 	public abstract String createJsonJs();
 
 	public abstract String createaXmlData() throws Exception;
