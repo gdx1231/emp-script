@@ -592,7 +592,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 		}
 
 		// Frame单独一行
-		boolean oneCell =false;
+		boolean oneCell = false;
 		// 合并对象
 		if (uxi.testName("DataItem")) {
 			String mt = uxi.getSingleValue("DataItem", "MeargeTo");
@@ -603,10 +603,10 @@ public class FrameFrame extends FrameBase implements IFrame {
 				meargeMap.get(mt).add(uxi.getName());
 
 			}
-			
+
 			// Frame单独一行
 			String paraOneCell = uxi.getSingleValue("DataItem", "FrameOneCell");
-			if("yes".equalsIgnoreCase(paraOneCell) ) {
+			if ("yes".equalsIgnoreCase(paraOneCell)) {
 				oneCell = true;
 			}
 		}
@@ -648,21 +648,26 @@ public class FrameFrame extends FrameBase implements IFrame {
 			MStr s1 = new MStr();
 
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.append("\r\n<tr SHOW_MSG='1'  class='");
+			stringBuilder.append("<tr SHOW_MSG='1' class='");
 			stringBuilder.append(trClass);
 			stringBuilder.append("' id='");
 			stringBuilder.append(trId);
 			stringBuilder.append("'");
 			stringBuilder.append(disp);
-			stringBuilder.append("><td colspan='");
+			stringBuilder.append("><td ewa_des=\"");
+			stringBuilder.append(Utils.textToInputValue(des));
+			stringBuilder.append("\" ewa_memo=\"");
+			stringBuilder.append(Utils.textToInputValue(memo));
+			stringBuilder.append("\" colspan='");
 			stringBuilder.append(colSpan);
 			stringBuilder.append("'>");
+
 			stringBuilder.append(SkinFrame.TAG_ITEM);
 			stringBuilder.append("</td></tr>");
 
 			s1.append(stringBuilder.toString());
 			parentHtml = s1.toString();
-		} else if(oneCell) {// Frame单独一行，参数：DataItem.FrameOneCell 2020-01-08
+		} else if (oneCell) {// Frame单独一行，参数：DataItem.FrameOneCell 2020-01-08
 			MStr s1 = new MStr();
 
 			StringBuilder stringBuilder = new StringBuilder();
@@ -672,7 +677,11 @@ public class FrameFrame extends FrameBase implements IFrame {
 			stringBuilder.append(trId);
 			stringBuilder.append("'");
 			stringBuilder.append(disp);
-			stringBuilder.append("><td class='EWA_TD_1' colspan='");
+			stringBuilder.append("><td class='EWA_TD_1' ewa_des=\"");
+			stringBuilder.append(Utils.textToInputValue(des));
+			stringBuilder.append("\" ewa_memo=\"");
+			stringBuilder.append(Utils.textToInputValue(memo));
+			stringBuilder.append("\" colspan='");
 			stringBuilder.append(colSpan);
 			stringBuilder.append("'>");
 			stringBuilder.append(SkinFrame.TAG_ITEM);
@@ -710,7 +719,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 			stringBuilder2.append(disp);
 			stringBuilder2.append("><td colspan='");
 			stringBuilder2.append(colSpan);
-			stringBuilder2.append("' class='EWA_TD_1' !! >");
+			stringBuilder2.append("' ewa_des=\"" + Utils.textToInputValue(des) + "\" ewa_memo=\""
+					+ Utils.textToInputValue(memo) + "\" class='EWA_TD_1' !! >");
 			stringBuilder2.append(SkinFrame.TAG_ITEM);
 			stringBuilder2.append("</td></tr>");
 
@@ -863,29 +873,39 @@ public class FrameFrame extends FrameBase implements IFrame {
 		 * class="EWA_TD_M">{__EWA_ITEM__}</td> <td class="EWA_TD_R">{__EWA_MSG__}</td>
 		 */
 
-		String[] tmps = new String[3];
+		String[] tmps = new String[5];
 		tmps[0] = "\t<td class=\"EWA_TD_L\">" + des + "</td>\n";
 		tmps[1] = "\t<td class=\"EWA_TD_M\">{__EWA_ITEM__}</td>\n";
 		tmps[2] = "\t<td class=\"EWA_TD_R\">" + memo + "</td>\n";
-
+		tmps[3] = des;
+		tmps[4] = memo;
 		return tmps;
 	}
 
 	private String createRowCols(String[] tmps, int colSpan, boolean isC11, String trClass, String disp) {
+		String des = Utils.textToInputValue(tmps[3]);
+		String memo = Utils.textToInputValue(tmps[4]);
+		StringBuilder stringBuilder = new StringBuilder(" ewa_des=\"");
+		stringBuilder.append(des);
+		stringBuilder.append("\" ewa_memo=\"");
+		stringBuilder.append(memo);
+		stringBuilder.append("\" ");
+		String template = tmps[1].replace(">{", stringBuilder.toString() + " >{");
 
 		StringBuilder sb = new StringBuilder();
 		if (isC11) { // 一段,上下排列
 			sb.append(tmps[0]);
 			sb.append("</tr>\n<tr class='" + trClass + " ewa-row-item' " + disp + ">\n");
-			sb.append(tmps[1]);
+			sb.append(template);
 		} else if (colSpan == 2) {
 			sb.append(tmps[0]);
-			sb.append(tmps[1]);
+			sb.append(template);
 		} else if (colSpan == 1) {
-			sb.append(tmps[1]);
+
+			sb.append(template);
 		} else {
 			sb.append(tmps[0]);
-			sb.append(tmps[1]);
+			sb.append(template);
 			sb.append(tmps[2]);
 		}
 		return sb.toString();
