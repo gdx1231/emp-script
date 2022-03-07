@@ -999,6 +999,7 @@ public class DataConnection {
 			return;
 		}
 		boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
+		boolean isSqlServer = this.getDatabaseType().equalsIgnoreCase("MSSQL");
 
 		String insertHeader = "insert into _EWA_SPT_DATA(idx, col, tag) values ";
 		List<String> values = new ArrayList<String>();
@@ -1008,9 +1009,14 @@ public class DataConnection {
 				StringBuilder sb = new StringBuilder();
 				sb.append("(");
 				sb.append(i);
-				sb.append(",'");
+				if(isSqlServer) {
+					sb.append(",N'"); // unicode
+				} else {
+					sb.append(",'");
+				}
 				String col = al.get(i);
-				if (col.length() > 1000) {
+				
+				if (isMysql && col.length() > 1000) {
 					col = col.substring(0, 1000);
 					LOGGER.warn("EwaSplitTempData col size > 1000, truncation");
 				}
@@ -1254,7 +1260,11 @@ public class DataConnection {
 			ResultSet rs = _pst.getGeneratedKeys();
 			if (rs.next()) {
 				autoKey = rs.getObject(1);
-				this.writeDebug(this, "SQL", "[返回自增] " + rs.getObject(1) + ".");
+				if(autoKey == null) {
+					this.writeDebug(this, "SQL", "[返回自增] null , SQL 没有执行成功.");
+				} else {
+					this.writeDebug(this, "SQL", "[返回自增] " + rs.getObject(1) + ".");
+				}
 			}
 
 			if (!this._IsTrans) {
@@ -1282,6 +1292,9 @@ public class DataConnection {
 	 */
 	public int executeUpdateReturnAutoIncrement(String sql) {
 		Object autoInc = executeUpdateReturnAutoIncrementObject(sql);
+		if(autoInc == null) {
+			return -1; // 没有执行
+		}
 		try {
 			return Integer.parseInt(autoInc.toString());
 		} catch (Exception err) {
