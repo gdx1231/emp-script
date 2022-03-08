@@ -2387,12 +2387,8 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="enus" Info="Multi" />
 						</DescriptionSet>
 					</Value>
-					<!--<Value Type="string" Name="UpType">
-						<DescriptionSet>
-							<Set Lang="zhcn" Info="上传类型，SWF上传无效" />
-							<Set Lang="enus" Info="Upload Type" />
-						</DescriptionSet>
-					</Value>-->
+					<!--<Value Type="string" Name="UpType"> <DescriptionSet> <Set Lang="zhcn" Info="上传类型，SWF上传无效" /> <Set Lang="enus" Info="Upload 
+						Type" /> </DescriptionSet> </Value> -->
 
 					<Value Type="string" Name="UpExts">
 						<DescriptionSet>
@@ -2406,19 +2402,15 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="enus" Info="Upload file limit(e.g. 100k, 12m)" />
 						</DescriptionSet>
 					</Value>
-					
+
 					<Value Type="group" Name="UpUnZip">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="解压压缩文件" />
 							<Set Lang="enus" Info="UnPack Zip File" />
 						</DescriptionSet>
 					</Value>
-					<!--<Value Type="group" Name="Up2Swf">
-						<DescriptionSet>
-							<Set Lang="zhcn" Info="自动转换成Swf文件" />
-							<Set Lang="enus" Info="Convert To Flash" />
-						</DescriptionSet>
-					</Value>-->
+					<!--<Value Type="group" Name="Up2Swf"> <DescriptionSet> <Set Lang="zhcn" Info="自动转换成Swf文件" /> <Set Lang="enus" Info="Convert 
+						To Flash" /> </DescriptionSet> </Value> -->
 
 					<Value Type="string" Name="UpPath">
 						<DescriptionSet>
@@ -3224,6 +3216,20 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
+			<XItemParameter Name="AllowJsonExport" IsShow="1" IsSet="0" IsMulti="0">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="允许Json数据输出" />
+					<Set Lang="enus" Info="Allow json export" />
+				</DescriptionSet>
+				<Values>
+					<Value Name="AllowJsonExport" Type="group" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="允许Json数据输出" />
+							<Set Lang="enus" Info="Allow json export" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
 			<XItemParameter Name="ConfigMemo" IsSet="0" IsShow="1" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="本配置说明" />
@@ -3927,6 +3933,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			</XItemParameter>
 		</XItemParameters>
 		<XGroupValues>
+			<XGroupValue Name="AllowJsonExport" default="no" Values="yes,no">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="是,否" />
+					<Set Lang="enus" Info="Yes,No" />
+				</DescriptionSet>
+			</XGroupValue>
 			<XGroupValue Name="FrameCols" default="0" Values="C3,C2,C1,C11">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="三栏,两栏,一栏,一栏(上下)" />

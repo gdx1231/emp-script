@@ -582,6 +582,9 @@ public class FrameFrame extends FrameBase implements IFrame {
 	 */
 	private void createItemHtml(UserXItem uxi, HtmlDocument doc, MTable mapGroup, MTable mapGroupId, String lang,
 			int colSpan, boolean isC11, HashMap<String, ArrayList<String>> meargeMap) throws Exception {
+		if(super.isHiddenField(uxi.getName())) {
+			return; // 隐含字段
+		}
 		XItem xItem = HtmlUtils.getXItem(uxi);
 		String tag = xItem.getName();
 

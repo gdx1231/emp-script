@@ -1026,6 +1026,10 @@ public class HtmlCreator {
 	}
 
 	public String createPageJson() throws Exception {
+		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
+		if("no".equals(allowJsonExport)) {
+			return "['AllowJsonExport=no']";
+		}
 		MStr sb = new MStr();
 		String jsonName = this._RequestValue.getString("EWA_JSON_NAME");
 		if (jsonName != null) {
@@ -1189,6 +1193,10 @@ public class HtmlCreator {
 	 * @return
 	 */
 	public String createPageJsonAll() {
+		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
+		if("no".equals(allowJsonExport)) {
+			return "[['AllowJsonExport=no']]";
+		}
 		int len = this._ItemValues.getDTTables().size();
 		if (len == 0) {
 			JSONArray arr = new JSONArray();
@@ -1225,6 +1233,10 @@ public class HtmlCreator {
 	 * @throws Exception
 	 */
 	public String createPageJsonExt() throws Exception {
+		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
+		if("no".equals(allowJsonExport)) {
+			return "{'AllowJsonExport':'no'}";
+		}
 		MStr sb = new MStr();
 		sb.a("{\"CFG\":");
 		sb.al(this._Frame.createJsonFrame());
@@ -1259,6 +1271,10 @@ public class HtmlCreator {
 	 * @throws Exception
 	 */
 	public String createPageJsonExt1() throws Exception {
+		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
+		if("no".equals(allowJsonExport)) {
+			return "{'AllowJsonExport':'no'}";
+		}
 		MStr sb = new MStr();
 		sb.a("{\"CFG\":");
 		sb.al(this._Frame.createJsonFrame());
