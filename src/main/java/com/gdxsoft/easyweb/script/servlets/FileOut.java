@@ -1228,7 +1228,8 @@ public class FileOut {
 		response.setHeader("Cache-Control", "max-age=0");
 		response.setHeader("Content-Disposition", "attachment; filename=" + name);
 
-		response.setContentType("image/oct");
+		//response.setContentType("image/oct");
+		outContetType();
 
 		return this.outFileBytesToClient();
 	}
