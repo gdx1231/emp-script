@@ -17,6 +17,8 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 	private String _Html;
 	private boolean _IsUsingEwaEvent = false;
 	
+	private Boolean usingRef;
+	
 	/**
 	 * 本体的样式
 	 * @return the _Style
@@ -166,5 +168,21 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 	 */
 	public void setIsUsingEwaEvent(boolean isUsingEwaEvent) {
 		_IsUsingEwaEvent = isUsingEwaEvent;
+	}
+
+	/**
+	 * 是否用dataRef
+	 * @return the usingRef
+	 */
+	public Boolean getUsingRef() {
+		return usingRef;
+	}
+
+	/**
+	 * 是否用dataRef
+	 * @param usingRef the usingRef to set
+	 */
+	public void setUsingRef(Boolean usingRef) {
+		this.usingRef = usingRef;
 	}
 }

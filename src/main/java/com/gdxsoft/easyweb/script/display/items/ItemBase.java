@@ -59,7 +59,10 @@ public class ItemBase implements IItem {
 		String val = getValue();
 		int tagIsLFEdit = this.isLfEdit();
 
-		val = this.createRefValue(val);
+		// 用dataRef替换id
+		if (this._UserXItem.getUsingRef() == null || this._UserXItem.getUsingRef()) {
+			val = this.createRefValue(val);
+		}
 
 		if ((tagIsLFEdit > 0 || tag.equalsIgnoreCase("hidden, 2018-08-30郭磊去除")) && val != null) {
 			val = Utils.textToInputValue(val);
@@ -161,7 +164,15 @@ public class ItemBase implements IItem {
 	 */
 	private String handleSpanTitle(String s1, String val) {
 		Object title = this._HtmlClass.getItemValues().getLastValue();
-		if (title != null && title.toString().length() < 50 && !title.equals(val)) {
+		if (title == null || title.toString().equals(val)) {
+			return s1;
+		}
+		// 引用
+		/*
+		 * if (this._UserXItem.getUsingRef() != null && this._UserXItem.getUsingRef()) {
+		 * return s1; }
+		 */
+		if (title.toString().length() < 50) {
 			String t = title.toString();
 			String[] times = t.split(" ");
 			if (times.length == 2) { // 时间去除为0的
@@ -264,10 +275,12 @@ public class ItemBase implements IItem {
 	 */
 	private String createRefValue(String val) {
 		if (!_UserXItem.testName("DataRef")) {
+			this._UserXItem.setUsingRef(false);
 			return val;
 		}
 		try {
 			if (_UserXItem.getItem("DataRef").count() == 0) {
+				this._UserXItem.setUsingRef(false);
 				return val;
 			}
 			UserXItemValue vs = _UserXItem.getItem("DataRef").getItem(0);
@@ -279,8 +292,16 @@ public class ItemBase implements IItem {
 			String refShowStype = vs.getItem("RefShowStyle");
 			if (refSql == null || refKey == null || refShow == null || refSql.trim().length() == 0
 					|| refKey.trim().length() == 0 || refShow.trim().length() == 0) {
+				this._UserXItem.setUsingRef(false);
 				return val;
 			}
+			if (this._UserXItem.getUsingRef() == null) {
+				this._UserXItem.setUsingRef(true);
+			}
+
+			// 是否多个ID的匹配，例如：CAMP_OPT_TSG,CAMP_OPT_LQC,CAMP_OPT_ZQC
+			boolean refShowMulti = "yes".equals(vs.checkItemExists("RefMulti") ? vs.getItem("RefMulti") : "");
+
 			String[] refKeys = new String[1];
 			refKeys[0] = refKey;
 			DTTable dt = this._HtmlClass.getItemValues().getRefTable(refSql, refKeys);
@@ -300,37 +321,63 @@ public class ItemBase implements IItem {
 				}
 			}
 
-			DTRow row = dt.getRowByKey(refKey, val);
-			if (row == null) {
-				return val;
+			if (!refShowMulti) { // 单个id匹配
+				DTRow row = dt.getRowByKey(refKey, val);
+				return this.createRefHtml(row, refShowStype, refShowType, refShow, val);
 			}
-			DTCell refValCell = row.getCell(refShow);
-			String refVal = refValCell == null ? "" : refValCell.getString();
-			refVal = refVal == null ? "" : refVal.trim();
-			String st = refShowStype == null || refShowStype.trim().length() == 0 ? ""
-					: row.getCell(refShowStype).getString();
-			String span = "<Span class=\"" + st + "\"";
 
-			// Text-Key, Key-Text, Text-Title, Key-Title
-			// ,文字(Key),Key(文字),文字-提示,Key-提示
-			if (refShowType == null || refShowType.trim().length() == 0) {
-				return span + ">" + refVal + "</span>";
-			} else if (refShowType.trim().equals("Text-Key")) {
-				return span + ">" + refVal + "(" + val + ")</span>";
-			} else if (refShowType.trim().equals("Key-Text")) {
-				return span + ">" + val + "(" + refVal + ")</span>";
-			} else if (refShowType.trim().equals("Text-Title")) {
-				return span + " title=\"" + Utils.textToInputValue(val) + "\">" + refVal + "</span>";
-			} else if (refShowType.trim().equals("Key-Title")) {
-				return span + " title=\"" + Utils.textToInputValue(val) + "\">" + refVal + "</span>";
-			} else {
-				return refVal;
+			// 多个ID的匹配， 例如 CAMP_OPT_TSG,CAMP_OPT_LQC,CAMP_OPT_ZQC
+			// 字符串分割字符，默认英文逗号
+			String splitChar = vs.checkItemExists("RefMultiSplit") ? vs.getItem("RefMultiSplit").trim() : ",";
+			if (splitChar.length() == 0) {
+				splitChar = ","; // 默认英文逗号
 			}
+			String[] vals = val.split(splitChar); // 正则表达式需要用户定义
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < vals.length; i++) {
+				String v = vals[i].trim();
+				DTRow row = dt.getRowByKey(refKey, v);
+				if (i > 0) {
+					sb.append(", ");
+				}
+				String html = this.createRefHtml(row, refShowStype, refShowType, refShow, v);
+				sb.append(html);
+			}
+			return sb.toString();
 
 		} catch (Exception e) {
 			return e.getMessage();
 		}
 
+	}
+
+	private String createRefHtml(DTRow row, String refShowStype, String refShowType, String refShow, String val)
+			throws Exception {
+		if (row == null) {
+			return val;
+		}
+		DTCell refValCell = row.getCell(refShow);
+		String refVal = refValCell == null ? "" : refValCell.getString();
+		refVal = Utils.textToInputValue(refVal.trim());
+		String st = refShowStype == null || refShowStype.trim().length() == 0 ? ""
+				: row.getCell(refShowStype).getString();
+		String span = "<Span class=\"" + st + "\" ref_key=\""+ Utils.textToInputValue(val) +"\" ";
+
+		// Text-Key, Key-Text, Text-Title, Key-Title
+		// ,文字(Key),Key(文字),文字-提示,Key-提示
+		if (refShowType == null || refShowType.trim().length() == 0) {
+			return span + ">" + refVal + "</span>";
+		} else if (refShowType.trim().equals("Text-Key")) {
+			return span + ">" + refVal + "(" + val + ")</span>";
+		} else if (refShowType.trim().equals("Key-Text")) {
+			return span + ">" + val + "(" + refVal + ")</span>";
+		} else if (refShowType.trim().equals("Text-Title")) {
+			return span + " title=\"" + Utils.textToInputValue(val) + "\">" + refVal + "</span>";
+		} else if (refShowType.trim().equals("Key-Title")) {
+			return span + " title=\"" + Utils.textToInputValue(val) + "\">" + refVal + "</span>";
+		} else {
+			return refVal;
+		}
 	}
 
 	private String createJsonRefValue(String val) {
@@ -760,7 +807,9 @@ public class ItemBase implements IItem {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IItem#setUserXItem(com.gdxsoft.easyweb .script.userConfig.UserXItem)
+	 * @see
+	 * com.gdxsoft.easyweb.script.display.IItem#setUserXItem(com.gdxsoft.easyweb
+	 * .script.userConfig.UserXItem)
 	 */
 	public void setUserXItem(UserXItem userXItem) {
 		_UserXItem = userXItem;
@@ -778,7 +827,8 @@ public class ItemBase implements IItem {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IItem#setInitValues(com.gdxsoft. easyweb .script.InitValues)
+	 * @see com.gdxsoft.easyweb.script.display.IItem#setInitValues(com.gdxsoft.
+	 * easyweb .script.InitValues)
 	 */
 	public void setInitValues(InitValues initValues) {
 		_InitValues = initValues;
@@ -796,7 +846,8 @@ public class ItemBase implements IItem {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IItem#setResponse(javax.servlet.http .HttpServletResponse)
+	 * @see com.gdxsoft.easyweb.script.display.IItem#setResponse(javax.servlet.http
+	 * .HttpServletResponse)
 	 */
 	public void setResponse(HttpServletResponse response) {
 		_Response = response;

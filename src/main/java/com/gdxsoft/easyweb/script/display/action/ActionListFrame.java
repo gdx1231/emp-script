@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -806,20 +807,45 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @return
 	 */
 	private String createSearchFixSql(SearchParameter lsp, DataConnection conn, String dataField, String dataType) {
+		UserConfig uc = super.getUserConfig();
+
 		StringBuilder sb = new StringBuilder();
 		sb.append(" (");
 		int inc = 0;
+		boolean useLike = false;
+		try {
+			UserXItem uxi = uc.getUserXItems().getItem(dataField);
+			if (uxi.getItem("DataRef").count() > 0) {
+				UserXItemValue vs = uxi.getItem("DataRef").getItem(0);
+				String refSql = vs.getItem("RefSql");
+				String refKey = vs.getItem("RefKey");
+				String refShow = vs.getItem("RefShow");
+				if (StringUtils.isNotBlank(refSql) && StringUtils.isNotBlank(refKey)
+						&& StringUtils.isNotBlank(refShow)) {
+					// 是否多个ID的匹配，例如：CAMP_OPT_TSG,CAMP_OPT_LQC,CAMP_OPT_ZQC
+					useLike = "yes".equals(vs.checkItemExists("RefMulti") ? vs.getItem("RefMulti") : "");
+				}
+			}
+		} catch (Exception e) {
+		}
 		for (int m = 0; m < lsp.getParas().length; m++) {
-			String pp = lsp.getParas()[m];
-			if (pp.trim().length() == 0) {
+			String pp = lsp.getParas()[m].trim();
+			if (pp.length() == 0 || pp.length() > 100) {
 				continue;
 			}
 
 			if (inc > 0) {
 				sb.append(" OR ");
 			}
-
-			sb.append(dataField + " = '" + pp.replace("'", "''") + "'");
+			pp = pp.replace("'", "''");
+			if (conn.getDatabaseType().equalsIgnoreCase("MYSQL")) {
+				pp = pp.replace("\\", "\\\\");
+			}
+			if (useLike) {
+				sb.append(dataField + " like '%" + pp + "%'");
+			} else {
+				sb.append(dataField + " = '" + pp + "'");
+			}
 			inc++;
 		}
 		if (inc == 0) { // 没有表达式

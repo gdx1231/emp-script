@@ -2006,7 +2006,18 @@ EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql
 							<Set Lang="enus" Info="Value Field" />
 						</DescriptionSet>
 					</Value>
-
+					<Value Type="group" Name="RefMulti">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="是否多个ID的匹配" />
+							<Set Lang="enus" Info="Multiple IDS match" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="RefMultiSplit">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="分割ID的字符或正则表达式" />
+							<Set Lang="enus" Info="Char or REGEX for split ID" />
+						</DescriptionSet>
+					</Value>
 					<Value Type="group" Name="RefShowType">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="显示方式" />
@@ -2804,6 +2815,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 
 		<XGroupValues>
+		
+			<XGroupValue Name="RefMulti" Default="" Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
 			<XGroupValue Name="FrameOneCell" Default="" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
