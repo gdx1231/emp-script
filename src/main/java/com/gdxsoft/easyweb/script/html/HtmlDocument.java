@@ -3,6 +3,10 @@ package com.gdxsoft.easyweb.script.html;
 import java.util.HashMap;
 
 import com.gdxsoft.easyweb.script.display.HtmlClass;
+import com.gdxsoft.easyweb.script.userConfig.UserConfig;
+import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
+import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
+import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class HtmlDocument {
@@ -73,17 +77,46 @@ public class HtmlDocument {
 	}
 
 	public String showBody() {
+		UserConfig uc = this._htmlClass.getUserConfig();
+		MStr sbPageAttr = new MStr();
+
+		// 附加的page属性
+		if (uc.getUserPageItem().testName("PageAttributeSet")) {
+			try {
+				UserXItemValues u = uc.getUserPageItem().getItem("PageAttributeSet");
+				for (int i = 0; i < u.count(); i++) {
+					UserXItemValue u0 = u.getItem(i);
+					String n = u0.getItem("PageAttName").trim();
+					String v = u0.getItem("PageAttValue").trim();
+					if (n.length() == 0 || v.length() == 0) {
+						continue;
+					}
+					sbPageAttr.append(" " + n + "=\"" + Utils.textToInputValue(v) + "\"");
+				}
+			} catch (Exception err) {
+				System.out.println(err.getMessage());
+			}
+		}
+
 		MStr sb = new MStr();
 		// sb.appendLine(this._BodyTop.toString());
 		if (this._htmlClass.getSysParas().isShowAsMobile()) {
-			sb.al(this._htmlClass.getSkin().getBodyStartMobile());
+			if (sbPageAttr.length() > 0) {
+				sb.al(this._htmlClass.getSkin().getBodyStartMobile().replace("!!>", sbPageAttr.toString() + " !!>"));
+			} else {
+				sb.al(this._htmlClass.getSkin().getBodyStartMobile());
+			}
 		} else {
-			sb.al(this._htmlClass.getSkin().getBodyStart());
+			if (sbPageAttr.length() > 0) {
+				sb.al(this._htmlClass.getSkin().getBodyStart().replace("!!>", sbPageAttr.toString() + " !!>"));
+			} else {
+				sb.al(this._htmlClass.getSkin().getBodyStart());
+			}
 		}
-		String css = _Css.toString();
-		if (css.trim().length() > 0) {
+		String css = _Css.toString().trim();
+		if (css.length() > 0) {
 			sb.appendLine("<style type='text/css'>");
-			sb.append(css);
+			sb.al(css);
 			sb.appendLine("</style>");
 		}
 		sb.appendLine(this._JsTop.getScripts(true));

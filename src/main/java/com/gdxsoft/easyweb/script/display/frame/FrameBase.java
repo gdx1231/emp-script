@@ -921,7 +921,10 @@ public class FrameBase {
 			doc.addScriptHtml(_Html5FrameSet[0]);
 		}
 		if (this.isUseTest1Table()) {
-			this.createTest1Table(doc, skinName);
+			this.createTest1Table(doc, skinName); //<table id='Test1'
+		}
+		if(this._HtmlClass.getItemValues().getRequestValue().s("ewa_in_dialog")!=null) {
+			doc.addScriptHtml("<div class='ewa-in-dialog'>");
 		}
 		doc.addScriptHtml(this._HtmlClass.getSkinFrameAll().getTop());
 		// sb.append("<div _s='内容窗体开始'>");
@@ -1021,7 +1024,8 @@ public class FrameBase {
 		sb.append(skinName);
 		sb.append("' border='0' cellspacing='0' cellpadding='0' style=\"");
 		sb.append(style);
-		sb.append("\">");
+		sb.append("\"");
+		sb.append(">");
 
 		String sizeVAlign = this.getPageItemValue("Size", "VAlign");
 		if (sizeVAlign == null || sizeVAlign.trim().length() == 0) {
@@ -1039,18 +1043,23 @@ public class FrameBase {
 	 */
 	public void createSkinBottom() throws Exception {
 		String pageAddBottom = this.getPageItemValue("AddHtml", "Bottom");
+		HtmlDocument doc = this._HtmlClass.getDocument();
 		if (pageAddBottom != null && pageAddBottom.trim().length() > 0) {
-			this._HtmlClass.getDocument().addScriptHtml(pageAddBottom);
-			this._HtmlClass.getDocument().addFrameHtml(pageAddBottom);
+			doc.addScriptHtml(pageAddBottom);
+			doc.addFrameHtml(pageAddBottom);
+		}
+		// 在对话框的类结束
+		if(this._HtmlClass.getItemValues().getRequestValue().s("ewa_in_dialog")!=null) {
+			doc.addScriptHtml("</div><!-- end of ewa-in-dialog -->");
 		}
 		if (this.isUseTest1Table()) {
-			this._HtmlClass.getDocument().addScriptHtml("</td></tr></table><!--浮动表结束-->");
+			doc.addScriptHtml("</td></tr></table><!--浮动表结束-->");
 		}
 		if (this._Html5FrameSet != null) {
-			this._HtmlClass.getDocument().addScriptHtml(_Html5FrameSet[1]);
+			doc.addScriptHtml(_Html5FrameSet[1]);
 		}
 		if (this.isUseTest1Table()) {
-			this._HtmlClass.getDocument().addScriptHtml("</div><!-- 主框架结束 -->");
+			doc.addScriptHtml("</div><!-- 主框架结束 -->");
 		}
 		// this._HtmlClass.getDocument().addScriptHtml(
 		// this._HtmlClass.getSkin().getBodyEnd());
