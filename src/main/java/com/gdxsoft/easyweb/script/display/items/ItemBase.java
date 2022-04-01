@@ -274,6 +274,9 @@ public class ItemBase implements IItem {
 	 * @return
 	 */
 	private String createRefValue(String val) {
+		if (val == null) {
+			return val;
+		}
 		if (!_UserXItem.testName("DataRef")) {
 			this._UserXItem.setUsingRef(false);
 			return val;
@@ -361,7 +364,7 @@ public class ItemBase implements IItem {
 		refVal = Utils.textToInputValue(refVal.trim());
 		String st = refShowStype == null || refShowStype.trim().length() == 0 ? ""
 				: row.getCell(refShowStype).getString();
-		String span = "<Span class=\"" + st + "\" ref_key=\""+ Utils.textToInputValue(val) +"\" ";
+		String span = "<Span class=\"" + st + "\" ref_key=\"" + Utils.textToInputValue(val) + "\" ";
 
 		// Text-Key, Key-Text, Text-Title, Key-Title
 		// ,文字(Key),Key(文字),文字-提示,Key-提示
