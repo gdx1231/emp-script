@@ -107,6 +107,34 @@
 					</additionalOptions>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<encoding>${project.build.sourceEncoding}</encoding>
+				</configuration>
+				<executions>
+					<execution>
+						<id>copy-spring-boot-resources</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<encoding>utf-8</encoding>
+							<outputDirectory>${basedir}/../../workspace.newVersion/allclass/classes</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/target/classes</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
