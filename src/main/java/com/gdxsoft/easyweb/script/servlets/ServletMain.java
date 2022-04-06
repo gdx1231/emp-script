@@ -3,6 +3,7 @@ package com.gdxsoft.easyweb.script.servlets;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,6 +24,7 @@ import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.script.template.Skin;
+import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ServletMain extends HttpServlet {
@@ -35,14 +37,42 @@ public class ServletMain extends HttpServlet {
 	// <load-on-startup>1</load-on-startup>
 	// </servlet>
 	static {
-		// The load-on-startup element indicates that this servlet should be loaded (instantiated and have its init()
-		// called) on the startup of the web application. The optional contents of these element must be an integer
-		// indicating the order in which the servlet should be loaded. If the value is a negative integer, or the
-		// element is not present, the container is free to load the servlet whenever it chooses. If the value is a
-		// positive integer or 0, the container must load and initialize the servlet as the application is deployed. The
-		// container must guarantee that servlets marked with lower integers are loaded before servlets marked with
-		// higher integers. The container may choose the order of loading of servlets with the same load-on-start-up
+		// The load-on-startup element indicates that this servlet should be loaded
+		// (instantiated and have its init()
+		// called) on the startup of the web application. The optional contents of these
+		// element must be an integer
+		// indicating the order in which the servlet should be loaded. If the value is a
+		// negative integer, or the
+		// element is not present, the container is free to load the servlet whenever it
+		// chooses. If the value is a
+		// positive integer or 0, the container must load and initialize the servlet as
+		// the application is deployed. The
+		// container must guarantee that servlets marked with lower integers are loaded
+		// before servlets marked with
+		// higher integers. The container may choose the order of loading of servlets
+		// with the same load-on-start-up
 		// value.
+		/*
+		 * ClassLoader load1 = ServletMain.class.getClassLoader(); for (int i = 0; i <
+		 * 100; i++) { System.out.println(load1); load1 = load1.getParent(); if (load1
+		 * == null) { break; } }
+		 */
+
+	}
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -349402668535724826L;
+
+	/**
+	 * Constructor of the object.
+	 */
+	public ServletMain() {
+		super();
+	}
+
+	public static void initEwaInstances() {
 		try {
 			EwaConfig.instance();
 			LOGGER.info("EwaConfig instance");
@@ -85,15 +115,40 @@ public class ServletMain extends HttpServlet {
 	}
 
 	/**
+	 * Initialization of the servlet. <br>
 	 * 
+	 * @throws ServletException if an error occurs
 	 */
-	private static final long serialVersionUID = -349402668535724826L;
+	public void init() throws ServletException {
+		// servlet init一个生命周期执行1次
+		super.init();
 
-	/**
-	 * Constructor of the object.
-	 */
-	public ServletMain() {
-		super();
+		// 从web.xml中获取 init-param参数
+		Enumeration<String> names = this.getInitParameterNames();
+		if (names != null) {
+			while (names.hasMoreElements()) {
+				String name = names.nextElement();
+				String value = this.getInitParameter(name);
+				if ("ewa_conf".equals(name)) { // 在web.xml中定义 ewa_conf.xml配置文件所在目录
+					File f = new File(value);
+					if (f.exists()) {
+						UPath.CONF_NAME = value;
+						LOGGER.info("UPath.CONF_NAME = " + UPath.CONF_NAME);
+					} else {
+						LOGGER.error("web.xml init ewa_conf={1} not exists", value);
+					}
+				} else if ("ewa_path_real".equals(name)) { // 在web.xml中定义项目所在WEB-INF/classes目录
+					File f = new File(value);
+					if (f.exists()) {
+						UPath.PATH_REAL = f.getAbsolutePath();
+						LOGGER.info("UPath.PATH_REAL = " + UPath.PATH_REAL);
+					} else {
+						LOGGER.error("web.xml init ewa_path_real={1} not exists", value);
+					}
+				}
+			}
+		}
+		initEwaInstances();
 	}
 
 	/**
@@ -101,7 +156,6 @@ public class ServletMain extends HttpServlet {
 	 */
 	public void destroy() {
 		super.destroy(); // Just puts "destroy" string in log
-		// Put your code here
 	}
 
 	@Override
@@ -439,21 +493,13 @@ public class ServletMain extends HttpServlet {
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and copyright.
+	 * Returns information about the servlet, such as author, version, and
+	 * copyright.
 	 * 
 	 * @return String information about this servlet
 	 */
 	public String getServletInfo() {
 		return "EWA(v2.0)";
-	}
-
-	/**
-	 * Initialization of the servlet. <br>
-	 * 
-	 * @throws ServletException if an error occurs
-	 */
-	public void init() throws ServletException {
-
 	}
 
 }
