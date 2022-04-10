@@ -14,7 +14,8 @@ public class Resource {
 	private String path_;
 
 	private boolean jarResource;
-
+	private String classLoader;
+	
 	private int index_;
 
 	public String getId() {
@@ -117,6 +118,21 @@ public class Resource {
 
 	public void setJarResource(boolean jarResource) {
 		this.jarResource = jarResource;
+	}
+
+	/**
+	 * 读取资源所用的class全名
+	 * @return the classLoader
+	 */
+	public String getClassLoader() {
+		return classLoader;
+	}
+
+	/**读取资源所用的class全名
+	 * @param classLoader the classLoader to set
+	 */
+	public void setClassLoader(String classLoader) {
+		this.classLoader = classLoader;
 	}
 
 }

@@ -22,6 +22,7 @@ import org.w3c.dom.NodeList;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFileCheck;
+import com.gdxsoft.easyweb.utils.UNet;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 
@@ -82,6 +83,7 @@ public class Resources {
 	private long lastScan_; // 上次扫描时间
 
 	private HashMap<String, Resource> mapOfJarResources = new HashMap<>();
+	private HashMap<String, Resource> mapOfHttpResources = new HashMap<>();
 
 	/**
 	 * 对象实例化
@@ -192,6 +194,7 @@ public class Resources {
 	 * @param r
 	 */
 	public Resource scanFile(Resource r) {
+		boolean isHttp = false;
 		if (r.isJarResource()) {
 			if (!mapOfJarResources.containsKey(r.getId())) {
 				// notify the client delete this resource
@@ -205,6 +208,17 @@ public class Resources {
 				return null;
 			}
 
+		} else if (r.getAllPath().startsWith("http:") || r.getAllPath().startsWith("https:")) {
+			if (!mapOfHttpResources.containsKey(r.getId())) {
+				// notify the client delete this resource
+				r.setHash("DELETED");
+				r.setContent("/* the resource " + r.getAllPath() + " has been deleted */");
+				LOGGER.info(r.getContent());
+				return r;
+			}
+			if (r.getHash().equals(mapOfHttpResources.get(r.getId()).getHash())) {
+				return null;
+			}
 		} else {
 			File f = new File(r.getAllPath());
 			if (!f.exists()) {
@@ -232,6 +246,10 @@ public class Resources {
 
 		if (r1.isJarResource()) {
 			Resource ref = mapOfJarResources.get(r.getId());
+			r1.setContent(ref.getContent());
+			r1.setHash(ref.getHash());
+		} else if (isHttp) {
+			Resource ref = mapOfHttpResources.get(r.getId());
 			r1.setContent(ref.getContent());
 			r1.setHash(ref.getHash());
 		} else {
@@ -274,6 +292,7 @@ public class Resources {
 			String root = eleGroup.getAttribute("root");
 			String name = eleGroup.getAttribute("name");
 			String loadBy = eleGroup.getAttribute("loadBy");
+			//String classLoader = eleGroup.getAttribute("classLoader");// 读取资源所用的class全名
 			// css or js
 			String tag = eleGroup.getParentNode().getNodeName();
 
@@ -314,11 +333,22 @@ public class Resources {
 		String cnt;
 		if (r.isJarResource()) {
 			String pathResource = r.getAllPath();
+			if(pathResource.startsWith("/")) {
+				pathResource = pathResource.substring(1);
+			}
+			/*
+			 * Class<?> cls = null; try { cls = Class.forName(r.getClassLoader()); } catch
+			 * (ClassNotFoundException e1) { LOGGER.error("The classLoader {}, {} error ",
+			 * r.getClassLoader(), pathResource); }
+			 */
+
+			//URL url = cls.getClassLoader().getResource(pathResource);
 			URL url = this.getClass().getClassLoader().getResource(pathResource);
 			if (url == null) {
 				cnt = "The resource not exists. " + pathResource;
-				LOGGER.error("The resource not exists. " + pathResource);
+				LOGGER.error("The resource not exists. {},{}", r.getId(), r.getPath());
 			} else {
+				LOGGER.info("fetch {} from {}", r.getId(), url);
 				try {
 					cnt = IOUtils.toString(url, StandardCharsets.UTF_8);
 				} catch (IOException e) {
@@ -328,22 +358,35 @@ public class Resources {
 				r.setContent(cnt);
 			}
 			r.setHash(Utils.md5(cnt));
-
 			// jar 文件中的资源不会变化，一次性读取到缓存中
 			mapOfJarResources.put(r.getId(), r);
-
 		} else {
 			String allPath = r.getAllPath();
-			File f1 = new File(allPath);
-			if (f1.exists()) {
-				cnt = this.readFileText(allPath);
-
+			LOGGER.info("fetch {} from {}", r.getId(), allPath);
+			if (allPath.startsWith("http:") || allPath.startsWith("https:")) {
+				UNet net = new UNet();
+				net.setIsShowLog(false);
+				cnt = net.doGet(allPath);
+				if (net.getLastStatusCode() != 200 && net.getLastStatusCode() != 304) {
+					LOGGER.error("{}, code={}", r.getAllPath(), net.getLastStatusCode());
+				} else if (net.getLastStatusCode() == 200) {
+					r.setContent(cnt);
+					String etag = net.getResponseHeaders().get("etag");
+					r.setHash(etag != null ? etag : cnt.hashCode() + "");
+					// http资源无变化
+					mapOfHttpResources.put(r.getId(), r);
+				}
 			} else {
-				cnt = "/* File not exists " + r.getPath() + " */";
-				LOGGER.error(cnt);
+				File f1 = new File(allPath);
+				if (f1.exists()) {
+					cnt = this.readFileText(allPath);
+				} else {
+					cnt = "/* File not exists " + allPath + " */";
+					LOGGER.error(cnt);
+				}
+				r.setHash(this.getFileHash(f1));
+				r.setContent(cnt);
 			}
-			r.setHash(this.getFileHash(f1));
-			r.setContent(cnt);
 		}
 
 		// 替换字体下载的绝对路径
@@ -359,7 +402,14 @@ public class Resources {
 		}
 	}
 
-	private Resource loadContent(String root, Element ele) {
+	/**
+	 * 加载每个资源的信息
+	 * 
+	 * @param root
+	 * @param ele
+	 * @return
+	 */
+	private Resource loadContent(String root,   Element ele) {
 		String path = ele.getTextContent().trim();
 		String id = ele.getAttribute("id");
 
@@ -367,7 +417,7 @@ public class Resources {
 		r.setId(id);
 		if (root.startsWith("resource:")) {
 			r.setJarResource(true);
-
+			// r.setClassLoader(classLoader);
 			String pathResource = root.substring("resource:".length()) + "/" + path;
 			pathResource = pathResource.replace("\\", "/").replace("//", "/").replace("//", "/");
 			r.setAllPath(pathResource);

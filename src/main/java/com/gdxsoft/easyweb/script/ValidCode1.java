@@ -2,56 +2,94 @@ package com.gdxsoft.easyweb.script;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.JarURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Random;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * ref http://blog.csdn.net/ruixue0117/article/details/22829557
- * docker: apk add ttf-dejavu
- *		   fc-cache -fv
+ * ref http://blog.csdn.net/ruixue0117/article/details/22829557  
+ *  
  * @author admin
  *
  */
 public class ValidCode1 {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ValidCode1.class);
 	// 使用到Algerian字体，系统里没有的话需要安装字体，字体只显示大写，去掉了1,0,i,o几个容易混淆的字符
-	public static final String VERIFY_CODES = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstwxy";
+	public static final String VERIFY_CODES = "023456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
 	public static final String VERIFY_NUMBERS = "0123456789";
-	private static Random random = new Random();
-	public static ArrayList<String> FONT_NAMES = new ArrayList<String>();
 
+	public static List<String> FONT_NAMES = new ArrayList<String>();
+	private static String fontPath = "validCodeFonts";
 	static {
-		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		String[] fontNames = e.getAvailableFontFamilyNames();
-		checkFontName(fontNames, "Lucida Handwriting");
-		checkFontName(fontNames, "Times New Roman");
-		checkFontName(fontNames, "Arial");
-		checkFontName(fontNames, "Footlight MT Light");
-		if (FONT_NAMES.size() == 0) {
-			FONT_NAMES.add(fontNames[0]);
+		try {
+			initializeFonts();
+		} catch (IOException | FontFormatException e) {
+			LOGGER.error(e.getLocalizedMessage());
 		}
 	}
 
-	private static boolean checkFontName(String[] fontNames, String chcekName) {
-		for (int i = 0; i < fontNames.length; i++) {
-			String fname = fontNames[i];
-			if (fname.equalsIgnoreCase(chcekName)) {
-				FONT_NAMES.add(fname);
-				System.out.println("vc-add-font:" + fname);
-				return true;
+	/**
+	 * Initialized the valid fonts, in the java resources validCodeFonts
+	 * @throws IOException
+	 * @throws FontFormatException
+	 */
+	public synchronized static void initializeFonts() throws IOException, FontFormatException {
+		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		Enumeration<URL> resources = ValidCode1.class.getClassLoader().getResources(fontPath);
+		while (resources.hasMoreElements()) {
+			URL url = resources.nextElement();
+			// 通过判断协议是不是jar文件
+			if (url.getProtocol().equals("jar")) {
+				JarURLConnection urlConnection = (JarURLConnection) url.openConnection();
+				JarFile jarFile = urlConnection.getJarFile();
+				Enumeration<JarEntry> entries = jarFile.entries(); // 返回jar中所有的文件目录
+				while (entries.hasMoreElements()) {
+					JarEntry jarEntry = entries.nextElement();
+					String name = jarEntry.getName();
+					if (!jarEntry.isDirectory() && name.startsWith(fontPath) && name.endsWith(".ttf")) { // 是我们需要的文件类型
+
+						InputStream resourceAsStream = ValidCode1.class.getClassLoader().getResourceAsStream(name);
+						Font font = Font.createFont(Font.TRUETYPE_FONT, resourceAsStream);
+						e.registerFont(font);
+						FONT_NAMES.add(font.getFontName());
+
+						LOGGER.info("Add font {}->{} from jar", name, font.getFontName());
+					}
+				}
+			} else if (url.getProtocol().equals("file")) {
+				// 获取class 根目录
+				URL resource = ValidCode1.class.getClassLoader().getResource(fontPath);
+				File[] files = new File(resource.getPath()).listFiles();
+				for (int i = 0; i < files.length; i++) {
+					Font font = Font.createFont(Font.TRUETYPE_FONT, files[i]);
+					e.registerFont(font);
+					FONT_NAMES.add(font.getName());
+					LOGGER.info("Add font {}->{} from jar", files[i], font.getFontName());
+				}
 			}
 		}
-		return false;
 	}
 
+	private Random random = new Random(System.currentTimeMillis());
 	private boolean _IsNumberCode = true;
 	private int _VcLen = 4;
 	private String _RandomNumber;
@@ -60,9 +98,7 @@ public class ValidCode1 {
 		return _RandomNumber;
 	}
 
-	public ValidCode1() {
-
-	}
+	public ValidCode1() {}
 
 	public ValidCode1(int vcLen, boolean isNumberCode) {
 		this._VcLen = vcLen;
@@ -78,8 +114,7 @@ public class ValidCode1 {
 	/**
 	 * 使用系统默认字符源生成验证码
 	 * 
-	 * @param verifySize
-	 *            验证码长度
+	 * @param verifySize 验证码长度
 	 * @return
 	 */
 	private String generateVerifyCode(int verifySize) {
@@ -93,10 +128,8 @@ public class ValidCode1 {
 	/**
 	 * 使用指定源生成验证码
 	 * 
-	 * @param verifySize
-	 *            验证码长度
-	 * @param sources
-	 *            验证码字符源
+	 * @param verifySize 验证码长度
+	 * @param sources    验证码字符源
 	 * @return
 	 */
 	private String generateVerifyCode(int verifySize, String sources) {
@@ -187,6 +220,8 @@ public class ValidCode1 {
 		int fontSize = h - 4;
 
 		char[] chars = code.toCharArray();
+		// 调用函数出来的颜色相同，可能是因为种子太接近，所以只能直接生成
+		g2.setColor(new Color(20 + random.nextInt(110), 20 + random.nextInt(110), 20 + random.nextInt(110)));
 		for (int i = 0; i < verifySize; i++) {
 			Font font = new Font(getRandFont(), Font.ITALIC, fontSize);
 			g2.setFont(font);
@@ -195,7 +230,7 @@ public class ValidCode1 {
 			affine.setToRotation(Math.PI / 4 * rand.nextDouble() * (rand.nextBoolean() ? 1 : -1),
 					(w / verifySize) * i + fontSize / 2, h / 2);
 			g2.setTransform(affine);
-			g2.setColor(new Color(20 + random.nextInt(110), 20 + random.nextInt(110), 20 + random.nextInt(110)));// 调用函数出来的颜色相同，可能是因为种子太接近，所以只能直接生成
+//			g2.setColor(new Color(20 + random.nextInt(110), 20 + random.nextInt(110), 20 + random.nextInt(110)));// 调用函数出来的颜色相同，可能是因为种子太接近，所以只能直接生成
 			g2.drawChars(chars, i, 1, ((w - 10) / verifySize) * i + 5, h / 2 + fontSize / 2 - 10);
 		}
 
