@@ -15,7 +15,8 @@ import java.util.Random;
 
 /**
  * ref http://blog.csdn.net/ruixue0117/article/details/22829557
- * 
+ * doker: apk add ttf-dejavu
+ *		  fc-cache -fv
  * @author admin
  *
  */
