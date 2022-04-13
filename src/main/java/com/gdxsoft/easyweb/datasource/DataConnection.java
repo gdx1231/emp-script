@@ -807,10 +807,8 @@ public class DataConnection {
 				sb.append(",");
 			}
 			i++;
-			sb.append("'");
-			sb.append(key.replace("'", "''"));
-			sb.append("'");
-
+			String keyExp = this.sqlParameterStringExp(key);
+			sb.append(keyExp);
 		}
 		sb.append(")");
 		String sqlDelete = sb.toString();
@@ -999,36 +997,29 @@ public class DataConnection {
 			return;
 		}
 		boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
-		boolean isSqlServer = this.getDatabaseType().equalsIgnoreCase("MSSQL");
-
 		String insertHeader = "insert into _EWA_SPT_DATA(idx, col, tag) values ";
 		List<String> values = new ArrayList<String>();
 		for (String key : this._CreateSplitData.getTempData().keySet()) {
 			ArrayList<String> al = this._CreateSplitData.getTempData().get(key);
+			String keyExp = this.sqlParameterStringExp(key);
 			for (int i = 0; i < al.size(); i++) {
 				StringBuilder sb = new StringBuilder();
 				sb.append("(");
 				sb.append(i);
-				if(isSqlServer) {
-					sb.append(",N'"); // unicode
-				} else {
-					sb.append(",'");
-				}
+				sb.append(", ");
+
 				String col = al.get(i);
-				
 				if (isMysql && col.length() > 1000) {
 					col = col.substring(0, 1000);
 					LOGGER.warn("EwaSplitTempData col size > 1000, truncation");
 				}
-				col = col.replace("'", "''");
-				if (isMysql) {
-					// MySql字符转义符 反斜线(‘\’)开始，
-					col = col.replace("\\", "\\\\");
-				}
-				sb.append(col);
-				sb.append("','");
-				sb.append(key.replace("'", "''"));
-				sb.append("')");
+				String colExp = this.sqlParameterStringExp(col);
+				sb.append(colExp);
+
+				sb.append(",'");
+				sb.append(keyExp);
+				sb.append(")");
+
 				values.add(sb.toString());
 			}
 
@@ -1260,7 +1251,7 @@ public class DataConnection {
 			ResultSet rs = _pst.getGeneratedKeys();
 			if (rs.next()) {
 				autoKey = rs.getObject(1);
-				if(autoKey == null) {
+				if (autoKey == null) {
 					this.writeDebug(this, "SQL", "[返回自增] null , SQL 没有执行成功.");
 				} else {
 					this.writeDebug(this, "SQL", "[返回自增] " + rs.getObject(1) + ".");
@@ -1292,7 +1283,7 @@ public class DataConnection {
 	 */
 	public int executeUpdateReturnAutoIncrement(String sql) {
 		Object autoInc = executeUpdateReturnAutoIncrementObject(sql);
-		if(autoInc == null) {
+		if (autoInc == null) {
 			return -1; // 没有执行
 		}
 		try {
@@ -1615,12 +1606,18 @@ public class DataConnection {
 			sql1 = sql1.replace("~" + para, v1);
 		}
 
+		// 分割字符串函数 ewa_split(@xxx, ',')
 		if (this._RequestValue != null) {
 			_CreateSplitData = new CreateSplitData(this._RequestValue);
 			sql = _CreateSplitData.replaceSplitData(sql1);
 			sql1 = sql;
 		}
 
+		// 查询上级或下级id
+		ReverseIds reverseIds = new ReverseIds(this);
+		String sqlReverseIds = reverseIds.replaceReverseIds(sql1);
+		sql1 =sqlReverseIds;
+		
 		// 提取 EWA定义的 方法，在 EwaFunctions.xml中
 		EwaSqlFunctions esf = new EwaSqlFunctions();
 		sql1 = esf.extractEwaSqlFunctions(sql1);
@@ -1645,11 +1642,12 @@ public class DataConnection {
 			if (v1 != null) {
 				String[] v2 = v1.split(",");
 				for (int m = 0; m < v2.length; m++) {
-					String v3 = v2[m].replaceAll("'", "''").trim();
+					String v3 = this.sqlParameterStringExp(v2[m]);
 					if (m == 0) {
-						sb.append("'" + v3 + "'");
+						sb.append(v3);
 					} else {
-						sb.append(", '" + v3 + "'");
+						sb.append(", ");
+						sb.append(v3);
 					}
 				}
 			} else {
@@ -1737,14 +1735,10 @@ public class DataConnection {
 			if (vOther == null) {
 				return "null";
 			} else {
-				StringBuilder sb = new StringBuilder();
-				sb.append("'");
-				sb.append(vOther.replace("'", "''").replace("@", "{@}"));
-				sb.append("'");
-				return sb.toString();
+				String vOtherExp = this.sqlParameterStringExp(vOther);
+				return vOtherExp.replace("@", "{@}");
 			}
 		}
-		boolean isMysql = "mysql".equalsIgnoreCase(this.getDatabaseType());
 
 		String dt = pv.getDataType();
 		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
@@ -1767,14 +1761,9 @@ public class DataConnection {
 		} else if (dt.equals("DATE")) {
 			return null;
 		} else {
-			if (isMysql) { // 替换转义符
-				v1 = v1.replace("\\", "\\\\");
-			}
-
+			String v1Exp = this.sqlParameterStringExp(v1);
 			StringBuilder sb = new StringBuilder();
-			sb.append("'");
-			sb.append(v1.replace("'", "''").replace("@", "{@}"));
-			sb.append("'");
+			sb.append(v1Exp.replace("@", "{@}"));
 			return sb.toString();
 		}
 
@@ -2256,6 +2245,25 @@ public class DataConnection {
 		for (String key : outValues1.keySet()) {
 			outValues.put(key, outValues1.get(key));
 		}
+	}
+
+	public String sqlParameterStringExp(String parameter) {
+		if (parameter == null) {
+			return "NULL";
+		}
+		boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
+		boolean isSqlServer = this.getDatabaseType().equalsIgnoreCase("MSSQL");
+
+		parameter = parameter.replace("'", "''");
+		if (isMysql) {
+			// MySql字符转义符 反斜线(‘\’)开始，
+			parameter = parameter.replace("\\", "\\\\");
+		}
+		parameter = "'" + parameter + "'";
+		if (isSqlServer) {
+			parameter = "N" + parameter;
+		}
+		return parameter;
 	}
 
 	public String getConnectionString() {

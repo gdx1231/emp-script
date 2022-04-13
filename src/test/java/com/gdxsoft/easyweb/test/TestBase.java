@@ -53,7 +53,7 @@ public class TestBase {
 		poolParams.put("url", CONN_URL);
 		poolParams.put("username", "root");
 
-		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		String password = UFile.readFileText("/Users/admin/360Rec/mysql-test-password.txt").trim();
 		poolParams.put("password", password);
 		poolParams.put("maxActive", 10);
 		poolParams.put("maxIdle", 100);
@@ -87,7 +87,7 @@ public class TestBase {
 		poolParams.put("url", CONN_URL);
 		poolParams.put("username", "root");
 
-		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		String password = UFile.readFileText("/Users/admin/360Rec/mysql-test-password.txt").trim();
 		poolParams.put("password", password);
 		poolParams.put("maxActive", 10);
 		poolParams.put("maxIdle", 100);
@@ -113,7 +113,7 @@ public class TestBase {
 		poolParams.put("url", CONN_URL);
 		poolParams.put("username", "root");
 
-		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		String password = UFile.readFileText("/Users/admin/360Rec/mysql-test-password.txt").trim();
 		poolParams.put("password", password);
 		poolParams.put("maxActive", 10);
 		poolParams.put("maxIdle", 100);
@@ -138,7 +138,7 @@ public class TestBase {
 		poolParams.put("url", CONN_URL);
 		poolParams.put("username", "root");
 
-		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		String password = UFile.readFileText("/Users/admin/360Rec/mysql-test-password.txt").trim();
 		poolParams.put("password", password);
 		poolParams.put("maxActive", 10);
 		poolParams.put("maxIdle", 100);
@@ -163,7 +163,7 @@ public class TestBase {
 		poolParams.put("url", CONN_URL);
 		poolParams.put("username", "root");
 
-		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		String password = UFile.readFileText("/Users/admin/360Rec/mysql-test-password.txt").trim();
 		poolParams.put("password", password);
 		poolParams.put("maxActive", 10);
 		poolParams.put("maxIdle", 100);
@@ -188,7 +188,7 @@ public class TestBase {
 		poolParams.put("url", CONN_URL);
 		poolParams.put("username", "root");
 
-		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		String password = UFile.readFileText("/Users/admin/360Rec/mysql-test-password.txt").trim();
 		poolParams.put("password", password);
 		poolParams.put("maxActive", 10);
 		poolParams.put("maxIdle", 100);
@@ -214,7 +214,7 @@ public class TestBase {
 		poolParams.put("url", CONN_URL);
 		poolParams.put("username", "sa");
 
-		String password = UFile.readFileText("d:/360Rec/mysql-test-password.txt").trim();
+		String password = UFile.readFileText("/Users/admin/360Rec/mysql-test-password.txt").trim();
 		poolParams.put("password", password);
 		poolParams.put("maxActive", 10);
 		poolParams.put("maxIdle", 100);
