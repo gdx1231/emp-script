@@ -1016,7 +1016,7 @@ public class DataConnection {
 				String colExp = this.sqlParameterStringExp(col);
 				sb.append(colExp);
 
-				sb.append(",'");
+				sb.append(",");
 				sb.append(keyExp);
 				sb.append(")");
 
@@ -2250,6 +2250,9 @@ public class DataConnection {
 	public String sqlParameterStringExp(String parameter) {
 		if (parameter == null) {
 			return "NULL";
+		}
+		if(parameter.length()==0) {
+			return "''";
 		}
 		boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
 		boolean isSqlServer = this.getDatabaseType().equalsIgnoreCase("MSSQL");

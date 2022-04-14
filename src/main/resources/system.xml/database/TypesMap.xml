@@ -3,7 +3,7 @@
 	<EwaMap>
 		<Map Name="VARCHAR" CreateNumber="1" InsertPrefix="'" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
-				<MapTo Name="NVARCHAR" Scale="2" />
+				<MapTo Name="NVARCHAR" Scale="1" />
 				<MapTo Name="VARCHAR" />
 			</Database>
 			<Database Name="ORACLE" Desc="ORACLE">
@@ -15,14 +15,14 @@
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="VARCHAR" />
-				<MapTo Name="NVARCHAR" Scale="2" />
+				<MapTo Name="NVARCHAR" Scale="1" />
 			</Database>
 		</Map>
 
 		<Map Name="CHAR" CreateNumber="1" InsertPrefix="'" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="CHAR" />
-				<MapTo Name="NCHAR" Scale="2" />
+				<MapTo Name="NCHAR" Scale="1" />
 			</Database>
 			<Database Name="ORACLE" Desc="ORACLE">
 				<MapTo Name="CHAR" />
