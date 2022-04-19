@@ -11,6 +11,7 @@ package com.gdxsoft.easyweb.uploader;
 import org.apache.commons.fileupload.ProgressListener;
 import javax.servlet.http.HttpServletRequest;
 
+@Deprecated
 public class FileUploadListener implements ProgressListener {
 	private HttpServletRequest request = null;
 

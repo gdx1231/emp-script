@@ -10,6 +10,7 @@ package com.gdxsoft.easyweb.uploader;
 
 import java.util.HashMap;
 
+@Deprecated
 public class FileUploadStatus {
 	// 上传用户地址
 	private String _guid;

@@ -408,19 +408,18 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 				</Template>
 			</XItem>
 			<XItem Name="switch" IsRepeat="1" UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemRepeat" BaseType="1"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemSwitch" BaseType="1"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
-					Style, ParentStyle, EventSet,DataItem, IsMustInput,OrderSearch,List">
+					Style, ParentStyle, EventSet, Switch, DataItem, IsMustInput, OrderSearch">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="开关" />
 					<Set Lang="enus" Info="Switch button" />
 				</DescriptionSet>
 				<Template>
-					<Html><![CDATA[<DIV class='ewa-switch' TAG="REPT" !!>{__EWA_VAL__}</DIV>]]></Html>
-					<Repeat><![CDATA[
-<input class="IX_CHECKBOX" type="checkbox" title="{__EWA_LST_TITLE__}" value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/>
-]]>
-					</Repeat>
+					<Html><![CDATA[<div class='ewa-switch' !!>
+<input type="checkbox" value="{__EWA_VAL__}" name="@name" [checked]
+ onchange="EWA.F.FOS['@sys_frame_unid'].switchButtonAction(this, &quot;@SwtAction&quot;)">
+</div>]]></Html>
 				</Template>
 			</XItem>
 			<XItem Name="radio" HtmlTag="input$radio" IsRepeat="1" UIGroup="Standard"
@@ -1865,6 +1864,26 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					</Value>
 				</Values>
 			</XItemParameter>
+			<XItemParameter Name="Switch" IsSet="0" IsMulti="1" IsShow="1" IsJsShow="1">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="开关定义" />
+					<Set Lang="enus" Info="Switch params" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="text" Name="SwtOnValue">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="打开开关值" />
+							<Set Lang="enus" Info="Value of the switch on" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="ref" Ref="EasyWebTemplate/Action/ActionSet" Name="SwtAction">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="开关调用Action" />
+							<Set Lang="enus" Info="The action of the switch" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
 			<XItemParameter Name="DataItem" IsSet="0" IsShow="1" UIGroup="Data" IsMulti="1" IsJsShow="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="数据项" />
@@ -2385,9 +2404,11 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 								Info="保存模式, [WithFrame]参数：&#x0D;&#x0A;
 {NAME} 文件二进制&#x0D;&#x0A;
 {NAME}_NAME 文件服务器名称&#x0D;&#x0A;
+{NAME}_LOCAL 用户本地文件名称&#x0D;&#x0A;
 {NAME}_URL 文件http的url&#x0D;&#x0A;
 {NAME}_EXT 文件扩展名&#x0D;&#x0A;
 {NAME}_PATH 文件服务器保存位置&#x0D;&#x0A;
+{NAME}_MD5 文件MD5&#x0D;&#x0A;
 {NAME}_SIZE 文件长度" />
 							<Set Lang="enus" Info="Save Method" />
 						</DescriptionSet>
@@ -2429,7 +2450,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="enus" Info="Upload Path" />
 						</DescriptionSet>
 					</Value>
-
+					<Value Type="group" Name="UpJsonEncyrpt">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="返回Json是否加密" />
+							<Set Lang="enus" Info="Encyrption the result" />
+						</DescriptionSet>
+					</Value>
 					<Value Type="group" Name="UpDelete">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="删除上传文件，用于数据库保存" />
@@ -2464,6 +2490,7 @@ EWA_UP_UNID 文件GUNID&#x0D;&#x0A;
 EWA_UP_FROM  来源，用于图片的重新生成&#x0D;&#x0A;
 EWA_UP_LOCAL 服务器本地路径&#x0D;&#x0A;
 EWA_UP_LENGTH 文件长度&#x0D;&#x0A;
+EWA_UP_MD5 文件md5#x0D;&#x0A;
 EWA_UP_LOCAL 用户本地文件名称
 " />
 							<Set Lang="enus"
@@ -2478,6 +2505,7 @@ EWA_UP_UNID GUNID&#x0D;&#x0A;
 EWA_UP_FROM  Source, &#x0D;&#x0A;
 EWA_UP_LOCAL Local Path&#x0D;&#x0A;
 EWA_UP_LENGTH Length &#x0D;&#x0A;
+EWA_UP_MD5 md5#x0D;&#x0A;
 EWA_UP_LOCAL User local file name
 " />
 						</DescriptionSet>
@@ -2828,6 +2856,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
+			<XGroupValue Name="UpJsonEncyrpt" Default="" Values="yes,no">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="是,否" />
+					<Set Lang="enus" Info="Yes,No" />
+				</DescriptionSet>
+			</XGroupValue>
+			
 			<XGroupValue Name="EncType" Default="" Values=",all,end3,before3,email,phone">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",全部,后三位, 前三位, 邮件, 电话" />

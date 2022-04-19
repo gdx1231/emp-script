@@ -16,6 +16,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 
+@Deprecated
 public class PostData {
 	private HttpServletRequest _request;
 	private HttpServletResponse _response;

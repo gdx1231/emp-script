@@ -12,6 +12,7 @@ import org.xml.sax.SAXException;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
+@Deprecated 
 public class UploaderUserTemplate {
 	private Node _ItemNode;
 	private String _Exts;

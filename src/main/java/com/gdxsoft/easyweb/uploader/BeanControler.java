@@ -10,6 +10,7 @@ package com.gdxsoft.easyweb.uploader;
 
 import java.util.Vector;
 
+@Deprecated
 public class BeanControler {
 	private static BeanControler beanControler = new BeanControler();
 

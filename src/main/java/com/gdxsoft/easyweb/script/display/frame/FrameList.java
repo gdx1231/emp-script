@@ -856,8 +856,6 @@ public class FrameList extends FrameBase implements IFrame {
 		return sb.toString();
 	}
 
-	
-
 	/**
 	 * 生成列表的标头的每个单元格
 	 * 
@@ -904,42 +902,41 @@ public class FrameList extends FrameBase implements IFrame {
 
 			return sb.toString();
 
-		} else {
+		}
 
-			header = header.replace("class=\"", "class=\"ewa-col-" + uxi.getName() + " ");
+		header = header.replace("class=\"", "class=\"ewa-col-" + uxi.getName() + " ");
 
-			String cellOrder = this.createOrderCell(uxi, userOrder, fUnid, des);
+		String cellOrder = this.createOrderCell(uxi, userOrder, fUnid, des);
 
-			String orderSearchExp = this.createCellSearch(uxi, fUnid);
+		String orderSearchExp = this.createCellSearch(uxi, fUnid);
 
-			String title = memo == null || memo.trim().length() == 0 ? ""
-					: " title=\"" + Utils.textToInputValue(memo) + "\"";
-			String s1 = header.replace(SkinFrame.TAG_ITEM,
-					"<nobr id='" + uxi.getName() + "'" + title + ">" + cellOrder + orderSearchExp + "</nobr>");
-			String style = "style=\"";
-			boolean haveStyle = false;
-			if (uxi.testName("ParentStyle") && uxi.getItem("ParentStyle").count() > 0) {
-				String st = uxi.getItem("ParentStyle").getItem(0).getItem(0);
-				if (st.trim().length() > 0) {
-					style += st + "; ";
-					haveStyle = true;
-				}
-			}
-
-			String tag = uxi.getSingleValue("Tag");
-			if (this._IsLuButtons && (tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit")
-					|| tag.equalsIgnoreCase("butFlow"))) {
-				style += "display: none;";
+		String title = memo == null || memo.trim().length() == 0 ? ""
+				: " title=\"" + Utils.textToInputValue(memo) + "\"";
+		String s1 = header.replace(SkinFrame.TAG_ITEM,
+				"<nobr id='" + uxi.getName() + "'" + title + ">" + cellOrder + orderSearchExp + "</nobr>");
+		String style = "style=\"";
+		boolean haveStyle = false;
+		if (uxi.testName("ParentStyle") && uxi.getItem("ParentStyle").count() > 0) {
+			String st = uxi.getItem("ParentStyle").getItem(0).getItem(0);
+			if (st.trim().length() > 0) {
+				style += st + "; ";
 				haveStyle = true;
 			}
-			if (haveStyle) {
-				style += "\" ";
-				s1 = s1.replaceFirst("!!", style);
-			} else {
-				s1 = s1.replaceFirst("!!", "");
-			}
-			return s1;
 		}
+
+		String tag = uxi.getSingleValue("Tag");
+		if (this._IsLuButtons && (tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit")
+				|| tag.equalsIgnoreCase("butFlow"))) {
+			style += "display: none;";
+			haveStyle = true;
+		}
+		if (haveStyle) {
+			style += "\" ";
+			s1 = s1.replaceFirst("!!", style);
+		} else {
+			s1 = s1.replaceFirst("!!", "");
+		}
+		return s1;
 
 	}
 
@@ -1398,7 +1395,8 @@ public class FrameList extends FrameBase implements IFrame {
 		/*
 		 * String APP_REF_TAG = super.getPageItemValue("Workflow", "WfRefTag");
 		 * 
-		 * if (APP_REF_TAG == null || APP_REF_TAG.length() == 0) { throw new Exception("WfRefTag在Page未定义"); }
+		 * if (APP_REF_TAG == null || APP_REF_TAG.length() == 0) { throw new
+		 * Exception("WfRefTag在Page未定义"); }
 		 */
 
 		OrgSqls sqls = OrgSqls.instance();
@@ -1616,10 +1614,10 @@ public class FrameList extends FrameBase implements IFrame {
 			}
 			String title = " title=\""
 					+ item.getValue().replace("<br />", "\n").replace("\"", "&quot;").replace("<", "&lt;") + "\" ";
-			
+
 			// 保留@符号
 			title = title.replace("@", IItem.REP_AT_STR);
-			
+
 			if (s2.indexOf("title=\"") > 0) {
 				title = "";
 			}
@@ -1695,5 +1693,4 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 	}
 
-	
 }

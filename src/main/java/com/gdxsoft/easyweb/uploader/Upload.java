@@ -67,6 +67,8 @@ public class Upload {
 	private String upLimit = "10M"; // 上传大小限制，默认10M
 	private long limitBytes = 1024 * 1024 * 10L; // 10m bytes
 
+	private boolean upJsonEncyrpt = true; // 返回Json是否加密
+
 	public RequestValue getRv() {
 		return _Rv;
 	}
@@ -214,6 +216,14 @@ public class Upload {
 						this._UpExts.put("JPEG", true);
 					}
 				}
+			}
+		}
+
+		// UpJsonEncyrpt 返回Json是否加密
+		if (u.testName("UpJsonEncyrpt")) {
+			String val = u.getItem("UpJsonEncyrpt");
+			if ("no".equalsIgnoreCase(val)) {
+				this.upJsonEncyrpt = false; // 不加密
 			}
 		}
 
@@ -367,7 +377,7 @@ public class Upload {
 						throw new Exception(msg);
 					}
 					if (!this.checkValidExt(fu)) {
-						String msg = "the upload file ext " + item.getName()+" is invalid";
+						String msg = "the upload file ext " + item.getName() + " is invalid";
 						LOGGER.error(msg);
 						throw new Exception(msg);
 					}
@@ -537,6 +547,7 @@ public class Upload {
 	public String createJSon(FileUpload fu) {
 		JSONObject json = new JSONObject();
 		boolean isReal = UPath.getPATH_UPLOAD_URL() != null;
+
 		try {
 			json.put("UP_NAME", fu.getSaveFileName());
 			json.put("UP_URL", fu.getFileUrl());
@@ -549,11 +560,14 @@ public class Upload {
 			if (isReal) {
 				json.put("CT", UPath.getPATH_UPLOAD_URL());
 			}
-			String encrypt = UAes.getInstance().encrypt(json.toString());
-			JSONObject json1 = new JSONObject();
-			json1.put("UP", encrypt);
-			
-			return json1.toString();
+			if(!this.upJsonEncyrpt) {
+				return json.toString();
+			} else {
+				String encrypt = UAes.getInstance().encrypt(json.toString());
+				JSONObject json1 = new JSONObject();
+				json1.put("UP", encrypt);
+				return json1.toString();
+			}
 		} catch (Exception err) {
 			return "{\"RST\":false, \"ERR\":\"" + Utils.textToJscript(err.getMessage()) + "\"}";
 		}
@@ -1081,5 +1095,23 @@ public class Upload {
 	 */
 	public void setUpLimit(String upLimit) {
 		this.upLimit = upLimit;
+	}
+
+	/**
+	 * 返回Json是否加密
+	 * 
+	 * @return the upJsonEncyrpt
+	 */
+	public boolean isUpJsonEncyrpt() {
+		return upJsonEncyrpt;
+	}
+
+	/**
+	 * 返回Json是否加密
+	 * 
+	 * @param upJsonEncyrpt the upJsonEncyrpt to set
+	 */
+	public void setUpJsonEncyrpt(boolean upJsonEncyrpt) {
+		this.upJsonEncyrpt = upJsonEncyrpt;
 	}
 }

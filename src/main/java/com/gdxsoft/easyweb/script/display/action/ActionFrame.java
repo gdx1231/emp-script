@@ -122,6 +122,15 @@ public class ActionFrame extends ActionBase implements IAction {
 			}
 		}
 
+		boolean upJsonEncyrpt = true;
+		// UpJsonEncyrpt 返回Json是否加密
+		if (u.testName("UpJsonEncyrpt")) {
+			String val = u.getItem("UpJsonEncyrpt");
+			if ("no".equalsIgnoreCase(val)) {
+				upJsonEncyrpt = false; // 不加密
+			}
+		}
+
 		String upName = rv.getString("UP_NAME");
 		JSONObject item1 = null;
 		JSONArray arr = null;
@@ -141,15 +150,18 @@ public class ActionFrame extends ActionBase implements IAction {
 					removeUpload(item);
 					return;
 				}
-				arr = new JSONArray();
-				for (int i = 0; i < arrEncrypted.length(); i++) {
-					JSONObject encryptUploadJson = arrEncrypted.getJSONObject(i);
-					if (encryptUploadJson.has("UP")) {
-						// AES 解密 json数据
-						String decrypt = UAes.getInstance().decrypt(encryptUploadJson.getString("UP"));
-						JSONObject decryptedJson = new JSONObject(decrypt);
-						arr.put(decryptedJson);
+				if (upJsonEncyrpt) { // 返回Json加密（默认）
+					arr = new JSONArray();
+					for (int i = 0; i < arrEncrypted.length(); i++) {
+						JSONObject encryptUploadJson = arrEncrypted.getJSONObject(i);
+						if (encryptUploadJson.has("UP")) { // AES 解密 json数据
+							String decrypt = UAes.getInstance().decrypt(encryptUploadJson.getString("UP"));
+							JSONObject decryptedJson = new JSONObject(decrypt);
+							arr.put(decryptedJson);
+						}
 					}
+				} else { // 返回Json使用明码
+					arr = arrEncrypted;
 				}
 				if (arr.length() == 0) {
 					removeUpload(item);
@@ -198,7 +210,7 @@ public class ActionFrame extends ActionBase implements IAction {
 
 		// 添加增加标识
 		rv.addValue("____createUploadPara____", "ADDED");
-		
+
 		if (!(f.exists() && f.isFile() && f.canRead())) {
 			// 文件被删除- 配置项指定了 删除文件
 			// 保留上传的json参数
@@ -237,7 +249,7 @@ public class ActionFrame extends ActionBase implements IAction {
 			// 上传文件(1或多个)的JSON
 			rv.addValue(uploadName + "_JSON", arr.toString());
 		}
-		
+
 		/* ------------ 以下仅对单个文件上传有意义 ----------------- */
 
 		// 文件md5
