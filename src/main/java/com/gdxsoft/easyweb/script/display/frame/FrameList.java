@@ -53,6 +53,7 @@ public class FrameList extends FrameBase implements IFrame {
 	private MStr _SearchExp = new MStr();
 	private boolean _IsLuButtons;
 	private boolean _IsLuSearch;
+	private boolean _ComposeSearchTexts; // 合并文字搜索
 	private String _LuSelect = "";
 	private boolean _IsLuDblClick;
 	private String _LuDblClickIdx;
@@ -178,7 +179,8 @@ public class FrameList extends FrameBase implements IFrame {
 			// bt.replace("<body", "<body style='overflow:hidden'");
 		}
 		if (this._IsLuSearch && !"NO".equalsIgnoreCase(rv.s("EWA_LU_SEARCH"))) {
-			String js = fname + ".ShowSearch();";
+			boolean compose = this._ComposeSearchTexts; // 合并搜索
+			String js = fname + ".ShowSearch(" + compose + ");";
 			sJs.al(js);
 		}
 
@@ -465,6 +467,9 @@ public class FrameList extends FrameBase implements IFrame {
 			String v1 = x.getItem("luSearch");
 			if (v1.equals("1")) {
 				this._IsLuSearch = true;
+			} else if (v1.equals("2")) {
+				this._IsLuSearch = true;
+				this._ComposeSearchTexts = true;
 			}
 		}
 		// 单选多选

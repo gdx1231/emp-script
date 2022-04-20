@@ -4053,10 +4053,10 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="luSearch" default="0" Values="0,1">
+			<XGroupValue Name="luSearch" default="0" Values="0,1,2">
 				<DescriptionSet>
-					<Set Lang="zhcn" Info="否,是" />
-					<Set Lang="enus" Info="No,Yes" />
+					<Set Lang="zhcn" Info="否,是,合并文字搜索" />
+					<Set Lang="enus" Info="No,Yes,Compose texts" />
 				</DescriptionSet>
 			</XGroupValue>
 			<XGroupValue Name="luSelect" default="0" Values=",S,M">
