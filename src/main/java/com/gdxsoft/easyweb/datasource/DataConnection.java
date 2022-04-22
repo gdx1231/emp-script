@@ -1616,8 +1616,8 @@ public class DataConnection {
 		// 查询上级或下级id
 		ReverseIds reverseIds = new ReverseIds(this);
 		String sqlReverseIds = reverseIds.replaceReverseIds(sql1);
-		sql1 =sqlReverseIds;
-		
+		sql1 = sqlReverseIds;
+
 		// 提取 EWA定义的 方法，在 EwaFunctions.xml中
 		EwaSqlFunctions esf = new EwaSqlFunctions();
 		sql1 = esf.extractEwaSqlFunctions(sql1);
@@ -1707,14 +1707,15 @@ public class DataConnection {
 			try {
 				paramValue = this.getReplaceParameterValueExp(paramName);
 			} catch (Exception err) {
-				System.out.println("replaceSqlSelectParameters[" + paramName + "]: " + err.getMessage());
+				LOGGER.error("replaceSqlSelectParameters[" + paramName + "]: {}", err.getMessage());
 			}
 			// 参数值带@符号不提换，否则出现{@}问题，例如邮件 郭磊 2019-11-11
 			if (paramValue == null || paramValue.indexOf("@") >= 0) {
 				paramValue = "[[@]]" + paramName;
 			}
-
-			sql1 = sql1.replaceFirst("@" + paramName, paramValue);
+			// "$"导致报错：java.sql.Exception:Illegal group reference 2022-04-21
+			String paramValue1 = Matcher.quoteReplacement(paramValue);
+			sql1 = sql1.replaceFirst("@" + paramName, paramValue1);
 		}
 
 		sql1 = sql1.replace("[[@]]", "@");
@@ -2251,7 +2252,7 @@ public class DataConnection {
 		if (parameter == null) {
 			return "NULL";
 		}
-		if(parameter.length()==0) {
+		if (parameter.length() == 0) {
 			return "''";
 		}
 		boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
