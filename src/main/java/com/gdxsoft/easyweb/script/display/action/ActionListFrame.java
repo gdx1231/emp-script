@@ -479,7 +479,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 
 		UserConfig uc = super.getUserConfig();
 		MStr sb = new MStr();
-		sb.append("  (1=1 ");
+		sb.al("(100 = 100 ");
 		String[] para = ewa_search.split(",");
 		for (int i = 0; i < para.length; i++) {
 			SearchParameterInit lsp = new SearchParameterInit(para[i]);
@@ -513,8 +513,19 @@ public class ActionListFrame extends ActionBase implements IAction {
 					dataField = searchExp;
 				}
 			}
-
-			if (lsp.getTag().equals("or")) {
+			if (lsp.getTag().equals("blk")) { //空白
+				sb.a(" AND (");
+				sb.a(dataField);
+				sb.a("='' or ");
+				sb.a(dataField);
+				sb.al(" is null) ");
+			} else if (lsp.getTag().equals("nblk")) { //非空白
+				sb.a(" AND (");
+				sb.a(dataField);
+				sb.a(" !='' and ");
+				sb.a(dataField);
+				sb.al(" is not null) ");
+			} else if (lsp.getTag().equals("or")) {
 				// EWA_SEARCH=MEMO_STATE[or]MEMO_ING;MEMO_FINISH
 				String[] pps = lsp.getPara1().split("\\;");
 				sb.al(" AND (");
@@ -586,24 +597,44 @@ public class ActionListFrame extends ActionBase implements IAction {
 
 			} else {
 				sb.append(" AND (");
-				String exp = lsp.getPara1().replace("'", "''");
+				String exp = lsp.getPara1();
 				if (databaseType.equals("HSQLDB")) {
 					sb.al(" UPPER(" + dataField + ")");
 					exp = exp.toUpperCase();
 				} else {
 					sb.al(dataField);
 				}
-				if (lsp.getTag().equalsIgnoreCase("llk")) { // 左 like
-					sb.al(" like '" + exp + "%')");
+				String exp1 = parameterStringExp(exp, conn);
+				if (lsp.getTag().equalsIgnoreCase("nlk")) { // not like
+					sb.al(" not like '%" + exp1 + "%')");
+				} else if (lsp.getTag().equalsIgnoreCase("llk")) { // 左 like
+					sb.al(" like '" + exp1 + "%')");
 				} else if (lsp.getTag().equalsIgnoreCase("rlk")) { // 右 like
-					sb.al(" like '%" + exp + "')");
+					sb.al(" like '%" + exp1 + "')");
 				} else { // lk
-					sb.al(" like '%" + exp.replace("'", "''") + "%')");
+					sb.al(" like '%" + exp1 + "%')");
 				}
 			}
 		}
-		return sb.toString() + ")";
+		sb.al(")");
+		return sb.toString();
 
+	}
+
+	private String parameterStringExp(String parameter, DataConnection conn) {
+		if (parameter == null) {
+			return "NULL";
+		}
+		boolean isMysql = conn.getDatabaseType().equalsIgnoreCase("MYSQL");
+		// boolean isSqlServer = conn.getDatabaseType().equalsIgnoreCase("MSSQL");
+
+		parameter = parameter.replace("'", "''");
+		if (isMysql) {
+			// MySql字符转义符 反斜线(‘\’)开始，
+			parameter = parameter.replace("\\", "\\\\");
+		}
+
+		return parameter;
 	}
 
 	/**
@@ -741,21 +772,34 @@ public class ActionListFrame extends ActionBase implements IAction {
 			// 用空格分割查询字符串，拼接为 OR
 			txtExps = lsp.getPara1().trim().split(" ");
 		}
-		MStr s = new MStr();
+		String opTag = lsp.getTag();
+
+		if (opTag.equals("blk")) {// 空白
+			return " (" + dataField + " = '' or " + dataField + " is null)";
+		} else if (opTag.equals("nblk")) {// 非空白
+			return " " + dataField + " != '' ";
+		}
 		String op = " like ";
 		String op_left = "%";
 		String op_right = "%";
 
-		if (lsp.getTag().equals("llk")) {// 左like
+		if (opTag.equals("llk")) {// 左like
 			op_left = "";
-		} else if (lsp.getTag().equals("rlk")) {// 右like
+		} else if (opTag.equals("rlk")) {// 右like
 			op_right = "";
-		} else if (lsp.getTag().equals("eq")) {// =
+		} else if (opTag.equals("nlk")) {// not like
+			op = " not like ";
+		} else if (opTag.equals("eq")) {// =
 			op_right = "";
 			op_left = "";
 			op = " = ";
-		}
+		} else if (opTag.equals("uneq")) {// !=
+			op_right = "";
+			op_left = "";
+			op = " != ";
+		}  
 
+		MStr s = new MStr();
 		StringBuilder sb = new StringBuilder();
 
 		int len = txtExps.length;
@@ -775,12 +819,21 @@ public class ActionListFrame extends ActionBase implements IAction {
 			if (s.length() > 0) {
 				s.a(" OR ");
 			}
-
-			if (databaseType.equals("HSQLDB")) {
-				s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp.replace("'", "''").toUpperCase() + op_right
-						+ "' ");
+			String exp1 = this.parameterStringExp(exp, conn);
+			if (opTag.equals("uneq") || opTag.equals("nlk")) {
+				// 不等于和不包含将null值包含进来
+				if (databaseType.equals("HSQLDB")) {
+					s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp1.toUpperCase() + op_right + "' or "
+							+ dataField + " is null)");
+				} else {
+					s.a(" (" + dataField + op + " '" + op_left + exp1 + op_right + "' or " + dataField + " is null)");
+				}
 			} else {
-				s.a(" " + dataField + op + " '" + op_left + exp.replace("'", "''") + op_right + "' ");
+				if (databaseType.equals("HSQLDB")) {
+					s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp1.toUpperCase() + op_right + "' ");
+				} else {
+					s.a(" " + dataField + op + " '" + op_left + exp1 + op_right + "' ");
+				}
 			}
 		}
 		if (s.length() == 0) {

@@ -2248,6 +2248,12 @@ public class DataConnection {
 		}
 	}
 
+	/**
+	 * SQL字符串参数值表达式，替换'号和\转译符号（mysql）
+	 * 
+	 * @param parameter 字符串参数值
+	 * @return
+	 */
 	public String sqlParameterStringExp(String parameter) {
 		if (parameter == null) {
 			return "NULL";
@@ -2268,6 +2274,24 @@ public class DataConnection {
 			parameter = "N" + parameter;
 		}
 		return parameter;
+	}
+
+	/**
+	 * 处理字段或表名的字符串表达式，带上[(sqlserver)或`(mysql)
+	 * 
+	 * @param fieldOrTable 字段或表名
+	 * @return 带上[(sqlserver)或`(mysql)的字段或表名
+	 */
+	public String sqlFieldOrTableExp(String fieldOrTable) {
+		boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
+		boolean isSqlServer = this.getDatabaseType().equalsIgnoreCase("MSSQL");
+		if (isMysql) {
+			return "`" + fieldOrTable + "`";
+		} else if (isSqlServer) {
+			return "[" + fieldOrTable + "]";
+		} else {
+			return fieldOrTable; // 不处理
+		}
 	}
 
 	public String getConnectionString() {
