@@ -9,9 +9,9 @@ public class Dir {
 	private String _parentPath;
 
 	private String _Name;
-	
+
 	private String _Ext;
-	
+
 	private boolean _IsFile;
 
 	/**
@@ -22,8 +22,7 @@ public class Dir {
 	}
 
 	/**
-	 * @param name
-	 *            the _Name to set
+	 * @param name the _Name to set
 	 */
 	public void setName(String name) {
 		_Name = name;
@@ -37,8 +36,7 @@ public class Dir {
 	}
 
 	/**
-	 * @param _path
-	 *            the _path to set
+	 * @param _path the _path to set
 	 */
 	public void setPath(String _path) {
 		this._path = _path;
@@ -52,8 +50,7 @@ public class Dir {
 	}
 
 	/**
-	 * @param path
-	 *            the _parentPath to set
+	 * @param path the _parentPath to set
 	 */
 	public void setParentPath(String path) {
 		_parentPath = path;
@@ -63,21 +60,21 @@ public class Dir {
 
 	}
 
-	public Dir(String name, String path, String parentPath,boolean isFile) {
+	public Dir(String name, String path, String parentPath, boolean isFile) {
 		_Name = name;
 		_path = path;
 		this._parentPath = parentPath;
-		this._Ext=Dir.getFileExt(_Name);
-		this._IsFile=isFile;
-		
+		this._Ext = Dir.getFileExt(_Name);
+		this._IsFile = isFile;
+
 	}
 
 	public Dir(File file) {
 		_Name = file.getName();
 		_path = file.getPath();
 		_parentPath = file.getParentFile().getPath();
-		this._Ext=Dir.getFileExt(_Name);
-		this._IsFile=file.isFile();
+		this._Ext = Dir.getFileExt(_Name);
+		this._IsFile = file.isFile();
 	}
 
 	/**
@@ -108,12 +105,19 @@ public class Dir {
 		_IsFile = isFile;
 	}
 
-	public static String getFileExt(String fileName){
-		int m=fileName.lastIndexOf(".");
-		if(m<0){
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("path=").append(this._path).append("; parentPath=").append(this._parentPath).append("; name=")
+				.append(this._Name).append("; file=").append(this._IsFile);
+		return sb.toString();
+	}
+
+	public static String getFileExt(String fileName) {
+		int m = fileName.lastIndexOf(".");
+		if (m < 0) {
 			return "";
 		}
-		String ext=fileName.substring(m);
+		String ext = fileName.substring(m);
 		return ext;
 	}
 }

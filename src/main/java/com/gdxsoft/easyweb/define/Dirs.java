@@ -2,6 +2,7 @@ package com.gdxsoft.easyweb.define;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,8 +10,13 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.EnumSet;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Dirs {
+	private static Logger LOGGER = LoggerFactory.getLogger(Dirs.class);
 	private ArrayList<Dir> _Dirs;
 	private String _InitPathName;
 	private boolean _DirAndFile;
@@ -20,7 +26,7 @@ public class Dirs {
 	public Dirs() {
 		this._Dirs = new ArrayList<Dir>();
 	}
-	
+
 	public Dirs(String initPathName, boolean dirAndFile) {
 		_DirAndFile = dirAndFile;
 		File f1 = new File(initPathName);
@@ -32,7 +38,7 @@ public class Dirs {
 	public void addDir(Dir dir) {
 		this._Dirs.add(dir);
 	}
-	
+
 	public void init() throws IOException {
 
 		this.initDirsNio(this._InitPathName);
@@ -87,16 +93,18 @@ public class Dirs {
 	/**
 	 * 初始化目录(jdk1.7)
 	 * 
-	 * @param name
-	 *            根目录
+	 * @param name 根目录
 	 * @throws IOException
 	 */
 	private void initDirsNio(String name) throws IOException {
 		long t0 = System.currentTimeMillis();
 		Path root = Paths.get(name);
 		MyVisitor fv = new MyVisitor(this);
-
-		Files.walkFileTree(root, fv);
+		
+		// 表示在遍历的时候软链接将会被处理为目标文件（默认情况下，软链接不会被处理）。
+		// follow links
+		EnumSet<FileVisitOption> opts = EnumSet.of(FileVisitOption.FOLLOW_LINKS); 
+		Files.walkFileTree(root, opts, 32, fv);
 		long t1 = System.currentTimeMillis();
 
 		System.out.println(t1 - t0);
@@ -108,8 +116,7 @@ public class Dirs {
 	/**
 	 * 老方法,速度慢jdk1.6 初始化目录(递归程序)
 	 * 
-	 * @param name
-	 *            根目录
+	 * @param name 根目录
 	 */
 	void initDirs(String name) {
 		long t0 = System.currentTimeMillis();
@@ -235,20 +242,10 @@ public class Dirs {
 	}
 
 	/**
-	 * @param filetes
-	 *            the _Filetes to set
+	 * @param filetes the _Filetes to set
 	 */
 	public void setFiletes(String[] filetes) {
 		_Filetes = filetes;
-	}
-
-	public static void main(String[] args) {
-		Dirs dirs = new Dirs("c:\\Volumes\\b2b\\user.config.xml\\", true);
-		String[] filter = { "xml" };
-		dirs.setFiletes(filter);
-		for (int i = 0; i < dirs.getDirs().size(); i++) {
-			System.out.println(dirs.getDirs().get(i).getPath());
-		}
 	}
 
 	private class MyVisitor extends SimpleFileVisitor<Path> {
@@ -269,7 +266,8 @@ public class Dirs {
 			Dir d = new Dir(name, path, parentPath, false);
 
 			this._Inst._Dirs.add(d);
-
+			LOGGER.debug("add dir: {}", d.toString());
+			
 			return FileVisitResult.CONTINUE;
 		}
 
@@ -284,9 +282,16 @@ public class Dirs {
 				Dir d = new Dir(name, path, parentPath, true);
 
 				if (this._Inst.checkFilter(d)) {
+					LOGGER.debug("add dir: {}", d.toString());
 					this._Inst._Dirs.add(d);
 				}
 			}
+			return FileVisitResult.CONTINUE;
+		}
+		
+		@Override
+		public FileVisitResult visitFileFailed(Path file,IOException e){
+			LOGGER.warn("SKIP error: {}, {}", file.toString(), e.getMessage());
 			return FileVisitResult.CONTINUE;
 		}
 	}
