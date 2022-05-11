@@ -961,11 +961,12 @@ public class ActionListFrame extends ActionBase implements IAction {
 				try {
 					Double.parseDouble(lsp.getPara1());
 					isHaveFirst = true;
+					sb.append(dataField + " >= " + lsp.getPara1());
 				} catch (Exception err) {
 					return null;
 				}
 			}
-			sb.append(dataField + " >= " + lsp.getPara1());
+			
 			if (!lsp.getPara2().equals("")) {
 				try {
 					Double.parseDouble(lsp.getPara2());
