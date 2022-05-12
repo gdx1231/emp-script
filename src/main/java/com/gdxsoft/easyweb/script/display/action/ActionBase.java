@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -290,95 +289,56 @@ public class ActionBase {
 		String sqlExp = sqlItem.getItem("JSON");
 
 		JSONArray jsonArray = new JSONArray(sqlExp);
-
-		ActionJSON actionJson = new ActionJSON();
+		RequestValue rv = this.getRequestValue();
 
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject act = jsonArray.getJSONObject(i);
 			String actStr = this._HtmlClass.getItemValues().replaceJsParameters(act.toString());
 
 			act = new JSONObject(actStr);
+			ActionJSONParameter actionJSONParameter = new ActionJSONParameter();
+			actionJSONParameter.init(act);
+			
+			if (actionJSONParameter.isAttacheQuery()) {
+				// 将Query本地数据带过去
+				MTable querys = rv.getPageValues().getQueryValues();
+				this.attachJsonPostData(querys, actionJSONParameter.getQueries());
+			}
 
-			if (!act.has("method")) {
-				throw new Exception("method没有提供 " + act.toString());
+			if (actionJSONParameter.isAttachePost()) {
+				// 将Form本地数据带过去
+				MTable forms = rv.getPageValues().getFormValues();
+				this.attachJsonPostData(forms, actionJSONParameter.getData());
 			}
-			if (!act.has("url")) {
-				throw new Exception("url 没有提供 " + act.toString());
-			}
-			String url = act.getString("url");
 
-			String charset = "";
-			if (act.has("charset")) {
-				charset = act.optString("charset");
+			if (actionJSONParameter.isAttacheCookies()) {
+				// 将本地的cookie带过去
+				actionJSONParameter.getHeaders().put("cookie", rv.getRequest().getHeader("cookie"));
 			}
-			if (act.has("userAgent")) {
-				if (act.optString("userAgent") != null && act.optString("userAgent").length() > 0) {
-					actionJson.setUserAgent(act.optString("userAgent"));
+
+			ActionJSON actionJson = new ActionJSON();
+
+			this.getDebugFrames().addDebug(this, "JSON-Q-开始", act.toString(4));
+			ArrayList<DTTable> tbs = actionJson.action(actionJSONParameter);
+			this.getDebugFrames().addDebug(this, "JSON-Q-结束", actionJson.getNet().getLastStatusCode() + "");
+
+			for (int ia = 0; ia < tbs.size(); ia++) {
+				DTTable tb = tbs.get(ia);
+				if (tb.getCount() == 1) {
+					this.addDTTableToRequestValue(tb);
 				}
-			}
-			// 设置是否system.out 输出调用结果
-			if (act.has("debug")) {
-				actionJson.setDebug(act.optBoolean("debug"));
-			}
+				this.getDTTables().add(tb);
 
-			String method = act.getString("method").toLowerCase().trim();
-
-			// post 提交的数据
-			HashMap<String, String> data = new HashMap<String, String>();
-			// 检查重复数据
-			HashMap<String, String> paras = new HashMap<String, String>();
-
-			RequestValue rv = this.getRequestValue();
-			// 将Query本地数据带过去
-			MTable querys = rv.getPageValues().getQueryValues();
-			this.attachJsonPostData(querys, data, paras);
-
-			// 将Form本地数据带过去
-			MTable forms = rv.getPageValues().getFormValues();
-			this.attachJsonPostData(forms, data, paras);
-
-			if (act.has("data")) {
-				JSONObject d = act.getJSONObject("data");
-				Iterator<?> it = d.keys();
-				while (it.hasNext()) {
-					String key = it.next().toString();
-					Object val = d.get(key);
-					if (val != null) {
-						// 去除重复值
-						if (paras.containsKey(key.toUpperCase())) {
-							paras.remove(key.toUpperCase());
+				if (tb.getAttsTable().containsKey("tag")) {
+					Object param = tb.getAttsTable().get("tag");
+					ActionJSONParameterListTag p = (ActionJSONParameterListTag) param;
+					try {
+						if (p.isSaveValid()) {
+							actionJson.saveData(tb, p);
 						}
-						data.put(key, val.toString());
+					} catch (Exception err) {
+						LOGGER.error("actionJson.save {}, {}", err.getMessage(), p.getJsonObject().toString(4));
 					}
-				}
-			}
-
-			if (method.equals("query")) {
-				this.getDebugFrames().addDebug(this, "JSON-Q-开始", act.toString());
-				ArrayList<DTTable> tbs = actionJson.query(url, data, charset);
-
-				for (int ia = 0; ia < tbs.size(); ia++) {
-					DTTable tb = tbs.get(ia);
-					if (tb.getCount() == 1) {
-						this.addDTTableToRequestValue(tb);
-					}
-					this.getDTTables().add(tb);
-
-					if (ia == 0 && act.has("save")) {
-						try {
-							actionJson.saveData(tb, act.getJSONObject("save"));
-						} catch (Exception err) {
-							System.out.println("actionJson.save:" + err.getMessage());
-						}
-					}
-				}
-				this.getDebugFrames().addDebug(this, "JSON-Q-结束", actionJson.getLastResult());
-			} else { // update
-				this.getDebugFrames().addDebug(this, "JSON-U-开始", act.toString());
-				boolean updateRst = actionJson.update(url, data, charset);
-				this.getDebugFrames().addDebug(this, "JSON-U-结束", actionJson.getLastResult());
-				if (!updateRst) {
-					throw new Exception(actionJson.getLastResult());
 				}
 			}
 
@@ -394,24 +354,22 @@ public class ActionBase {
 	 * @param data
 	 * @param paras
 	 */
-	private void attachJsonPostData(MTable querys, HashMap<String, String> data, HashMap<String, String> paras) {
+	private void attachJsonPostData(MTable querys, Map<String, String> paras) {
 		for (int ia = 0; ia < querys.getCount(); ia++) {
 			Object key = querys.getKey(ia);
 			PageValue val = (PageValue) querys.get(key);
 			String v = val.getStringValue();
 			if (v != null) {
 				String val_name = val.getName();
-
 				if (val_name.toUpperCase().equals("XMLNAME") || val_name.toUpperCase().equals("ITEMNAME")
 						|| val_name.toUpperCase().equals("EWA_AJAX")) {
 					continue;
 				}
 				// 去除重复值
-				if (paras.containsKey(val_name.toUpperCase())) {
-					paras.remove(val_name.toUpperCase());
+				if (paras.containsKey(val_name)) {
+					continue;
 				}
-				data.put(val_name, v);
-				paras.put(val_name.toUpperCase(), val_name);
+				paras.put(val_name, v);
 			}
 		}
 	}
@@ -419,7 +377,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClass(java.lang .String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClass(java.lang
+	 * .String)
 	 */
 	public void executeCallClass(String name) throws Exception {
 		UserXItemValues sqlset = this.getUserConfig().getUserActionItem().getItem("ClassSet");
@@ -569,7 +528,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClassCreateObjects (java.lang.String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallClassCreateObjects
+	 * (java.lang.String)
 	 */
 	public Object[] executeCallClassCreateObjects(String strData) {
 		if (strData == null)
@@ -588,7 +548,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallScript(java.lang .String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeCallScript(java.lang
+	 * .String)
 	 */
 	public String executeCallScript(String name) throws Exception {
 		// <ScriptSet>
@@ -616,7 +577,7 @@ public class ActionBase {
 			this.executeSqlProcdure(sql);
 			// 检查执行提交时返回的错误判断
 			return !this.checkActionErrorOutInProcdure();
-		} else if (isSelect) { //不再判断 sqlType = query or update
+		} else if (isSelect) { // 不再判断 sqlType = query or update
 			// 查询
 			this.executeSqlQuery(sql);
 			DTTable dt = (DTTable) this.getDTTables().getLast();
@@ -624,14 +585,14 @@ public class ActionBase {
 				this.addDTTableToRequestValue(dt);
 			}
 			dt.setName(name);
-			
+
 			// 检查执行提交时返回的错误判断
 			return !this.checkActionErrorOutInTable(dt);
 		} else {// 更新
 			this.executeSqlUpdate(sql);
 			return true;
 		}
-		
+
 //		if (sqlType.equals("update") && isSelect) {
 //			// 执行过程中有其它Select过程
 //			this.executeSqlQuery(sql);
@@ -666,6 +627,7 @@ public class ActionBase {
 
 	/**
 	 * 执行SQL语句
+	 * 
 	 * @param name SqlSet名称
 	 * @throws Exception
 	 */
@@ -682,20 +644,20 @@ public class ActionBase {
 		int runInc = 0; // 执行次数
 		for (int i = 0; i < sqlArray.length; i++) {
 			String sql = sqlArray[i].trim();
-			if (sql.length() == 0 ) {// 空语句
+			if (sql.length() == 0) {// 空语句
 				continue;
 			}
 			String sqlType = sqlItem.getSqlType();
-			
+
 			boolean isSuccessful = this.executeSql(runInc, sql, sqlType, name);
 			if (!isSuccessful) { // 检查执行提交时返回的错误判断
-				if (isTrans) {	// 事务回滚
+				if (isTrans) { // 事务回滚
 					cnn.transRollback();
 				}
 				cnn.close();
 				return;
 			}
-			
+
 			if (cnn.getErrorMsg() != null && cnn.getErrorMsg().length() > 0) {
 				if (isTrans) {
 					cnn.transRollback();
@@ -705,7 +667,6 @@ public class ActionBase {
 			}
 			this.setChkErrorMsg(null);
 
-			
 			runInc++;
 		}
 		if (isTrans) {
@@ -728,7 +689,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#exceuteCallUrl(java.lang. String )
+	 * @see com.gdxsoft.easyweb.script.display.IAction#exceuteCallUrl(java.lang.
+	 * String )
 	 */
 	public String exceuteCallUrl(String name) throws Exception {
 		// <UrlSet>
@@ -789,8 +751,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#executeSessionCookie(com. gdxsoft
-	 * .easyweb.script.userConfig.UserXItemValue)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#executeSessionCookie(com.
+	 * gdxsoft .easyweb.script.userConfig.UserXItemValue)
 	 */
 	public void executeSessionCookie(UserXItemValue uxv) throws Exception {
 
@@ -985,19 +947,24 @@ public class ActionBase {
 
 		/*
 		 * MStr s = new MStr(); // Set-Cookie:G_ADM_UNID__EWA__=
-		 * TxcW7fr2HY6WYLEn8hj3Q78IG3lvkSpmymAwL0nJERk8EuvwdyUjxA%3D%3D; // Expires=Tue, 19-Apr-2016 02:05:54 GMT;
-		 * Path=/cm-b2b-ex s.a(cookie.getName()); s.a("="); if (cookie.getValue() != null) { s.a(cookie.getValue()); }
-		 * // Set-Cookie:JSESSIONID=2221EC98D8C089036065E4F31FFB42DF; // Path=/cm-b2b-ex if (cookie.getMaxAge() > 0) {
-		 * Calendar c = Calendar.getInstance(); c.add(Calendar.SECOND, cookie.getMaxAge()); String dt =
-		 * Utils.getDateGMTString(c); s.a("; Expires=" + dt); } else if (cookie.getMaxAge() == 0 ) { // 删除cookie
-		 * Calendar c = Calendar.getInstance(); c.add(Calendar.YEAR, -2); String dt = Utils.getDateGMTString(c);
-		 * s.a("; Expires=" + dt); } if (cookie.getPath() != null && cookie.getPath().trim().length() > 0) {
-		 * s.a("; Path=" + cookie.getPath()); } if (cookie.getSecure()) { s.a("; Secure"); } cookie.setHttpOnly(true);
+		 * TxcW7fr2HY6WYLEn8hj3Q78IG3lvkSpmymAwL0nJERk8EuvwdyUjxA%3D%3D; // Expires=Tue,
+		 * 19-Apr-2016 02:05:54 GMT; Path=/cm-b2b-ex s.a(cookie.getName()); s.a("="); if
+		 * (cookie.getValue() != null) { s.a(cookie.getValue()); } //
+		 * Set-Cookie:JSESSIONID=2221EC98D8C089036065E4F31FFB42DF; // Path=/cm-b2b-ex if
+		 * (cookie.getMaxAge() > 0) { Calendar c = Calendar.getInstance();
+		 * c.add(Calendar.SECOND, cookie.getMaxAge()); String dt =
+		 * Utils.getDateGMTString(c); s.a("; Expires=" + dt); } else if
+		 * (cookie.getMaxAge() == 0 ) { // 删除cookie Calendar c = Calendar.getInstance();
+		 * c.add(Calendar.YEAR, -2); String dt = Utils.getDateGMTString(c);
+		 * s.a("; Expires=" + dt); } if (cookie.getPath() != null &&
+		 * cookie.getPath().trim().length() > 0) { s.a("; Path=" + cookie.getPath()); }
+		 * if (cookie.getSecure()) { s.a("; Secure"); } cookie.setHttpOnly(true);
 		 * s.a("; HttpOnly");
 		 * 
 		 * // 当是https请求时，需要配置 nginx // proxy_set_header X-Forwarded-Scheme $scheme; if
-		 * ("https".equals(this.getRequestValue().getRequest().getHeader( "X-Forwarded-Scheme"))) { s.a("; secure");
-		 * cookie.setSecure(true); } // ; SameSite=Lax 老版本浏览器不支持
+		 * ("https".equals(this.getRequestValue().getRequest().getHeader(
+		 * "X-Forwarded-Scheme"))) { s.a("; secure"); cookie.setSecure(true); } // ;
+		 * SameSite=Lax 老版本浏览器不支持
 		 * 
 		 * this._Response.addHeader("Set-Cookie", s.toString());
 		 */
@@ -1006,7 +973,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#getPageItemValue(java.lang .String, java.lang.String)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#getPageItemValue(java.lang
+	 * .String, java.lang.String)
 	 */
 	public String getPageItemValue(String itemName, String tagName) {
 		if (this.getUserConfig().getUserPageItem().testName(itemName)) {
@@ -1166,7 +1134,8 @@ public class ActionBase {
 
 	/**
 	 * 执行纵向表转为横向表<br>
-	 * {"TYPE":"HOR", "RUN_TYPE": "U", "FROM_TABLE": "WEB_USER", "UNID":"XX", "WHERE":"A=@AA"}
+	 * {"TYPE":"HOR", "RUN_TYPE": "U", "FROM_TABLE": "WEB_USER", "UNID":"XX",
+	 * "WHERE":"A=@AA"}
 	 * 
 	 * @param opt
 	 * @param fromTable
@@ -1240,8 +1209,8 @@ public class ActionBase {
 
 	/**
 	 * 连接纵向表<br>
-	 * {"TYPE":"JOIN_HOR", "FROM_KEYS": "TAG1,TAG2", "TO_KEYS": "BAS_TAG1,BAS_TAG2", "FIELDS":"A1,A2, A3",
-	 * "NAME_KEY":"DT_NAME", "NAME_KEY":"DT_VAL"}
+	 * {"TYPE":"JOIN_HOR", "FROM_KEYS": "TAG1,TAG2", "TO_KEYS": "BAS_TAG1,BAS_TAG2",
+	 * "FIELDS":"A1,A2, A3", "NAME_KEY":"DT_NAME", "NAME_KEY":"DT_VAL"}
 	 * 
 	 * @param opt
 	 * @param fromTable
@@ -1329,7 +1298,8 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#setResponse(javax.servlet. http.HttpServletResponse)
+	 * @see com.gdxsoft.easyweb.script.display.IAction#setResponse(javax.servlet.
+	 * http.HttpServletResponse)
 	 */
 	public void setResponse(HttpServletResponse response) {
 		_Response = response;

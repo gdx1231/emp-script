@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -386,8 +387,12 @@ public class DTTable implements Serializable {
 	 */
 	public List<?> toClasses(Class<?> objectClass) throws Exception {
 		List<Object> al = new ArrayList<Object>();
+		// 1.获取指定的构造器：
+		Constructor<?> con1 = objectClass.getDeclaredConstructor();
+		// 2.保证此构造器是可访问的：
+		con1.setAccessible(true);
 		for (int i = 0; i < this.getCount(); i++) {
-			Object obj = objectClass.newInstance();
+			Object obj = con1.newInstance();
 			this.getRow(i).parseToClass(obj);
 			al.add(obj);
 		}
@@ -417,8 +422,8 @@ public class DTTable implements Serializable {
 
 	/**
 	 * 根据指定的字段初始化字段的XML属性，是否从XML的属性中获取<br>
-	 * Initialize the table columns XML "isAttribute" according to the specified, Whether to get the value from the XML
-	 * element attribute fields
+	 * Initialize the table columns XML "isAttribute" according to the specified,
+	 * Whether to get the value from the XML element attribute fields
 	 * 
 	 * @param fields      the fields name
 	 * @param isAttribute 是否从XML的属性中获取 <br>
@@ -1376,35 +1381,52 @@ public class DTTable implements Serializable {
 	 * 通过JSONArray创建表<br>
 	 * Initialize the table data from the JSON array
 	 * 
-	 * @param obj the JSON array
+	 * @param arr the JSON array
 	 * @throws Exception the exception
 	 */
-	public void initData(JSONArray obj) throws Exception {
-		for (int i = 0; i < obj.length(); i++) {
-			DTRow row = new DTRow();
-			row.setTable(this);
-			this._Rows.addRow(row);
-
-			JSONObject o = obj.getJSONObject(i);
+	public void initData(JSONArray arr) throws Exception {
+		// 由于jsonarray的每个对象的字段不一定相同，因此扫描全部数据的字段
+		for (int i = 0; i < arr.length(); i++) {
+			JSONObject o = arr.getJSONObject(i);
 			Iterator<?> it = o.keys();
 			while (it.hasNext()) {
 				String name = it.next().toString();
-				Object val = o.get(name);
 				if (!this._Columns.testName(name)) {
 					DTColumn col = new DTColumn();
 					col.setName(name);
 					col.setTypeName("varchar");
 					this._Columns.addColumn(col);
 				}
-				DTCell cell = new DTCell();
-				cell.setColumn(this._Columns.getColumn(name));
-				if (val != null) {
-					cell.setValue(val);
-				}
-				row.addData(cell);
 			}
 		}
 
+		for (int i = 0; i < arr.length(); i++) {
+			DTRow row = new DTRow();
+			row.setTable(this);
+			this._Rows.addRow(row);
+
+			JSONObject o = arr.getJSONObject(i);
+			boolean isDebug = false;
+			for (int m = 0; m < this.getColumns().getCount(); m++) {
+				DTColumn col = this.getColumns().getColumn(m);
+				String name = col.getName();
+
+				Object val = o.has(name) ? o.get(name) : null;
+				if ("supplierId".equals(name) && "13356".equals(val.toString())) {
+					isDebug = true;
+				}
+
+				DTCell cell = new DTCell();
+				cell.setColumn(col);
+				cell.setValue(val);
+
+				row.addData(cell);
+			}
+			if (isDebug) {
+				LOGGER.info(row.toJson().toString(2));
+				LOGGER.info(o.toString(2));
+			}
+		}
 	}
 
 	/**
@@ -1478,14 +1500,14 @@ public class DTTable implements Serializable {
 				col.setPrecision(md.getPrecision(i));
 				col.setScale(md.getScale(i));
 				col.setTypeName(md.getColumnTypeName(i));
-				
-				// 2021-07-01 
+
+				// 2021-07-01
 				col.setCatalogName(md.getCatalogName(i));
-				col.setTableName( md.getTableName(i));
+				col.setTableName(md.getTableName(i));
 				col.setSchemaName(md.getSchemaName(i));
-				
+
 				col.setClassName(md.getColumnClassName(i));
-				
+
 				this._Columns.addColumn(col);
 
 				// JSON字段

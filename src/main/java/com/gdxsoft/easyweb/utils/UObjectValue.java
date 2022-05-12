@@ -193,13 +193,13 @@ public class UObjectValue {
 			method.invoke(instance, newVals);
 			return null;
 		} catch (IllegalArgumentException e) {
-			LOGGER.error(e.getMessage());
+			LOGGER.error("{},{},{}", instance,method, e.getMessage());
 			return e.getMessage();
 		} catch (IllegalAccessException e) {
-			LOGGER.error(e.getMessage());
+			LOGGER.error("{},{},{}", instance,method, e.getMessage());
 			return e.getMessage();
 		} catch (InvocationTargetException e) {
-			LOGGER.error(e.getMessage());
+			LOGGER.error("{},{},{}", instance,method, e.getMessage());
 			return e.getMessage();
 		}
 	}

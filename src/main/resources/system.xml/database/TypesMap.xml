@@ -36,8 +36,9 @@
 		</Map>
 		<Map Name="TEXT" CreateNumber="0" InsertPrefix="'" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
-				<MapTo Name="TEXT" />
+				<MapTo Name="nvarchar(max)" />
 				<MapTo Name="NTEXT" />
+				<MapTo Name="TEXT" />
 			</Database>
 			<Database Name="ORACLE" Desc="ORACLE">
 				<MapTo Name="CLOB" />
@@ -169,8 +170,7 @@
 				<MapTo Name="NUMERIC" />
 			</Database>
 		</Map>
-		<Map Name="BINARY" CreateNumber="1" InsertPrefix="" InsertCovert="BIN"
-			Desc="">
+		<Map Name="BINARY" CreateNumber="1" InsertPrefix="" InsertCovert="BIN" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="BINARY" />
 			</Database>
@@ -184,8 +184,7 @@
 				<MapTo Name="BINARY" />
 			</Database>
 		</Map>
-		<Map Name="VARBINARY" CreateNumber="1" InsertPrefix=""
-			InsertCovert="BIN" Desc="">
+		<Map Name="VARBINARY" CreateNumber="1" InsertPrefix="" InsertCovert="BIN" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="VARBINARY" />
 			</Database>
@@ -199,8 +198,7 @@
 				<MapTo Name="VARBINARY" />
 			</Database>
 		</Map>
-		<Map Name="IMAGE" CreateNumber="0" InsertPrefix="" InsertCovert="BIN"
-			Desc="">
+		<Map Name="IMAGE" CreateNumber="0" InsertPrefix="" InsertCovert="BIN" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="IMAGE" />
 			</Database>
@@ -219,18 +217,15 @@
 			</Database>
 		</Map>
 
-		<Map Name="DATETIME" CreateNumber="0" InsertCovert="DATE"
-			InsertPrefix="" Desc="">
+		<Map Name="DATETIME" CreateNumber="0" InsertCovert="DATE" InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
 				<MapTo Name="SMALLDATETIME" InsertCovert="replace('@val', 'T',' ')" />
 				<MapTo Name="DATE" InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
 			<Database Name="ORACLE" Desc="ORACLE">
-				<MapTo Name="DATE"
-					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
-				<MapTo Name="TIME"
-					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+				<MapTo Name="DATE" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+				<MapTo Name="TIME" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
 			</Database>
 			<Database Name="MYSQL" Desc="MySQL">
 				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
@@ -242,14 +237,12 @@
 				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
 		</Map>
-		<Map Name="TIMESTAMP" CreateNumber="0" InsertCovert="DATE"
-			InsertPrefix="" Desc="">
+		<Map Name="TIMESTAMP" CreateNumber="0" InsertCovert="DATE" InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="TIMESTAMP" InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
 			<Database Name="ORACLE" Desc="ORACLE">
-				<MapTo Name="TIMESTAMP"
-					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+				<MapTo Name="TIMESTAMP" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
 			</Database>
 			<Database Name="MYSQL" Desc="MySQL">
 				<MapTo Name="TIMESTAMP" InsertCovert="replace('@val', 'T',' ')" />
@@ -273,8 +266,7 @@
 			</Database>
 		</Map>
 
-		<Map Name="uniqueidentifier" CreateNumber="0" InsertPrefix="'"
-			Desc="">
+		<Map Name="uniqueidentifier" CreateNumber="0" InsertPrefix="'" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="uniqueidentifier" />
 			</Database>
@@ -288,7 +280,48 @@
 				<MapTo Name="VARCHAR" />
 			</Database>
 		</Map>
-
+		<Map Name="XML" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="XML" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="XML" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="XML" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="XML" />
+			</Database>
+		</Map>
+		<Map Name="JSON" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="nvarchar(max)" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="clob" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="JSON" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="text" />
+			</Database>
+		</Map>
+		<Map Name="ENUM" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="NVARCHAR(50)" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="VARCHAR2(50)" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="ENUM" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="VARCHAR(50)" />
+			</Database>
+		</Map>
 		<Map Name="XML" CreateNumber="0" InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="XML" />
