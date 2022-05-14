@@ -17,6 +17,7 @@ import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UDataUtils;
+import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UNet;
 import com.gdxsoft.easyweb.utils.USnowflake;
 import com.gdxsoft.easyweb.utils.UUrl;
@@ -117,7 +118,7 @@ public class ActionJSON {
 		int loc = jsonStr.indexOf("{");
 		int loc1 = jsonStr.indexOf("[");
 
-		if (loc1 >= 0 && loc < loc1) {// JSONObject
+		if (loc == 0 || loc < loc1) {// JSONObject
 			return true;
 		} else { // jsonArray
 			return false;
@@ -468,9 +469,12 @@ public class ActionJSON {
 		String sql0 = "SELECT * FROM " + table + " WHERE 1=2";
 		DTTable tbTmp = DTTable.getJdbcTable(sql0, param.getConnConfigName());
 
+		// 检查表是否有 _EWA_LOG_ID 字段，没有的化自动创建字段和创建检索
+		this.checkAndCreateField_EWA_LOG_ID(tbTmp, table);
+
 		// 主键表达式
 		String[] keys = key.split(",");
-		HashMap<String, Boolean> map = new HashMap<String, Boolean>();
+		Map<String, Boolean> map = new HashMap<String, Boolean>();
 		for (int i = 0; i < keys.length; i++) {
 			String k = keys[i].trim();
 			map.put(k.toUpperCase(), true);
@@ -481,16 +485,13 @@ public class ActionJSON {
 			}
 		}
 
-		StringBuilder sb = new StringBuilder(); // 字段列表
-		StringBuilder sb1 = new StringBuilder(); // 字段值列表
-		StringBuilder sb3 = new StringBuilder(); // 更新 where 列表
-		StringBuilder logExists = new StringBuilder(); // 更新 where 列表
-		logExists.append(
-				"SELECT 1 FROM _EWA_API_REQ_LOG_LST WHERE REQ_ID=@_EWA_API_REQ_LOG_LST_REQ_ID AND REF_TABLE=@_EWA_API_REQ_LOG_LST_REF_TABLE");
-		StringBuilder logInsert = new StringBuilder(); // 更新 where 列表
-		logInsert.append("INSERT INTO _EWA_API_REQ_LOG_LST(REQ_ID, REF_TABLE, REF_PARA0, REF_PARA1, REF_PARA2)"
-				+ " VALUES(@_EWA_API_REQ_LOG_LST_REQ_ID, @_EWA_API_REQ_LOG_LST_REF_TABLE");
-		int keysInc = 0;
+		StringBuilder insertFields = new StringBuilder(); // 插入字段列表
+		StringBuilder insertValues = new StringBuilder(); // 插入值列表
+
+		insertFields.append("_EWA_LOG_ID"); // 日志记录ID，和表_EWA_API_REQ_LOG_LST.REF_EWA_LOG_ID一致
+		insertValues.append("@_EWA_LOG_ID");
+
+		StringBuilder updateWhere = new StringBuilder(); // 更新 where 列表
 		for (int i = 0; i < tb.getColumns().getCount(); i++) {
 			String field = tb.getColumns().getColumn(i).getName().trim();
 			if (field.toUpperCase().equals("EWA_KEY")) {
@@ -501,122 +502,84 @@ public class ActionJSON {
 				LOGGER.warn("{}.{} not exists", table, field);
 				continue;
 			}
-			if (sb.length() > 0) {
-				sb.append("	   \n, ");
-				sb1.append("	\n, ");
-			}
-
-			sb.append(field);
-			sb1.append("@" + field);
-
+			insertFields.append("   \n, ").append(field);
+			insertValues.append("	\n, @").append(field);
 			// update where 表达式
 			if (map.containsKey(field.toUpperCase())) {
-				if (sb3.length() > 0) {
-					sb3.append(" AND ");
+				if (updateWhere.length() > 0) {
+					updateWhere.append(" AND ");
 				}
-				sb3.append(field + " = @" + field);
-				logInsert.append(", @" + field);
-				logExists.append(" and REF_PARA" + keysInc + " = @" + field);
-				keysInc++;
+				updateWhere.append(field).append("=@").append(field);
 			}
 		}
-		for (int i = keys.length; i < 3; i++) {
-			// 最多3个参数，补齐不足3个的部分
-			logInsert.append(", ''");
-			logExists.append(" and REF_PARA" + i + " = ''");
-		}
-		logInsert.append(")");
 
 		StringBuilder sbInsert = new StringBuilder();
-		sbInsert.append("INSERT INTO ").append(table).append(" (").append(sb).append(") VALUES(").append(sb1)
-				.append(")");
+		sbInsert.append("INSERT INTO ").append(table).append("(").append(insertFields).append(")VALUES(")
+				.append(insertValues).append(")");
 		String sqlInsert = sbInsert.toString();
 
-		// 加载已经存在数据 SQL
-		StringBuilder exists = new StringBuilder("SELECT * FROM " + table + " WHERE ");
-		for (int i = 0; i < tb.getCount(); i++) {
-			StringBuilder w1 = new StringBuilder(); // where条件
-			for (String key_field : map.keySet()) {
-				if (w1.length() > 0) {
-					w1.append(" AND ");
-				}
-				w1.append(key_field);
-				String v = tb.getCell(i, key_field).toString();
-				if (v != null) {
-					w1.append("=").append(conn.sqlParameterStringExp(v));
-				} else {
-					w1.append(" is null");
-				}
-			}
-			if (i > 0) {
-				exists.append("\n or ");
-			}
-			exists.append("(");
-			exists.append(w1);
-			exists.append(")");
-		}
-		LOGGER.debug(exists.toString());
-		// 已经存在数据
-		DTTable tbExists = DTTable.getJdbcTable(exists.toString(), conn);
-		if (conn.getErrorMsg() != null) {
-			conn.close();
-			throw new Exception(conn.getErrorMsg());
-		}
-
+		this.getActionBase().getDebugFrames().addDebug(this, "save", "start get exists data ");
 		// 已经存在数据的map，便于快速查找
-		HashMap<String, DTRow> mapExists = new HashMap<String, DTRow>();
-		for (int i = 0; i < tbExists.getCount(); i++) {
-			DTRow r = tbExists.getRow(i);
-			String exp = this.createKeyExp(keys, r);
-			mapExists.put(exp, r);
-		}
-		this.getActionBase().getDebugFrames().addDebug(this, "save", "end save  ");
-		this.getActionBase().getDebugFrames().addDebug(this, "save", "start save log to _EWA_API_REQ_LOG_LST ");
+		Map<String, DTRow> mapExists = this.createMapExistsData(table, tb, map, keys);
+		this.getActionBase().getDebugFrames().addDebug(this, "save", "end get exists data (" + mapExists.size() + ")");
+
+		this.getActionBase().getDebugFrames().addDebug(this, "save", "start new/update data and log detail");
 		rv.addOrUpdateValue("_EWA_API_REQ_LOG_LST_REQ_ID", this.reqId);
 		rv.addOrUpdateValue("_EWA_API_REQ_LOG_LST_REF_TABLE", table);
+
+		String logExists = this.getSqlLogExists();
+		String logInsert = this.getSqlLogListNew();
+		List<String> addedField = new ArrayList<String>();
 		try {
 			for (int i = 0; i < tb.getCount(); i++) {
+				long ewaLogId = -1;
 				DTRow r = tb.getRow(i);
 				String exp = this.createKeyExp(keys, r);
-
+				// 清除增加的字段
+				addedField.forEach(name -> {
+					rv.getPageValues().remove(name);
+				});
+				// 增加数据行到 rv
+				addedField = rv.addValues(r);
 				if (mapExists.containsKey(exp)) {
-					if (param.isSkipExists()) {
+					DTRow exisRow = mapExists.get(exp);
+					ewaLogId = exisRow.getCell("_EWA_LOG_ID").toLong();
+					rv.addOrUpdateValue("_EWA_LOG_ID", ewaLogId);
+					// 保存日志明细
+					saveLogList(logExists, logInsert);
 
+					if (param.isSkipExists()) {
 						continue;
 					}
 					// 获取不一致的字段
-					List<String> fields = UDataUtils.getNotEqualsFields(r, mapExists.get(exp), true);
-					if (fields.size() == 0) {
-
+					List<String> fields = UDataUtils.getNotEqualsFields(r, exisRow, true);
+					if (fields.size() == 0) { // 数据一致
 						continue;
 					}
-					List<String> addedField = rv.addValues(r);
-					String sqlUpdate = this.createUpdateSql(table, fields, sb3.toString());
+
+					String sqlUpdate = this.createUpdateSql(table, fields, updateWhere.toString());
 					conn.executeUpdate(sqlUpdate);
-					// 清除增加的字段
-					addedField.forEach(name -> {
-						rv.getPageValues().remove(name);
-					});
 				} else {
-					List<String> addedField = rv.addValues(r);
+					ewaLogId = USnowflake.nextId(); // 获取雪花id，用于记录日志编号
+					rv.addOrUpdateValue("_EWA_LOG_ID", ewaLogId);
 					conn.executeUpdate(sqlInsert);
-
 					// 保存日志明细
-					saveLogList(logExists.toString(), logInsert.toString());
-
+					saveLogList(logExists, logInsert);
 					// 清除增加的字段
 					addedField.forEach(name -> {
 						rv.getPageValues().remove(name);
 					});
 				}
-
 				if (conn.getErrorMsg() != null) {
 					LOGGER.error("{}", r.toJson().toString(4));
 					throw new Exception(conn.getErrorMsg());
 				}
 			}
 			this.getActionBase().getDebugFrames().addDebug(this, "save", "end save log to _EWA_API_REQ_LOG_LST ");
-
+			// 清除增加的字段
+			addedField.forEach(name -> {
+				rv.getPageValues().remove(name);
+			});
 
 		} catch (Exception err) {
 			this.getActionBase().getDebugFrames().addDebug(this, "error", err.getMessage());
@@ -630,6 +593,108 @@ public class ActionJSON {
 		} finally {
 			conn.close();
 		}
+	}
+
+	private Map<String, DTRow> createMapExistsData(String table, DTTable jsonTable, Map<String, Boolean> keysMap,
+			String[] keys) throws Exception {
+		// 加载已经存在数据 SQL
+		String exists = this.getExistsDataSql(table, jsonTable, keysMap);
+		LOGGER.debug(exists);
+		// 已经存在数据
+		DTTable tbExists = DTTable.getJdbcTable(exists, conn);
+		if (conn.getErrorMsg() != null) {
+			conn.close();
+			throw new Exception(conn.getErrorMsg());
+		}
+
+		// 已经存在数据的map，便于快速查找
+		Map<String, DTRow> mapExists = new HashMap<>();
+		for (int i = 0; i < tbExists.getCount(); i++) {
+			DTRow r = tbExists.getRow(i);
+			String exp = this.createKeyExp(keys, r);
+			mapExists.put(exp, r);
+		}
+
+		return mapExists;
+	}
+
+	private String getExistsDataSql(String table, DTTable jsonTable, Map<String, Boolean> keysMap) throws Exception {
+		// 加载已经存在数据 SQL
+		StringBuilder exists = new StringBuilder("SELECT * FROM " + table + " WHERE ");
+		for (int i = 0; i < jsonTable.getCount(); i++) {
+			StringBuilder w1 = new StringBuilder(); // where条件
+			for (String key_field : keysMap.keySet()) {
+				if (w1.length() > 0) {
+					w1.append(" AND ");
+				}
+				w1.append(key_field);
+				String v = jsonTable.getCell(i, key_field).toString();
+				if (v != null) {
+					w1.append("=").append(conn.sqlParameterStringExp(v));
+				} else {
+					w1.append(" is null");
+				}
+			}
+			if (i > 0) {
+				exists.append("\n or ");
+			}
+			exists.append("(");
+			exists.append(w1);
+			exists.append(")");
+		}
+
+		return exists.toString();
+	}
+
+	/**
+	 * 检查表是否有 _EWA_LOG_ID 字段，没有的化自动创建字段和创建检索
+	 * 
+	 * @param tbTmp 模板表
+	 * @param table 标名称
+	 * @throws Exception
+	 */
+	private void checkAndCreateField_EWA_LOG_ID(DTTable tbTmp, String table) throws Exception {
+		if (tbTmp.getColumns().testName("_EWA_LOG_ID")) {
+			return;
+		}
+		String sql = "alter table " + table + " add _EWA_LOG_ID bigint ";
+		String sql1 = "create index IDX_" + table + "__EWA_LOG_ID on " + table + "(_EWA_LOG_ID)";
+		conn.executeUpdate(sql);
+		if (conn.getErrorMsg() == null) {
+			conn.executeUpdate(sql1);
+		}
+		if (conn.getErrorMsg() != null) {
+			LOGGER.error(conn.getErrorMsg());
+			conn.close();
+			throw new Exception(conn.getErrorMsg());
+		}
+		conn.close();
+	}
+
+	/**
+	 * 获取插入 _EWA_API_REQ_LOG_LST 表的sql
+	 * 
+	 * @return
+	 */
+	private String getSqlLogListNew() {
+		StringBuilder logInsert = new StringBuilder();
+		logInsert.append("INSERT INTO _EWA_API_REQ_LOG_LST(REQ_ID, REF_TABLE, REF_EWA_LOG_ID)\n");
+		logInsert.append("VALUES(@_EWA_API_REQ_LOG_LST_REQ_ID, @_EWA_API_REQ_LOG_LST_REF_TABLE, @_EWA_LOG_ID)");
+		return logInsert.toString();
+	}
+
+	/**
+	 * 获取日志明细 _EWA_API_REQ_LOG_LST 查询sql
+	 * 
+	 * @return
+	 */
+	private String getSqlLogExists() {
+		StringBuilder logExists = new StringBuilder(); // 更新 where 列表
+		logExists.append("SELECT 1 FROM _EWA_API_REQ_LOG_LST WHERE \n");
+		logExists.append("     REQ_ID    		= @_EWA_API_REQ_LOG_LST_REQ_ID\n");
+		logExists.append(" AND REF_TABLE 		= @_EWA_API_REQ_LOG_LST_REF_TABLE\n");
+		logExists.append(" AND REF_EWA_LOG_ID	= @_EWA_LOG_ID");
+		return logExists.toString();
 	}
 
 	private void saveLogList(String sqlLogExists, String sqlLogInsert) {
@@ -806,7 +871,13 @@ public class ActionJSON {
 				exp.append("\1$$$$gdx$$$\2");
 			}
 			String kn = keys[m].toString();
-			String kv = r.getCell(kn).toString();
+			Object v = r.getCell(kn).getValue();
+			String kv = null;
+			if(v instanceof java.math.BigDecimal ) {
+				kv = UFormat.formatDecimalClearZero(v);
+			} else {
+				kv = v.toString();
+			}
 			exp.append(kn);
 			exp.append("=");
 			exp.append(kv);
