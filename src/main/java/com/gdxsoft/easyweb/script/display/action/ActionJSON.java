@@ -1,10 +1,10 @@
 package com.gdxsoft.easyweb.script.display.action;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -16,7 +16,9 @@ import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.utils.UDataUtils;
 import com.gdxsoft.easyweb.utils.UNet;
+import com.gdxsoft.easyweb.utils.USnowflake;
 import com.gdxsoft.easyweb.utils.UUrl;
 import com.gdxsoft.easyweb.utils.Utils;
 
@@ -34,6 +36,15 @@ public class ActionJSON {
 	private String lastResult_;
 	private boolean isDebug_ = false;
 
+	private ActionBase actionBase;
+
+	private DataConnection conn;
+	private RequestValue rv;
+
+	private long reqId;
+	private boolean fromCache;
+	private String reqOptMd5;
+
 	public ActionJSON() {
 
 	}
@@ -43,28 +54,60 @@ public class ActionJSON {
 	}
 
 	public ArrayList<DTTable> action(ActionJSONParameter param) throws Exception {
-		lastResult_ = this.httpRequest(param);
-		if (!(this.net_.getLastStatusCode() >= 200 && this.net_.getLastStatusCode() < 400)) {
-			// 错误的结果
-			throw new Exception(this.net_.getLastStatusCode() + ":" + this.net_.getLastResult());
-		}
+		rv = new RequestValue();
+		conn = new DataConnection(param.getConnConfigName(), rv);
 
+		String opt = param.getJsonObject().toString(2);
+		String optMd5 = Utils.md5(opt);
+		this.reqOptMd5 = optMd5;
+
+		// 后面要用到
+		this.rv.addOrUpdateValue("REQ_OPTS", opt);
+		this.rv.addOrUpdateValue("REQ_OPTS_MD5", optMd5);
+
+		long reqId = this.checkExistsRequest(param);
+		if (reqId > 0) { // from cached
+			String sqlExists = "SELECT * FROM _EWA_API_REQ_LOG WHERE REQ_ID=" + reqId;
+			DTTable tbExists = DTTable.getJdbcTable(sqlExists, conn);
+			conn.close();
+			lastResult_ = tbExists.getCell(0, "REQ_RST").toString();
+
+			// 保存请求编号
+			this.reqId = reqId;
+			this.fromCache = true; // 来自缓存
+
+		} else { // new request
+			lastResult_ = this.httpRequest(param);
+			if (!(this.net_.getLastStatusCode() >= 200 && this.net_.getLastStatusCode() < 400)) {
+				// 错误的结果
+				throw new Exception(this.net_.getLastStatusCode() + ":" + this.net_.getLastResult());
+			}
+		}
 		ArrayList<DTTable> al = new ArrayList<DTTable>();
 		if (isJSONObject(lastResult_)) {// JSONObject
 			JSONObject resultObj = new JSONObject(this.lastResult_);
 			if (param.getListTags().size() == 0) {
-				DTTable tb = this.fromJSONObject(resultObj);
-				al.add(tb);
+				if (!this.isFromCache() || param.isAsLfData()) {
+					DTTable tb = this.fromJSONObject(resultObj);
+					al.add(tb);
+					// 作为列表数据，默认不用
+					tb.getAttsTable().add("AsLfData", param.isAsLfData());
+				}
 			} else {
 				param.getListTags().forEach(tag -> {
-					this.getTable(tag, resultObj, al, null);
+					if (!this.isFromCache() || tag.isAsLfData()) {
+						this.getTable(tag, resultObj, al, null);
+					}
 				});
-
 			}
 		} else { // JSONArray
-			JSONArray arr = new JSONArray(this.lastResult_);
-			DTTable tb = this.fromJSONArray(arr);
-			al.add(tb);
+			if (!this.isFromCache() || param.isAsLfData()) {
+				JSONArray arr = new JSONArray(this.lastResult_);
+				DTTable tb = this.fromJSONArray(arr);
+				al.add(tb);
+				// 作为列表数据，默认不用
+				tb.getAttsTable().add("AsLfData", param.isAsLfData());
+			}
 		}
 
 		return al;
@@ -88,7 +131,7 @@ public class ActionJSON {
 		}
 		Object o = jsonData.opt(tagName);
 		DTTable tb = null;
-		String tbName = pTag == null ? tagName : pTag + "." + tag;
+		String tbName = pTag == null ? tagName : pTag + "." + tagName;
 		try {
 			if (o instanceof org.json.JSONObject) {// JSONObject
 				tb = this.fromJSONObject((JSONObject) o);
@@ -97,19 +140,28 @@ public class ActionJSON {
 			}
 			tb.getAttsTable().add("tag", tag);
 			tb.setName(tbName);
+
 			al.add(tb);
+			// 作为列表数据，默认不用
+			tb.getAttsTable().add("AsLfData", tag.isAsLfData());
+
 		} catch (Exception e) {
 			LOGGER.error("JSON 2 TABLE, error={}, json={}", e.getMessage(), o.toString());
 		}
 
 		for (int i = 0; i < tag.getSubListTags().size(); i++) {
 			ActionJSONParameterListTag subTag = tag.getSubListTags().get(i);
+			if (!tb.getColumns().testName(subTag.getTag())) {
+				LOGGER.warn("The field {} not in the table. {}", subTag.getTag(), subTag.getJsonObject().toString(2));
+				continue;
+			}
 			JSONArray arr = new JSONArray();
 			String[] keys = tag.getKey().split(",");
 			try {
 				// 将表指定字段拼接成JSONArray
 				for (int m = 0; m < tb.getCount(); m++) {
 					DTRow row = tb.getRow(m);
+
 					String json = row.getCell(subTag.getTag()).toString();
 					if (json == null || json.trim().length() == 0) {
 						continue;
@@ -166,15 +218,115 @@ public class ActionJSON {
 		return this.fromJSONArray(arr);
 	}
 
+	public long checkExistsRequest(ActionJSONParameter param) {
+		if (StringUtils.isBlank(param.getExpire())) {
+			return -1;
+		}
+		String expire = param.getExpire();
+		long expireLong = 0;
+		try {
+			expireLong = this.getExpireLong(expire);
+		} catch (Exception err) {
+			LOGGER.warn("The api request expire time {}, {}", expire, err.getMessage());
+		}
+		if (expireLong <= 0) {
+			return -1;
+		}
+
+		Date expireDate = new Date(System.currentTimeMillis() + expireLong);
+		this.rv.addOrUpdateValue("REQ_EXPIRE", expireDate, "DATE", 100);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT REQ_ID FROM _EWA_API_REQ_LOG \n");
+		sb.append(" WHERE REQ_OPTS_MD5 = @REQ_OPTS_MD5 \n");
+		sb.append("   AND REQ_EXPIRE < @REQ_EXPIRE \n");
+		sb.append("   AND REQ_RST_HTTP_CODE BETWEEN 200 AND 300 \n");
+		sb.append(" ORDER BY REQ_ID DESC");
+		String sqlchk = sb.toString();
+
+		this.getActionBase().getDebugFrames().addDebug(this, "Check exists",
+				"Start check optmd5=" + rv.s("REQ_OPTS_MD5"));
+
+		DTTable tbChk = DTTable.getJdbcTable(sqlchk, "REQ_ID", 1, 1, conn);
+		if (conn.getErrorMsg() != null) {
+			LOGGER.warn("{}", conn.getErrorMsg());
+			this.getActionBase().getDebugFrames().addDebug(this, "error", conn.getErrorMsg());
+			// 创建表 _EWA_API_REQ_LOG 的ddl
+			LOGGER.info("如果表不存在，请用下面DDL:\n{}", ActionJsonDdl.getLogDdl());
+			this.getActionBase().getDebugFrames().addDebug(this, "error",
+					"如果表不存在，请用下面DDL:\n" + ActionJsonDdl.getLogDdl());
+			conn.clearErrorMsg();
+			conn.close();
+			return -1;
+		}
+		conn.close();
+		if (tbChk.getCount() == 0) {
+			this.getActionBase().getDebugFrames().addDebug(this, "Check exists", "no data");
+			return -1;
+		}
+		this.getActionBase().getDebugFrames().addDebug(this, "Check exists",
+				"Found. REQ_ID=" + tbChk.getCell(0, 0).toLong());
+		return tbChk.getCell(0, 0).toLong();
+	}
+
+	private long getExpireLong(String expire) {
+		expire = expire.trim().toLowerCase();
+		long scale = 1000; // second
+		boolean haveUnit = false;
+		if (expire.endsWith("h")) { // hour
+			scale = 60 * 60 * 1000;
+			haveUnit = true;
+		} else if (expire.endsWith("m")) { // minute
+			scale = 60 * 1000;
+			haveUnit = true;
+		} else if (expire.endsWith("d")) { // day
+			scale = 24 * 60 * 60 * 1000;
+			haveUnit = true;
+		} else if (expire.endsWith("s")) { // second
+			scale = 1000;
+			haveUnit = true;
+		}
+		if (haveUnit) {
+			expire = expire.substring(0, expire.length() - 1);
+		}
+		long expireLong = 0;
+		expireLong = Long.parseLong(expire);
+		if (expireLong <= 0) {
+			return expireLong;
+		}
+		expireLong = expireLong * scale;
+		return expireLong;
+	}
+
+	/**
+	 * 发送RSETful请求
+	 * 
+	 * @param param 请求参数
+	 * @return 结果
+	 * @throws Exception
+	 */
 	private String httpRequest(ActionJSONParameter param) throws Exception {
+
 		UNet net = this.getNet();
 		if (StringUtils.isNotBlank(param.getUserAgent())) {
 			net.setUserAgent(param.getUserAgent());
 		}
+
+		// 头部是否有accept参数设定
+		Map<String, Boolean> haveAccept = new HashMap<>();
+
+		// 添加请求头部信息，一般会有apikey等信息
 		param.getHeaders().forEach((k, v) -> {
 			net.addHeader(k, v);
+			if (k.equalsIgnoreCase("accept")) {
+				haveAccept.put("accept", true);
+			}
 		});
 
+		// 添加默认请求方式
+		if (!haveAccept.containsKey("accept")) {
+			net.addHeader("accept", "application/json");
+		}
 		if (param.isDebug()) {
 			net.setIsShowLog(true);
 		}
@@ -185,6 +337,10 @@ public class ActionJSON {
 		});
 		String url = u.getUrlWithDomain();
 		String result;
+
+		Date reqStart = new Date();
+		this.getActionBase().getDebugFrames().addDebug(this, "http start", param.getMethod() + ": " + url);
+
 		if ("GET".equalsIgnoreCase(param.getMethod())) {
 			result = net.doGet(url);
 		} else if ("POST".equalsIgnoreCase(param.getMethod())) {
@@ -218,7 +374,59 @@ public class ActionJSON {
 		} else {
 			throw new Exception("invalid method: " + param.getMethod());
 		}
+		Date reqEnd = new Date();
+		this.getActionBase().getDebugFrames().addDebug(this, "http end", "statusCode=" + net.getLastStatusCode());
 
+		String expire = param.getExpire();
+		long expireLong = 0;
+		try {
+			expireLong = this.getExpireLong(expire);
+		} catch (Exception err) {
+			LOGGER.warn("The api request expire time {}, {}", expire, err.getMessage());
+		}
+		Date expireDate = new Date(System.currentTimeMillis() + expireLong);
+		this.rv.addOrUpdateValue("REQ_EXPIRE", expireDate, "DATE", 100);
+
+		long reqId = USnowflake.nextId();
+		this.rv.addOrUpdateValue("REQ_ID", reqId);
+		this.rv.addOrUpdateValue("REQ_URL", param.getUrl());
+
+		this.rv.addOrUpdateValue("REQ_RST", result);
+		this.rv.addOrUpdateValue("REQ_RST_MD5", Utils.md5(result));
+		this.rv.addOrUpdateValue("REQ_RST_HTTP_CODE", this.net_.getLastStatusCode());
+
+		this.rv.addOrUpdateValue("REQ_START", reqStart, "DATE", 100);
+		this.rv.addOrUpdateValue("REQ_START", reqEnd, "DATE", 100);
+
+		this.rv.addOrUpdateValue("REQ_UA", this.actionBase.getRequestValue().s("SYS_USER_AGENT"));
+		this.rv.addOrUpdateValue("REQ_IP", this.actionBase.getRequestValue().s("SYS_REMOTEIP"));
+		this.rv.addOrUpdateValue("REQ_JSP", this.actionBase.getRequestValue().s("SYS_REMOTE_URL_ALL"));
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("INSERT INTO _EWA_API_REQ_LOG(\n");
+		sb.append("  REQ_ID, REQ_AGENT, REQ_URL, REQ_OPTS, REQ_OPTS_MD5\n");
+		sb.append(", REQ_CDATE, REQ_MDATE, REQ_EXPIRE, REQ_RST, REQ_RST_MD5\n");
+		sb.append(", REQ_RST_HTTP_CODE, REQ_START, REQ_END, REQ_UA, REQ_IP, REQ_JSP\n");
+		sb.append(")VALUES(\n");
+		// @REQ_OPTS, @REQ_OPTS_MD5 在action已经赋值
+		sb.append(
+				"  @REQ_ID, CASE WHEN @REQ_AGENT IS NULL THEN '' ELSE @REQ_AGENT END, @REQ_URL, @REQ_OPTS, @REQ_OPTS_MD5\n");
+		sb.append(", @sys_DATE, @sys_DATE, @REQ_EXPIRE, @REQ_RST, @REQ_RST_MD5\n");
+		sb.append(", @REQ_RST_HTTP_CODE, @REQ_START, @REQ_END, @REQ_UA, @REQ_IP, @REQ_JSP\n");
+		sb.append(")");
+
+		// 记录日志
+		conn.executeUpdate(sb.toString());
+		if (conn.getErrorMsg() != null) {
+			LOGGER.warn("{}", conn.getErrorMsg());
+			conn.clearErrorMsg();
+		}
+		conn.close();
+		this.getActionBase().getDebugFrames().addDebug(this, "http",
+				"Save the result to _EWA_API_REQ_LOG, REQ_ID = " + reqId);
+		// 保存请求编号
+		this.reqId = reqId;
+		this.fromCache = false;
 		return result;
 	}
 
@@ -233,15 +441,34 @@ public class ActionJSON {
 		if (tb == null || tb.getCount() == 0) {
 			return;
 		}
-		/*
-		 * "save": { "key": "HOTEL_ID", "table": "V_CACHED_HOTEL_MAIN" }
-		 */
+		// "listTags": [{
+		// "tag": "products",
+		// "key": "PRODUCTCODE",
+		// "table": "PRODUCT",
+		// "connConfigName": "this_is_dev",
+		// "listTags": [{
+		// "tag": "images",
+		// "key": "id",
+		// "table": "image",
+		// "connConfigName": "this_is_dev"
+		// },{
+		// "tag": "extras",
+		// "key": "name",
+		// "table": "extra",
+		// "connConfigName": "this_is_dev"
+		// }]
+		// }]
 		String key = param.getKey();
 		String table = param.getTable();
 
+		this.getActionBase().getDebugFrames().addDebug(this, "save",
+				"start save to the talbe " + table + ", records= " + tb.getCount());
+
+		// 从数据库获取空表，用于字段判断
 		String sql0 = "SELECT * FROM " + table + " WHERE 1=2";
 		DTTable tbTmp = DTTable.getJdbcTable(sql0, param.getConnConfigName());
 
+		// 主键表达式
 		String[] keys = key.split(",");
 		HashMap<String, Boolean> map = new HashMap<String, Boolean>();
 		for (int i = 0; i < keys.length; i++) {
@@ -256,9 +483,14 @@ public class ActionJSON {
 
 		StringBuilder sb = new StringBuilder(); // 字段列表
 		StringBuilder sb1 = new StringBuilder(); // 字段值列表
-		StringBuilder sb2 = new StringBuilder(); // 更新 set 列表
 		StringBuilder sb3 = new StringBuilder(); // 更新 where 列表
-
+		StringBuilder logExists = new StringBuilder(); // 更新 where 列表
+		logExists.append(
+				"SELECT 1 FROM _EWA_API_REQ_LOG_LST WHERE REQ_ID=@_EWA_API_REQ_LOG_LST_REQ_ID AND REF_TABLE=@_EWA_API_REQ_LOG_LST_REF_TABLE");
+		StringBuilder logInsert = new StringBuilder(); // 更新 where 列表
+		logInsert.append("INSERT INTO _EWA_API_REQ_LOG_LST(REQ_ID, REF_TABLE, REF_PARA0, REF_PARA1, REF_PARA2)"
+				+ " VALUES(@_EWA_API_REQ_LOG_LST_REQ_ID, @_EWA_API_REQ_LOG_LST_REF_TABLE");
+		int keysInc = 0;
 		for (int i = 0; i < tb.getColumns().getCount(); i++) {
 			String field = tb.getColumns().getColumn(i).getName().trim();
 			if (field.toUpperCase().equals("EWA_KEY")) {
@@ -270,26 +502,35 @@ public class ActionJSON {
 				continue;
 			}
 			if (sb.length() > 0) {
-				sb.append("	\n, ");
+				sb.append("	   \n, ");
 				sb1.append("	\n, ");
 			}
 
 			sb.append(field);
 			sb1.append("@" + field);
 
-			// update
+			// update where 表达式
 			if (map.containsKey(field.toUpperCase())) {
 				if (sb3.length() > 0) {
 					sb3.append(" AND ");
 				}
 				sb3.append(field + " = @" + field);
-			} else {
-				if (sb2.length() > 0) {
-					sb2.append("	\n,");
-				}
-				sb2.append(field + " = @" + field);
+				logInsert.append(", @" + field);
+				logExists.append(" and REF_PARA" + keysInc + " = @" + field);
+				keysInc++;
 			}
 		}
+		for (int i = keys.length; i < 3; i++) {
+			// 最多3个参数，补齐不足3个的部分
+			logInsert.append(", ''");
+			logExists.append(" and REF_PARA" + i + " = ''");
+		}
+		logInsert.append(")");
+
+		StringBuilder sbInsert = new StringBuilder();
+		sbInsert.append("INSERT INTO ").append(table).append(" (").append(sb).append(") VALUES(").append(sb1)
+				.append(")");
+		String sqlInsert = sbInsert.toString();
 
 		// 加载已经存在数据 SQL
 		StringBuilder exists = new StringBuilder("SELECT * FROM " + table + " WHERE ");
@@ -302,9 +543,7 @@ public class ActionJSON {
 				w1.append(key_field);
 				String v = tb.getCell(i, key_field).toString();
 				if (v != null) {
-					w1.append("='");
-					w1.append(v.replace("'", "''"));
-					w1.append("'");
+					w1.append("=").append(conn.sqlParameterStringExp(v));
 				} else {
 					w1.append(" is null");
 				}
@@ -316,78 +555,108 @@ public class ActionJSON {
 			exists.append(w1);
 			exists.append(")");
 		}
-
-		RequestValue rv1 = new RequestValue();
-		DataConnection cnn = new DataConnection(param.getConnConfigName(), rv1);
+		LOGGER.debug(exists.toString());
 		// 已经存在数据
-		DTTable tbExists = DTTable.getJdbcTable(exists.toString(), cnn);
-		if (cnn.getErrorMsg() != null) {
-			cnn.close();
-			throw new Exception(cnn.getErrorMsg());
+		DTTable tbExists = DTTable.getJdbcTable(exists.toString(), conn);
+		if (conn.getErrorMsg() != null) {
+			conn.close();
+			throw new Exception(conn.getErrorMsg());
 		}
 
+		// 已经存在数据的map，便于快速查找
 		HashMap<String, DTRow> mapExists = new HashMap<String, DTRow>();
-
 		for (int i = 0; i < tbExists.getCount(); i++) {
 			DTRow r = tbExists.getRow(i);
 			String exp = this.createKeyExp(keys, r);
 			mapExists.put(exp, r);
 		}
-
-		StringBuilder sbUpdate = new StringBuilder();
-		sbUpdate.append("UPDATE ");
-		sbUpdate.append(table);
-		sbUpdate.append(" SET ");
-		sbUpdate.append(sb2);
-		sbUpdate.append(" WHERE ");
-		sbUpdate.append(sb3);
-
-		StringBuilder sbInsert = new StringBuilder();
-		sbInsert.append("INSERT INTO ");
-		sbInsert.append(table);
-		sbInsert.append(" (");
-		sbInsert.append(sb);
-		sbInsert.append(") VALUES(");
-		sbInsert.append(sb1);
-		sbInsert.append(")");
-
-		String sqlInsert = sbInsert.toString();
-		String sqlUpdate = sbUpdate.toString();
-
+		this.getActionBase().getDebugFrames().addDebug(this, "save", "end save  ");
+		this.getActionBase().getDebugFrames().addDebug(this, "save", "start save log to _EWA_API_REQ_LOG_LST ");
+		rv.addOrUpdateValue("_EWA_API_REQ_LOG_LST_REQ_ID", this.reqId);
+		rv.addOrUpdateValue("_EWA_API_REQ_LOG_LST_REF_TABLE", table);
 		try {
 			for (int i = 0; i < tb.getCount(); i++) {
 				DTRow r = tb.getRow(i);
 				String exp = this.createKeyExp(keys, r);
+
 				if (mapExists.containsKey(exp)) {
 					if (param.isSkipExists()) {
-						continue;
-					}
-					if (this.checkRowEquals(r, mapExists.get(exp))) {
-						continue;
-					}
-					rv1.addValues(r);
-					cnn.executeUpdate(sqlUpdate);
 
+						continue;
+					}
+					// 获取不一致的字段
+					List<String> fields = UDataUtils.getNotEqualsFields(r, mapExists.get(exp), true);
+					if (fields.size() == 0) {
+
+						continue;
+					}
+					List<String> addedField = rv.addValues(r);
+					String sqlUpdate = this.createUpdateSql(table, fields, sb3.toString());
+					conn.executeUpdate(sqlUpdate);
+					// 清除增加的字段
+					addedField.forEach(name -> {
+						rv.getPageValues().remove(name);
+					});
 				} else {
-					rv1.addValues(r);
-					cnn.executeUpdate(sqlInsert);
+					List<String> addedField = rv.addValues(r);
+					conn.executeUpdate(sqlInsert);
+
+					// 保存日志明细
+					saveLogList(logExists.toString(), logInsert.toString());
+
+					// 清除增加的字段
+					addedField.forEach(name -> {
+						rv.getPageValues().remove(name);
+					});
 				}
-				if (cnn.getErrorMsg() != null) {
+
+				if (conn.getErrorMsg() != null) {
 					LOGGER.error("{}", r.toJson().toString(4));
-					throw new Exception(cnn.getErrorMsg());
+					throw new Exception(conn.getErrorMsg());
 				}
 			}
+			this.getActionBase().getDebugFrames().addDebug(this, "save", "end save log to _EWA_API_REQ_LOG_LST ");
+
+
 		} catch (Exception err) {
+			this.getActionBase().getDebugFrames().addDebug(this, "error", err.getMessage());
 			if (!param.isSkipError()) {
-				cnn.clearErrorMsg();
 				LOGGER.error(err.getMessage());
+				conn.clearErrorMsg();
 				throw err;
 			} else {
 				LOGGER.warn(err.getMessage());
 			}
 		} finally {
-			cnn.close();
+			conn.close();
 		}
+	}
+
+	private void saveLogList(String sqlLogExists, String sqlLogInsert) {
+		DTTable tb = DTTable.getJdbcTable(sqlLogExists, conn);
+		if (tb.getCount() > 0) {
+			return;
+		}
+		conn.executeUpdate(sqlLogInsert);
+
+	}
+
+	private String createUpdateSql(String table, List<String> fields, String where) {
+		StringBuilder sbUpdate = new StringBuilder();
+		sbUpdate.append("UPDATE ");
+		sbUpdate.append(table);
+		sbUpdate.append(" SET \n\t");
+		for (int i = 0; i < fields.size(); i++) {
+			String field = fields.get(i);
+			if (i > 0) {
+				sbUpdate.append("\n\t, ");
+			}
+			sbUpdate.append(field + " = @" + field);
+		}
+		sbUpdate.append("\nWHERE ");
+		sbUpdate.append(where);
+
+		return sbUpdate.toString();
 	}
 
 	/**
@@ -513,7 +782,7 @@ public class ActionJSON {
 				DTRow r = tb.getRow(i);
 				String exp = this.createKeyExp(keys, r);
 				if (mapExists.containsKey(exp)) {
-					if (this.checkRowEquals(r, mapExists.get(exp))) {
+					if (UDataUtils.checkRowEquals(r, mapExists.get(exp), true)) {
 						continue;
 					}
 					rv1.addValues(r);
@@ -528,93 +797,6 @@ public class ActionJSON {
 		} finally {
 			cnn.close();
 		}
-	}
-
-	/**
-	 * 比较两个数据行数据是否一致
-	 * 
-	 * @param r
-	 * @param r1
-	 * @return
-	 */
-	private boolean checkRowEquals(DTRow r, DTRow r1) {
-		try {
-			for (int i = 0; i < r.getCount(); i++) {
-				Object o1 = r.getCell(i).getValue();
-				String field_name = r.getTable().getColumns().getColumn(i).getName();
-				if (field_name.equalsIgnoreCase("EWA_KEY")) {
-					continue;
-				}
-				if(!r1.getTable().getColumns().testName(field_name)) {
-					continue; // 试题表中字段不存在
-				}
-				/*
-				 * if (field_name.equalsIgnoreCase("DATECREATED")) { int m = 1; m++; }
-				 */
-				Object o2 = r1.getCell(field_name).getValue();
-				 
-				System.out.println(o1.getClass());
-				System.out.println(o2.getClass());
-				
-				if(!checkEquals(o1,o2)) {
-					return false;
-				}
-			}
-			return true;
-		} catch (Exception err) {
-			System.out.print(this);
-			System.out.println(".checkRowEquals");
-			System.out.println(err.getMessage());
-			return false;
-		}
-	}
-
-	private boolean checkEquals(Object o1, Object o2) {
-		if (o1 == null && o2 != null) {
-			return false;
-		}
-		if (o1 != null && o2 == null) {
-			return false;
-		}
-		
-		if(o1 instanceof java.sql.Timestamp || o2 instanceof java.sql.Timestamp) {
-			Date t1;
-			Date t2;
-			if(o1 instanceof java.sql.Timestamp) {
-				t1 = new Date( ((java.sql.Timestamp)o1).getTime());
-			} else {
-				t1 = Utils.getDate(o1.toString());
-			}
-			if(o2 instanceof java.sql.Timestamp) {
-				t2 = new Date( ((java.sql.Timestamp)o2).getTime());
-			} else {
-				t2 = Utils.getDate(o1.toString());
-			}
-			return t1.getTime() == t2.getTime();
-		}
-		
-		if (o1 instanceof org.json.JSONObject || o2 instanceof org.json.JSONObject) {
-			JSONObject jo1 = new JSONObject(o1.toString());
-			JSONObject jo2 = new JSONObject(o2.toString());
-			Iterator<String> it = jo1.keys();
-			while (it.hasNext()) {
-				String key = it.next();
-				Object jv1 = jo1.get(key);
-				Object jv2 = jo2.get(key);
-				if(!checkEquals(jv1,jv2)) {
-					return false;
-				}
-			}
-			
-			return true;
-		}
-		if (o1 instanceof java.math.BigDecimal || o2 instanceof java.math.BigDecimal) {
-			BigDecimal bd1 = new BigDecimal(o1.toString());
-			BigDecimal bd2 = new BigDecimal(o2.toString());
-
-			return bd1.compareTo(bd2) == 0;
-		}
-		return o1.toString().equals(o2.toString());
 	}
 
 	private String createKeyExp(String[] keys, DTRow r) throws Exception {
@@ -687,6 +869,74 @@ public class ActionJSON {
 	 */
 	public void setDebug(boolean isDebug_) {
 		this.isDebug_ = isDebug_;
+	}
+
+	/**
+	 * @return the actionBase
+	 */
+	public ActionBase getActionBase() {
+		return actionBase;
+	}
+
+	/**
+	 * @param actionBase the actionBase to set
+	 */
+	public void setActionBase(ActionBase actionBase) {
+		this.actionBase = actionBase;
+	}
+
+	/**
+	 * 请求数据保存的日志id
+	 * 
+	 * @return the reqId
+	 */
+	public long getReqId() {
+		return reqId;
+	}
+
+	/**
+	 * 请求数据保存的日志id
+	 * 
+	 * @param reqId the reqId to set
+	 */
+	public void setReqId(long reqId) {
+		this.reqId = reqId;
+	}
+
+	/**
+	 * 请求数据来自缓存
+	 * 
+	 * @return the fromCache
+	 */
+	public boolean isFromCache() {
+		return fromCache;
+	}
+
+	/**
+	 * 请求数据来自缓存
+	 * 
+	 * @param fromCache the fromCache to set
+	 */
+	public void setFromCache(boolean fromCache) {
+		this.fromCache = fromCache;
+	}
+
+	/**
+	 * 请求数据参数的md5
+	 * 
+	 * @return the reqOptMd5
+	 */
+	public String getReqOptMd5() {
+		return reqOptMd5;
+	}
+
+	/**
+	 * 请求数据参数的md5
+	 * 
+	 * @param reqOptMd5 the reqOptMd5 to set
+	 */
+	public void setReqOptMd5(String reqOptMd5) {
+		this.reqOptMd5 = reqOptMd5;
 	}
 
 }

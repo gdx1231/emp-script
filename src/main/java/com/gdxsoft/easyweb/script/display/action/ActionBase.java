@@ -298,7 +298,7 @@ public class ActionBase {
 			act = new JSONObject(actStr);
 			ActionJSONParameter actionJSONParameter = new ActionJSONParameter();
 			actionJSONParameter.init(act);
-			
+
 			if (actionJSONParameter.isAttacheQuery()) {
 				// 将Query本地数据带过去
 				MTable querys = rv.getPageValues().getQueryValues();
@@ -316,29 +316,53 @@ public class ActionBase {
 				actionJSONParameter.getHeaders().put("cookie", rv.getRequest().getHeader("cookie"));
 			}
 
+			if (StringUtils.isBlank(actionJSONParameter.getConnConfigName())) {
+				String dataSource = this.getPageItemValue("DataSource", "DataSource");
+				actionJSONParameter.setConnConfigName(dataSource);
+			}
+
 			ActionJSON actionJson = new ActionJSON();
+			actionJson.setActionBase(this);
 
 			this.getDebugFrames().addDebug(this, "JSON-Q-开始", act.toString(4));
 			ArrayList<DTTable> tbs = actionJson.action(actionJSONParameter);
 			this.getDebugFrames().addDebug(this, "JSON-Q-结束", actionJson.getNet().getLastStatusCode() + "");
 
+			// 放到全局中，用于sql等访问 EWA_API.REQ_ID0， EWA_API.REQ_ID1 ...
+			this.getRequestValue().addOrUpdateValue("EWA_API.REQ_ID" + i, actionJson.getReqId());
+			this.getRequestValue().addOrUpdateValue("EWA_API.REQ_OPT_MD5" + i, actionJson.getReqOptMd5());
+			
 			for (int ia = 0; ia < tbs.size(); ia++) {
 				DTTable tb = tbs.get(ia);
-				if (tb.getCount() == 1) {
-					this.addDTTableToRequestValue(tb);
-				}
-				this.getDTTables().add(tb);
-
-				if (tb.getAttsTable().containsKey("tag")) {
-					Object param = tb.getAttsTable().get("tag");
-					ActionJSONParameterListTag p = (ActionJSONParameterListTag) param;
-					try {
-						if (p.isSaveValid()) {
-							actionJson.saveData(tb, p);
-						}
-					} catch (Exception err) {
-						LOGGER.error("actionJson.save {}, {}", err.getMessage(), p.getJsonObject().toString(4));
+				// JSON请求默认不用作为列表数据
+				if (tb.getAttsTable().containsKey("AsLfData") && Utils.cvtBool(tb.getAttsTable().get("AsLfData"))) {
+					if (tb.getCount() == 1) {
+						this.addDTTableToRequestValue(tb);
 					}
+					this.getDTTables().add(tb);
+				}
+
+				if (actionJson.isFromCache()) {
+					// 来自缓存的数据不进行本地保存
+					continue;
+				}
+
+				// ActionJSONParameterListTag
+				if (!tb.getAttsTable().containsKey("tag")) {
+					continue;
+				}
+				
+				Object param = tb.getAttsTable().get("tag");
+				ActionJSONParameterListTag p = null;
+				try {
+					p = (ActionJSONParameterListTag) param;
+					// 本地保存
+					if (p.isSaveValid()) {
+						actionJson.saveData(tb, p);
+					}
+				} catch (Exception err) {
+					LOGGER.error("actionJson.save {}, {}", err.getMessage(),
+							p == null ? "" : p.getJsonObject().toString(4));
 				}
 			}
 
@@ -977,23 +1001,7 @@ public class ActionBase {
 	 * .String, java.lang.String)
 	 */
 	public String getPageItemValue(String itemName, String tagName) {
-		if (this.getUserConfig().getUserPageItem().testName(itemName)) {
-			try {
-				UserXItemValues v = this.getUserConfig().getUserPageItem().getItem(itemName);
-				if (v.count() == 0) {
-					return null;
-				}
-				if (!v.getParameter().isMulti()) {
-					return v.getItem(0).getItem(0);
-				} else {
-					return v.getItem(0).getItem(tagName);
-				}
-			} catch (Exception e) {
-				return e.getMessage();
-			}
-		} else {
-			return null;
-		}
+		return this.getHtmlClass().getHtmlCreator().getPageItemValue(itemName, tagName);
 	}
 
 	/**

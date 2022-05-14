@@ -1829,7 +1829,7 @@ public class HtmlCreator {
 		this._Log.setDescription(title);
 	}
 
-	private String getPageItemValue(String itemName, String tagName) {
+	public String getPageItemValue(String itemName, String tagName) {
 		if (this._UserConfig.getUserPageItem().testName(itemName)) {
 			try {
 				UserXItemValues v = this._UserConfig.getUserPageItem().getItem(itemName);

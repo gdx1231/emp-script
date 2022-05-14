@@ -16,28 +16,27 @@ import com.gdxsoft.easyweb.utils.msnet.MTableStr;
 
 public class TestBase {
 	static {
-	      InputStream stream = TestBase.class.getClassLoader().
-	              getResourceAsStream("logging.properties");
-	      try {
-	          LogManager.getLogManager().readConfiguration(stream);
+		InputStream stream = TestBase.class.getClassLoader().getResourceAsStream("logging.properties");
+		try {
+			LogManager.getLogManager().readConfiguration(stream);
 
-	      } catch (IOException e) {
-	          e.printStackTrace();
-	      }
-	  }
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public void initConnPools() throws ParserConfigurationException, SAXException, IOException {
 		this.initConnPool();
 		this.initConnPool1();
 		initConnPoolEwa();
 		initConnPoolCm();
-		
+
 		initConnPoolVisaMainData();
 		initConnPoolVisa();
-		
+
 		initConnPoolVisaEwa();
 	}
-	
+
 	public void initConnPool() throws ParserConfigurationException, SAXException, IOException {
 		ConnectionConfigs c1 = ConnectionConfigs.instance();
 		String CONN_STR = "b2b";
@@ -75,7 +74,7 @@ public class TestBase {
 		ConnectionConfigs c1 = ConnectionConfigs.instance();
 		String CONN_STR = "visa_main";
 		String CONN_URL = "jdbc:mysql://devmysql/visa_main_data?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&nullNamePatternMatchesAll=true&nullCatalogMeansCurrent=true";
-		
+
 		ConnectionConfig poolCfg = new ConnectionConfig();
 		poolCfg.setName(CONN_STR);
 		poolCfg.setType("MYSQL");
@@ -93,15 +92,15 @@ public class TestBase {
 		poolParams.put("maxIdle", 100);
 
 		poolCfg.setPool(poolParams);
-		
+
 		c1.put(CONN_STR, poolCfg);
 	}
-	
+
 	public void initConnPoolVisa() throws ParserConfigurationException, SAXException, IOException {
 		ConnectionConfigs c1 = ConnectionConfigs.instance();
 		String CONN_STR = "visa";
 		String CONN_URL = "jdbc:mysql://devmysql/visa?useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&nullNamePatternMatchesAll=true&nullCatalogMeansCurrent=true";
-		
+
 		ConnectionConfig poolCfg = new ConnectionConfig();
 		poolCfg.setName(CONN_STR);
 		poolCfg.setType("MYSQL");
@@ -119,10 +118,10 @@ public class TestBase {
 		poolParams.put("maxIdle", 100);
 
 		poolCfg.setPool(poolParams);
-		
+
 		c1.put(CONN_STR, poolCfg);
 	}
-	
+
 	public void initConnPoolCm() throws ParserConfigurationException, SAXException, IOException {
 		ConnectionConfigs c1 = ConnectionConfigs.instance();
 		String CONN_STR = "cm";
@@ -198,7 +197,6 @@ public class TestBase {
 
 	}
 
-	
 	private void initConnPool1() throws ParserConfigurationException, SAXException, IOException {
 		ConnectionConfigs c1 = ConnectionConfigs.instance();
 		String CONN_STR = "pf";
@@ -223,6 +221,7 @@ public class TestBase {
 		c1.put(CONN_STR, poolCfg);
 
 	}
+
 	public void printCaption(String caption) {
 		int width = 80;
 		int capWidth = this.captionLength(caption);

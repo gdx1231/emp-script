@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -21,20 +22,28 @@ import com.gdxsoft.easyweb.utils.Utils;
 public class ActionJSONParameter {
 
 	private String method; // PUT, GET, POST, PATCH, DELETE
-	private String url;
-	private Map<String, String> headers = new HashMap<>();
-	private Map<String, String> data = new HashMap<>();
-	private String body;
-	private Map<String, String> queries = new HashMap<>();
+	private String url; // 请求地址
+	private Map<String, String> headers = new HashMap<>(); // http请求的header数据
+	private Map<String, String> data = new HashMap<>(); // http请求的form数据和body互斥
+	private String body; // body提交数据和 form互斥
+	private Map<String, String> queries = new HashMap<>(); // 查询参数请求
 	private List<ActionJSONParameterListTag> listTags = new ArrayList<>();
 
 	private String charset = StandardCharsets.UTF_8.name();
 	private String userAgent = "github.com/gdx1231";
 	private boolean debug = false;
 
-	private boolean attacheQuery = false;
-	private boolean attachePost = false;
-	private boolean attacheCookies = false;
+	private boolean attacheQuery = false; // 附加请求参数
+	private boolean attachePost = false;// 附加请求form数据
+	private boolean attacheCookies = false; // 附加请求页面的cookies
+
+	private JSONObject jsonObject; // 配置的json，替换了参数
+
+	private String expire = ""; // 1d, 13h, 300m 1200s
+
+	private String connConfigName; // database connection configure name
+
+	private boolean asLfData = false; // 作为列表数据
 
 	public void init(String jsonStr) throws Exception {
 		JSONObject obj = new JSONObject(jsonStr);
@@ -42,6 +51,7 @@ public class ActionJSONParameter {
 	}
 
 	public void init(JSONObject obj) throws Exception {
+		jsonObject = obj;
 		Iterator<String> it = obj.keys();
 		while (it.hasNext()) {
 			String key = it.next();
@@ -57,6 +67,12 @@ public class ActionJSONParameter {
 			} else if (key.equalsIgnoreCase("charset")) {
 				String val = obj.optString(key);
 				this.charset = val;
+			} else if (key.equalsIgnoreCase("expire")) {
+				String val = obj.optString(key);
+				this.expire = val;
+			} else if (key.equalsIgnoreCase("connConfigName")) {
+				String val = obj.optString(key);
+				this.connConfigName = val;
 			} else if (key.equalsIgnoreCase("headers") || key.equalsIgnoreCase("header")) {
 				JSONObject h = obj.optJSONObject(key);
 				if (h != null) {
@@ -84,12 +100,23 @@ public class ActionJSONParameter {
 			} else if (key.equalsIgnoreCase("attacheCookies")) {
 				String val = obj.optString(key);
 				this.attacheCookies = Utils.cvtBool(val);
+			} else if (key.equalsIgnoreCase("asLfData")) {
+				// 作为列表数据
+				String val = obj.optString(key);
+				this.asLfData = Utils.cvtBool(val);
 			} else if (key.equalsIgnoreCase("listTags")) {
 				JSONArray arr = obj.optJSONArray(key);
 				if (arr != null) {
 					this.listTag(arr);
 				}
 			}
+		}
+		if (StringUtils.isNotBlank(this.connConfigName)) {
+			this.listTags.forEach(t -> {
+				if (StringUtils.isBlank(t.getConnConfigName())) {
+					t.setConnConfigName(this.connConfigName);
+				}
+			});
 		}
 		// set method default
 		if (method == null || method.trim().length() == 0) {
@@ -125,7 +152,7 @@ public class ActionJSONParameter {
 			this.listTags.add(t);
 		}
 	}
-	 
+
 	private void jsonObject2Map(JSONObject json, Map<String, String> map) {
 		Iterator<String> it = json.keys();
 		while (it.hasNext()) {
@@ -287,6 +314,79 @@ public class ActionJSONParameter {
 	 */
 	public void setAttacheCookies(boolean attacheCookies) {
 		this.attacheCookies = attacheCookies;
+	}
+
+	/**
+	 * 获取初始化参数的jsonObject
+	 * 
+	 * @return the jsonObject
+	 */
+	public JSONObject getJsonObject() {
+		return jsonObject;
+	}
+
+	public String toString() {
+		if (this.jsonObject == null) {
+			return "not initialized";
+		} else {
+			return this.jsonObject.toString(3);
+		}
+	}
+
+	/**
+	 * 缓存过期时间 1d, 13h, 300m 1200s
+	 * 
+	 * @return the expire
+	 */
+	public String getExpire() {
+		return expire;
+	}
+
+	/**
+	 * 缓存过期时间1d, 13h, 300m 1200s
+	 * 
+	 * @param expire the expire to set
+	 */
+	public void setExpire(String expire) {
+		this.expire = expire;
+	}
+
+	/**
+	 * @return the connConfigName
+	 */
+	public String getConnConfigName() {
+		return connConfigName;
+	}
+
+	/**
+	 * @param connConfigName the connConfigName to set
+	 */
+	public void setConnConfigName(String connConfigName) {
+		this.connConfigName = connConfigName;
+
+		this.listTags.forEach(t -> {
+			if (StringUtils.isBlank(t.getConnConfigName())) {
+				t.setConnConfigName(this.connConfigName);
+			}
+		});
+	}
+
+	/**
+	 * 作为列表数据
+	 * 
+	 * @return the asLfData
+	 */
+	public boolean isAsLfData() {
+		return asLfData;
+	}
+
+	/**
+	 * 作为列表数据
+	 * 
+	 * @param asLfData the asLfData to set
+	 */
+	public void setAsLfData(boolean asLfData) {
+		this.asLfData = asLfData;
 	}
 
 }

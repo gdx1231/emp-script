@@ -29,6 +29,8 @@ public class ActionJSONParameterListTag {
 	private List<ActionJSONParameterListTag> subListTags = new ArrayList<>();
 	private JSONObject jsonObject;
 
+	private boolean asLfData = false; // 作为列表数据
+	
 	/**
 	 * 保持数据的设置是否完整
 	 * 
@@ -73,17 +75,25 @@ public class ActionJSONParameterListTag {
 				this.skipError = Utils.cvtBool(val);
 			} else if (key.equalsIgnoreCase("skipExists")) {
 				this.skipExists = Utils.cvtBool(val);
+			} else if (key.equalsIgnoreCase("asLfData")) {
+				// 作为列表数据
+				this.asLfData = Utils.cvtBool(val);
 			} else if (key.equalsIgnoreCase("listTags")) {
 				JSONArray arr = obj.optJSONArray(key);
 				for (int i = 0; i < arr.length(); i++) {
 					JSONObject tag = arr.getJSONObject(i);
 					ActionJSONParameterListTag o = new ActionJSONParameterListTag();
 					o.init(tag);
+
 					this.subListTags.add(o);
 				}
 			}
 		}
-
+		this.subListTags.forEach(o -> {
+			if (StringUtils.isBlank(o.getConnConfigName())) {
+				o.setConnConfigName(this.connConfigName);
+			}
+		});
 	}
 
 	/**
@@ -134,6 +144,11 @@ public class ActionJSONParameterListTag {
 	 */
 	public void setConnConfigName(String connConfigName) {
 		this.connConfigName = connConfigName;
+		this.subListTags.forEach(t -> {
+			if (StringUtils.isBlank(t.getConnConfigName())) {
+				t.setConnConfigName(this.connConfigName);
+			}
+		});
 	}
 
 	/**
@@ -190,5 +205,27 @@ public class ActionJSONParameterListTag {
 	 */
 	public List<ActionJSONParameterListTag> getSubListTags() {
 		return subListTags;
+	}
+
+	/**
+	 * @return the asLfData
+	 */
+	public boolean isAsLfData() {
+		return asLfData;
+	}
+
+	/**
+	 * @param asLfData the asLfData to set
+	 */
+	public void setAsLfData(boolean asLfData) {
+		this.asLfData = asLfData;
+	}
+	
+	public String toString() {
+		if (this.jsonObject == null) {
+			return "not initialized";
+		} else {
+			return this.jsonObject.toString(3);
+		}
 	}
 }

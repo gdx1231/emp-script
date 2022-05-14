@@ -1017,23 +1017,29 @@ public class RequestValue implements Cloneable {
 	/**
 	 * 添加表到Rv中, 只有第一行数据
 	 * 
-	 * @param table
+	 * @param table 表
+	 * @return 添加的字段列表，null表示表无数据或表有错误
 	 */
-	public void addValues(DTTable table) {
-		if (!table.isOk() || table.getCount() == 0) {
-			return;
+	public List<String> addValues(DTTable table) {
+		if (table == null || !table.isOk() || table.getCount() == 0) {
+			return null;
 		}
 		DTRow r = table.getRow(0);
 
-		addValues(r);
+		return addValues(r);
 	}
 
 	/**
-	 * 添加表到Rv中
+	 * 添加数据行到Rv中
 	 * 
-	 * @param table
+	 * @param r 数据行
+	 * @return 添加的字段列表
 	 */
-	public void addValues(DTRow r) {
+	public List<String> addValues(DTRow r) {
+		if (r == null) {
+			return null;
+		}
+		List<String> addList = new ArrayList<String>();
 		DTTable table = r.getTable();
 		for (int i = 0; i < table.getColumns().getCount(); i++) {
 			String key = table.getColumns().getColumn(i).getName();
@@ -1046,18 +1052,24 @@ public class RequestValue implements Cloneable {
 			pv.setValue(r.getCell(i).getValue());
 			pv.setPVTag(PageValueTag.DTTABLE);
 			this._ReqValues.addOrUpdateValue(pv);
-		}
 
+			addList.add(key);
+		}
+		return addList;
 	}
 
+	/**
+	 * 添加JSONObject到Rv中
+	 * 
+	 * @param json JSONObject
+	 * @return 添加的字段
+	 */
 	public List<String> addValues(JSONObject json) {
-		List<String> addList = new ArrayList<String>();
 		if (json == null) {
-			return addList;
+			return null;
 		}
-
+		List<String> addList = new ArrayList<String>();
 		Iterator<?> it = json.keys();
-
 		while (it.hasNext()) {
 			String key = it.next().toString();
 			try {
