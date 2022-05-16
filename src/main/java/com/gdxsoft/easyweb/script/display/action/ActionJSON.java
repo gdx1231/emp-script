@@ -3,8 +3,10 @@ package com.gdxsoft.easyweb.script.display.action;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -118,7 +120,7 @@ public class ActionJSON {
 		int loc = jsonStr.indexOf("{");
 		int loc1 = jsonStr.indexOf("[");
 
-		if (loc == 0 || loc < loc1) {// JSONObject
+		if (loc == 0 || (loc > 0 && loc < loc1)) {// JSONObject
 			return true;
 		} else { // jsonArray
 			return false;
@@ -158,15 +160,21 @@ public class ActionJSON {
 			}
 			JSONArray arr = new JSONArray();
 			String[] keys = tag.getKey().split(",");
-			try {
-				// 将表指定字段拼接成JSONArray
-				for (int m = 0; m < tb.getCount(); m++) {
-					DTRow row = tb.getRow(m);
 
-					String json = row.getCell(subTag.getTag()).toString();
-					if (json == null || json.trim().length() == 0) {
-						continue;
-					}
+			// 将表指定字段拼接成JSONArray
+			for (int m = 0; m < tb.getCount(); m++) {
+				DTRow row = tb.getRow(m);
+				String json = null;
+				try {
+					json = row.getCell(subTag.getTag()).toString();
+				} catch (Exception e) {
+					LOGGER.error(e.getMessage());
+					continue;
+				}
+				if (json == null || json.trim().length() == 0) {
+					continue;
+				}
+				try {
 					if (this.isJSONObject(json)) {
 						JSONObject jsonObj = new JSONObject(json);
 						// 添加父表主键
@@ -181,15 +189,16 @@ public class ActionJSON {
 							arr.put(jsonObj);
 						}
 					}
+				} catch (Exception e) {
+					LOGGER.error("{},{}", json, e.getMessage());
+					continue;
 				}
-				JSONObject subData = new JSONObject();
-				subData.put(subTag.getTag(), arr);
-				// 递归调用
-				this.getTable(subTag, subData, al, tbName);
-			} catch (Exception e) {
-				LOGGER.error(e.getMessage());
-				continue;
 			}
+			JSONObject subData = new JSONObject();
+			subData.put(subTag.getTag(), arr);
+			// 递归调用
+			this.getTable(subTag, subData, al, tbName);
+
 		}
 	}
 
@@ -434,36 +443,52 @@ public class ActionJSON {
 	/**
 	 * 将返回数据保存到本地表中
 	 * 
-	 * @param tb
+	 * @param jsonTb
 	 * @param saveJSON
 	 * @throws Exception
 	 */
-	public void saveData(DTTable tb, ActionJSONParameterListTag param) throws Exception {
-		if (tb == null || tb.getCount() == 0) {
+	public void saveData(DTTable jsonTb, ActionJSONParameterListTag param) throws Exception {
+		if (jsonTb == null || jsonTb.getCount() == 0) {
 			return;
 		}
 		// "listTags": [{
-		// "tag": "products",
-		// "key": "PRODUCTCODE",
-		// "table": "PRODUCT",
-		// "connConfigName": "this_is_dev",
-		// "listTags": [{
-		// "tag": "images",
-		// "key": "id",
-		// "table": "image",
-		// "connConfigName": "this_is_dev"
-		// },{
-		// "tag": "extras",
-		// "key": "name",
-		// "table": "extra",
-		// "connConfigName": "this_is_dev"
+		// ...."tag": "products",
+		// ...."key": "PRODUCTCODE",
+		// ...."table": "PRODUCT"
+		// ...."listTags": [{
+		// ........"tag": "images",
+		// ........"key": "id",
+		// ........"table": "image"
+		// ....},{
+		// ........"tag": "extras",
+		// ........"key": "name",
+		// ........"table": "extra"
+		// ....}]
 		// }]
-		// }]
+
+		if (param.getFieldsMap().size() > 0) {// 段对应关系，jsonKey:fieldName
+			// 更改 jsonTb 的字段名称为物理表的字段名称
+			Iterator<String> it = param.getFieldsMap().keySet().iterator();
+			while (it.hasNext()) {
+				String jsonKey = it.next();
+				String field = param.getFieldsMap().get(jsonKey);
+				if (jsonTb.getColumns().testName(jsonKey)) {
+					jsonTb.getColumns().getColumn(jsonKey).setName(field);
+					LOGGER.info("Change jsonTb.{} to {}", jsonKey, field);
+				} else {
+					LOGGER.error("jsonTb.{} not exists", jsonKey);
+					throw new Exception("jsonTb." + jsonKey + " not exists");
+				}
+			}
+			// 重建表字段名称索引
+			jsonTb.getColumns().refreshNamesIndex();
+		}
+
 		String key = param.getKey();
 		String table = param.getTable();
 
 		this.getActionBase().getDebugFrames().addDebug(this, "save",
-				"start save to the talbe " + table + ", records= " + tb.getCount());
+				"start save to the talbe " + table + ", records= " + jsonTb.getCount());
 
 		// 从数据库获取空表，用于字段判断
 		String sql0 = "SELECT * FROM " + table + " WHERE 1=2";
@@ -472,7 +497,7 @@ public class ActionJSON {
 		// 检查表是否有 _EWA_LOG_ID 字段，没有的化自动创建字段和创建检索
 		this.checkAndCreateField_EWA_LOG_ID(tbTmp, table);
 
-		// 主键表达式
+		// 物理主键表达式
 		String[] keys = key.split(",");
 		Map<String, Boolean> map = new HashMap<String, Boolean>();
 		for (int i = 0; i < keys.length; i++) {
@@ -492,8 +517,9 @@ public class ActionJSON {
 		insertValues.append("@_EWA_LOG_ID");
 
 		StringBuilder updateWhere = new StringBuilder(); // 更新 where 列表
-		for (int i = 0; i < tb.getColumns().getCount(); i++) {
-			String field = tb.getColumns().getColumn(i).getName().trim();
+		for (int i = 0; i < jsonTb.getColumns().getCount(); i++) {
+			String field = jsonTb.getColumns().getColumn(i).getName().trim();
+
 			if (field.toUpperCase().equals("EWA_KEY")) {
 				continue;
 			}
@@ -504,6 +530,7 @@ public class ActionJSON {
 			}
 			insertFields.append("   \n, ").append(field);
 			insertValues.append("	\n, @").append(field);
+
 			// update where 表达式
 			if (map.containsKey(field.toUpperCase())) {
 				if (updateWhere.length() > 0) {
@@ -520,7 +547,7 @@ public class ActionJSON {
 
 		this.getActionBase().getDebugFrames().addDebug(this, "save", "start get exists data ");
 		// 已经存在数据的map，便于快速查找
-		Map<String, DTRow> mapExists = this.createMapExistsData(table, tb, map, keys);
+		Map<String, DTRow> mapExists = this.createMapExistsData(table, jsonTb, map, keys);
 		this.getActionBase().getDebugFrames().addDebug(this, "save", "end get exists data (" + mapExists.size() + ")");
 
 		this.getActionBase().getDebugFrames().addDebug(this, "save", "start new/update data and log detail");
@@ -531,9 +558,10 @@ public class ActionJSON {
 		String logInsert = this.getSqlLogListNew();
 		List<String> addedField = new ArrayList<String>();
 		try {
-			for (int i = 0; i < tb.getCount(); i++) {
+			// 循环导入/更高数据
+			for (int i = 0; i < jsonTb.getCount(); i++) {
 				long ewaLogId = -1;
-				DTRow r = tb.getRow(i);
+				DTRow r = jsonTb.getRow(i);
 				String exp = this.createKeyExp(keys, r);
 				// 清除增加的字段
 				addedField.forEach(name -> {
@@ -731,6 +759,7 @@ public class ActionJSON {
 	 * @param saveJSON
 	 * @throws Exception
 	 */
+	@Deprecated
 	public void saveData(DTTable tb, JSONObject saveJSON) throws Exception {
 		if (tb == null || tb.getCount() == 0) {
 			return;
@@ -873,16 +902,15 @@ public class ActionJSON {
 			String kn = keys[m].toString();
 			Object v = r.getCell(kn).getValue();
 			String kv = null;
-			if(v instanceof java.math.BigDecimal ) {
+			if (v instanceof java.math.BigDecimal) {
 				kv = UFormat.formatDecimalClearZero(v);
 			} else {
 				kv = v.toString();
 			}
-			exp.append(kn);
+			exp.append(m);
 			exp.append("=");
 			exp.append(kv);
 		}
-
 		return exp.toString();
 	}
 

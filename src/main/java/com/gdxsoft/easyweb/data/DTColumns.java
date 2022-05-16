@@ -90,6 +90,18 @@ public class DTColumns implements Serializable {
 		col.setIndex(index);
 
 	}
+	
+	/**
+	 * Refresh the columns name index, manual call by changed column name
+	 */
+	public void refreshNamesIndex() {
+		this._ColumnNames = new MTable();
+		for(int i=0;i<this._Columns.size();i++) {
+			DTColumn col = this.getColumn(i);
+			String n = col.getName().toUpperCase().trim();
+			this._ColumnNames.put(n, i);
+		}
+	}
 
 	public int getCount() {
 		return this._Columns.size();

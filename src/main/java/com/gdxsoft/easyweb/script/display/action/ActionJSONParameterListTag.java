@@ -1,8 +1,10 @@
 package com.gdxsoft.easyweb.script.display.action;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -30,7 +32,11 @@ public class ActionJSONParameterListTag {
 	private JSONObject jsonObject;
 
 	private boolean asLfData = false; // 作为列表数据
-	
+
+	// 字段对应关系，key = json key, value = table fieldname
+	// 用于数据库save操作
+	private Map<String, String> fieldsMap = new HashMap<>();
+
 	/**
 	 * 保持数据的设置是否完整
 	 * 
@@ -86,6 +92,15 @@ public class ActionJSONParameterListTag {
 					o.init(tag);
 
 					this.subListTags.add(o);
+				}
+			} else if (key.equalsIgnoreCase("fieldsMap")) {
+				// 自定义字段对应关系
+				JSONObject fieldsMap = obj.optJSONObject(key);
+				Iterator<String> itfieldsMap = fieldsMap.keys();
+				while (itfieldsMap.hasNext()) {
+					String jsonKey = itfieldsMap.next();
+					String tableField = fieldsMap.optString(jsonKey);
+					this.fieldsMap.put(jsonKey, tableField);
 				}
 			}
 		}
@@ -220,12 +235,21 @@ public class ActionJSONParameterListTag {
 	public void setAsLfData(boolean asLfData) {
 		this.asLfData = asLfData;
 	}
-	
+
 	public String toString() {
 		if (this.jsonObject == null) {
 			return "not initialized";
 		} else {
 			return this.jsonObject.toString(3);
 		}
+	}
+
+	/**
+	 * 字段对应关系，jsonKey:fieldName
+	 * 
+	 * @return the fieldsMap
+	 */
+	public Map<String, String> getFieldsMap() {
+		return fieldsMap;
 	}
 }
