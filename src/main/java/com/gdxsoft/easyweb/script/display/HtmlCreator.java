@@ -1697,7 +1697,19 @@ public class HtmlCreator {
 		sb.append(Utils.textToJscript(_SysParas.getBehavior()));
 		sb.append("\", \"");
 		sb.append(Utils.textToJscript(this._RequestValue.s("EWA_PARENT_FRAME")));
-		sb.append("\");\r\n");
+		sb.append("\"");
+		for (int i=0; i<this._ItemValues.getDTTables().size();i++) {
+			DTTable tb = (DTTable)this._ItemValues.getDTTables().get(i);
+			String tbName = tb.getName(); // = SQLset name
+			if(tbName == null) {
+				continue;
+			}
+			if(tbName.toLowerCase().indexOf("paramsout")==0){ // 参数输出 SQLset name
+				sb.append(", ");
+				sb.append(tb.toJson(_RequestValue)); // 强制转成字符串表达式，避免long类型在js中溢出
+			}
+		}
+		sb.append(");");
 
 		String s1 = sb.toString();
 		this._Document.addJs("PostBehavior", s1, false);
