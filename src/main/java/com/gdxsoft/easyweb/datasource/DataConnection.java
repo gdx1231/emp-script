@@ -2261,17 +2261,20 @@ public class DataConnection {
 		if (parameter.length() == 0) {
 			return "''";
 		}
-		boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
-		boolean isSqlServer = this.getDatabaseType().equalsIgnoreCase("MSSQL");
-
 		parameter = parameter.replace("'", "''");
-		if (isMysql) {
-			// MySql字符转义符 反斜线(‘\’)开始，
-			parameter = parameter.replace("\\", "\\\\");
-		}
-		parameter = "'" + parameter + "'";
-		if (isSqlServer) {
-			parameter = "N" + parameter;
+		if(this.getDatabaseType() != null) {
+			boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
+			boolean isSqlServer = this.getDatabaseType().equalsIgnoreCase("MSSQL");
+			if (isMysql) {
+				// MySql字符转义符 反斜线(‘\’)开始，
+				parameter = parameter.replace("\\", "\\\\");
+			}
+			parameter = "'" + parameter + "'";
+			if (isSqlServer) {
+				parameter = "N" + parameter;
+			}
+		} else {
+			parameter = "'" + parameter + "'";
 		}
 		return parameter;
 	}

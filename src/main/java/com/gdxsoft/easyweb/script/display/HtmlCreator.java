@@ -314,9 +314,6 @@ public class HtmlCreator {
 		// 设置Log的执行名称
 		this._Log.setActionName(actionName);
 
-		// 初始化数据库数据参数
-		this.initDataParameters();
-
 		// 初始化权限
 		this.initAcl();
 
@@ -329,6 +326,9 @@ public class HtmlCreator {
 		// 初始化操作类
 		this.initClass();
 
+		// 初始化数据库数据参数
+		this.initDataParameters();
+				
 		_DebugFrames.addDebug(this, "INIT", "结束赋值数据库参数");
 		_DebugFrames.addDebug(this, "INIT", "结束初始化数据");
 
@@ -366,6 +366,7 @@ public class HtmlCreator {
 			if (tag == null) {
 				tag = "";
 			}
+			// 已经无用了
 			if (tag.equals("SwfTakePhoto") || key.toLowerCase().endsWith("_base64")) { // 从页面获取的照片
 				try {
 					byte[] buf = UConvert.FromBase64String(val);
@@ -375,10 +376,14 @@ public class HtmlCreator {
 					pv.setValue(buf);
 					// 增加数据的长度
 					this._RequestValue.addValue(key + "_LENGTH", buf.length, PageValueTag.SYSTEM);
-
 				} catch (Exception err1) {
 					LOGGER.error(err1.getMessage(), err1);
 				}
+				continue;
+			}
+
+			if ("signature".equalsIgnoreCase(tag)) { // 签名
+				HtmlUtils.handleSignature(val, key, _RequestValue, uxi,   _ItemValues);
 				continue;
 			}
 
@@ -725,7 +730,8 @@ public class HtmlCreator {
 		if (this._Acl == null) {
 			return true;
 		}
-		/* initial this parameters in the function initAcl
+		/*
+		 * initial this parameters in the function initAcl
 		 * _Acl.setRequestValue(this._RequestValue);
 		 * 
 		 * _Acl.setItemName(this._RequestValue.getString("ITEMNAME"));
@@ -1027,7 +1033,7 @@ public class HtmlCreator {
 
 	public String createPageJson() throws Exception {
 		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
-		if("no".equals(allowJsonExport)) {
+		if ("no".equals(allowJsonExport)) {
 			return "['AllowJsonExport=no']";
 		}
 		MStr sb = new MStr();
@@ -1194,7 +1200,7 @@ public class HtmlCreator {
 	 */
 	public String createPageJsonAll() {
 		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
-		if("no".equals(allowJsonExport)) {
+		if ("no".equals(allowJsonExport)) {
 			return "[['AllowJsonExport=no']]";
 		}
 		int len = this._ItemValues.getDTTables().size();
@@ -1234,7 +1240,7 @@ public class HtmlCreator {
 	 */
 	public String createPageJsonExt() throws Exception {
 		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
-		if("no".equals(allowJsonExport)) {
+		if ("no".equals(allowJsonExport)) {
 			return "{'AllowJsonExport':'no'}";
 		}
 		MStr sb = new MStr();
@@ -1272,7 +1278,7 @@ public class HtmlCreator {
 	 */
 	public String createPageJsonExt1() throws Exception {
 		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
-		if("no".equals(allowJsonExport)) {
+		if ("no".equals(allowJsonExport)) {
 			return "{'AllowJsonExport':'no'}";
 		}
 		MStr sb = new MStr();
@@ -1698,13 +1704,13 @@ public class HtmlCreator {
 		sb.append("\", \"");
 		sb.append(Utils.textToJscript(this._RequestValue.s("EWA_PARENT_FRAME")));
 		sb.append("\"");
-		for (int i=0; i<this._ItemValues.getDTTables().size();i++) {
-			DTTable tb = (DTTable)this._ItemValues.getDTTables().get(i);
+		for (int i = 0; i < this._ItemValues.getDTTables().size(); i++) {
+			DTTable tb = (DTTable) this._ItemValues.getDTTables().get(i);
 			String tbName = tb.getName(); // = SQLset name
-			if(tbName == null) {
+			if (tbName == null) {
 				continue;
 			}
-			if(tbName.toLowerCase().indexOf("paramsout")==0){ // 参数输出 SQLset name
+			if (tbName.toLowerCase().indexOf("paramsout") == 0) { // 参数输出 SQLset name
 				sb.append(", ");
 				sb.append(tb.toJson(_RequestValue)); // 强制转成字符串表达式，避免long类型在js中溢出
 			}

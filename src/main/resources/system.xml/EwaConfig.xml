@@ -983,6 +983,134 @@ addEvent(window, 'load', ewa_load_upload_image);
 ]]></Html>
 				</Template>
 			</XItem>
+
+			<XItem Name="signature" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemSignature"
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
+					DataItem, EventSet, Style, ParentStyle,IsMustInput,signature">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="手写签名"  />
+					<Set Lang="enus" Info="Handwritten signature" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[
+<div class='ewa-sign-box' style="@style">
+	<div class='ewa-sign-canvas' id='signerature_@name'></div>
+	<div class='ewa-sign-btns'>
+		<a class='ewa-sign-btn-clear'></a>
+		<a class='ewa-sign-btn-revoke'></a>
+	</div>
+<input type="hidden" ewa_tag="signature" 
+ val_ref="EWA.F.FOS['@sys_frame_unid'].tablets['@name'].getImage1()" 
+ value="{__EWA_VAL__}"
+ !!>
+</div>
+<script type="text/javascript" src="@RV_EWA_STYLE_PATH/thrid-party/canvas-tablet/dist/Tablet-2.0-jquery.min.js"></script>
+<script type="text/javascript">$(document).ready(function(){
+	let box = $('#signerature_@name').parent();
+	let css = {
+		'height': box.height() - box.find('.ewa-sign-btns').height(),
+		'width': box.width()
+	};
+	$('#signerature_@name').css(css);
+	let tablet = new Tablet("#signerature_@name", {
+		defaultColor : "@SignColor"||"#2e76da",
+		defaultBackgroundColor : "@SignBgColor"||'#ffffff',
+		response: true,
+		imgType: "@SignFormat"||"png",
+		autoResize : true, 
+		onInit : function() {
+			let that = this, container = this.container;
+			let lineWidth = "@SignLineWidth";
+			if(lineWidth){
+				that.setLineWidth(lineWidth);
+			} else {
+				that.setLineWidth(2);
+			}
+			box.find('.ewa-sign-btn-clear').on('click', function() {
+				that.lines = [];
+				that.clear();
+			});
+			box.find(".ewa-sign-btn-revoke").on('click', function() {
+				that.revoke();
+			});
+			let img = $("<img >");
+			img.attr('src', box.find('input[type=hidden]').val());
+			img[0].onload = function(){
+				that.setBackgroundImage(img[0]);
+				let timer = setTimeout(function() {
+						clearTimeout(timer);
+						that.refresh();
+				}, 0);
+			};
+		}
+	});
+	tablet.getImage1 = function(){
+		let colors = tablet.getImageColors();
+		let number = 0;
+		for(let n in colors){
+			number++;
+		}
+		if(number < 2){ // 颜色少于2种，没有写东西
+			return "";
+		}
+		let _type = ("@SignFormat"||"png").toLowerCase();
+       	return this.getImage2(_type, 0.7);
+	};
+	tablet.getImage2 = function(_type, r){
+		let type = "image/png";
+		_type = _type.toLowerCase();
+		if (_type === "jpg" || _type === "jpeg") {
+			type = "image/jpeg";
+		} else {
+			type = "image/"+_type;
+		}
+       	return this.canvas.toDataURL(type, r);
+	};
+	tablet.getImageData = function() {
+		let data = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+		return data.data;
+	};
+	tablet.getImageColors = function() {
+		// 获取像素数据
+		let data = this.getImageData();
+		function toHex(a){
+			let hex = a.toString(16);
+			if(hex.length == 1){
+				return "0"+hex;
+			} else {
+				return hex;
+			}
+		};
+		function toColor(r,g,b,a){
+			let s = [];
+			s.push(toHex(r));
+			s.push(toHex(g));
+			s.push(toHex(b));
+			s.push(toHex(a));
+			return s.join('');
+		}
+		let map={};
+		for (let i = 0; i < data.length; i += 4) {
+			let r = data[i];
+			let g = data[i+1];
+			let b = data[i+2];
+			let a = data[i+3];
+			let c =  toColor(r,g,b,a);
+			if(map[c]){
+				map[c]++;
+			} else {
+				map[c]=1;
+			}
+		}
+		return map;
+	};
+	EWA.F.FOS['@sys_frame_unid'].tablets = EWA.F.FOS['@sys_frame_unid'].tablets || {};
+	EWA.F.FOS['@sys_frame_unid'].tablets["@name"] = tablet;
+});</script>
+]]></Html>
+				</Template>
+			</XItem>			
 			<XItem Name="smsValid" HtmlTag="" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, 
@@ -1763,7 +1891,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 							<Set Lang="enus" Info="Search Type" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="string" Name="SearchSql" IsNotJsShow="1">
+					<Value Type="sql" Name="SearchSql" IsNotJsShow="1">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="检索字段SQL" />
 							<Set Lang="enus" Info="Search SQL" />
@@ -2392,6 +2520,66 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 				</Values>
 			</XItemParameter>
+			
+			<XItemParameter Name="signature" IsSet="0" IsShow="1" IsJsShow="0" UIGroup="Others" IsMulti="1" Html="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="手写签名" />
+					<Set Lang="enus" Info="Signature" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="group" Name="SignFormat">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="图片格式&#x0D;&#x0A;
+保存参数：&#x0D;&#x0A;
+{NAME} 签名图片的base64&#x0D;&#x0A;
+{NAME}_BIN 签名图片的二进制&#x0D;&#x0A;
+{NAME}_EXT 图片扩展名&#x0D;&#x0A;
+{NAME}_URL 图片的下载地址&#x0D;&#x0A;
+{NAME}_PATH 图片在服务器的保存全地址&#x0D;&#x0A;
+{NAME}_PATH_SHORT 图片在服务器保存的短地址&#x0D;&#x0A;
+{NAME}_MD5 图片的MD5&#x0D;&#x0A;
+{NAME}_LENGTH 图片的长度&#x0D;&#x0A;
+{NAME}_CHANGED 图片是否发生变化Y/N" />
+							<Set Lang="enus" Info="Picture format&#x0D;&#x0A;
+Save parameters：&#x0D;&#x0A;
+{NAME} Signature image's base64&#x0D;&#x0A;
+{NAME}_BIN Signature image's binary&#x0D;&#x0A;
+{NAME}_EXT Signature image's ext&#x0D;&#x0A;
+{NAME}_URL Signature image's download url&#x0D;&#x0A;
+{NAME}_PATH Full path of the image saved on the server&#x0D;&#x0A;
+{NAME}_PATH_SHORT Short path of the image saved on the server&#x0D;&#x0A;
+{NAME}_MD5 Signature image's MD5&#x0D;&#x0A;
+{NAME}_LENGTH Signature image's length&#x0D;&#x0A;
+{NAME}_CHANGED Submit image whether changed Y/N" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="SignLineWidth">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="笔宽度" />
+							<Set Lang="enus" Info="Line width" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="SignColor">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="笔颜色" />
+							<Set Lang="enus" Info="Line color" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="SignBgColor">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="签名背景色" />
+							<Set Lang="enus" Info="Background color" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="SignPath">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="上传路径" />
+							<Set Lang="enus" Info="Upload Path" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
+			
 			<XItemParameter Name="Upload" IsSet="0" IsShow="1" IsJsShow="0" UIGroup="Others" IsMulti="1" Html="">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="文件上传配置" />
@@ -2490,7 +2678,7 @@ EWA_UP_UNID 文件GUNID&#x0D;&#x0A;
 EWA_UP_FROM  来源，用于图片的重新生成&#x0D;&#x0A;
 EWA_UP_LOCAL 服务器本地路径&#x0D;&#x0A;
 EWA_UP_LENGTH 文件长度&#x0D;&#x0A;
-EWA_UP_MD5 文件md5#x0D;&#x0A;
+EWA_UP_MD5 文件md5&#x0D;&#x0A;
 EWA_UP_LOCAL 用户本地文件名称
 " />
 							<Set Lang="enus"
@@ -2505,7 +2693,7 @@ EWA_UP_UNID GUNID&#x0D;&#x0A;
 EWA_UP_FROM  Source, &#x0D;&#x0A;
 EWA_UP_LOCAL Local Path&#x0D;&#x0A;
 EWA_UP_LENGTH Length &#x0D;&#x0A;
-EWA_UP_MD5 md5#x0D;&#x0A;
+EWA_UP_MD5 md5&#x0D;&#x0A;
 EWA_UP_LOCAL User local file name
 " />
 						</DescriptionSet>
@@ -2844,6 +3032,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 		<XGroupValues>
 		
+		<XGroupValue Name="SignFormat" Default="png" Values="png,jpeg,webp">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="png,jpeg,webp" />
+					<Set Lang="enus" Info="png,jpeg,webp" />
+				</DescriptionSet>
+			</XGroupValue>
 			<XGroupValue Name="RefMulti" Default="" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />

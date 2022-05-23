@@ -645,7 +645,7 @@ public class ItemBase implements IItem {
 			}
 			// 从数据库显示列表信息
 
-		} else if ("valid".equals(tag)) {
+		}  else if ("valid".equals(tag)) {
 			String event = "EWA.F.FOS['@sys_frame_unid'].CheckValid(this);";
 			sb.append(" onchange=\"" + event + "\"");
 			sb.append(" onfocus='if(window.EWA_FrameRemoveAlert){EWA_FrameRemoveAlert(this)}' ");
@@ -725,6 +725,7 @@ public class ItemBase implements IItem {
 
 		// 替换一次
 		ss.replace("!!", sb.toString());
+		 
 		s1 = ss.toString();
 		_UserXItem.setHtml(s1);
 		// if (s1.indexOf("disabled") >= 0) {

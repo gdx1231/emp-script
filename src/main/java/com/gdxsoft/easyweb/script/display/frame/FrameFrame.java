@@ -756,7 +756,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 			parentStyle = uxi.getSingleValue("ParentStyle");
 		}
 		if (parentStyle.length() > 0) {
-			parentHtml = parentHtml.replaceFirst("!!", " style=\"" + parentStyle + "\" ");
+				parentHtml = parentHtml.replaceFirst("!!", " style=\"" + parentStyle + "\" ");
 		} else {
 			parentHtml = parentHtml.replaceFirst("!!", "");
 		}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -491,6 +492,11 @@ public class EwaWfMain {
 		sb.append(",\r\n\"ST\":");
 		sql = o.getSql("WF_LOG_GET");
 
+		if(StringUtils.isBlank(sql)) {
+			LOGGER.error("找不到WF_LOG_GET在ewa_conf.xml的工作流配置中");
+			throw new Exception ("Can't found WF_LOG_GET node in the ewa_conf.xml's workflow");
+		}
+		
 		DTTable table = DTTable.getJdbcTable(sql, cnn);
 		cnn.close();
 
