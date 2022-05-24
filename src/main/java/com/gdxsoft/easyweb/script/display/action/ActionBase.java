@@ -331,7 +331,7 @@ public class ActionBase {
 			// 放到全局中，用于sql等访问 EWA_API.REQ_ID0， EWA_API.REQ_ID1 ...
 			this.getRequestValue().addOrUpdateValue("EWA_API.REQ_ID" + i, actionJson.getReqId());
 			this.getRequestValue().addOrUpdateValue("EWA_API.REQ_OPT_MD5" + i, actionJson.getReqOptMd5());
-			
+
 			for (int ia = 0; ia < tbs.size(); ia++) {
 				DTTable tb = tbs.get(ia);
 				// JSON请求默认不用作为列表数据
@@ -351,7 +351,7 @@ public class ActionBase {
 				if (!tb.getAttsTable().containsKey("tag")) {
 					continue;
 				}
-				
+
 				Object param = tb.getAttsTable().get("tag");
 				ActionJSONParameterListTag p = null;
 				try {
@@ -589,64 +589,27 @@ public class ActionBase {
 	/**
 	 * 执行sql语句
 	 * 
-	 * @param runInc
 	 * @param sql
 	 * @param sqlType
 	 * @param name
 	 * @return false = 检查执行提交时返回的错误判断
 	 */
-	boolean executeSql(int runInc, String sql, String sqlType, String name) {
+	public boolean executeSql(String sql, String sqlType, String name) {
 		boolean isSelect = DataConnection.checkIsSelect(sql);
 		if (sqlType.equals("procedure")) {
 			this.executeSqlProcdure(sql);
 			// 检查执行提交时返回的错误判断
-			return !this.checkActionErrorOutInProcdure();
+			return StringUtils.isBlank(this.getChkErrorMsg());
 		} else if (isSelect) { // 不再判断 sqlType = query or update
 			// 查询
-			this.executeSqlQuery(sql);
-			DTTable dt = (DTTable) this.getDTTables().getLast();
-			if (dt.getCount() == 1) {
-				this.addDTTableToRequestValue(dt);
-			}
+			DTTable dt = this.executeSqlQuery(sql);
 			dt.setName(name);
-
 			// 检查执行提交时返回的错误判断
-			return !this.checkActionErrorOutInTable(dt);
+			return StringUtils.isBlank(this.getChkErrorMsg());
 		} else {// 更新
 			this.executeSqlUpdate(sql);
 			return true;
 		}
-
-//		if (sqlType.equals("update") && isSelect) {
-//			// 执行过程中有其它Select过程
-//			this.executeSqlQuery(sql);
-//			DTTable dt = (DTTable) this.getDTTables().getLast();
-//			if (dt.getCount() == 1) {
-//				this.addDTTableToRequestValue(dt);
-//			}
-//			dt.setName(name);
-//		} else if (sqlType.equals("query")) {// 查询
-//			this.executeSqlQuery(sql);
-//			DTTable dt = (DTTable) this.getDTTables().get(this.getDTTables().size() - 1);
-//			dt.setName(name);
-//			if (dt.getCount() == 1) {
-//				this.addDTTableToRequestValue(dt);
-//			}
-//			// 检查执行提交时返回的错误判断
-//			if (this.checkActionErrorOutInTable(dt)) {
-//				return false;
-//			}
-//		} else if (sqlType.equals("procedure")) {// 存储过程
-//			this.executeSqlProcdure(sql);
-//			// 检查执行提交时返回的错误判断
-//			if (this.checkActionErrorOutInProcdure()) {
-//				return false;
-//			}
-//		} else {// 更新
-//			this.executeSqlUpdate(sql);
-//		}
-
-//		return true;
 	}
 
 	/**
@@ -665,7 +628,6 @@ public class ActionBase {
 		if (isTrans) {
 			cnn.transBegin();
 		}
-		int runInc = 0; // 执行次数
 		for (int i = 0; i < sqlArray.length; i++) {
 			String sql = sqlArray[i].trim();
 			if (sql.length() == 0) {// 空语句
@@ -673,25 +635,21 @@ public class ActionBase {
 			}
 			String sqlType = sqlItem.getSqlType();
 
-			boolean isSuccessful = this.executeSql(runInc, sql, sqlType, name);
-			if (!isSuccessful) { // 检查执行提交时返回的错误判断
-				if (isTrans) { // 事务回滚
-					cnn.transRollback();
-				}
-				cnn.close();
-				return;
-			}
-
-			if (cnn.getErrorMsg() != null && cnn.getErrorMsg().length() > 0) {
+			this.executeSql(sql, sqlType, name);
+			if (StringUtils.isNotBlank(cnn.getErrorMsg())) {
 				if (isTrans) {
 					cnn.transRollback();
 				}
 				cnn.close();
 				throw new Exception(cnn.getErrorMsg());
 			}
-			this.setChkErrorMsg(null);
-
-			runInc++;
+			if (StringUtils.isNotBlank(this.getChkErrorMsg())) { // 检查执行提交时返回的错误判断
+				if (isTrans) { // 事务回滚
+					cnn.transRollback();
+				}
+				cnn.close();
+				return;
+			}
 		}
 		if (isTrans) {
 			cnn.transCommit();
@@ -1080,7 +1038,7 @@ public class ActionBase {
 	 * 
 	 * @param sql
 	 */
-	public void executeSqlQuery(String sql) {
+	public DTTable executeSqlQuery(String sql) {
 		String sql1 = getSql(sql);
 		DataConnection conn = this.getItemValues().getDataConn();
 		conn.executeQuery(sql1);
@@ -1090,9 +1048,11 @@ public class ActionBase {
 		try {
 			this.getItemValues().getDataConn().getLastResult().getResultSet().close();
 		} catch (SQLException e) {
+			LOGGER.warn("close the result. {} {}", e.getMessage(), sql);
 		}
 		if (!tb.isOk()) {
-			return;
+			conn.setErrorMsg("tb error, " + sql);
+			return null;
 		}
 
 		// 执行SQL的描述
@@ -1102,6 +1062,13 @@ public class ActionBase {
 		} else {
 			this.getDTTables().add(tb);
 		}
+
+		if (!this.checkActionErrorOutInTable(tb)) {
+			if (tb.getCount() == 1) {
+				this.addDTTableToRequestValue(tb);
+			}
+		}
+		return tb;
 
 	}
 
@@ -1404,17 +1371,20 @@ public class ActionBase {
 	 * @return
 	 */
 	public boolean checkActionErrorOutInTable(DTTable dt) {
-		if (dt.getCount() >= 1 && dt.getColumns().testName("EWA_ERR_OUT")) {
-			try {
-				String v = dt.getCell(0, "EWA_ERR_OUT").toString();
+		if (dt.getCount() == 0 || !dt.getColumns().testName("EWA_ERR_OUT")) {
+			return false;
+		}
+		try {
+			for (int i = 0; i < dt.getCount(); i++) {
+				String v = dt.getCell(i, "EWA_ERR_OUT").toString();
 				if (v != null && v.trim().length() > 0) {
 					this.setChkErrorMsg(v);
 					return true;
 				}
-			} catch (Exception e) {
-				this.setChkErrorMsg(e.getMessage());
-				return true;
 			}
+		} catch (Exception e) {
+			this.setChkErrorMsg("Exception, " + e.getMessage());
+			return true;
 		}
 		return false;
 	}

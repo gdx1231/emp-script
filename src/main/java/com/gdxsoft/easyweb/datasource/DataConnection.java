@@ -2083,6 +2083,15 @@ public class DataConnection {
 	}
 
 	/**
+	 * Manual set conn error message
+	 * @param errorMessage
+	 */
+	public void setErrorMsg(String errorMessage) {
+		this._errorMsg = errorMessage;
+		this._errorMsgOnly = errorMessage;
+	}
+
+	/**
 	 * Clear the error
 	 */
 	public void clearErrorMsg() {
@@ -2262,7 +2271,7 @@ public class DataConnection {
 			return "''";
 		}
 		parameter = parameter.replace("'", "''");
-		if(this.getDatabaseType() != null) {
+		if (this.getDatabaseType() != null) {
 			boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
 			boolean isSqlServer = this.getDatabaseType().equalsIgnoreCase("MSSQL");
 			if (isMysql) {

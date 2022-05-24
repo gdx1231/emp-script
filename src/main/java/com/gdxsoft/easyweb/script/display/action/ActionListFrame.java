@@ -2,6 +2,7 @@ package com.gdxsoft.easyweb.script.display.action;
 
 import java.io.File;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,109 +143,108 @@ public class ActionListFrame extends ActionBase implements IAction {
 		}
 
 		RequestValue rv = super.getRequestValue();
-		int runInc = 0; // 执行次数
-		boolean isSplitSql = false;
+		boolean executedSplitSql = false;
 		for (int i = 0; i < sqlArray.length; i++) {
 			String sql = sqlArray[i].trim();
-			if (sql.length() == 0) {
-				// 空语句
+			if (sql.length() == 0) {// 空语句
 				continue;
 			}
 
 			String sqlType = sqlItem.getItem("SqlType");
-			if (runInc > 0 && DataConnection.checkIsSelect(sql) && !sqlType.equals("query")) {
-				// 执行过程中有其它Select过程
-				super.executeSqlQuery(sql);
-				DTTable dt = (DTTable) super.getDTTables().getLast();
-				if (dt.getCount() == 1) {
-					super.addDTTableToRequestValue(dt);
-				}
-
-			} else if (sqlType.equals("query")) {// 查询
-				if (sql.toLowerCase().indexOf("ewa_err_out") > 0 || isSplitSql) {
-					super.executeSqlQuery(sql);
-				} else {
-					// 执行分页
-					isSplitSql = true; // 分页只执行1次
-					if (sql.toUpperCase().indexOf("WHERE") < 0) {
-						throw new Exception("查询语句中应包含WHERE条件, (" + sql + ")");
-					}
-					String sql1 = this.createSqListFrame(sql, conn);
-					String ajax = super.getRequestValue().getString("EWA_AJAX");
-					if (ajax == null) {
-						ajax = "";
-					} else {
-						ajax = ajax.trim();
-					}
-					if (ajax.equalsIgnoreCase("DOWN_DATA")) {
-						// 下载数据
-						String dataName = this.createDownloadData(sql1);
-						if (dataName != null) {
-							String key = "DOWN_DATA_" + rv.getString("EWA.ID");
-							rv.addValue(key, dataName);
-						}
-					} else if (ajax.equalsIgnoreCase("JSON") || ajax.equalsIgnoreCase("JSON_ALL")) {
-						if (rv.getString("EWA_PAGESIZE") != null) { // 分页
-							int iPageSize = this.getUserSettingPageSize();
-							PageSplit ps = new PageSplit(0, rv, iPageSize);
-							String keyField = this.getPageItemValue("PageSize", "KeyField");
-							conn.executeQueryPage(sql1, keyField, ps.getPageCurrent(), ps.getPageSize());
-						} else {
-							conn.executeQuery(sql1); // all
-						}
-						DTTable tb = new DTTable(); // 映射到自定义数据表
-						tb.initData(conn.getLastResult().getResultSet());
-						tb.setName(name);
-						conn.getLastResult().getResultSet().close();
-						if (tb.isOk()) {
-							super.getDTTables().add(tb);
-							// 加载Hor数据
-							super.executeExtOpt(sql, tb);
-						}
-					} else {
-						int iPageSize = this.getUserSettingPageSize();
-						PageSplit ps = new PageSplit(0, rv, iPageSize);
-						String keyField = this.getPageItemValue("PageSize", "KeyField");
-						conn.executeQueryPage(sql1, keyField, ps.getPageCurrent(), ps.getPageSize());
-
-						DTTable tb = new DTTable(); // 映射到自定义数据表
-						tb.initData(conn.getLastResult().getResultSet());
-						tb.setName(name);
-						conn.getLastResult().getResultSet().close();
-						if (tb.isOk()) {
-							super.getDTTables().add(tb);
-							// 加载Hor数据
-							super.executeExtOpt(sql, tb);
-							super.checkActionErrorOutInTable(tb);
-						}
-					}
-				}
-			} else if (sqlType.equals("procedure")) {// 存储过程
-				super.executeSqlProcdure(sql);
-			} else {// 更新
-				if (DataConnection.checkIsSelect(sql)) {
-					super.executeSqlQuery(sql);
-					DTTable dt = (DTTable) super.getDTTables().getLast();
-					if (dt.getCount() == 1) {
-						super.addDTTableToRequestValue(dt);
-					}
-				} else {
-					super.executeSqlUpdate(sql);
-				}
+			if (sqlType.equals("query") && !executedSplitSql && DataConnection.checkIsSelect(sql)
+					&& sql.toLowerCase().indexOf("ewa_err_out") == -1) {
+				// 执行分页查询
+				executedSplitSql = true; // 分页只执行1次
+				this.executeSplitSql(sql, conn, rv, name);
+			} else {
+				super.executeSql(sql, sqlType, name);
 			}
-			if (conn.getErrorMsg() != null && conn.getErrorMsg().length() > 0) {
+			if (StringUtils.isNotBlank(conn.getErrorMsg())) {
 				if (isTrans) {
 					conn.transRollback();
 				}
 				conn.close();
 				throw new Exception(conn.getErrorMsg());
 			}
-			runInc++;
+			if (StringUtils.isNotBlank(this.getChkErrorMsg())) { // 出现用户定义错误，退出执行
+				if (isTrans) {
+					conn.transRollback();
+				}
+				conn.close();
+				return;
+			}
 		}
 		if (isTrans) {
 			conn.transCommit();
 		}
 		this.executeSessionsCookies(sqlItem);
+	}
+
+	/**
+	 * 执行分页查询
+	 * 
+	 * @param sql
+	 * @param conn
+	 * @param rv
+	 * @param name
+	 * @throws Exception
+	 */
+	private void executeSplitSql(String sql, DataConnection conn, RequestValue rv, String name) throws Exception {
+		if (sql.toUpperCase().indexOf("WHERE") < 0) {
+			throw new Exception("查询语句中应包含WHERE条件, (" + sql + ")");
+		}
+		String sql1 = this.createSqListFrame(sql, conn);
+		String ajax = super.getRequestValue().getString("EWA_AJAX");
+		if (ajax == null) {
+			ajax = "";
+		} else {
+			ajax = ajax.trim();
+		}
+		if (ajax.equalsIgnoreCase("DOWN_DATA")) {// 下载数据
+			String dataName = this.createDownloadData(sql1);
+			if (dataName != null) {
+				String key = "DOWN_DATA_" + rv.getString("EWA.ID");
+				rv.addValue(key, dataName);
+			}
+		} else if (ajax.equalsIgnoreCase("JSON") || ajax.equalsIgnoreCase("JSON_ALL")) {
+			boolean useSplit = rv.getString("EWA_PAGESIZE") != null;
+			DTTable tb = this.executeSqlWithPageSplit(sql1, conn, rv, useSplit);
+			tb.setName(name);
+			if (tb.isOk()) {
+				super.getDTTables().add(tb);
+				// 加载Hor数据
+				super.executeExtOpt(sql, tb);
+			}
+		} else {
+			DTTable tb = this.executeSqlWithPageSplit(sql1, conn, rv, true);
+			tb.setName(name);
+			if (tb.isOk()) {
+				super.getDTTables().add(tb);
+				// 加载Hor数据
+				super.executeExtOpt(sql, tb);
+				super.checkActionErrorOutInTable(tb);
+			}
+		}
+	}
+
+	private DTTable executeSqlWithPageSplit(String sql1, DataConnection conn, RequestValue rv, boolean useSplit) {
+		if (useSplit) { // 分页
+			int iPageSize = this.getUserSettingPageSize();
+			PageSplit ps = new PageSplit(0, rv, iPageSize);
+			String keyField = this.getPageItemValue("PageSize", "KeyField");
+			conn.executeQueryPage(sql1, keyField, ps.getPageCurrent(), ps.getPageSize());
+		} else {
+			conn.executeQuery(sql1); // all
+		}
+		DTTable tb = new DTTable(); // 映射到自定义数据表
+		tb.initData(conn.getLastResult().getResultSet());
+		try {
+			conn.getLastResult().getResultSet().close();
+		} catch (SQLException e) {
+			LOG.warn("Close the resultSet. {}, {}", e.getMessage(), sql1);
+		}
+
+		return tb;
 	}
 
 	/**
@@ -513,13 +513,13 @@ public class ActionListFrame extends ActionBase implements IAction {
 					dataField = searchExp;
 				}
 			}
-			if (lsp.getTag().equals("blk")) { //空白
+			if (lsp.getTag().equals("blk")) { // 空白
 				sb.a(" AND (");
 				sb.a(dataField);
 				sb.a("='' or ");
 				sb.a(dataField);
 				sb.al(" is null) ");
-			} else if (lsp.getTag().equals("nblk")) { //非空白
+			} else if (lsp.getTag().equals("nblk")) { // 非空白
 				sb.a(" AND (");
 				sb.a(dataField);
 				sb.a(" !='' and ");
@@ -797,7 +797,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 			op_right = "";
 			op_left = "";
 			op = " != ";
-		}  
+		}
 
 		MStr s = new MStr();
 		StringBuilder sb = new StringBuilder();
@@ -966,7 +966,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 					return null;
 				}
 			}
-			
+
 			if (!lsp.getPara2().equals("")) {
 				try {
 					Double.parseDouble(lsp.getPara2());
