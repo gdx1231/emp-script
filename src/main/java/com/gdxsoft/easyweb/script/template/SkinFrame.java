@@ -7,6 +7,7 @@ public class SkinFrame implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 6573436592904386030L;
+	public final static String TAG_COL_SPAN = "{__EWA_COL_SPAN__}"; // 替换跨列 colSpan=3
 	public final static String TAG_ITEM = "{__EWA_ITEM__}";
 	public final static String TAG_DES = "{__EWA_DES__}"; // 描述替换符号
 	public final static String TAG_NAME = "{__EWA_NAME__}"; // ID 替换符号

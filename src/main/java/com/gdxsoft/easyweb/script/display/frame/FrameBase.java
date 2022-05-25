@@ -33,6 +33,7 @@ import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
+import com.gdxsoft.easyweb.script.userConfig.UserXItems;
 import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -57,39 +58,62 @@ public class FrameBase {
 	 */
 	public boolean isHiddenField(String name) {
 		if (_HiddenFields == null) {
-			UserXItem page = this.getHtmlClass().getUserConfig().getUserPageItem();
-			this._HiddenFields = new MTable();
-			try {
-				if (page.testName("LogicShow")) {
-					UserXItemValues logicShows = page.getItem("LogicShow");
-					for (int i = 0; i < logicShows.count(); i++) {
-						UserXItemValue logicShow = logicShows.getItem(i);
-						// String name = logicShow.getItem("Name");
-						String paraExp = logicShow.getItem("ParaExp");
-						paraExp = this.getHtmlClass().getItemValues().replaceParameters(paraExp, false);
-						if (!ULogic.runLogic(paraExp)) {
-							continue;
-						}
-						String hiddenFields = logicShow.getItem("HiddenFields");
-						String[] fields = hiddenFields.split(",");
-						for (int k = 0; k < fields.length; k++) {
-							String n = fields[k].trim().toUpperCase();
-							if (!this._HiddenFields.containsKey(n)) {
-								this._HiddenFields.add(n, true);
-							}
-						}
-						// break;
-					}
-				}
-			} catch (Exception e) {
-				LOGGER.error("initial the hidden fields error: {}", e.getMessage());
-			}
+			this.initHiddenFields();
 		}
 		if (this._HiddenFields.getCount() == 0) {
 			return false;
 		}
 		String name1 = name.trim().toUpperCase();
 		return this._HiddenFields.containsKey(name1);
+	}
+
+	/**
+	 * 初始化隐含的字段
+	 */
+	private void initHiddenFields() {
+		UserXItem page = this.getHtmlClass().getUserConfig().getUserPageItem();
+		this._HiddenFields = new MTable();
+		if (page.testName("LogicShow")) {
+			try {
+				UserXItemValues logicShows = page.getItem("LogicShow");
+				for (int i = 0; i < logicShows.count(); i++) {
+					UserXItemValue logicShow = logicShows.getItem(i);
+					// String name = logicShow.getItem("Name");
+					String paraExp = logicShow.getItem("ParaExp");
+					paraExp = this.getHtmlClass().getItemValues().replaceParameters(paraExp, false);
+					if (!ULogic.runLogic(paraExp)) {
+						continue;
+					}
+					String hiddenFields = logicShow.getItem("HiddenFields");
+					String[] fields = hiddenFields.split(",");
+					for (int k = 0; k < fields.length; k++) {
+						String n = fields[k].trim().toUpperCase();
+						if (!this._HiddenFields.containsKey(n)) {
+							this._HiddenFields.add(n, true);
+						}
+					}
+				}
+			} catch (Exception e) {
+				LOGGER.error("initial the hidden fields(LogicShow) error: {}", e.getMessage());
+			}
+		}
+
+		try {
+			UserXItems items = this.getHtmlClass().getUserConfig().getUserXItems();
+			for (int i = 0; i < items.count(); i++) {
+				UserXItem uxi = items.getItem(i);
+				String tag = uxi.getSingleValue("Tag");
+				// 数据类型定义元素无UI
+				if ("dataType".equalsIgnoreCase(tag)) {
+					String name1 = uxi.getName().toUpperCase();
+					if (!this._HiddenFields.containsKey(name1)) {
+						this._HiddenFields.add(name1, true);
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("initial the hidden fields (dataType) error: {}", e.getMessage());
+		}
 	}
 
 	public void createHtmlVue() {
@@ -921,9 +945,9 @@ public class FrameBase {
 			doc.addScriptHtml(_Html5FrameSet[0]);
 		}
 		if (this.isUseTest1Table()) {
-			this.createTest1Table(doc, skinName); //<table id='Test1'
+			this.createTest1Table(doc, skinName); // <table id='Test1'
 		}
-		if(this._HtmlClass.getItemValues().getRequestValue().s("ewa_in_dialog")!=null) {
+		if (this._HtmlClass.getItemValues().getRequestValue().s("ewa_in_dialog") != null) {
 			doc.addScriptHtml("<div class='ewa-in-dialog'>");
 		}
 		doc.addScriptHtml(this._HtmlClass.getSkinFrameAll().getTop());
@@ -1049,7 +1073,7 @@ public class FrameBase {
 			doc.addFrameHtml(pageAddBottom);
 		}
 		// 在对话框的类结束
-		if(this._HtmlClass.getItemValues().getRequestValue().s("ewa_in_dialog")!=null) {
+		if (this._HtmlClass.getItemValues().getRequestValue().s("ewa_in_dialog") != null) {
 			doc.addScriptHtml("</div><!-- end of ewa-in-dialog -->");
 		}
 		if (this.isUseTest1Table()) {

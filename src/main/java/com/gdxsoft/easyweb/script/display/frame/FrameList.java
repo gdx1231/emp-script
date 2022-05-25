@@ -524,7 +524,7 @@ public class FrameList extends FrameBase implements IFrame {
 
 		if (!isApp) {
 			// 鼠标滑出脚本
-			top = top.replace("<table", "<table onmouseout='" + fos + ".MOut(event)'");
+			top = top.replace("<table", "<table onmouseout='if(window.EWA && EWA.F && EWA.F.FOS && " + fos+"){" + fos + ".MOut(event)}'");
 		}
 		doc.addScriptHtml(top);
 		doc.addFrameHtml(top);
@@ -597,13 +597,13 @@ public class FrameList extends FrameBase implements IFrame {
 					if (!isApp) {
 						// 是否来自App调用，如果是的话，取消 onmouseover...的事件
 						StringBuilder stringBuilder = new StringBuilder();
-						stringBuilder.append(" onmouseover='try{");
+						stringBuilder.append(" onmouseover='if(window.EWA && EWA.F && EWA.F.FOS && ");
 						stringBuilder.append(fos);
-						stringBuilder.append(".MOver(this,event)}catch(e){console.log(e)}' onmousedown='try{");
+						stringBuilder.append("){").append(fos).append(".MOver(this,event)}'");
+						stringBuilder.append(" onmousedown='if(window.EWA && EWA.F && EWA.F.FOS && ");
 						stringBuilder.append(fos);
-						stringBuilder.append(".MDown(this,event)}catch(e){console.log(e)}'");
-
-						sb.a(stringBuilder.toString());
+						stringBuilder.append("){").append(fos).append(".MDown(this,event)}'");
+						sb.a(stringBuilder);
 					}
 					sb.al(">");
 				}

@@ -377,7 +377,7 @@ EWA_App.showFrameAsMobile(EWA.F.FOS["@sys_frame_unid"] );
 ]]>
 			</Item>
 			<ItemButton><![CDATA[
-	<td class="EWA_TD_B" colspan="3" align="right">
+	<td class="EWA_TD_B" colspan="{__EWA_COL_SPAN__}" align="right">
 		{__EWA_ITEM__}
 	</td>
 ]]>

@@ -582,7 +582,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 	 */
 	private void createItemHtml(UserXItem uxi, HtmlDocument doc, MTable mapGroup, MTable mapGroupId, String lang,
 			int colSpan, boolean isC11, HashMap<String, ArrayList<String>> meargeMap) throws Exception {
-		if(super.isHiddenField(uxi.getName())) {
+		if (super.isHiddenField(uxi.getName())) {
 			return; // 隐含字段
 		}
 		XItem xItem = HtmlUtils.getXItem(uxi);
@@ -590,7 +590,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 
 		super.addDebug(this, "Item", "Create item " + uxi.getName() + "[" + tag + "]");
 
-		if (tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit")) {
+		if (tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit") || tag.equalsIgnoreCase("hidden")) {
 			return; // 在CreateFooter中
 		}
 
@@ -642,7 +642,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 
 		}
 		boolean isShow = true;
-		if (xItem.getName().equalsIgnoreCase("hidden") || curIndex > 0) {
+		if (tag.equalsIgnoreCase("hidden") || curIndex > 0) {
 			isShow = false;
 		}
 		String disp = " style='·~！@display:" + (isShow ? "" : "none") + "' groupIndex='" + curIndex + "' ";
@@ -756,7 +756,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 			parentStyle = uxi.getSingleValue("ParentStyle");
 		}
 		if (parentStyle.length() > 0) {
-				parentHtml = parentHtml.replaceFirst("!!", " style=\"" + parentStyle + "\" ");
+			parentHtml = parentHtml.replaceFirst("!!", " style=\"" + parentStyle + "\" ");
 		} else {
 			parentHtml = parentHtml.replaceFirst("!!", "");
 		}
@@ -1073,49 +1073,92 @@ public class FrameFrame extends FrameBase implements IFrame {
 	 */
 	public void createFrameFooter() throws Exception {
 		HtmlDocument doc = this.getHtmlClass().getDocument();
-		UserConfig uc = this.getHtmlClass().getUserConfig();
-		String lang = this.getHtmlClass().getSysParas().getLang();
-
 		// 索引号错误（<0 或超出范围）index=0,size=0
 		// 当 从 ListFrame 修改成 Frame 时候
 		String userHtml = this.getUserHtml();
-
 		if (userHtml.trim().length() > 0 || _IsRedrawJson) {
 			return;
 		}
-		MStr sb = new MStr();
+
+		String buttons = this.getButtonsHtml();
+		if (buttons.length() > 0) {
+			MStr sbButtons = new MStr(); //
+			sbButtons.append("\r\n<tr class='ewa-frame-buttons'>\r\n" + super.createSkinFCItemButton() + "</tr>\r\n");// 皮肤定义的button样式
+			int index = sbButtons.indexOf(SkinFrame.TAG_ITEM);
+			sbButtons.insert(index, buttons);
+
+			String sFrameHtml = sbButtons.toString().replace(SkinFrame.TAG_ITEM, "");
+			// 显示为3段还是2段
+			int colSpan = this.getFrameColSize();
+			sFrameHtml = sFrameHtml.replace(SkinFrame.TAG_COL_SPAN, colSpan + "");
+			doc.addScriptHtml(sFrameHtml, "FrameFooter");
+
+			doc.addFrameHtml(sFrameHtml);
+		}
+		// 隐藏字段
+		String hiddens = this.getHiddensHtml();
+		if (hiddens.length() > 0) {
+			doc.addScriptHtml(hiddens, "FrameFooter");
+			doc.addFrameHtml(hiddens);
+		}
+
+	}
+
+	/**
+	 * 获取按钮的html
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public String getButtonsHtml() throws Exception {
+		UserConfig uc = this.getHtmlClass().getUserConfig();
+		String lang = this.getHtmlClass().getSysParas().getLang();
+		MStr sbButtons = new MStr(); //
 		for (int i = 0; i < uc.getUserXItems().count(); i++) {
 			UserXItem uxi = uc.getUserXItems().getItem(i);
 			XItem xItem = HtmlUtils.getXItem(uxi);
 			if (!(xItem.getName().equalsIgnoreCase("button") || xItem.getName().equalsIgnoreCase("submit"))) {
 				continue;
 			}
-			String des = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Info", lang);// 描述
-			String memo = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Memo", lang);// memo
-
-			if (sb.length() == 0) {
-				sb.append("\r\n<tr>\r\n" + super.createSkinFCItemButton() + "</tr>\r\n");// 皮肤定义的button样式
-			}
-			int index = sb.indexOf(SkinFrame.TAG_ITEM);
 			IItem item = super.getHtmlClass().getItem(uxi);
 			String s1 = item.createItemHtml();
+
+			String des = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Info", lang);// 描述
+			String memo = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Memo", lang);// memo
 
 			// 根据逻辑表达式去除属性
 			s1 = this.removeAttr(uxi, s1);
 
 			String buttonHtml = s1.replace(SkinFrame.TAG_DES, des);
 			buttonHtml = buttonHtml.replace(SkinFrame.TAG_MSG, memo);
-			sb.insert(index, buttonHtml);
+			sbButtons.a(buttonHtml);
 		}
-		if (sb.length() > 0) {
-			String sFrameHtml = sb.toString().replace(SkinFrame.TAG_ITEM, "");
-			// 显示为3段还是2段
-			int colSpan = this.getFrameColSize();
-			sFrameHtml = sFrameHtml.replace(" colspan=\"3\" ", " colspan=\"" + colSpan + "\" ");
-			doc.addScriptHtml(sFrameHtml, "FrameFooter");
 
-			doc.addFrameHtml(sFrameHtml);
+		return sbButtons.toString();
+	}
+
+	/**
+	 * 获取隐含字段的 html
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public String getHiddensHtml() throws Exception {
+		UserConfig uc = this.getHtmlClass().getUserConfig();
+
+		MStr sbHiddens = new MStr();
+		for (int i = 0; i < uc.getUserXItems().count(); i++) {
+			UserXItem uxi = uc.getUserXItems().getItem(i);
+			XItem xItem = HtmlUtils.getXItem(uxi);
+			if (!xItem.getName().equalsIgnoreCase("hidden")) {
+				continue;
+			}
+			IItem item = super.getHtmlClass().getItem(uxi);
+			String s1 = item.createItemHtml();
+			sbHiddens.al(s1);
+
 		}
+		return sbHiddens.toString();
 	}
 
 	/**

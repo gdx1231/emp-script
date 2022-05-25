@@ -1,5 +1,7 @@
 package com.gdxsoft.easyweb.script;
 
+import java.math.BigDecimal;
+
 public class PageValue {
 
 	private Object _Value;
@@ -17,37 +19,147 @@ public class PageValue {
 		if (this._Value == null)
 			return;
 
-		String tName = this._Value.getClass().getName().toLowerCase();
-		if (tName.equals("java.lang.String")) {
+		if (this._Value instanceof java.lang.String) {
 			this._DataType = "String";
-			return;
-		}
-		if (tName.equals("java.util.date")) {
+		} else if (this._Value instanceof java.util.Date) {
 			this._DataType = "Date";
-			return;
+		} else if (this._Value instanceof java.lang.Long) {
+			this._DataType = "BigInt";
+		} else if (this._Value instanceof java.lang.Integer || this._Value instanceof java.lang.Short) {
+			this._DataType = "Int";
+		} else if (this._Value instanceof java.lang.Double || this._Value instanceof java.lang.Float) {
+			this._DataType = "Number";
 		}
+		String simpleName = this._Value.getClass().getSimpleName();
+		if (simpleName.equals("byte[]") || simpleName.equals("Byte[]")) {
+			this._DataType = "Binary";
+		} else {
+			this._DataType = simpleName;
+		}
+	}
 
-		String s1 = this._Value.toString().trim();
-		if (s1.length() == 0) {
-			this._DataType = "String";
-			return;
+	/**
+	 * 获取二进制数组
+	 * 
+	 * @return
+	 */
+	public byte[] toBinary() {
+		Object v = this.getValue();
+		if (v == null) {
+			return null;
 		}
-		try {
-			Double dv = Double.parseDouble(s1);
-			if (s1.indexOf(".") > 0) {
-				this._DataType = "Number";
-				this._Value = dv.doubleValue();
-			} else {
-				if ((dv.intValue() + "").equalsIgnoreCase(s1)) {
-					this._DataType = "Int";
-					this._Value = dv.intValue();
+		// 类型为Byte[]时，需要手动转换为 byte[]
+		if (v.getClass().getSimpleName().equals("Byte[]")) {
+			Byte[] bb = (Byte[]) v;
+			byte[] bb1 = new byte[bb.length];
+			for (int i = 0; i < bb.length; i++) {
+				Byte b = bb[i];
+				if (b == null) {
+					b = 0;
 				}
+				bb1[i] = b;
 			}
-		} catch (Exception e) {
-			this._DataType = "String";
-			this._Length = this._Value.toString().length();
+			return bb1;
 		}
+		return (byte[]) v;
+	}
 
+	/**
+	 * 获取参数的整数
+	 * 
+	 * @param pv
+	 * @return
+	 */
+	public Integer toInteger() {
+		Object t1 = this.getValue();
+		if (t1 == null) {
+			return null;
+		}
+		if (t1 instanceof java.lang.Integer) {
+			return (Integer) t1;
+		}
+		String v1 = t1.toString();
+		if (v1.trim().length() > 0) {
+			if (v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
+				return null;
+			}
+			int intVal = Integer.parseInt(v1.split("\\.")[0]);
+			return intVal;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * 获取参数的长整数
+	 * 
+	 * @param pv
+	 * @return
+	 */
+	public Long toLong() {
+		Object t1 = this.getValue();
+		if (t1 == null) {
+			return null;
+		}
+		if (t1 instanceof java.lang.Long) {
+			return (Long) t1;
+		}
+		String v1 = t1.toString();
+		if (v1.trim().length() > 0) {
+			if (v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
+				return null;
+			}
+			long intVal = Long.parseLong(v1.split("\\.")[0]);
+			return intVal;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * 获取参数的双精度
+	 * 
+	 * @param pv
+	 * @return
+	 */
+	public Double toDouble() {
+		Object t1 = this.getValue();
+		if (t1 == null) {
+			return null;
+		}
+		if (t1 instanceof java.lang.Double) {
+			return (Double) t1;
+		}
+		String v1 = t1.toString();
+		if (v1 != null && v1.trim().length() > 0) {
+			if (v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
+				return null;
+			}
+			double dbVal = Double.parseDouble(v1);
+			return dbVal;
+		} else {
+			return null;
+		}
+	}
+
+	public BigDecimal toBigDecimal() {
+		Object t1 = this.getValue();
+		if (t1 == null) {
+			return null;
+		}
+		if (t1 instanceof java.math.BigDecimal) {
+			return (BigDecimal) t1;
+		}
+		String v1 = t1.toString();
+		if (v1.trim().length() > 0) {
+			if (v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
+				return null;
+			}
+			BigDecimal dbVal = new BigDecimal(v1);
+			return dbVal;
+		} else {
+			return null;
+		}
 	}
 
 	public PageValue(String name, String value) {
@@ -92,6 +204,14 @@ public class PageValue {
 	 */
 	public void setName(String name) {
 		_Name = name;
+	}
+
+	public String toString() {
+		if (this._Value == null) {
+			return null;
+		} else {
+			return this._Value.toString();
+		}
 	}
 
 	/**

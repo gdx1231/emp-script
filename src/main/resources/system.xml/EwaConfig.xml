@@ -1154,6 +1154,17 @@ addEvent(window, 'load', ewa_load_upload_image);
 					<Html><![CDATA[{__EWA_VAL__}]]></Html>
 				</Template>
 			</XItem>
+			<XItem Name="dataType" HtmlTag="" BaseType="0" UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemDataType"
+				Parameters="Name,DataItem,DescriptionSet,Format">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="数据类型，无UI" />
+					<Set Lang="enus" Info="Defined the data type, none UI" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[]]></Html>
+				</Template>
+			</XItem>
 			<XItem Name="addressMap" HtmlTag="" BaseType="0" UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
 				Parameters="GroupIndex,OrderSearch,Name,XStyle,DataItem,AddrMapRels,

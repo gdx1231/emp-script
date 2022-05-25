@@ -1,5 +1,6 @@
 package com.gdxsoft.easyweb.datasource;
 
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -1743,16 +1744,17 @@ public class DataConnection {
 
 		String dt = pv.getDataType();
 		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
-		String v1 = pv.getStringValue();
 		if (dt.equals("BINARY") || dt.equals("B[")) {
 			return null;
-		} else if (dt.equals("INT")) {
+		} 
+		
+		String v1 = pv.getStringValue();
+		if (dt.equals("INT")) {
 			if (v1.trim().length() > 0) {
 				return Integer.parseInt(v1.split("\\.")[0]) + "";
 			} else {
 				return "null";
 			}
-
 		} else if (dt.equals("NUMBER")) {
 			if (v1.trim().length() > 0) {
 				return Double.parseDouble(v1) + "";
@@ -1802,9 +1804,7 @@ public class DataConnection {
 	 * @return
 	 */
 	private byte[] getParaBinary(PageValue pv) {
-		Object v = pv.getValue();
-		byte[] b = v == null ? null : (byte[]) pv.getValue();
-		return b;
+		return pv.toBinary();
 	}
 
 	/**
@@ -1849,20 +1849,7 @@ public class DataConnection {
 	 * @return
 	 */
 	private Integer getParaInteger(PageValue pv) {
-		Object t1 = pv.getValue();
-		if (t1 == null) {
-			return null;
-		}
-		String v1 = t1.toString();
-		if (v1 != null && v1.trim().length() > 0) {
-			if (v1.equals("undefined")) {
-				return null;
-			}
-			int intVal = Integer.parseInt(v1.split("\\.")[0]);
-			return intVal;
-		} else {
-			return null;
-		}
+		return pv.toInteger();
 	}
 
 	/**
@@ -1872,43 +1859,11 @@ public class DataConnection {
 	 * @return
 	 */
 	private Long getParaLong(PageValue pv) {
-		Object t1 = pv.getValue();
-		if (t1 == null) {
-			return null;
-		}
-		String v1 = t1.toString();
-		if (v1 != null && v1.trim().length() > 0) {
-			if (v1.equals("undefined")) {
-				return null;
-			}
-			long intVal = Long.parseLong(v1.split("\\.")[0]);
-			return intVal;
-		} else {
-			return null;
-		}
+		return pv.toLong();
 	}
 
-	/**
-	 * 获取参数的浮点
-	 * 
-	 * @param pv
-	 * @return
-	 */
-	private Double getParaDouble(PageValue pv) {
-		Object t1 = pv.getValue();
-		if (t1 == null) {
-			return null;
-		}
-		String v1 = t1.toString();
-		if (v1 != null && v1.trim().length() > 0) {
-			if (v1.equals("undefined")) {
-				return null;
-			}
-			double dbVal = Double.parseDouble(v1);
-			return dbVal;
-		} else {
-			return null;
-		}
+	private BigDecimal getParaBigDecimal(PageValue pv) {
+		return pv.toBigDecimal();
 	}
 
 	private void addStatementParameter(PreparedStatement cst, String parameterName, int index) throws SQLException {
@@ -1961,13 +1916,14 @@ public class DataConnection {
 				this.writeDebug(this, "添加参数(LONG)" + index, parameterName + "=" + longVal);
 			}
 		} else if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("JAVA.LANG.DOUBLE")) {
-			Double dbVal = this.getParaDouble(pv);
+			BigDecimal dbVal = this.getParaBigDecimal(pv);
 			if (dbVal == null) {
 				cst.setNull(index, java.sql.Types.DOUBLE);
 				this.writeDebug(this, "添加参数(double)" + index, parameterName + "=null");
 			} else {
-				cst.setDouble(index, dbVal);
-				this.writeDebug(this, "添加参数(double)" + index, parameterName + "=" + dbVal);
+				cst.setBigDecimal(index, dbVal);
+				// cst.setDouble(index, dbVal);
+				this.writeDebug(this, "添加参数(BigDecimal)" + index, parameterName + "=" + dbVal);
 			}
 		} else if (dt.equals("DATE") || dt.equals("JAVA.UTIL.DATE") || dt.equals("JAVA.SQL.DATE")) {
 			Timestamp t1 = this.getParaTimestamp(pv);
@@ -2084,6 +2040,7 @@ public class DataConnection {
 
 	/**
 	 * Manual set conn error message
+	 * 
 	 * @param errorMessage
 	 */
 	public void setErrorMsg(String errorMessage) {
