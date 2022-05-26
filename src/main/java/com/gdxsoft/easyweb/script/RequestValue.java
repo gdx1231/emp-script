@@ -1405,6 +1405,9 @@ public class RequestValue implements Cloneable {
 		PageValues target = rv.getPageValues();
 		this._ReqValues.copyTo(target);
 
+		rv._Request = this._Request;
+		rv._ContextPath = this._ContextPath;
+		rv._Session = this._Session;
 		return rv;
 
 	}

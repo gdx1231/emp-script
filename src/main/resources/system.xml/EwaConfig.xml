@@ -2488,6 +2488,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="enus" Info="Parameters" />
 						</DescriptionSet>
 					</Value>
+					<Value Type="group" Name="CallUrlMethod">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="URL调用模式" />
+							<Set Lang="enus" Info="Url call method" />
+						</DescriptionSet>
+					</Value>
 				</Values>
 			</XItemParameter>
 			<XItemParameter Name="PopFrame" IsSet="0" IsShow="1" UIGroup="Others" IsJsShow="0"
@@ -3043,6 +3049,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 		<XGroupValues>
 		
+			<XGroupValue Name="CallUrlMethod" Default="" Values="INNER_CALL,WITH_PAGE">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="EWA调用,跟随页面" />
+					<Set Lang="enus" Info="EWA Call, With page" />
+				</DescriptionSet>
+			</XGroupValue>
 		<XGroupValue Name="SignFormat" Default="png" Values="png,jpeg,webp">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="png,jpeg,webp" />

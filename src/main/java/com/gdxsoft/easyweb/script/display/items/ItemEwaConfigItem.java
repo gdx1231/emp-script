@@ -3,6 +3,7 @@
  */
 package com.gdxsoft.easyweb.script.display.items;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +27,9 @@ public class ItemEwaConfigItem extends ItemBase {
 		UserXItem userXItem = super.getUserXItem();
 		SysParameters sysParas = super.getHtmlClass().getSysParas();
 		RequestValue rv1 = sysParas.getRequestValue();
-		//RequestValue rv = new RequestValue(rv1.getRequest(), rv1.getSession());
+		// RequestValue rv = new RequestValue(rv1.getRequest(), rv1.getSession());
 		RequestValue rv = rv1.clone();
-		
+
 		if (sysParas.getFrameType().equalsIgnoreCase("listFrame")) {
 			DTTable tb = super.getHtmlClass().getItemValues().getListFrameTable();
 			DTRow row = tb.getCurRow();
@@ -39,15 +40,13 @@ public class ItemEwaConfigItem extends ItemBase {
 		String val;
 		String xmlName = userXItem.getSingleValue("DefineFrame", "CallXmlName");
 		xmlName = super.getHtmlClass().getItemValues().replaceParameters(xmlName, false, true);
-
 		String itemName = userXItem.getSingleValue("DefineFrame", "CallItemName");
 
 		String refParas = userXItem.getSingleValue("DefineFrame", "CallPara");
 		refParas = super.getHtmlClass().getItemValues().replaceParameters(refParas, false, true);
-
 		String[] paras = null;
 		if (refParas.trim().length() > 0) {
-			if (refParas.indexOf("=") > 0) { 
+			if (refParas.indexOf("=") > 0) {
 				// 新方法 name=@user_name&phone=@user_phone
 				this.attachParas(refParas, rv);
 			} else {
@@ -65,20 +64,23 @@ public class ItemEwaConfigItem extends ItemBase {
 			}
 		}
 		rv.addOrUpdateValue("EWA_AJAX", "TOP_CNT_BOTTOM");
-		// 调用模式，用于判断使用
-		rv.addOrUpdateValue("EWA_CALL_METHOD", "INNER_CALL");
 
+		if (rv.s("EWA_CALL_METHOD") == null) {// 调用模式，用于判断使用
+			String callUrlMethod = userXItem.getSingleValue("DefineFrame", "CallUrlMethod");
+			//INNER_CALL url = /xxx/EWA_STYLE/cgi-bin/?xmlname=...
+			rv.addOrUpdateValue("EWA_CALL_METHOD", StringUtils.isBlank(callUrlMethod) ? "INNER_CALL" : callUrlMethod);
+		}
 		// 移除EWA_P_BEHAVIOR 脚本，由父窗体带入
 		rv.getPageValues().remove("EWA_P_BEHAVIOR");
 
 		rv.addOrUpdateValue("XMLNAME", xmlName);
 		rv.addOrUpdateValue("itemName", itemName);
-		
+
 		try {
-			
+
 			HtmlCreator hc = new HtmlCreator();
 			hc.setDebugFrames(super.getHtmlClass().getDebugFrames());
-			
+
 			hc.init(rv, super.getResponse());
 			hc.createPageHtml();
 			val = hc.getPageHtml();
@@ -112,7 +114,7 @@ public class ItemEwaConfigItem extends ItemBase {
 			if (key.length() == 0) {
 				continue;
 			}
-			rv.addValue(key, pp[1], PageValueTag.OTHER);
+			rv.addValue(key, pp[1], PageValueTag.HTML_CONTROL_PARAS);
 		}
 
 	}
