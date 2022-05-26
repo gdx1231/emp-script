@@ -14,7 +14,7 @@
 	<EwaFunction name="sha1" className="com.gdxsoft.easyweb.utils.Utils" methodName="sha1" des="sha1"
 		desEn="sha1" usage="ewa_func.sha1(@source)" />
 
-	<EwaFunction name="digest" className="com.gdxsoft.easyweb.utils.UDigest" methodName="deigesHex"
+	<EwaFunction name="digest" className="com.gdxsoft.easyweb.utils.UDigest" methodName="digestHex"
 		des="摘要算法( md5, sha1, sha224, sha256, sha384, sha512, sha3, sm3
 	                    , RIPEMD320, RIPEMD256, RIPEMD160, RIPEMD128
 	                    , GOST3411, GOST3411_2012_256, GOST3411_2012_512, Tiger)"
