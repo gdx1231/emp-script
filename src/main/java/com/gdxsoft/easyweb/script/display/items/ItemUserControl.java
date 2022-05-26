@@ -97,7 +97,7 @@ public class ItemUserControl extends ItemBase {
 		}
 		String s1 = super.getXItemFrameHtml();
 		s1 = s1.replace(SkinFrame.TAG_VAL,
-				val == null ? "" : val.replace("@", "\1\2$$##GDX~##JZY$$\3\4")); // 替换值
+				val == null ? "" : val.replace("@", IItem.REP_AT_STR)); // 替换值
 		return s1.trim();
 	}
 

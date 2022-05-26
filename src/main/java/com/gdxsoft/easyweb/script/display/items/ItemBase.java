@@ -360,11 +360,15 @@ public class ItemBase implements IItem {
 			return val;
 		}
 		DTCell refValCell = row.getCell(refShow);
-		String refVal = refValCell == null ? "" : refValCell.getString();
-		refVal = Utils.textToInputValue(refVal.trim());
+		String refVal = refValCell.isNull() ? "" : refValCell.getString();
+		if (this.isShowAsHtml()) {
+			refVal = this.checkHtmlScript(refVal);
+		} else {
+			refVal = Utils.textToInputValue(refVal.trim());
+		}
 		String st = refShowStype == null || refShowStype.trim().length() == 0 ? ""
 				: row.getCell(refShowStype).getString();
-		String span = "<Span class=\"" + st + "\" ref_key=\"" + Utils.textToInputValue(val) + "\" ";
+		String span = "<span class=\"" + st + "\" ref_key=\"" + Utils.textToInputValue(val) + "\" ";
 
 		// Text-Key, Key-Text, Text-Title, Key-Title
 		// ,文字(Key),Key(文字),文字-提示,Key-提示
@@ -487,6 +491,17 @@ public class ItemBase implements IItem {
 		return sb.toString();
 	}
 
+	String checkHtmlScript(String val) {
+		if (val == null) {
+			return "";
+		}
+		String v1 = val.toLowerCase();
+		if (v1.indexOf("<script") >= 0) {
+			val = v1.replace("<script", "[脚本1").replace("</script", "[/脚本1");
+		}
+		return val;
+	}
+
 	/**
 	 * 获取对象值，如果为空，则取初始化值的定义
 	 */
@@ -509,46 +524,56 @@ public class ItemBase implements IItem {
 		}
 		String tag = this._UserXItem.getItem("Tag").getItem(0).getItem(0).trim().toLowerCase();
 		if (tag.indexOf("dhtml") >= 0) {
-			if (val.toLowerCase().indexOf("<script") >= 0) {
-				val = val.toLowerCase().replace("<script", "[脚本1").replace("</script", "[/脚本1");
-			}
-
+			val = this.checkHtmlScript(val);
 			val = Utils.textToInputValue(val);
 			return val;
 		}
-		String isHtmlValue = "";
-		boolean isHtml = false; // 显示为HTML内码
-		if (_UserXItem.testName("IsHtml") && _UserXItem.getItem("IsHtml").count() > 0) {
 
-			isHtmlValue = _UserXItem.getItem("IsHtml").getItem(0).getItem(0);
-
-			if (isHtmlValue.equals("1")) {
-				isHtml = true;
-			}
-		}
-		if (!isHtml) { // 替换标签
-			val = Utils.textToInputValue(val);
-			if (tag.equals("span") || tag.equals("user")) {
-				if (isHtmlValue.equals("2")) { // 替换回车为P标签
-					StringBuilder sb = new StringBuilder();
-					sb.append("<p>");
-					sb.append(val.replace("\n", "</p><p>"));
-					sb.append("</p>");
-					val = sb.toString();
-				} else if (isHtmlValue.equals("3")) {
-					// 不替换回车
-				} else {// 替换回车为<br>标签
-					val = val.replace("\n", "<br />");
-				}
-			}
+		boolean isHtml = this.isShowAsHtml(); // 是否显示为HTML
+		if (isHtml) {
+			val = this.checkHtmlScript(val);
 			return val;
-		} else {
-			if (val.toLowerCase().indexOf("<script") >= 0) {
-				val = val.toLowerCase().replace("<script", "[脚本2").replace("</script", "[/脚本2");
+		}
+		// 替换标签
+		val = Utils.textToInputValue(val);
+		if (tag.equals("span") || tag.equals("user")) {
+			String isHtmlValue = this.getIsHtmlValue(); // 1 html,2 回车为p,3 不替换回车，0，br
+			if (isHtmlValue.equals("2")) { // 替换回车为P标签
+				StringBuilder sb = new StringBuilder();
+				sb.append("<p>");
+				sb.append(val.replace("\n", "</p><p>"));
+				sb.append("</p>");
+				val = sb.toString();
+			} else if (isHtmlValue.equals("3")) {
+				// 不替换回车
+			} else {// 替换回车为<br>标签
+				val = val.replace("\n", "<br />");
 			}
 		}
-
 		return val;
+	}
+
+	/**
+	 * 显示为HTML，不替换&lt;和&gt;
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	boolean isShowAsHtml() throws Exception {
+		boolean isHtml = false; // 显示为HTML内码
+		String isHtmlValue = this.getIsHtmlValue();
+		if (isHtmlValue.equals("1")) {
+			isHtml = true;
+		}
+		return isHtml;
+	}
+
+	String getIsHtmlValue() throws Exception {
+		if (_UserXItem.testName("IsHtml") && _UserXItem.getItem("IsHtml").count() > 0) {
+			String isHtmlValue = _UserXItem.getItem("IsHtml").getItem(0).getItem(0);
+			return isHtmlValue;
+		}
+		return "";
 	}
 
 	/**
@@ -645,7 +670,7 @@ public class ItemBase implements IItem {
 			}
 			// 从数据库显示列表信息
 
-		}  else if ("valid".equals(tag)) {
+		} else if ("valid".equals(tag)) {
 			String event = "EWA.F.FOS['@sys_frame_unid'].CheckValid(this);";
 			sb.append(" onchange=\"" + event + "\"");
 			sb.append(" onfocus='if(window.EWA_FrameRemoveAlert){EWA_FrameRemoveAlert(this)}' ");
@@ -725,7 +750,7 @@ public class ItemBase implements IItem {
 
 		// 替换一次
 		ss.replace("!!", sb.toString());
-		 
+
 		s1 = ss.toString();
 		_UserXItem.setHtml(s1);
 		// if (s1.indexOf("disabled") >= 0) {

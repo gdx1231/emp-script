@@ -99,7 +99,7 @@ public class ItemCombine extends ItemBase {
 		String s1 = super.getXItemFrameHtml();
 		s1 = s1.replace("@DES", des);
 		s1 = s1.replace(SkinFrame.TAG_VAL, val == null ? "" : val.replace("@",
-				"\1\2$$##GDX~##JZY$$\3\4")); // 替换值
+				IItem.REP_AT_STR)); // 替换值
 
 		if (install.equals("iframe") || install.equals("iframe_lazy")) {
 			s1 = s1.replace("[$]",

@@ -2,6 +2,7 @@ package com.gdxsoft.easyweb.script.display.frame;
 
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.script.display.items.IItem;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
@@ -113,7 +114,7 @@ public class FrameReport extends FrameBase implements IFrame {
 
 				String itemHtml = getHtmlClass().getItemValues()
 						.replaceParameters(tmp, true, true, true);
-				itemHtml = itemHtml.replace("@", "\1\2$$##GDX~##JZY$$\3\4"); // 替换值
+				itemHtml = itemHtml.replace("@", IItem.REP_AT_STR); // 替换值
 				s1.al(itemHtml);
 			}
 
@@ -123,7 +124,7 @@ public class FrameReport extends FrameBase implements IFrame {
 		} else {
 			String itemHtml = getHtmlClass().getItemValues().replaceParameters(
 					tmp, true, true, true);
-			itemHtml = itemHtml.replace("@", "\1\2$$##GDX~##JZY$$\3\4"); // 替换值
+			itemHtml = itemHtml.replace("@", IItem.REP_AT_STR); // 替换值
 			String s2 = parentHtml.replace(SkinFrame.TAG_ITEM, itemHtml);
 			return s2;
 		}

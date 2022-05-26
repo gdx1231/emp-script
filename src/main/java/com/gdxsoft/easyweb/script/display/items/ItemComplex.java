@@ -68,7 +68,7 @@ public class ItemComplex extends ItemBase {
 			// nothing
 		} else if (install.equals("html")) {
 			String html = this.createHtml(id, x, i, p, des, js_rename);
-			s1 = s1.replace(SkinFrame.TAG_VAL, html == null ? "" : html.replace("@", "\1\2$$##GDX~##JZY$$\3\4")); // 替换值
+			s1 = s1.replace(SkinFrame.TAG_VAL, html == null ? "" : html.replace("@", IItem.REP_AT_STR)); // 替换值
 		} else if (install.equals("iframe")) {
 			String rst = this.createIframe(id, x, i, p, des);
 			s1 = s1.replace(">" + SkinFrame.TAG_VAL, rst + " >");

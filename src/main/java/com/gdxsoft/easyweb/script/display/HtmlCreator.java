@@ -1420,7 +1420,8 @@ public class HtmlCreator {
 
 		_DebugFrames.addDebug(this, "HTML", "结束合成脚本");
 
-		return sb.toString().replace("\1\2$$##GDX~##JZY$$\3\4", "@");
+		// "\1\2$$##GDX~##JZY$$\3\4"
+		return sb.toString().replace(IItem.REP_AT_STR, "@"); 
 	}
 
 	/**
@@ -1454,7 +1455,7 @@ public class HtmlCreator {
 		sb.append(this._Document.getScriptHtml());
 		sb.append(this._Document.getJsTop().getScripts(true));
 		sb.append(this._Document.getJsBottom().getScripts(true));
-		sb.replace("\1\2$$##GDX~##JZY$$\3\4", "@");
+		sb.replace(IItem.REP_AT_STR, "@"); //"\1\2$$##GDX~##JZY$$\3\4"
 		String s1 = _ItemValues.replaceParameters(sb.toString(), true);
 
 		_DebugFrames.addDebug(this, "HTML", "结束合成脚本");
@@ -1681,7 +1682,6 @@ public class HtmlCreator {
 			} else {
 				this._Frame.createHtml();
 			}
-			// sb.append(content.replace("\1\2$$##GDX~##JZY$$\3\4", "@"));
 			_DebugFrames.addDebug(this, "HTML", "结束合成HTML");
 		}
 	}

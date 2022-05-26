@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.gdxsoft.easyweb.script.template.SetBase;
 
-public class UserXItem extends SetBase<UserXItemValues>  implements Serializable {
+public class UserXItem extends SetBase<UserXItemValues> implements Serializable {
 
 	/**
 	 * 
@@ -16,11 +16,12 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 	private String _Name;
 	private String _Html;
 	private boolean _IsUsingEwaEvent = false;
-	
+
 	private Boolean usingRef;
-	
+
 	/**
 	 * 本体的样式
+	 * 
 	 * @return the _Style
 	 */
 	public String getStyle() {
@@ -36,6 +37,7 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 
 	/**
 	 * 父体的样式
+	 * 
 	 * @return the _ParentStyle
 	 */
 	public String getParentStyle() {
@@ -51,21 +53,16 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 
 	private String _Style;
 	private String _ParentStyle;
-	
 
 	/**
 	 * 获取用户定义条目的指定标记的值
 	 * 
-	 * @param itemTagName
-	 *            要判断的Tag名称
-	 * @param itemTagValue
-	 *            要判断的值 ,例如 Lang=zhcn
-	 * @param valueTag
-	 *            取回值Tag的名称
+	 * @param itemTagName  要判断的Tag名称
+	 * @param itemTagValue 要判断的值 ,例如 Lang=zhcn
+	 * @param valueTag     取回值Tag的名称
 	 * @return 值
 	 */
-	public String getItemValue(String itemTagName, String itemTagValue,
-			String valueTag) {
+	public String getItemValue(String itemTagName, String itemTagValue, String valueTag) {
 		if (!super.testName(itemTagName)) {
 			return itemTagName + "没有啊！";
 		}
@@ -90,35 +87,47 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 		}
 	}
 
-	public String getSingleValue(String itemTagName,String valueTag) {
+	public String getSingleValue(String itemTagName, String valueTag) {
 		if (!super.testName(itemTagName)) {
 			return itemTagName + "没有啊！";
 		}
 		try {
 			UserXItemValues uvs = super.getItem(itemTagName);
-			return uvs.getItem(0).getItem(valueTag);
+			if (uvs.count() == 0  ) {
+				return "";
+			} else {
+				UserXItemValue item = uvs.getItem(0);
+				if(item.testName(valueTag)) {
+					return uvs.getItem(0).getItem(valueTag);
+				} else {
+					return "";
+				}
+			}
 		} catch (Exception e) {
 			return e.getMessage();
 		}
 	}
-	
+
 	/**
 	 * 返回指定Tag名称的单值
 	 * 
-	 * @param itemTagName
-	 *            Tag名称
+	 * @param itemTagName Tag名称
 	 * @return
 	 */
 	public String getSingleValue(String itemTagName) {
-		if (!super.testName(itemTagName)) {
-			return itemTagName + "没有啊！";
-		}
-		try {
-			UserXItemValues uvs = super.getItem(itemTagName);
-			return uvs.getItem(0).getItem(0);
-		} catch (Exception e) {
-			return e.getMessage();
-		}
+//		if (!super.testName(itemTagName)) {
+//			return itemTagName + "没有啊！";
+//		}
+//		try {
+//			UserXItemValues uvs = super.getItem(itemTagName);
+//			if (uvs.count() == 0) {
+//				return "";
+//			}
+//			return uvs.getItem(0).getItem(0);
+//		} catch (Exception e) {
+//			return e.getMessage();
+//		}
+		return this.getSingleValue(itemTagName, itemTagName);
 	}
 
 	/**
@@ -133,8 +142,7 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 	/**
 	 * XItem name 参数
 	 * 
-	 * @param name
-	 *            the _Name to set
+	 * @param name the _Name to set
 	 */
 	public void setName(String name) {
 		_Name = name;
@@ -148,8 +156,7 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 	}
 
 	/**
-	 * @param html
-	 *            the _Html to set
+	 * @param html the _Html to set
 	 */
 	public void setHtml(String html) {
 		_Html = html;
@@ -163,8 +170,7 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 	}
 
 	/**
-	 * @param isUsingEwaEvent
-	 *            the _IsUsingEwaEvent to set
+	 * @param isUsingEwaEvent the _IsUsingEwaEvent to set
 	 */
 	public void setIsUsingEwaEvent(boolean isUsingEwaEvent) {
 		_IsUsingEwaEvent = isUsingEwaEvent;
@@ -172,6 +178,7 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 
 	/**
 	 * 是否用dataRef
+	 * 
 	 * @return the usingRef
 	 */
 	public Boolean getUsingRef() {
@@ -180,6 +187,7 @@ public class UserXItem extends SetBase<UserXItemValues>  implements Serializable
 
 	/**
 	 * 是否用dataRef
+	 * 
 	 * @param usingRef the usingRef to set
 	 */
 	public void setUsingRef(Boolean usingRef) {
