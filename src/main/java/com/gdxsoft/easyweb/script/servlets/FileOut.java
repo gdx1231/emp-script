@@ -1167,6 +1167,9 @@ public class FileOut {
 	}
 
 	public void outContetType() {
+		if(file == null) {
+			return;
+		}
 		String ext = UFile.getFileExt(file.getName()).toLowerCase();
 		this.outContetType(ext);
 	}
@@ -1188,6 +1191,9 @@ public class FileOut {
 	}
 
 	public boolean chcekIfNotModified() {
+		if(file == null) {
+			return false;
+		}
 		String lastModified = Utils.getDateGMTString(new Date(file.lastModified()));
 		if (lastModified.equals(request.getHeader("If-Modified-Since"))) {
 			// 资源没有变化，返回 HTTP 304（Not Changed.）
@@ -1205,6 +1211,9 @@ public class FileOut {
 	 */
 
 	public int download(String downloadName) {
+		if(this.file == null) {
+			return -1;
+		}
 		String name = file.getName();
 		String ext = UFile.getFileExt(file.getName());
 		if (ext.length() == 0) {
@@ -1308,6 +1317,9 @@ public class FileOut {
 	 * @return out bytes length
 	 */
 	public int outFileBytesToClient() {
+		if(file == null) {
+			return -1;
+		}
 		FileInputStream input = null;
 		try {
 			input = new FileInputStream(file);

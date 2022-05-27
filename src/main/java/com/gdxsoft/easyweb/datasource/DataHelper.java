@@ -13,11 +13,13 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.gdxsoft.easyweb.conf.ConnectionConfig;
+import com.gdxsoft.easyweb.utils.msnet.MStr;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
@@ -135,9 +137,32 @@ public class DataHelper {
 	private DataSource createMyDatasourcesHikariCP() throws Exception {
 		LOGGER.info("Using HikariCP");
 		String driverClassName = _Cfg.getPool().get("driverClassName");
+		MStr errors = new MStr();
+		if (StringUtils.isBlank(driverClassName)) {
+			LOGGER.error("driverClassName not defined");
+			errors.al("driverClassName not defined");
+		}
 		String url = _Cfg.getPool().get("url");
+		if (StringUtils.isBlank(url)) {
+			LOGGER.error("url not defined");
+			errors.al("url not defined");
+		}
 		String username = _Cfg.getPool().get("username");
+		if (StringUtils.isBlank(username)) {
+			LOGGER.error("username not defined");
+			errors.al("username not defined");
+		}
+		/*
+		 * if (StringUtils.isBlank(password)) { LOGGER.error("password not defined");
+		 * errors.al("password not defined"); }
+		 */
+		LOGGER.debug("driverClassName={}, username={}, url={}", driverClassName, username, url);
+		if (errors.length() > 0) {
+			throw new Exception(errors.toString());
+		}
+
 		String password = _Cfg.getPool().get("password");
+
 		String maxActive = _Cfg.getPool().get("maxActive");
 		// String maxIdle = _Cfg.getPool().get("maxIdle");
 
@@ -179,9 +204,31 @@ public class DataHelper {
 		LOGGER.info("Using Druid");
 
 		String driverClassName = _Cfg.getPool().get("driverClassName");
+		MStr errors = new MStr();
+		if (StringUtils.isBlank(driverClassName)) {
+			LOGGER.error("driverClassName not defined");
+			errors.al("driverClassName not defined");
+		}
 		String url = _Cfg.getPool().get("url");
+		if (StringUtils.isBlank(url)) {
+			LOGGER.error("url not defined");
+			errors.al("url not defined");
+		}
 		String username = _Cfg.getPool().get("username");
+		if (StringUtils.isBlank(username)) {
+			LOGGER.error("username not defined");
+			errors.al("username not defined");
+		}
 		String password = _Cfg.getPool().get("password");
+		if (StringUtils.isBlank(password)) {
+			LOGGER.error("password not defined");
+			errors.al("password not defined");
+		}
+		LOGGER.debug("driverClassName={}, username={}, password=xxx, url={}", driverClassName, username, url);
+		if (errors.length() > 0) {
+			throw new Exception(errors.toString());
+		}
+		
 		String maxActive = _Cfg.getPool().get("maxActive");
 		// String maxIdle = _Cfg.getPool().get("maxIdle");
 
