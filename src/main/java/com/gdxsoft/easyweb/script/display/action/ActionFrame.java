@@ -253,28 +253,43 @@ public class ActionFrame extends ActionBase implements IAction {
 		/* ------------ 以下仅对单个文件上传有意义 ----------------- */
 
 		// 文件md5
-		rv.addValue(uploadName + "_MD5", UFile.md5(f));
+		String md5 = UFile.md5(f);
+		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_MD5=" + md5);
+		rv.addValue(uploadName + "_MD5", md5);
 		// 文件保存名称
+		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_NAME=" + f.getName());
 		rv.addValue(uploadName + "_NAME", f.getName());
 		// 文件物理地址( 完整路径)
+		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_PATH=" + f.getAbsolutePath());
 		rv.addValue(uploadName + "_PATH", f.getAbsolutePath());
 		// 去除UPath.getPATH_UPLOAD() 的路径
+		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_PATH_SHORT=" + shortPath);
 		rv.addValue(uploadName + "_PATH_SHORT", shortPath);
-		// 文件字节
+		
+		// 文件字节 length/size
+		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_SIZE=" + f.length());
 		rv.addValue(uploadName + "_SIZE", f.length());
-		// 文件字节
+		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_LENGTH=" + f.length());
 		rv.addValue(uploadName + "_LENGTH", f.length());
+		
 		// 文件扩展名
+		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_EXT=" + UFile.getFileExt(f.getName()));
 		rv.addValue(uploadName + "_EXT", UFile.getFileExt(f.getName()));
 
 		if (item1 != null) {
 			// 上传文件(1或多个)的UNID
+			super.getDebugFrames().addDebug(this, "Upload", uploadName + "_UP_UNID=" + item1.getString("UP_UNID"));
 			rv.addValue(uploadName + "_UP_UNID", item1.getString("UP_UNID"));
 			// 文件URL
+			super.getDebugFrames().addDebug(this, "Upload", uploadName + "_URL=" + item1.getString("UP_URL"));
 			rv.addValue(uploadName + "_URL", item1.getString("UP_URL"));
+			
 			// 上传文件的Url前缀
+			super.getDebugFrames().addDebug(this, "Upload", uploadName + "_CT=" + item1.getString("CT"));
 			rv.addValue(uploadName + "_CT", item1.getString("CT"));
 			// 上传文件的本地名称
+			super.getDebugFrames().addDebug(this, "Upload",
+					uploadName + "_LOCAL_NAME=" + item1.getString("UP_LOCAL_NAME"));
 			rv.addValue(uploadName + "_LOCAL_NAME", item1.getString("UP_LOCAL_NAME"));
 		}
 	}

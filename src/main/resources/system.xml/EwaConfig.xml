@@ -2609,13 +2609,30 @@ Save parameters：&#x0D;&#x0A;
 								Info="保存模式, [WithFrame]参数：&#x0D;&#x0A;
 {NAME} 文件二进制&#x0D;&#x0A;
 {NAME}_NAME 文件服务器名称&#x0D;&#x0A;
-{NAME}_LOCAL 用户本地文件名称&#x0D;&#x0A;
+{NAME}_PATH 文件服务器保存位置&#x0D;&#x0A;
+{NAME}_PATH_SHORT 文件服务器保存位置&#x0D;&#x0A;
+{NAME}_LOCAL_NAME 用户本地文件名称&#x0D;&#x0A;
 {NAME}_URL 文件http的url&#x0D;&#x0A;
 {NAME}_EXT 文件扩展名&#x0D;&#x0A;
-{NAME}_PATH 文件服务器保存位置&#x0D;&#x0A;
 {NAME}_MD5 文件MD5&#x0D;&#x0A;
-{NAME}_SIZE 文件长度" />
-							<Set Lang="enus" Info="Save Method" />
+{NAME}_SIZE 文件长度&#x0D;&#x0A;
+{NAME}_LENGTH 文件长度(同size)&#x0D;&#x0A;
+{NAME}_UP_UNID 上传文件(1或多个)的UNID&#x0D;&#x0A;
+{NAME}_CT 上传文件的Url前缀"
+ />
+							<Set Lang="enus" Info="Save Method [WithFrame]：&#x0D;&#x0A;
+{NAME} binary &#x0D;&#x0A;
+{NAME}_NAME server name&#x0D;&#x0A;
+{NAME}_PATH server path&#x0D;&#x0A;
+{NAME}_PATH_SHORT server path short&#x0D;&#x0A;
+{NAME}_LOCAL_NAME user file name&#x0D;&#x0A;
+{NAME}_URL url&#x0D;&#x0A;
+{NAME}_EXT ext&#x0D;&#x0A;
+{NAME}_MD5 MD5&#x0D;&#x0A;
+{NAME}_SIZE file size&#x0D;&#x0A;
+{NAME}_LENGTH file length(size)&#x0D;&#x0A;
+{NAME}_UP_UNID upload's UNID&#x0D;&#x0A;
+{NAME}_CT prefix of url" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="group" Name="UpMulti">
