@@ -1620,7 +1620,7 @@ public class FrameList extends FrameBase implements IFrame {
 				return s2;
 			}
 			String title = " title=\""
-					+ item.getValue().replace("<br />", "\n").replace("\"", "&quot;").replace("<", "&lt;") + "\" ";
+					+ v1.replace("<br />", "\n").replace("\"", "&quot;").replace("<", "&lt;") + "\" ";
 
 			// 保留@符号
 			title = title.replace("@", IItem.REP_AT_STR);
@@ -1628,11 +1628,12 @@ public class FrameList extends FrameBase implements IFrame {
 			if (s2.indexOf("title=\"") > 0) {
 				title = "";
 			}
-			s2 = s2.replace("!!", title + style);
+			// s2 = s2.replace("!!", title + style);
+			String style1 = style.replace("a:1;display:block;a:2;", "display:block;");
 			if (s2.indexOf("><span ") > 0) {
-				s2 = s2.replace("><span ", "><span " + title + style);
+				s2 = s2.replaceFirst("><span ", "><span " + title + style1);
 			} else {
-				s2 = s2.replace("><SPAN ", "><SPAN " + title + style);
+				s2 = s2.replaceFirst("><SPAN ", "><SPAN " + title + style1);
 			}
 		} else {
 		}
