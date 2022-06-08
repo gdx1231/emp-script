@@ -524,7 +524,8 @@ public class FrameList extends FrameBase implements IFrame {
 
 		if (!isApp) {
 			// 鼠标滑出脚本
-			top = top.replace("<table", "<table onmouseout='if(window.EWA && EWA.F && EWA.F.FOS && " + fos+"){" + fos + ".MOut(event)}'");
+			top = top.replace("<table",
+					"<table onmouseout='if(window.EWA && EWA.F && EWA.F.FOS && " + fos + "){" + fos + ".MOut(event)}'");
 		}
 		doc.addScriptHtml(top);
 		doc.addFrameHtml(top);
@@ -802,7 +803,7 @@ public class FrameList extends FrameBase implements IFrame {
 		json.put("PAGE_COUNT", ps.getPageCount());
 		s1 = s1.replace("{JSONEXP}", json.toString().replace("\"", "&quot;"));
 		// 在class里记录页数，可以根据count=1时隐含 （ewa-lf-page-count-1）
-		s1 = s1.replace("ewa-lf-frame-split", "ewa-lf-frame-split ewa-lf-page-count-"+ps.getPageCount());
+		s1 = s1.replace("ewa-lf-frame-split", "ewa-lf-frame-split ewa-lf-page-count-" + ps.getPageCount());
 		this.getHtmlClass().getDocument().addScriptHtml(s1, "SPLIT PAGE");
 		this.getHtmlClass().getDocument().addFrameHtml(s1);
 	}
@@ -1614,13 +1615,13 @@ public class FrameList extends FrameBase implements IFrame {
 			s2 = s2.replace("{WF}", wf);
 		}
 		s2 = s2.replaceFirst("!!", style.replace("a:1;display:block;a:2", ""));
-		if (tag.equalsIgnoreCase("span") && style.indexOf(";a:1;") > 0) {
+		if ((tag.equalsIgnoreCase("span") || tag.equalsIgnoreCase("linkButton"))  && style.indexOf(";a:1;") > 0) {
 			String v1 = item.getValue();
 			if (v1 == null || v1.trim().length() == 0) {
 				return s2;
 			}
-			String title = " title=\""
-					+ v1.replace("<br />", "\n").replace("\"", "&quot;").replace("<", "&lt;") + "\" ";
+			String title = " title=\"" + v1.replace("<br>", "\n").replace("<br />", "\n").replace("\"", "&quot;").replace("<", "&lt;")
+					+ "\" ";
 
 			// 保留@符号
 			title = title.replace("@", IItem.REP_AT_STR);
@@ -1630,15 +1631,19 @@ public class FrameList extends FrameBase implements IFrame {
 			}
 			// s2 = s2.replace("!!", title + style);
 			String style1 = style.replace("a:1;display:block;a:2;", "display:block;");
-			if (s2.indexOf("><span ") > 0) {
-				s2 = s2.replaceFirst("><span ", "><span " + title + style1);
-			} else {
-				s2 = s2.replaceFirst("><SPAN ", "><SPAN " + title + style1);
+			if(tag.equalsIgnoreCase("span")) {
+				if (s2.indexOf("><span ") > 0) {
+					s2 = s2.replaceFirst("><span ", "><span " + title + style1);
+				} else {
+					s2 = s2.replaceFirst("><SPAN ", "><SPAN " + title + style1);
+				}
+			} else { // linkButton
+				s2 = s2.replaceFirst("><a ", "><a " + title + style1 + " ");
 			}
-		} else {
+		} else   {
+
 		}
 		return s2;
-
 	}
 
 	private int getUserSettingPageSize() {
