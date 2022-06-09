@@ -509,9 +509,12 @@ public class FrameList extends FrameBase implements IFrame {
 		this.initListUIParams(item);
 
 		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
+
 		// 是否来自App调用，如果是的话，取消 onmouseover...的事件
 		String paraEwaApp = rv.s("EWA_APP");
 		boolean isApp = paraEwaApp == null ? false : true;
+		// 列表每行所有TD字符串进行md5签名，用于刷新数据 refreshPage or replaceRowsData 的比对
+		boolean ewaRowSign = Utils.cvtBool(rv.s("EWA_ROW_SIGN"));
 
 		HtmlDocument doc = this.getHtmlClass().getDocument();
 
@@ -536,7 +539,6 @@ public class FrameList extends FrameBase implements IFrame {
 		doc.addFrameHtml(frameHeader);
 
 		MList tbs = super.getHtmlClass().getAction().getDTTables();
-
 		if (tbs == null || tbs.size() == 0) {
 			createItemHtmls(false);
 			doc.addScriptHtml("<!-- no data -->");
@@ -586,6 +588,7 @@ public class FrameList extends FrameBase implements IFrame {
 			if (frameTemplate != null && frameTemplate.trim().length() > 0 && rv.s("EWA_TEMP_NO") == null) {
 				isUseTemplate = true;
 			}
+			MStr rowContents = new MStr();
 			for (int i = 0; i < tb.getCount(); i++) {
 				tb.getRow(i); // 将数据移动到当前行
 				String keyExp = " EWA_KEY=\"" + this.createItemKeys() + "\" ";
@@ -593,8 +596,10 @@ public class FrameList extends FrameBase implements IFrame {
 						: this.createItemHtmls();
 				String groupHtml = this.createFrameGroup(flGroup);
 				sb.append(groupHtml);
+				
 				if (colSizeInc == 1 || colSize == 1) {
 					sb.a("<tr " + keyExp + " class='ewa-lf-data-row'");
+					rowContents = new MStr();
 					if (!isApp) {
 						// 是否来自App调用，如果是的话，取消 onmouseover...的事件
 						StringBuilder stringBuilder = new StringBuilder();
@@ -606,11 +611,18 @@ public class FrameList extends FrameBase implements IFrame {
 						stringBuilder.append("){").append(fos).append(".MDown(this,event)}'");
 						sb.a(stringBuilder);
 					}
-					sb.al(">");
+					
 				}
-				sb.append(rowHtml);
+				rowContents.append(rowHtml);
 				if (colSizeInc == colSize || colSize == 1) {
-					sb.appendLine("</tr>");
+					if(ewaRowSign) {
+						// 列表每行所有TD字符串进行md5签名，用于刷新数据 refreshPage or replaceRowsData 的比对
+						String rowMd5 = Utils.md5(rowContents.toString());
+						sb.a(" ewa_row_sign='"+ rowMd5 +"'");
+					}
+					sb.al(">");
+					sb.a(rowContents);
+					sb.al("</tr>");
 				}
 				colSizeInc++;
 				if (colSizeInc > colSize) {
