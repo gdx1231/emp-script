@@ -1640,9 +1640,13 @@ public class FrameList extends FrameBase implements IFrame {
 
 			if (s2.indexOf("title=\"") > 0) {
 				title = "";
+			} else {
+				// Illegal group reference的解决办法
+				title = java.util.regex.Matcher.quoteReplacement(title);
 			}
 			// s2 = s2.replace("!!", title + style);
 			String style1 = style.replace("a:1;display:block;a:2;", "display:block;");
+			
 			if(tag.equalsIgnoreCase("span")) {
 				if (s2.indexOf("><span ") > 0) {
 					s2 = s2.replaceFirst("><span ", "><span " + title + style1);
