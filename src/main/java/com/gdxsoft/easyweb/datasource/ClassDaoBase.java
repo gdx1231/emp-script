@@ -592,10 +592,10 @@ public class ClassDaoBase<T> {
 	 * @see com.gdxsoft.easyweb.datasource.IClassDao#executeProcdure(java.lang.
 	 * String, com.gdxsoft.easyweb.script.RequestValue)
 	 */
-	public HashMap<String, String> executeProcdure(String procName, RequestValue requestValue) {
+	public HashMap<String, Object> executeProcdure(String procName, RequestValue requestValue) {
 		ConnectToDatabase();
 		_Conn.setRequestValue(requestValue);
-		HashMap<String, String> hm = _Conn.executeProcdure(procName);
+		HashMap<String, Object> hm = _Conn.executeProcdure(procName);
 		_Conn.close();
 		return hm;
 	}

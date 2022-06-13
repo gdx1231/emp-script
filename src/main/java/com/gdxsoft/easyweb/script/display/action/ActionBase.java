@@ -981,11 +981,11 @@ public class ActionBase {
 		String sql1 = getSql(sql);
 		DataConnection conn = this.getItemValues().getDataConn();
 
-		HashMap<String, String> a = conn.executeProcdure(sql1);
+		HashMap<String, Object> a = conn.executeProcdure(sql1);
 		java.util.Iterator<String> it = a.keySet().iterator();
 		while (it.hasNext()) {
 			String key = it.next();
-			String val = a.get(key);
+			Object val = a.get(key);
 			PageValue pv = new PageValue();
 			pv.setPVTag(PageValueTag.DTTABLE);
 			pv.setValue(val);

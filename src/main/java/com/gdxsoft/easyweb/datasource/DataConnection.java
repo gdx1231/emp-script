@@ -565,7 +565,7 @@ public class DataConnection {
 		}
 	}
 
-	private void addResult(ResultSet rs, String sqlExecute, String sqlOrigin) {
+	private DataResult addResult(ResultSet rs, String sqlExecute, String sqlOrigin) {
 		DataResult ds = new DataResult();
 		ds.setIsEof(false);
 		ds.setIsNext(false);
@@ -574,6 +574,8 @@ public class DataConnection {
 		ds.setSqlExecute(sqlExecute);
 		ds.setSqlOrigin(sqlOrigin);
 		this._ResultSetList.add(ds);
+
+		return ds;
 	}
 
 	private void executeEwaFunctions() {
@@ -1182,9 +1184,9 @@ public class DataConnection {
 				tbs.add(tb);
 			} else if (sql1.toUpperCase().indexOf("CALL ") == 0) {
 				// 存储过程
-				HashMap<String, String> outparams = this.executeProcdure(sql1);
+				HashMap<String, Object> outparams = this.executeProcdure(sql1);
 				for (String key : outparams.keySet()) {
-					String val = outparams.get(key);
+					Object val = outparams.get(key);
 					this._RequestValue.addValue(key, val, PageValueTag.DTTABLE);
 				}
 			} else {
@@ -1746,8 +1748,8 @@ public class DataConnection {
 		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
 		if (dt.equals("BINARY") || dt.equals("B[")) {
 			return null;
-		} 
-		
+		}
+
 		String v1 = pv.getStringValue();
 		if (dt.equals("INT")) {
 			if (v1.trim().length() > 0) {
@@ -1950,32 +1952,62 @@ public class DataConnection {
 	 * 
 	 * @param parameters
 	 * @param cst
+	 * @return 输出参数map，key转换为大写
 	 * @throws SQLException
 	 */
-	private HashMap<String, String> addSqlParameter(MListStr parameters, CallableStatement cst) throws SQLException {
-		HashMap<String, String> outValues = new HashMap<String, String>();
+	private HashMap<String, Object> addSqlParameter(MListStr parameters, CallableStatement cst) throws SQLException {
+		HashMap<String, Object> outValues = new HashMap<>();
 		if (parameters == null || this._RequestValue == null) {
 			return outValues;
 		}
 		PreparedStatement pst = (PreparedStatement) cst;
 		int index = 0;
 		for (int i = 0; i < parameters.size(); i++) {
-			String PKey = parameters.get(i).toUpperCase().trim();
-			if (PKey.indexOf("ROWNUM") == 0) {
+			String key = parameters.get(i).trim();
+			String key1 = key.toUpperCase();
+			if (key1.indexOf("ROWNUM") == 0) {
 				// 不替换rownum开头的参数，mysql使用
 				// select les_out_idx, @rownum := @rownum+1
 				// from camp_lesson_outline b ,(select @rownum :=0) c
 				continue;
 			}
 			index++;
-			if (!PKey.endsWith("_OUT")) { // 非输出参数
-				this.addStatementParameter(pst, PKey, index);
-			} else {
-				// 输出参数
-				cst.registerOutParameter(index, java.sql.Types.VARCHAR);
-				outValues.put(PKey, "" + (index));
-				this.writeDebug(this, "添返回加参数(String)" + index, PKey);
+			if (!key1.endsWith("_OUT")) { // 非输出参数
+				this.addStatementParameter(pst, key, index);
+				continue;
 			}
+			// 输出参数
+			if (key1.indexOf("_BIGINT_") >= 0 || key1.indexOf("_LONG_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.BIGINT);
+			} else if (key1.indexOf("_TINYINT_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.TINYINT);
+			} else if (key1.indexOf("_SMALLINT_") >= 0 || key1.indexOf("_SHORT_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.SMALLINT);
+			} else if (key1.indexOf("_INT_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.INTEGER);
+			} else if (key1.indexOf("_BIT_") >= 0 || key1.indexOf("_BOOL_") >= 0 || key1.indexOf("_BOOLEAN_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.BIT);
+			} else if (key1.indexOf("_NUMBER_") >= 0 || key1.indexOf("_MONEY_") >= 0 || key1.indexOf("_DECIMAL_") >= 0
+					|| key1.indexOf("_NUMERIC_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.DECIMAL);
+			} else if (key1.indexOf("_DOUBLE_") >= 0 || key1.indexOf("_FLOAT_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.DOUBLE);
+			} else if (key1.indexOf("_IMAGE_") >= 0 || key1.indexOf("_BLOB_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.BLOB);
+			} else if (key1.indexOf("_TEXT_") >= 0 || key1.indexOf("_CLOB_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.CLOB);
+			} else if (key1.indexOf("_BINARY_") >= 0 || key1.indexOf("_BYTE_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.VARBINARY);
+			} else if (key1.indexOf("_DATE_") >= 0 || key1.indexOf("_DATETIME_") >= 0
+					|| key1.indexOf("_TIMESTAMP_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.TIMESTAMP);
+			} else if (key1.indexOf("_TIME_") >= 0) {
+				cst.registerOutParameter(index, java.sql.Types.TIME);
+			} else {
+				cst.registerOutParameter(index, java.sql.Types.VARCHAR);
+			}
+			outValues.put(key1, "" + (index));
+			this.writeDebug(this, "添返回加参数(String)" + index, key);
 		}
 		return outValues;
 	}
@@ -2123,27 +2155,39 @@ public class DataConnection {
 	/**
 	 * 执行存储过程
 	 * 
-	 * @param sql
-	 * @param requestValue
-	 * @return 输出参数
+	 * @param callProcduceSql 存储过程调用方法: call pr_some(@name, @id_int_output)<br>
+	 *                        结尾为_output，表示是输出参数<br>
+	 *                        _int_output,表示输出参数为整形<br>
+	 *                        _smallint_output,表示输出参数为小整形<br>
+	 *                        _tinyint_output,表示输出参数为短整形<br>
+	 *                        _number_output,_money_output,_numeric_output,_decimal_output表示输出参数为bcd数值<br>
+	 *                        _long_output/_bigint_output,表示输出参数为长整形<br>
+	 *                        _text_output/_clob_output,表示输出参数为长文本<br>
+	 *                        _image_output/_blob_output,表示输出参数为长二进制<br>
+	 *                        _binary_output/_byte_output,表示输出参数为二进制(varbinary)<br>
+	 *                        _date_output/_datetime_output/_timestamp_output,表示输出参数为日期时间<br>
+	 *                        _time_output,表示输出参数为时间<br>
+	 *                        默认，为varchar字符串
+	 * @return 输出参数Map，key转换为大写
 	 */
-	public HashMap<String, String> executeProcdure(String sql) {
+	public HashMap<String, Object> executeProcdure(String callProcduceSql) {
 		// 修补存储过程的大括号 {CALL prTest(@a1, ...)}
-		sql = this.repaireProcdureSqlBrackets(sql);
+		String sql = this.repaireProcdureSqlBrackets(callProcduceSql);
 
 		this.writeDebug(this, "开始执行", sql);
 		String sql1;
 		try {
 			sql1 = rebuildSql(sql);
 		} catch (Exception e) {
-			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
+			writeDebug(this, "ERR",
+					"[executeProcdure(callProcduceSql)] <font color=red>" + e.getMessage() + "</font>" + ")");
 			LOGGER.error(e.getLocalizedMessage());
 			setError(e, sql);
 			return null;
 		}
 
 		MListStr al = Utils.getParameters(sql, "@");
-		HashMap<String, String> outValues = null;
+		HashMap<String, Object> outValues = null;
 
 		sql1 = this.replaceSqlParameters(sql);
 		this.writeDebug(this, "开始执行", sql1);
@@ -2151,7 +2195,90 @@ public class DataConnection {
 			CallableStatement cst = this._ds.getCallableStatement(sql1);
 			outValues = this.addSqlParameter(al, cst);
 			cst.execute();
+
 			this.getOutValues(outValues, cst);
+			if (!this._ds.getConnection().getAutoCommit()) {
+				this._ds.getConnection().commit();
+			}
+			cst.close();
+		} catch (Exception e) {
+			LOGGER.error(e.getLocalizedMessage());
+			LOGGER.error(sql1);
+			this.setError(e, sql);
+		}
+		this.writeDebug(this, "执行完毕", sql1);
+		return outValues;
+	}
+
+	/**
+	 * 执行存储过程
+	 * 
+	 * @param callProcduceSql 存储过程调用方法: call pr_some(@name, @id_int_output)<br>
+	 *                        结尾为_output，表示是输出参数<br>
+	 *                        _int_output,表示输出参数为整形<br>
+	 *                        _smallint_output,表示输出参数为小整形<br>
+	 *                        _tinyint_output,表示输出参数为短整形<br>
+	 *                        _number_output,_money_output,_numeric_output,_decimal_output表示输出参数为bcd数值<br>
+	 *                        _long_output/_bigint_output,表示输出参数为长整形<br>
+	 *                        _text_output/_clob_output,表示输出参数为长文本<br>
+	 *                        _image_output/_blob_output,表示输出参数为长二进制<br>
+	 *                        _binary_output/_byte_output,表示输出参数为二进制(varbinary)<br>
+	 *                        _date_output/_datetime_output/_timestamp_output,表示输出参数为日期时间<br>
+	 *                        _time_output,表示输出参数为时间<br>
+	 *                        默认，为varchar字符串
+	 * @return 输出参数Map，key转换为大写，<br>
+	 *         RS_SIZE 表示返回的结果集数量<br>
+	 *         返回的结果集转换为DTTable，名字以RS开头,RS0,RS1,RS2 ...
+	 * @return
+	 */
+	public HashMap<String, Object> executeProcdureReturnResults(String callProcduceSql) {
+		// 修补存储过程的大括号 {CALL prTest(@a1, ...)}
+		String sql = this.repaireProcdureSqlBrackets(callProcduceSql);
+
+		this.writeDebug(this, "开始执行", callProcduceSql);
+		String sql1;
+		try {
+			sql1 = rebuildSql(sql);
+		} catch (Exception e) {
+			writeDebug(this, "ERR", "[executeProcdureReturnResults(callProcduceSql)] <font color=red>" + e.getMessage()
+					+ "</font>" + ")");
+			LOGGER.error(e.getLocalizedMessage());
+			setError(e, sql);
+			return null;
+		}
+
+		MListStr al = Utils.getParameters(sql, "@");
+		HashMap<String, Object> outValues = null;
+
+		sql1 = this.replaceSqlParameters(sql);
+		this.writeDebug(this, "开始执行", sql1);
+		int inc = 0;
+		try {
+			CallableStatement cst = this._ds.getCallableStatement(sql1);
+			outValues = this.addSqlParameter(al, cst);
+			this.getOutValues(outValues, cst);
+
+			ResultSet rsMore = cst.executeQuery();
+			while (true) {
+				DTTable tbMore = new DTTable();
+				tbMore.initData(rsMore);
+				rsMore.close();
+				outValues.put("RS" + inc, tbMore);
+				this.writeDebug(this, "添加返回表", "RS" + inc);
+				inc++;
+				if (inc > 100) { // too much
+					this.writeDebug(this, "太多了返回表>100", inc + "");
+					LOGGER.warn("太多了返回表>100");
+					break;
+				}
+
+				if (!cst.getMoreResults()) {
+					break;
+				}
+				rsMore = cst.getResultSet();
+			}
+			outValues.put("RS_SIZE", inc);
+
 			if (!this._ds.getConnection().getAutoCommit()) {
 				this._ds.getConnection().commit();
 			}
@@ -2193,16 +2320,16 @@ public class DataConnection {
 		this.writeDebug(this, "执行完毕", sql);
 	}
 
-	private void getOutValues(HashMap<String, String> outValues, CallableStatement cst) {
+	private void getOutValues(HashMap<String, Object> outValues, CallableStatement cst) {
 		if (outValues == null)
 			return;
 		Iterator<String> it = outValues.keySet().iterator();
-		HashMap<String, String> outValues1 = new HashMap<String, String>();
+		HashMap<String, Object> outValues1 = new HashMap<String, Object>();
 		while (it.hasNext()) {
 			String key = it.next();
-			String index = outValues.get(key);
+			int index = Integer.parseInt(outValues.get(key).toString());
 			try {
-				String v1 = cst.getString(Integer.parseInt(index));
+				Object v1 = cst.getObject(index);
 				outValues1.put(key, v1);
 			} catch (Exception e) {
 				LOGGER.error(e.getLocalizedMessage());

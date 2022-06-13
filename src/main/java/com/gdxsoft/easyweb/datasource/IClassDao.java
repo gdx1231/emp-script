@@ -44,7 +44,7 @@ public interface IClassDao<T> {
 
 	public abstract boolean executeUpdate(String sql, RequestValue requestValue);
 
-	public abstract HashMap<String, String> executeProcdure(String procName, RequestValue requestValue);
+	public abstract HashMap<String, Object> executeProcdure(String procName, RequestValue requestValue);
 
 	public abstract ArrayList<T> executeQuery(String sql, T obj, String[] fieldList);
 
