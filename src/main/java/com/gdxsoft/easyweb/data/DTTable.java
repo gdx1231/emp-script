@@ -1066,12 +1066,24 @@ public class DTTable implements Serializable {
 	}
 
 	/**
+	 * 根据ResultSet初始化数据<br>
+	 * Initialize the table data from the JDBC ResultSet
+	 * 
+	 * @param rs    the JDBC ResultSet
+	 * @param limit 限制返回数量，&lt;=0为不限制
+	 */
+	public void initData(ResultSet rs, int limit) {
+		this.initData(rs, null, limit);
+	}
+
+	/**
 	 * 根据ResultSet初始化数据 Initialize the table data from the JDBC ResultSet
 	 * 
-	 * @param rs   the JDBC ResultSet
-	 * @param keys 主键表达式 the data keys
+	 * @param rs    the JDBC ResultSet
+	 * @param keys  主键表达式 the data keys
+	 * @param limit 限制返回数量，&lt;=0为不限制
 	 */
-	public void initData(ResultSet rs, String[] keys) {
+	public void initData(ResultSet rs, String[] keys, int limit) {
 		this.initColumns(rs);
 		if (keys != null && keys.length > 0) {
 			this._Columns.setKeys(keys);
@@ -1079,9 +1091,14 @@ public class DTTable implements Serializable {
 		if (!_IsOk) {
 			return;
 		}
+		int inc = 0;
 		try {
 			while (rs.next()) {
 				this.initDataRowByRs(rs);
+				inc++;
+				if (inc >= limit && limit > 0) {
+					break;
+				}
 			}
 
 		} catch (SQLException e) {
@@ -1099,6 +1116,16 @@ public class DTTable implements Serializable {
 		if (jsonCols.size() > 0) {
 			this.handleJsonData(jsonCols);
 		}
+	}
+
+	/**
+	 * 根据ResultSet初始化数据 Initialize the table data from the JDBC ResultSet
+	 * 
+	 * @param rs   the JDBC ResultSet
+	 * @param keys 主键表达式 the data keys
+	 */
+	public void initData(ResultSet rs, String[] keys) {
+		this.initData(rs, keys, 0);
 	}
 
 	/**
