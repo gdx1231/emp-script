@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -220,7 +221,7 @@ public class TreeViewMain {
 			style = "";
 		}
 
-		itemHtml = itemHtml.replaceFirst("!!", style.replace("a:1;display:block;a:2", ""));
+		itemHtml = itemHtml.replaceFirst("!!", Matcher.quoteReplacement(style.replace("a:1;display:block;a:2", "")));
 		if (tag.equalsIgnoreCase("span") && style.indexOf(";a:1;") > 0) {
 			String v1 = item.getValue();
 			if (v1 == null || v1.trim().length() == 0) {

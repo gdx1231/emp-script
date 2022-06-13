@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -448,7 +449,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 			}
 
 			if (tag.equalsIgnoreCase("textarea")) {
-				itemHtml = itemHtml.replaceFirst(">", " placeholder=\"" + des + "\">");
+				itemHtml = itemHtml.replaceFirst(">", " placeholder=\"" + Matcher.quoteReplacement(des) + "\">");
 			}
 			// 根据逻辑表达式去除属性
 			itemHtml = this.removeAttr(uxi, itemHtml);
@@ -757,7 +758,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 			parentStyle = uxi.getSingleValue("ParentStyle");
 		}
 		if (parentStyle.length() > 0) {
-			parentHtml = parentHtml.replaceFirst("!!", " style=\"" + parentStyle + "\" ");
+			parentHtml = parentHtml.replaceFirst("!!", " style=\"" + Matcher.quoteReplacement(parentStyle) + "\" ");
 		} else {
 			parentHtml = parentHtml.replaceFirst("!!", "");
 		}

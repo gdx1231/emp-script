@@ -6,6 +6,7 @@ package com.gdxsoft.easyweb.script.display.frame;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -952,7 +953,7 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 		if (haveStyle) {
 			style += "\" ";
-			s1 = s1.replaceFirst("!!", style);
+			s1 = s1.replaceFirst("!!", Matcher.quoteReplacement(style));
 		} else {
 			s1 = s1.replaceFirst("!!", "");
 		}
@@ -1570,7 +1571,7 @@ public class FrameList extends FrameBase implements IFrame {
 				String v1 = val == null ? "" : val.toString();
 				String tmp = "<div>" + v1 + "</div>";
 				String s2 = parentHtml.replace(SkinFrame.TAG_ITEM, tmp);
-				s2 = s2.replaceFirst("!!", style + "\" ");
+				s2 = s2.replaceFirst("!!", Matcher.quoteReplacement(style) + "\" ");
 				sb.al(s2);
 			}
 			return sb.toString();

@@ -136,15 +136,15 @@ public class OdtWorker {
 			String val = this.getValue(name, o, r);
 			if (val == null) {
 				val = "";
-			}
-			// System.out.println(name + "=" + val);
-			if (val.indexOf("\n") > 0) {
+			} else if (val.indexOf("\n") > 0) {
 				int idx0 = cnt.indexOf("@" + name);
 				int idx1 = cnt.lastIndexOf("<text:p", idx0);
 				String tmp = cnt.substring(0, idx0);
 				String prefix = tmp.substring(idx1, idx0);
 				val = val.replace("\n", "</text:p>" + prefix);
+				val = Matcher.quoteReplacement(val);
 			}
+			
 			cnt = cnt.replaceFirst("@" + name, val);
 
 		}
