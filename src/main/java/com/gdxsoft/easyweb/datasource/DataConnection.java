@@ -39,6 +39,8 @@ public class DataConnection {
 	private CallableStatement _cst;
 	private PreparedStatement _pst;
 
+	private Statement _queryStatement;
+
 	private String _errorMsg; // 错误信息和 SQL
 	private String _errorMsgOnly; // 只有错误信息
 
@@ -205,6 +207,34 @@ public class DataConnection {
 		List<DTTable> tbs = cnn.runMultiSqls(listSqls);
 		cnn.close();
 		return tbs;
+	}
+
+	/**
+	 * 执行SQL查询返回多条结果集
+	 * 
+	 * @param sql
+	 * @param configName
+	 * @param rv
+	 * @return 结果集
+	 * @throws SQLException
+	 */
+	public static List<DTTable> executeQueryAndReturnTables(String sql, String configName, RequestValue rv)
+			throws SQLException {
+		DataConnection cnn = new DataConnection(configName, rv);
+		boolean resultStatus = cnn.executeQuery(sql);
+		if (!resultStatus) {
+			cnn.close();
+			throw new SQLException(cnn.getErrorMsg());
+		}
+		List<DTTable> tables = new ArrayList<DTTable>();
+		cnn.getMoreResults();
+		for (int i = 0; i < cnn.getResultSetList().size(); i++) {
+			DataResult r = (DataResult) cnn.getResultSetList().get(i);
+			DTTable tb = new DTTable();
+			tb.initData(r.getResultSet());
+		}
+		cnn.close();
+		return tables;
 	}
 
 	/**
@@ -546,11 +576,14 @@ public class DataConnection {
 		debuginfo.append(sql);
 		writeDebug(this, "SQL", debuginfo.toString());
 
+		this.closeStatment(this._queryStatement);
 		try {
 			sql = this.rebuildSql(sql);
 
 			_ds.connect();
-			ResultSet rs = _ds.getStatement().executeQuery(sql);
+
+			this._queryStatement = _ds.getStatement();
+			ResultSet rs = _queryStatement.executeQuery(sql);
 			this.addResult(rs, sql, sql);
 			writeDebug(this, "SQL", "[executeQuery(sql)] End query.");
 			return true;
@@ -637,19 +670,20 @@ public class DataConnection {
 				sql1 = "USE " + this._DataBaseName + ";\r\n" + sql1;
 			}
 			ResultSet rs;
+
+			this.closeStatment(this._queryStatement);
 			if (parameters.size() > 0) {
 				_pst = this._ds.getPreparedStatement(sql1);
-
 				this._errorMsg = null;
-
 				// add parameter
 				addSqlParameter(parameters, _pst);
+				this._queryStatement = _pst;
 				rs = _pst.executeQuery();
 			} else {
 				_ds.connect();
 				this._errorMsg = null;
-
-				rs = _ds.getStatement().executeQuery(sql1);
+				this._queryStatement = _ds.getStatement();
+				rs = this._queryStatement.executeQuery(sql1);
 			}
 			this.addResult(rs, sql, oriSql);
 			writeDebug(this, "SQL", "[executeQuery(sql,rv)] End query.");
@@ -663,6 +697,27 @@ public class DataConnection {
 		} finally {
 			this.clearEwaSplitTempData();
 		}
+	}
+
+	/**
+	 * 从执行完的sql中获取更多的结果集
+	 * 
+	 * @return
+	 * @throws SQLException
+	 */
+	public List<DataResult> getMoreResults() throws SQLException {
+		if (this._queryStatement == null) {
+			return null;
+		}
+		List<DataResult> lst = new ArrayList<>();
+		int inc = 0;
+		while (this._queryStatement.getMoreResults()) {
+			ResultSet rs = this._queryStatement.getResultSet();
+			DataResult ds = this.addResult(rs, "more", inc + "");
+			inc++;
+			lst.add(ds);
+		}
+		return lst;
 	}
 
 	/**
@@ -2016,19 +2071,20 @@ public class DataConnection {
 	 * 清除所有返回的 resultSet，当长期执行查询的时，会造成内存占用过高 关闭连接会自动执行清除
 	 */
 	public void clearResultSets() {
-		if (this._ResultSetList != null && this._ResultSetList.size() > 0) {
-			for (int i = 0; i < this._ResultSetList.size(); i++) {
-				DataResult r = (DataResult) _ResultSetList.get(i);
-				try {
-					r.getResultSet().close();
-				} catch (SQLException e) {
-					LOGGER.error(e.getLocalizedMessage());
-					setError(e, "Error _resultSet close");
-				}
-			}
-			// 清除数据所有返回的 resultSet
-			this._ResultSetList.clear();
+		if (this._ResultSetList == null || this._ResultSetList.size() == 0) {
+			return;
 		}
+		for (int i = 0; i < this._ResultSetList.size(); i++) {
+			DataResult r = (DataResult) _ResultSetList.get(i);
+			try {
+				r.getResultSet().close();
+			} catch (SQLException e) {
+				LOGGER.error(e.getLocalizedMessage());
+				setError(e, "Error _resultSet close");
+			}
+		}
+		// 清除数据所有返回的 resultSet
+		this._ResultSetList.clear();
 	}
 
 	/**
@@ -2038,22 +2094,9 @@ public class DataConnection {
 		// 清除所有返回的 resultSet，当长期执行查询的时，会造成内存占用过高
 		// 郭磊 2019-02-14
 		this.clearResultSets();
-		if (_cst != null) {
-			try {
-				_cst.close();
-			} catch (SQLException e) {
-				LOGGER.error(e.getLocalizedMessage());
-				setError(e, "Error _cst close !");
-			}
-		}
-		if (_pst != null) {
-			try {
-				_pst.close();
-			} catch (SQLException e) {
-				LOGGER.error(e.getLocalizedMessage());
-				setError(e, "Error _pst close !");
-			}
-		}
+		this.closeStatment(this._cst);
+		this.closeStatment(this._pst);
+		this.closeStatment(this._queryStatement);
 		if (_DebugFrames != null) {
 			_DebugFrames.addDebug(this, "SQL", "[close] Close connection.");
 		}
@@ -2121,14 +2164,21 @@ public class DataConnection {
 	private String repaireProcdureSqlBrackets(String sqlSource) {
 		String sql = sqlSource.trim();
 		String chkSql = sql.toUpperCase();
-		if (chkSql.indexOf("{CALL") > 0) {
+
+		int leftBracket0 = chkSql.indexOf("{");
+		int rightBracket0 = chkSql.indexOf("}");
+		int call0 = chkSql.indexOf("CALL");
+		if (leftBracket0 >= 0 && call0 > leftBracket0 && rightBracket0 > call0) {
+			// {@id_int_out = call proc(@name, @age)}
 			return sqlSource;
 		}
+
 		// ﬁ 是单个字符，toUpperCase() 后变成两个字符 FI
 		if (sql.length() != chkSql.length()) {
 			sql = chkSql; // 例如 ﬁ 64257
 			LOGGER.warn("出现大小写长度不一致情况：" + sql);
 		}
+
 		if (chkSql.indexOf("{CALL") < 0) {
 			int start = chkSql.indexOf("CALL");
 			if (start >= 0) {
@@ -2255,33 +2305,29 @@ public class DataConnection {
 		int inc = 0;
 		try {
 			CallableStatement cst = this._ds.getCallableStatement(sql1);
+			this._queryStatement = cst;
+
 			outValues = this.addSqlParameter(al, cst);
 			this.getOutValues(outValues, cst);
 
-			ResultSet rsMore = cst.executeQuery();
-			while (true) {
-				DTTable tbMore = new DTTable();
-				tbMore.initData(rsMore);
-				rsMore.close();
-				outValues.put("RS" + inc, tbMore);
-				this.writeDebug(this, "添加返回表", "RS" + inc);
-				inc++;
-				if (inc > 100) { // too much
-					this.writeDebug(this, "太多了返回表>100", inc + "");
-					LOGGER.warn("太多了返回表>100");
-					break;
-				}
-
-				if (!cst.getMoreResults()) {
-					break;
-				}
-				rsMore = cst.getResultSet();
-			}
-			outValues.put("RS_SIZE", inc);
+			ResultSet rs = cst.executeQuery();
 
 			if (!this._ds.getConnection().getAutoCommit()) {
 				this._ds.getConnection().commit();
 			}
+
+			DataResult ds0 = this.addResult(rs, sql, sql1);
+			List<DataResult> results = this.getMoreResults();
+			results.add(0, ds0);
+			for (int i = 0; i < results.size(); i++) {
+				this.writeDebug(this, "添加返回表", "RS" + i);
+				DataResult dr = results.get(i);
+				DTTable tbMore = new DTTable();
+				tbMore.initData(dr.getResultSet());
+				outValues.put("RS" + inc, tbMore);
+			}
+			outValues.put("RS_SIZE", results.size());
+
 			cst.close();
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
