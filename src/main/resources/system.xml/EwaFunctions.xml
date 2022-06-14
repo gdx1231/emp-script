@@ -8,6 +8,12 @@
 		des="返回Argon2验证密码结果true/false" desEn="Return Argon2 verification password result(true / false)"
 		usage="ewa_func.password_verify(@password, @hashed_password)" />
 
+	<EwaFunction name="encrypt" className="com.gdxsoft.easyweb.utils.UAes" methodName="defaultEncrypt"
+		des="默认的AES加密，ewa_conf中的配置" desEn="Default encrypt" usage="ewa_func.encrypt(@source)" />
+
+	<EwaFunction name="decrypt" className="com.gdxsoft.easyweb.utils.UAes" methodName="defaultDecrypt"
+		des="默认的AES解密，ewa_conf中的配置" desEn="Default decrypt" usage="ewa_func.decrypt(@source)" />
+
 	<EwaFunction name="md5" className="com.gdxsoft.easyweb.utils.Utils" methodName="md5" des="md5" desEn="md5"
 		usage="ewa_func.md5(@source)" />
 
@@ -23,8 +29,8 @@
 	                    , GOST3411, GOST3411_2012_256, GOST3411_2012_512, Tiger)"
 		usage="ewa_func.digestHex(@source, @algorithm)" />
 
-	<EwaFunction name="http_get" className="com.gdxsoft.easyweb.utils.UNet" methodName="doGet"
-		des="http请求（GET）" desEn="Http Get" usage="ewa_func.http_get().(@url)" />
+	<EwaFunction name="http_get" className="com.gdxsoft.easyweb.utils.UNet" methodName="doGet" des="http请求（GET）"
+		desEn="Http Get" usage="ewa_func.http_get().(@url)" />
 
 	<EwaFunction name="snowflake" className="com.gdxsoft.easyweb.utils.USnowflake" methodName="nextId"
 		des="Twitter雪花id" desEn="The twitter snowlfake id" usage="ewa_func.snowflake()" />
