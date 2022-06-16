@@ -1378,6 +1378,9 @@ public class DataConnection {
 		this.executeEwaFunctions(); // guolei 2021-03-16
 
 		MListStr parameters = Utils.getParameters(sql1, "@");
+		if (parameters.size() == 0) {
+			return this.executeUpdateNoParameter(sql1);
+		}
 		try {
 			sql1 = replaceSqlParameters(sql1);
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Start update. (" + sql1 + ")");
@@ -2501,6 +2504,10 @@ public class DataConnection {
 		return _Connection;
 	}
 
+	public void setConnection(Connection cnn) {
+		this._Connection = cnn;
+	}
+
 	/**
 	 * @param currentConfig the _CurrentConfig to set
 	 */
@@ -2567,5 +2574,19 @@ public class DataConnection {
 	 */
 	public String getErrorMsgOnly() {
 		return _errorMsgOnly;
+	}
+
+	/**
+	 * @return the DataHelper
+	 */
+	public DataHelper getDataHelper() {
+		return _ds;
+	}
+
+	/**
+	 * @param dataHelper the DataHelper to set
+	 */
+	public void setDataHelper(DataHelper dataHelper) {
+		this._ds = dataHelper;
 	}
 }

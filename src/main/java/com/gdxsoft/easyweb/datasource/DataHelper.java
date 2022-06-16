@@ -50,6 +50,14 @@ public class DataHelper {
 	public Connection getConnection() {
 		return _conn;
 	}
+	/**
+	 * 外部设置 数据库连接
+	 * @param connection
+	 */
+	public void setConnection(Connection connection) {
+		 _conn = connection;
+		 this._connected = true;
+	}
 
 	/**
 	 * 连接到数据库
