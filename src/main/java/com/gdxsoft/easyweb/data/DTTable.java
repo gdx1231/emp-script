@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -1309,6 +1310,7 @@ public class DTTable implements Serializable {
 		DTRow row = new DTRow();
 		row.setTable(this);
 		MStr keysExp = new MStr();
+		long m10 = 50 * 1024 * 1024; // 50m
 		for (int i = 0; i < this._Columns.getCount(); i++) {
 			DTCell cell = new DTCell();
 			DTColumn col = this._Columns.getColumn(i);
@@ -1319,6 +1321,21 @@ public class DTTable implements Serializable {
 				if (colTypeName.indexOf("TIMESTAMP") >= 0 || colTypeName.indexOf("DATE") >= 0) {
 					java.sql.Timestamp t = rs.getTimestamp(i + 1);
 					cell.setValue(t);
+				} else if (colTypeName.indexOf("BLOB") >= 0) {
+					Object blob = rs.getObject(i + 1);
+					if (blob != null) {
+						Blob blobVal = (Blob) rs.getBlob(i + 1);
+						int length = blobVal.length() > m10 ? 0 : Integer.parseInt(blobVal.length() + "");
+						byte[] buf;
+						if (length > 0) {
+							// the first byte is at position 1
+							buf = blobVal.getBytes(1, length);
+						} else {
+							LOGGER.warn("ResultSet blob({}) {} > 50m, ignored", col.getName(), length);
+							buf = null;
+						}
+						cell.setValue(buf);
+					}
 				} else {
 					cell.setValue(rs.getObject(i + 1));
 				}
@@ -1334,7 +1351,6 @@ public class DTTable implements Serializable {
 				keysExp.append(cell.getValue());
 			}
 			row.addData(cell);
-
 		}
 		// keys表达式，要放置到this._Rows.addRow之前
 		if (keysExp.length() > 0) {

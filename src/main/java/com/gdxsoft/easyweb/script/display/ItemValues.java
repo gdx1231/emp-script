@@ -18,6 +18,7 @@ import com.gdxsoft.easyweb.script.display.items.ItemImage;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
+import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UObjectValue;
@@ -605,6 +606,8 @@ public class ItemValues {
 				return val;
 			}
 		}
+		RequestValue rv = this._HtmlClass.getHtmlCreator().getRequestValue();
+		String binType = rv.s("EWA_BIN_TYPE");
 		// 从所有Table中获取数据
 		for (int i = 0; i < this._DTTables.size(); i++) {
 			DTTable tb = (DTTable) this._DTTables.get(i);
@@ -626,21 +629,28 @@ public class ItemValues {
 			val = this.getCellValue(row, dataFieldName, dataType);
 			if (dataType.equalsIgnoreCase("binary")) { // 二进制转换成二进制文件
 				String sVal = null;
+				byte[] buf;
 				if (val != null) {
-					byte[] buf = (byte[]) val;
-					String path0 = UPath.getPATH_IMG_CACHE_URL() + "/binary/";
-					String path = UPath.getPATH_IMG_CACHE() + "/binary/";
-					String ext = null;
+					buf = (byte[]) val;
+					if ("base64".equals(binType)) { // base64
+						sVal = UConvert.ToBase64String(buf);
+					} else if ("16".equals(binType)) { // 16进制
+						sVal = Utils.bytes2hex(buf);
+					} else {
+						String path0 = UPath.getPATH_IMG_CACHE_URL() + "/binary/";
+						String path = UPath.getPATH_IMG_CACHE() + "/binary/";
+						String ext = null;
 
-					// 先从数据库中检查是否有文件扩展名字段（文件+"_EXT"）,例如：F_CNT对应 F_CNT_EXT，大小写无关
-					if (row.getTable().getColumns().testName(dataFieldName + "_EXT")) {
-						ext = row.getCell(dataFieldName + "_EXT").toString();
+						// 先从数据库中检查是否有文件扩展名字段（文件+"_EXT"）,例如：F_CNT对应 F_CNT_EXT，大小写无关
+						if (row.getTable().getColumns().testName(dataFieldName + "_EXT")) {
+							ext = row.getCell(dataFieldName + "_EXT").toString();
+						}
+						if (ext == null) {
+							ext = UFile.getExtFromFileBytes(buf);
+						}
+						String name = UFile.createMd5File(buf, ext, path, false);
+						sVal = path0 + name;
 					}
-					if (ext == null) {
-						ext = UFile.getExtFromFileBytes(buf);
-					}
-					String name = UFile.createMd5File(buf, ext, path, false);
-					sVal = path0 + name;
 				}
 				this.addParameterValue(dataFieldName, sVal);
 				return sVal;
@@ -677,7 +687,7 @@ public class ItemValues {
 	}
 
 	public String getRvValue(String name, String dataFieldName) {
-		if(this._HtmlClass.getSysParas() == null || this._HtmlClass.getSysParas().getRequestValue() == null) {
+		if (this._HtmlClass.getSysParas() == null || this._HtmlClass.getSysParas().getRequestValue() == null) {
 			return null;
 		}
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
