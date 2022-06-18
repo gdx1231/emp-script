@@ -48,7 +48,7 @@ public class EwaConfHelpHSqlServer {
 			String url = "jdbc:hsqldb:res:/conf.help.hsqldb/data/ewaconfhelp";
 
 			MTableStr poolParams = new MTableStr();
-			poolParams.put("driverClassName", "org.hsqldb.jdbcDriver");
+			poolParams.put("driverClassName", "org.hsqldb.jdbc.JDBCDriver");
 			poolParams.put("url", url);
 			poolParams.put("username", "sa");
 			poolParams.put("password", "");
