@@ -147,7 +147,7 @@ public class ResourceConfig extends ConfigBase implements IConfig, Serializable,
 		String[] jarPaths = url.getPath().split("\\!");
 		Map<String, String> xmlContents = null;
 
-		if (jarPaths.length == 2) {//from jar
+		if (jarPaths.length == 2) {// from jar
 			LOGGER.info("Load reource: {}", url.toString());
 			String jarPath = jarPaths[0];
 
@@ -168,28 +168,52 @@ public class ResourceConfig extends ConfigBase implements IConfig, Serializable,
 			LOGGER.info("Load resource from springboot {}", url.toString());
 			// file:/target/visa-1.0.0.jar!/BOOT-INF/lib/emp-script-1.1.1.jar!/define.xml
 			String bootJar = jarPaths[0];
-
 			String ewaJar = jarPaths[1].substring(1); // 去除前导"/"
-
 			String dir = jarPaths[2];
-			// remove start with '/'
-			String dirZip = dir.substring(1);
-			try {
-				URL url1 = new URL(bootJar);
-				File f1 = new File(url1.toURI());
 
-				byte[] buf = UFile.readZipBytes(f1.getAbsolutePath(), ewaJar);
+			if (!ewaJar.endsWith(".jar")) {// 在springboot中不是以jar打包的文件
+				// file:/profiler-boot-1.0.0.jar!/BOOT-INF/classes!/profiler_define_xml
 
-				File temp = File.createTempFile("emp_script", ".jar");
-				LOGGER.info("Create temp file: {}", temp.getAbsolutePath());
-				UFile.createBinaryFile(temp.getAbsolutePath(), buf, true);
+				String dirZip = ewaJar + dir; // BOOT-INF/classes/profiler_define_xml
+				try {
+					URL url1 = new URL(bootJar);
+					File f1 = new File(url1.toURI());
+					Map<String, String> xmlContents1 = this.readCfg(f1.getAbsolutePath(), dirZip);
+					
+					xmlContents = new HashMap<>();
+					int subLen = ewaJar.length()+1;
+					for (String key : xmlContents1.keySet()) {
+						String newKey = key.substring(subLen); //去除 /BOOT-INF/classes
+						String xmlContent = xmlContents1.get(key);
+						xmlContents.put(newKey, xmlContent);
+					}
+				} catch (IOException | URISyntaxException e1) {
+					this.hasError = true;
+					LOGGER.error(e1.getMessage());
+				}
+			} else {// 在springboot中以jar打包的文件
+				// file:/profiler-boot-1.0.0.jar!/BOOT-INF/lib/emp-script-1.1.3.jar!/define.xml
 
-				xmlContents = this.readCfg(temp.getAbsolutePath(), dirZip);
-				
-				UFile.delete(temp.getAbsolutePath());
-			} catch (Exception e1) {
-				this.hasError = true;
-				LOGGER.error(e1.getMessage());
+				String dirZip = dir.substring(1); // remove start with '/'
+				try {
+					URL url1 = new URL(bootJar);
+					File f1 = new File(url1.toURI());
+
+					// 从boot.jar中读取jar文件并放到临时文件
+					byte[] buf = UFile.readZipBytes(f1.getAbsolutePath(), ewaJar);
+
+					File temp = File.createTempFile("emp_script", ".jar");
+
+					LOGGER.info("Create temp file: {}", temp.getAbsolutePath());
+					UFile.createBinaryFile(temp.getAbsolutePath(), buf, true);
+
+					xmlContents = this.readCfg(temp.getAbsolutePath(), dirZip);
+
+					UFile.delete(temp.getAbsolutePath());
+				} catch (Exception e1) {
+					this.hasError = true;
+					LOGGER.error(e1.getMessage());
+				}
 			}
 		}
 		return xmlContents;
