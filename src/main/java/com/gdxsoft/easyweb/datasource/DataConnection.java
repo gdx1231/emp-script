@@ -695,7 +695,8 @@ public class DataConnection {
 			setError(e, sql1);
 			return false;
 		} finally {
-			this.clearEwaSplitTempData();
+			// 放到close处理，以便复用时不用重复创建
+			// this.clearEwaSplitTempData();
 		}
 	}
 
@@ -844,35 +845,6 @@ public class DataConnection {
 
 	}
 
-	/**
-	 * 删除临时数据
-	 */
-	private void clearEwaSplitTempData() {
-		if (this._CreateSplitData == null) {
-			return;
-		}
-		if (this._CreateSplitData.getTempData() == null) {
-			return;
-		}
-		if (this._CreateSplitData.getTempData().size() == 0) {
-			return;
-		}
-		StringBuilder sb = new StringBuilder();
-		sb.append("delete from _EWA_SPT_DATA where tag in (");
-		int i = 0;
-		for (String key : this._CreateSplitData.getTempData().keySet()) {
-			if (i > 0) {
-				sb.append(",");
-			}
-			i++;
-			String keyExp = this.sqlParameterStringExp(key);
-			sb.append(keyExp);
-		}
-		sb.append(")");
-		String sqlDelete = sb.toString();
-		this.executeUpdateNoParameter(sqlDelete);
-	}
-
 	public String closeStatment(Statement stmt) {
 		if (stmt == null) {
 			return null;
@@ -966,128 +938,14 @@ public class DataConnection {
 	}
 
 	/**
-	 * 将字符串分割成表数据
-	 */
-//	private void createEwaSplitTempData1() {
-//		if (this._CreateSplitData == null) {
-//			return;
-//		}
-//		if (this._CreateSplitData.getTempData() == null) {
-//			return;
-//		}
-//		if (this._CreateSplitData.getTempData().size() == 0) {
-//			return;
-//		}
-//		this.connect();
-//		this.getConnection();
-//		boolean isMysql = this.getDatabaseType().equals("MYSQL");
-//		Statement stmt = null;
-//		try {
-//			stmt = _Connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-//
-//			for (String key : this._CreateSplitData.getTempData().keySet()) {
-//				ArrayList<String> al = this._CreateSplitData.getTempData().get(key);
-//				if (isMysql) {
-//					// mysql 批量更新
-//					StringBuilder sb = new StringBuilder();
-//					sb.append("insert into _EWA_SPT_DATA(idx,col,tag) values\n");
-//					for (int i = 0; i < al.size(); i++) {
-//						if (i > 0) {
-//							sb.append(",\n");
-//						}
-//						sb.append("(");
-//						sb.append(i);
-//						sb.append(",'");
-//						sb.append(al.get(i).replace("'", "''"));
-//						sb.append("','");
-//						sb.append(key.replace("'", "''"));
-//						sb.append("')");
-//					}
-//					String sql1 = sb.toString();
-//					stmt.addBatch(sql1);
-//				} else {
-//					for (int i = 0; i < al.size(); i++) {
-//						StringBuilder sb = new StringBuilder();
-//						sb.append("insert into _EWA_SPT_DATA(idx,col,tag) values(");
-//						sb.append(i);
-//						sb.append(",'");
-//						sb.append(al.get(i).replace("'", "''"));
-//						sb.append("','");
-//						sb.append(key.replace("'", "''"));
-//						sb.append("')");
-//						String sql1 = sb.toString();
-//
-//						// System.out.println(sql1);
-//
-//						stmt.addBatch(sql1);
-//					}
-//				}
-//			}
-//			stmt.executeBatch();
-//			if (!this._Connection.getAutoCommit()) {
-//				this._Connection.commit();
-//			}
-//		} catch (SQLException e) {
-//			LOGGER.error(e.getLocalizedMessage());
-//		} finally {
-//			if (stmt != null) {
-//				try {
-//					stmt.close();
-//				} catch (SQLException e) {
-//					LOGGER.error(e.getLocalizedMessage());
-//				}
-//			}
-//		}
-//
-//	}
-
-	/**
+	 * EWA_SPLIT(@ids, ',') <br>
 	 * 将字符串分割成表数据，字符串限制长度1000
 	 */
 	private void createEwaSplitTempData() {
 		if (this._CreateSplitData == null) {
 			return;
 		}
-		if (this._CreateSplitData.getTempData() == null) {
-			return;
-		}
-		if (this._CreateSplitData.getTempData().size() == 0) {
-			return;
-		}
-		boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
-		String insertHeader = "insert into _EWA_SPT_DATA(idx, col, tag) values ";
-		List<String> values = new ArrayList<String>();
-		for (String key : this._CreateSplitData.getTempData().keySet()) {
-			ArrayList<String> al = this._CreateSplitData.getTempData().get(key);
-			String keyExp = this.sqlParameterStringExp(key);
-			for (int i = 0; i < al.size(); i++) {
-				StringBuilder sb = new StringBuilder();
-				sb.append("(");
-				sb.append(i);
-				sb.append(", ");
-
-				String col = al.get(i);
-				if (isMysql && col.length() > 1000) {
-					col = col.substring(0, 1000);
-					LOGGER.warn("EwaSplitTempData col size > 1000, truncation");
-				}
-				String colExp = this.sqlParameterStringExp(col);
-				sb.append(colExp);
-
-				sb.append(",");
-				sb.append(keyExp);
-				sb.append(")");
-
-				values.add(sb.toString());
-			}
-
-		}
-		BatchInsert bi = new BatchInsert(this, false);
-
-		String result = bi.insertBatch(insertHeader, values);
-		if (result != null) {
-			LOGGER.error(result);
-		}
+		this._CreateSplitData.createEwaSplitTempData();
 	}
 
 	/**
@@ -1321,8 +1179,9 @@ public class DataConnection {
 					this._ds.getConnection().commit();
 				}
 			}
-			this.writeDebug(this, "SQL", "删除分割临时数据.");
-			this.clearEwaSplitTempData();
+			// 放到close处理，以便复用时不用重复创建
+			// this.writeDebug(this, "SQL", "删除分割临时数据.");
+			// this.clearEwaSplitTempData();
 
 			return autoKey;
 		} catch (Exception err) {
@@ -1400,8 +1259,9 @@ public class DataConnection {
 					this._ds.getConnection().commit();
 				}
 			}
-			this.writeDebug(this, "SQL", "删除分割临时数据.");
-			this.clearEwaSplitTempData();
+			// 放到close处理，以便复用时不用重复创建
+			// this.writeDebug(this, "SQL", "删除分割临时数据.");
+			// this.clearEwaSplitTempData();
 
 			return true;
 		} catch (Exception err) {
@@ -1482,8 +1342,9 @@ public class DataConnection {
 					this._ds.getConnection().commit();
 				}
 			}
-			this.writeDebug(this, "SQL", "删除分割临时数据.");
-			this.clearEwaSplitTempData();
+			// 放到close处理，以便复用时不用重复创建
+			// this.writeDebug(this, "SQL", "删除分割临时数据.");
+			// this.clearEwaSplitTempData();
 
 			if (is_ok) {
 				tbAfterUpdate = DTTable.getJdbcTable(sqlGet, this);
@@ -1669,7 +1530,9 @@ public class DataConnection {
 
 		// 分割字符串函数 ewa_split(@xxx, ',')
 		if (this._RequestValue != null) {
-			_CreateSplitData = new CreateSplitData(this._RequestValue);
+			if (_CreateSplitData == null) {
+				_CreateSplitData = new CreateSplitData(this._RequestValue, this);
+			}
 			sql = _CreateSplitData.replaceSplitData(sql1);
 			sql1 = sql;
 		}
@@ -2094,6 +1957,12 @@ public class DataConnection {
 	 * 关闭所有连接,包括ResultSet，Cst，Pst
 	 */
 	public void close() {
+		this.writeDebug(this, "SQL", "删除分割临时数据.");
+		// 放到close处理，以便复用时不用重复创建
+		if (this._CreateSplitData != null) {
+			this._CreateSplitData.clearEwaSplitTempData();
+			this._CreateSplitData = null;
+		}
 		// 清除所有返回的 resultSet，当长期执行查询的时，会造成内存占用过高
 		// 郭磊 2019-02-14
 		this.clearResultSets();
@@ -2103,7 +1972,9 @@ public class DataConnection {
 		if (_DebugFrames != null) {
 			_DebugFrames.addDebug(this, "SQL", "[close] Close connection.");
 		}
-		_ds.close();
+		if (_ds != null) {
+			_ds.close();
+		}
 
 	}
 

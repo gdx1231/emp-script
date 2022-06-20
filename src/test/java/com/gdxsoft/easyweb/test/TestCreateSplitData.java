@@ -24,11 +24,15 @@ public class TestCreateSplitData extends TestBase {
 	}
 
 	public void testSqlSplitData() {
+		DataConnection cnn = new DataConnection();
+		cnn.setConfigName("");
 		RequestValue rv = new RequestValue();
+		cnn.setRequestValue(rv);
+
 		rv.addValue("s1", "1,2,3");
 		rv.addValue("s2", "a,b,c");
 
-		CreateSplitData p = new CreateSplitData(rv);
+		CreateSplitData p = new CreateSplitData(rv, cnn);
 		String sql = "insert into a(v1,v2) \nselect a.col,b.col from (select * from ewa_split(@s1,',')) a \n"
 				+ "inner join (select * from ewa_split ( @s2,',')) b on a.idx=b.idx";
 		String rst = p.replaceSplitData(sql);
@@ -57,12 +61,12 @@ public class TestCreateSplitData extends TestBase {
 		super.printCaption("after");
 		System.out.println(sqlf);
 
-		List<String> sqls  = new ArrayList<>();
+		List<String> sqls = new ArrayList<>();
 		sqls.add(sql1);
 		sqls.add(sql2);
 		sqls.add(sql3);
-		
+
 		DataConnection.updateBatchAndCloseTransaction(sqls, "", rv);
-		
+
 	}
 }
