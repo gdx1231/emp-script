@@ -20,8 +20,8 @@ import com.gdxsoft.easyweb.utils.msnet.MListStr;
  */
 public class CreateSplitData {
 	public static String DDL_SQLSERVER = "CREATE TABLE _ewa_spt_data(idx int NOT NULL,col nvarchar(MAX), tag varchar(50) NOT NULL, PRIMARY KEY (tag,idx) )";
-	public static String DDL_MYSQL = "CREATE temporary TABLE _ewa_spt_data(idx int NOT NULL,col varchar(8000), tag varchar(50) NOT NULL, PRIMARY KEY (tag,idx) )";
-	public static String DDL_COMMON = "CREATE TABLE _ewa_spt_data(idx int NOT NULL,col varchar(1000), tag varchar(50) NOT NULL, PRIMARY KEY (tag,idx))";
+	public static String DDL_MYSQL = "CREATE temporary TABLE _ewa_spt_data(idx int NOT NULL,col varchar(8000), tag varchar(50) NOT NULL, PRIMARY KEY(tag,idx))DEFAULT CHARSET=utf8mb4";
+	public static String DDL_COMMON = "CREATE TABLE _ewa_spt_data(idx int NOT NULL,col varchar(1000), tag varchar(50) NOT NULL, PRIMARY KEY(tag,idx))";
 	private static Logger LOGGER = LoggerFactory.getLogger(CreateSplitData.class);
 	private RequestValue rv_;
 
@@ -53,8 +53,10 @@ public class CreateSplitData {
 		boolean mysql = "MYSQL".equalsIgnoreCase(databaseType);
 		if (sqlserver) {
 			this.tempTableName = "[#EWA_SPT_DATA_" + this.uid + "]"; // 使用内存
+			dropOnClose = true;
 		} else if (mysql) {
 			this.tempTableName = "`EWA_SPT_DATA_" + this.uid + "`"; // 使用内存
+			dropOnClose = true;
 		} else {
 			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
 		}
@@ -68,7 +70,7 @@ public class CreateSplitData {
 			return;
 		}
 		String databaseType = this.cnn.getDatabaseType();
-		boolean mysql ="MYSQL".equalsIgnoreCase(databaseType);
+		boolean mysql = "MYSQL".equalsIgnoreCase(databaseType);
 		boolean sqlserver = "sqlserver".equalsIgnoreCase(databaseType) || "mssql".equalsIgnoreCase(databaseType);
 		if (!tempTableCreated) {
 			if (sqlserver) {
@@ -77,14 +79,12 @@ public class CreateSplitData {
 				// SQLServer创建内存临时表
 				this.cnn.executeUpdateNoParameter(sqlCreate);
 				tempTableCreated = true;
-				dropOnClose = true;
 			} else if (mysql) {
 				String sqlCreate = DDL_MYSQL.replace("_ewa_spt_data", this.tempTableName);
 				LOGGER.debug("Create mysql temp table. {}" + sqlCreate);
 				// mysql 创建内存临时表
 				this.cnn.executeUpdateNoParameter(sqlCreate);
 				tempTableCreated = true;
-				dropOnClose = true;
 			}
 		}
 		String insertHeader = "insert into " + this.tempTableName + " (idx, col, tag) values ";
@@ -105,7 +105,7 @@ public class CreateSplitData {
 				String col = al.get(i);
 				if (sqlserver) {
 					// max 2g
-				} else 	if (mysql) {
+				} else if (mysql) {
 					if (col.length() > 8000) {
 						col = col.substring(0, 8000);
 						LOGGER.warn("EwaSplitTempData col size > 8000, truncation");
@@ -217,9 +217,6 @@ public class CreateSplitData {
 		}
 		String p1 = paras.get(0);
 		String v1 = this.rv_.getString(p1);
-		if (v1 == null) {
-			return null;
-		}
 
 		int loc0 = para.indexOf(",");
 		int loc1 = para.lastIndexOf(")");
@@ -231,7 +228,7 @@ public class CreateSplitData {
 			return this.keyMap_.get(keyExp);
 		}
 		// 创建在_ewa_split_data.tag (唯一ID)
-		String tmpDataTag = this.uid + ".gdx." + this.keyMap_.size();
+		String tmpDataTag = (this.dropOnClose ? "" : this.uid) + ".gdx." + this.keyMap_.size();
 		LOGGER.debug("Create temp data {}", tmpDataTag);
 
 		this.keyMap_.put(keyExp, tmpDataTag);
@@ -245,6 +242,13 @@ public class CreateSplitData {
 		String splitStr = sb.toString();
 
 		boolean isAppendBlank = false;
+
+		ArrayList<String> al = new ArrayList<String>();
+		this.tempData_.put(tmpDataTag, al);
+		if (v1 == null) {
+			// 创建空记录
+			return tmpDataTag;
+		}
 		if (v1.endsWith(splitStr0)) {
 			v1 += " ";
 			isAppendBlank = true;
@@ -253,9 +257,6 @@ public class CreateSplitData {
 		String[] vs = v1.split(splitStr);
 
 		// 创建数组列表
-		ArrayList<String> al = new ArrayList<String>();
-		this.tempData_.put(tmpDataTag, al);
-
 		for (int i = 0; i < vs.length; i++) {
 			String v2 = vs[i];
 			if (isAppendBlank && i == vs.length - 1) {
