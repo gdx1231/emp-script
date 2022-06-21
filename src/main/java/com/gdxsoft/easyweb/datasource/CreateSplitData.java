@@ -55,8 +55,9 @@ public class CreateSplitData {
 			this.tempTableName = "[#EWA_SPT_DATA_" + this.uid + "]"; // 使用内存
 			dropOnClose = true;
 		} else if (mysql) {
-			this.tempTableName = "`EWA_SPT_DATA_" + this.uid + "`"; // 使用内存
-			dropOnClose = true;
+			//this.tempTableName = "`EWA_SPT_DATA_" + this.uid + "`"; // 使用内存
+			//dropOnClose = true;
+			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
 		} else {
 			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
 		}
@@ -80,11 +81,11 @@ public class CreateSplitData {
 				this.cnn.executeUpdateNoParameter(sqlCreate);
 				tempTableCreated = true;
 			} else if (mysql) {
-				String sqlCreate = DDL_MYSQL.replace("_ewa_spt_data", this.tempTableName);
-				LOGGER.debug("Create mysql temp table. {}" + sqlCreate);
-				// mysql 创建内存临时表
-				this.cnn.executeUpdateNoParameter(sqlCreate);
-				tempTableCreated = true;
+				/*
+				 * String sqlCreate = DDL_MYSQL.replace("_ewa_spt_data", this.tempTableName);
+				 * LOGGER.debug("Create mysql temp table. {}" + sqlCreate); // mysql 创建内存临时表
+				 * this.cnn.executeUpdateNoParameter(sqlCreate); tempTableCreated = true;
+				 */
 			}
 		}
 		String insertHeader = "insert into " + this.tempTableName + " (idx, col, tag) values ";
