@@ -20,6 +20,7 @@ public class DTCell implements Serializable {
 	private Object _Value;
 	private DTColumn _Column;
 	private DTRow _Row;
+	private Object attachement; // 相关附件
 
 	/**
 	 * @return the _Value
@@ -275,5 +276,23 @@ public class DTCell implements Serializable {
 		}
 		return this._Value.toString();
 
+	}
+
+	/**
+	 * 相关附件
+	 * 
+	 * @return the attacheMent
+	 */
+	public Object getAttachement() {
+		return attachement;
+	}
+
+	/**
+	 * 相关附件
+	 * 
+	 * @param attachement the attacheMent to set
+	 */
+	public void setAttachement(Object attachement) {
+		this.attachement = attachement;
 	}
 }

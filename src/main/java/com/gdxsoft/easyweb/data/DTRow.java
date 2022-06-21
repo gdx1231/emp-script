@@ -41,8 +41,7 @@ public class DTRow implements Serializable {
 	 * @throws InvocationTargetException
 	 * @throws IllegalArgumentException
 	 */
-	public Object parseToClass(Object obj)
-			throws  Exception {
+	public Object parseToClass(Object obj) throws Exception {
 		UObjectValue ov = new UObjectValue();
 		ov.setObject(obj);
 		ov.setDaoValue(this);
@@ -212,5 +211,9 @@ public class DTRow implements Serializable {
 	 */
 	public void setKeysExp(int keysExp) {
 		_KeysExp = keysExp;
+	}
+
+	public String toString() {
+		return this.toJson().toString(2);
 	}
 }

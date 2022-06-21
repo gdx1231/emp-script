@@ -1,7 +1,6 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
 import java.text.NumberFormat;
-import java.util.HashMap;
 
 import com.gdxsoft.easyweb.data.DTCell;
 import com.gdxsoft.easyweb.data.DTColumn;
@@ -24,7 +23,6 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 public class FrameMultiGrid extends FrameBase implements IFrame {
 	private static String ID_PREFIX = "[~!@#%烱]";
 
-	private HashMap<String, DTRow> _MapOriData;
 
 	/**
 	 * 生成多维表内容<br>
@@ -34,14 +32,12 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 	 * 第四步，生产多维HTML
 	 */
 	public void createContent() throws Exception {
-		_MapOriData = new HashMap<String, DTRow>();
-
 		HtmlDocument doc = this.getHtmlClass().getDocument();
 
 		String pageAddTop = this.getPageItemValue("AddHtml", "Top");
 		doc.addScriptHtml(pageAddTop == null ? "" : pageAddTop);
 
-		DTTable t = new DTTable(); // 填充数据用临时表
+		DTTable multiDimTable = new DTTable(); // 填充数据用临时表
 
 		String EWA_GRID_TRANS = super.getHtmlClass().getItemValues().getRequestValue().getString("EWA_GRID_TRANS");
 		MStr[] heads;
@@ -52,12 +48,12 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 			isTrans = true;
 		}
 		// 行标头
-		heads = this.createGridHeaders(t, isTrans);
+		heads = this.createGridHeaders(multiDimTable, isTrans);
 		// 列左侧标头
-		leftRows = this.createGridLeftRows(t, isTrans);
+		leftRows = this.createGridLeftRows(multiDimTable, isTrans);
 
 		// 填充数据
-		this.fillGridData(t, isTrans);
+		this.fillGridData(multiDimTable, isTrans);
 
 		// 生成网格
 		MStr sb = new MStr();
@@ -88,8 +84,8 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 		MListStr al = Utils.getParameters(cellTemplateHtml, "@");
 		// 生成数据HTML
 
-		for (int i = 0; i < t.getCount(); i++) {
-			DTRow r = t.getRow(i);
+		for (int i = 0; i < multiDimTable.getCount(); i++) {
+			DTRow r = multiDimTable.getRow(i);
 			sb.append("<tr>");
 			try {
 				for (int m = 0; m < leftRows1.length; m++) {
@@ -100,12 +96,12 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 						sb.append(left);
 					}
 				}
-				for (int m = 0; m < t.getColumns().getCount(); m++) {
-					DTColumn col = t.getColumns().getColumn(m);
+				for (int m = 0; m < multiDimTable.getColumns().getCount(); m++) {
+					DTColumn col = multiDimTable.getColumns().getColumn(m);
 					DTCell cell = r.getCell(m);
 					if (col.getName().indexOf("$$EWA_COL$$") == 0) {
 						// 列汇总
-						Double v2 = getRowComputValue(t, i, col.getName());
+						Double v2 = getRowComputValue(multiDimTable, i, col.getName());
 						String[] names = col.getName().split("\\$\\$");
 
 						cell.setValue(v2);
@@ -118,7 +114,7 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 						}
 					} else if (r.getName().indexOf("$$EWA_ROW$$") == 0) {
 						// 行汇总
-						Double v2 = getColComputValue(t, m, r.getName());
+						Double v2 = getColComputValue(multiDimTable, m, r.getName());
 						String[] names = r.getName().split("\\$\\$");
 						cell.setValue(v2);
 						try {
@@ -239,13 +235,12 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 				} else if (tag.toUpperCase().trim().equals("ROW")) {
 					html = html.replace("@" + tag, rowId);
 				}
-
 			}
 
 			try {
 				// 获取原始行数据
-				String key = cell.getRow().getName() + "," + cell.getColumn().getName();
-				DTRow cellRowData = this._MapOriData.get(key);
+//					String key = cell.getRow().getName();
+				DTRow cellRowData = cell.getAttachement() == null ? null : (DTRow) cell.getAttachement();
 				html = this.myReplaceParameters(html, cellRowData);
 				if (html.trim().equals("+")) {
 					html = "";
@@ -273,11 +268,11 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 	 * 将数据填充到多维表中，根据actionName获取所有表名为actionName的表<br>
 	 * 并将数据根据X（DTRow名称），Y（DTColumn名称）轴名称填充数据到单元格中。
 	 * 
-	 * @param t    多维表
-	 * @param item
+	 * @param multiDimTable 多维表
+	 * @param isTrans       是否X,Y对调
 	 * @throws Exception
 	 */
-	private void fillGridData(DTTable t, boolean isTrans) throws Exception {
+	private void fillGridData(DTTable multiDimTable, boolean isTrans) throws Exception {
 		UserXItemValue item = super.getHtmlClass().getUserConfig().getUserPageItem().getItem("MGCell").getItem(0);
 
 		String fieldXName = item.getItem("CellXField");
@@ -292,7 +287,7 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 		DTTable tbData = this.getDTTable(actionName);
 		while (tbData != null) {
 			tbData.setName(null);
-			this.fillGridData(t, tbData, xx, yy, dd, isTrans);
+			this.fillGridData(multiDimTable, tbData, xx, yy, dd, isTrans);
 			tbData = this.getDTTable(actionName);
 		}
 	}
@@ -301,30 +296,30 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 	 * 将数据填充到多维表中，根据actionName获取所有表名为actionName的表<br>
 	 * 并将数据根据X（DTRow名称），Y（DTColumn名称）轴名称填充数据到单元格中。
 	 * 
-	 * @param t       多维表
-	 * @param tbData  数据
-	 * @param xx      X轴名称列表
-	 * @param yy      Y轴名称列表
-	 * @param dd      数据字段列表
-	 * @param isTrans 是否转置
+	 * @param multiDimTable 多维表
+	 * @param tbData        数据
+	 * @param xx            X轴名称列表
+	 * @param yy            Y轴名称列表
+	 * @param dd            数据字段列表
+	 * @param isTrans       是否转置
 	 * @throws Exception
 	 */
-	private void fillGridData(DTTable t, DTTable tbData, String[] xx, String[] yy, String[] dd, boolean isTrans)
-			throws Exception {
+	private void fillGridData(DTTable multiDimTable, DTTable tbData, String[] xx, String[] yy, String[] dd,
+			boolean isTrans) throws Exception {
 		for (int i = 0; i < tbData.getCount(); i++) {
-			DTRow r = tbData.getRow(i);
+			DTRow orginalDataRow = tbData.getRow(i);
 			for (int m1 = 0; m1 < dd.length; m1++) {
 				String xId = "";
 				String yId = "";
 
 				for (int m = 0; m < xx.length; m++) {
 					String f = xx[m].trim().equalsIgnoreCase("@") ? dd[m1].toUpperCase().trim()
-							: r.getCell(xx[m]).toString();
+							: orginalDataRow.getCell(xx[m]).toString();
 					xId = xId + ID_PREFIX + f + ID_PREFIX;
 				}
 				for (int m = 0; m < yy.length; m++) {
 					String f = yy[m].trim().equalsIgnoreCase("@") ? dd[m1].toUpperCase().trim()
-							: r.getCell(yy[m]).toString();
+							: orginalDataRow.getCell(yy[m]).toString();
 					yId = yId + ID_PREFIX + f + ID_PREFIX;
 				}
 				if (isTrans) {
@@ -333,19 +328,15 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 					yId = tmp;
 				}
 
-				if (t.getColumns().testName(xId)) {
-					DTRow r1 = t.getRows().getRow(yId);
+				if (multiDimTable.getColumns().testName(xId)) {
+					DTRow r1 = multiDimTable.getRows().getRow(yId);
 					if (r1 == null)
 						continue;
 					DTCell cell = r1.getCell(xId);
-					Object v = r.getCell(dd[m1]).getValue();
+					Object v = orginalDataRow.getCell(dd[m1]).getValue();
 					cell.setValue(v);
-					String rowKey = yId + "," + xId;
-					if (_MapOriData.containsKey(rowKey)) {
-						System.out.println(rowKey + "REPEAT");
-					} else {
-						_MapOriData.put(rowKey, r);
-					}
+					// 设置相关附件
+					cell.setAttachement(orginalDataRow);
 				}
 			}
 		}
@@ -359,7 +350,7 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 	 * @return
 	 * @throws Exception
 	 */
-	private MStr[] createGridHeaders(DTTable t, boolean isTrans) throws Exception {
+	private MStr[] createGridHeaders(DTTable multiDimTable, boolean isTrans) throws Exception {
 
 		String fieldName;
 		String actionName;
@@ -444,7 +435,7 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 			}
 			col.setName(colName);
 			col.setTypeName(ids);
-			t.getColumns().addColumn(col);
+			multiDimTable.getColumns().addColumn(col);
 		}
 		for (int m = 0; m < fys.length; m++) {
 			sbHeads[m].replace("[COLSPAN]", "colspan='" + colSpans[m] + "'");
@@ -481,7 +472,7 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 				DTColumn col = new DTColumn();
 				col.setName("$$EWA_COL$$" + mgfComput + "$$" + calc + "$$" + item.getName());
 				col.setTypeName("number");
-				t.getColumns().addColumn(col);
+				multiDimTable.getColumns().addColumn(col);
 				MStr sb = new MStr();
 				sb.append("<td  nowrap class='EWA_GRID_H' rowspan='" + sbHeads.length + "'><nobr>" + des
 						+ "</nobr></td>\r\n");
@@ -500,7 +491,7 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 	 * @return
 	 * @throws Exception
 	 */
-	private MStr[] createGridLeftRows(DTTable t, boolean isTrans) throws Exception {
+	private MStr[] createGridLeftRows(DTTable multiDimTable, boolean isTrans) throws Exception {
 		String fieldName;
 		String actionName;
 		String attrExp = null;
@@ -534,7 +525,7 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 		}
 
 		for (int i = 0; i < tbX.getCount(); i++) {
-			DTRow r = t.addRow();
+			DTRow r = multiDimTable.addRow();
 			String name = "";
 			String htmlId = "MGB_" + i;
 			String id1 = "";
@@ -593,7 +584,7 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 						: mgfComput.trim().toUpperCase();
 				String des = HtmlUtils.getDescription(item.getItem("DescriptionSet"), "Info", lang);
 				String calc = item.getSingleValue("MGAddField", "MgfCalc");
-				DTRow row = t.addRow();
+				DTRow row = multiDimTable.addRow();
 				row.setName("$$EWA_ROW$$" + mgfComput + "$$" + calc + "$$" + item.getName());
 				MStr sb = new MStr();
 				sb.append("<td  nowrap class='EWA_GRID_L'  colspan='" + sbLefRows.length + "'><nobr>" + des
@@ -713,6 +704,12 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 	}
 
 	private String getCellValue(DTRow row, String dataFieldName) throws Exception {
+		if(row == null) {
+			return null;
+		}
+		if(!row.getTable().getColumns().testName(dataFieldName)) {
+			return null;
+		}
 		DTCell cell = row.getCell(dataFieldName);
 		if (cell.getColumn().getTypeName() != null && cell.getColumn().getTypeName().toUpperCase() == "CLOB") {
 			return cell.toString();
