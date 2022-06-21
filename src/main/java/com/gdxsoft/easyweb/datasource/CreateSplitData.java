@@ -20,7 +20,7 @@ import com.gdxsoft.easyweb.utils.msnet.MListStr;
  */
 public class CreateSplitData {
 	public static String DDL_SQLSERVER = "CREATE TABLE _ewa_spt_data(idx int NOT NULL,col nvarchar(MAX), tag varchar(50) NOT NULL, PRIMARY KEY (tag,idx) )";
-	public static String DDL_MYSQL = "CREATE temporary TABLE _ewa_spt_data(idx int NOT NULL,col varchar(8000), tag varchar(50) NOT NULL, PRIMARY KEY(tag,idx))DEFAULT CHARSET=utf8mb4";
+	public static String DDL_MYSQL = "CREATE TABLE _ewa_spt_data(idx int NOT NULL,col varchar(8000), tag varchar(50) NOT NULL, PRIMARY KEY(tag,idx))DEFAULT CHARSET=utf8mb4";
 	public static String DDL_COMMON = "CREATE TABLE _ewa_spt_data(idx int NOT NULL,col varchar(1000), tag varchar(50) NOT NULL, PRIMARY KEY(tag,idx))";
 	private static Logger LOGGER = LoggerFactory.getLogger(CreateSplitData.class);
 	private RequestValue rv_;
@@ -55,8 +55,8 @@ public class CreateSplitData {
 			this.tempTableName = "[#EWA_SPT_DATA_" + this.uid + "]"; // 使用内存
 			dropOnClose = true;
 		} else if (mysql) {
-			//this.tempTableName = "`EWA_SPT_DATA_" + this.uid + "`"; // 使用内存
-			//dropOnClose = true;
+			// this.tempTableName = "`EWA_SPT_DATA_" + this.uid + "`"; // 使用内存
+			// dropOnClose = true;
 			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
 		} else {
 			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
@@ -81,6 +81,10 @@ public class CreateSplitData {
 				this.cnn.executeUpdateNoParameter(sqlCreate);
 				tempTableCreated = true;
 			} else if (mysql) {
+				// MYSQL 临时表在一条查询里只能打开一次
+				// ERROR 1137 (HY000): Can't reopen table: '_ewa_spt_data'
+				// • You cannot refer to a TEMPORARY table more than once in the same query.
+				
 				/*
 				 * String sqlCreate = DDL_MYSQL.replace("_ewa_spt_data", this.tempTableName);
 				 * LOGGER.debug("Create mysql temp table. {}" + sqlCreate); // mysql 创建内存临时表
