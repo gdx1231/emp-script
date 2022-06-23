@@ -279,7 +279,23 @@ public class DataConnection {
 	 * @return
 	 */
 	public static boolean checkIsSelect(String sql) {
-		return checkStartWord(sql, "SELECT");
+		if( checkStartWord(sql, "SELECT")) {
+			int intoIndex = sql.toLowerCase().indexOf("into");
+			if(intoIndex == -1) {
+				return true;
+			}
+			int fromIndex = sql.toLowerCase().indexOf("from");
+			if(intoIndex < fromIndex && fromIndex >0) {
+				// select * into aa from bb SQLSEREVER
+				return false;
+			}
+			if(fromIndex == -1) {
+				// select 1 a,2 b into #temp
+				return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/**
