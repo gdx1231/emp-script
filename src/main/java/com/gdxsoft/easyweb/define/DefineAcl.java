@@ -2,6 +2,7 @@ package com.gdxsoft.easyweb.define;
 
 import com.gdxsoft.easyweb.acl.IAcl;
 import com.gdxsoft.easyweb.acl.SampleAcl;
+import com.gdxsoft.easyweb.conf.ConfDefine;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.utils.UUrl;
@@ -10,6 +11,9 @@ import com.gdxsoft.easyweb.utils.Utils;
 public class DefineAcl extends SampleAcl implements IAcl {
 
 	public boolean canRun() {
+		if (!ConfDefine.isAllowDefine()) {
+			return false;
+		}
 		PageValue pv = super.getRequestValue().getPageValues().getValue("EWA_ADMIN_ID");
 
 		// EWA_ADMIN_ID 不在seesion中

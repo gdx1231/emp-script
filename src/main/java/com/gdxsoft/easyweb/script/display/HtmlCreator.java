@@ -752,12 +752,14 @@ public class HtmlCreator {
 		JSONObject msgJson = UJSon.rstFalse(msg);
 
 		_DebugFrames.addDebug(this, "HTML", "验证失败");
-		if (_Acl.getGoToUrl() == null) {
-			this._PageHtml = msg;
-			return false;
-		}
+		
 
 		if (!this.isAjaxCall()) {
+			if (_Acl.getGoToUrl() == null) {
+				this._PageHtml = msg;
+				return false;
+			}
+			
 			String s1 = "document.location.href=\"" + this._Acl.getGoToUrl() + "\";";
 			this._PageHtml = "\r\n<script language=\"javascript\">\r\n" + s1 + "\r\n</script>\r\n";
 			return false;
