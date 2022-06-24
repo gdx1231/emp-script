@@ -2041,7 +2041,12 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 							<Set Lang="enus" Info="Data Field" />
 						</DescriptionSet>
 					</Value>
-
+					<Value Type="group" Name="Trim">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="删除前后空白" />
+							<Set Lang="enus" Info="Trim" />
+						</DescriptionSet>
+					</Value>
 					<Value Type="group" Name="Translation">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="翻译方式" />
@@ -3082,6 +3087,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />
 					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
+			<XGroupValue Name="Trim" Default="" Values="yes,no">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="是,否" />
+					<Set Lang="enus" Info="Yes,No" />
 				</DescriptionSet>
 			</XGroupValue>
 			<XGroupValue Name="FrameOneCell" Default="" Values="no,yes">
