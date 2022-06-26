@@ -401,6 +401,6 @@ CREATE TABLE EWA_CFG_TREE (
 <dependency>
     <groupId>com.gdxsoft.easyweb</groupId>
     <artifactId>emp-script</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.3</version>
 </dependency>
 ```
