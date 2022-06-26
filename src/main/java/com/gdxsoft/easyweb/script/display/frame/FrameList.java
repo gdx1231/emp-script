@@ -713,13 +713,7 @@ public class FrameList extends FrameBase implements IFrame {
 		// 用户定义参数 EWA_IS_SPLIT_PAGE yes表示分页，no表示不分页
 		String paramIsSplit = super.getHtmlClass().getItemValues().getRequestValue().getString("EWA_IS_SPLIT_PAGE");
 		if (paramIsSplit != null) {
-			if (paramIsSplit.equals("yes") || paramIsSplit.equals("1") || paramIsSplit.equals("true")) {
-				return true;
-			}
-			if (paramIsSplit.equals("no") || paramIsSplit.equals("0") || paramIsSplit.equals("false")) {
-				// 用户定义不分页
-				return false;
-			}
+			return Utils.cvtBool(paramIsSplit);
 		}
 		String isSplitPage = this.getPageItemValue("PageSize", "IsSplitPage");
 
