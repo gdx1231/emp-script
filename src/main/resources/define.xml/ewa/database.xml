@@ -233,7 +233,7 @@ show('TABLE');]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss
 		
 		var tb=tr.parentNode.parentNode;
 		var tb1=tr1.parentNode.parentNode;
-		s+='\r\n\t JOIN ' +tb.id.replace('TABLE#','')
+		s+='\\r\\n\\t JOIN ' +tb.id.replace('TABLE#','')
 			+' ON (' + kk.LinkObj2.id.replace('ROW#','').replace('#','.') 
 			+ ' = ' + kk.LinkObj1.id.replace('ROW#','').replace('#','.') + ')';
 		m++;

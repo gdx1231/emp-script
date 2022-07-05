@@ -1,4 +1,119 @@
-<?xml version="1.0" encoding="UTF-8"?><EasyWebTemplates><EasyWebTemplate Author="gl" CreateDate="2010-03-16 18:42:57" Name="main" UpdateDate="2021-03-15 10:53:46"><Page><Name><Set Name="main"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource="system"/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="主信息" Lang="zhcn" Memo=""/><Set Info="The main information" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<?xml version="1.0" encoding="UTF-8"?><EasyWebTemplates><EasyWebTemplate Author="gl" CreateDate="2010-03-24 10:08:39" Name="addTables" UpdateDate="2021-03-15 09:19:23"><Page><Name><Set Name="addTables"/></Name><FrameTag><Set FrameTag="ListFrame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="添加表" Lang="zhcn" Memo=""/><Set Info="Add a table" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="350" HiddenCaption="1" VAlign="top" Width="860"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<table border=0 width=100% height=400>
+    <tr>
+        <td>
+            <iframe width=100% height=100% src='./?XMLNAME=/ewa/ewa.xml&ITEMNAME=tabletree&linkType=GROUP&EWA_FRAMESET_NO=1' frameborder=0></iframe>
+        </td>
+    </tr>
+
+    <tr>
+        <td height=20 align=right>
+            <hr>
+            <input type=button value='添加' onclick='addTables()'>
+            <input type=button value='清除' onclick='clearSelect()'>
+            <input type=button value='关闭'>
+        </td>
+    </tr>
+</table>]]></Top><Bottom><![CDATA[<div style='display:none'> 
+<form action="../../EWA_DEFINE/cgi-bin/group/" method=post target="contents">
+<input type=hidden name=q > 
+<input type=hidden name=i value="@i" > 
+</form>
+</div>]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow = 'hidden';
+]]></Top><Bottom><![CDATA[
+function clearSelect() {
+    var o = window.frames[0].document.getElementsByTagName('input');
+    for (var i = 0; i < o.length; i++) {
+        var o1 = o[i];
+        if (o1.checked) {
+            o1.checked = false;
+        }
+    }
+}
+
+function addTables() {
+    var os = window.frames[0].document.getElementsByTagName('input');
+    var s = [];
+    var r = /\\;/ig;
+    for (var i = 0; i < os.length; i++) {
+        var o = os[i];
+        if (o.type == 'checkbox' && o.checked) {
+            s.push(o.value.replace(r, ',') + ",true,1=2");
+        }
+    }
+    if (s.length == 0) {
+        alert('请选择');
+        return;
+    }
+    var s1 = s.join(';');
+    var p = [];
+    p[0] = {
+        Name: 'tables',
+        Value: s1
+    };
+    alert(s1);
+    EWA.F.FOS['@SYS_FRAME_UNID'].DoAction(this, 'OnPagePost', '', '', p);
+
+    //_EWA_DialogWnd._OpenerWindow.addTables1(s1);
+    //_EWA_DialogWnd.CloseWindow();
+}]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[body{overflow:hidden}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="add" CallType="XmlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql/><CSSet/></Set><Set Name="OnPagePost SQL" SqlType="update" TransType="no"><Sql/><CSSet/></Set></SqlSet><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.group.UIGroup" ConData="" MethodData="@ID,@tables" MethodName="addTableInfos" Name="addTable" XmlTag=""/></ClassSet><XmlSet><Set Name="add" XmlAction="inertOrUpdate" XmlData="@tables" XmlFields="TableType,Schema,TableName,DatabaseType,DataSource,IsExport,ExportWhere" XmlSetData="config" XmlWhere="TableName"/></XmlSet><XmlSetData><Set Name="config" XmlFields="TableName,TableType,DatabaseType,DataSource,Schema,IsExport,ExportWhere" XmlLoadType="attribute" XmlName="@EWA.GROUP.PATH/exports/@id/des.xml" XmlTagPath="baseInfo/Tables/Table"/></XmlSetData><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-03-24 12:22:11" Name="addItems" UpdateDate="2021-03-15 09:20:37"><Page><Name><Set Name="addItems"/></Name><FrameTag><Set FrameTag="ListFrame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="添加配置项" Lang="zhcn" Memo=""/><Set Info="Add items" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="390" HiddenCaption="1" VAlign="top" Width="860"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<table border=0 width=100% height=400>
+    <tr>
+        <td>
+            <iframe width=100% height=100% src='./?xmlname=/ewa/ewa.xml&itemname=cfgtree&linktype=group' frameborder=0></iframe>
+        </td>
+    </tr>
+
+    <tr>
+        <td height=20 align=right>
+            <hr>
+            <input type=button value='添加' onclick='addTables()'>
+            <input type=button value='清除' onclick='clearSelect()'>
+            <input type=button value='关闭'>
+        </td>
+    </tr>
+</table>]]></Top><Bottom><![CDATA[<div style='display:none'> 
+<form action="../../EWA_DEFINE/cgi-bin/group/" method=post target="contents">
+<input type=hidden name=q > 
+<input type=hidden name=i value="@i" > 
+</form>
+</div>]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow = 'hidden';]]></Top><Bottom><![CDATA[function clearSelect() {
+    var o = window.frames[0].frames[1].document.getElementsByTagName('input');
+    for (var i = 0; i < o.length; i++) {
+        var o1 = o[i];
+        if (o1.checked) {
+            o1.checked = false;
+        }
+    }
+}
+
+function addTables() {
+    var os = window.frames[0].frames[1].document.getElementsByTagName('input');
+    var s = [];
+    for (var i = 0; i < os.length; i++) {
+        var o = os[i];
+        if (o.type == 'checkbox' && o.checked) {
+            var tr = o.parentNode.parentNode.parentNode.parentNode;
+            var ss = window.frames[0].frames[1].VIEW_XMLNAME + ',' +
+                o.value + ',' + GetInnerText(tr.cells[4]).trim() + ',' + GetInnerText(tr.cells[3]).trim();
+            s.push(ss);
+        }
+    }
+    if (s.length == 0) {
+        alert('请选择');
+        return;
+    }
+    var s1 = s.join(';');
+    //	alert(s1);
+    var p = [];
+    p[0] = {
+        Name: 'items',
+        Value: s1
+    };
+    EWA.F.FOS['@SYS_FRAME_UNID'].DoAction(this, 'OnPagePost', '', '', p);
+}]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[body{overflow:hidden}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="group" ParaExp="'@link' = 'group'"/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="addItems" CallType="XmlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql/><CSSet/></Set><Set Name="OnPagePost SQL" SqlType="update" TransType="no"><Sql/><CSSet/></Set></SqlSet><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.group.UIGroup" ConData="" MethodData="@ID,@tables" MethodName="addItemInfos" Name="addItem" XmlTag=""/></ClassSet><XmlSet><Set Name="addItems" XmlAction="inertOrUpdate" XmlData="@items" XmlFields="" XmlSetData="config" XmlWhere="XmlName,ItemName"/></XmlSet><XmlSetData><Set Name="config" XmlFields="XmlName,ItemName,Description,FrameType" XmlLoadType="attribute" XmlName="@EWA.GROUP.PATH/exports/@id/des.xml" XmlTagPath="baseInfo/EasyWebTemplates/EasyWebTemplate"/></XmlSetData><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-03-16 18:42:57" Name="main" UpdateDate="2021-03-15 10:53:46"><Page><Name><Set Name="main"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource="system"/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="主信息" Lang="zhcn" Memo=""/><Set Info="The main information" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
 <link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
 <table border=0 width=100% height=100%>
 <tr>
@@ -97,7 +212,7 @@ class='ewa_table'  align=center style='table-layout:fixed'>
 </td>
 </tr>
 </table>]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[function addReses(){
-	var r=/\;/ig;
+	var r=/\\;/ig;
 	var tb=$X('res');                     
 	var s=[];                     
 	for(var i=1;i<tb.rows.length;i++){
@@ -201,117 +316,4 @@ function addTables1(s){
 	p[0]={Name:'tables', Value:s};
 	EWA.F.FOS['@SYS_FRAME_UNID'].DoAction(this, 'OnAddTables','','',p);
 	EWA.F.FOS['@SYS_FRAME_UNID'].Goto(1);
-}]]></Top><Bottom/></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="0" KeyField="tableName" PageSize="100" Recycle="" StatusField=""/></PageSize><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="load" CallType="XmlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnAddTables"><CallSet><Set CallIsChk="" CallName="addTables" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnRemoveTable"><CallSet><Set CallIsChk="" CallName="reomve" CallType="XmlSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.group.UIGroup" ConData="" MethodData="@ID" MethodName="getTableInfos" Name="load" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.group.UIGroup" ConData="" MethodData="@ID,@tables" MethodName="addTableInfos" Name="addTables" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.group.UIGroup" ConData="" MethodData="@ID,@getNAme" MethodName="removeTableInfo" Name="removeTable" XmlTag=""/></ClassSet><XmlSet><Set Name="load" XmlAction="load" XmlData="" XmlFields="" XmlSetData="config" XmlWhere=""/><Set Name="reomve" XmlAction="deletes" XmlData="" XmlFields="" XmlSetData="config" XmlWhere="tableName=@TableName"/></XmlSet><XmlSetData><Set Name="config" XmlFields="TableName,TableType,DatabaseType,DataSource,Schema,IsExport,ExportWhere" XmlLoadType="attribute" XmlName="@EWA.GROUP.PATH/exports/@id/des.xml" XmlTagPath="baseInfo/Tables/Table"/></XmlSetData><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="load" CallType="XmlSet" Test=""/></CallSet></Action><XItems><XItem Name="tablename"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="tablename"/></Name><GroupIndex/><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="表名" Lang="zhcn" Memo=""/><Set Info="Name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="tablename" DataType="Int" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="tableType"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="tableType"/></Name><GroupIndex/><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="Table Type" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="tableType" DataType="String" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="dataSource"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="dataSource"/></Name><GroupIndex/><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="数据源" Lang="zhcn" Memo=""/><Set Info="Source" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="dataSource" DataType="String" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="schema"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="schema"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="Schema" Lang="zhcn" Memo=""/><Set Info="Schema" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="schema" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="databaseType"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="databaseType"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="数据库" Lang="zhcn" Memo=""/><Set Info="Database" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="databaseType" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="IsExport"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="IsExport"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="导出数据" Lang="zhcn" Memo=""/><Set Info="Is Export" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="IsExport" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="ExportWhere"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="ExportWhere"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="导出条件" Lang="zhcn" Memo=""/><Set Info="Export Where" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="ExportWhere" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="butOk"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butOk"/></Name><GroupIndex/><DescriptionSet><Set Info="去除" Lang="zhcn" Memo=""/><Set Info="Remove" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><CallAction><Set Action="OnRemoveTable" AfterTip="" ConfirmInfo="DeleteBefore"/></CallAction><OpenFrame><Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame></XItem><XItem Name="but1"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="but1"/></Name><GroupIndex/><DescriptionSet><Set Info="修改" Lang="zhcn" Memo=""/><Set Info="Modify" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet/><EventSet/><CallAction/><OpenFrame><Set AttatchParas="" CallItemName="moditable" CallMethod="OpenReloadClose" CallParas="ID=@ID&amp;tn=@tablename" CallXmlName="|ewa|group1.xml"/></OpenFrame></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-03-24 12:22:11" Name="addItems" UpdateDate="2021-12-06 11:20:47"><Page><Name><Set Name="addItems"/></Name><FrameTag><Set FrameTag="ListFrame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="添加配置项" Lang="zhcn" Memo=""/><Set Info="Add items" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="390" HiddenCaption="1" VAlign="top" Width="860"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
-<table border=0 width=100% height=400>
-    <tr>
-        <td height="100%">
-            <iframe width=100% height=100% src='./?xmlname=/ewa/ewa.xml&itemname=cfgtree&linktype=group' frameborder=0></iframe>
-        </td>
-    </tr>
-    <tr>
-        <td height=20 align=right>
-            <hr>
-            <input type=button value='添加' onclick='addTables()'>
-            <input type=button value='清除' onclick='clearSelect()'>
-            <input type=button value='关闭'>
-        </td>
-    </tr>
-</table>]]></Top><Bottom><![CDATA[<div style='display:none'> 
-<form action="../../EWA_DEFINE/cgi-bin/group/" method=post target="contents">
-<input type=hidden name=q > 
-<input type=hidden name=i value="@i" > 
-</form>
-</div>]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow = 'hidden';]]></Top><Bottom><![CDATA[function clearSelect() {
-    var o = window.frames[0].frames[1].document.getElementsByTagName('input');
-    for (var i = 0; i < o.length; i++) {
-        var o1 = o[i];
-        if (o1.checked) {
-            o1.checked = false;
-        }
-    }
-}
-
-function addTables() {
-    var os = window.frames[0].frames[1].document.getElementsByTagName('input');
-    var s = [];
-    for (var i = 0; i < os.length; i++) {
-        var o = os[i];
-        if (o.type == 'checkbox' && o.checked) {
-            var tr = o.parentNode.parentNode.parentNode.parentNode;
-            var ss = window.frames[0].frames[1].VIEW_XMLNAME + ',' +
-                o.value + ',' + GetInnerText(tr.cells[4]).trim() + ',' + GetInnerText(tr.cells[3]).trim();
-            s.push(ss);
-        }
-    }
-    if (s.length == 0) {
-        alert('请选择');
-        return;
-    }
-    var s1 = s.join(';');
-    //	alert(s1);
-    var p = [];
-    p[0] = {
-        Name: 'items',
-        Value: s1
-    };
-    EWA.F.FOS['@SYS_FRAME_UNID'].DoAction(this, 'OnPagePost', '', '', p);
-}]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[body{overflow:hidden}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="group" ParaExp="'@link' = 'group'"/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="addItems" CallType="XmlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql/><CSSet/></Set><Set Name="OnPagePost SQL" SqlType="update" TransType="no"><Sql/><CSSet/></Set></SqlSet><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.group.UIGroup" ConData="" MethodData="@ID,@tables" MethodName="addItemInfos" Name="addItem" XmlTag=""/></ClassSet><XmlSet><Set Name="addItems" XmlAction="inertOrUpdate" XmlData="@items" XmlFields="" XmlSetData="config" XmlWhere="XmlName,ItemName"/></XmlSet><XmlSetData><Set Name="config" XmlFields="XmlName,ItemName,Description,FrameType" XmlLoadType="attribute" XmlName="@EWA.GROUP.PATH/exports/@id/des.xml" XmlTagPath="baseInfo/EasyWebTemplates/EasyWebTemplate"/></XmlSetData><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-03-24 10:08:39" Name="addTables" UpdateDate="2021-12-06 11:35:58"><Page><Name><Set Name="addTables"/></Name><FrameTag><Set FrameTag="ListFrame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="添加表" Lang="zhcn" Memo=""/><Set Info="Add a table" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="350" HiddenCaption="1" VAlign="top" Width="860"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
-<table border=0 width=100% height=400>
-    <tr>
-        <td height="100%">
-            <iframe width=100% height=100% src='./?XMLNAME=/ewa/ewa.xml&ITEMNAME=tabletree&linkType=GROUP&EWA_FRAMESET_NO=1' frameborder=0></iframe>
-        </td>
-    </tr>
-
-    <tr>
-        <td height=20 align=right>
-            <hr>
-            <input type=button value='添加' onclick='addTables()'>
-            <input type=button value='清除' onclick='clearSelect()'>
-            <input type=button value='关闭'>
-        </td>
-    </tr>
-</table>]]></Top><Bottom><![CDATA[<div style='display:none'> 
-<form action="../../EWA_DEFINE/cgi-bin/group/" method=post target="contents">
-<input type=hidden name=q > 
-<input type=hidden name=i value="@i" > 
-</form>
-</div>]]></Bottom></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow = 'hidden';
-]]></Top><Bottom><![CDATA[
-function clearSelect() {
-    var o = window.frames[0].document.getElementsByTagName('input');
-    for (var i = 0; i < o.length; i++) {
-        var o1 = o[i];
-        if (o1.checked) {
-            o1.checked = false;
-        }
-    }
-}
-
-function addTables() {
-    var os = window.frames[0].document.getElementsByTagName('input');
-    var s = [];
-    var r = /\;/ig;
-    for (var i = 0; i < os.length; i++) {
-        var o = os[i];
-        if (o.type == 'checkbox' && o.checked) {
-            s.push(o.value.replace(r, ',') + ",true,1=2");
-        }
-    }
-    if (s.length == 0) {
-        alert('请选择');
-        return;
-    }
-    var s1 = s.join(';');
-    var p = [];
-    p[0] = {
-        Name: 'tables',
-        Value: s1
-    };
-    console.log(s1);
-    EWA.F.FOS['@SYS_FRAME_UNID'].DoAction(this, 'OnPagePost', '', '', p);
-    //_EWA_DialogWnd._OpenerWindow.addTables1(s1);
-    //_EWA_DialogWnd.CloseWindow();
-}]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[body{overflow:hidden}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="add" CallType="XmlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql/><CSSet/></Set><Set Name="OnPagePost SQL" SqlType="update" TransType="no"><Sql/><CSSet/></Set></SqlSet><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.group.UIGroup" ConData="" MethodData="@ID,@tables" MethodName="addTableInfos" Name="addTable" XmlTag=""/></ClassSet><XmlSet><Set Name="add" XmlAction="inertOrUpdate" XmlData="@tables" XmlFields="TableType,Schema,TableName,DatabaseType,DataSource,IsExport,ExportWhere" XmlSetData="config" XmlWhere="TableName"/></XmlSet><XmlSetData><Set Name="config" XmlFields="TableName,TableType,DatabaseType,DataSource,Schema,IsExport,ExportWhere" XmlLoadType="attribute" XmlName="@EWA.GROUP.PATH/exports/@id/des.xml" XmlTagPath="baseInfo/Tables/Table"/></XmlSetData><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>
+}]]></Top><Bottom/></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize><Set AllowExport="" ColSize="" IsSplitPage="0" KeyField="tableName" PageSize="100" Recycle="" StatusField=""/></PageSize><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="load" CallType="XmlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnAddTables"><CallSet><Set CallIsChk="" CallName="addTables" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnRemoveTable"><CallSet><Set CallIsChk="" CallName="reomve" CallType="XmlSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.group.UIGroup" ConData="" MethodData="@ID" MethodName="getTableInfos" Name="load" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.group.UIGroup" ConData="" MethodData="@ID,@tables" MethodName="addTableInfos" Name="addTables" XmlTag=""/><Set ClassName="com.gdxsoft.easyweb.define.group.UIGroup" ConData="" MethodData="@ID,@getNAme" MethodName="removeTableInfo" Name="removeTable" XmlTag=""/></ClassSet><XmlSet><Set Name="load" XmlAction="load" XmlData="" XmlFields="" XmlSetData="config" XmlWhere=""/><Set Name="reomve" XmlAction="deletes" XmlData="" XmlFields="" XmlSetData="config" XmlWhere="tableName=@TableName"/></XmlSet><XmlSetData><Set Name="config" XmlFields="TableName,TableType,DatabaseType,DataSource,Schema,IsExport,ExportWhere" XmlLoadType="attribute" XmlName="@EWA.GROUP.PATH/exports/@id/des.xml" XmlTagPath="baseInfo/Tables/Table"/></XmlSetData><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="load" CallType="XmlSet" Test=""/></CallSet></Action><XItems><XItem Name="tablename"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="tablename"/></Name><GroupIndex/><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="表名" Lang="zhcn" Memo=""/><Set Info="Name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="tablename" DataType="Int" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="tableType"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="tableType"/></Name><GroupIndex/><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="类型" Lang="zhcn" Memo=""/><Set Info="Table Type" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="tableType" DataType="String" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="dataSource"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="dataSource"/></Name><GroupIndex/><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="数据源" Lang="zhcn" Memo=""/><Set Info="Source" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="dataSource" DataType="String" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="schema"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="schema"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="Schema" Lang="zhcn" Memo=""/><Set Info="Schema" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="schema" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="databaseType"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="databaseType"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="数据库" Lang="zhcn" Memo=""/><Set Info="Database" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="databaseType" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="IsExport"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="IsExport"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="导出数据" Lang="zhcn" Memo=""/><Set Info="Is Export" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="IsExport" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="ExportWhere"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="ExportWhere"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="导出条件" Lang="zhcn" Memo=""/><Set Info="Export Where" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><DataItem><Set DataField="ExportWhere" DataType="" DisableOnModify="" Format="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Valid=""/></DataItem><DispEnc/><DataRef/></XItem><XItem Name="butOk"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butOk"/></Name><GroupIndex/><DescriptionSet><Set Info="去除" Lang="zhcn" Memo=""/><Set Info="Remove" Lang="enus" Memo=""/></DescriptionSet><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><CallAction><Set Action="OnRemoveTable" AfterTip="" ConfirmInfo="DeleteBefore"/></CallAction><OpenFrame><Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame></XItem><XItem Name="but1"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="but1"/></Name><GroupIndex/><DescriptionSet><Set Info="修改" Lang="zhcn" Memo=""/><Set Info="Modify" Lang="enus" Memo=""/></DescriptionSet><Style/><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet/><EventSet/><CallAction/><OpenFrame><Set AttatchParas="" CallItemName="moditable" CallMethod="OpenReloadClose" CallParas="ID=@ID&amp;tn=@tablename" CallXmlName="|ewa|group1.xml"/></OpenFrame></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>
