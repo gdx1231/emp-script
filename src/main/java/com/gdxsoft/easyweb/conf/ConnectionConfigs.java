@@ -33,26 +33,41 @@ public class ConnectionConfigs extends HashMap<String, ConnectionConfig> {
 
 	private ArrayList<String> _ListNames;
 
+	/**
+	 * Get the instance
+	 * 
+	 * @return ConnectionConfigs
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
 	public static ConnectionConfigs instance() throws ParserConfigurationException, SAXException, IOException {
 		if (CNNS == null) {
-			ConnectionConfigs cnn1s = new ConnectionConfigs();
-			cnn1s.initDataSource();
-			CNNS = cnn1s;
-		} else {
-			if (LAST_CODE > 0 && UPath.getDATABASEXML() != null) {
-				int code = UPath.getDATABASEXML().hashCode();
-				if (code != LAST_CODE) {
-					ConnectionConfigs cnn1s = new ConnectionConfigs();
-					cnn1s.initDataSource();
-					CNNS = cnn1s;
-				}
+			initNew();
+		} else if (!StringUtils.isBlank(UPath.getDATABASEXML())) {
+			int code = UPath.getDATABASEXML().hashCode();
+			if (code != LAST_CODE) {
+				// ewa_conf.xml changed
+				initNew();
 			}
-
 		}
 		return CNNS;
 	}
 
-	private synchronized void initDataSource() throws ParserConfigurationException, SAXException, IOException {
+	/**
+	 * Create the new instance
+	 * 
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	private static synchronized void initNew() throws ParserConfigurationException, SAXException, IOException {
+		ConnectionConfigs cnn1s = new ConnectionConfigs();
+		cnn1s.initDataSource();
+		CNNS = cnn1s;
+	}
+
+	private void initDataSource() throws ParserConfigurationException, SAXException, IOException {
 
 		if (StringUtils.isBlank(UPath.getDATABASEXML())) {
 			return;
