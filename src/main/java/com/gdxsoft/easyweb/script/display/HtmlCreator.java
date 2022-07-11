@@ -328,7 +328,7 @@ public class HtmlCreator {
 
 		// 初始化数据库数据参数
 		this.initDataParameters();
-				
+
 		_DebugFrames.addDebug(this, "INIT", "结束赋值数据库参数");
 		_DebugFrames.addDebug(this, "INIT", "结束初始化数据");
 
@@ -383,7 +383,7 @@ public class HtmlCreator {
 			}
 
 			if ("signature".equalsIgnoreCase(tag)) { // 签名
-				HtmlUtils.handleSignature(val, key, _RequestValue, uxi,   _ItemValues);
+				HtmlUtils.handleSignature(val, key, _RequestValue, uxi, _ItemValues);
 				continue;
 			}
 
@@ -558,32 +558,37 @@ public class HtmlCreator {
 		}
 		UserXItemValue acl = this._UserConfig.getUserPageItem().getItem("Acl").getItem(0);
 		String aclExp = acl.getItem("Acl");
-		if (aclExp.trim().length() > 0) {
-			UObjectValue ov = new UObjectValue();
-			try {
-				Object o = ov.loadClass(aclExp, null);
-				Type oAcl = o.getClass().getGenericInterfaces()[0];
-				String name = oAcl.toString();
-				if (name.equals("interface com.gdxsoft.easyweb.acl.IAcl")) { // 权限控制版本1
-					this._Acl = (IAcl) o;
-					this._Acl.setXmlName(this._UserConfig.getXmlName());
-					this._Acl.setItemName(this._UserConfig.getItemName());
-					this._Acl.setHtmlCreator(this);
-					this._Acl.setRequestValue(this.getRequestValue());
-				} else { // 权限控制版本2
-					this._Acl2 = (IAcl2) o;
-					this._Acl2.setXmlName(this._UserConfig.getXmlName());
-					this._Acl2.setItemName(this._UserConfig.getItemName());
-					this._Acl.setRequestValue(this.getRequestValue());
-					this._Acl2.setHtmlCreator(this);
-				}
-				_DebugFrames.addDebug(this, "INIT", "加载了权限控制(" + o.getClass().getName() + ")");
-			} catch (Exception e) {
-				this._Acl = null;
-				_DebugFrames.addDebug(this, "INIT", "权限错误(" + aclExp + ")");
+		if (StringUtils.isBlank(aclExp)) {
+			return;
+		}
+		aclExp = aclExp.trim();
+		if (aclExp.length() <= 5) {
+			return;
+		}
 
-				// throw new Exception("初始化权限错误:" + e.getMessage());
+		UObjectValue ov = new UObjectValue();
+		try {
+			Object o = ov.loadClass(aclExp, null);
+			Type oAcl = o.getClass().getGenericInterfaces()[0];
+			String name = oAcl.toString();
+			if (name.equals("interface com.gdxsoft.easyweb.acl.IAcl")) { // 权限控制版本1
+				this._Acl = (IAcl) o;
+				this._Acl.setXmlName(this._UserConfig.getXmlName());
+				this._Acl.setItemName(this._UserConfig.getItemName());
+				this._Acl.setHtmlCreator(this);
+				this._Acl.setRequestValue(this.getRequestValue());
+			} else { // 权限控制版本2
+				this._Acl2 = (IAcl2) o;
+				this._Acl2.setXmlName(this._UserConfig.getXmlName());
+				this._Acl2.setItemName(this._UserConfig.getItemName());
+				this._Acl.setRequestValue(this.getRequestValue());
+				this._Acl2.setHtmlCreator(this);
 			}
+			_DebugFrames.addDebug(this, "INIT", "加载了权限控制(" + o.getClass().getName() + ")");
+		} catch (Exception e) {
+			this._Acl = null;
+			_DebugFrames.addDebug(this, "INIT", "权限错误(" + aclExp + ")");
+			LOGGER.warn("Load acl (" + aclExp + ") error, skiped, {}", e.getMessage());
 		}
 	}
 
@@ -752,14 +757,13 @@ public class HtmlCreator {
 		JSONObject msgJson = UJSon.rstFalse(msg);
 
 		_DebugFrames.addDebug(this, "HTML", "验证失败");
-		
 
 		if (!this.isAjaxCall()) {
 			if (_Acl.getGoToUrl() == null) {
 				this._PageHtml = msg;
 				return false;
 			}
-			
+
 			String s1 = "document.location.href=\"" + this._Acl.getGoToUrl() + "\";";
 			this._PageHtml = "\r\n<script language=\"javascript\">\r\n" + s1 + "\r\n</script>\r\n";
 			return false;
@@ -1423,7 +1427,7 @@ public class HtmlCreator {
 		_DebugFrames.addDebug(this, "HTML", "结束合成脚本");
 
 		// "\1\2$$##GDX~##JZY$$\3\4"
-		return sb.toString().replace(IItem.REP_AT_STR, "@"); 
+		return sb.toString().replace(IItem.REP_AT_STR, "@");
 	}
 
 	/**
@@ -1457,7 +1461,7 @@ public class HtmlCreator {
 		sb.append(this._Document.getScriptHtml());
 		sb.append(this._Document.getJsTop().getScripts(true));
 		sb.append(this._Document.getJsBottom().getScripts(true));
-		sb.replace(IItem.REP_AT_STR, "@"); //"\1\2$$##GDX~##JZY$$\3\4"
+		sb.replace(IItem.REP_AT_STR, "@"); // "\1\2$$##GDX~##JZY$$\3\4"
 		String s1 = _ItemValues.replaceParameters(sb.toString(), true);
 
 		_DebugFrames.addDebug(this, "HTML", "结束合成脚本");
