@@ -248,7 +248,8 @@
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>2.6.1</version>
+			<!-- 2.6.1 默认版本是 jdk11  -->
+			<version>2.5.2</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
 		<dependency>
