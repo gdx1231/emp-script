@@ -44,7 +44,152 @@ public class UserConfig implements Serializable, Cloneable {
 	 */
 	public static int CHECK_CHANG_SPAN_SECONDS = 5;
 
-	
+	/**
+	 * 获取默认的XItem的xml模板，用于自定义字段显示，参数：<br>
+	 * [NAME]<br>
+	 * [DES_INFO_ZHCN]<br>
+	 * [DES_MEMO_ZHCN]<br>
+	 * [DES_INFO_ENUS]<br>
+	 * [DES_MEMO_ENUS]<br>
+	 * [DATA_FIELD]<br>
+	 * [DATA_TYPE]<br>
+	 * [DATA_FORMAT]
+	 * 
+	 * @return XItem的xml模板
+	 */
+	public static String getXItemXmlTemplate() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<XItem Name=\"[NAME]\">\n");
+		sb.append("<Tag>\n");
+		sb.append("  <Set IsLFEdit=\"0\" SpanShowAs=\"\" Tag=\"span\"/>\n");
+		sb.append("</Tag>\n");
+		sb.append("<Name>\n");
+		sb.append("  <Set Name=\"[NAME]\"/>\n");
+		sb.append("</Name>\n");
+		sb.append("<GroupIndex>\n");
+		sb.append("  <Set GroupIndex=\"\"/>\n");
+		sb.append("</GroupIndex>\n");
+		sb.append("<InitValue>\n");
+		sb.append("  <Set InitValue=\"\"/>\n");
+		sb.append("</InitValue>\n");
+		sb.append("<DescriptionSet>\n");
+		sb.append("  <Set Info=\"[DES_INFO_ZHCN]\" Lang=\"zhcn\" Memo=\"[DES_MEMO_ZHCN]\"/>\n");
+		sb.append("  <Set Info=\"[DES_INFO_ENUS]\" Lang=\"enus\" Memo=\"[DES_MEMO_ENUS]\"/>\n");
+		sb.append("</DescriptionSet>\n");
+		sb.append("<XStyle>\n");
+		sb.append(
+				"  <Set XStyleAlign=\"\" XStyleBold=\"\" XStyleColor=\"\" XStyleCursor=\"\" XStyleFixed=\"\" XStyleNoWrap=\"\" XStyleVAlign=\"\" XStyleWidth=\"\"/>\n");
+		sb.append("</XStyle>\n");
+		sb.append("<Style>\n");
+		sb.append("  <Set Style=\"\"/>\n");
+		sb.append("</Style>\n");
+		sb.append("<ParentStyle>\n");
+		sb.append("  <Set ParentStyle=\"\"/>\n");
+		sb.append("</ParentStyle>\n");
+		sb.append("<AttributeSet>\n");
+		sb.append("  <Set AttLogic=\"\" AttName=\"\" AttValue=\"\"/>\n");
+		sb.append("</AttributeSet>\n");
+		sb.append("<EventSet>\n");
+		sb.append("  <Set EventLogic=\"\" EventName=\"\" EventType=\"\" EventValue=\"\"/>\n");
+		sb.append("</EventSet>\n");
+		sb.append("<IsHtml>\n");
+		sb.append("  <Set IsHtml=\"\"/>\n");
+		sb.append("</IsHtml>\n");
+		sb.append("<OrderSearch>\n");
+		sb.append(
+				"  <Set GroupTestLength=\"\" IsGroup=\"\" IsGroupDefault=\"\" IsOrder=\"1\" IsSearchQuick=\"\" OrderExp=\"\" SearchExp=\"\" SearchMulti=\"\" SearchSql=\"\" SearchType=\"\"/>\n");
+		sb.append("</OrderSearch>\n");
+		sb.append("<MaxMinLength>\n");
+		sb.append("  <Set MaxLength=\"\" MinLength=\"\"/>\n");
+		sb.append("</MaxMinLength>\n");
+		sb.append("<MaxMinValue>\n");
+		sb.append("  <Set MaxValue=\"\" MinValue=\"\"/>\n");
+		sb.append("</MaxMinValue>\n");
+		sb.append("<IsMustInput>\n");
+		sb.append("  <Set IsMustInput=\"\"/>\n");
+		sb.append("</IsMustInput>\n");
+		sb.append("<Switch>\n");
+		sb.append("  <Set SwtAction=\"\" SwtOnValue=\"\"/>\n");
+		sb.append("</Switch>\n");
+		sb.append("<DataItem>\n");
+		sb.append(
+				"  <Set DataField=\"[DATA_FIELD]\" DataType=\"[DATA_TYPE]\" DisableOnModify=\"\" Format=\"[DATA_FORMAT]\" FrameOneCell=\"\" Icon=\"\" IconLoction=\"\" IsEncrypt=\"\" NumberScale=\"\" SumBottom=\"\" TransTarget=\"\" Translation=\"\" Trim=\"\" Valid=\"\"/>\n");
+		sb.append("</DataItem>\n");
+		sb.append("<DispEnc>\n");
+		sb.append("  <Set EncShowUrl=\"\" EncType=\"\"/>\n");
+		sb.append("</DispEnc>\n");
+		sb.append("<DataRef>\n");
+		sb.append(
+				"  <Set RefKey=\"\" RefMulti=\"\" RefMultiSplit=\"\" RefShow=\"\" RefShowStyle=\"\" RefShowType=\"\" RefSql=\"\"/>\n");
+		sb.append("</DataRef>\n");
+		sb.append("<List>\n");
+		sb.append(
+				"  <Set DisplayField=\"\" DisplayList=\"\" GroupField=\"\" ListAddBlank=\"\" ListFilterField=\"\" ListFilterType=\"\" ListShowType=\"\" ParentField=\"\" Sql=\"\" TitleField=\"\" TitleList=\"\" ValueField=\"\" ValueList=\"\"/>\n");
+		sb.append("</List>\n");
+		sb.append("<UserSet>\n");
+		sb.append("  <Set Lang=\"\" User=\"\"/>\n");
+		sb.append("</UserSet>\n");
+		sb.append("<CallAction>\n");
+		sb.append("  <Set Action=\"\" AfterTip=\"\" ConfirmInfo=\"\"/>\n");
+		sb.append("</CallAction>\n");
+		sb.append("<OpenFrame>\n");
+		sb.append("  <Set AttatchParas=\"\" CallItemName=\"\" CallMethod=\"\" CallParas=\"\" CallXmlName=\"\"/>\n");
+		sb.append("</OpenFrame>\n");
+		sb.append("<Frame>\n");
+		sb.append("  <Set CallItemName=\"\" CallPara=\"\" CallXmlName=\"\"/>\n");
+		sb.append("</Frame>\n");
+		sb.append("<UserControl>\n");
+		sb.append("  <Set UCCallItem=\"\" UCCallItemName=\"\" UCCallPara=\"\" UCCallXmlName=\"\"/>\n");
+		sb.append("</UserControl>\n");
+		sb.append("<DefineFrame>\n");
+		sb.append("  <Set CallItemName=\"\" CallPara=\"\" CallUrlMethod=\"\" CallXmlName=\"\"/>\n");
+		sb.append("</DefineFrame>\n");
+		sb.append("<PopFrame>\n");
+		sb.append("  <Set PopItemName=\"\" PopPara=\"\" PopTitleField=\"\" PopXmlName=\"\"/>\n");
+		sb.append("</PopFrame>\n");
+		sb.append("<signature>\n");
+		sb.append("  <Set SignBgColor=\"\" SignColor=\"\" SignFormat=\"\" SignLineWidth=\"\" SignPath=\"\"/>\n");
+		sb.append("</signature>\n");
+		sb.append("<Upload>\n");
+		sb.append(
+				"  <Set NewSizesIn=\"\" RunUpSQLResized=\"\" UpDelete=\"\" UpExts=\"\" UpJsonEncyrpt=\"\" UpLimit=\"\" UpMulti=\"\" UpNewSizes=\"\" UpPath=\"\" UpSQL=\"\" UpSaveMethod=\"\" UpUnZip=\"\"/>\n");
+		sb.append("</Upload>\n");
+		sb.append("<VaildEx>\n");
+		sb.append("  <Set VXAction=\"\" VXFail=\"\" VXJs=\"\" VXMode=\"\" VXOk=\"\"/>\n");
+		sb.append("</VaildEx>\n");
+		sb.append("<MGAddField>\n");
+		sb.append("  <Set MgfCalc=\"\" MgfComput=\"\" MgfId=\"\" MgfTarget=\"\"/>\n");
+		sb.append("</MGAddField>\n");
+		sb.append("<AnchorParas>\n");
+		sb.append("  <Set aHref=\"\" aTarget=\"\"/>\n");
+		sb.append("</AnchorParas>\n");
+		sb.append("<LinkButtonParas>\n");
+		sb.append("  <Set lkbButtonId=\"\"/>\n");
+		sb.append("</LinkButtonParas>\n");
+		sb.append("<DopListShow>\n");
+		sb.append("  <Set DlsAction=\"\" DlsAfterEvent=\"\" DlsShow=\"\" isDlsEventLoad=\"\"/>\n");
+		sb.append("</DopListShow>\n");
+		sb.append("<ReportCfg>\n");
+		sb.append("  <Set IsReportRepeat=\"\" ReportAction=\"\">\n");
+		sb.append("    <ReportTemplate/>\n");
+		sb.append("  </Set>\n");
+		sb.append("</ReportCfg>\n");
+		sb.append("<CombineFrame>\n");
+		sb.append(
+				"  <Set CbAll=\"\" CbGrp=\"\" CbInstall=\"\" CbItemName=\"\" CbJsRename=\"\" CbLst=\"\" CbMearge=\"\" CbPara=\"\" CbXmlName=\"\">\n");
+		sb.append("    <CbJs/>\n");
+		sb.append("  </Set>\n");
+		sb.append("</CombineFrame>\n");
+		sb.append("<AddrMapRels>\n");
+		sb.append("  <Set AmrCity=\"\" AmrCountry=\"\" AmrLat=\"\" AmrLng=\"\" AmrProvince=\"\" AmrZip=\"\"/>\n");
+		sb.append("</AddrMapRels>\n");
+		sb.append("<ImageDefault>\n");
+		sb.append("  <Set ImageDefault=\"\" ImageLazyLoad=\"\" ImageUrl=\"\"/>\n");
+		sb.append("</ImageDefault>\n");
+		sb.append("</XItem>");
+
+		return sb.toString();
+	}
 
 	/**
 	 * Get a UserConfig instance from all configurations
@@ -108,6 +253,7 @@ public class UserConfig implements Serializable, Cloneable {
 
 	/**
 	 * Get the cloned configure from the cached
+	 * 
 	 * @param xmlName
 	 * @param itemName
 	 * @param debugFrames
@@ -253,7 +399,6 @@ public class UserConfig implements Serializable, Cloneable {
 		return xmlFileName;
 	}
 
-	
 	private DebugFrames _DebugFrames;
 	private UserXItems _UserXItems; // EasyWebTemplates/EasyWebTemplate/Xitems
 	private UserXItem _UserPageItem; // EasyWebTemplates/EasyWebTemplate/Page
@@ -273,7 +418,7 @@ public class UserConfig implements Serializable, Cloneable {
 	private IConfig configType;
 
 	private UserXItem validXItem; // The validCode item
-	
+
 	public IConfig getConfigType() {
 		if (this.configType != null && this.configType.getFixedXmlName() == null) {
 			// parse from Serializable, the configType parameters are null value
@@ -281,7 +426,7 @@ public class UserConfig implements Serializable, Cloneable {
 		}
 		return configType;
 	}
-	
+
 	public UserConfig() {
 	}
 
@@ -398,7 +543,7 @@ public class UserConfig implements Serializable, Cloneable {
 		}
 		if (this._DebugFrames != null)
 			this._DebugFrames.addDebug(this, "配置", "结束加载配 XItems. (" + nl.getLength() + ")");
-		
+
 		// find the valid code item
 		for (int i = 0; i < this.getUserXItems().count(); i++) {
 			UserXItem uxi = this.getUserXItems().getItem(i);
@@ -475,13 +620,54 @@ public class UserConfig implements Serializable, Cloneable {
 			this._DebugFrames.addDebug(this, "配置", "结束加载配 Charts. (" + nl.getLength() + ")");
 	}
 
+	
+	/**
+	 * 根据SqlSet的callName修改Action的Sql
+	 * @param callName 例如：OnPageLoad Sql
+	 * @param newSql 需要修改的SQL
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean changeSqlSetSql(String callName, String newSql) throws Exception{
+		UserXItem action = this.getUserActionItem();
+
+		UserXItemValues actionSet = action.getItem("ActionSet");
+		for (int i = 0; i < actionSet.count(); i++) {
+			UserXItemValue actionItem = actionSet.getItem(i);
+			 
+			java.util.Iterator<String> it1 = actionItem.getChildren().keySet().iterator();
+			UserXItemValues callSet1 = null;
+			while (it1.hasNext()) {
+				String key = it1.next();
+				if (key.equals("CallSet")) {
+					callSet1 = actionItem.getChildren().get(key);
+					break;
+				}
+			}
+			if (callSet1 == null || callSet1.count() == 0) {
+				continue;
+			}
+			UserXItemValue callItem1 = callSet1.getItem(0);
+			String callType = callItem1.getItem("CallType");
+			String callName1 = callItem1.getItem("CallName");
+			//System.out.println(callType + ", " + callName);
+			if("SqlSet".equals(callType) && callName.equalsIgnoreCase(callName1) ){
+				UserXItemValues sqlset = this.getUserActionItem().getItem("SqlSet");
+				UserXItemValue sqlItem = sqlset.getItem(callName1);
+				sqlItem.addObject(newSql, "Sql");
+				return true;
+			}
+		}
+		return false;
+	}
 	/**
 	 * 初始化用户配置中的XItems/XItem中当前XItem信息
 	 * 
 	 * @param node
+	 * @param type xitem,menu,workflow,chart,default
 	 * @throws Exception
 	 */
-	private void initXItem(Node node, String type) throws Exception {
+	public void initXItem(Node node, String type) throws Exception {
 		String nodeXml = UXml.asXml(node);
 		UserXItem ui = new UserXItem();
 		ui.setName(UXml.retNodeValue(node, "Name"));
@@ -535,11 +721,12 @@ public class UserConfig implements Serializable, Cloneable {
 		uxvs.setParameter(itemPara);
 		uxvs.setXml(UXml.asXml(node));
 		/*
-		 * String aaa=UXml.asXml(node); if(aaa.indexOf("DescriptionSet")>=0){ int a=1; a++; }
+		 * String aaa=UXml.asXml(node); if(aaa.indexOf("DescriptionSet")>=0){ int a=1;
+		 * a++; }
 		 */
 		/*
-		 * 集合参数，例如: <DescriptionSet> <Set Lang="zh-cn" Value="" Memo="用户名" /> <Set Lang="en-us" Value=""
-		 * Memo="User Name" /> </DescriptionSet>
+		 * 集合参数，例如: <DescriptionSet> <Set Lang="zh-cn" Value="" Memo="用户名" /> <Set
+		 * Lang="en-us" Value="" Memo="User Name" /> </DescriptionSet>
 		 */
 		NodeList childList = node.getChildNodes();
 		// int m = 0;
@@ -761,6 +948,7 @@ public class UserConfig implements Serializable, Cloneable {
 
 	/**
 	 * the valid code item
+	 * 
 	 * @return item or null
 	 */
 	public UserXItem getValidXItem() {
