@@ -796,6 +796,7 @@ public class Upload {
 	 * EWA_UP_URL 文件http的url<br>
 	 * EWA_UP_EXT 文件扩展名<br>
 	 * EWA_UP_PATH 文件服务器保存位置<br>
+	 * EWA_UP_PATH_SHORT 文件服务器保存位置(去除UPath.getPATH_UPLOAD() 的路径)<br>
 	 * EWA_UP_TYPE 文件的http的contentType<br>
 	 * EWA_UP_UNID 文件的unid，用于数据库定位使用<br>
 	 * EWA_UP_FROM 来源，图片重新生成尺寸的母体<br>
