@@ -1,6 +1,7 @@
 package com.gdxsoft.easyweb.datasource;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -31,6 +32,9 @@ import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
+import com.gdxsoft.easyweb.utils.types.UInt16;
+import com.gdxsoft.easyweb.utils.types.UInt32;
+import com.gdxsoft.easyweb.utils.types.UInt64;
 
 public class DataConnection {
 	private static Logger LOGGER = LoggerFactory.getLogger(DataConnection.class);
@@ -279,17 +283,17 @@ public class DataConnection {
 	 * @return
 	 */
 	public static boolean checkIsSelect(String sql) {
-		if( checkStartWord(sql, "SELECT")) {
+		if (checkStartWord(sql, "SELECT")) {
 			int intoIndex = sql.toLowerCase().indexOf("into");
-			if(intoIndex == -1) {
+			if (intoIndex == -1) {
 				return true;
 			}
 			int fromIndex = sql.toLowerCase().indexOf("from");
-			if(intoIndex < fromIndex && fromIndex >0) {
+			if (intoIndex < fromIndex && fromIndex > 0) {
 				// select * into aa from bb SQLSEREVER
 				return false;
 			}
-			if(fromIndex == -1) {
+			if (fromIndex == -1) {
 				// select 1 a,2 b into #temp
 				return false;
 			}
@@ -1828,56 +1832,103 @@ public class DataConnection {
 		}
 
 		String dt = pv.getDataType();
-		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
+		dt = (dt == null ? (pv.getValue() == null ? "STRING" : pv.getValue().getClass().getName()) : dt).toUpperCase()
+				.trim();
 		String v1 = pv.getStringValue();
+		if ("JAVA.LANG.STRING".equals(dt) || "STRING".equals(dt)) {
+			// 字符串
+			cst.setString(index, v1);
+			String des1 = parameterName + "=" + (v1 == null ? "null" : v1);
+			this.writeDebug(this, "添加参数(String)" + index, des1);
+			return;
+		}
+
 		if (dt.equals("BINARY") || dt.equals("[B") || dt.equals("BYTE[]")) {
 			byte[] b = this.getParaBinary(pv);
 			String des = b == null ? "null" : b.length + "";
-			this.writeDebug(this, "添加参数(byte[])" + index, parameterName + "=(" + des + ")");
+			this.writeDebug(this, "添加参数(" + dt + "/byte[])" + index, parameterName + "=(" + des + ")");
 			cst.setBytes(index, b);
-			b = null;
-		} else if (dt.equals("INT") || dt.equals("INTEGER") || dt.equals("JAVA.LANG.INTEGER")) {
+			return;
+		}
+		if (dt.equals("INT") || dt.equals("INTEGER") || dt.equals("JAVA.LANG.INTEGER")) {
 			Integer intVal = this.getParaInteger(pv);
 			if (intVal == null) {
 				cst.setNull(index, java.sql.Types.INTEGER);
-				this.writeDebug(this, "添加参数(INT)" + index, parameterName + "=null");
+				this.writeDebug(this, "添加参数(" + dt + "/INT)" + index, parameterName + "=null");
 			} else {
 				cst.setInt(index, intVal);
-				this.writeDebug(this, "添加参数(INTEGER)" + index, parameterName + "=" + intVal);
+				this.writeDebug(this, "添加参数(" + dt + "/INT)" + index, parameterName + "=" + intVal);
 			}
-		} else if (dt.equals("BIGINT") || dt.equals("LONG") || dt.equals("JAVA.LANG.LONG")) {
+			return;
+		}
+		if (dt.equals("BIGINT") || dt.equals("LONG") || dt.equals("JAVA.LANG.LONG")) {
 			Long longVal = this.getParaLong(pv);
 			if (longVal == null) {
 				cst.setNull(index, java.sql.Types.BIGINT);
-				this.writeDebug(this, "添加参数(LONG)" + index, parameterName + "=null");
+				this.writeDebug(this, "添加参数(" + dt + "/LONG)" + index, parameterName + "=null");
 			} else {
 				cst.setLong(index, longVal);
-				this.writeDebug(this, "添加参数(LONG)" + index, parameterName + "=" + longVal);
+				this.writeDebug(this, "添加参数(" + dt + "/LONG)" + index, parameterName + "=" + longVal);
 			}
-		} else if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("JAVA.LANG.DOUBLE")) {
+			return;
+		}
+		if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("JAVA.LANG.DOUBLE")) {
 			BigDecimal dbVal = this.getParaBigDecimal(pv);
 			if (dbVal == null) {
 				cst.setNull(index, java.sql.Types.DOUBLE);
-				this.writeDebug(this, "添加参数(double)" + index, parameterName + "=null");
+				this.writeDebug(this, "添加参数(" + dt + "/BigDecimal)" + index, parameterName + "=null");
 			} else {
 				cst.setBigDecimal(index, dbVal);
 				// cst.setDouble(index, dbVal);
-				this.writeDebug(this, "添加参数(BigDecimal)" + index, parameterName + "=" + dbVal);
+				this.writeDebug(this, "添加参数(" + dt + "/BigDecimal)" + index, parameterName + "=" + dbVal);
 			}
-		} else if (dt.equals("DATE") || dt.equals("JAVA.UTIL.DATE") || dt.equals("JAVA.SQL.DATE")) {
+			return;
+		}
+		if (dt.equals("DATE") || dt.equals("JAVA.UTIL.DATE") || dt.equals("JAVA.SQL.DATE")) {
 			Timestamp t1 = this.getParaTimestamp(pv);
 			if (t1 == null) {
 				cst.setNull(index, java.sql.Types.TIMESTAMP);
 				this.writeDebug(this, "添加参数(Timestamp)" + index, parameterName + "=null");
 			} else {
 				cst.setTimestamp(index, t1);
-				this.writeDebug(this, "添加参数(Timestamp)" + index, parameterName + "=" + t1);
+				this.writeDebug(this, "添加参数(" + dt + ")/Timestamp" + index, parameterName + "=" + t1);
 			}
-		} else {
-			cst.setString(index, v1);
-			String des1 = parameterName + "=" + (v1 == null ? "null" : v1);
-			this.writeDebug(this, "添加参数(String)" + index, des1);
+			return;
 		}
+		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT64".equals(dt) || "UINT64".equals(dt)) {
+			UInt64 uint64 = (UInt64) pv.getValue();
+			cst.setBigDecimal(index, new BigDecimal(uint64.bigInteger()));
+			this.writeDebug(this, "添加参数(" + dt + ")/BigDecimal" + index, parameterName + "=" + uint64);
+			return;
+		}
+		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT32".equals(dt) || "UINT32".equals(dt)) {
+			UInt32 uint32 = (UInt32) pv.getValue();
+			cst.setLong(index, uint32.longValue());
+			this.writeDebug(this, "添加参数(" + dt + ")/Long" + index, parameterName + "=" + uint32);
+			return;
+		}
+		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT16".equals(dt) || "UINT16".equals(dt)) {
+			UInt16 uint16 = (UInt16) pv.getValue();
+			cst.setInt(index, uint16.intValue());
+			this.writeDebug(this, "添加参数(" + dt + ")/Int" + index, parameterName + "=" + uint16);
+			return;
+		}
+		if ("JAVA.MATH.BIGDECIMAL".equals(dt) || "BIGDECIMAL".equals(dt)) {
+			BigDecimal bigd = (BigDecimal) pv.getValue();
+			cst.setBigDecimal(index, bigd);
+			this.writeDebug(this, "添加参数(" + dt + ")" + index, parameterName + "=" + bigd);
+			return;
+		}
+		if ("JAVA.MATH.BIGINTEGER".equals(dt) || "BIGINTEGER".equals(dt)) {
+			BigInteger bigi = (BigInteger) pv.getValue();
+			cst.setBigDecimal(index, new BigDecimal(bigi));
+			this.writeDebug(this, "添加参数(" + dt + ")/BigDecimal" + index, parameterName + "=" + bigi);
+			return;
+		}
+		// 默认字符串字符串
+		cst.setString(index, v1);
+		String des1 = parameterName + "=" + (v1 == null ? "null" : v1);
+		this.writeDebug(this, "添加参数(" + dt + ")" + index, des1);
 	}
 
 	/**

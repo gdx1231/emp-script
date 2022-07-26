@@ -23,19 +23,6 @@ import com.gdxsoft.easyweb.utils.types.UInt64;
 
 public class ClassDaoBase<T> {
 	private static Logger LOGGER = LoggerFactory.getLogger(ClassDaoBase.class);
-	private String _ErrorMsg;
-	private DataConnection _Conn;
-	private String _ConfigName = "default";
-	private RequestValue _rv;
-	private Class<?> instanceClass; // 实例化的T 的 class
-
-	private String tableName;
-	private String[] fields;
-	private String[] keyFields;
-	private String sqlInsert;
-
-	private String database;
-
 	private static HashMap<String, Boolean> MYSQL_RESERVED;
 	static {
 		String[] reseverds = ("ADD,ALL,ALTER,ANALYZE,AND,AS,ASC,ASENSITIVE,BEFORE,BETWEEN,BIGINT,BINARY"
@@ -66,6 +53,50 @@ public class ClassDaoBase<T> {
 			String reseverd = reseverds[i].trim().toUpperCase();
 			MYSQL_RESERVED.put(reseverd, true);
 		}
+	}
+
+	private String _ErrorMsg;
+	private DataConnection _Conn;
+	private String _ConfigName = "default";
+	private RequestValue _rv;
+	private Class<?> instanceClass; // 实例化的T 的 class
+
+	private String tableName;
+	private String[] fields;
+	private String[] keyFields;
+	private String sqlInsert;
+
+	private String database;
+
+	private String autoKey; // 自增主键
+
+	/**
+	 * 创建所用更新字段
+	 * 
+	 * @param fieldLst
+	 * @return
+	 */
+	public Map<String, Boolean> createAllUpdateFields(String[] fieldLst) {
+		HashMap<String, Boolean> updateFields = new HashMap<>();
+		for (short i = 0; i < fieldLst.length; i++) {
+			updateFields.put(fieldLst[i], true);
+		}
+
+		return updateFields;
+	}
+
+	/**
+	 * 删除多条记录
+	 * 
+	 * @param whereString 查询条件，注意过滤“'”符号，避免SQL注入攻击
+	 * @param rv
+	 * @return
+	 */
+	public boolean deleteRecords(String whereString, RequestValue rv) {
+		StringBuilder sql = new StringBuilder(this.createDeleteSql(false));
+		sql.append("\n");
+		sql.append(whereString);
+		return this.executeUpdate(this.getSqlUpdate(), rv);
 	}
 
 	/**
@@ -276,6 +307,10 @@ public class ClassDaoBase<T> {
 	}
 
 	public String createDeleteSql() {
+		return this.createDeleteSql(true);
+	}
+
+	public String createDeleteSql(boolean includePk) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("DELETE FROM ");
 		// 增加database前缀
@@ -285,10 +320,10 @@ public class ClassDaoBase<T> {
 		}
 		sb.append(this.tableName);
 		sb.append(" WHERE ");
-
-		String pk = this.createPkSql();
-		sb.append(pk);
-
+		if (includePk) {
+			String pk = this.createPkSql();
+			sb.append(pk);
+		}
 		return sb.toString();
 	}
 
@@ -479,7 +514,7 @@ public class ClassDaoBase<T> {
 	 * @param updateFields 更新字段
 	 * @return
 	 */
-	public String sqlInsertChanged(String tableName, HashMap<String, Boolean> updateFields, ClassBase ref) {
+	public String sqlInsertChanged(String tableName, Map<String, Boolean> updateFields, ClassBase ref) {
 		if (updateFields.size() == 0 || ref == null) {
 			return null;
 		}
@@ -502,7 +537,10 @@ public class ClassDaoBase<T> {
 			if (ref.getField(key) == null) {
 				continue;
 			}
-
+			if (this.autoKey != null && key.equalsIgnoreCase(this.autoKey)) {
+				// 自增字段
+				continue;
+			}
 			if (inc > 0) {
 				sb.append("\n ,");
 				sb_values.append("\n ,");
@@ -941,12 +979,40 @@ public class ClassDaoBase<T> {
 		this.keyFields = keyFields;
 	}
 
+	/**
+	 * 数据库
+	 * 
+	 * @return
+	 */
 	public String getDatabase() {
 		return database;
 	}
 
+	/**
+	 * 数据库
+	 * 
+	 * @param database
+	 */
 	public void setDatabase(String database) {
 		this.database = database;
+	}
+
+	/**
+	 * 自增主键
+	 * 
+	 * @return the autoKey
+	 */
+	public String getAutoKey() {
+		return autoKey;
+	}
+
+	/**
+	 * 自增主键
+	 * 
+	 * @param autoKey the autoKey to set
+	 */
+	public void setAutoKey(String autoKey) {
+		this.autoKey = autoKey;
 	}
 
 }

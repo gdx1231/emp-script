@@ -30,16 +30,7 @@ import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.display.action.ActionBase;
-import com.gdxsoft.easyweb.utils.IUSymmetricEncyrpt;
-import com.gdxsoft.easyweb.utils.UConvert;
-import com.gdxsoft.easyweb.utils.UCookies;
-import com.gdxsoft.easyweb.utils.UFile;
-import com.gdxsoft.easyweb.utils.UFormat;
-import com.gdxsoft.easyweb.utils.UHtml;
-import com.gdxsoft.easyweb.utils.UNet;
-import com.gdxsoft.easyweb.utils.UPath;
-import com.gdxsoft.easyweb.utils.UUrl;
-import com.gdxsoft.easyweb.utils.Utils;
+import com.gdxsoft.easyweb.utils.*;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
@@ -254,8 +245,11 @@ public class RequestValue implements Cloneable {
 	/**
 	 * 获取其它值 EWA.HOST，EWA.HOST_PORT，EWA.HOST_PROTOCOL，EWA.HOST_BASE，EWA.HOST.CONTEXT
 	 * <br>
+	 * xxxx.HASH 参数xxxx的 hashCode <br>
 	 * xxxx.MD5 参数xxxx的md5值 <br>
-	 * xxxx.HASH 参数xxxx的 hashCode
+	 * xxxx.SHA1 参数xxxx的sha1值 <br>
+	 * xxxx.SHA256 参数xxxx的sha256值 <br>
+	 * xxxx.SM3 参数xxxx的sm3值 <br>
 	 * 
 	 * @param name
 	 * @return
@@ -295,31 +289,49 @@ public class RequestValue implements Cloneable {
 			if (v1 != null) {
 				v = v1.hashCode() + "";
 			}
-		} else if (name1.endsWith(".MD5")) {
+		} else if (name1.endsWith(".MD5") || name1.endsWith(".SHA1") || name1.endsWith(".SHA256")
+				|| name1.endsWith(".SM3")) {
 			String name2 = name1.substring(0, name1.length() - 4);
 			PageValue pv = this._ReqValues.getPageValue(name2);
 			if (pv == null || pv.getValue() == null) {
 				return null;
 			}
-			String dt = pv.getDataType();
-			dt = dt == null ? "STRING" : dt.toUpperCase().trim();
-			byte[] buf;
-			if (dt.equals("BINARY") || dt.equals("B[")) {
-				buf = (byte[]) pv.getValue();
-			} else {
-				try {
-					buf = pv.getStringValue().getBytes("UTF8");
-				} catch (UnsupportedEncodingException e) {
-					return null;
-				}
-			}
+			byte[] buf = this.getPvBytes(pv);
 			try {
-				v = Utils.md5(buf);
+				if (name1.endsWith(".SHA1")) {
+					v = UDigest.digestHex(buf, "sha1");
+				} else if (name1.endsWith(".SHA256")) {
+					v = UDigest.digestHex(buf, "sha256");
+				} else if (name1.endsWith(".SM3")) {
+					v = UDigest.digestHex(buf, "sm3"); // 国密3
+				} else {
+					v = UDigest.digestHex(buf, "md5");
+				}
 			} catch (Exception err) {
 				v = err.getMessage();
 			}
 		}
 		return v;
+	}
+
+	private byte[] getPvBytes(PageValue pv) {
+		if (pv == null || pv.getValue() == null) {
+			return null;
+		}
+		String dt = pv.getDataType();
+		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
+		byte[] buf;
+		if (dt.equals("BINARY") || dt.equals("B[")) {
+			buf = (byte[]) pv.getValue();
+		} else {
+			try {
+				buf = pv.getStringValue().getBytes("UTF8");
+			} catch (UnsupportedEncodingException e) {
+				return null;
+			}
+		}
+
+		return buf;
 	}
 
 	/**
