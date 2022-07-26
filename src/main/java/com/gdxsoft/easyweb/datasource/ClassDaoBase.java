@@ -1,6 +1,7 @@
 package com.gdxsoft.easyweb.datasource;
 
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,6 +17,9 @@ import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UObjectValue;
+import com.gdxsoft.easyweb.utils.types.UInt16;
+import com.gdxsoft.easyweb.utils.types.UInt32;
+import com.gdxsoft.easyweb.utils.types.UInt64;
 
 public class ClassDaoBase<T> {
 	private static Logger LOGGER = LoggerFactory.getLogger(ClassDaoBase.class);
@@ -552,16 +556,28 @@ public class ClassDaoBase<T> {
 	 * @return
 	 */
 	public int executeUpdateAutoIncrement(String sql, RequestValue requestValue) {
-		ConnectToDatabase();
+		BigInteger autoKey = executeUpdateAutoIncrementReturnBigInteger(sql, requestValue);
+		return autoKey.intValueExact();
+	}
 
+	/**
+	 * 执行自增插入
+	 * 
+	 * @param sql
+	 * @param requestValue
+	 * @return
+	 */
+	public BigInteger executeUpdateAutoIncrementReturnBigInteger(String sql, RequestValue requestValue) {
+		ConnectToDatabase();
 		_Conn.setRequestValue(requestValue);
-		int auto_key = _Conn.executeUpdateReturnAutoIncrement(sql);
+		Object auto_key = _Conn.executeUpdateReturnAutoIncrementObject(sql);
 		_Conn.close();
+
 		if (this._Conn.getErrorMsg() == null) {
-			return auto_key;
+			return new BigInteger(auto_key.toString());
 		} else {
 			this._ErrorMsg = this._Conn.getErrorMsg();
-			return -1;
+			return BigInteger.valueOf(-1l);
 		}
 	}
 
@@ -573,17 +589,44 @@ public class ClassDaoBase<T> {
 	 * @return
 	 */
 	public long executeUpdateAutoIncrementLong(String sql, RequestValue requestValue) {
-		ConnectToDatabase();
+		BigInteger autoKey = executeUpdateAutoIncrementReturnBigInteger(sql, requestValue);
+		return autoKey.longValue();
+	}
 
-		_Conn.setRequestValue(requestValue);
-		Object auto_key = _Conn.executeUpdateReturnAutoIncrementObject(sql);
-		_Conn.close();
-		if (this._Conn.getErrorMsg() == null) {
-			return Long.parseLong(auto_key.toString());
-		} else {
-			this._ErrorMsg = this._Conn.getErrorMsg();
-			return -1;
-		}
+	/**
+	 * 执行自增插入，返回UInt32
+	 * 
+	 * @param sql
+	 * @param requestValue
+	 * @return
+	 */
+	public UInt32 executeUpdateAutoIncrementUInt32(String sql, RequestValue requestValue) {
+		BigInteger autoKey = executeUpdateAutoIncrementReturnBigInteger(sql, requestValue);
+		return UInt32.valueOf(autoKey);
+	}
+
+	/**
+	 * 执行自增插入，返回UInt16
+	 * 
+	 * @param sql
+	 * @param requestValue
+	 * @return
+	 */
+	public UInt16 executeUpdateAutoIncrementUInt16(String sql, RequestValue requestValue) {
+		BigInteger autoKey = executeUpdateAutoIncrementReturnBigInteger(sql, requestValue);
+		return UInt16.valueOf(autoKey);
+	}
+
+	/**
+	 * 执行自增插入，返回UInt64
+	 * 
+	 * @param sql
+	 * @param requestValue
+	 * @return
+	 */
+	public UInt64 executeUpdateAutoIncrementUInt64(String sql, RequestValue requestValue) {
+		BigInteger autoKey = executeUpdateAutoIncrementReturnBigInteger(sql, requestValue);
+		return UInt64.valueOf(autoKey);
 	}
 
 	/*

@@ -226,16 +226,49 @@ public class ClassBase {
 	}
 
 	/**
-	 * 返回JSON对象<br>
+	 * 返回JSON对象，输出json的字段大小写按照数据库字段定义<br>
 	 * Return the JSON object
 	 * 
 	 * @return the JSON object
 	 */
 	public JSONObject toJSON() {
+		return toJSON(0);
+	}
+
+	/**
+	 * 返回JSON对象，输出json的字段大写
+	 * 
+	 * @return
+	 */
+	public JSONObject toJsonFieldUpper() {
+		return toJSON(1);
+	}
+
+	/**
+	 * 返回JSON对象，输出json的字段小写
+	 * 
+	 * @return
+	 */
+	public JSONObject toJsonFieldLower() {
+		return toJSON(-1);
+	}
+
+	/**
+	 * 返回JSON对象<br>
+	 * 
+	 * @param fieldUpperOrLowerOrNoChange 输出json的字段大小写<br>
+	 *                                    -1:小写<br>
+	 *                                    1:大写<br>
+	 *                                    其它值:按照数据库字段定义
+	 * @return
+	 */
+	public JSONObject toJSON(int fieldUpperOrLowerOrNoChange) {
 		JSONObject json = new JSONObject();
 		for (String field : this._MapFieldChanged.keySet()) {
 			Object val = this.getField(field);
-			this.addToJson(json, field, val);
+			String fieldName = fieldUpperOrLowerOrNoChange == -1 ? field.toLowerCase()
+					: fieldUpperOrLowerOrNoChange == 1 ? field.toUpperCase() : field;
+			this.addToJson(json, fieldName, val);
 		}
 
 		// 有扩展属性
@@ -249,6 +282,12 @@ public class ClassBase {
 		return json;
 	}
 
+	/**
+	 * 对象添加到json，对于long型或bigInteger型，由于js的number会掉精度，因此转换为字符串
+	 * @param json
+	 * @param key
+	 * @param val
+	 */
 	private void addToJson(JSONObject json, String key, Object val) {
 		if (val == null) {
 			return;
@@ -262,7 +301,15 @@ public class ClassBase {
 			byte[] buf = (byte[]) val;
 			String base64 = UConvert.ToBase64String(buf);
 			json.put(key, base64);
-		} else {
+		} else if ("com.gdxsoft.easyweb.utils.types.UInt64".equals(className)) {
+			//64位无符号型
+			json.put(key, val.toString());
+		} else if ("long".equals(className) || "java.lang.Long".equals(className)) {
+			//64
+			json.put(key, val.toString());
+		} else if ("BigInteger".equals(className) || "java.math.BigInteger".equals(className)) {
+			json.put(key, val.toString());
+		}  else {
 			json.put(key, val);
 		}
 	}

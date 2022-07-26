@@ -67,6 +67,7 @@ public class TestBase {
 		poolCfgEx.setSchemaName("b2b");
 		poolCfgEx.setPool(poolParams);
 
+		
 		c1.put("ex", poolCfgEx);
 	}
 

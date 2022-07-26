@@ -80,11 +80,15 @@ public class ConnectionConfigs extends HashMap<String, ConnectionConfig> {
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
 			ConnectionConfig cc = new ConnectionConfig(node);
-			super.put(cc.getName(), cc);
-			_ListNames.add(cc.getName());
+			addCfg(cc);
 		}
 	}
 
+	public void addCfg(ConnectionConfig cc) {
+		super.put(cc.getName(), cc);
+		_ListNames.add(cc.getName());
+	}
+	
 	private ConnectionConfigs() throws ParserConfigurationException, SAXException, IOException {
 		_ListNames = new ArrayList<String>();
 		initDataSource();
@@ -93,6 +97,13 @@ public class ConnectionConfigs extends HashMap<String, ConnectionConfig> {
 
 	public ConnectionConfig getConfig(int cfgIndex) {
 		return super.get(_ListNames.get(cfgIndex));
+	}
+
+	/**
+	 * @return the _ListNames
+	 */
+	public ArrayList<String> getListNames() {
+		return _ListNames;
 	}
 
 }

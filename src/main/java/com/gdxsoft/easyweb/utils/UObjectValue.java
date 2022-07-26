@@ -24,6 +24,9 @@ import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
+import com.gdxsoft.easyweb.utils.types.UInt16;
+import com.gdxsoft.easyweb.utils.types.UInt32;
+import com.gdxsoft.easyweb.utils.types.UInt64;
 
 /**
  * Reflect the class by name
@@ -193,13 +196,13 @@ public class UObjectValue {
 			method.invoke(instance, newVals);
 			return null;
 		} catch (IllegalArgumentException e) {
-			LOGGER.error("{},{},{}", instance,method, e.getMessage());
+			LOGGER.error("{},{},{}", instance, method, e.getMessage());
 			return e.getMessage();
 		} catch (IllegalAccessException e) {
-			LOGGER.error("{},{},{}", instance,method, e.getMessage());
+			LOGGER.error("{},{},{}", instance, method, e.getMessage());
 			return e.getMessage();
 		} catch (InvocationTargetException e) {
-			LOGGER.error("{},{},{}", instance,method, e.getMessage());
+			LOGGER.error("{},{},{}", instance, method, e.getMessage());
 			return e.getMessage();
 		}
 	}
@@ -1033,6 +1036,12 @@ public class UObjectValue {
 			} else {
 				v[0] = val; // 不处理
 			}
+		} else if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT32".equals(paraType)) {
+			v[0] = UInt32.valueOf(val.toString());
+		} else if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT16".equals(paraType)) {
+			v[0] = UInt16.valueOf(val.toString());
+		} else if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT64".equals(paraType)) {
+			v[0] = UInt64.valueOf(val.toString());
 		} else {
 			v[0] = val;
 		}
