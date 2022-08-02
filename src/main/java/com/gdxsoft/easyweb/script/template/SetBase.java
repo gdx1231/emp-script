@@ -12,7 +12,7 @@ import java.util.Iterator;
  * @author Administrator
  * 
  */
-public class SetBase<T> implements Cloneable   , Serializable {
+public class SetBase<T> implements Cloneable, Serializable {
 	/**
 	 * 
 	 */
@@ -23,8 +23,7 @@ public class SetBase<T> implements Cloneable   , Serializable {
 
 	public T getItem(int index) throws Exception {
 		if (index < 0 || index >= this._Names.size()) {
-			throw new Exception("索引号错误（<0 或超出范围）index=" + index + ",size="
-					+ this._Names.size());
+			throw new Exception("索引号错误（<0 或超出范围）index=" + index + ",size=" + this._Names.size());
 		}
 		return this.getItem(_Names.get(index));
 	}
@@ -41,19 +40,20 @@ public class SetBase<T> implements Cloneable   , Serializable {
 			return this._V.get(n1);
 		}
 	}
-	
+
 	/**
 	 * 检查名称对象是否存在
+	 * 
 	 * @param name 名称，不区分大小写
-	 * @return 
+	 * @return
 	 */
-	public boolean checkItemExists(String name){
-		if(this._V.containsKey(name)){
+	public boolean checkItemExists(String name) {
+		if (this._V.containsKey(name)) {
 			return true;
-		}else{
-			if(this.getName(name)==null){
+		} else {
+			if (this.getName(name) == null) {
 				return false;
-			}else{
+			} else {
 				return true;
 			}
 		}
@@ -79,13 +79,14 @@ public class SetBase<T> implements Cloneable   , Serializable {
 
 	/**
 	 * 获取索引对应的名字
+	 * 
 	 * @param index
 	 * @return
 	 */
-	public String getName(int index){
+	public String getName(int index) {
 		return this._Names.get(index);
 	}
-	
+
 	/**
 	 * 不区分大小写获取名称
 	 * 
@@ -115,8 +116,8 @@ public class SetBase<T> implements Cloneable   , Serializable {
 	}
 
 	public void addObject(T obj, String name) {
-		if(name == null){
-			name=this._Names.size()+"";
+		if (name == null || name.length() == 0) {
+			name = this._Names.size() + "";
 		}
 		this._V.put(name, obj);
 		this._Names.add(name);
@@ -137,8 +138,7 @@ public class SetBase<T> implements Cloneable   , Serializable {
 		int m0 = this._Xml.indexOf("DataField=\"");
 		if (m0 > 0) {
 			int m1 = this._Xml.indexOf("\"", "DataField=\"".length() + m0);
-			String s1 = this._Xml.substring(0, m0)
-					+ this._Xml.substring(m1 + 2);
+			String s1 = this._Xml.substring(0, m0) + this._Xml.substring(m1 + 2);
 			// System.out.println(s1);
 			return s1;
 		} else {
@@ -147,8 +147,7 @@ public class SetBase<T> implements Cloneable   , Serializable {
 	}
 
 	/**
-	 * @param xml
-	 *            the _Xml to set
+	 * @param xml the _Xml to set
 	 */
 	public void setXml(String xml) {
 		_Xml = xml;

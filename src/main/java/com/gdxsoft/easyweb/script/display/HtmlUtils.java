@@ -25,7 +25,27 @@ import com.gdxsoft.easyweb.utils.Utils;
 
 public class HtmlUtils {
 	private static Logger LOGGER = LoggerFactory.getLogger(HtmlUtils.class);
-
+	/**
+	 * 如果名称为空的话，根据值表达式，生成属性名称，例如：@USER_NAME = data-user-name<br>
+	 * name = "" and value = "" return null<br>
+	 * name = "" return data-xxx<br>
+	 * name !="" return name
+	 * 
+	 * @param name  属性名称
+	 * @param value 属性参数
+	 * @return 属性名称
+	 */
+	public static String createAttNameByValue(String name, String value) {
+		if (name.length() == 0 && value.length() == 0) {
+			return null;
+		}
+		if (name.length() == 0) {
+			// 以data-开头的参数名称
+			return "data-" + value.replace("@", "").toLowerCase().replace("_", "-").replace(" ", "");
+		} else {
+			return name;
+		}
+	}
 	/**
 	 * 处理签名数据，将imageBase64转换为二进制
 	 * 

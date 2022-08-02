@@ -489,6 +489,35 @@ public class ItemValues {
 				}
 			}
 			String find = "@" + name;
+			// 替换一次
+			sb.replace(find, val);
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * 替换逻辑表达式中参数，如果参数不存在，则替换为""
+	 * 
+	 * @param s1
+	 * @return
+	 */
+	public String replaceLogicParameters(String s1) {
+		if (s1 == null)
+			return s1;
+		MListStr a = Utils.getParameters(s1, "@");
+		MStr sb = new MStr(s1);
+		for (int i = 0; i < a.size(); i++) {
+			String name = a.get(i);
+			String val = null;
+			try {
+				val = this.getValue(name, name);
+			} catch (Exception e) {
+				val = e.getLocalizedMessage();
+			}
+			if (val == null) {
+				val = "";
+			}
+			String find = "@" + name;
 			sb.replace(find, val);
 		}
 		return sb.toString();

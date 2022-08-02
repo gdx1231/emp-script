@@ -27,7 +27,6 @@ import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
-import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
@@ -452,7 +451,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 				itemHtml = itemHtml.replaceFirst(">", " placeholder=\"" + Matcher.quoteReplacement(des) + "\">");
 			}
 			// 根据逻辑表达式去除属性
-			itemHtml = this.removeAttr(uxi, itemHtml);
+			itemHtml = this.removeAttrsByLogic(uxi, itemHtml);
 
 			ArrayList<String> al = new ArrayList<String>();
 			al.add(itemHtml);
@@ -775,7 +774,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 			itemHtml = itemHtml.replace(SkinFrame.TAG_MSG, memo);
 		}
 		// 根据逻辑表达式去除属性
-		itemHtml = this.removeAttr(uxi, itemHtml);
+		itemHtml = this.removeAttrsByLogic(uxi, itemHtml);
 
 		String s2 = parentHtml.replace(SkinFrame.TAG_ITEM, itemHtml);
 
@@ -916,51 +915,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 		return sb.toString();
 	}
 
-	/**
-	 * 根据逻辑表达式去除对象属性
-	 * 
-	 * @param uxi
-	 * @param itemHtml
-	 * @return 去除对象属性
-	 */
-	private String removeAttr(UserXItem uxi, String itemHtml) {
-		if (!uxi.testName("AttributeSet")) {
-			return itemHtml;
-		}
-		ItemValues iv = super.getHtmlClass().getItemValues();
-
-		UserXItemValues atts;
-		try {
-			atts = uxi.getItem("AttributeSet");
-			if (atts.count() == 0) {
-				return itemHtml;
-			}
-			for (int ia = 0; ia < atts.count(); ia++) {
-				UserXItemValue att = atts.getItem(ia);
-				String attName = att.getItem("AttName");
-				if (attName == null || attName.trim().length() == 0 || !att.testName("AttLogic")) {
-					continue;
-				}
-				String logic = att.getItem("AttLogic");
-				if (logic.length() == 0) {
-					continue;
-				}
-				logic = iv.replaceParameters(logic, false, true);
-				if (!ULogic.runLogic(logic)) {
-					// 表达式为假
-					String attValue = att.getItem("AttValue");
-					String exp = attName + "=\"" + attValue + "\"";
-					itemHtml = itemHtml.replace(exp, "");
-				}
-
-			}
-			return itemHtml;
-		} catch (Exception e) {
-			return itemHtml;
-		}
-
-	}
-
+	 
 	/**
 	 * 页面分组显示处理过程
 	 * 
@@ -1129,7 +1084,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 			String memo = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Memo", lang);// memo
 
 			// 根据逻辑表达式去除属性
-			s1 = this.removeAttr(uxi, s1);
+			s1 = this.removeAttrsByLogic(uxi, s1);
 
 			String buttonHtml = s1.replace(SkinFrame.TAG_DES, des);
 			buttonHtml = buttonHtml.replace(SkinFrame.TAG_MSG, memo);

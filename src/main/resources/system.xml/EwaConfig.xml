@@ -3640,6 +3640,33 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
+			<XItemParameter Name="RowAttributeSet" IsShow="1" IsSet="1" UIGroup="Others" IsJsShow="0" IsMulti="1"
+				Html='@AttName="@AttValue"'>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="行属性值" />
+					<Set Lang="enus" Info="Row Atts" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="RowAttName" IsUnique="1">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="属性名称" />
+							<Set Lang="enus" Info="Att Name" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="RowAttValue">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="属性值" />
+							<Set Lang="enus" Info="Att Value" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="string" Name="RowAttLogic">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="逻辑表达式，当为true时期作用" />
+							<Set Lang="enus" Info="Att Logic (true)" />
+						</DescriptionSet>
+					</Value>
+				</Values>
+			</XItemParameter>
 			<XItemParameter Name="GroupSet" IsSet="1" IsShow="1" IsMulti="1" FrameTag="Frame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="分组描述" />

@@ -4,7 +4,10 @@ import java.util.HashMap;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.data.DTCell;
 import com.gdxsoft.easyweb.data.DTRow;
@@ -23,6 +26,17 @@ import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ItemBase implements IItem {
+	private static Logger LOGGER = LoggerFactory.getLogger(ItemBase.class);
+	
+	/**
+	 * 定义数据类型的 Item tag=dataType
+	 */
+	public final static String TAG_DATA_TYPE = "dataType";
+	
+	/**
+	 * 属性表达式保存的名称，用于Frame的removeAttrByLogic
+	 */
+	public final static String ATTR_EXP_NAME = "____attr_exp_____";
 	private UserXItem _UserXItem;
 	private HtmlClass _HtmlClass;
 	private InitValues _InitValues; // 初始值类
@@ -790,38 +804,87 @@ public class ItemBase implements IItem {
 				UserXItemValue uv = _UserXItemValues.getItem(i0);
 				HashMap<String, String> paras = new HashMap<String, String>();
 
-				boolean ok = false;
-				for (int i1 = 0; i1 < a.size(); i1++) {
-					String key = a.get(i1);
-					if (!uv.testName(key)) {
-						continue;
+				try {
+					h1 = this.replaceProperties(uv, paras, events, a, h1);
+					if (h1 != null) {
+						inc++;
+						paras.put("---GDX-RST---", h1);
+						sb.put(html + inc, paras);
 					}
-					String v = uv.getItem(key);
-					if (v == null || v.trim().equals("")) {
-						continue;
-					}
-					if (events.testName(v)) {// 是否为内置的事件
-						v = events.getItem(v).getFrontValue(); // 获取内部前端脚本
-						_UserXItem.setIsUsingEwaEvent(true);
-					}
-					if (key.equalsIgnoreCase("DlsShow")) {
-						v = v.replace("@", ItemBase.REP_AT_STR);
-					}
-					v = v.replace("\"", "&quot;");
-					h1 = h1.replace("@" + key, v);
-					ok = true;
+				} catch (Exception err) {
+					LOGGER.warn(err.getMessage());
+				}
 
-					paras.put(key, v);
-				}
-				if (ok) {
-					inc++;
-					paras.put("---GDX-RST---", h1);
-					sb.put(html + inc, paras);
-				}
 			}
 		}
 
 		return sb;
+	}
+
+	/**
+	 * 替换属性值
+	 * 
+	 * @param uv
+	 * @param paras
+	 * @param events
+	 * @param a
+	 * @param h1
+	 * @return
+	 * @throws Exception
+	 */
+	private String replaceProperties(UserXItemValue uv, HashMap<String, String> paras, EwaEvents events, MListStr a,
+			String h1) throws Exception {
+
+		// attName允许为空，名称根据AttValue的名称来定义
+		String fixedAttName = "";
+		MStr html = new MStr(h1);
+		if (a.size() >= 2 && "AttName".equals(a.get(0)) && "AttValue".equals(a.get(1))) {
+			if (uv.testName("AttName") && uv.testName("AttValue")) {
+				String attName = uv.getItem("AttName");
+				String attValue = uv.getItem("AttValue");
+				fixedAttName = HtmlUtils.createAttNameByValue(attName, attValue);
+
+				if (fixedAttName == null) {
+					return null;
+				}
+			}
+		}
+		boolean isOk = false;
+		for (int i1 = 0; i1 < a.size(); i1++) {
+			String key = a.get(i1);
+			if (!uv.testName(key)) {
+				continue;
+			}
+
+			String v = uv.getItem(key);
+			if ("AttName".equals(key)) {
+				v = fixedAttName;
+			}
+			if (v == null || v.trim().equals("")) {
+				continue;
+			}
+			if (events.testName(v)) {// 是否为内置的事件
+				v = events.getItem(v).getFrontValue(); // 获取内部前端脚本
+				_UserXItem.setIsUsingEwaEvent(true);
+			}
+			if (key.equalsIgnoreCase("DlsShow")) {
+				v = v.replace("@", ItemBase.REP_AT_STR);
+			}
+			v = Utils.textToInputValue(v);
+			html.replace( "@" + key, v);
+			// h1 = h1.replaceFirst("@" + key, Matcher.quoteReplacement(v));
+			paras.put(key, v);
+			
+			isOk = true;
+		}
+		if(!isOk) {
+			return null;
+		}
+
+		if (fixedAttName.length() > 0) {
+			uv.addObject(html.toString(), ATTR_EXP_NAME);
+		}
+		return html.toString();
 	}
 
 	/*

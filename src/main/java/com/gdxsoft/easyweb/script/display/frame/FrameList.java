@@ -592,34 +592,47 @@ public class FrameList extends FrameBase implements IFrame {
 			MStr rowContents = new MStr();
 			for (int i = 0; i < tb.getCount(); i++) {
 				tb.getRow(i); // 将数据移动到当前行
-				String keyExp = " EWA_KEY=\"" + this.createItemKeys() + "\" ";
+				String keyExp = "EWA_KEY=\"" + this.createItemKeys() + "\" ";
+				// 行属性表达式，2022-08-01 （RowAttributeSet ）
+
+				String[] rowAttrExp = this.createRowAttrs(uc);
+				String rowAttrs = rowAttrExp[0]; // 属性表达式
+				String rowClassName = rowAttrExp[1]; // 类表达式 class
+				
 				String rowHtml = isUseTemplate ? this.createItemHtmlsByFrameHtml(frameTemplate, "FrameList")
 						: this.createItemHtmls();
 				String groupHtml = this.createFrameGroup(flGroup);
 				sb.append(groupHtml);
-				
+
 				if (colSizeInc == 1 || colSize == 1) {
-					sb.a("<tr " + keyExp + " class='ewa-lf-data-row'");
+					sb.a("<tr ").a(keyExp).a(" class=\"ewa-lf-data-row");
+					if(StringUtils.isNotBlank(rowClassName)) {
+						sb.a(" ").a(rowClassName);// class
+					}
+					sb.a("\" ");
+					if(StringUtils.isNotBlank(rowAttrs)) {
+						sb.a(rowAttrs);
+					}
 					rowContents = new MStr();
 					if (!isApp) {
 						// 是否来自App调用，如果是的话，取消 onmouseover...的事件
 						StringBuilder stringBuilder = new StringBuilder();
-						stringBuilder.append(" onmouseover='if(window.EWA && EWA.F && EWA.F.FOS && ");
+						stringBuilder.append(" onmouseover='if(window.EWA&&");
 						stringBuilder.append(fos);
 						stringBuilder.append("){").append(fos).append(".MOver(this,event)}'");
-						stringBuilder.append(" onmousedown='if(window.EWA && EWA.F && EWA.F.FOS && ");
+						stringBuilder.append(" onmousedown='if(window.EWA&&");
 						stringBuilder.append(fos);
 						stringBuilder.append("){").append(fos).append(".MDown(this,event)}'");
 						sb.a(stringBuilder);
 					}
-					
+
 				}
 				rowContents.append(rowHtml);
 				if (colSizeInc == colSize || colSize == 1) {
-					if(ewaRowSign) {
+					if (ewaRowSign) {
 						// 列表每行所有TD字符串进行md5签名，用于刷新数据 refreshPage or replaceRowsData 的比对
 						String rowMd5 = Utils.md5(rowContents.toString());
-						sb.a(" ewa_row_sign='"+ rowMd5 +"'");
+						sb.a(" ewa_row_sign='" + rowMd5 + "'");
 					}
 					sb.al(">");
 					sb.a(rowContents);
@@ -702,6 +715,71 @@ public class FrameList extends FrameBase implements IFrame {
 			}
 		}
 		return keyExp;
+	}
+
+	/**
+	 * 行属性表达式，2022-08-01 （RowAttributeSet ）
+	 * 
+	 * @param uc
+	 * @return 行属性表达式 0=属性，1=CSS类名
+	 * @throws Exception
+	 */
+	String[] createRowAttrs(UserConfig uc) throws Exception {
+		if (!uc.getUserPageItem().testName("RowAttributeSet")) {
+			String[] returns = { "", "" };
+			return returns;
+		}
+		ItemValues iv = super.getHtmlClass().getItemValues();
+		
+		MStr sbPageAttr = new MStr(); //属性表达式
+		String className = ""; // CSS类名称
+		
+		UserXItemValues u = uc.getUserPageItem().getItem("RowAttributeSet");
+		Map<String, Boolean> map = new HashMap<>();
+		for (int i = 0; i < u.count(); i++) {
+			UserXItemValue u0 = u.getItem(i);
+			
+			
+			String logic = u0.getItem("RowAttLogic").trim();
+			if (StringUtils.isNotBlank(logic)) {
+				//逻辑判断，如果有逻辑判断，则执行，否则不进行判断
+				
+				String logic1 = iv.replaceLogicParameters(logic);
+				if (!ULogic.runLogic(logic1)) {
+					continue;
+				}
+			}
+
+			String name = u0.getItem("RowAttName").trim();
+			String value = u0.getItem("RowAttValue").trim();
+
+			String attName = HtmlUtils.createAttNameByValue(name, value);
+			if (StringUtils.isBlank(attName)) {
+				continue;
+			}
+
+			if (map.containsKey(attName)) {
+				// 重复的属性
+				LOGGER.warn("Repeated row attr: {}={}", attName, value);
+				continue;
+			}
+			map.put(attName, true);
+
+			String attValue = iv.replaceLogicParameters(value);
+
+			if ("class".equalsIgnoreCase(attName)) {
+				className = attValue;
+			} else {
+				sbPageAttr.a(" ");
+				sbPageAttr.a(attName);
+				sbPageAttr.a("=\"");
+				sbPageAttr.a(Utils.textToInputValue(attValue));
+				sbPageAttr.a("\"");
+			}
+		}
+		String[] returns = { sbPageAttr.toString(), className };
+
+		return returns;
 	}
 
 	/**
@@ -1572,33 +1650,7 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 
 		String itemHtml = item.createItemHtml();
-		ItemValues iv = super.getHtmlClass().getItemValues();
-		if (uxi.testName("AttributeSet")) {
-			// 根据逻辑表达式去除属性
-			UserXItemValues atts = uxi.getItem("AttributeSet");
-			for (int i = 0; i < atts.count(); i++) {
-				UserXItemValue att = atts.getItem(i);
-				if (!att.testName("AttLogic")) {
-					continue;
-				}
-
-				String logic = att.getItem("AttLogic").trim();
-				if (logic.length() == 0) {
-					continue;
-				}
-				logic = iv.replaceParameters(logic, false, true);
-				if (ULogic.runLogic(logic)) {
-					// 表达式true
-					continue;
-				}
-
-				String attName = att.getItem("AttName");
-				String attValue = att.getItem("AttValue");
-				String exp = attName + "=\"" + attValue + "\"";
-				// 去除属性
-				itemHtml = itemHtml.replace(exp, "");
-			}
-		}
+		itemHtml = super.removeAttrsByLogic(uxi, itemHtml);
 
 		String tag = uxi.getSingleValue("Tag");
 		if (this._IsLuButtons && (tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit")
@@ -1622,12 +1674,13 @@ public class FrameList extends FrameBase implements IFrame {
 			s2 = s2.replace("{WF}", wf);
 		}
 		s2 = s2.replaceFirst("!!", style.replace("a:1;display:block;a:2", ""));
-		if ((tag.equalsIgnoreCase("span") || tag.equalsIgnoreCase("linkButton"))  && style.indexOf(";a:1;") > 0) {
+		if ((tag.equalsIgnoreCase("span") || tag.equalsIgnoreCase("linkButton")) && style.indexOf(";a:1;") > 0) {
 			String v1 = item.getValue();
 			if (v1 == null || v1.trim().length() == 0) {
 				return s2;
 			}
-			String title = " title=\"" + v1.replace("<br>", "\n").replace("<br />", "\n").replace("\"", "&quot;").replace("<", "&lt;")
+			String title = " title=\""
+					+ v1.replace("<br>", "\n").replace("<br />", "\n").replace("\"", "&quot;").replace("<", "&lt;")
 					+ "\" ";
 
 			// 保留@符号
@@ -1641,8 +1694,8 @@ public class FrameList extends FrameBase implements IFrame {
 			}
 			// s2 = s2.replace("!!", title + style);
 			String style1 = style.replace("a:1;display:block;a:2;", "display:block;");
-			
-			if(tag.equalsIgnoreCase("span")) {
+
+			if (tag.equalsIgnoreCase("span")) {
 				if (s2.indexOf("><span ") > 0) {
 					s2 = s2.replaceFirst("><span ", "><span " + title + style1);
 				} else {
@@ -1651,7 +1704,7 @@ public class FrameList extends FrameBase implements IFrame {
 			} else { // linkButton
 				s2 = s2.replaceFirst("><a ", "><a " + title + style1 + " ");
 			}
-		} else   {
+		} else {
 
 		}
 		return s2;

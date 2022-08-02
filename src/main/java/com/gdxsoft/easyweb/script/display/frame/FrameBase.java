@@ -23,7 +23,9 @@ import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlClass;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
+import com.gdxsoft.easyweb.script.display.ItemValues;
 import com.gdxsoft.easyweb.script.display.items.IItem;
+import com.gdxsoft.easyweb.script.display.items.ItemBase;
 import com.gdxsoft.easyweb.script.html.HtmlDocument;
 import com.gdxsoft.easyweb.script.template.Description;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
@@ -73,6 +75,7 @@ public class FrameBase {
 	private void initHiddenFields() {
 		UserXItem page = this.getHtmlClass().getUserConfig().getUserPageItem();
 		this._HiddenFields = new MTable();
+		ItemValues iv = this.getHtmlClass().getItemValues();
 		if (page.testName("LogicShow")) {
 			try {
 				UserXItemValues logicShows = page.getItem("LogicShow");
@@ -80,7 +83,7 @@ public class FrameBase {
 					UserXItemValue logicShow = logicShows.getItem(i);
 					// String name = logicShow.getItem("Name");
 					String paraExp = logicShow.getItem("ParaExp");
-					paraExp = this.getHtmlClass().getItemValues().replaceParameters(paraExp, false);
+					paraExp = iv.replaceLogicParameters(paraExp);
 					if (!ULogic.runLogic(paraExp)) {
 						continue;
 					}
@@ -98,13 +101,15 @@ public class FrameBase {
 			}
 		}
 
+		// 数据类型定义元素无UI tag = dataType
 		try {
 			UserXItems items = this.getHtmlClass().getUserConfig().getUserXItems();
 			for (int i = 0; i < items.count(); i++) {
 				UserXItem uxi = items.getItem(i);
 				String tag = uxi.getSingleValue("Tag");
-				// 数据类型定义元素无UI
-				if ("dataType".equalsIgnoreCase(tag)) {
+
+				// dataType
+				if (ItemBase.TAG_DATA_TYPE.equalsIgnoreCase(tag)) {
 					String name1 = uxi.getName().toUpperCase();
 					if (!this._HiddenFields.containsKey(name1)) {
 						this._HiddenFields.add(name1, true);
@@ -297,6 +302,7 @@ public class FrameBase {
 		UserConfig uc = this._HtmlClass.getUserConfig();
 		String lang = this._HtmlClass.getSysParas().getLang();
 		JSONArray arr = new JSONArray();
+		ItemValues iv = this._HtmlClass.getItemValues();
 
 		for (int i = 0; i < uc.getUserXItems().count(); i++) {
 			UserXItem uxi = uc.getUserXItems().getItem(i);
@@ -354,7 +360,7 @@ public class FrameBase {
 						continue;
 					}
 
-					String attValue1 = this._HtmlClass.getItemValues().replaceParameters(attValue, false, true);
+					String attValue1 = iv.replaceLogicParameters(attValue);
 					obj.put(attName.toUpperCase(), attValue1);
 					obj.put("_" + attName.toUpperCase(), attValue);
 				}
@@ -922,20 +928,10 @@ public class FrameBase {
 
 		UserConfig uc = this._HtmlClass.getUserConfig();
 
-		if (uc.getUserPageItem().testName("PageAttributeSet")) {
-			MStr sbPageAttr = new MStr();
-			UserXItemValues u = uc.getUserPageItem().getItem("PageAttributeSet");
-			for (int i = 0; i < u.count(); i++) {
-				UserXItemValue u0 = u.getItem(i);
-				String n = u0.getItem("PageAttName").trim();
-				String v = u0.getItem("PageAttValue").trim();
-				if (n.length() == 0 || v.length() == 0) {
-					continue;
-				}
-				sbPageAttr.append(" " + n + "=\"" + Utils.textToInputValue(v) + "\"");
-			}
-			bs = bs.replace("!!>", sbPageAttr.toString() + ">");
-		}
+		// 页面定义的参数 PageAttributeSet
+		String attrs = this.createPageAttrs(uc);
+		bs = bs.replace("!!>", attrs + ">");
+
 		doc.addBodyHtml(bs, true);
 		if (this.isUseTest1Table()) {
 			doc.addScriptHtml("<div id='EWA_FRAME_MAIN' _s='主框架开始'>", "主框架开始");
@@ -953,6 +949,86 @@ public class FrameBase {
 		doc.addScriptHtml(this._HtmlClass.getSkinFrameAll().getTop());
 		// sb.append("<div _s='内容窗体开始'>");
 
+	}
+
+	/**
+	 * 根据逻辑表达式去除对象属性
+	 * 
+	 * @param uxi
+	 * @param itemHtml
+	 * @return 去除对象属性
+	 */
+	String removeAttrsByLogic(UserXItem uxi, String itemHtml) {
+		if (!uxi.testName("AttributeSet")) {
+			return itemHtml;
+		}
+		ItemValues iv = getHtmlClass().getItemValues();
+		MStr html = new MStr(itemHtml);
+		try {
+			UserXItemValues atts = uxi.getItem("AttributeSet");
+
+			for (int ia = 0; ia < atts.count(); ia++) {
+				UserXItemValue att = atts.getItem(ia);
+				if (!att.testName("AttLogic")) {
+					continue;
+				}
+				String logic = att.getItem("AttLogic");
+				if (logic.length() == 0) {
+					continue;
+				}
+				String logic1 = iv.replaceLogicParameters(logic);
+				if (ULogic.runLogic(logic1)) {
+					continue;
+				}
+
+				// 在 ItemBase.replaceProperties中创建
+				String attrExp = att.getItem(ItemBase.ATTR_EXP_NAME);
+				// 表达式为假
+				/*
+				 * String attName = att.getItem("AttName"); String attValue =
+				 * att.getItem("AttValue"); String attName1 =
+				 * HtmlUtils.createAttNameByValue(attName, attValue);
+				 * 
+				 * if (StringUtils.isBlank(attName1)) { continue; }
+				 * 
+				 * String exp = attName1 + "=\"" + Utils.textToInputValue(attValue) + "\"";
+				 */
+				html.replace(attrExp, "");
+			}
+			return html.toString();
+		} catch (Exception e) {
+			LOGGER.warn(e.getMessage());
+			return itemHtml;
+		}
+
+	}
+
+	/**
+	 * 页面定义的参数 PageAttributeSet
+	 * 
+	 * @param uc
+	 * @return
+	 * @throws Exception
+	 */
+	public String createPageAttrs(UserConfig uc) throws Exception {
+		if (!uc.getUserPageItem().testName("PageAttributeSet")) {
+			return "";
+		}
+		MStr sbPageAttr = new MStr();
+		UserXItemValues u = uc.getUserPageItem().getItem("PageAttributeSet");
+		for (int i = 0; i < u.count(); i++) {
+			UserXItemValue u0 = u.getItem(i);
+			String n = u0.getItem("PageAttName").trim();
+			String v = u0.getItem("PageAttValue").trim();
+			String attName = HtmlUtils.createAttNameByValue(n, v);
+			if (StringUtils.isBlank(attName)) {
+				continue;
+			}
+			// v 在最后处理，以避免数据未获取到
+			sbPageAttr.append(" " + attName + "=\"" + Utils.textToInputValue(v) + "\"");
+		}
+
+		return sbPageAttr.toString();
 	}
 
 	/**
