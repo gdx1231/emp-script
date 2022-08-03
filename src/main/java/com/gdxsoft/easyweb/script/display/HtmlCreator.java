@@ -801,6 +801,64 @@ public class HtmlCreator {
 	}
 
 	/**
+	 * 创建错误输出html
+	 * 
+	 * @param returnValue
+	 * @return
+	 */
+	private String createEwaErrOut(String err) {
+		String ua = this.getRequestValue().s("SYS_USER_AGENT");
+
+		// 是否为移动调用
+		boolean isMobile = false;
+		if (ua != null) {
+			ua = ua.toLowerCase();
+			isMobile = ua.indexOf("android") > 0 || ua.indexOf("iphone") > 0 || ua.indexOf("ipad") > 0;
+		}
+		StringBuilder sber = new StringBuilder();
+		if (isMobile) {
+			//移动处理
+			sber.append("<div id='Test1' class='ewa-err-out MSG_INFO' >");
+			sber.append("<table id='EWA_FRAME_MAIN' align=center border=0 width=100%><tr>");
+			sber.append("<td align=center width=64><div class='ERR_ICON'></div></td><td class='MSG_TEXT'>");
+			sber.append(Utils.textToInputValue(err));
+			sber.append("</td></tr>");
+			sber.append("<tr><td colspan=2><a onclick='EWA_App.back();' class='ewa-err-out-back'></a></td></tr>");
+			sber.append("</table></div>");
+			return sber.toString();
+		}
+
+		String alert = "EWA.UI.Msg.ShowError(\"" + Utils.textToInputValue(err) + "\",'Error');";
+		String id = "ewa_err_out_" + Utils.randomStr(20);
+		try {
+			this._Frame.createSkinTop();
+			String header = this._HtmlClass.getDocument().showHeader();
+			header = this._HtmlClass.getItemValues().replaceLogicParameters(header);
+			sber.append(header);
+			sber.append("<style>.ewa-err-out {min-width: 390px;min-height:150px;}</style>");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		sber.append("<div id='Test1' class='ewa-err-out'><div id='" + id + "'></div></div>");
+
+		// 为了和列表弹出对话框一致
+		sber.append("<script>(function(){");
+		// 1.利用脚本弹出对话框
+		sber.append("let a=" + alert);
+		// 2.获取对话框内容
+		sber.append("let b=a._Dialog._Dialog.GetFrameContent().innerHTML;");
+		// 3.关闭对话框
+		sber.append("a._Dialog.CloseWindow();");
+		// 4.将对话框内容放到页面里
+		sber.append("$('#" + id + "').html(b);");
+		// 5.修改按钮事件
+		sber.append("$('#" + id + " button').attr('onclick', '_EWA_DialogWnd.CloseWindow()')");
+		sber.append("})();</script></body></html>");
+
+		return sber.toString();
+	}
+
+	/**
 	 * 生成页面信息
 	 * 
 	 * @throws Exception
@@ -876,80 +934,7 @@ public class HtmlCreator {
 						// this._PageHtml = alert;
 						// }
 					} else {// 抛出错误
-
-						String _g_user_agent = this.getRequestValue().s("SYS_USER_AGENT");
-
-						// 是否为移动调用
-						boolean isMobile = false;
-						if (_g_user_agent != null) {
-							_g_user_agent = _g_user_agent.toLowerCase();
-							isMobile = _g_user_agent.indexOf("android") > 0 || _g_user_agent.indexOf("iphone") > 0
-									|| _g_user_agent.indexOf("ipad") > 0;
-						}
-
-						String img_path = this.getRequestValue().getString("rv_remote_ewa_style_path");
-						if (img_path == null || img_path.trim().length() == 0) {
-							img_path = this.getRequestValue().getString("rv_ewa_style_path");
-						}
-						if (img_path == null || img_path.trim().length() == 0) {
-							img_path = "/EmpScriptV2"; // the default static url prefix
-						}
-
-						StringBuilder sber = new StringBuilder();
-						if (!isMobile) {
-							sber.append("<html><head><title>");
-							sber.append(Utils.textToInputValue(returnValue));
-							sber.append("</title><body class='ewa-err-out' bgColor='#fff'>");
-							sber.append("<div id='Test1' class='ewa-err-out' style='min-width:500px'>");
-						} else {
-							sber.append("<div class='ewa-err-out'>");
-						}
-
-						sber.append("<table id='EWA_FRAME_MAIN' border=0 width=100% height=200><tr>");
-						sber.append("<td align=center><img width='64' height='64' src='");
-						sber.append(img_path);
-						sber.append("/EWA_STYLE/images/dialog/error_red.png'></td><td align=center>");
-						if (!isMobile) {
-							sber.append("<h2 style='white-space: nowrap;'>");
-						} else {
-							sber.append("<h2>");
-						}
-						sber.append(Utils.textToInputValue(returnValue));
-						sber.append("</h2></td></tr>");
-						if (isMobile) {
-							sber.append(
-									"<tr><td colspan=2><a onclick='EWA_App.back();' class='ewa-err-out-back'></a></td></tr>");
-						}
-						sber.append("</table></div>");
-						if (!isMobile) {
-							sber.append("</body></html>");
-						}
-						this._PageHtml = sber.toString();
-
-						// String msg = Utils.textToJscript(returnValue);
-						//
-						// StringBuilder sb = new StringBuilder();
-						// sb.append("\n\n\n\n<script>(function(){var buts =
-						// [];\n");
-						// sb.append("buts[0] = {\n");
-						// sb.append(" Text : _EWA_INFO_MSG['BUT.OK'],\n");
-						// sb.append(" Event : null,\n");
-						// sb.append(" Default : true\n");
-						// sb.append("};\n");
-						// sb.append("var a=new EWA_UI_MsgClass(\"" + msg +
-						// "\");\n");
-						// sb.append("a.AddButtons(buts);\n
-						// a._Dialog={id:'aaa'}\n");
-						//
-						// sb.append("a._CloseWindowJs=function(){return
-						// 'EWA.OW.Load();EWA.OW.Close();'}\n");
-						// sb.append("var s=a._CreateHtml()\n");
-						// sb.append(
-						// "document.body.innerHTML='<div class=\"ewa-err\"
-						// id=EWA_FRAME_MAIN><div id=Test1
-						// style=\"min-width:500px;\">'+s+'</div></div>';\n})();</script>\n\n\n\n");
-						// this._PageHtml = sb.toString();
-
+						this._PageHtml = this.createEwaErrOut(returnValue);
 						this.getDocument().setTitle(returnValue);
 					}
 				}
