@@ -807,8 +807,19 @@ public class HtmlCreator {
 	 * @return
 	 */
 	private String createEwaErrOut(String err) {
-		String ua = this.getRequestValue().s("SYS_USER_AGENT");
+		try {
+			this._Frame.createSkinTop();
+		} catch (Exception e) {
+			LOGGER.warn(e.getMessage());
+		}
+		String title = this._HtmlClass.getDocument().getTitle();
+		String alert = "EWA.UI.Msg.ShowError(\"" + Utils.textToJscript(err) + "\",\"" + Utils.textToJscript(title)
+				+ "\");";
+		if (this.isAjaxCall()) {
+			return alert;
+		}
 
+		String ua = this.getRequestValue().s("SYS_USER_AGENT");
 		// 是否为移动调用
 		boolean isMobile = false;
 		if (ua != null) {
@@ -817,7 +828,7 @@ public class HtmlCreator {
 		}
 		StringBuilder sber = new StringBuilder();
 		if (isMobile) {
-			//移动处理
+			// 移动处理
 			sber.append("<div id='Test1' class='ewa-err-out MSG_INFO' >");
 			sber.append("<table id='EWA_FRAME_MAIN' align=center border=0 width=100%><tr>");
 			sber.append("<td align=center width=64><div class='ERR_ICON'></div></td><td class='MSG_TEXT'>");
@@ -828,16 +839,14 @@ public class HtmlCreator {
 			return sber.toString();
 		}
 
-		String alert = "EWA.UI.Msg.ShowError(\"" + Utils.textToInputValue(err) + "\",'Error');";
 		String id = "ewa_err_out_" + Utils.randomStr(20);
 		try {
-			this._Frame.createSkinTop();
 			String header = this._HtmlClass.getDocument().showHeader();
 			header = this._HtmlClass.getItemValues().replaceLogicParameters(header);
 			sber.append(header);
 			sber.append("<style>.ewa-err-out {min-width: 390px;min-height:150px;}</style>");
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.warn(e.getMessage());
 		}
 		sber.append("<div id='Test1' class='ewa-err-out'><div id='" + id + "'></div></div>");
 
@@ -922,21 +931,9 @@ public class HtmlCreator {
 					this._ErrOut = true;
 					this.errOutMessage = returnValue;
 
-					if (_SysParas.isAjaxCall()) {
-						String fType = this._SysParas.getFrameType();
-						fType = fType == null ? "" : fType;
-						String msg = Utils.textToJscript(returnValue);
-						String alert = "EWA.UI.Msg.ShowError(\"" + msg + "\",'Error');";
-
-						// if (fType.equalsIgnoreCase("ListFrame")) {
-						this._PageHtml = alert;
-						// } else {
-						// this._PageHtml = alert;
-						// }
-					} else {// 抛出错误
-						this._PageHtml = this.createEwaErrOut(returnValue);
-						this.getDocument().setTitle(returnValue);
-					}
+					// 抛出错误
+					this._PageHtml = this.createEwaErrOut(returnValue);
+					this.getDocument().setTitle(returnValue);
 				}
 				writeCache(cache, this.getPageHtml());
 			} else {
