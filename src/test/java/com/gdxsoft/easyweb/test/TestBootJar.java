@@ -20,8 +20,11 @@ public class TestBootJar {
 	}
 
 	public void testFileConvert() throws Exception {
-		String root = "file:/E:/Guolei/workspace.gezz/visa/target/visa-1.0.0.jar!/BOOT-INF/lib/emp-script-1.1.1.jar!/define.xml";
-
+		String root = "file:/Users/admin/com.gdxsoft/emp-script-help/target/emp-script-help-1.0.1.jar!/BOOT-INF/lib/emp-script-1.1.1.jar!/define.xml";
+		File f = new File(root);
+		if (!f.exists()) {
+			System.out.println("The file not exists: " + f.getAbsolutePath());
+		}
 		String[] paths = root.split("\\!");
 		for (int i = 0; i < paths.length; i++) {
 			System.out.println(paths[i]);
@@ -42,9 +45,9 @@ public class TestBootJar {
 		System.out.println(buf.length);
 
 		File temp = File.createTempFile("testrunoobtmp", ".txt");
-		
+
 		System.out.println(temp.getAbsolutePath());
-		
+
 		UFile.createBinaryFile(temp.getAbsolutePath(), buf, true);
 		List<String> lst1 = UFile.getZipList(temp.getAbsolutePath());
 		lst1.forEach(fileName -> {

@@ -19,9 +19,12 @@ public class TestFileConvert {
 		String root = UPath.getRealPath() + "/docs";
 		// String[] exts = { "doc", "docx", "txt", "ppt", "pptx", "xls", "xlsx", "wps"
 		// };
-		String[] exts = { "ppt", "pptx" };
+		String[] exts = { "doc", "docx", "ppt", "pptx" };
 		File[] docs = UFile.getFiles(root, exts);
-
+		if (docs == null) {
+			System.out.println("No files in " + root);
+			return;
+		}
 		final Map<String, Object> filterData = new HashMap<>();
 
 		/*
@@ -29,7 +32,7 @@ public class TestFileConvert {
 		 * filterData.put("logicalWidth", 2550); filterData.put("logicalHeight", 3300);
 		 */
 		filterData.put("Quality", 90);
-		
+
 		Map<String, Object> outProperties = new HashMap<>();
 		outProperties.put("Overwrite", true);
 		outProperties.put("FilterData", filterData);
