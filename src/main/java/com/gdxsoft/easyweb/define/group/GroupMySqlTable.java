@@ -15,7 +15,6 @@ public class GroupMySqlTable extends GroupTableBase implements IGroupTable {
 	 * @see com.gdxsoft.easyweb.define.group.IGroupTable#createTableFks()
 	 */
 	public String createTableFks() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -23,7 +22,6 @@ public class GroupMySqlTable extends GroupTableBase implements IGroupTable {
 	 * @see com.gdxsoft.easyweb.define.group.IGroupTable#createTableIndexs()
 	 */
 	public String createTableIndexs() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

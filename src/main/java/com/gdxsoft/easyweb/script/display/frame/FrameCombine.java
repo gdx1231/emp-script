@@ -207,7 +207,6 @@ public class FrameCombine extends FrameBase implements IFrame {
 	}
 
 	public String createaXmlData() throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

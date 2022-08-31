@@ -1,21 +1,16 @@
 package com.gdxsoft.easyweb.define;
 
-import java.io.IOException;
 import java.util.HashMap;
 
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import com.gdxsoft.easyweb.cache.SqlCached;
-import com.gdxsoft.easyweb.utils.UFileCheck;
 import com.gdxsoft.easyweb.utils.UPath;
-import com.gdxsoft.easyweb.utils.UXml;
 
 /**
  *

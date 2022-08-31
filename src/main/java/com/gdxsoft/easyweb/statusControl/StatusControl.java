@@ -67,9 +67,11 @@ public class StatusControl {
 		Document doc = UXml.retDocument(path);
 		NodeList nl = doc.getElementsByTagName("sc");
 		Node node = null;
+		Element ele = null;
 		for (int i = 0; i < nl.getLength(); i++) {
 			node = nl.item(i);
-			if (node.getAttributes().getNamedItem("name").equals(itemName)) {
+			  ele = (Element) node;
+			if (ele.getAttribute("name").equals(itemName)) {
 				break;
 			}
 		}
@@ -78,8 +80,6 @@ public class StatusControl {
 		}
 		this._Name = itemName;
 		this._Des = UXml.retNodeValue(node, "des");
-
-		Element ele = (Element) node;
 
 		nl = ele.getElementsByTagName("st");
 		for (int i = 0; i < nl.getLength(); i++) {
