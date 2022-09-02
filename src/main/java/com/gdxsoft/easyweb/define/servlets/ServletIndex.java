@@ -13,7 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConfAdmins;
 import com.gdxsoft.easyweb.conf.ConfDefine;
+import com.gdxsoft.easyweb.define.EwaConfHelpHSqlServer;
+import com.gdxsoft.easyweb.utils.UUrl;
 
 /**
  * @author Administrator
@@ -62,10 +65,13 @@ public class ServletIndex extends HttpServlet {
 			LOGGER.info("Not allow define", request == null ? "?not request?" : request.getRequestURI());
 			return;
 		}
-
+		
+		EwaConfHelpHSqlServer.getInstance();
+		ConfAdmins.getInstance().getLst();
+		UUrl uu = new UUrl(request);
 		request.setCharacterEncoding("UTF-8");
 		// version =3 menus call by EwaDefineMenu
-		String urlDefine = request.getContextPath()
+		String urlDefine = uu.getRoot0() + request.getContextPath()
 				+ "/EWA_STYLE/cgi-bin/?XMLNAME=/ewa/ewa.xml&ITEMNAME=index&version=3&EWA_DEBUG_NO=0";
 
 		response.sendRedirect(urlDefine);
