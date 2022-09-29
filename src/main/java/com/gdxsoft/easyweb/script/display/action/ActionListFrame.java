@@ -413,46 +413,63 @@ public class ActionListFrame extends ActionBase implements IAction {
 				s1 = orderExp;
 			}
 		}
-
-		if (isMySqlOrder) { // mysql utf8 的中文排序
-			if (!(dt.equalsIgnoreCase("bigint") || dt.equalsIgnoreCase("int") || dt.equalsIgnoreCase("number")
-					|| dt.equalsIgnoreCase("date") || dt.equalsIgnoreCase("binary"))) {
-				if (s1.indexOf("(") == -1) {
-					s1 = "CONVERT( " + s1 + " USING gbk )";
-				}
-			}
+		// mysql utf8 的中文排序
+		if (isMySqlOrder && this.mysqlGbk(dt) && s1.indexOf("(") == -1) {
+			s1 = "CONVERT( " + s1 + " USING gbk )";
 		}
 		if (userOrder.indexOf(" ") > 0) {
 			s1 += " DESC";
 		}
-
 		userOrder = s1;
-		if (keyField != null && keyField.trim().length() > 0) {
-			String[] s2 = keyField.trim().toUpperCase().split(",");
-			for (int i = 0; i < s2.length; i++) {
-				String f = s2[i].trim().split(" ")[0];
-				if (orderField.equals(f)) { // 已经在表达式上面了
-					continue;
-				}
-				if (isMySqlOrder && !uc.getUserXItems().testName(f)) {
-					uxi = uc.getUserXItems().getItem(name);
-					dt = uxi.getItem("DataItem").getItem(0).getItem("DataType");
-					if (!(dt.equalsIgnoreCase("bigint") || dt.equalsIgnoreCase("int") || dt.equalsIgnoreCase("number")
-							|| dt.equalsIgnoreCase("date") || dt.equalsIgnoreCase("binary"))) {
-						String desc = "";
-						if (f.indexOf(" ") > 0) {
-							String[] fs = f.split(" ");
-							f = fs[0];
-							desc = " " + fs[1];
-						}
-						f = "CONVERT( " + f + " USING gbk )" + desc;
-					}
-				}
-				userOrder += "," + f;
+		if (keyField == null || keyField.trim().length() == 0) {
+			return userOrder;
+		}
+
+		String[] keyFields = keyField.trim().split(",");
+		// 补充主键的排序
+		for (int i = 0; i < keyFields.length; i++) {
+			String keyField0 = keyFields[i].trim();
+			String key = keyField0;
+
+			String desc = ""; // 升序或降序
+			// 去除desc or asc
+			if (key.toUpperCase().endsWith(" DESC")) {
+				key = key.substring(0, key.length() - 4).trim();
+				desc = " DESC";
+			} else if (key.toUpperCase().endsWith(" ASC")) {
+				key = key.substring(0, key.length() - 3).trim();
+				desc = " ASC";
 			}
+			if (orderField.equalsIgnoreCase(key)) {
+				// 已经在表达式上面了
+				continue;
+			}
+			if (isMySqlOrder && uc.getUserXItems().testName(key)) {
+				uxi = uc.getUserXItems().getItem(name);
+				dt = uxi.getItem("DataItem").getItem(0).getItem("DataType");
+				if (this.mysqlGbk(dt)) {
+					key = "CONVERT( " + key + " USING gbk )";
+				}
+			}
+			userOrder += "," + key + desc;
 		}
 		// System.out.println(userOrder);
 		return userOrder;
+	}
+
+	/**
+	 * 排序字段字段是否使用 USING gbk
+	 * 
+	 * @param dt
+	 * @return
+	 */
+	private boolean mysqlGbk(String dt) {
+		if (dt.equalsIgnoreCase("bigint") || dt.equalsIgnoreCase("int") || dt.equalsIgnoreCase("number")
+				|| dt.equalsIgnoreCase("date") || dt.equalsIgnoreCase("time") || dt.equalsIgnoreCase("binary")) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**

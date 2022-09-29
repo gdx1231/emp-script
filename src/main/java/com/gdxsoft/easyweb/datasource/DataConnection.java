@@ -859,6 +859,9 @@ public class DataConnection {
 		} else if (this._DatabaseType.equals("HSQLDB") || this._DatabaseType.equals("MYSQL")) {
 			sb.append(sql);
 			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);
+		} else { // 默认模式
+			sb.append(sql);
+			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);			
 		}
 		String sqla = sb.toString();
 		return this.executeQuery(sqla, sql);
