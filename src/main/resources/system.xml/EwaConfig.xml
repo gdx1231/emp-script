@@ -1376,16 +1376,15 @@ var swfVersionStr = "11.1.0";
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
-<div class="ewa_sql_editor"><textarea style='display:none' !! >{__EWA_VAL__}</textarea><div style="position:relative"></div></div>
+<div id='@sys_frame_unid$@name' class="ewa_sql_editor"><textarea style='display:none' !! >{__EWA_VAL__}</textarea><div style="position:relative"></div></div>
 <script type="text/javascript">
 (function(){
-	__TYPE__='sql';
-	__VAL__= $X('@Name').value;
+	var box = $(document.getElementById("@sys_frame_unid$@name"));
 	var s='@RV_EWA_STYLE_PATH/EWA_STYLE/editor/CodeMirror/index.html?__TYPE__=sql&__SID__=@Name';
 	s='<iframe name="IF_SQL_@NAME" src="'+s+'" width=100% height=100% scrolling=yes scroll=yes frameborder=0></iframe>';
 	var s1="<i id='IF_SQL_B_@NAME' class='fa fa-expand' style='text-align:center;position:absolute;top:-10px;left:-4px;width:20px;"
 		+"box-shadow: 0px 0px 10px 2px #08c;font-size:12px;line-height:20px;border-radius:10px;color:#fff;background:#08c;cursor:pointer;'></i>";
-	var p=$($X('@Name').parentNode.getElementsByTagName('div')[0]);
+	var p = box.find('div:eq(0)');
 	p.html(s+s1);
 	p.find('i')[0].onclick=function(){
 		if(this.getAttribute('ismax')=='yes'){
@@ -1413,9 +1412,7 @@ var swfVersionStr = "11.1.0";
 		}
 	};
 })();
-</script>	
-					
-					]]></Html>
+</script>]]></Html>
 				</Template>
 			</XItem>
 			<XItem Name="JsEditor" HtmlTag="" BaseType="0" UIGroup="Extend"
@@ -1428,17 +1425,18 @@ var swfVersionStr = "11.1.0";
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
-<div class="ewa_sql_editor"><textarea style='display:none' !! >{__EWA_VAL__}</textarea><div style='position:relative'></div></div>
+<div id='@sys_frame_unid$@name' class="ewa_sql_editor"><textarea style='display:none' !! >{__EWA_VAL__}</textarea><div style='position:relative'></div></div>
 <script type="text/javascript">
 (function(){
+	var box = $(document.getElementById("@sys_frame_unid$@name"));
 	var s='@RV_EWA_STYLE_PATH/EWA_STYLE/editor/CodeMirror/index.html?__TYPE__=jscript&__SID__=@Name';
 	s='<iframe name="IF_SQL_@NAME" src="'+s+'" width=100% height=100% scrolling=yes scroll=yes frameborder=0></iframe>';
 	var s1="<i id='IF_SQL_B_@NAME' class='fa fa-expand' style='text-align:center;position:absolute;top:-10px;left:-4px;width:20px;"
 		+"box-shadow: 0px 0px 10px 2px #08c;font-size:12px;line-height:20px;border-radius:10px;color:#fff;background:#08c;cursor:pointer;'></i>";
 
-	var p=$($X('@Name').parentNode.getElementsByTagName('div')[0]);
+	var p = box.find('div:eq(0)');
 	p.html(s+s1);
-	p.find('i')[0].onclick=function(){
+	p.find('i')[0].onclick = function(){
 		if(this.getAttribute('ismax')=='yes'){
 			$(this).parent().css({
 				position:'relative',
@@ -1464,9 +1462,7 @@ var swfVersionStr = "11.1.0";
 		}
 	};
 })();
-</script>	
-					
-					]]></Html>
+</script>]]></Html>
 				</Template>
 			</XItem>
 
@@ -1480,16 +1476,15 @@ var swfVersionStr = "11.1.0";
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
-<div class="ewa_sql_editor"><textarea style='display:none' !! >{__EWA_VAL__}</textarea><div style="position:relative"></div></div>
+<div id='@sys_frame_unid$@name' class="ewa_sql_editor"><textarea style='display:none' !! >{__EWA_VAL__}</textarea><div style="position:relative"></div></div>
 <script type="text/javascript">
 (function(){
-	__TYPE__='sql';
-	__VAL__= $X('@Name').value;
+	var box = $(document.getElementById("@sys_frame_unid$@name"));
 	var s='@RV_EWA_STYLE_PATH/EWA_STYLE/editor/CodeMirror/index.html?__TYPE__=xml&__SID__=@Name';
 	s='<iframe name="IF_SQL_@NAME" src="'+s+'" width=100% height=100% scrolling=yes scroll=yes frameborder=0></iframe>';
 	var s1="<i id='IF_SQL_B_@NAME' class='fa fa-expand' style='text-align:center;position:absolute;top:-10px;left:-4px;width:20px;"
 		+"box-shadow: 0px 0px 10px 2px #08c;font-size:12px;line-height:20px;border-radius:10px;color:#fff;background:#08c;cursor:pointer;'></i>";
-	var p=$($X('@Name').parentNode.getElementsByTagName('div')[0]);
+	var p=box.find("div:eq(0)");
 	p.html(s+s1);
 	p.find('i')[0].onclick=function(){
 		if(this.getAttribute('ismax')=='yes'){
