@@ -26,6 +26,7 @@ import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.datasource.SearchParameter;
 import com.gdxsoft.easyweb.datasource.SearchParameterInit;
 import com.gdxsoft.easyweb.datasource.SqlPart;
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
@@ -375,11 +376,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @throws Exception
 	 */
 	private String createSqlOrder() throws Exception {
-		DataConnection conn = super.getItemValues().getSysParas().getDataConn();
-		boolean isMySqlOrder = false;
-		if (conn != null && conn.getCurrentConfig().getType().equalsIgnoreCase("MYSQL")) {
-			isMySqlOrder = true;
-		}
+
 		RequestValue rv = super.getItemValues().getRequestValue();
 		UserConfig uc = super.getUserConfig();
 
@@ -400,6 +397,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 			return "";
 		}
 
+		DataConnection conn = super.getItemValues().getSysParas().getDataConn();
+		// 数据库类型
+		String dbType = conn == null ? "" : conn.getCurrentConfig().getType();
 		// 排序字段
 		String s1 = uxi.getItem("DataItem").getItem(0).getItem("DataField");
 		String dt = uxi.getItem("DataItem").getItem(0).getItem("DataType");
@@ -413,10 +413,8 @@ public class ActionListFrame extends ActionBase implements IAction {
 				s1 = orderExp;
 			}
 		}
-		// mysql utf8 的中文排序
-		if (isMySqlOrder && this.mysqlGbk(dt) && s1.indexOf("(") == -1) {
-			s1 = "CONVERT( " + s1 + " USING gbk )";
-		}
+		s1 = SqlUtils.replaceChnOrder(dbType, s1, dt);
+
 		if (userOrder.indexOf(" ") > 0) {
 			s1 += " DESC";
 		}
@@ -444,32 +442,16 @@ public class ActionListFrame extends ActionBase implements IAction {
 				// 已经在表达式上面了
 				continue;
 			}
-			if (isMySqlOrder && uc.getUserXItems().testName(key)) {
+			if (uc.getUserXItems().testName(key)) {
 				uxi = uc.getUserXItems().getItem(name);
-				dt = uxi.getItem("DataItem").getItem(0).getItem("DataType");
-				if (this.mysqlGbk(dt)) {
-					key = "CONVERT( " + key + " USING gbk )";
-				}
+				String keydt = uxi.getItem("DataItem").getItem(0).getItem("DataType");
+				key = SqlUtils.replaceChnOrder(dbType, key, keydt);
 			}
+
 			userOrder += "," + key + desc;
 		}
 		// System.out.println(userOrder);
 		return userOrder;
-	}
-
-	/**
-	 * 排序字段字段是否使用 USING gbk
-	 * 
-	 * @param dt
-	 * @return
-	 */
-	private boolean mysqlGbk(String dt) {
-		if (dt.equalsIgnoreCase("bigint") || dt.equalsIgnoreCase("int") || dt.equalsIgnoreCase("number")
-				|| dt.equalsIgnoreCase("date") || dt.equalsIgnoreCase("time") || dt.equalsIgnoreCase("binary")) {
-			return false;
-		} else {
-			return true;
-		}
 	}
 
 	/**
@@ -1008,11 +990,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @throws Exception
 	 */
 	private String createSqListFrame(String sql, DataConnection conn) throws Exception {
-		// mysql中文排序
-		boolean isMySqlOrder = false;
-		if (conn != null && conn.getCurrentConfig().getType().equalsIgnoreCase("MYSQL")) {
-			isMySqlOrder = true;
-		}
+		// 数据库类型
+		String dbType = conn == null ? "" : conn.getCurrentConfig().getType();
+
 		sql = super.getSql(sql);
 
 		String userOrder = this.createSqlOrder();
@@ -1023,7 +1003,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 		}
 		SqlPart sp = new SqlPart();
 		sp.setSql(sql);
-		sql = sp.rebuildSql(userOrder, userSearch, isMySqlOrder);
+
+		String temp = SqlUtils.chnOrderTemplate(dbType);
+		sql = sp.rebuildSql(userOrder, userSearch, temp);
 		return sql;
 	}
 

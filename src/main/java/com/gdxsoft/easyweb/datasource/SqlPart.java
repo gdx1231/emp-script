@@ -22,110 +22,69 @@ public class SqlPart {
 	/**
 	 * 根据 order 或 where重建 SQL
 	 * 
-	 * @param order
-	 * @param where
-	 * @return
+	 * @param order 排序表达式
+	 * @param where 查询表达式
+	 * @return 重组后的SQL
 	 */
 	public String rebuildSql(String order, String where) {
-		StringBuilder sqlTmp = new StringBuilder();
-		sqlTmp.append("SELECT " + this._Fields + "\nFROM " + this._TableName);
-		sqlTmp.append(" WHERE (" + this._Where + " )");
-
-		if (where != null && where.trim().length() > 0) {
-			sqlTmp.append(" AND (" + where + ") ");
-		}
-		if (this._GroupBy.length() > 0) {
-			sqlTmp.append("\n GROUP BY " + this._GroupBy);
-		}
-		if (this._Having.length() > 0) {
-			sqlTmp.append("\n HAVING " + this._Having);
-		}
-		if (order != null && order.trim().length() > 0) {
-			sqlTmp.append("\n ORDER BY " + order);
-		} else {
-			if (_OrderBy.length() > 0) {
-				sqlTmp.append("\r\n ORDER BY " + _OrderBy);
-			}
-		}
-
-		return sqlTmp.toString();
-	}
-
-	public String rebuildSql(String order, String where, boolean isMySqlChnOrder) {
-		StringBuilder sqlTmp = new StringBuilder();
-		sqlTmp.append("SELECT " + this._Fields + "\nFROM " + this._TableName);
-		sqlTmp.append(" WHERE (" + this._Where + " )");
-
-		if (where != null && where.trim().length() > 0) {
-			sqlTmp.append(" AND (" + where + ") ");
-		}
-		if (this._GroupBy.length() > 0) {
-			sqlTmp.append("\n GROUP BY " + this._GroupBy);
-		}
-		if (this._Having.length() > 0) {
-			sqlTmp.append("\n HAVING " + this._Having);
-		}
-		if (order != null && order.trim().length() > 0) {
-			sqlTmp.append("\n ORDER BY " + order);
-		} else if (_OrderBy.length() > 0) {
-			if (isMySqlChnOrder) {
-				// mysql 按照中文进行排序
-				sqlTmp.append("\n ORDER BY ");
-				String[] fields = _OrderBy.split(",");
-				for (int i = 0; i < fields.length; i++) {
-					String f = fields[i].trim().toUpperCase();
-					if (i > 0) {
-						sqlTmp.append(", ");
-					}
-					if (f.endsWith(" DESC")) {
-						f = f.substring(0, f.length() - 4);
-						if (this.checkIsUseGbk(f)) {
-							sqlTmp.append("CONVERT(" + f + " USING gbk) DESC");
-						} else {
-							sqlTmp.append(f + " DESC");
-						}
-					} else if (f.endsWith(" ASC")) {
-						f = f.substring(0, f.length() - 3);
-						if (this.checkIsUseGbk(f)) {
-							sqlTmp.append("CONVERT(" + f + " USING gbk) ASC");
-						} else {
-							sqlTmp.append(f + " ASC");
-						}
-					} else {
-						if (this.checkIsUseGbk(f)) {
-							sqlTmp.append("CONVERT(" + f + " USING gbk)");
-						} else {
-							sqlTmp.append(f);
-						}
-					}
-				}
-			} else {
-				sqlTmp.append("\r\n ORDER BY " + _OrderBy);
-			}
-		}
-
-		return sqlTmp.toString();
+		return rebuildSql(order, where, null);
 	}
 
 	/**
-	 * 根据字段名称判断是字段否用 GBK转换 CONVERT(fieldName USING gbk)
+	 * 根据 order 或 where重建 SQL
 	 * 
-	 * @param fieldName
-	 * @return
+	 * @param order        排序表达式
+	 * @param where        查询表达式
+	 * @param dataBaseType 数据库类型，用于判断是否用中文排序方法（MySQL, PostgreSQL)
+	 * @return 重组后的SQL
 	 */
-	public boolean checkIsUseGbk(String fieldName) {
-		fieldName = fieldName.trim().toUpperCase();
-		if (fieldName.indexOf("(") > 0 || fieldName.endsWith("ID") || fieldName.endsWith("IDX")
-				|| fieldName.endsWith("UID") || fieldName.endsWith("ORD") || fieldName.endsWith("DATE")
-				|| fieldName.endsWith("NUM") || fieldName.endsWith("DAY") || fieldName.endsWith("TIME")
-				|| fieldName.endsWith("INC") || fieldName.indexOf("MOENY") >= 0 || fieldName.indexOf("PRICE") >= 0
-				|| fieldName.indexOf("STAR") >= 0 || fieldName.indexOf("SCORE") >= 0 || fieldName.indexOf("COUNT") >= 0
-				|| fieldName.indexOf("SIZE") >= 0 || fieldName.indexOf("UNID") >= 0 || fieldName.indexOf("AGE") >= 0
-				|| fieldName.endsWith("LVL") 
-				) {
-			return false;
+	public String rebuildSql(String order, String where, String dataBaseType) {
+		StringBuilder sqlTmp = new StringBuilder();
+		sqlTmp.append("SELECT " + this._Fields + "\nFROM " + this._TableName);
+		sqlTmp.append(" WHERE (" + this._Where + " )");
+
+		if (where != null && where.trim().length() > 0) {
+			sqlTmp.append(" AND (" + where + ") ");
 		}
-		return true;
+		if (this._GroupBy.length() > 0) {
+			sqlTmp.append("\n GROUP BY " + this._GroupBy);
+		}
+		if (this._Having.length() > 0) {
+			sqlTmp.append("\n HAVING " + this._Having);
+		}
+		if (order != null && order.trim().length() > 0) {
+			sqlTmp.append("\n ORDER BY " + order);
+			return sqlTmp.toString();
+		}
+		if (_OrderBy.length() == 0) {
+			return sqlTmp.toString();
+		}
+		if (!SqlUtils.checkChnOrderByDatabase(dataBaseType)) {
+			sqlTmp.append("\n ORDER BY " + _OrderBy);
+			return sqlTmp.toString();
+		}
+
+		sqlTmp.append("\n ORDER BY ");
+		String[] fields = _OrderBy.split(",");
+		for (int i = 0; i < fields.length; i++) {
+			String f = fields[i].trim();
+			if (i > 0) {
+				sqlTmp.append(", ");
+			}
+			String asc = "";
+			if (f.toUpperCase().endsWith(" DESC")) {
+				f = f.substring(0, f.length() - 4).trim();
+				asc = " DESC"; // 降序
+			} else if (f.toUpperCase().endsWith(" ASC")) {
+				f = f.substring(0, f.length() - 3).trim();
+				asc = " ASC"; // 升序
+			}
+			f = SqlUtils.replaceChnOrder(dataBaseType, f, null);
+			sqlTmp.append(f).append(asc);
+		}
+
+		return sqlTmp.toString();
+
 	}
 
 	public String getTableName() {

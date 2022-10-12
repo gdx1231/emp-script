@@ -9,6 +9,7 @@ import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.SqlPart;
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.PageValues;
@@ -154,13 +155,12 @@ public class ItemValues {
 				return dt;
 			}
 		} else { // 标准SQL查询
-
-			if (this.getDataConn().getDatabaseType().equals("MYSQL")) {
+			if (SqlUtils.checkChnOrderByDatabase(this.getDataConn().getDatabaseType())) {
 				// 处理中文排序 CONVERT(username USING gbk)
 				SqlPart sp = new SqlPart();
 				try {
 					sp.setSql(sql);
-					sql = sp.rebuildSql(null, null, true);
+					sql = sp.rebuildSql(null, null, this.getDataConn().getDatabaseType());
 				} catch (Exception err) {
 					// 可能没有 where条件
 				}
