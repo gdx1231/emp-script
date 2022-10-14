@@ -30,6 +30,7 @@ import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.display.action.ActionBase;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.*;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -74,9 +75,9 @@ public class RequestValue implements Cloneable {
 	 */
 	public String getLang() {
 		// 字符集
-		String lang = this.s("EWA_LANG");
+		String lang = this.s(FrameParameters.EWA_LANG);
 		if (lang == null || lang.trim().length() == 0) {
-			lang = this.s("SYS_EWA_LANG"); // 从session取
+			lang = this.s(FrameParameters.SYS_EWA_LANG); // 从session取
 		}
 		// //避免跨站脚本攻击漏洞 2015-2-4
 		// 因为 FrameFrame.createJsFramePage sJs.append("\r\nEWA.LANG='" +
@@ -614,7 +615,7 @@ public class RequestValue implements Cloneable {
 			parameters.append("=");
 			parameters.append(v1);
 
-			if (key.equalsIgnoreCase("XMLNAME") || key.equalsIgnoreCase("ITEMNAME")
+			if (key.equalsIgnoreCase(FrameParameters.XMLNAME) || key.equalsIgnoreCase(FrameParameters.ITEMNAME)
 					|| key.toUpperCase().startsWith("EWA_")) {
 				continue;
 			}
@@ -969,7 +970,7 @@ public class RequestValue implements Cloneable {
 
 			// 过滤掉所有以EWA_开头的cookie,不应存在的数据
 			// 时差可以放到 cookie 里
-			if (key.startsWith("EWA_") && !key.endsWith(ckPrefix) && !key.equals("EWA_TIMEDIFF")) {
+			if (key.startsWith("EWA_") && !key.endsWith(ckPrefix) && !key.equals(FrameParameters.EWA_TIMEDIFF)) {
 				continue;
 			}
 
@@ -1000,7 +1001,7 @@ public class RequestValue implements Cloneable {
 		boolean ewaEncrypted = key.endsWith(ActionBase.COOKIE_NAME_PREFIX);
 		// 过滤掉所有以EWA_开头的cookie,不应存在的数据
 		// 时差可以放到 cookie 里
-		if (key.startsWith("EWA_") && !ewaEncrypted && !key.equals("EWA_TIMEDIFF")) {
+		if (key.startsWith("EWA_") && !ewaEncrypted && !key.equals(FrameParameters.EWA_TIMEDIFF)) {
 			return;
 		}
 

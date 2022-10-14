@@ -18,6 +18,7 @@ import org.xml.sax.SAXException;
 import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
@@ -399,10 +400,10 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		DTTable tbXml = op.getJdbcTable(sql1, rv);
 		for (int i = 0; i < tbXml.getCount(); i++) {
 			String xmlName = tbXml.getCell(i, 0).toString();
-			rv.addOrUpdateValue("xmlname", xmlName);
+			rv.addOrUpdateValue(FrameParameters.XMLNAME, xmlName);
 			String sql2 = "select ITEMNAME from ewa_cfg ec where XMLNAME = @xmlname ";
 			DTTable tbItems = op.getJdbcTable(sql2, rv);
-			String itemNames = tbItems.joinIds("ITEMNAME", false);
+			String itemNames = tbItems.joinIds(FrameParameters.ITEMNAME, false);
 
 			UpdateXmlJdbcImpl ux = new UpdateXmlJdbcImpl(this.scriptPath);
 			ux.setXmlName(xmlName);

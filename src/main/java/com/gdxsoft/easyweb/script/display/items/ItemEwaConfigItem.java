@@ -13,6 +13,7 @@ import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
 import com.gdxsoft.easyweb.script.display.SysParameters;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 
@@ -63,18 +64,18 @@ public class ItemEwaConfigItem extends ItemBase {
 				}
 			}
 		}
-		rv.addOrUpdateValue("EWA_AJAX", "TOP_CNT_BOTTOM");
+		rv.addOrUpdateValue(FrameParameters.EWA_AJAX, "TOP_CNT_BOTTOM");
 
-		if (rv.s("EWA_CALL_METHOD") == null) {// 调用模式，用于判断使用
+		if (rv.s(FrameParameters.EWA_CALL_METHOD) == null) {// 调用模式，用于判断使用
 			String callUrlMethod = userXItem.getSingleValue("DefineFrame", "CallUrlMethod");
 			//INNER_CALL url = /xxx/EWA_STYLE/cgi-bin/?xmlname=...
-			rv.addOrUpdateValue("EWA_CALL_METHOD", StringUtils.isBlank(callUrlMethod) ? "INNER_CALL" : callUrlMethod);
+			rv.addOrUpdateValue(FrameParameters.EWA_CALL_METHOD, StringUtils.isBlank(callUrlMethod) ? "INNER_CALL" : callUrlMethod);
 		}
 		// 移除EWA_P_BEHAVIOR 脚本，由父窗体带入
-		rv.getPageValues().remove("EWA_P_BEHAVIOR");
+		rv.getPageValues().remove(FrameParameters.EWA_P_BEHAVIOR);
 
-		rv.addOrUpdateValue("XMLNAME", xmlName);
-		rv.addOrUpdateValue("itemName", itemName);
+		rv.addOrUpdateValue(FrameParameters.XMLNAME, xmlName);
+		rv.addOrUpdateValue(FrameParameters.ITEMNAME, itemName);
 
 		try {
 
@@ -84,7 +85,7 @@ public class ItemEwaConfigItem extends ItemBase {
 			hc.init(rv, super.getResponse());
 			hc.createPageHtml();
 			val = hc.getPageHtml();
-			val = val.replace("@SYS_FRAME_UNID", rv.getString("SYS_FRAME_UNID"));
+			val = val.replace("@SYS_FRAME_UNID", rv.getString(FrameParameters.SYS_FRAME_UNID));
 
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());

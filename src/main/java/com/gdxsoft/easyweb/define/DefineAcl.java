@@ -14,7 +14,7 @@ public class DefineAcl extends SampleAcl implements IAcl {
 		if (!ConfDefine.isAllowDefine()) {
 			return false;
 		}
-		PageValue pv = super.getRequestValue().getPageValues().getValue("EWA_ADMIN_ID");
+		PageValue pv = super.getRequestValue().getPageValues().getValue(DefineParameters.EWA_ADMIN_ID);
 
 		// EWA_ADMIN_ID 不在seesion中
 		if (pv == null || pv.getPVTag() != PageValueTag.SESSION) {

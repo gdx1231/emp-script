@@ -12,6 +12,7 @@ import com.gdxsoft.easyweb.debug.DebugRecords;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.statusControl.StatusControl;
 import com.gdxsoft.easyweb.utils.UPath;
 
@@ -60,8 +61,8 @@ public class EwaWebPage {
 			sc.load(scXmlName, scItemName);
 			String logicExp = sc.createFmLogicExp(scFormName);
 			this._Rv.addValue("EWA_SC_LG", logicExp, PageValueTag.SYSTEM);
-			this._Rv.addValue("XMLNAME", sc.getCurFm().getXmlName());
-			this._Rv.addValue("ITEMNAME", sc.getCurFm().getItemName());
+			this._Rv.addValue(FrameParameters.XMLNAME, sc.getCurFm().getXmlName());
+			this._Rv.addValue(FrameParameters.ITEMNAME, sc.getCurFm().getItemName());
 			this.runEwaScript();
 		} catch (Exception e) {
 			this._PageDeubgInfo = e.getMessage();
@@ -75,12 +76,12 @@ public class EwaWebPage {
 		if (xip != null) {
 			clientIp = xip;
 		}
-		String ewaDebugNo = this._Rv.getString("EWA_DEBUG_NO");
+		String ewaDebugNo = this._Rv.getString(FrameParameters.EWA_DEBUG_NO);
 		String q = _PageRequest.getQueryString();
 		if (q == null)
 			q = "";
 		if ((ewaDebugNo != null && ewaDebugNo.equals("1"))
-				|| this._Rv.getString("EWA_P_BEHAVIOR") != null
+				|| this._Rv.getString(FrameParameters.EWA_P_BEHAVIOR) != null
 				|| q.indexOf("ewa.xml") > 0) {
 			// 参数设置不跟踪
 			// 弹出窗体不显示Debug
@@ -117,7 +118,7 @@ public class EwaWebPage {
 				isXml = true;
 			} else if (ajaxType.equalsIgnoreCase("JSON")) {
 				// application/json
-				if (this._Rv.getString("EWA_JSON_NAME") == null) {
+				if (this._Rv.getString(FrameParameters.EWA_JSON_NAME) == null) {
 					this._PageContentType = "text/json";
 				} else {
 					this._PageContentType = "text/javascript";
@@ -139,10 +140,10 @@ public class EwaWebPage {
 			// debug信息，用于后台跟踪
 			if (record != null) {
 				String xmlName = _HtmlCreator.getRequestValue().getString(
-						"xmlname");
+						FrameParameters.XMLNAME);
 				record.setXmlName(xmlName);
 				record.setItemName(_HtmlCreator.getRequestValue().getString(
-						"itemname"));
+						FrameParameters.ITEMNAME));
 				record.setParameters(_HtmlCreator.getRequestValue().listValues(
 						false));
 				record.setRunSeq(_HtmlCreator.getDebugFrames().listDebugHtml());
@@ -173,10 +174,10 @@ public class EwaWebPage {
 		// //debug信息，用于后台跟踪
 		if (record != null) {
 			String xmlName = _HtmlCreator.getRequestValue()
-					.getString("xmlname");
+					.getString(FrameParameters.XMLNAME);
 			record.setXmlName(xmlName);
 			record.setItemName(_HtmlCreator.getRequestValue().getString(
-					"itemname"));
+					FrameParameters.ITEMNAME));
 			record.setParameters(_HtmlCreator.getRequestValue().listValues(
 					false));
 			record.setRunSeq(_HtmlCreator.getDebugFrames().listDebugHtml());

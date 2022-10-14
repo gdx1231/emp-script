@@ -3,6 +3,7 @@ package com.gdxsoft.easyweb.cache;
 import java.io.File;
 
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -75,8 +76,8 @@ public class CacheEwaScript {
 	}
 
 	public void init() {
-		String xmlName = _Rv.getString("XMLNAME");
-		String itemName = _Rv.getString("ITEMNAME");
+		String xmlName = _Rv.getString(FrameParameters.XMLNAME);
+		String itemName = _Rv.getString(FrameParameters.ITEMNAME);
 
 		this.initPath(xmlName, itemName);
 

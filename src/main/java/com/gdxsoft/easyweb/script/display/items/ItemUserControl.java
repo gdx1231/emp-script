@@ -11,6 +11,7 @@ import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.SysParameters;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.html.HtmlDocument;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
 import com.gdxsoft.easyweb.script.template.XItem;
@@ -108,15 +109,15 @@ public class ItemUserControl extends ItemBase {
 			return (HtmlDocument) cache.get(key);
 		}
 
-		rv.addValue("EWA_AJAX", "TOP_CNT_BOTTOM");
+		rv.addValue(FrameParameters.EWA_AJAX, "TOP_CNT_BOTTOM");
 		// 调用模式，用于判断使用
-		rv.addValue("EWA_CALL_METHOD", "INNER_CALL");
+		rv.addValue(FrameParameters.EWA_CALL_METHOD, "INNER_CALL");
 
 		// 移除EWA_P_BEHAVIOR 脚本，由父窗体带入
-		rv.getPageValues().remove("EWA_P_BEHAVIOR");
-		rv.getPageValues().remove("EWA_REDRAW");
-		rv.addValue("XMLNAME", xmlName);
-		rv.addValue("itemName", itemName);
+		rv.getPageValues().remove(FrameParameters.EWA_P_BEHAVIOR);
+		rv.getPageValues().remove(FrameParameters.EWA_REDRAW);
+		rv.addValue(FrameParameters.XMLNAME, xmlName);
+		rv.addValue(FrameParameters.ITEMNAME, itemName);
 
 		SysParameters sysParas = super.getHtmlClass().getSysParas();
 		RequestValue rv1 = sysParas.getRequestValue();

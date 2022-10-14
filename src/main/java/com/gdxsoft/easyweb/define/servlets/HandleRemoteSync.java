@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
+import com.gdxsoft.easyweb.define.DefineParameters;
 import com.gdxsoft.easyweb.define.SyncRemote;
 import com.gdxsoft.easyweb.define.SyncRemotes;
 import com.gdxsoft.easyweb.script.PageValue;
@@ -54,7 +55,7 @@ public class HandleRemoteSync {
 			method = "";
 		}
 
-		PageValue pv = rv.getPageValues().getPageValue("EWA_ADMIN_ID");
+		PageValue pv = rv.getPageValues().getPageValue(DefineParameters.EWA_ADMIN_ID);
 
 		if (pv == null || (pv.getPVTag() != PageValueTag.SESSION)) {
 			// not login

@@ -51,9 +51,9 @@ public class FrameTree extends FrameBase implements IFrame {
 		sJs.append("o._Id ='" + gunid + "';\n})();\n");
 
 		// 初始化显示的值
-		String k = rv.getString("EWA_TREE_INIT_KEY");
+		String k = rv.getString( FrameParameters.EWA_TREE_INIT_KEY);
 		if (k != null && k.trim().length() > 0) {
-			k = Utils.textToJscript(rv.getString("EWA_TREE_INIT_KEY"));
+			k = Utils.textToJscript(k);
 			sJs.append("try{");
 			sJs.append(fName + ".ShowNode(\"" + k + "\");\r\n");
 			sJs.append("}catch(e){}\r\n");
@@ -134,7 +134,7 @@ public class FrameTree extends FrameBase implements IFrame {
 		// 设置附加字段内容 2019-03-26
 		this._TreeViewMain.initCreateAddCols(this);
 
-		String rootId = super.getHtmlClass().getSysParas().getRequestValue().getString("EWA_TREE_ROOT_ID");
+		String rootId = super.getHtmlClass().getSysParas().getRequestValue().getString(FrameParameters.EWA_TREE_ROOT_ID);
 		if (rootId != null) {
 			this._TreeViewMain.setRootId(rootId);
 		}

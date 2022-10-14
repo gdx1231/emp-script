@@ -35,6 +35,7 @@ import com.gdxsoft.easyweb.script.Workflow.WfRst;
 import com.gdxsoft.easyweb.script.Workflow.WfUnits;
 import com.gdxsoft.easyweb.script.display.action.IAction;
 import com.gdxsoft.easyweb.script.display.frame.FrameList;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.display.frame.IFrame;
 import com.gdxsoft.easyweb.script.display.items.IItem;
 import com.gdxsoft.easyweb.script.html.HtmlDocument;
@@ -110,15 +111,15 @@ public class HtmlCreator {
 	public void init(HttpServletRequest req, HttpSession session, HttpServletResponse response) throws Exception {
 		this._RequestValue = new RequestValue(req, session);
 		this._Response = response;
-		String shortName = this._RequestValue.getString("EWA_SN");
+		String shortName = this._RequestValue.getString(FrameParameters.EWA_SN);
 		if (shortName == null) {
-			shortName = this._RequestValue.getString("$S");
+			shortName = this._RequestValue.getString(FrameParameters.$S);
 		}
 		String xmlName = null;
 		String itemName = null;
 		if (shortName == null) {
-			xmlName = this._RequestValue.getString("XMLNAME");
-			itemName = this._RequestValue.getString("ITEMNAME");
+			xmlName = this._RequestValue.getString(FrameParameters.XMLNAME);
+			itemName = this._RequestValue.getString(FrameParameters.ITEMNAME);
 		} else { // ShortName定义
 			ShortName sn = ShortNames.Instance().getShortName(shortName);
 			if (sn != null) {
@@ -164,8 +165,8 @@ public class HtmlCreator {
 		this._RequestValue = new RequestValue(req, session);
 		this._Response = response;
 
-		_RequestValue.addValue("XMLNAME", xmlName);
-		_RequestValue.addValue("ITEMNAME", itemName);
+		_RequestValue.addValue(FrameParameters.XMLNAME, xmlName);
+		_RequestValue.addValue(FrameParameters.ITEMNAME, itemName);
 
 		this.attachParas(paras);
 
@@ -187,13 +188,13 @@ public class HtmlCreator {
 		this._Response = response;
 		this._RequestValue = rv;
 
-		rv.getPageValues().remove("XMLNAME");
-		rv.getPageValues().remove("ITEMNAME");
+		rv.getPageValues().remove(FrameParameters.XMLNAME);
+		rv.getPageValues().remove(FrameParameters.ITEMNAME);
 
 		// rv.getPageValues().remove("SYS_UNID");
 
-		_RequestValue.addValue("XMLNAME", xmlName);
-		_RequestValue.addValue("ITEMNAME", itemName);
+		_RequestValue.addValue(FrameParameters.XMLNAME, xmlName);
+		_RequestValue.addValue(FrameParameters.ITEMNAME, itemName);
 
 		this.attachParas(paras);
 
@@ -229,8 +230,8 @@ public class HtmlCreator {
 	public void init(RequestValue requestValue, HttpServletResponse response) throws Exception {
 		this._RequestValue = requestValue;
 		this._Response = response;
-		String xmlName = this._RequestValue.getString("XMLNAME");
-		String itemName = this._RequestValue.getString("ITEMNAME");
+		String xmlName = this._RequestValue.getString(FrameParameters.XMLNAME);
+		String itemName = this._RequestValue.getString(FrameParameters.ITEMNAME);
 
 		initParameters(xmlName, itemName);
 	}
@@ -488,14 +489,14 @@ public class HtmlCreator {
 
 		Skin skin = Skin.instance();
 
-		String skinName = this._RequestValue.getString("EWA_SKIN");
+		String skinName = this._RequestValue.getString(FrameParameters.EWA_SKIN);
 		if (skinName == null || skinName.trim().length() == 0) {
-			skinName = this._RequestValue.getString("EWA_SKIN_SESSION");
+			skinName = this._RequestValue.getString(FrameParameters.EWA_SKIN_SESSION);
 			if (skinName == null || skinName.trim().length() == 0) {
 				skinName = getPageItemValue("SkinName", "SkinName");
 			}
 		} else {
-			this._RequestValue.getSession().setAttribute("EWA_SKIN_SESSION", skinName);
+			this._RequestValue.getSession().setAttribute(FrameParameters.EWA_SKIN_SESSION, skinName);
 		}
 
 		_DebugFrames.addDebug(this, "INIT", "开始读取皮肤 (" + skinName + ")");
@@ -503,7 +504,7 @@ public class HtmlCreator {
 		if (skinFrames == null) {
 			skinName = "Test1";
 			skinFrames = skin.getSkinFrames(skinName);
-			this._RequestValue.getSession().setAttribute("EWA_SKIN_SESSION", skinName);
+			this._RequestValue.getSession().setAttribute(FrameParameters.EWA_SKIN_SESSION, skinName);
 		}
 		SkinFrame skinFrameAll = skinFrames.getItem("ALL");
 		SkinFrame skinFrameCurrent = skinFrames.getItem(this._SysParas.getFrameType());
@@ -597,7 +598,7 @@ public class HtmlCreator {
 	 */
 	private void initParametersDoAction() {
 		// 用于ListFrame调用
-		String ewaActionKey = this._RequestValue.getString("EWA_ACTION_KEY");
+		String ewaActionKey = this._RequestValue.getString(FrameParameters.EWA_ACTION_KEY);
 		if (ewaActionKey != null) {
 			if (!this._UserConfig.getUserPageItem().testName("PageSize")) {
 				return;
@@ -620,7 +621,7 @@ public class HtmlCreator {
 		}
 
 		// 用于Tree调用
-		String ewaTreeKey = this._RequestValue.getString("EWA_TREE_KEY");
+		String ewaTreeKey = this._RequestValue.getString(FrameParameters.EWA_TREE_KEY);
 		if (ewaTreeKey != null) {
 			if (!this._UserConfig.getUserPageItem().testName("Tree")) {
 				return;
@@ -636,13 +637,13 @@ public class HtmlCreator {
 
 				// 将标准树传递的 EWA_TREE_KEY映射为表对应的字段
 				this._RequestValue.addValue(key, ewaTreeKey);
-				String pkey = this._RequestValue.getString("EWA_TREE_PARENT_KEY");
+				String pkey = this._RequestValue.getString(FrameParameters.EWA_TREE_PARENT_KEY);
 				if (pkey != null && pkey.equals(TreeViewMain.TREE_ROOT_KEY)) {
 					// 最高层主键值
 					pkey = uxvs.getItem(0).getItem("RootId");
 				}
 				this._RequestValue.addValue(parentKey, pkey);
-				this._RequestValue.addValue(text, this._RequestValue.getString("EWA_TREE_TEXT"));
+				this._RequestValue.addValue(text, this._RequestValue.getString(FrameParameters.EWA_TREE_TEXT));
 
 			} catch (Exception e) {
 				return;
@@ -657,7 +658,7 @@ public class HtmlCreator {
 	 * @throws Exception
 	 */
 	private boolean createFrameSet() throws Exception {
-		if (this._RequestValue.getString("EWA_FRAMESET_NO") != null) {
+		if (this._RequestValue.getString(FrameParameters.EWA_FRAMESET_NO) != null) {
 			return false;
 		}
 		if (!this._UserConfig.getUserPageItem().testName("HtmlFrame")) {
@@ -694,7 +695,7 @@ public class HtmlCreator {
 		String url = Utils.encodeUrl(sbUrl.toString());
 		// url= URLEncoder.encode(url,"iso8859-1");
 
-		String url1 = this._RequestValue.getString("EWA_FRAME_URL");
+		String url1 = this._RequestValue.getString(FrameParameters.EWA_FRAME_URL);
 		if (url1 == null) {
 			url1 = "about:blank";
 		} else {
@@ -735,14 +736,7 @@ public class HtmlCreator {
 		if (this._Acl == null) {
 			return true;
 		}
-		/*
-		 * initial this parameters in the function initAcl
-		 * _Acl.setRequestValue(this._RequestValue);
-		 * 
-		 * _Acl.setItemName(this._RequestValue.getString("ITEMNAME"));
-		 * _Acl.setXmlName(this._RequestValue.getString("XMLNAME"));
-		 * _Acl.setRequestValue(this._RequestValue); _Acl.setHtmlCreator(this);
-		 */
+		 
 		_DebugFrames.addDebug(this, "HTML", "开始验证权限");
 		if (_Acl.canRun()) {
 			_DebugFrames.addDebug(this, "HTML", "验证通过");
@@ -1025,7 +1019,7 @@ public class HtmlCreator {
 			return "['AllowJsonExport=no']";
 		}
 		MStr sb = new MStr();
-		String jsonName = this._RequestValue.getString("EWA_JSON_NAME");
+		String jsonName = this._RequestValue.getString(FrameParameters.EWA_JSON_NAME);
 		if (jsonName != null) {
 			// 避免xss注入
 			if (jsonName.indexOf("<") >= 0 || jsonName.indexOf("&") >= 0 || jsonName.indexOf("#") >= 0
@@ -1525,8 +1519,7 @@ public class HtmlCreator {
 	 */
 	private void createPageAjax() throws Exception {
 		boolean isNoCnt = false;
-		if (this._RequestValue.getString("EWA_NO_CONTENT") != null
-				&& this._RequestValue.getString("EWA_NO_CONTENT").equals("1")) {
+		if ("1".equals(this._RequestValue.getString(FrameParameters.EWA_NO_CONTENT) )) {
 			isNoCnt = true;
 		}
 		if (this._SysParas.getAjaxCallType() == null)
@@ -1617,7 +1610,7 @@ public class HtmlCreator {
 			if (this._Workflow == null) {
 				sb.a("EWA.UI.Msg.Alter('工作流未定义，无法执行');");
 			} else {
-				String wfCtrl = this._ItemValues.getRequestValue().getString("EWA_WF_CTRL");
+				String wfCtrl = this._ItemValues.getRequestValue().getString(FrameParameters.EWA_WF_CTRL);
 				WfRst rst = this._Workflow.runNext();
 				if (wfCtrl != null && wfCtrl.equals("1")) { // 控制
 					if (rst.isOk()) {
@@ -1662,8 +1655,7 @@ public class HtmlCreator {
 		_DebugFrames.addDebug(this, "HTML", "结束合成脚本");
 
 		// EWA_NO_CONTENT 是否显示内容
-		if (this._RequestValue.getString("EWA_NO_CONTENT") == null
-				|| !this._RequestValue.getString("EWA_NO_CONTENT").equals("1")) {
+		if ("1".equals(this._RequestValue.getString(FrameParameters.EWA_NO_CONTENT))) {
 			_DebugFrames.addDebug(this, "HTML", "开始合成HTML");
 			if (_SysParas.isAjaxCall()) {
 				this._Frame.createContent();
@@ -1690,7 +1682,7 @@ public class HtmlCreator {
 		sb.append("EWA_PostBehavior(\"");
 		sb.append(Utils.textToJscript(_SysParas.getBehavior()));
 		sb.append("\", \"");
-		sb.append(Utils.textToJscript(this._RequestValue.s("EWA_PARENT_FRAME")));
+		sb.append(Utils.textToJscript(this._RequestValue.s(FrameParameters.EWA_PARENT_FRAME)));
 		sb.append("\"");
 		for (int i = 0; i < this._ItemValues.getDTTables().size(); i++) {
 			DTTable tb = (DTTable) this._ItemValues.getDTTables().get(i);
@@ -1714,7 +1706,7 @@ public class HtmlCreator {
 	 */
 	private void createJsActionTip() {
 		// 提交后执行的提示
-		String s1 = this._RequestValue.getString("EWA_ACTION_TIP");
+		String s1 = this._RequestValue.getString(FrameParameters.EWA_ACTION_TIP);
 
 		if (s1 == null) { // 页面第一次加载，没有该参数
 			return;
@@ -1725,7 +1717,7 @@ public class HtmlCreator {
 		}
 
 		// 执行后是否重新加载页面
-		String reload = this._RequestValue.getString("EWA_ACTION_RELOAD");
+		String reload = this._RequestValue.getString(FrameParameters.EWA_ACTION_RELOAD);
 		if (reload != null && reload.equals("0")) { // 不加载了
 			return;
 		}
@@ -1740,7 +1732,7 @@ public class HtmlCreator {
 			return;
 		}
 		// 页面提交的要执行的事件
-		String js = this._RequestValue.getString("EWA_AFTER_EVENT");
+		String js = this._RequestValue.getString(FrameParameters.EWA_AFTER_EVENT);
 
 		if (js == null || js.trim().length() == 0) {
 			return;
@@ -1785,7 +1777,7 @@ public class HtmlCreator {
 			return true;
 		}
 
-		PageValue pv = this._RequestValue.getPageValues().getPageValue("EWA_VALIDCODE_CHECK");
+		PageValue pv = this._RequestValue.getPageValues().getPageValue(FrameParameters.EWA_VALIDCODE_CHECK);
 		// 不检查验证码，用于手机应用或AJAX调用
 		if (pv != null && pv.getValue() != null && pv.getValue().toString().equals("NOT_CHECK")) {
 			if (pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS || pv.getPVTag() == PageValueTag.SYSTEM
@@ -1945,13 +1937,11 @@ public class HtmlCreator {
 		boolean isTreeGetStatus = false;
 		if (actionItem == null && frameType.equalsIgnoreCase("Tree")) {
 			// Tree的调用子节点没有定义，使用内部默认的SQL
-			if (this._RequestValue.getString("EWA_TREE_MORE") != null
-					&& this._RequestValue.getString("EWA_TREE_MORE").equals("1")) {
+			if ("1".equals(this._RequestValue.getString(FrameParameters.EWA_TREE_MORE)) ) {
 				actionItem = this.queryActionItem("OnPageLoad");
 			}
 			// EWA_TREE_STATUS
-			if (this._RequestValue.getString("EWA_TREE_STATUS") != null
-					&& this._RequestValue.getString("EWA_TREE_STATUS").equals("1")) {
+			if ("1".equals(this._RequestValue.getString(FrameParameters.EWA_TREE_STATUS))) {
 				actionItem = this.queryActionItem("OnPageLoad");
 				isTreeGetStatus = true;
 			}

@@ -27,6 +27,7 @@ import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
@@ -1487,9 +1488,9 @@ public class DataConnection {
 
 	private void writeDebug(Object obj, String eventName, String des) {
 		this.showSqlDebug(obj.toString() + ": " + des);
-		if (this._RequestValue != null && this._RequestValue.getString("EWA_DB_LOG") != null) {
-			String x = this._RequestValue.getString("xmlname");
-			String i = this._RequestValue.getString("itemname");
+		if (this._RequestValue != null && this._RequestValue.getString(FrameParameters.EWA_DB_LOG) != null) {
+			String x = this._RequestValue.getString(FrameParameters.XMLNAME);
+			String i = this._RequestValue.getString(FrameParameters.ITEMNAME);
 			String COMBINE_ID = this._RequestValue.getString("COMBINE_ID");
 			// if (x != null && i != null && des.indexOf("executeUpdate") > 0) {
 			String log = "X=" + x + ", I=" + i + ", COMBINE_ID=" + (COMBINE_ID == null ? "" : COMBINE_ID) + " : " + des;
@@ -2428,7 +2429,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public java.sql.Timestamp getTimestamp(String s1) {
-		String lang = this._RequestValue != null ? this._RequestValue.getString("ewa_lang") : "zhcn";
+		String lang = this._RequestValue != null ? this._RequestValue.getLang() : "zhcn";
 		boolean isUKFormat = this._RequestValue != null && this._RequestValue.getString("SYS_EWA_ENUS_YMD") != null
 				&& this._RequestValue.getString("SYS_EWA_ENUS_YMD").toLowerCase().equals("dd/mm/yyyy");
 		return Utils.getTimestamp(s1, lang, isUKFormat);

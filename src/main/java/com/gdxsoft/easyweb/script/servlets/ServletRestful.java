@@ -23,6 +23,7 @@ import com.gdxsoft.easyweb.conf.ConfRestfuls;
 import com.gdxsoft.easyweb.script.HtmlControl;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.frame.FrameList;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
@@ -99,11 +100,11 @@ public class ServletRestful extends HttpServlet {
 			return result.toString();
 		}
 
-		if ("DOWNLOAD-INLINE".equalsIgnoreCase(rv.s("ewa_ajax")) || (conf.getParameters() != null
+		if ("DOWNLOAD-INLINE".equalsIgnoreCase(rv.s(FrameParameters.EWA_AJAX)) || (conf.getParameters() != null
 				&& conf.getParameters().toUpperCase().indexOf("EWA_AJAX=DOWNLOAD-INLINE") >= 0)) {
 			// output the file bytes e.g. image, pdf
 			isOutImage = true;
-		} else if ("DOWNLOAD".equalsIgnoreCase(rv.s("ewa_ajax")) || (conf.getParameters() != null
+		} else if ("DOWNLOAD".equalsIgnoreCase(rv.s(FrameParameters.EWA_AJAX)) || (conf.getParameters() != null
 				&& conf.getParameters().toUpperCase().indexOf("EWA_AJAX=DOWNLOAD") >= 0)) {
 			// download the file
 			isDownload = true;
@@ -283,7 +284,7 @@ public class ServletRestful extends HttpServlet {
 			LOGGER.warn("The download file not found: {}, root: {}", fileStr, UPath.getPATH_UPLOAD());
 			return;
 		}
-		String resize = rv.s("ewa_image_resize");
+		String resize = rv.s(FrameParameters.EWA_IMAGE_RESIZE);
 		if (StringUtils.isNotBlank(resize)) {
 			File imgSize = FileOut.getImageResizedFile(image, resize);
 			if (imgSize != null && imgSize.exists()) {
@@ -386,8 +387,8 @@ public class ServletRestful extends HttpServlet {
 	}
 
 	public void initUploadParameters(ConfRestful conf, RequestValue rv, RestfulResult<Object> result) throws Exception {
-		rv.addOrUpdateValue("xmlname", conf.getXmlName());
-		rv.addOrUpdateValue("itemname", conf.getItemName());
+		rv.addOrUpdateValue(FrameParameters.XMLNAME, conf.getXmlName());
+		rv.addOrUpdateValue(FrameParameters.ITEMNAME, conf.getItemName());
 		String uploadName = null;
 		UserConfig uc = UserConfig.instance(conf.getXmlName(), conf.getItemName(), null);
 		UserXItems items = uc.getUserXItems();

@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UNet;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
@@ -582,7 +583,7 @@ public class HtmlMobile {
 
 			if (tag.equalsIgnoreCase("select")) {
 				JSONArray opts;
-				if (name.equalsIgnoreCase("EWA_WF_UOK")
+				if (name.equalsIgnoreCase(FrameParameters.EWA_WF_UOK)
 						&& this.wfOptions != null) {
 					// 审批选项
 					opts = this.wfOptions;

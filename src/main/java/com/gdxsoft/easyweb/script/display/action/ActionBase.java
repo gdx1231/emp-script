@@ -32,6 +32,7 @@ import com.gdxsoft.easyweb.script.display.HtmlClass;
 import com.gdxsoft.easyweb.script.display.ItemValues;
 import com.gdxsoft.easyweb.script.display.action.extend.ExtOpt;
 import com.gdxsoft.easyweb.script.display.action.extend.ExtOpts;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
@@ -385,8 +386,9 @@ public class ActionBase {
 			String v = val.getStringValue();
 			if (v != null) {
 				String val_name = val.getName();
-				if (val_name.toUpperCase().equals("XMLNAME") || val_name.toUpperCase().equals("ITEMNAME")
-						|| val_name.toUpperCase().equals("EWA_AJAX")) {
+				if (val_name.toUpperCase().equals(FrameParameters.XMLNAME) 
+						|| val_name.toUpperCase().equals(FrameParameters.ITEMNAME)
+						|| val_name.toUpperCase().equals(FrameParameters.EWA_AJAX)) {
 					continue;
 				}
 				// 去除重复值
@@ -798,7 +800,7 @@ public class ActionBase {
 		String life = uxv.getItem("Life");
 
 		// 郭磊 2017-08-24 增加，用于更改cookie的域
-		PageValue pv = rv.getPageValues().getPageValue("EWA_COOKIE_DOMAIN");
+		PageValue pv = rv.getPageValues().getPageValue(FrameParameters.EWA_COOKIE_DOMAIN);
 		if (pv != null && (pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS)) {
 			// 只能用于HtmlControl调用
 			domain = pv.getValue().toString();
@@ -868,7 +870,7 @@ public class ActionBase {
 		String life = uxv.getItem("Life");
 
 		// 郭磊 2017-08-24 增加，用于更改cookie的域
-		PageValue pv = rv.getPageValues().getPageValue("EWA_COOKIE_DOMAIN");
+		PageValue pv = rv.getPageValues().getPageValue(FrameParameters.EWA_COOKIE_DOMAIN);
 		if (pv != null && (pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS)) {
 			// 只能用于HtmlControl调用
 			domain = pv.getValue().toString();
@@ -1371,12 +1373,12 @@ public class ActionBase {
 	 * @return
 	 */
 	public boolean checkActionErrorOutInTable(DTTable dt) {
-		if (dt.getCount() == 0 || !dt.getColumns().testName("EWA_ERR_OUT")) {
+		if (dt.getCount() == 0 || !dt.getColumns().testName(FrameParameters.EWA_ERR_OUT)) {
 			return false;
 		}
 		try {
 			for (int i = 0; i < dt.getCount(); i++) {
-				String v = dt.getCell(i, "EWA_ERR_OUT").toString();
+				String v = dt.getCell(i, FrameParameters.EWA_ERR_OUT).toString();
 				if (v != null && v.trim().length() > 0) {
 					this.setChkErrorMsg(v);
 					return true;
@@ -1395,7 +1397,7 @@ public class ActionBase {
 	public boolean checkActionErrorOutInProcdure() {
 		// 现在参数中检查是否存在错误输出
 		MTable pvs = this.getRequestValue().getPageValues().getTagValues(PageValueTag.DTTABLE);
-		Object o = pvs.get("EWA_ERR_OUT");
+		Object o = pvs.get(FrameParameters.EWA_ERR_OUT);
 		if (o != null) {
 			PageValue pv = (PageValue) o;
 			if (pv.getValue() != null) {

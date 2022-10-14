@@ -45,7 +45,7 @@ public class FrameComplex extends FrameBase implements IFrame {
 
 	public void createHtml() throws Exception {
 		_Rv = super.getHtmlClass().getSysParas().getRequestValue();
-		init_grp = _Rv.getString("EWA_INIT_GRP");
+		init_grp = _Rv.getString(FrameParameters.EWA_INIT_GRP);
 		if (init_grp == null) {
 			init_grp = "";
 		} else {

@@ -26,6 +26,7 @@ import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.define.CodeFormat;
 import com.gdxsoft.easyweb.define.ConfigUtils;
+import com.gdxsoft.easyweb.define.DefineParameters;
 import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UpdateXmlBase;
 import com.gdxsoft.easyweb.define.UserDirXmls;
@@ -34,6 +35,7 @@ import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.servlets.GZipOut;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
@@ -145,7 +147,7 @@ public class ServletXml extends HttpServlet {
 			return;
 		}
 
-		PageValue pvAdmin = rv.getPageValues().getPageValue("EWA_ADMIN_ID");
+		PageValue pvAdmin = rv.getPageValues().getPageValue(DefineParameters.EWA_ADMIN_ID);
 
 		// not login
 		if (pvAdmin == null || (pvAdmin.getPVTag() != PageValueTag.SESSION)) {
@@ -239,15 +241,15 @@ public class ServletXml extends HttpServlet {
 	 * @return
 	 */
 	private String handleSqls(RequestValue rv, PageValue pvAdmin) {
-		String xmlName = rv.getString("XMLNAME");
+		String xmlName = rv.getString(FrameParameters.XMLNAME);
 		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 		String sqls = up.getSqls();
 		return sqls;
 	}
 
 	private boolean handleSave(RequestValue rv, PageValue pvAdmin) {
-		String xmlName = rv.getString("XMLNAME");
-		String itemName = rv.getString("ITEMNAME");
+		String xmlName = rv.getString(FrameParameters.XMLNAME);
+		String itemName = rv.getString(FrameParameters.ITEMNAME);
 		String xml = rv.getString("XML");
 		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 		return up.updateItem(itemName, xml);
@@ -281,8 +283,8 @@ public class ServletXml extends HttpServlet {
 
 	private String handleAll(RequestValue rv, PageValue pvAdmin) {
 		MStr s = new MStr();
-		String xmlName = rv.getString("XMLNAME");
-		String itemName = rv.getString("ITEMNAME");
+		String xmlName = rv.getString(FrameParameters.XMLNAME);
+		String itemName = rv.getString(FrameParameters.ITEMNAME);
 		try {
 			IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 			String xml;
@@ -319,7 +321,7 @@ public class ServletXml extends HttpServlet {
 	 * @return
 	 */
 	private String handleCfgXml(RequestValue rv, HttpServletResponse response) {
-		String xmlName = rv.getString("XMLNAME");
+		String xmlName = rv.getString(FrameParameters.XMLNAME);
 		String name = xmlName;
 		String xml = null;
 		String modeName = rv.getString("MODE_NAME");
@@ -342,8 +344,8 @@ public class ServletXml extends HttpServlet {
 	}
 
 	private void handleRemove(RequestValue rv, PageValue pvAdmin) {
-		String xmlName = rv.getString("XMLNAME");
-		String itemName = rv.getString("ITEMNAME");
+		String xmlName = rv.getString(FrameParameters.XMLNAME);
+		String itemName = rv.getString(FrameParameters.ITEMNAME);
 		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 		up.removeItem(itemName);
 	}
@@ -368,7 +370,7 @@ public class ServletXml extends HttpServlet {
 	 * @return the removes count
 	 */
 	private int handleDeleteBaks(RequestValue rv, PageValue pvAdmin) {
-		String xmlname = rv.getString("xmlname");
+		String xmlname = rv.getString(FrameParameters.XMLNAME);
 		IUpdateXml up = this.getUpdateXml(xmlname, pvAdmin.getStringValue());
 		int bakFilesCount = up.deleteBaks(xmlname);
 
@@ -418,7 +420,7 @@ public class ServletXml extends HttpServlet {
 
 	private void handleGetDocXml(RequestValue rv, HttpServletResponse response, PageValue pvAdmin) throws IOException {
 		// 获取整个配置文件
-		String xmlname = rv.getString("xmlname");
+		String xmlname = rv.getString(FrameParameters.XMLNAME);
 		IUpdateXml up = this.getUpdateXml(xmlname, pvAdmin.getStringValue());
 		String cnt = up.getDocXml();
 
@@ -444,7 +446,7 @@ public class ServletXml extends HttpServlet {
 		String sourceXmlFilePath = UPath.getPATH_UPLOAD() + rv.s("UP_NAME");
 
 		String path = rv.s("path");
-		String xmlname = rv.s("xmlname");
+		String xmlname = rv.s(FrameParameters.XMLNAME);
 
 		IUpdateXml up = this.getUpdateXml(path, pvAdmin.getStringValue());
 		JSONObject rst = up.importXml(path, xmlname, sourceXmlFilePath);
@@ -482,7 +484,7 @@ public class ServletXml extends HttpServlet {
 	 * @return
 	 */
 	private String handleEwacDdlReload(RequestValue rv, PageValue pvAdmin) {
-		String ewascriptpath = rv.s("EWA_SCRIPT_PATH");
+		String ewascriptpath = rv.s(FrameParameters.EWA_SCRIPT_PATH);
 		ConfScriptPath sp = ConfScriptPaths.getInstance().getScriptPath(ewascriptpath);
 
 		if (sp == null) {

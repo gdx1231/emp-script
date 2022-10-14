@@ -72,25 +72,23 @@ public class FrameGrid extends FrameList implements IFrame {
 
 		String tag0 = "li";
 		String tag1 = "li";
-		if (rv.s("ewa_grid_as") != null) {
-			if (rv.s("ewa_grid_as").equalsIgnoreCase("a")) {
+		String gridAs = rv.s(FrameParameters.EWA_GRID_AS);
+		if (rv.s(gridAs) != null) {
+			if (rv.s(gridAs).equalsIgnoreCase("a")) {
 				tag0 = "a";
 				tag1 = "a";
-			} else if (rv.s("ewa_grid_as").equalsIgnoreCase("div")) {
+			} else if (gridAs.equalsIgnoreCase("div")) {
 				tag0 = "div";
 				tag1 = "div";
-			} else if (rv.s("ewa_grid_as").equalsIgnoreCase("div2")) {
+			} else if (gridAs.equalsIgnoreCase("div2")) {
 				tag0 = "div><div";
 				tag1 = "div></div";
 			}
 		}
 
 		// 是否使用模板
-		boolean isUseTemplate = false;
+		boolean isUseTemplate = super.isUsingTemplate();
 		String frameTemplate = super.getPageItemValue("FrameHtml", "FrameHtml");
-		if (frameTemplate != null && frameTemplate.trim().length() > 0 && rv.s("EWA_LF_TEMP_NO") == null) {
-			isUseTemplate = true;
-		}
 
 		if (colSize == 0) {
 

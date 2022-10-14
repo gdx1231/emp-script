@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
@@ -125,7 +126,7 @@ public class PageValues {
 		}
 		pv.setTag(pv.getPVTag().toString());
 
-		if ("EWA_MTYPE".equalsIgnoreCase(pv.getName())) {
+		if (FrameParameters.EWA_MTYPE.equalsIgnoreCase(pv.getName())) {
 			String val = pv.getStringValue();
 			// 避免非法字符例如，',",< ...
 			if (!StringUtils.isAlpha(val) || val.length() > 1) {

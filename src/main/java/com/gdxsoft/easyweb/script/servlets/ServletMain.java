@@ -22,6 +22,7 @@ import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.define.EwaConfHelpHSqlServer;
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.script.template.Skin;
 import com.gdxsoft.easyweb.utils.UPath;
@@ -242,7 +243,7 @@ public class ServletMain extends HttpServlet {
 			} else {
 				// 跳转到错误页面
 				String u = request.getContextPath() + EwaWebPage.ERR_PAGE;
-				String ajax = rv.s("EWA_AJAX");
+				String ajax = rv.s(FrameParameters.EWA_AJAX);
 				if (ajax != null && ajax.trim().length() > 0) {
 					if (u.indexOf("?") == -1) {
 						u += "?EWA_AJAX=" + ajax;
@@ -258,7 +259,7 @@ public class ServletMain extends HttpServlet {
 			return;
 		}
 
-		String debugKey = rv.s("EWA_DEBUG_KEY");
+		String debugKey = rv.s(FrameParameters.EWA_DEBUG_KEY);
 		String frameUnid = p.getHtmlCreator().getHtmlClass().getSysParas().getFrameUnid();
 		if (frameUnid != null && frameUnid.equals(debugKey)) {
 			p.getDebugInfo().recordToHsql();
@@ -272,17 +273,17 @@ public class ServletMain extends HttpServlet {
 		String cnt1 = p.getPageContent();
 
 		// 输出二进制内容，例如图片、pdf文件等
-		if ("download-inline".equalsIgnoreCase(rv.s("ewa_ajax"))) {
+		if ("download-inline".equalsIgnoreCase(rv.s(FrameParameters.EWA_AJAX))) {
 			this.outImage(rv, response, p);
 			return;
 		}
-		if ("validcode".equalsIgnoreCase(rv.s("ewa_ajax"))) { // 输出验证码图片
+		if ("validcode".equalsIgnoreCase(rv.s(FrameParameters.EWA_AJAX))) { // 输出验证码图片
 			this.outValidCode(p);
 			return;
 		}
-		if ("download".equalsIgnoreCase(rv.s("ewa_ajax"))) {
+		if ("download".equalsIgnoreCase(rv.s(FrameParameters.EWA_AJAX))) {
 			// the download saved file name's field name
-			String downloadNameField = rv.s("EWA_DOWNLOAD_NAME");
+			String downloadNameField = rv.s(FrameParameters.EWA_DOWNLOAD_NAME);
 			String downloadFile = null;
 			if (StringUtils.isNotBlank(downloadNameField)) {
 				String name = p.getHtmlCreator().getValueFromFrameTables(downloadNameField);
@@ -300,7 +301,7 @@ public class ServletMain extends HttpServlet {
 			ewaPath = "/EmpScriptV2"; // default static url prefix
 		}
 
-		if (rv.s("EWA_JS_DEBUG") != null && cnt1.indexOf("<script") > 0 && cnt1.indexOf("ewa.min.js") > 0) {
+		if (rv.s(FrameParameters.EWA_JS_DEBUG) != null && cnt1.indexOf("<script") > 0 && cnt1.indexOf("ewa.min.js") > 0) {
 			cnt1 = cnt1.replace("ewa.min.js", "fas.js");
 			String debugScripts = this.createJsDebug(ewaPath);
 			cnt1 = cnt1.replace("</head>", debugScripts);
@@ -351,7 +352,7 @@ public class ServletMain extends HttpServlet {
 	private void outImage(RequestValue rv, HttpServletResponse response, EwaWebPage p) {
 		String fileStr = p.getPageContent();
 		File image = new File(fileStr);
-		String resize = rv.s("ewa_image_resize");
+		String resize = rv.s(FrameParameters.EWA_IMAGE_RESIZE);
 		if (StringUtils.isNotBlank(resize)) {
 			File imgSize = FileOut.getImageResizedFile(image, resize);
 			if (imgSize.exists()) {

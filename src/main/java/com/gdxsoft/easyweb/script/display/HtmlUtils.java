@@ -10,6 +10,7 @@ import com.gdxsoft.easyweb.datasource.SqlPart;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.script.template.XItem;
 import com.gdxsoft.easyweb.script.template.XItems;
@@ -187,8 +188,8 @@ public class HtmlUtils {
 		RequestValue rv = htmlCreator.getRequestValue();
 		UserConfig uc = htmlCreator.getUserConfig();
 		DataConnection conn = htmlCreator.getDataConn();
-		String userOrder = rv.getString("EWA_LF_ORDER");
-		String userSearch = rv.getString("EWA_LF_SEARCH");
+		String userOrder = rv.getString(FrameParameters.EWA_LF_ORDER);
+		String userSearch = rv.getString(FrameParameters.EWA_LF_SEARCH);
 		if (userOrder == null && userSearch == null) {
 			return sql;
 		}
@@ -286,7 +287,7 @@ public class HtmlUtils {
 		String key = v.getItem("Key");
 		String pkey = v.getItem("ParentKey");
 
-		if (rv.getString("EWA_TREE_MORE") != null && rv.getString("EWA_TREE_MORE").equals("1")) {
+		if ("1".equals(rv.getString(FrameParameters.EWA_TREE_MORE))) {
 			String s3 = "SELECT " + sp.getFields() + " FROM " + sp.getTableName() + " WHERE " + pkey + "=@" + key;
 			String s2 = "SELECT " + pkey + " EWAPID, COUNT(*) EWAMORECNT FROM " + sp.getTableName() + " GROUP BY "
 					+ pkey;

@@ -23,6 +23,7 @@ import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.define.ConfigUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -80,7 +81,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 
 		if (tb.getCount() == 0) {
 			String xmlPath2 = UserConfig.filterXmlNameByJdbc(xmlPath);
-			rv.addValue("XMLNAME", xmlPath2);
+			rv.addValue(FrameParameters.XMLNAME, xmlPath2);
 			String sql1 = "select 1 a from  ewa_cfg_tree where XMLNAME = @XMLNAME";
 			tb = this.getJdbcTable(sql1, rv);
 		}
@@ -103,7 +104,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 
 		xmlname = UserConfig.filterXmlNameByJdbc(xmlname);
 		RequestValue rv = new RequestValue();
-		rv.addValue("XMLNAME", xmlname);
+		rv.addValue(FrameParameters.XMLNAME, xmlname);
 		String sql0 = "select 1 from EWA_CFG_TREE where XMLNAME = @xmlname";
 		DTTable tb = this.getJdbcTable(sql0, rv);
 
@@ -257,7 +258,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		sqls.add(sql1);
 
 		RequestValue rv = new RequestValue();
-		rv.addValue("XMLNAME", xmlName);
+		rv.addValue(FrameParameters.XMLNAME, xmlName);
 		rv.addValue("ADM_ID", admId);
 		rv.addValue("XMLDATA", ConfigUtils.XML_ROOT);
 
@@ -276,7 +277,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		List<String> sqls = new ArrayList<String>();
 		sqls.add(sql);
 		RequestValue rv = new RequestValue();
-		rv.addValue("XMLNAME", xmlName);
+		rv.addValue(FrameParameters.XMLNAME, xmlName);
 
 		updates(sqls, rv);
 	}
@@ -383,7 +384,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		sqls.add(sql1);
 
 		RequestValue rv = new RequestValue();
-		rv.addValue("XMLNAME", xmlName);
+		rv.addValue(FrameParameters.XMLNAME, xmlName);
 		rv.addValue("OLD_ITEMNAME", oldItemName);
 		rv.addValue("NEW_ITEMNAME", newItemName);
 		rv.addValue("XMLDATA", xml);
@@ -407,8 +408,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		sb.append(", ADM_LID, CREATE_DATE, UPDATE_DATE , DATASOURCE, MD5, CLASS_ACL, CLASS_LOG, DESCRIPTION \n");
 		sb.append(" FROM EWA_CFG WHERE xmlname = @XMLNAME and itemname = @ITEMNAME");
 		RequestValue rv = new RequestValue();
-		rv.addValue("XMLNAME", xmlName);
-		rv.addValue("ITEMNAME", itemname);
+		rv.addValue(FrameParameters.XMLNAME, xmlName);
+		rv.addValue(FrameParameters.ITEMNAME, itemname);
 
 		update(sb.toString(), rv);
 	}
@@ -441,8 +442,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 			sqls.add(sql2);
 		}
 		RequestValue rv = new RequestValue();
-		rv.addValue("XMLNAME", xmlName);
-		rv.addValue("ITEMNAME", itemname);
+		rv.addValue(FrameParameters.XMLNAME, xmlName);
+		rv.addValue(FrameParameters.ITEMNAME, itemname);
 
 		updates(sqls, rv);
 	}
@@ -464,8 +465,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		String sql = sb.toString();
 
 		RequestValue rv = new RequestValue();
-		rv.addValue("XMLNAME", xmlName);
-		rv.addValue("ITEMNAME", itemname);
+		rv.addValue(FrameParameters.XMLNAME, xmlName);
+		rv.addValue(FrameParameters.ITEMNAME, itemname);
 
 		update(sql, rv);
 	}
@@ -496,7 +497,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		String xmlNameJdbc = UserConfig.filterXmlNameByJdbc(xmlname);
 		RequestValue rv = new RequestValue();
 		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
-		rv.addOrUpdateValue("itemname", itemname);
+		rv.addOrUpdateValue(FrameParameters.ITEMNAME, itemname);
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("select HASH_CODE, UPDATE_DATE, MD5, DATASOURCE, CLASS_ACL, CLASS_LOG, ADM_LID from EWA_CFG ");
@@ -586,8 +587,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		rv.addValue("md5", md5);
 		rv.addValue("hashCode", hashCode);
 		rv.addValue("ADM_LID", adm);
-		rv.addValue("XMLNAME", xmlName);
-		rv.addValue("ITEMNAME", itemname);
+		rv.addValue(FrameParameters.XMLNAME, xmlName);
+		rv.addValue(FrameParameters.ITEMNAME, itemname);
 
 		Node node = UXml.asNode(xmlStr);
 		if (itemname.length() > 0) {
@@ -767,7 +768,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 
 		JSONObject obj = new JSONObject();
 		obj.put("HASH", hashCode);
-		obj.put("XMLNAME", xmlName);
+		obj.put(FrameParameters.XMLNAME, xmlName);
 		obj.put("DATE", new Date());
 		obj.put("MD5", md5);
 
@@ -872,7 +873,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		DTTable tb = getAllXmlnames();
 		for (int i = 0; i < tb.getCount(); i++) {
 			int hashCode = tb.getCell(i, "HASH_CODE").toInt();
-			String xmlName = tb.getCell(i, "XMLNAME").toString();
+			String xmlName = tb.getCell(i, FrameParameters.XMLNAME).toString();
 			long CREATE_DATE = tb.getCell(i, "CREATE_DATE").toTime();
 			long UPDATE_DATE = tb.getCell(i, "UPDATE_DATE").toTime();
 			String md5 = tb.getCell(i, "MD5").toString();
@@ -983,7 +984,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 
 		RequestValue rv = new RequestValue();
 		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
-		rv.addOrUpdateValue("itemname", itemname);
+		rv.addOrUpdateValue(FrameParameters.ITEMNAME, itemname);
 
 		if (this.isHsqlDb()) {
 			sb.append("select 1 a from EWA_CFG where xmlname=@xmlNameJdbc and lower(itemname)=lower(@itemname)");
@@ -1008,7 +1009,7 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		String xmlNameJdbc = UserConfig.filterXmlNameByJdbc(xmlname);
 		RequestValue rv = new RequestValue();
 		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
-		rv.addOrUpdateValue("itemname", itemname);
+		rv.addOrUpdateValue(FrameParameters.ITEMNAME, itemname);
 
 		StringBuilder sb = new StringBuilder();
 		if (this.isHsqlDb()) {

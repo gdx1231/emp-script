@@ -14,6 +14,41 @@ public class ConfAddedResource {
 	private String xml;
 	private boolean last;
 	private boolean defaultConf;
+	private String content; // 资源内容
+
+	private String resourceType;
+
+	/**
+	 * 资源类型，css、js、html
+	 * 
+	 * @return
+	 */
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	/**
+	 * 资源类型，css、js、html
+	 * 
+	 * @param resourceType
+	 */
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
+	public String toString() {
+		if ("css".equalsIgnoreCase(this.getResourceType())) {
+			return toCss();
+		} else if ("html".equalsIgnoreCase(this.getResourceType())) {
+			return toHtml();
+		} else {
+			return toJs();
+		}
+	}
+
+	public String toHtml() {
+		return this.content == null ? "" : this.content;
+	}
 
 	/**
 	 * 转成JS表达式
@@ -21,12 +56,16 @@ public class ConfAddedResource {
 	 * @return
 	 */
 	public String toJs() {
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("<script type=\"text/javascript\" id=\"ewa_resource_");
-		sb.append(Utils.textToInputValue(this.name));
-		sb.append("\" src=\"");
-		sb.append(Utils.textToInputValue(this.src) + "\"></script>");
-
+		sb.append(Utils.textToInputValue(this.name)).append("\" ");
+		if (src != null && src.trim().length() > 0) {
+			sb.append("src=\"").append(Utils.textToInputValue(this.src)).append("\">");
+		} else {
+			sb.append(">").append(this.content == null ? "" : this.content);
+		}
+		sb.append("</script>");
 		return sb.toString();
 	}
 
@@ -37,11 +76,18 @@ public class ConfAddedResource {
 	 */
 	public String toCss() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<link rel=\"stylesheet\" id=\"ewa_resource_");
-		sb.append(Utils.textToInputValue(this.name));
-		sb.append("\" href=\"");
-		sb.append(Utils.textToInputValue(this.src) + "\">");
-
+		if (src != null && src.trim().length() > 0) {
+			sb.append("<link rel=\"stylesheet\" id=\"ewa_resource_");
+			sb.append(Utils.textToInputValue(this.name));
+			sb.append("\" href=\"");
+			sb.append(Utils.textToInputValue(this.src) + "\">");
+		} else {
+			sb.append("<style id=\"ewa_resource_");
+			sb.append(Utils.textToInputValue(this.name));
+			sb.append("\">");
+			sb.append(this.content == null ? "" : this.content);
+			sb.append("<style>");
+		}
 		return sb.toString();
 	}
 
@@ -130,5 +176,19 @@ public class ConfAddedResource {
 
 	public void setDefaultConf(boolean defaultConf) {
 		this.defaultConf = defaultConf;
+	}
+
+	/**
+	 * 资源内容，和src互斥
+	 * 
+	 * @param content
+	 */
+	public void setContent(String content) {
+		this.content = content;
+
+	}
+
+	public String getContent() {
+		return content;
 	}
 }

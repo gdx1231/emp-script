@@ -35,6 +35,7 @@ import com.gdxsoft.easyweb.cache.SqlCached;
 import com.gdxsoft.easyweb.cache.SqlCachedValue;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -892,10 +893,10 @@ public class DTTable implements Serializable {
 
 		int field_name_case = 0; // 原始
 		if (rv != null) {
-			if (rv.s("EWA_JSON_FIELD_CASE") != null) {
-				if (rv.s("EWA_JSON_FIELD_CASE").equalsIgnoreCase("upper")) {
+			if (rv.s(FrameParameters.EWA_JSON_FIELD_CASE) != null) {
+				if (rv.s(FrameParameters.EWA_JSON_FIELD_CASE).equalsIgnoreCase("upper")) {
 					field_name_case = 1; // 大写字段
-				} else if (rv.s("EWA_JSON_FIELD_CASE").equalsIgnoreCase("lower")) {
+				} else if (rv.s(FrameParameters.EWA_JSON_FIELD_CASE).equalsIgnoreCase("lower")) {
 					field_name_case = 2; // 小写字段
 				}
 			}

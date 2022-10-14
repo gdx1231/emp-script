@@ -17,6 +17,7 @@ import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UDataUtils;
 import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UNet;
@@ -519,7 +520,7 @@ public class ActionJSON {
 		for (int i = 0; i < jsonTb.getColumns().getCount(); i++) {
 			String field = jsonTb.getColumns().getColumn(i).getName().trim();
 
-			if (field.toUpperCase().equals("EWA_KEY")) {
+			if (field.toUpperCase().equals(FrameParameters.EWA_KEY)) {
 				continue;
 			}
 			if (!tbTmp.getColumns().testName(field)) {
@@ -784,7 +785,7 @@ public class ActionJSON {
 
 		for (int i = 0; i < tb.getColumns().getCount(); i++) {
 			String field = tb.getColumns().getColumn(i).getName().trim();
-			if (field.toUpperCase().equals("EWA_KEY")) {
+			if (field.toUpperCase().equals(FrameParameters.EWA_KEY)) {
 				continue;
 			}
 			if (sb.length() > 0) {

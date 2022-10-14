@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import com.gdxsoft.easyweb.cache.SqlCachedHsqldbImpl;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
@@ -22,11 +23,11 @@ public class DebugInfo {
 	 * 记录到 HSQL数据库中
 	 */
 	public void recordToHsql() {
-		String xmlname = this._RequestValue.s("xmlname");
+		String xmlname = this._RequestValue.s(FrameParameters.XMLNAME);
 		if (xmlname == null || xmlname.indexOf("ewa.xml") > 0) {
 			return;
 		}
-		String ITEMNAME = this._RequestValue.s("ITEMNAME");
+		String ITEMNAME = this._RequestValue.s(FrameParameters.ITEMNAME);
 		if ("FRAME_DEBUG.LF.M".equalsIgnoreCase(ITEMNAME) || "FRAME_DEBUG.F.NM".equalsIgnoreCase(ITEMNAME)) {
 			return;
 		}
@@ -81,9 +82,9 @@ public class DebugInfo {
 	public String getDebugPage() {
 		MStr u1sb = new MStr();
 		u1sb.append("XMLNAME=ewa|ewa.xml&ITEMNAME=define_right&D_XMLNAME=");
-		u1sb.append(_RequestValue.getString("xmlname"));
+		u1sb.append(_RequestValue.getString(FrameParameters.XMLNAME));
 		u1sb.append("&D_ITEMNAME=");
-		u1sb.append(_RequestValue.getString("ITEMNAME"));
+		u1sb.append(_RequestValue.getString(FrameParameters.ITEMNAME));
 		String u1 = u1sb.toString();
 		String u2 = "";
 		try {

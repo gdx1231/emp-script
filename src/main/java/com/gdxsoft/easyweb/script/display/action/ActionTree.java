@@ -6,6 +6,7 @@ import com.gdxsoft.easyweb.data.DTCell;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.SqlPart;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
@@ -19,20 +20,16 @@ public class ActionTree extends ActionBase implements IAction {
 	 * @return
 	 * @throws Exception
 	 */
-	private String createSqlLoadByLevel(String sql, UserXItemValues u)
-			throws Exception {
+	private String createSqlLoadByLevel(String sql, UserXItemValues u) throws Exception {
 		UserXItemValue v = u.getItem(0);
 		SqlPart sp = new SqlPart();
 		sp.setSql(sql);
 		String key = v.getItem("Key");
 		String pkey = v.getItem("ParentKey");
 
-		String s3 = "SELECT " + sp.getFields() + " FROM " + sp.getTableName()
-				+ " WHERE " + sp.getWhere();
-		String s2 = "SELECT " + pkey + " EWAPID, COUNT(*) EWAMORECNT FROM "
-				+ sp.getTableName() + " GROUP BY " + pkey;
-		String s1 = "SELECT A.*, B.EWAMORECNT FROM (" + s3
-				+ ") A \r\n LEFT JOIN (" + s2 + ") B ON A." + key
+		String s3 = "SELECT " + sp.getFields() + " FROM " + sp.getTableName() + " WHERE " + sp.getWhere();
+		String s2 = "SELECT " + pkey + " EWAPID, COUNT(*) EWAMORECNT FROM " + sp.getTableName() + " GROUP BY " + pkey;
+		String s1 = "SELECT A.*, B.EWAMORECNT FROM (" + s3 + ") A \r\n LEFT JOIN (" + s2 + ") B ON A." + key
 				+ "=B.EWAPID ";
 		if (sp.getOrderBy() != null) {
 			s1 += " ORDER BY " + sp.getOrderBy();
@@ -49,20 +46,16 @@ public class ActionTree extends ActionBase implements IAction {
 	 * @return
 	 * @throws Exception
 	 */
-	private String createLoadByLevelMore(String sql, UserXItemValues u)
-			throws Exception {
+	private String createLoadByLevelMore(String sql, UserXItemValues u) throws Exception {
 		UserXItemValue v = u.getItem(0);
 		SqlPart sp = new SqlPart();
 		sp.setSql(sql);
 		String key = v.getItem("Key");
 		String pkey = v.getItem("ParentKey");
 
-		String s3 = "SELECT " + sp.getFields() + " FROM " + sp.getTableName()
-				+ " WHERE " + pkey + "=@" + key;
-		String s2 = "SELECT " + pkey + " EWAPID, COUNT(*) EWAMORECNT FROM "
-				+ sp.getTableName() + " GROUP BY " + pkey;
-		String s1 = "SELECT A.*, B.EWAMORECNT FROM (" + s3
-				+ ") A \r\n LEFT JOIN (" + s2 + ") B ON A." + key
+		String s3 = "SELECT " + sp.getFields() + " FROM " + sp.getTableName() + " WHERE " + pkey + "=@" + key;
+		String s2 = "SELECT " + pkey + " EWAPID, COUNT(*) EWAMORECNT FROM " + sp.getTableName() + " GROUP BY " + pkey;
+		String s1 = "SELECT A.*, B.EWAMORECNT FROM (" + s3 + ") A \r\n LEFT JOIN (" + s2 + ") B ON A." + key
 				+ "=B.EWAPID ";
 		if (sp.getOrderBy() != null) {
 			s1 += " ORDER BY " + sp.getOrderBy();
@@ -72,16 +65,15 @@ public class ActionTree extends ActionBase implements IAction {
 
 	private String createStatusFindPkey(String sql) {
 		super.executeSqlQuery(sql);
-		DTTable tb =(DTTable) super.getDTTables().getLast();
-		if(tb.getCount()==0){
+		DTTable tb = (DTTable) super.getDTTables().getLast();
+		if (tb.getCount() == 0) {
 			return null;
 		}
 		DTCell cell = tb.getCell(0, 0);
 		return cell.toString();
 	}
 
-	private String createStatusFindPkeys(String sql, UserXItemValues u)
-			throws Exception {
+	private String createStatusFindPkeys(String sql, UserXItemValues u) throws Exception {
 		ArrayList<String> keys = new ArrayList<String>();
 		UserXItemValue v = u.getItem(0);
 		SqlPart sp = new SqlPart();
@@ -89,8 +81,7 @@ public class ActionTree extends ActionBase implements IAction {
 		String key = v.getItem("Key");
 		String pkey = v.getItem("ParentKey");
 
-		String s1 = "SELECT " + pkey + " FROM " + sp.getTableName() + " WHERE "
-				+ key + "='";
+		String s1 = "SELECT " + pkey + " FROM " + sp.getTableName() + " WHERE " + key + "='";
 		String keyValue = super.getRequestValue().getString(key);
 		int m = 0;
 		while (keyValue != null) {
@@ -98,21 +89,20 @@ public class ActionTree extends ActionBase implements IAction {
 			if (m > 20) {// 循环加载？
 				return null;
 			}
-			if(keys.contains(keyValue)){
+			if (keys.contains(keyValue)) {
 				break;
 			}
 			keys.add(keyValue);
 			String s2 = s1 + keyValue.replace("'", "''") + "'";
 			keyValue = this.createStatusFindPkey(s2);
 		}
-		if(keys.size()<=1){
-			return null; //指定的key值不对
+		if (keys.size() <= 1) {
+			return null; // 指定的key值不对
 		}
-		
+
 		StringBuilder s3 = new StringBuilder();
-		s3.append("SELECT " + sp.getFields() + " FROM " + sp.getTableName()
-				+ " WHERE " + pkey + " IN (");
-		for (int i = 0; i < keys.size()-1; i++) {
+		s3.append("SELECT " + sp.getFields() + " FROM " + sp.getTableName() + " WHERE " + pkey + " IN (");
+		for (int i = 0; i < keys.size() - 1; i++) {
 			if (i > 0) {
 				s3.append(",");
 			}
@@ -142,11 +132,9 @@ public class ActionTree extends ActionBase implements IAction {
 		UserXItemValue v = u.getItem(0);
 		if (!v.getItem("LoadByLevel").equals("1")) {
 			return sql;
-		} else if (rv.getString("EWA_TREE_MORE") != null
-				&& rv.getString("EWA_TREE_MORE").equals("1")) {
+		} else if ("1".equals(rv.getString(FrameParameters.EWA_TREE_MORE))) {
 			return this.createLoadByLevelMore(sql, u);
-		} else if (rv.getString("EWA_TREE_STATUS") != null
-				&& rv.getString("EWA_TREE_STATUS").equals("1")) {
+		} else if ("1".equals(rv.getString(FrameParameters.EWA_TREE_STATUS))) {
 			String s1 = this.createStatusFindPkeys(sql, u);
 			if (s1 == null) {
 				return "";
@@ -159,5 +147,4 @@ public class ActionTree extends ActionBase implements IAction {
 		}
 	}
 
- 
 }

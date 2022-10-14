@@ -3,7 +3,6 @@ package com.gdxsoft.easyweb.script.display;
 import java.util.ArrayList;
 
 public class TreeViewNode {
-
 	private String _strKey;
 	private String _strDispVal;
 	private String _strParentKey;
@@ -19,7 +18,7 @@ public class TreeViewNode {
 	private TreeViewNode _PrevNode;
 	private ArrayList<TreeViewNode> _ChildNodes;
 	private ArrayList<String> _AddParas = new ArrayList<String>();
-	public static String NODE_ROOT_KEY = "EWA_TREE_ROOT";
+	public static String NODE_ROOT_KEY = TreeViewMain.TREE_ROOT_KEY;// EWA_TREE_ROOT
 
 	// 关联的数据
 	private Object _Data;

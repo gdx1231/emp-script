@@ -345,7 +345,7 @@ public class ItemRepeat extends ItemBase {
 
 		// 英文的标记处理
 		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
-		String lang = rv.getString("EWA_LANG");
+		String lang = rv.getLang();
 		if (lang != null && lang.toUpperCase().trim().equals("ENUS")) {
 			if (this._Table.getColumns().testName(this._Text + "_EN")) {
 				this._Text = this._Text + "_EN";
@@ -500,7 +500,7 @@ public class ItemRepeat extends ItemBase {
 
 		// 英文的标记处理 2017-04-26 guolei
 		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
-		String lang = rv.getString("EWA_LANG");
+		String lang = rv.getLang();
 		if (lang != null && lang.equalsIgnoreCase("enus") && !titleList.isEmpty()) {
 			displayList = titleList;
 			titleList = "";

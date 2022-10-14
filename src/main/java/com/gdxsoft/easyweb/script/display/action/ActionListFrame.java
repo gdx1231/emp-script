@@ -29,6 +29,7 @@ import com.gdxsoft.easyweb.datasource.SqlPart;
 import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
@@ -153,7 +154,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 
 			String sqlType = sqlItem.getItem("SqlType");
 			if (sqlType.equals("query") && !executedSplitSql && DataConnection.checkIsSelect(sql)
-					&& sql.toLowerCase().indexOf("ewa_err_out") == -1) {
+					&& sql.toLowerCase().indexOf(FrameParameters.EWA_ERR_OUT) == -1) {
 				// 执行分页查询
 				executedSplitSql = true; // 分页只执行1次
 				this.executeSplitSql(sql, conn, rv, name);
@@ -195,7 +196,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 			throw new Exception("查询语句中应包含WHERE条件, (" + sql + ")");
 		}
 		String sql1 = this.createSqListFrame(sql, conn);
-		String ajax = super.getRequestValue().getString("EWA_AJAX");
+		String ajax = super.getRequestValue().getString(FrameParameters.EWA_AJAX);
 		if (ajax == null) {
 			ajax = "";
 		} else {
@@ -208,7 +209,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 				rv.addValue(key, dataName);
 			}
 		} else if (ajax.equalsIgnoreCase("JSON") || ajax.equalsIgnoreCase("JSON_ALL")) {
-			boolean useSplit = rv.getString("EWA_PAGESIZE") != null;
+			boolean useSplit = rv.getString(FrameParameters.EWA_PAGESIZE) != null;
 			DTTable tb = this.executeSqlWithPageSplit(sql1, conn, rv, useSplit);
 			tb.setName(name);
 			if (tb.isOk()) {
@@ -258,7 +259,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 	private String createDownloadData(String sql) throws Exception {
 		RequestValue rv = super.getRequestValue();
 		String lang = rv.getLang();
-		String downType = rv.s("EWA_AJAX_DOWN_TYPE");
+		String downType = rv.s(FrameParameters.EWA_AJAX_DOWN_TYPE);
 		// 允许导出的模式
 		String allowExport = super.getPageItemValue("PageSize", "AllowExport");
 		if (allowExport == null || allowExport.trim().length() == 0) {
@@ -295,7 +296,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 		File ff;
 		String exportPathAndName = upload + "/download_datas/" + rv.s("EWA.ID");
 		try {
-			if (isExcel && !rv.s("EWA_AJAX_DOWN_TYPE").equals("XLS_OLD")) {
+			if (isExcel && !"XLS_OLD".equals(rv.s(FrameParameters.EWA_AJAX_DOWN_TYPE) )) {
 				// 下载 字段显示成为配置的信息，去掉未显示的内容
 				DTTable tbExport = this.createDownloadTable(rs);
 				ff = exp.export(tbExport, exportPathAndName);
@@ -380,7 +381,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 		RequestValue rv = super.getItemValues().getRequestValue();
 		UserConfig uc = super.getUserConfig();
 
-		String userOrder = rv.getString("EWA_LF_ORDER");
+		String userOrder = rv.getString(FrameParameters.EWA_LF_ORDER);
 		if (userOrder == null || userOrder.trim().length() == 0) {
 			return "";
 
@@ -464,7 +465,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 	private String createSqlSearchInit(DataConnection conn) throws Exception {
 		RequestValue rv = super.getItemValues().getRequestValue();
 
-		String ewa_search = rv.getString("ewa_search");
+		String ewa_search = rv.getString(FrameParameters.EWA_SEARCH);
 		if (ewa_search == null || ewa_search.trim().length() == 0) {
 			return "";
 		}
@@ -646,7 +647,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 	private String createSqlSearch(DataConnection conn) throws Exception {
 		RequestValue rv = super.getItemValues().getRequestValue();
 
-		String userSearch = rv.getString("EWA_LF_SEARCH");
+		String userSearch = rv.getString(FrameParameters.EWA_LF_SEARCH);
 		if (userSearch == null || userSearch.trim().length() == 0) {
 			return "";
 		}

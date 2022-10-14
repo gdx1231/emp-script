@@ -22,6 +22,7 @@ import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlClass;
 import com.gdxsoft.easyweb.script.display.ItemValues;
 import com.gdxsoft.easyweb.script.display.SysParameters;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
@@ -234,8 +235,8 @@ public class Upload {
 		}
 
 		// 覆盖新尺寸设定 例如：800x600,400x300
-		if (this._Rv.getString("EWA_UP_NEWSIZES") != null) {
-			String para = this._Rv.getString("EWA_UP_NEWSIZES").trim().toLowerCase().replace(" ", "");
+		if (this._Rv.getString(FrameParameters.EWA_UP_NEWSIZES) != null) {
+			String para = this._Rv.getString(FrameParameters.EWA_UP_NEWSIZES).trim().toLowerCase().replace(" ", "");
 			if (para.length() > 0) {
 				_upNewSizes = para;
 			}
@@ -310,8 +311,8 @@ public class Upload {
 		// _request = request;
 		RequestValue rv = this._Rv;
 		// 从tomcat 7.6以上版本，|符号不能之间传递，必须转义，否则抛出400错误
-		String xmlName = decode(rv.getString("XMLNAME"));
-		String itemName = decode(rv.getString("ITEMNAME"));
+		String xmlName = decode(rv.getString(FrameParameters.XMLNAME));
+		String itemName = decode(rv.getString(FrameParameters.ITEMNAME));
 		String name = decode(this._Rv.getString("NAME"));
 		if (xmlName == null || itemName == null || name == null) {
 			System.err.println("上传配置失败：参数未传递(XMLNAME,ITEMNAME, NAME)");

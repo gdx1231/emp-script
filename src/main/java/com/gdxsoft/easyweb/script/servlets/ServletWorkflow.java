@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import com.gdxsoft.easyweb.define.UpdateWorkflow;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.Workflow.EwaWfMain;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
@@ -67,7 +68,7 @@ public class ServletWorkflow extends HttpServlet {
 		RequestValue rv = new RequestValue(request, request.getSession());
 		UpdateWorkflow u = new UpdateWorkflow();
 		String s = "";
-		String wfType = rv.getString("ewa_wf_type");
+		String wfType = rv.getString(FrameParameters.EWA_WF_TYPE);
 		if (wfType == null) {
 			wfType = "";
 		}
