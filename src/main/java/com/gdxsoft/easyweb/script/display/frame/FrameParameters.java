@@ -1,7 +1,11 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
-
 public class FrameParameters {
+
+	/**
+	 * ewaconfigitem或Jsp程序调用内部调用，创建为 /EWA_STYLE/cgi-bin/?xmlname=xx&amp;itemname=yy
+	 */
+	public static final String INNER_CALL = "INNER_CALL";
 
 	/**
 	 * 列表内容默认为li，指定参数后更改标签，参数值大小写无关<br>
@@ -459,7 +463,6 @@ public class FrameParameters {
 	public static final String EWA_UP_NEWSIZES = "EWA_UP_NEWSIZES";
 
 	public static final String EWA_KEY = "EWA_KEY";
-	
 
 	/**
 	 * shortName

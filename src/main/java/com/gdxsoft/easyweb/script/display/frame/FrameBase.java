@@ -1,6 +1,5 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,6 +36,7 @@ import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
 import com.gdxsoft.easyweb.utils.ULogic;
+import com.gdxsoft.easyweb.utils.UUrl;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -626,14 +626,6 @@ public class FrameBase {
 		}
 	}
 
-	private String encodeUrl(String s) {
-		try {
-			return java.net.URLEncoder.encode(s, "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			return s;
-		}
-	}
-
 	/**
 	 * 获取页面的URL的JS表达式
 	 * 
@@ -641,101 +633,50 @@ public class FrameBase {
 	 */
 	public String getUrlJs() {
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
-		String q;
-		String callMethod = rv.getString(FrameParameters.EWA_CALL_METHOD);
 
 		String url;
-		// //INNER_CALL 调用模式，表示为ewaconfigitem或 JSp程序调用
-		if (callMethod != null && callMethod.equalsIgnoreCase("INNER_CALL")) {
-			MTable map = new MTable();
-			map.put(FrameParameters.XMLNAME, encodeUrl(FrameParameters.XMLNAME));
-			map.put(FrameParameters.ITEMNAME, encodeUrl(rv.getString(FrameParameters.ITEMNAME)));
+		UUrl uu = new UUrl(rv.getRequest());
 
-			// htmlcontrol传递的参数
-			MTable qvsHtmlControl = rv.getPageValues().getTagValues(PageValueTag.HTML_CONTROL_PARAS);
-			if (qvsHtmlControl != null) {
-				for (int i = 0; i < qvsHtmlControl.getCount(); i++) {
-					String key = qvsHtmlControl.getKey(i).toString().trim().toUpperCase();
-					if (!map.containsKey(key)) {
-						PageValue o = (PageValue) qvsHtmlControl.get(key);
-						String val = o.getStringValue();
-						if (val != null) {
-							map.put(key, encodeUrl(val));
-						}
-					}
-				}
-			}
+		String callMethod = rv.s(FrameParameters.EWA_CALL_METHOD);
+		//  INNER_CALL 调用模式，表示为ewaconfigitem或 JSp程序调用
+		if (FrameParameters.INNER_CALL.equalsIgnoreCase(callMethod)) {
+			uu.setPath(rv.getContextPath());
+			uu.setName("/EWA_STYLE/cgi-bin/");
 
-			// query传递的参数
-			MTable qvs = rv.getPageValues().getQueryValues();
-			for (int i = 0; i < qvs.getCount(); i++) {
-				String key = qvs.getKey(i).toString().trim().toUpperCase();
-				if (!map.containsKey(key)) {
-					PageValue o = (PageValue) qvs.get(key);
-					String val = o.getStringValue();
-					if (val != null) {
-						map.put(key, encodeUrl(val));
-					}
-				}
-			}
-
-			MStr sb = new MStr();
-			for (int i = 0; i < map.getCount(); i++) {
-				String key = map.getKey(i).toString().trim().toUpperCase();
-				if (map.get(key) == null) {
-					continue;
-				}
-				String val = map.get(key).toString();
-				if (sb.length() > 0) {
-					sb.append("&");
-				}
-				sb.append(key + "=" + val);
-			}
-			q = sb.toString();
-			url = rv.getContextPath() + "/EWA_STYLE/cgi-bin/?" + Utils.textToJscript(q);
-		} else {
-			q = rv.getRequest() == null ? null : rv.getRequest().getQueryString();
-			StringBuilder sb = new StringBuilder();
-			if (rv.getRequest() != null) {
-				sb.append(rv.getContextPath());
-				sb.append(rv.getRequest().getServletPath());
-			}
-			boolean ismark = false;
-			if (q != null) {
-				sb.append("?");
-				sb.append(Utils.textToJscript(q));
-				ismark = true;
-			}
-			// 来自HtmlControl的参数放到 PageValueTag.HTML_CONTROL_PARAS 中
-			MTable paras = rv.getPageValues().getTagValues(PageValueTag.HTML_CONTROL_PARAS);
-			if (paras != null) {
-				for (int i = 0; i < paras.getCount(); i++) {
-					String key = paras.getKey(i).toString();
-					Object val = paras.getByIndex(i);
-					PageValue pv = (PageValue) val;
-					String sval = pv.getStringValue();
-					if (sval == null) {
-						continue;
-					}
-					if (sval.length() > 1000) { // 太长了，抛弃
-						continue;
-					}
-					if (ismark) {
-						sb.append("&");
-					} else {
-						sb.append("?");
-						ismark = true;
-					}
-					sb.append(encodeUrl(key));
-					sb.append("=");
-					sb.append(encodeUrl(sval));
-				}
-			}
-
-			url = sb.toString();
+			uu.add(FrameParameters.XMLNAME, rv.s(FrameParameters.XMLNAME));
+			uu.add(FrameParameters.ITEMNAME, rv.s(FrameParameters.ITEMNAME));
 		}
+		// 来自HtmlControl的参数放到 PageValueTag.HTML_CONTROL_PARAS 中
+		// 覆盖queryString
+		this.attachHtmlControlParas(uu, rv);
+		url = uu.getUrl();
 		return url == null ? null : url.replace("@", "%40");
+	}
 
+	/**
+	 * 来自HtmlControl的参数放到 PageValueTag.HTML_CONTROL_PARAS 中
+	 * 
+	 * @param uu
+	 * @param rv
+	 */
+	private void attachHtmlControlParas(UUrl uu, RequestValue rv) {
+		MTable paras = rv.getPageValues().getTagValues(PageValueTag.HTML_CONTROL_PARAS);
+		if (paras == null) {
+			return;
+		}
+		for (int i = 0; i < paras.getCount(); i++) {
+			String key = paras.getKey(i).toString();
+			Object val = paras.getByIndex(i);
+			PageValue pv = (PageValue) val;
+			String sval = pv.getStringValue();
+			if (sval == null) {
+				continue;
+			}
+			if (sval.length() > 1000) { // 太长了，抛弃
+				continue;
+			}
+			uu.add(key, sval);
+		}
 	}
 
 	/**
@@ -919,7 +860,7 @@ public class FrameBase {
 			List<ConfAddedResource> al = StringUtils.isBlank(ewa_added_resources)
 					? ConfAddedResources.getInstance().getDefaultResList(false)
 					: ConfAddedResources.getInstance().getResList(ewa_added_resources, false);
-			al.forEach(r->{
+			al.forEach(r -> {
 				doc.addScriptHtml(r.toString());
 			});
 		}
@@ -934,7 +875,7 @@ public class FrameBase {
 		if (this.isUseTest1Table()) {
 			this.createTest1Table(doc, skinName); // <table id='Test1'
 		}
-		if (this._HtmlClass.getItemValues().getRequestValue().s(FrameParameters. EWA_IN_DIALOG) != null) {
+		if (this._HtmlClass.getItemValues().getRequestValue().s(FrameParameters.EWA_IN_DIALOG) != null) {
 			doc.addScriptHtml("<div class='ewa-in-dialog'>");
 		}
 		doc.addScriptHtml(this._HtmlClass.getSkinFrameAll().getTop());
@@ -1061,11 +1002,13 @@ public class FrameBase {
 
 		// 用户参数指定宽度
 		if (rv.s(FrameParameters.EWA_WIDTH) != null) {
-			sizeW = rv.s(FrameParameters.EWA_WIDTH).replace("'", "").replace("\"", "").replace(">", "").replace("<", "");
+			sizeW = rv.s(FrameParameters.EWA_WIDTH).replace("'", "").replace("\"", "").replace(">", "").replace("<",
+					"");
 		}
 		// 用户参数指定的高度
 		if (rv.s(FrameParameters.EWA_HEIGHT) != null) {
-			sizeH = rv.s(FrameParameters.EWA_HEIGHT).replace("'", "").replace("\"", "").replace(">", "").replace("<", "");
+			sizeH = rv.s(FrameParameters.EWA_HEIGHT).replace("'", "").replace("\"", "").replace(">", "").replace("<",
+					"");
 		}
 		if (sizeW != null && sizeW.trim().length() > 0) {
 			try {

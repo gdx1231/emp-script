@@ -736,7 +736,7 @@ public class HtmlCreator {
 		if (this._Acl == null) {
 			return true;
 		}
-		 
+
 		_DebugFrames.addDebug(this, "HTML", "开始验证权限");
 		if (_Acl.canRun()) {
 			_DebugFrames.addDebug(this, "HTML", "验证通过");
@@ -1519,7 +1519,7 @@ public class HtmlCreator {
 	 */
 	private void createPageAjax() throws Exception {
 		boolean isNoCnt = false;
-		if ("1".equals(this._RequestValue.getString(FrameParameters.EWA_NO_CONTENT) )) {
+		if ("1".equals(this._RequestValue.getString(FrameParameters.EWA_NO_CONTENT))) {
 			isNoCnt = true;
 		}
 		if (this._SysParas.getAjaxCallType() == null)
@@ -1655,15 +1655,16 @@ public class HtmlCreator {
 		_DebugFrames.addDebug(this, "HTML", "结束合成脚本");
 
 		// EWA_NO_CONTENT 是否显示内容
-		if ("1".equals(this._RequestValue.getString(FrameParameters.EWA_NO_CONTENT))) {
-			_DebugFrames.addDebug(this, "HTML", "开始合成HTML");
-			if (_SysParas.isAjaxCall()) {
-				this._Frame.createContent();
-			} else {
-				this._Frame.createHtml();
-			}
-			_DebugFrames.addDebug(this, "HTML", "结束合成HTML");
+		if (this._RequestValue.s(FrameParameters.EWA_NO_CONTENT) != null) {
+			return;
 		}
+		_DebugFrames.addDebug(this, "HTML", "开始合成HTML");
+		if (_SysParas.isAjaxCall()) {
+			this._Frame.createContent();
+		} else {
+			this._Frame.createHtml();
+		}
+		_DebugFrames.addDebug(this, "HTML", "结束合成HTML");
 	}
 
 	/**
@@ -1706,7 +1707,7 @@ public class HtmlCreator {
 	 */
 	private void createJsActionTip() {
 		// 提交后执行的提示
-		String s1 = this._RequestValue.getString(FrameParameters.EWA_ACTION_TIP);
+		String s1 = this._RequestValue.s(FrameParameters.EWA_ACTION_TIP);
 
 		if (s1 == null) { // 页面第一次加载，没有该参数
 			return;
@@ -1717,7 +1718,7 @@ public class HtmlCreator {
 		}
 
 		// 执行后是否重新加载页面
-		String reload = this._RequestValue.getString(FrameParameters.EWA_ACTION_RELOAD);
+		String reload = this._RequestValue.s(FrameParameters.EWA_ACTION_RELOAD);
 		if (reload != null && reload.equals("0")) { // 不加载了
 			return;
 		}
@@ -1732,7 +1733,7 @@ public class HtmlCreator {
 			return;
 		}
 		// 页面提交的要执行的事件
-		String js = this._RequestValue.getString(FrameParameters.EWA_AFTER_EVENT);
+		String js = this._RequestValue.s(FrameParameters.EWA_AFTER_EVENT);
 
 		if (js == null || js.trim().length() == 0) {
 			return;
@@ -1937,7 +1938,7 @@ public class HtmlCreator {
 		boolean isTreeGetStatus = false;
 		if (actionItem == null && frameType.equalsIgnoreCase("Tree")) {
 			// Tree的调用子节点没有定义，使用内部默认的SQL
-			if ("1".equals(this._RequestValue.getString(FrameParameters.EWA_TREE_MORE)) ) {
+			if ("1".equals(this._RequestValue.getString(FrameParameters.EWA_TREE_MORE))) {
 				actionItem = this.queryActionItem("OnPageLoad");
 			}
 			// EWA_TREE_STATUS
