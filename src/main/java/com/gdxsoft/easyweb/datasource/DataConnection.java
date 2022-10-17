@@ -862,7 +862,7 @@ public class DataConnection {
 			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);
 		} else { // 默认模式
 			sb.append(sql);
-			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);			
+			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);
 		}
 		String sqla = sb.toString();
 		return this.executeQuery(sqla, sql);
@@ -935,7 +935,7 @@ public class DataConnection {
 		}
 
 		try {
-			if (!haveData) { // 有数据
+			if (haveData) { // 有数据
 				stmt.executeBatch();
 				if (transcation) {
 					this.transCommit();
@@ -1583,11 +1583,25 @@ public class DataConnection {
 		MListStr paras = Utils.getParameters(sql, "@");
 		for (int i = 0; i < paras.size(); i++) {
 			String para = paras.get(i);
-			if (para.toUpperCase().indexOf("_SPLIT") < 0)
+			PageValue pv = this._RequestValue.getPageValues().getValue(para);
+			String v1 = null;
+			if (pv == null || pv.getValue() == null) {
+				String vOther = this._RequestValue.s(para);
+				if (vOther != null) {
+					v1 = vOther;
+				}
+			} else {
+				v1 = pv.getStringValue();
+			}
+			if (v1 == null) { 
+				// postgresql $1 is null could not determine data type of parameter $1
+				// NULL 值在SQL里提前替换
+				sql1 = sql1.replace("@" + para, " null ");
 				continue;
-			String v1 = this._RequestValue.getString(para.toUpperCase());
-			StringBuilder sb = new StringBuilder();
-			if (v1 != null) {
+			}
+			if (para.toUpperCase().indexOf("_SPLIT") > 0) {
+				// 逗号分割的字符串
+				StringBuilder sb = new StringBuilder();
 				String[] v2 = v1.split(",");
 				for (int m = 0; m < v2.length; m++) {
 					String v3 = this.sqlParameterStringExp(v2[m]);
@@ -1598,10 +1612,9 @@ public class DataConnection {
 						sb.append(v3);
 					}
 				}
-			} else {
-				sb.append("null");
+				sql1 = sql1.replace("@" + para, sb.toString());
 			}
-			sql1 = sql1.replace("@" + para, sb.toString());
+
 		}
 		return sql1;
 	}
@@ -1623,7 +1636,8 @@ public class DataConnection {
 				// from camp_lesson_outline b ,(select @rownum :=0) c
 				continue;
 			}
-			sql1 = sql1.replaceFirst("@" + al.get(i), "?");
+			String parameterTag = "?";
+			sql1 = sql1.replaceFirst("@" + al.get(i), parameterTag);
 		}
 
 		// 保留@符号

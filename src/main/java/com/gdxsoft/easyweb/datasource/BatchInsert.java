@@ -126,8 +126,10 @@ public class BatchInsert {
 				this.cnn.clearErrorMsg();
 			}
 		}
-		this.cnn.transCommit();
-		this.cnn.transClose();
+		if (this.transcation) {
+			this.cnn.transCommit();
+			this.cnn.transClose();			
+		}
 
 		return sbError.toString();
 	}
