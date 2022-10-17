@@ -36,7 +36,6 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 	private static final long serialVersionUID = -1054775785967204755L;
 	private static Logger LOGER = LoggerFactory.getLogger(JdbcConfigOperation.class);
 	private ConfScriptPath scriptPath;
-	private Boolean hsqlDb = null;
 
 	private boolean isImportMethod = false;
 
@@ -44,22 +43,18 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		this.scriptPath = scriptPath;
 	}
 
+	 
 	/**
-	 * Check if the database type is HSQLDB
-	 * 
-	 * @return true=HSQLDB/false=not
+	 * 查询时大小写敏感
+	 * @return
 	 */
-	public boolean isHsqlDb() {
-		if (hsqlDb == null) {
-			try {
-				ConnectionConfig conf = ConnectionConfigs.instance().get(this.getJdbcConfigName().toLowerCase());
-				hsqlDb = "HSQLDB".equalsIgnoreCase(conf.getType());
-			} catch (Exception e) {
-				hsqlDb = false;
-			}
+	public boolean isCaseSensitive() {
+		try {
+			ConnectionConfig conf = ConnectionConfigs.instance().get(this.getJdbcConfigName().toLowerCase());
+			return "HSQLDB".equalsIgnoreCase(conf.getType()) || "Postgresql".equalsIgnoreCase(conf.getType());
+		} catch (Exception e) {
 		}
-		return hsqlDb.booleanValue();
-
+		return false;
 	}
 
 	/**
@@ -501,8 +496,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("select HASH_CODE, UPDATE_DATE, MD5, DATASOURCE, CLASS_ACL, CLASS_LOG, ADM_LID from EWA_CFG ");
-		if (this.isHsqlDb()) {
-			sb.append(" where xmlname=@xmlNameJdbc and lower(itemname) = lower(@itemname) ");
+		if (this.isCaseSensitive()) {
+			sb.append(" where lower(xmlname)=lower(@xmlNameJdbc) and lower(itemname) = lower(@itemname) ");
 		} else {
 			sb.append(" where xmlname=@xmlNameJdbc and itemname=@itemname ");
 		}
@@ -986,8 +981,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		rv.addOrUpdateValue("xmlNameJdbc", xmlNameJdbc);
 		rv.addOrUpdateValue(FrameParameters.ITEMNAME, itemname);
 
-		if (this.isHsqlDb()) {
-			sb.append("select 1 a from EWA_CFG where xmlname=@xmlNameJdbc and lower(itemname)=lower(@itemname)");
+		if (this.isCaseSensitive()) {
+			sb.append("select 1 a from EWA_CFG where lower(xmlname)=lower(@xmlNameJdbc) and lower(itemname)=lower(@itemname)");
 		} else {
 			sb.append("select 1 a from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
 		}
@@ -1012,8 +1007,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		rv.addOrUpdateValue(FrameParameters.ITEMNAME, itemname);
 
 		StringBuilder sb = new StringBuilder();
-		if (this.isHsqlDb()) {
-			sb.append("select * from EWA_CFG where xmlname=@xmlNameJdbc and lower(itemname)= lower(@itemname)");
+		if (this.isCaseSensitive()) {
+			sb.append("select * from EWA_CFG where lower(xmlname)=lower(@xmlNameJdbc) and lower(itemname)= lower(@itemname)");
 		} else {
 			sb.append("select * from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
 		}
