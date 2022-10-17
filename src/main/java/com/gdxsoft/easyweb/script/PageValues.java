@@ -160,23 +160,36 @@ public class PageValues {
 		// paramName, paramType
 		String paramType = UPath.getRvTypes().get(key);
 		String paramValue = pv.getStringValue();
-		if (paramValue != null && "int".equals(paramType)) {
+		if (paramValue == null) {
+			pv.setDataType(paramType);
+			return;
+		}
+		if ("int".equals(paramType)) {
 			// 测试整型
 			try {
 				int intVal = Integer.parseInt(paramValue);
 				pv.setValue(intVal);
 				pv.setDataType(paramType);
 			} catch (Exception err) {
-
+				// 非整形
 			}
-		} else if (paramValue != null && "number".equals(paramType)) {
+		} else if ("number".equals(paramType)) {
 			// 测试数字
 			try {
 				double douVal = Double.parseDouble(paramValue);
 				pv.setValue(douVal);
 				pv.setDataType(paramType);
 			} catch (Exception err) {
-
+				// 非双精度
+			}
+		} else if ("bigint".equals(paramType)) {
+			// 测试长整型
+			try {
+				Long longVal = Long.parseLong(paramValue);
+				pv.setValue(longVal);
+				pv.setDataType(paramType);
+			} catch (Exception err) {
+				// 非长整型
 			}
 		} else {
 			pv.setDataType(paramType);
