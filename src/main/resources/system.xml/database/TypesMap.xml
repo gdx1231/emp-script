@@ -17,6 +17,9 @@
 				<MapTo Name="VARCHAR" />
 				<MapTo Name="NVARCHAR" Scale="1" />
 			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="VARCHAR" />
+			</Database>
 		</Map>
 
 		<Map Name="CHAR" CreateNumber="1" InsertPrefix="'" Desc="">
@@ -31,6 +34,9 @@
 				<MapTo Name="CHAR" />
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="CHAR" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
 				<MapTo Name="CHAR" />
 			</Database>
 		</Map>
@@ -51,6 +57,9 @@
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="CLOB" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="TEXT" />
 			</Database>
 		</Map>
 
@@ -77,6 +86,9 @@
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="INT" />
 			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="INT" />
+			</Database>
 		</Map>
 		<Map Name="BIGINT UNSIGNED" CreateNumber="0" InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
@@ -89,6 +101,9 @@
 				<MapTo Name="BIGINT UNSIGNED" />
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="BIGINT" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
 				<MapTo Name="BIGINT" />
 			</Database>
 		</Map>
@@ -105,6 +120,9 @@
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="BIGINT" />
 			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="BIGINT" />
+			</Database>
 		</Map>
 
 		<Map Name="MONEY" CreateNumber="0" InsertPrefix="" Desc="">
@@ -119,6 +137,9 @@
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="NUMERIC" Fixed="17,4" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="MONEY" />
 			</Database>
 		</Map>
 
@@ -138,6 +159,9 @@
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="FLOAT" />
 			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="FLOAT" />
+			</Database>
 		</Map>
 		<Map Name="REAL" CreateNumber="0" InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
@@ -150,6 +174,9 @@
 				<MapTo Name="REAL" />
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="REAL" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
 				<MapTo Name="REAL" />
 			</Database>
 		</Map>
@@ -169,6 +196,9 @@
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="NUMERIC" />
 			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="NUMERIC" />
+			</Database>
 		</Map>
 		<Map Name="BINARY" CreateNumber="1" InsertPrefix="" InsertCovert="BIN" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
@@ -183,6 +213,9 @@
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="BINARY" />
 			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="BYTEA" />
+			</Database>
 		</Map>
 		<Map Name="VARBINARY" CreateNumber="1" InsertPrefix="" InsertCovert="BIN" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
@@ -196,6 +229,9 @@
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="VARBINARY" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="BYTEA" />
 			</Database>
 		</Map>
 		<Map Name="IMAGE" CreateNumber="0" InsertPrefix="" InsertCovert="BIN" Desc="">
@@ -214,6 +250,9 @@
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="BLOB" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="BYTEA" />
 			</Database>
 		</Map>
 
@@ -236,6 +275,9 @@
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="DATE" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+			</Database>
 		</Map>
 		<Map Name="TIMESTAMP" CreateNumber="0" InsertCovert="DATE" InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
@@ -250,6 +292,9 @@
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="TIMESTAMP" InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="TIMESTAMP" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+			</Database>
 		</Map>
 		<Map Name="BIT" CreateNumber="0" InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
@@ -262,6 +307,9 @@
 				<MapTo Name="BIT" />
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="BIT" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
 				<MapTo Name="BIT" />
 			</Database>
 		</Map>
@@ -279,6 +327,9 @@
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="VARCHAR" />
 			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="VARCHAR" />
+			</Database>
 		</Map>
 		<Map Name="XML" CreateNumber="0" InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
@@ -292,6 +343,9 @@
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="XML" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="TEXT" />
 			</Database>
 		</Map>
 		<Map Name="JSON" CreateNumber="0" InsertPrefix="" Desc="">
@@ -307,6 +361,9 @@
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="text" />
 			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="JSON" />
+			</Database>
 		</Map>
 		<Map Name="ENUM" CreateNumber="0" InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
@@ -321,19 +378,8 @@
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="VARCHAR(50)" />
 			</Database>
-		</Map>
-		<Map Name="XML" CreateNumber="0" InsertPrefix="" Desc="">
-			<Database Name="MSSQL" Desc="微软SQL SERVER">
-				<MapTo Name="XML" />
-			</Database>
-			<Database Name="ORACLE" Desc="ORACLE">
-				<MapTo Name="XML" />
-			</Database>
-			<Database Name="MYSQL" Desc="MySQL">
-				<MapTo Name="XML" />
-			</Database>
-			<Database Name="HSQLDB" Desc="HSQLDB">
-				<MapTo Name="XML" />
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="VARCHAR(50)" />
 			</Database>
 		</Map>
 	</EwaMap>
@@ -342,6 +388,7 @@
 			<Database Name="MSSQL" Func="getdate()" />
 			<Database Name="MYSQL" Func="now()" />
 			<Database Name="ORACLE" Func="sysdate" />
+			<Database Name="POSTGRESQL" Func="now()" />
 		</Function>
 	</Functions>
 	<SqlTemplates des="用于不同数据库的 SQL 模板">
@@ -424,6 +471,12 @@ FROM dba_tab_columns A
 		</SqlTemplate>
 
 		<SqlTemplate Name="HSQLDB">
+			<FieldCommentSet>
+				<![CDATA[COMMENT ON COLUMN {TABLE_NAME}.{FIELD_NAME} IS '{COMMENT}']]>
+			</FieldCommentSet>
+		</SqlTemplate>
+		
+		<SqlTemplate Name="POSTGRESQL">
 			<FieldCommentSet>
 				<![CDATA[COMMENT ON COLUMN {TABLE_NAME}.{FIELD_NAME} IS '{COMMENT}']]>
 			</FieldCommentSet>
