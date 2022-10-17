@@ -84,6 +84,9 @@ public class SqlTable {
 			fixCharBefore = "[";
 			fixCharAfter = "]";
 		}
+		boolean isPostgresql = databaseType.equalsIgnoreCase("POSTGRESQL");
+		boolean isMySql = databaseType.equalsIgnoreCase("MYSQL");
+		boolean isSqlServer = databaseType.equalsIgnoreCase("MYSQL");
 		sb.append("CREATE TABLE " + fixCharBefore + table.getName() + fixCharAfter + "(\r\n");
 		for (int i = 0; i < table.getFields().size(); i++) {
 			Field f = table.getFields().get(table.getFields().getFieldList().get(i));
@@ -116,9 +119,18 @@ public class SqlTable {
 				mapTo = b[0];
 			}
 			if (i > 0) {
-				sb.append(",\r\n");
+				sb.append(",\n");
 			}
-			sb.append("\t" + fixCharBefore + f.getName() + fixCharAfter + " " + mapTo.getName());
+			String fieldType1 = mapTo.getName();
+			if (f.isIdentity() && isPostgresql) {
+				fieldType1=" serial ";
+				if("bigint".equals(mapTo.getName())) {
+					fieldType1= " bigserial "; 
+				} else if("smallint".equals(mapTo.getName())) {
+					fieldType1= " smallserial ";
+				}
+			}
+			sb.append("\t" + fixCharBefore + f.getName() + fixCharAfter + " " + fieldType1);
 			if (mapTo.getEwa().getCreateNumber() == 1) {
 				int len = f.getColumnSize() * mapType.getScale() / mapTo.getScale();
 				String lenDes = len + "";
@@ -130,7 +142,7 @@ public class SqlTable {
 			} else if (mapTo.getEwa().getCreateNumber() == 2) {
 				sb.append("(" + f.getColumnSize() + "," + f.getDecimalDigits() + ")");
 			}
-			if (f.isIdentity() && databaseType.equalsIgnoreCase("MSSQL")) {
+			if (f.isIdentity() && isSqlServer) {
 				sb.append(" IDENTITY(1,1) ");
 			}
 
@@ -139,11 +151,11 @@ public class SqlTable {
 			} else {
 				sb.append(" NULL");
 			}
-			if (f.isIdentity() && databaseType.equalsIgnoreCase("MYSQL")) {
+			if (f.isIdentity() && isMySql) {
 				sb.append(" AUTO_INCREMENT, PRIMARY KEY(`" + f.getName() + "`) ");
 			}
 			// 如果是mysql的话，在建表过程中，将注解建好
-			if (databaseType.equalsIgnoreCase("MYSQL")) {
+			if (isMySql) {
 				sb.append(" COMMENT '" + f.getDescription().replace("'", "''") + "' ");
 			}
 		}
