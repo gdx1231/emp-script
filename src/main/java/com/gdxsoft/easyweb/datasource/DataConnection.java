@@ -1596,7 +1596,7 @@ public class DataConnection {
 			if (v1 == null) { 
 				// postgresql $1 is null could not determine data type of parameter $1
 				// NULL 值在SQL里提前替换
-				sql1 = sql1.replace("@" + para, " null ");
+				sql1 = sql1.replaceFirst("@" + para, " null ");
 				continue;
 			}
 			if (para.toUpperCase().indexOf("_SPLIT") > 0) {

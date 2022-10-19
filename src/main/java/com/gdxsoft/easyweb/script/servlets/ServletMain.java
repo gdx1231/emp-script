@@ -22,6 +22,7 @@ import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.define.EwaConfHelpHSqlServer;
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.ValidCode1;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.script.template.Skin;
@@ -78,21 +79,21 @@ public class ServletMain extends HttpServlet {
 			EwaConfig.instance();
 			LOGGER.info("EwaConfig instance");
 		} catch (Exception e) {
-			LOGGER.error("EwaConfig instance,", e.getMessage());
+			LOGGER.error("EwaConfig instance, {}", e.getMessage());
 		}
 
 		try {
 			Skin.instance();
 			LOGGER.info("Skin instance");
 		} catch (Exception e1) {
-			LOGGER.error("Skin instance,", e1.getMessage());
+			LOGGER.error("Skin instance, {}", e1.getMessage());
 		}
 
 		try {
 			EwaGlobals.instance();
 			LOGGER.info("EwaGlobals instance");
 		} catch (Exception e) {
-			LOGGER.error("EwaGlobals instance,", e.getMessage());
+			LOGGER.error("EwaGlobals instance, {}", e.getMessage());
 		}
 		try {
 			ConfSecurities inst = ConfSecurities.getInstance();
@@ -101,7 +102,7 @@ public class ServletMain extends HttpServlet {
 				LOGGER.warn("The security not defined in ewa_conf.xml");
 			}
 		} catch (Exception e) {
-			LOGGER.error("ConfSecurities instance,", e.getMessage());
+			LOGGER.error("ConfSecurities instance, {}", e.getMessage());
 		}
 		try {
 			if (ConfDefine.isAllowDefine()) {
@@ -111,8 +112,15 @@ public class ServletMain extends HttpServlet {
 				ConfAdmins.getInstance().getLst();
 			}
 		} catch (Exception err) {
-			LOGGER.error("define ServletIndex static,", err.getMessage());
+			LOGGER.error("define ServletIndex static, {}", err.getMessage());
 		}
+		// 加载字体
+		try {
+			new ValidCode1();
+		} catch (Exception err) {
+			LOGGER.error("Initialize valid fonts error, {}", err.getMessage());
+		}
+		 
 	}
 
 	/**

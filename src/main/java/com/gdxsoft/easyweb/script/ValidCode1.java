@@ -26,15 +26,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * ref http://blog.csdn.net/ruixue0117/article/details/22829557  
- *  
+ * ref http://blog.csdn.net/ruixue0117/article/details/22829557
+ * 
  * @author admin
  *
  */
 public class ValidCode1 {
 	private static Logger LOGGER = LoggerFactory.getLogger(ValidCode1.class);
 	// 使用到Algerian字体，系统里没有的话需要安装字体，字体只显示大写，去掉了1,0,i,o几个容易混淆的字符
-	public static final String VERIFY_CODES = "023456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
+	public static final String VERIFY_CODES = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 	public static final String VERIFY_NUMBERS = "0123456789";
 
 	public static List<String> FONT_NAMES = new ArrayList<String>();
@@ -42,18 +42,18 @@ public class ValidCode1 {
 	static {
 		try {
 			initializeFonts();
-		} catch (IOException | FontFormatException e) {
+		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
 		}
 	}
 
 	/**
 	 * Initialized the valid fonts, in the java resources validCodeFonts
+	 * 
 	 * @throws IOException
 	 * @throws FontFormatException
 	 */
-	public synchronized static void initializeFonts() throws IOException, FontFormatException {
-		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
+	public synchronized static void initializeFonts() throws Exception {
 		Enumeration<URL> resources = ValidCode1.class.getClassLoader().getResources(fontPath);
 		while (resources.hasMoreElements()) {
 			URL url = resources.nextElement();
@@ -64,29 +64,57 @@ public class ValidCode1 {
 				Enumeration<JarEntry> entries = jarFile.entries(); // 返回jar中所有的文件目录
 				while (entries.hasMoreElements()) {
 					JarEntry jarEntry = entries.nextElement();
-					String name = jarEntry.getName();
-					if (!jarEntry.isDirectory() && name.startsWith(fontPath) && name.endsWith(".ttf")) { // 是我们需要的文件类型
-
-						InputStream resourceAsStream = ValidCode1.class.getClassLoader().getResourceAsStream(name);
-						Font font = Font.createFont(Font.TRUETYPE_FONT, resourceAsStream);
-						e.registerFont(font);
-						FONT_NAMES.add(font.getFontName());
-
-						LOGGER.info("Add font {}->{} from jar", name, font.getFontName());
-					}
+					initializeFont(jarEntry);
 				}
 			} else if (url.getProtocol().equals("file")) {
 				// 获取class 根目录
 				URL resource = ValidCode1.class.getClassLoader().getResource(fontPath);
 				File[] files = new File(resource.getPath()).listFiles();
 				for (int i = 0; i < files.length; i++) {
-					Font font = Font.createFont(Font.TRUETYPE_FONT, files[i]);
-					e.registerFont(font);
-					FONT_NAMES.add(font.getName());
-					LOGGER.info("Add font {}->{} from jar", files[i], font.getFontName());
+					File fontFile = files[i];
+					initializeFont(fontFile);
 				}
 			}
 		}
+	}
+
+	/**
+	 * 添加一个字体
+	 * 
+	 * @param jarEntry
+	 */
+	private static void initializeFont(JarEntry jarEntry) {
+		String name = jarEntry.getName();
+		if (jarEntry.isDirectory() || !name.startsWith(fontPath) || !name.endsWith(".ttf")) { // 是我们需要的文件类型
+			return;
+		}
+		try {
+			InputStream resourceAsStream = ValidCode1.class.getClassLoader().getResourceAsStream(jarEntry.getName());
+			Font font = Font.createFont(Font.TRUETYPE_FONT, resourceAsStream);
+			LOGGER.info("Added font {} from jar {}", font.getFontName(), jarEntry);
+			registerFont(font);
+		} catch (FontFormatException | IOException e1) {
+			LOGGER.warn("Add font {}, {}", jarEntry, e1.getMessage());
+		}
+	}
+
+	private static void initializeFont(File fontFile) {
+		if (fontFile.isDirectory() || !fontFile.getName().endsWith(".ttf")) {
+			return;
+		}
+		try {
+			Font font = Font.createFont(Font.TRUETYPE_FONT, fontFile);
+			LOGGER.info("Added font {} from File {}", font.getFontName(), fontFile);
+			registerFont(font);
+		} catch (FontFormatException | IOException e1) {
+			LOGGER.warn("Add font {}, {}", fontFile, e1.getMessage());
+		}
+	}
+
+	private static void registerFont(Font font) {
+		GraphicsEnvironment e = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		e.registerFont(font);
+		FONT_NAMES.add(font.getName());
 	}
 
 	private Random random = new Random(System.currentTimeMillis());
@@ -98,7 +126,8 @@ public class ValidCode1 {
 		return _RandomNumber;
 	}
 
-	public ValidCode1() {}
+	public ValidCode1() {
+	}
 
 	public ValidCode1(int vcLen, boolean isNumberCode) {
 		this._VcLen = vcLen;

@@ -98,7 +98,7 @@ public class SqlUtils {
 		if (!checkChnOrderByDatabase(databaseType)) {
 			return fieldName;
 		}
-		if (checkChnOrderByName(fieldName) || checkChnOrderByType(dataType)) {
+		if (checkChnOrderByName(fieldName) && checkChnOrderByType(dataType)) {
 			return replaceChnOrder(databaseType, fieldName);
 		}
 		return fieldName;
