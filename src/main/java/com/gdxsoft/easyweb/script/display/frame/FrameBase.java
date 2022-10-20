@@ -638,7 +638,7 @@ public class FrameBase {
 		UUrl uu = new UUrl(rv.getRequest());
 
 		String callMethod = rv.s(FrameParameters.EWA_CALL_METHOD);
-		//  INNER_CALL 调用模式，表示为ewaconfigitem或 JSp程序调用
+		// INNER_CALL 调用模式，表示为ewaconfigitem或 JSp程序调用
 		if (FrameParameters.INNER_CALL.equalsIgnoreCase(callMethod)) {
 			uu.setPath(rv.getContextPath());
 			uu.setName("/EWA_STYLE/cgi-bin/");
@@ -702,22 +702,12 @@ public class FrameBase {
 		List<ConfAddedResource> al = StringUtils.isBlank(ewa_added_resources)
 				? ConfAddedResources.getInstance().getDefaultResList(true)
 				: ConfAddedResources.getInstance().getResList(ewa_added_resources, true);
-
-		if (al.size() > 0) {
-			MStr sbCss = new MStr();
-			MStr sbJs = new MStr();
-			for (int i = 0; i < al.size(); i++) {
-				ConfAddedResource r = al.get(i);
-				if (r.getSrc().toLowerCase().endsWith(".css")) {
-					LOGGER.warn("The css put on bottom, " + r.getSrc());
-					sbCss.al(r.toCss());
-				} else {
-					sbJs.al(r.toJs());
-				}
+		al.forEach(r -> {
+			if ("css".equals(r.getResourceType())) {
+				LOGGER.warn("The css put on bottom, " + r.getName());
 			}
-			doc.addBodyHtml(sbCss.toString(), false);
-			doc.addBodyHtml(sbJs.toString(), false);
-		}
+			doc.addScriptHtml(r.toString());
+		});
 	}
 
 	private String[] createH5FrameSet() {

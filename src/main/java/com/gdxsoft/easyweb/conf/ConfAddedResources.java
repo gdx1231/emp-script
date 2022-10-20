@@ -88,7 +88,6 @@ public class ConfAddedResources {
 					sp.setResourceType("js");
 				}
 			}
-
 			sps.getResources().put(sp.getName(), sp);
 			LOGGER.debug(sp.getXml());
 		}

@@ -47,7 +47,10 @@ public class ConfAddedResource {
 	}
 
 	public String toHtml() {
-		return this.content == null ? "" : this.content;
+		StringBuilder sb = new StringBuilder();
+		sb.append("<!-- ewa_conf-addedResource-").append(Utils.textToInputValue(this.name)).append(" -->");
+		sb.append(this.content == null ? "" : this.content.trim());
+		return sb.toString();
 	}
 
 	/**
@@ -58,12 +61,12 @@ public class ConfAddedResource {
 	public String toJs() {
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("<script type=\"text/javascript\" id=\"ewa_resource_");
+		sb.append("<script type=\"text/javascript\" id=\"ewa_conf-addedResource-");
 		sb.append(Utils.textToInputValue(this.name)).append("\" ");
 		if (src != null && src.trim().length() > 0) {
 			sb.append("src=\"").append(Utils.textToInputValue(this.src)).append("\">");
 		} else {
-			sb.append(">").append(this.content == null ? "" : this.content);
+			sb.append(">").append(this.content == null ? "" : this.content.trim());
 		}
 		sb.append("</script>");
 		return sb.toString();
@@ -77,7 +80,7 @@ public class ConfAddedResource {
 	public String toCss() {
 		StringBuilder sb = new StringBuilder();
 		if (src != null && src.trim().length() > 0) {
-			sb.append("<link rel=\"stylesheet\" id=\"ewa_resource_");
+			sb.append("<link rel=\"stylesheet\" id=\"ewa_conf-addedResource-");
 			sb.append(Utils.textToInputValue(this.name));
 			sb.append("\" href=\"");
 			sb.append(Utils.textToInputValue(this.src) + "\">");
@@ -85,8 +88,8 @@ public class ConfAddedResource {
 			sb.append("<style id=\"ewa_resource_");
 			sb.append(Utils.textToInputValue(this.name));
 			sb.append("\">");
-			sb.append(this.content == null ? "" : this.content);
-			sb.append("<style>");
+			sb.append(this.content == null ? "" : this.content.trim());
+			sb.append("</style>");
 		}
 		return sb.toString();
 	}
