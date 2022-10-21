@@ -125,7 +125,7 @@ public class ItemImage extends ItemBase {
 		} catch (Exception err) {
 		}
 
-		// ewa_conf.xml 自定义的 静态文件前缀 
+		// ewa_conf.xml 自定义的 静态文件前缀
 		String rvEwaStylePath = super.getHtmlClass().getSysParas().getRequestValue().s("RV_EWA_STYLE_PATH");
 		if (StringUtils.isBlank(rvEwaStylePath)) {
 			rvEwaStylePath = "/EmpScriptV2";
@@ -170,11 +170,7 @@ public class ItemImage extends ItemBase {
 					v = a1;
 				} else {
 					a1 = a1.replace("\\", "/"); // 替换windows 目录分隔符 2018-02-13
-					if (UPath.PATH_IMG_CACHE.startsWith("@")) {// 用户定义路径
-						v = a1;
-					} else {
-						v = rvEwaStylePath + "/" + a1;
-					}
+					v = a1.replace("//", "/").replace("//", "/").replace("//", "/");
 				}
 			}
 			image = v;
