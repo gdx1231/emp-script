@@ -427,10 +427,14 @@ public class ServletResources extends HttpServlet {
 				.replace("\\", "d").replace("|", "d").replace("%", "d");
 		ext = ext.toLowerCase();
 
+		// 解决使用上传base64图片后台为null的问题
+		// 调整tomcat的server.xml中的maxPostSize="104857600"，
+		// 因为tomcat的post提交默认为2M，maxPostSize改为104857600，代表100M。
 		String base64 = request.getParameter("src");
 		if (base64 == null) {
 			rst.put("rst", false);
-			rst.put("msg", "上传文件内容为空");
+			rst.put("msg", "上传文件内容为 null");
+			rst.put("info", "可能的原因，请调整tomcat的server.xml中的maxPostSize=\"104857600\"(100M)");
 			return rst.toString();
 		}
 		int loc = base64.indexOf(",");
