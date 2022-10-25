@@ -458,7 +458,7 @@ public class Exchange {
 			String where = UXml.retNodeValue(node, "ExportWhere");
 
 			// 视图 VIEW 不输出数据
-			if (IsExport.equals("true") && !"VIEW".equals(tableType)) {
+			if (IsExport.equals("true")) {
 				this.exportData(table, where);
 			}
 		}
@@ -560,6 +560,10 @@ public class Exchange {
 		String exportDefaultItmename = UXml.retNodeValue(cfgEle, "ExportDefaultItmename");
 
 		UserXmls ux = new UserXmls(xmlName);
+		if (ux.getUpdateXml() == null) {
+			LOGGER.warn("Can't get conf: {}", xmlName);
+			return;
+		}
 		ux.initXml();
 		List<UserXml> al = ux.getXmls();
 		String itemName1 = itemName.trim().toUpperCase();

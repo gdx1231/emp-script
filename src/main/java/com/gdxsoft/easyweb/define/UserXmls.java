@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -16,6 +18,7 @@ import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public class UserXmls {
+	private static Logger LOGGER = LoggerFactory.getLogger(UserXmls.class);
 	private List<UserXml> _Xmls;
 	private IUpdateXml _UpdateXml;
 	private RequestValue rv;
@@ -26,6 +29,9 @@ public class UserXmls {
 
 	public UserXmls(String xmlName) {
 		this._UpdateXml = ConfigUtils.getUpdateXml(xmlName);
+		if (this._UpdateXml == null) {
+			LOGGER.error("Init IUpdateXml from xmlname fail: {}", xmlName);
+		}
 	}
 
 	/**
@@ -112,19 +118,23 @@ public class UserXmls {
 	}
 
 	public void initXml() {
+		if (this._UpdateXml == null) {
+			LOGGER.error("The IUpdateXml is null");
+			return;
+		}
 		ConfScriptPath sp = this._UpdateXml.getConfigType().getScriptPath();
 		if (sp.isJdbc()) {
 			try {
 				this.initXmlJdbc();
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				LOGGER.error("Init(initXmlJdbc) ConfScriptPath fail, {}", e.getMessage());
 				return;
 			}
 		} else {
 			try {
 				this.initXmlFile();
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				LOGGER.error("Init(initXmlFile) ConfScriptPath fail, {}", e.getMessage());
 				return;
 			}
 		}
@@ -177,5 +187,9 @@ public class UserXmls {
 
 	public void setRv(RequestValue rv) {
 		this.rv = rv;
+	}
+
+	public IUpdateXml getUpdateXml() {
+		return _UpdateXml;
 	}
 }
