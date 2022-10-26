@@ -26,6 +26,7 @@ import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
+import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
 import com.gdxsoft.easyweb.utils.UAes;
 import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UFile;
@@ -70,6 +71,9 @@ public class Upload {
 
 	private boolean upJsonEncyrpt = true; // 返回Json是否加密
 
+	// 配置文件定义的类型 ,写数据库用，因为Postgresql是强类型
+	private HashMap<String, String> userConfigTypes;
+
 	public RequestValue getRv() {
 		return _Rv;
 	}
@@ -109,6 +113,32 @@ public class Upload {
 	}
 
 	/**
+	 * 初始化数据配置文件定义的类型 ,写数据库用，因为Postgresql是强类型
+	 * 
+	 * @param uc
+	 * @throws Exception
+	 */
+	private void initUserConfigTypes(UserConfig uc) throws Exception {
+		this.userConfigTypes = new HashMap<>();
+		for (int i = 0; i < uc.getUserXItems().count(); i++) {
+
+			UserXItem uxi = uc.getUserXItems().getItem(i);
+			if (!uxi.testName("DataItem") || uxi.getItem("DataItem").count() == 0) {
+				continue;
+			}
+
+			UserXItemValues uxv = uxi.getItem("DataItem");
+			String dataType = uxv.getItem(0).getItem("DataType");
+
+			String dataField = uxv.getItem(0).getItem("DataField").toUpperCase().trim();
+			String name = uxi.getName().toUpperCase().trim();
+
+			this.userConfigTypes.put(dataField, dataType);
+			this.userConfigTypes.put(name, dataType);
+		}
+	}
+
+	/**
 	 * 初始化
 	 * 
 	 * @param uploadXmlName  上传文件配置文件
@@ -131,9 +161,12 @@ public class Upload {
 
 		UserConfig uc = UserConfig.instance(uploadXmlName, uploadItemName, null);
 		if (!uc.getUserXItems().testName(name)) { // 无效
-			_uploadDir = null;
-			return;
+			throw new Exception("Can't find upload field name, " + name);
 		}
+
+		// 初始化数据配置文件定义的类型 ,写数据库用，因为Postgresql是强类型
+		this.initUserConfigTypes(uc);
+
 		_uploadDir = DEFAULT_UPLOAD_PATH;
 		UserXItem uxi = uc.getUserXItems().getItem(name);
 		if (!uxi.testName("Upload")) {
@@ -561,7 +594,7 @@ public class Upload {
 			if (isReal) {
 				json.put("CT", UPath.getPATH_UPLOAD_URL());
 			}
-			if(!this.upJsonEncyrpt) {
+			if (!this.upJsonEncyrpt) {
 				return json.toString();
 			} else {
 				String encrypt = UAes.getInstance().encrypt(json.toString());
@@ -721,6 +754,12 @@ public class Upload {
 
 	public void writeToDatabase() throws Exception {
 		HashMap<String, Boolean> map = new HashMap<String, Boolean>();
+		// 根据配置数据类型调整rv的数据类型，因为Postgresql是强类型
+		this.userConfigTypes.forEach((String name, String dataType) -> {
+			if (this._Rv.getObject(name) != null) {
+				this._Rv.changeValue(name, this._Rv.getObject(name), dataType, 10000);
+			}
+		});
 		try {
 			for (int i = 0; i < this._AlFiles.size(); i++) {
 				FileUpload fu = this._AlFiles.get(i);
