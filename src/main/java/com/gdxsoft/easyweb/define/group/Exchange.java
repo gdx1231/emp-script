@@ -312,14 +312,18 @@ public class Exchange {
 			}
 		}
 
+		String targetDatabaseType = this._Conn.getDatabaseType();
 		// 转换不同类型数据库的 SQL function
 		try {
 			MapFunctions funcs = Maps.instance().getMapFunctions();
-			HashMap<String, MapFunction> types = funcs.getTypes(this._Conn.getDatabaseType());
+			HashMap<String, MapFunction> types = funcs.getTypes(targetDatabaseType);
 
 			for (int i = 0; i < al.size(); i++) {
 				CDATASection sec = al.get(i);
 				String sql = sec.getTextContent();
+				if (sql == null || sql.trim().length() == 0) {
+					continue;
+				}
 				Iterator<String> it = types.keySet().iterator();
 				while (it.hasNext()) {
 					MapFunction map = types.get(it.next());

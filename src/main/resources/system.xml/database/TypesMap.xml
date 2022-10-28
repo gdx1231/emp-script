@@ -276,7 +276,7 @@
 				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
 			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
-				<MapTo Name="DATE" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+				<MapTo Name="TIMESTAMP" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
 			</Database>
 		</Map>
 		<Map Name="TIMESTAMP" CreateNumber="0" InsertCovert="DATE" InsertPrefix="" Desc="">
@@ -390,6 +390,12 @@
 			<Database Name="ORACLE" Func="sysdate" />
 			<Database Name="POSTGRESQL" Func="now()" />
 		</Function>
+		<Function Name="[F_IS_NULL]">
+			<Database Name="MSSQL" Func="isnull" />
+			<Database Name="MYSQL" Func="ifnull" />
+			<Database Name="ORACLE" Func="nvl" />
+			<Database Name="POSTGRESQL" Func="coalesce" />
+		</Function>
 	</Functions>
 	<SqlTemplates des="用于不同数据库的 SQL 模板">
 		<SqlTemplate Name="MSSQL">
@@ -464,22 +470,29 @@ FROM dba_tab_columns A
 				<![CDATA[ALTER TABLE {TABLE_NAME} ADD PRIMARY KEY ({FIELD_NAMES})]]>
 			</PrimaryKey>
 			<IdentityField des="获取字段是否为自增型">
-				<![CDATA[SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.columns where table_schema='{SCHMEA}' AND 	TABLE_NAME='{TABLE_NAME}' AND EXTRA='auto_increment']]>
+				<![CDATA[SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.columns where table_schema='{SCHMEA}' AND TABLE_NAME='{TABLE_NAME}' AND EXTRA='auto_increment']]>
 			</IdentityField>
 			<ViewDDL><![CDATA[SHOW CREATE TABLE `{SCHMEA}`.`{TABLE_NAME}`]]></ViewDDL>
 			<TableDDL><![CDATA[SHOW CREATE TABLE `{SCHMEA}`.`{TABLE_NAME}`]]></TableDDL>
 		</SqlTemplate>
 
 		<SqlTemplate Name="HSQLDB">
+			<PrimaryKey>
+				<![CDATA[ALTER TABLE {TABLE_NAME} ADD CONSTRAINT pk_{TABLE_NAME} PRIMARY KEY ({FIELD_NAMES})]]>
+			</PrimaryKey>
 			<FieldCommentSet>
 				<![CDATA[COMMENT ON COLUMN {TABLE_NAME}.{FIELD_NAME} IS '{COMMENT}']]>
 			</FieldCommentSet>
 		</SqlTemplate>
 		
 		<SqlTemplate Name="POSTGRESQL">
+			<PrimaryKey>
+				<![CDATA[ALTER TABLE {TABLE_NAME} ADD CONSTRAINT pk_{TABLE_NAME} PRIMARY KEY ({FIELD_NAMES})]]>
+			</PrimaryKey>
 			<FieldCommentSet>
 				<![CDATA[COMMENT ON COLUMN {TABLE_NAME}.{FIELD_NAME} IS '{COMMENT}']]>
 			</FieldCommentSet>
+			<ViewDDL><![CDATA[select definition from pg_views where viewname = '{TABLE_NAME}' and schemaname ='{SCHMEA}']]></ViewDDL>
 		</SqlTemplate>
 	</SqlTemplates>
 
