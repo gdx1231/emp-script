@@ -1585,15 +1585,21 @@ public class DataConnection {
 			String para = paras.get(i);
 			PageValue pv = this._RequestValue.getPageValues().getValue(para);
 			String v1 = null;
-			if (pv == null || pv.getValue() == null) {
-				String vOther = this._RequestValue.s(para);
-				if (vOther != null) {
-					v1 = vOther;
+			if (pv == null) {
+				// 获取根据类型的数据
+				pv = this.getParameterByEndWithType(para);
+				if (pv.getLength() == -1) {
+					String vOther = this._RequestValue.s(para);
+					if (vOther != null) {
+						v1 = vOther;
+					}
+				} else {
+					v1 = pv.getStringValue();
 				}
 			} else {
 				v1 = pv.getStringValue();
 			}
-			if (v1 == null) { 
+			if (v1 == null) {
 				// postgresql $1 is null could not determine data type of parameter $1
 				// NULL 值在SQL里提前替换
 				sql1 = sql1.replaceFirst("@" + para, " null ");
@@ -1827,31 +1833,83 @@ public class DataConnection {
 		return pv.toBigDecimal();
 	}
 
+	public PageValue getParameterByEndWithType(String parameterName) {
+		PageValue pv = null;
+		String dt = null;
+		String pname = parameterName.toLowerCase();
+		if (pname.endsWith(".int")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 4);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "int";
+		} else if (pname.endsWith(".bigint")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 7);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "bigint";
+		} else if (pname.endsWith(".long")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 5);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "bigint";
+		} else if (pname.endsWith(".date")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 5);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "date";
+		} else if (pname.endsWith(".number")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 7);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "number";
+		} else if (pname.endsWith(".double")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 7);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "double";
+		} else if (pname.endsWith(".binary")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 7);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "binary";
+		} else if (pname.endsWith(".bin")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 4);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "binary";
+		}
+		if (pv != null) {
+			pv.setDataType(dt);
+		} else {
+			pv = new PageValue();
+			pv.setDataType(dt);
+			pv.setLength(-1);
+		}
+		return pv;
+	}
+
 	private void addStatementParameter(PreparedStatement cst, String parameterName, int index) throws SQLException {
+		String dt;
 		PageValue pv = this._RequestValue.getPageValues().getValue(parameterName);
 		if (pv == null) {
-			// hash, md5 ...
-			String othVal = this._RequestValue.getOtherValue(parameterName);
-			if (othVal == null) {
-				cst.setObject(index, null);
-				this.writeDebug(this, "添加参数(Object)" + index, parameterName + "=null");
-			} else {
-				if (parameterName.endsWith(".HASH")) { // hashCode
-					Integer intVal = Integer.parseInt(othVal);
-					cst.setInt(index, intVal);
-					this.writeDebug(this, "添加参数(INTEGER)" + index, parameterName + "=" + intVal);
+			pv = this.getParameterByEndWithType(parameterName);
+			dt = pv.getDataType();
+			if (pv.getLength() == -1) { // 不是扩展类型数据
+				// hash, md5 ...
+				String othVal = this._RequestValue.getOtherValue(parameterName);
+				if (othVal == null) {
+					cst.setObject(index, null);
+					this.writeDebug(this, "添加参数(Object)" + index, parameterName + "=null");
 				} else {
-					cst.setString(index, othVal);
-					String des1 = parameterName + "=" + othVal;
-					this.writeDebug(this, "添加参数(String)" + index, des1);
+					if (parameterName.endsWith(".HASH")) { // hashCode
+						Integer intVal = Integer.parseInt(othVal);
+						cst.setInt(index, intVal);
+						this.writeDebug(this, "添加参数(INTEGER)" + index, parameterName + "=" + intVal);
+					} else {
+						cst.setString(index, othVal);
+						String des1 = parameterName + "=" + othVal;
+						this.writeDebug(this, "添加参数(String)" + index, des1);
+					}
 				}
+				return;
 			}
-			return;
 		}
-
-		String dt = pv.getDataType();
+		dt = pv.getDataType();
 		dt = (dt == null ? (pv.getValue() == null ? "STRING" : pv.getValue().getClass().getName()) : dt).toUpperCase()
 				.trim();
+
 		String v1 = pv.getStringValue();
 		if ("JAVA.LANG.STRING".equals(dt) || "STRING".equals(dt)) {
 			// 字符串
