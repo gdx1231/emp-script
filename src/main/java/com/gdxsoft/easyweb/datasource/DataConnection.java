@@ -106,6 +106,46 @@ public class DataConnection {
 		return rst;
 	}
 
+	/**
+	 * 新建记录并返回自增字段，数据库连接自动关闭
+	 * 
+	 * @param sql
+	 * @param configName
+	 * @param rv
+	 * @return
+	 */
+	public static long insertAndReturnAutoIdLong(String sql, String configName, RequestValue rv) {
+		DataConnection cnn = new DataConnection(configName, rv);
+		Object v1 = cnn.executeUpdateReturnAutoIncrementObject(sql);
+		cnn.close();
+		if (cnn.getErrorMsg() != null) {
+			return -1L;
+		}
+		if (v1 == null) {
+			return 0L;
+		} else {
+			return Long.parseLong(v1.toString());
+		}
+	}
+
+	/**
+	 * 新建记录并返回自增字段，数据库连接自动关闭
+	 * 
+	 * @param sql
+	 * @param configName
+	 * @param rv
+	 * @return
+	 */
+	public static int insertAndReturnAutoIdInt(String sql, String configName, RequestValue rv) {
+		DataConnection cnn = new DataConnection(configName, rv);
+		int id = cnn.executeUpdateReturnAutoIncrement(sql);
+		cnn.close();
+		if (cnn.getErrorMsg() != null) {
+			return -1;
+		}
+		return id;
+	}
+
 	public static String updateAndClose(StringBuilder sb, String configName, RequestValue rv) {
 		return updateAndClose(sb.toString(), configName, rv);
 	}
@@ -1699,13 +1739,11 @@ public class DataConnection {
 	 */
 	private String getReplaceParameterValueExp(String paramName) {
 		PageValue pv = this._RequestValue.getPageValues().getValue(paramName);
+
 		if (pv == null || pv.getValue() == null) {
-			String vOther = this._RequestValue.s(paramName);
-			if (vOther == null) {
+			pv = this.getParameterByEndWithType(paramName);
+			if (pv == null) {
 				return "null";
-			} else {
-				String vOtherExp = this.sqlParameterStringExp(vOther);
-				return vOtherExp.replace("@", "{@}");
 			}
 		}
 
@@ -1717,17 +1755,11 @@ public class DataConnection {
 
 		String v1 = pv.getStringValue();
 		if (dt.equals("INT")) {
-			if (v1.trim().length() > 0) {
-				return Integer.parseInt(v1.split("\\.")[0]) + "";
-			} else {
-				return "null";
-			}
-		} else if (dt.equals("NUMBER")) {
-			if (v1.trim().length() > 0) {
-				return Double.parseDouble(v1) + "";
-			} else {
-				return "null";
-			}
+			return this.getParaInteger(pv).toString();
+		} else if (dt.equals("LONG") || dt.equals("BIGINT")) {
+			return this.getParaLong(pv).toString();
+		} else if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("FLOAT")) {
+			return this.getParaBigDecimal(pv).toPlainString();
 		} else if (dt.equals("DATE")) {
 			return null;
 		} else {
