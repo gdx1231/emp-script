@@ -7,6 +7,13 @@ import com.gdxsoft.easyweb.script.display.HtmlClass;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public interface IFrame {
+	 
+
+	 
+	
+	FrameBase getFrameBase();
+	 
+
 	/**
 	 * 需要隐藏的字段集合
 	 * 
@@ -20,7 +27,7 @@ public interface IFrame {
 	 * @param hiddenFields the 需要隐藏的字段集合 to set
 	 */
 	public abstract void setHiddenFields(MTable hiddenFields);
-	
+
 	public abstract String createJsonJs();
 
 	public abstract String createaXmlData() throws Exception;

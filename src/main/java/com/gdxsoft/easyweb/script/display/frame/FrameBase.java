@@ -52,6 +52,10 @@ public class FrameBase {
 	// 需要隐藏的字段集合
 	private MTable _HiddenFields = null;
 
+	public FrameBase getFrameBase() {
+		return this;
+	}
+	
 	/**
 	 * 检查是否为隐含字段，在Page的LogicShow中定义
 	 * 
@@ -72,7 +76,7 @@ public class FrameBase {
 	/**
 	 * 初始化隐含的字段
 	 */
-	private void initHiddenFields() {
+	public void initHiddenFields() {
 		UserXItem page = this.getHtmlClass().getUserConfig().getUserPageItem();
 		this._HiddenFields = new MTable();
 		ItemValues iv = this.getHtmlClass().getItemValues();
