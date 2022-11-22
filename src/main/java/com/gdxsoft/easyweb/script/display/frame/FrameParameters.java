@@ -3,6 +3,10 @@ package com.gdxsoft.easyweb.script.display.frame;
 public class FrameParameters {
 
 	/**
+	 * 更改FrameUnid的前缀
+	 */
+	public static final String FRAME_UNID_PREFIX = "FRAME_UNID_PREFIX";
+	/**
 	 * ewaconfigitem或Jsp程序调用内部调用，创建为 /EWA_STYLE/cgi-bin/?xmlname=xx&amp;itemname=yy
 	 */
 	public static final String INNER_CALL = "INNER_CALL";

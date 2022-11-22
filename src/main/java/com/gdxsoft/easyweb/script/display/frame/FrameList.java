@@ -29,6 +29,7 @@ import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.ItemValues;
 import com.gdxsoft.easyweb.script.display.SysParameters;
 import com.gdxsoft.easyweb.script.display.items.IItem;
+import com.gdxsoft.easyweb.script.display.items.ItemEwaConfigItem;
 import com.gdxsoft.easyweb.script.display.items.ItemImage;
 import com.gdxsoft.easyweb.script.html.HtmlDocument;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
@@ -1247,8 +1248,14 @@ public class FrameList extends FrameBase implements IFrame {
 			IItem item = super.getHtmlClass().getItem(uxi);
 			this._LastItem = item;
 
+			this.setItemEwaConfigItemUnidPrefix(item);
+
 			String itemHtml = item.createItemHtml();
 
+			if (itemHtml.indexOf("@") >= 0) {
+				// 替换其它@参数
+				itemHtml = super.getHtmlClass().getItemValues().replaceParameters(itemHtml, false, false);
+			}
 			cellData.put(uxi.getName().toUpperCase(), itemHtml);
 		}
 
@@ -1630,6 +1637,19 @@ public class FrameList extends FrameBase implements IFrame {
 	}
 
 	/**
+	 * 设置 ItemEwaConfigItem的 FrameUnid前缀
+	 * 
+	 * @param item
+	 */
+	private void setItemEwaConfigItemUnidPrefix(IItem item) {
+		if ("ItemEwaConfigItem".equals(item.getClass().getSimpleName())) {
+			ItemEwaConfigItem item0 = (ItemEwaConfigItem) item;
+			String key = this.createItemKeys();
+			item0.setFrameUnidPrefix("IECI_" + key + "_");
+		}
+	}
+
+	/**
 	 * 生成列表的每个单元格数据
 	 * 
 	 * @param uxi 配置单元
@@ -1642,6 +1662,8 @@ public class FrameList extends FrameBase implements IFrame {
 		IItem item = super.getHtmlClass().getItem(uxi);
 
 		this._LastItem = item;
+
+		this.setItemEwaConfigItemUnidPrefix(item);
 
 		String parentHtml = super.createItemParentHtml(uxi); // 皮肤定义的页面样式
 

@@ -24,6 +24,26 @@ import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 public class ItemEwaConfigItem extends ItemBase {
 	private static Logger LOGGER = LoggerFactory.getLogger(ItemEwaConfigItem.class);
 
+	private String _FrameUnidPrefix;
+
+	/**
+	 * FrameUnid 前缀修正名称，避免同一个对象多次调用
+	 * 
+	 * @return
+	 */
+	public String getFrameUnidPrefix() {
+		return _FrameUnidPrefix;
+	}
+
+	/**
+	 * FrameUnid 前缀修正名称，避免同一个对象多次调用
+	 * 
+	 * @param frameUnidPrefix
+	 */
+	public void setFrameUnidPrefix(String frameUnidPrefix) {
+		this._FrameUnidPrefix = frameUnidPrefix;
+	}
+
 	public String createItemHtml() throws Exception {
 		UserXItem userXItem = super.getUserXItem();
 		SysParameters sysParas = super.getHtmlClass().getSysParas();
@@ -49,7 +69,7 @@ public class ItemEwaConfigItem extends ItemBase {
 		if (refParas.trim().length() > 0) {
 			if (refParas.indexOf("=") > 0) {
 				// 新方法 name=@user_name&phone=@user_phone
-				this.attachParas(refParas, rv);
+				rv.addValues(refParas, PageValueTag.HTML_CONTROL_PARAS);
 			} else {
 				// 老方法 name,phone
 				paras = refParas.split(",");
@@ -68,8 +88,9 @@ public class ItemEwaConfigItem extends ItemBase {
 
 		if (rv.s(FrameParameters.EWA_CALL_METHOD) == null) {// 调用模式，用于判断使用
 			String callUrlMethod = userXItem.getSingleValue("DefineFrame", "CallUrlMethod");
-			//INNER_CALL url = /xxx/EWA_STYLE/cgi-bin/?xmlname=...
-			rv.addOrUpdateValue(FrameParameters.EWA_CALL_METHOD, StringUtils.isBlank(callUrlMethod) ? "INNER_CALL" : callUrlMethod);
+			// INNER_CALL url = /xxx/EWA_STYLE/cgi-bin/?xmlname=...
+			rv.addOrUpdateValue(FrameParameters.EWA_CALL_METHOD,
+					StringUtils.isBlank(callUrlMethod) ? "INNER_CALL" : callUrlMethod);
 		}
 		// 移除EWA_P_BEHAVIOR 脚本，由父窗体带入
 		rv.getPageValues().remove(FrameParameters.EWA_P_BEHAVIOR);
@@ -80,6 +101,8 @@ public class ItemEwaConfigItem extends ItemBase {
 		try {
 
 			HtmlCreator hc = new HtmlCreator();
+			hc.getSysParas().setFrameUnidPrefix(this._FrameUnidPrefix);
+
 			hc.setDebugFrames(super.getHtmlClass().getDebugFrames());
 
 			hc.init(rv, super.getResponse());
@@ -96,27 +119,4 @@ public class ItemEwaConfigItem extends ItemBase {
 		return s1.trim();
 	}
 
-	/**
-	 * 初始化的参数放到RV中
-	 * 
-	 * @param paras
-	 */
-	private void attachParas(String paras, RequestValue rv) {
-		if (paras == null || paras.trim().length() == 0) {
-			return;
-		}
-		String[] ps = paras.split("\\&");
-		for (int i = 0; i < ps.length; i++) {
-			String[] pp = ps[i].split("=");
-			if (pp.length == 1 || pp.length > 2) {
-				continue;
-			}
-			String key = pp[0].trim();
-			if (key.length() == 0) {
-				continue;
-			}
-			rv.addValue(key, pp[1], PageValueTag.HTML_CONTROL_PARAS);
-		}
-
-	}
 }

@@ -36,7 +36,7 @@ public class SysParameters {
 	private String _FrameType;// 显示类型
 
 	private String _FrameUnid;
-
+	private String _FrameUnidPrefix;
 	private String _ActionName;
 
 	private RequestValue _RequestValue;
@@ -112,13 +112,13 @@ public class SysParameters {
 		} else {
 			this._IsXhtml = false;
 		}
-		
+
 		// Default is h5
 		String isH5 = rv.getString(FrameParameters.EWA_H5);
 		if ("no".equalsIgnoreCase(isH5)) {
 			this._IsH5 = false;
 		}
-		
+
 		// 输出为手机显示模式， 参数 EWA_MOBILE=1
 		if (rv.s(FrameParameters.EWA_MOBILE) != null) {
 			this._IsShowAsMobile = true;
@@ -178,6 +178,15 @@ public class SysParameters {
 		if (rv.s(FrameParameters.SYS_FRAME_UNID) != null) {
 			rv.getPageValues().remove(FrameParameters.SYS_FRAME_UNID);
 		}
+		// Frame的唯一编号的前缀
+		String prefix = this._FrameUnidPrefix;
+		if (prefix == null) {
+			// 通过参数传递的前缀
+			prefix = rv.s(FrameParameters.FRAME_UNID_PREFIX);
+		}
+		if (prefix != null && prefix.trim().length() > 0) {
+			frameUnid = prefix + frameUnid;
+		}
 		rv.addValue("SYS_FRAME_UNID", frameUnid);
 		setFrameUnid(frameUnid);
 	}
@@ -214,7 +223,8 @@ public class SysParameters {
 	 * @param rv
 	 */
 	private void initTimeDiffMinitus(RequestValue rv) {
-		if (rv == null || rv.s(FrameParameters.EWA_TIMEDIFF) == null || rv.s(FrameParameters.EWA_TIMEDIFF).trim().length() == 0) {
+		if (rv == null || rv.s(FrameParameters.EWA_TIMEDIFF) == null
+				|| rv.s(FrameParameters.EWA_TIMEDIFF).trim().length() == 0) {
 			return;
 		}
 		try {
@@ -665,6 +675,24 @@ public class SysParameters {
 	 */
 	public void setVue(boolean vue) {
 		this._IsVue = vue;
+	}
+
+	/**
+	 * FrameUnid 前缀修正名称，避免同一个对象多次调用
+	 * 
+	 * @return
+	 */
+	public String getFrameUnidPrefix() {
+		return _FrameUnidPrefix;
+	}
+
+	/**
+	 * FrameUnid 前缀修正名称，避免同一个对象多次调用
+	 * 
+	 * @param frameUnidPrefix
+	 */
+	public void setFrameUnidPrefix(String frameUnidPrefix) {
+		this._FrameUnidPrefix = frameUnidPrefix;
 	}
 
 }

@@ -200,6 +200,10 @@ public class HtmlControl {
 	private void initHtmlCreator(HtmlCreator hc) {
 		StringBuilder sb = new StringBuilder();
 
+		// FrameUnid 前缀修正名称，避免同一个对象多次调用
+		if (this._FrameUnidPrefix != null && this._FrameUnidPrefix.trim().length() > 0) {
+			hc.getSysParas().setFrameUnidPrefix(_FrameUnidPrefix);
+		}
 		boolean isDebug = false; // 是否显示跟踪信息在页面
 		boolean paraNotDebug = false; // 是否参数指定了不跟踪
 
@@ -305,14 +309,7 @@ public class HtmlControl {
 			// 记录到数据库中
 			di.recordToHsql();
 		}
-
-		// FrameUnid 前缀修正名称，避免同一个对象多次调用
-		if (this._FrameUnidPrefix != null && this._FrameUnidPrefix.trim().length() > 0) {
-			String unid = hc.getRequestValue().getString("SYS_FRAME_UNID");
-			this.Html = sb.toString().replace(unid, this._FrameUnidPrefix.trim() + unid);
-		} else {
-			this.Html = sb.toString();
-		}
+		this.Html = sb.toString();
 	}
 
 	/**
@@ -331,7 +328,7 @@ public class HtmlControl {
 		if (this.isError) {
 			return Utils.textToInputValue(this.Html);
 		}
- 
+
 		// 当输出 ValidCode时
 		if (this.Html == null) {
 			return null;

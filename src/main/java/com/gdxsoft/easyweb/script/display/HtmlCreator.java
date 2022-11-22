@@ -90,6 +90,16 @@ public class HtmlCreator {
 	private WfUnits _Workflow;
 	private Log _Log; // 日志类
 	private SysParameters _SysParas; // 系统参数
+
+	/**
+	 * 系统参数
+	 * 
+	 * @return
+	 */
+	public SysParameters getSysParas() {
+		return _SysParas;
+	}
+
 	private HtmlDocument _Document;
 
 	private String _PageHtml;
@@ -178,7 +188,7 @@ public class HtmlCreator {
 	 * 
 	 * @param xmlName  配置文件
 	 * @param itemName 配置项
-	 * @param paras    参数，用“&”分割，放到RV的OTHER中
+	 * @param paras    参数，用“&”分割，放到RV的OTHER中，如果有特殊字符?&=等，需要用UrlEncode编码
 	 * @param rv
 	 * @param response
 	 * @throws Exception
@@ -197,9 +207,7 @@ public class HtmlCreator {
 		_RequestValue.addValue(FrameParameters.ITEMNAME, itemName);
 
 		this.attachParas(paras);
-
 		initParameters(xmlName, itemName);
-
 	}
 
 	/**
@@ -208,23 +216,7 @@ public class HtmlCreator {
 	 * @param paras
 	 */
 	private void attachParas(String paras) {
-		if (paras == null || paras.trim().length() == 0) {
-			return;
-		}
-		String[] ps = paras.split("\\&");
-		for (int i = 0; i < ps.length; i++) {
-			String[] pp = ps[i].split("=");
-			if (pp.length == 1 || pp.length > 2) {
-				continue;
-			}
-			String key = pp[0].trim();
-			if (key.length() == 0) {
-				continue;
-			}
-			this._RequestValue.addValue(key, pp[1], PageValueTag.HTML_CONTROL_PARAS);
-			// this._RequestValue.getRequest().setAttribute(key, pp[1]);
-		}
-
+		this._RequestValue.addValues(paras, PageValueTag.HTML_CONTROL_PARAS);
 	}
 
 	public void init(RequestValue requestValue, HttpServletResponse response) throws Exception {

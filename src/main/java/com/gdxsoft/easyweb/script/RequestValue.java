@@ -189,7 +189,7 @@ public class RequestValue implements Cloneable {
 	 * 网站的BASE地址
 	 */
 	public static final String EWAdotHOST_BASE = "EWA.HOST_BASE";
-	 
+
 	/**
 	 * 网站的端口
 	 */
@@ -881,15 +881,16 @@ public class RequestValue implements Cloneable {
 
 		UUrl uu = new UUrl(req);
 
-		//域名
+		// 域名
 		this._ReqValues.addValue(EWAdotHOST, req.getServerName(), PageValueTag.SYSTEM);
-		
-		//网站的BASE地址
-		this._ReqValues.addValue(EWAdotHOST_BASE, uu.getRoot()+req.getContextPath()+"/", PageValueTag.SYSTEM);
-		
+
+		// 网站的BASE地址
+		this._ReqValues.addValue(EWAdotHOST_BASE, uu.getRoot() + req.getContextPath() + "/", PageValueTag.SYSTEM);
+
 		this._ReqValues.addValue(EWAdotHOST_PORT, req.getServerPort(), PageValueTag.SYSTEM);
-		
-		this._ReqValues.addValue(EWAdotHOST_PROTOCOL, uu.getRoot().startsWith("https")?"https":"http", PageValueTag.SYSTEM);
+
+		this._ReqValues.addValue(EWAdotHOST_PROTOCOL, uu.getRoot().startsWith("https") ? "https" : "http",
+				PageValueTag.SYSTEM);
 		// 网址,例如 https://www.gdxsoft.com
 		this._ReqValues.addValue(EWAdotHTTP, uu.getRoot(), PageValueTag.SYSTEM);
 
@@ -901,7 +902,6 @@ public class RequestValue implements Cloneable {
 		this._ReqValues.addValue(SYS_REMOTE_URL, uu.getUrlWithDomain(false), PageValueTag.SYSTEM);
 		this._ReqValues.addValue(SYS_REMOTE_URL_ALL, uu.getUrlWithDomain(true), PageValueTag.SYSTEM);
 
-		
 		this.addQueryValues(_Request.getQueryString());
 
 		if (this.jsonBodyParameters) {
@@ -955,8 +955,6 @@ public class RequestValue implements Cloneable {
 
 	}
 
-	
-
 	private void loadJsonBodyParameters(HttpServletRequest request) {
 		String bodyContent = null;
 		String charset = request.getCharacterEncoding();
@@ -982,7 +980,7 @@ public class RequestValue implements Cloneable {
 	}
 
 	private void addParameter(HttpServletRequest req) {
-		 
+
 		Enumeration<?> ee = req.getParameterNames();
 		MTable mt = new MTable();
 		while (ee.hasMoreElements()) {
@@ -1224,6 +1222,50 @@ public class RequestValue implements Cloneable {
 
 			addList.add(key);
 		}
+		return addList;
+	}
+
+	/**
+	 * 添加参数表达式到Rv中 PageValueTag.OTHER
+	 * 
+	 * @param params 字符串表达式a=1&b=2&c=%20abc
+	 * @return 添加的参数名称列表
+	 */
+	public List<String> addValues(String params) {
+		return this.addValues(params, PageValueTag.OTHER);
+	}
+
+	/**
+	 * 添加参数表达式到Rv中
+	 * 
+	 * @param params       字符串表达式a=1&b=2&c=%20abc
+	 * @param pageValueTag 添加的类别
+	 * @return 添加的参数名称列表
+	 */
+	public List<String> addValues(String params, PageValueTag pageValueTag) {
+		if (params == null) {
+			return null;
+		}
+		List<String> addList = new ArrayList<String>();
+		if (params.trim().length() == 0) {
+			return addList;
+		}
+		String[] ps = params.split("\\&");
+		for (int i = 0; i < ps.length; i++) {
+			String[] pp = ps[i].split("=");
+			if (pp.length == 1 || pp.length > 2) {
+				continue;
+			}
+			String key = pp[0].trim();
+			if (key.length() == 0) {
+				continue;
+			}
+			String val = Utils.urlToText(pp[1]);
+			this.addValue(key, val, pageValueTag);
+
+			addList.add(key);
+		}
+
 		return addList;
 	}
 
