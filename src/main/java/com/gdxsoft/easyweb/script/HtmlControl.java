@@ -197,7 +197,7 @@ public class HtmlControl {
 	 * @param session
 	 * @param response
 	 */
-	private void initHtmlCreator(HtmlCreator hc) {
+	public void initHtmlCreator(HtmlCreator hc) {
 		StringBuilder sb = new StringBuilder();
 
 		// FrameUnid 前缀修正名称，避免同一个对象多次调用
