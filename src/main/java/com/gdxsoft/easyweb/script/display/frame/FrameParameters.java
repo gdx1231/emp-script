@@ -235,7 +235,7 @@ public class FrameParameters {
 	/**
 	 * 用户参数指定的高度，参数大小写无关
 	 */
-	public final static String EWA_HEIGHT = "EWA_WIDTH";
+	public final static String EWA_HEIGHT = "EWA_HEIGHT";
 	/**
 	 * 不使用 Test1的table，非空，参数大小写无关
 	 */
