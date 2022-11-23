@@ -55,7 +55,7 @@ public class FrameBase {
 	public FrameBase getFrameBase() {
 		return this;
 	}
-	
+
 	/**
 	 * 检查是否为隐含字段，在Page的LogicShow中定义
 	 * 
@@ -122,6 +122,25 @@ public class FrameBase {
 			}
 		} catch (Exception e) {
 			LOGGER.error("initial the hidden fields (dataType) error: {}", e.getMessage());
+		}
+
+		// 通过参数传递需要隐藏的字段表达式，用,分割
+		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
+		if (rv.s(FrameParameters.EWA_HIDDEN_FIELDS) != null) {
+			String[] fields = rv.s(FrameParameters.EWA_HIDDEN_FIELDS).split(",");
+			if (fields.length > 300) {
+				LOGGER.warn("EWA_HIDDEN_FIELDS fields over 300");
+				return;
+			}
+			for (int i = 0; i < fields.length; i++) {
+				String field = fields[i].trim().toUpperCase();
+				if (field.length() == 0) {
+					continue;
+				}
+				if (!this._HiddenFields.containsKey(field)) {
+					this._HiddenFields.add(field, true);
+				}
+			}
 		}
 	}
 

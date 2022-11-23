@@ -3,6 +3,11 @@ package com.gdxsoft.easyweb.script.display.frame;
 public class FrameParameters {
 
 	/**
+	 * 隐藏Frame字段的字符串表达式，用,分割
+	 */
+	public static final String EWA_HIDDEN_FIELDS="EWA_HIDDEN_FIELDS";
+	
+	/**
 	 * 更改FrameUnid的前缀
 	 */
 	public static final String FRAME_UNID_PREFIX = "FRAME_UNID_PREFIX";
