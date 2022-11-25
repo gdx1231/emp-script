@@ -259,7 +259,7 @@ public class ServletXml extends HttpServlet {
 		}
 		MStr sb = new MStr();
 		sb.setNewLine("\n");
-		sb.al("StringBuilder " + prefix + "sb = new StringBuilder()");
+		sb.al("StringBuilder " + prefix + "Sb = new StringBuilder();");
 		String[] sqls = sql.split("\n");
 		for (int i = 0; i < sqls.length; i++) {
 			String s = sqls[i];
@@ -267,10 +267,10 @@ public class ServletXml extends HttpServlet {
 				continue;
 			}
 			s = s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\t", "    ");
-			sb.al("sb.append(\"" + s + "\\n\");");
+			sb.al(prefix + "Sb.append(\"" + s + "\\n\");");
 		}
-		sb.al("DTTable " + prefix + "tb = new DTTable(" + prefix + "sb.toString(), \"" + configName + "\", rv);");
-		sb.al("for(int i = 0;i < " + prefix + "tb.getCount(); i++){");
+		sb.al("DTTable " + prefix + "Tb = DTTable.getJdbcTable(" + prefix + "Sb.toString(), \"" + configName + "\", rv);");
+		sb.al("for (int i = 0; i < " + prefix + "Tb.getCount(); i++) {");
 		JSONArray columns = new JSONArray();
 		for (int i = 0; i < tb.getColumns().getCount(); i++) {
 			DTColumn col = tb.getColumns().getColumn(i);
@@ -279,21 +279,21 @@ public class ServletXml extends HttpServlet {
 			String name = this.field2ClassName(col.getName());
 			String code;
 			if ("java.lang.String".equalsIgnoreCase(col.getClassName())) {
-				code = "String " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toString();";
+				code = "String " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toString();";
 			} else if ("java.lang.Integer".equalsIgnoreCase(col.getClassName())) {
-				code = "Int " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toInt();";
+				code = "Integer " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toInt();";
 			} else if ("java.lang.Long".equalsIgnoreCase(col.getClassName())) {
-				code = "Long " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toLong();";
+				code = "Long " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toLong();";
 			} else if ("java.lang.Double".equalsIgnoreCase(col.getClassName())) {
-				code = "Double " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toDouble();";
+				code = "Double " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toDouble();";
 			} else if ("java.sql.Timestamp".equalsIgnoreCase(col.getClassName())) {
-				code = "Date " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toDate();";
+				code = "Date " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toDate();";
 			} else if ("java.math.BigDecimal".equalsIgnoreCase(col.getClassName())) {
-				code = "BigDecimal " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toBigDecimal();";
+				code = "BigDecimal " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toBigDecimal();";
 			}  else if ("java.math.BigInteger".equalsIgnoreCase(col.getClassName())) {
-				code = "BigInteger " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toBigInteger();";
+				code = "BigInteger " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toBigInteger();";
 			}  else {
-				code = "Object " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").getValue();";
+				code = "Object " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").getValue();";
 			}
 			
 			sb.al("    " + code);
