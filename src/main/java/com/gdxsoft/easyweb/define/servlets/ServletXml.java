@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,15 +25,16 @@ import com.gdxsoft.easyweb.SystemXmlUtils;
 import com.gdxsoft.easyweb.conf.ConfDefine;
 import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
+import com.gdxsoft.easyweb.data.DTColumn;
+import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.define.CodeFormat;
 import com.gdxsoft.easyweb.define.ConfigUtils;
-import com.gdxsoft.easyweb.define.DefineParameters;
+import com.gdxsoft.easyweb.define.DefineAcl;
 import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UpdateXmlBase;
 import com.gdxsoft.easyweb.define.UserDirXmls;
 import com.gdxsoft.easyweb.define.database.SqlSyntaxCheck;
 import com.gdxsoft.easyweb.script.PageValue;
-import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
@@ -40,6 +42,7 @@ import com.gdxsoft.easyweb.script.servlets.GZipOut;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
+import com.gdxsoft.easyweb.utils.UJSon;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UUrl;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -147,16 +150,16 @@ public class ServletXml extends HttpServlet {
 			return;
 		}
 
-		PageValue pvAdmin = rv.getPageValues().getPageValue(DefineParameters.EWA_ADMIN_ID);
-
-		// not login
-		if (pvAdmin == null || (pvAdmin.getPVTag() != PageValueTag.SESSION)) {
+		DefineAcl acl = new DefineAcl();
+		acl.setRequestValue(rv);
+		if (!acl.canRun()) { // not login
 			JSONObject rst = new JSONObject();
 			rst.put("RST", false);
 			rst.put("ERR", "deny! request login");
 			response.getWriter().println(rst);
 			return;
 		}
+		PageValue pvAdmin = acl.getAdmin();
 
 		if (oType == null) {
 			cnt = this.handleNull(rv, response);
@@ -212,12 +215,115 @@ public class ServletXml extends HttpServlet {
 		} else if (oType.toUpperCase().equals("IMPORT_XML")) {
 			cnt = this.handleImportXml(rv, pvAdmin);
 			this.setOutType(response, "json");
-		} else if (oType.toUpperCase().equals("SAVE_JAVA")) {// 保存java代码
+		} else if (oType.toUpperCase().equals("SAVE_JAVA")) {
+			// 保存java代码
 			JSONObject rst = this.saveJavaCode(rv);
+			cnt = rst.toString();
+			this.setOutType(response, "json");
+		} else if ("selectSql2DTTable".equalsIgnoreCase(oType)) {
+			// sql 语句转换为 DTTable的java代码
+			JSONObject rst = this.handleSelectSql2DTTable(rv);
 			cnt = rst.toString();
 			this.setOutType(response, "json");
 		}
 		this.outContent(request, response, cnt);
+	}
+
+	/**
+	 * sql 语句转换为 DTTable的java代码
+	 * 
+	 * @param rv
+	 * @return
+	 */
+	private JSONObject handleSelectSql2DTTable(RequestValue rv) {
+		JSONObject obj = UJSon.rstTrue();
+
+		String sql = rv.s("SQL");
+		String configName = rv.s("CONFIG_NAME");
+		if (configName == null) {
+			configName = "";
+		}
+		String prefix = rv.s("PREF_FIX");
+		if (prefix == null) {
+			prefix = "";
+		}
+		obj.put("SQL", sql);
+		obj.put("CONFIG_NAME", configName);
+		String sql1 = "select a.* from (" + sql + ")a where 1=2";
+		DTTable tb = DTTable.getJdbcTable(sql1, configName);
+
+		if (!tb.isOk()) {
+			UJSon.rstSetFalse(obj, tb.getErrorInfo());
+			return obj;
+		}
+		MStr sb = new MStr();
+		sb.setNewLine("\n");
+		sb.al("StringBuilder " + prefix + "sb = new StringBuilder()");
+		String[] sqls = sql.split("\n");
+		for (int i = 0; i < sqls.length; i++) {
+			String s = sqls[i];
+			if (s.trim().length() == 0) {
+				continue;
+			}
+			s = s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\t", "    ");
+			sb.al("sb.append(\"" + s + "\\n\");");
+		}
+		sb.al("DTTable " + prefix + "tb = new DTTable(" + prefix + "sb.toString(), \"" + configName + "\", rv);");
+		sb.al("for(int i = 0;i < " + prefix + "tb.getCount(); i++){");
+		JSONArray columns = new JSONArray();
+		for (int i = 0; i < tb.getColumns().getCount(); i++) {
+			DTColumn col = tb.getColumns().getColumn(i);
+			JSONObject colJson = new JSONObject(col);
+			columns.put(colJson);
+			String name = this.field2ClassName(col.getName());
+			String code;
+			if ("java.lang.String".equalsIgnoreCase(col.getClassName())) {
+				code = "String " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toString();";
+			} else if ("java.lang.Integer".equalsIgnoreCase(col.getClassName())) {
+				code = "Int " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toInt();";
+			} else if ("java.lang.Long".equalsIgnoreCase(col.getClassName())) {
+				code = "Long " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toLong();";
+			} else if ("java.lang.Double".equalsIgnoreCase(col.getClassName())) {
+				code = "Double " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toDouble();";
+			} else if ("java.sql.Timestamp".equalsIgnoreCase(col.getClassName())) {
+				code = "Date " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toDate();";
+			} else if ("java.math.BigDecimal".equalsIgnoreCase(col.getClassName())) {
+				code = "BigDecimal " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toBigDecimal();";
+			}  else if ("java.math.BigInteger".equalsIgnoreCase(col.getClassName())) {
+				code = "BigInteger " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").toBigInteger();";
+			}  else {
+				code = "Object " + name + " = " + prefix + "tb.getCell(i, \"" + col.getName() + "\").getValue();";
+			}
+			
+			sb.al("    " + code);
+		}
+		sb.al("}");
+		obj.put("JAVA", sb.toString());
+		obj.put("COLUMNS", columns);
+		return obj;
+	}
+
+	private String field2ClassName(String field) {
+		String[] names = field.split("\\_");
+		MStr s = new MStr();
+		for (int i = 0; i < names.length; i++) {
+			String name = names[i];
+			if (name.length() == 0) {
+				s.a("_");
+				continue;
+			}
+			String firstAlpha = name.substring(0, 1);
+			if (i == 0) {
+				s.a(firstAlpha.toLowerCase());
+			} else {
+				s.a(firstAlpha.toUpperCase());
+			}
+			if (name.length() > 1) {
+				String others = name.substring(1);
+				s.a(others.toLowerCase());
+			}
+		}
+		return s.toString();
 	}
 
 	/**
@@ -631,7 +737,8 @@ public class ServletXml extends HttpServlet {
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and copyright.
+	 * Returns information about the servlet, such as author, version, and
+	 * copyright.
 	 *
 	 * @return String information about this servlet
 	 */
