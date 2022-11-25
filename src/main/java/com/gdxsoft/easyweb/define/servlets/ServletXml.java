@@ -243,12 +243,13 @@ public class ServletXml extends HttpServlet {
 		if (configName == null) {
 			configName = "";
 		}
-		String prefix = rv.s("PREF_FIX");
+		String prefix = rv.s("PREFIX");
 		if (prefix == null) {
 			prefix = "";
 		}
 		obj.put("SQL", sql);
 		obj.put("CONFIG_NAME", configName);
+		obj.put("PREFIX", prefix);
 		String sql1 = "select a.* from (" + sql + ")a where 1=2";
 		DTTable tb = DTTable.getJdbcTable(sql1, configName);
 
