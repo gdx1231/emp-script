@@ -673,7 +673,7 @@ public class FrameBase {
 		// 覆盖queryString
 		this.attachHtmlControlParas(uu, rv);
 		url = uu.getUrl();
-		return url == null ? null : url.replace("@", "%40");
+		return url == null ? null : url.replace("@", "%40").replace("+", "%20");
 	}
 
 	/**
