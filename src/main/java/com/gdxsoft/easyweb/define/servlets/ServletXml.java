@@ -170,9 +170,13 @@ public class ServletXml extends HttpServlet {
 			this.setOutType(response, "html");
 			cnt = this.handleSqls(rv, pvAdmin);
 		} else if (oType.equals("SAVE")) {
-			this.handleSave(rv, pvAdmin);
-			this.setOutType(response, "html");
-			cnt = "alert('ok')";
+			try {
+				this.handleSave(rv, pvAdmin);
+				this.setOutType(response, "html");
+				cnt = "alert('ok')";
+			} catch (Exception err) {
+				cnt = err.getMessage();
+			}
 		} else if (oType.equals("VIEW")) {
 			cnt = this.handleView(rv);
 		} else if (oType.equals("CFG_XML")) {// 调用配置文件
@@ -269,7 +273,8 @@ public class ServletXml extends HttpServlet {
 			s = s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\t", "    ");
 			sb.al(prefix + "Sb.append(\"" + s + "\\n\");");
 		}
-		sb.al("DTTable " + prefix + "Tb = DTTable.getJdbcTable(" + prefix + "Sb.toString(), \"" + configName + "\", rv);");
+		sb.al("DTTable " + prefix + "Tb = DTTable.getJdbcTable(" + prefix + "Sb.toString(), \"" + configName
+				+ "\", rv);");
 		sb.al("for (int i = 0; i < " + prefix + "Tb.getCount(); i++) {");
 		JSONArray columns = new JSONArray();
 		for (int i = 0; i < tb.getColumns().getCount(); i++) {
@@ -289,13 +294,15 @@ public class ServletXml extends HttpServlet {
 			} else if ("java.sql.Timestamp".equalsIgnoreCase(col.getClassName())) {
 				code = "Date " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toDate();";
 			} else if ("java.math.BigDecimal".equalsIgnoreCase(col.getClassName())) {
-				code = "BigDecimal " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toBigDecimal();";
-			}  else if ("java.math.BigInteger".equalsIgnoreCase(col.getClassName())) {
-				code = "BigInteger " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toBigInteger();";
-			}  else {
+				code = "BigDecimal " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName()
+						+ "\").toBigDecimal();";
+			} else if ("java.math.BigInteger".equalsIgnoreCase(col.getClassName())) {
+				code = "BigInteger " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName()
+						+ "\").toBigInteger();";
+			} else {
 				code = "Object " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").getValue();";
 			}
-			
+
 			sb.al("    " + code);
 		}
 		sb.al("}");
@@ -360,6 +367,7 @@ public class ServletXml extends HttpServlet {
 		String xml = rv.getString("XML");
 		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 		return up.updateItem(itemName, xml);
+
 	}
 
 	private String handleNull(RequestValue rv, HttpServletResponse response) {
