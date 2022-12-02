@@ -586,61 +586,111 @@ public class HtmlCreator {
 	}
 
 	/**
+	 * 当为表达式的是否，例如 A.USER_ID 取第一个点后面的名称
+	 * 
+	 * @param keyField
+	 * @return
+	 */
+	private String removeDotEwaActionKey(String keyField) {
+		String field = keyField;
+		int dotLoc = keyField.indexOf(".");
+		if (dotLoc > 0) {
+			// 当为表达式的是否，例如 A.USER_ID
+			// 取第一个点后面的名称
+			field = field.substring(dotLoc + 1).trim();
+		} else {
+			field = field.trim();
+		}
+		return field;
+	}
+
+	/**
+	 * ListFrame EWA_ACTION_KEY
+	 * 
+	 * @throws Exception
+	 */
+	private void initParameterEwaActionKey() throws Exception {
+		// 用于ListFrame调用
+		String ewaActionKey = this._RequestValue.s(FrameParameters.EWA_ACTION_KEY);
+		if (ewaActionKey == null || !this._UserConfig.getUserPageItem().testName("PageSize")) {
+			return;
+		}
+		String keyField = null;
+		UserXItemValues uxvs = this._UserConfig.getUserPageItem().getItem("PageSize");
+		if (uxvs.count() == 0)
+			return;
+
+		keyField = uxvs.getItem(0).getItem("KeyField");
+		String[] fields = keyField.split(",");
+		if (fields.length == 1) {
+			// 单字段表达式
+			String field = this.removeDotEwaActionKey(keyField);
+			this._RequestValue.addValue(field, ewaActionKey);
+
+			return;
+		}
+		// 多字段表达式
+		String[] vals = ewaActionKey.split(",");
+		if (fields.length != vals.length) {
+			LOGGER.warn("EWA_ACTION_KEY, fields.length != vals.length");
+			return;
+		}
+		for (int i = 0; i < fields.length; i++) {
+			String field = this.removeDotEwaActionKey(fields[i]);
+			this._RequestValue.addValue(field, vals[i]);
+		}
+
+	}
+
+	/**
+	 * tree EWA_TREE_KEY
+	 * 
+	 * @throws Exception
+	 */
+	private void initParameterTree() throws Exception {
+		// 用于Tree调用
+		String ewaTreeKey = this._RequestValue.s(FrameParameters.EWA_TREE_KEY);
+		if (ewaTreeKey == null || !this._UserConfig.getUserPageItem().testName("Tree")) {
+			return;
+		}
+		UserXItemValues uxvs = this._UserConfig.getUserPageItem().getItem("Tree");
+		if (uxvs.count() == 0)
+			return;
+
+		String key = uxvs.getItem(0).getItem("Key");
+		String parentKey = uxvs.getItem(0).getItem("ParentKey");
+		String text = uxvs.getItem(0).getItem("Text");
+
+		// 将标准树传递的 EWA_TREE_KEY映射为表对应的字段
+		this._RequestValue.addValue(key, ewaTreeKey);
+		String pkey = this._RequestValue.getString(FrameParameters.EWA_TREE_PARENT_KEY);
+		if (pkey != null && pkey.equals(TreeViewMain.TREE_ROOT_KEY)) {
+			// 最高层主键值
+			pkey = uxvs.getItem(0).getItem("RootId");
+		}
+		this._RequestValue.addValue(parentKey, pkey);
+		this._RequestValue.addValue(text, this._RequestValue.getString(FrameParameters.EWA_TREE_TEXT));
+
+	}
+
+	/**
 	 * 将Action传递的Key转换为表达式,例如：SALES_ID=1
 	 */
 	private void initParametersDoAction() {
-		// 用于ListFrame调用
-		String ewaActionKey = this._RequestValue.getString(FrameParameters.EWA_ACTION_KEY);
-		if (ewaActionKey != null) {
-			if (!this._UserConfig.getUserPageItem().testName("PageSize")) {
-				return;
-			}
-			String keyField = null;
-			try {
-				UserXItemValues uxvs = this._UserConfig.getUserPageItem().getItem("PageSize");
-				if (uxvs.count() == 0)
-					return;
 
-				keyField = uxvs.getItem(0).getItem("KeyField");
-				String[] fields = keyField.split(",");
-				String[] vals = ewaActionKey.split(",");
-				for (int i = 0; i < fields.length; i++) {
-					this._RequestValue.addValue(fields[i], vals[i]);
-				}
-			} catch (Exception e) {
-				return;
-			}
+		try {
+			// 用于ListFrame调用 EWA_ACTION_KEY
+			initParameterEwaActionKey();
+		} catch (Exception e) {
+			LOGGER.warn(e.getMessage());
+		}
+		try {
+			// tree EWA_TREE_KEY
+			initParameterTree();
+		} catch (Exception e) {
+			LOGGER.warn(e.getMessage());
 		}
 
-		// 用于Tree调用
-		String ewaTreeKey = this._RequestValue.getString(FrameParameters.EWA_TREE_KEY);
-		if (ewaTreeKey != null) {
-			if (!this._UserConfig.getUserPageItem().testName("Tree")) {
-				return;
-			}
-			try {
-				UserXItemValues uxvs = this._UserConfig.getUserPageItem().getItem("Tree");
-				if (uxvs.count() == 0)
-					return;
-
-				String key = uxvs.getItem(0).getItem("Key");
-				String parentKey = uxvs.getItem(0).getItem("ParentKey");
-				String text = uxvs.getItem(0).getItem("Text");
-
-				// 将标准树传递的 EWA_TREE_KEY映射为表对应的字段
-				this._RequestValue.addValue(key, ewaTreeKey);
-				String pkey = this._RequestValue.getString(FrameParameters.EWA_TREE_PARENT_KEY);
-				if (pkey != null && pkey.equals(TreeViewMain.TREE_ROOT_KEY)) {
-					// 最高层主键值
-					pkey = uxvs.getItem(0).getItem("RootId");
-				}
-				this._RequestValue.addValue(parentKey, pkey);
-				this._RequestValue.addValue(text, this._RequestValue.getString(FrameParameters.EWA_TREE_TEXT));
-
-			} catch (Exception e) {
-				return;
-			}
-		}
 	}
 
 	/**
