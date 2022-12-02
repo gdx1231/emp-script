@@ -296,7 +296,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 		File ff;
 		String exportPathAndName = upload + "/download_datas/" + rv.s("EWA.ID");
 		try {
-			if (isExcel && !"XLS_OLD".equals(rv.s(FrameParameters.EWA_AJAX_DOWN_TYPE) )) {
+			if (isExcel && !"XLS_OLD".equals(rv.s(FrameParameters.EWA_AJAX_DOWN_TYPE))) {
 				// 下载 字段显示成为配置的信息，去掉未显示的内容
 				DTTable tbExport = this.createDownloadTable(rs);
 				ff = exp.export(tbExport, exportPathAndName);
@@ -598,21 +598,34 @@ public class ActionListFrame extends ActionBase implements IAction {
 			} else {
 				sb.append(" AND (");
 				String exp = lsp.getPara1();
-				if (databaseType.equals("HSQLDB")) {
-					sb.al(" UPPER(" + dataField + ")");
-					exp = exp.toUpperCase();
-				} else {
-					sb.al(dataField);
-				}
 				String exp1 = parameterStringExp(exp, conn);
-				if (lsp.getTag().equalsIgnoreCase("nlk")) { // not like
-					sb.al(" not like '%" + exp1 + "%')");
-				} else if (lsp.getTag().equalsIgnoreCase("llk")) { // 左 like
-					sb.al(" like '" + exp1 + "%')");
-				} else if (lsp.getTag().equalsIgnoreCase("rlk")) { // 右 like
-					sb.al(" like '%" + exp1 + "')");
-				} else { // lk
-					sb.al(" like '%" + exp1 + "%')");
+				if (dataField.indexOf("(") >= 0) {
+					// 例如全文检索的用法 contains(字段, @q)
+					// SQLServer 的 contains(字段, '北京')
+					String searchFunc = this.searchFuncion(dataField, exp1);
+
+					if (lsp.getTag().equalsIgnoreCase("nlk")) { // not like
+						sb.al(" not " + searchFunc + ")");
+					} else { // 不区分包含方式
+						sb.al(" " + searchFunc + ")");
+					}
+				} else {
+					if (databaseType.equals("HSQLDB")) {
+						sb.al(" UPPER(" + dataField + ")");
+						exp = exp.toUpperCase();
+					} else {
+						sb.al(dataField);
+					}
+
+					if (lsp.getTag().equalsIgnoreCase("nlk")) { // not like
+						sb.al(" not like '%" + exp1 + "%')");
+					} else if (lsp.getTag().equalsIgnoreCase("llk")) { // 左 like
+						sb.al(" like '" + exp1 + "%')");
+					} else if (lsp.getTag().equalsIgnoreCase("rlk")) { // 右 like
+						sb.al(" like '%" + exp1 + "')");
+					} else { // lk
+						sb.al(" like '%" + exp1 + "%')");
+					}
 				}
 			}
 		}
@@ -755,6 +768,25 @@ public class ActionListFrame extends ActionBase implements IAction {
 		return exp;
 	}
 
+	private String searchFuncion(String dataField, String exp1) throws Exception {
+		String searchFunc;
+		DataConnection conn = this.getItemValues().getDataConn();
+		if ("MSSQL".equalsIgnoreCase(conn.getDatabaseType())) {
+			if (dataField.trim().startsWith("contains")) {
+				exp1 = "\"" + exp1.replace("\"", "\"\"") + "\"";
+			}
+		}
+		if (dataField.indexOf("@q") > 0) {
+			searchFunc = dataField.replace("@q", "'" + exp1 + "'");
+		} else if (dataField.indexOf("@Q") > 0) {
+			searchFunc = dataField.replace("@Q", "'" + exp1 + "'");
+		} else {
+			throw new Exception("SearchExp error, MUST have @q or @Q. (" + dataField + ")");
+		}
+
+		return searchFunc;
+	}
+
 	/**
 	 * 创建检索的文字查询
 	 * 
@@ -774,10 +806,21 @@ public class ActionListFrame extends ActionBase implements IAction {
 		}
 		String opTag = lsp.getTag();
 
+		// 例如全文检索的用法 contains(字段, @q)
+		// SQLServer 的 contains(字段, '北京')
+		boolean isFunc = dataField.indexOf("(") >= 0;
 		if (opTag.equals("blk")) {// 空白
-			return " (" + dataField + " = '' or " + dataField + " is null)";
+			if (isFunc) {
+				return null;
+			} else {
+				return " (" + dataField + " = '' or " + dataField + " is null)";
+			}
 		} else if (opTag.equals("nblk")) {// 非空白
-			return " " + dataField + " != '' ";
+			if (isFunc) {
+				return null;
+			} else {
+				return " " + dataField + " != '' ";
+			}
 		}
 		String op = " like ";
 		String op_left = "%";
@@ -817,22 +860,41 @@ public class ActionListFrame extends ActionBase implements IAction {
 				continue;
 			}
 			if (s.length() > 0) {
-				s.a(" OR ");
+				if (opTag.equals("uneq") || opTag.equals("nlk")) {
+					s.a(" AND ");
+				} else {
+					s.a(" OR ");
+				}
 			}
 			String exp1 = this.parameterStringExp(exp, conn);
-			if (opTag.equals("uneq") || opTag.equals("nlk")) {
-				// 不等于和不包含将null值包含进来
-				if (databaseType.equals("HSQLDB")) {
-					s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp1.toUpperCase() + op_right + "' or "
-							+ dataField + " is null)");
-				} else {
-					s.a(" (" + dataField + op + " '" + op_left + exp1 + op_right + "' or " + dataField + " is null)");
+			if (isFunc) {
+				try {
+					String search = this.searchFuncion(dataField, exp1);
+					if (opTag.equals("uneq") || opTag.equals("nlk")) {
+						s.a(" not ").a(search);
+					} else {
+						s.a(search);
+					}
+				} catch (Exception e) {
+					LOG.warn(e.getMessage());
+					return null;
 				}
 			} else {
-				if (databaseType.equals("HSQLDB")) {
-					s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp1.toUpperCase() + op_right + "' ");
+				if (opTag.equals("uneq") || opTag.equals("nlk")) {
+					// 不等于和不包含将null值包含进来
+					if (databaseType.equals("HSQLDB")) {
+						s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp1.toUpperCase() + op_right + "' or "
+								+ dataField + " is null)");
+					} else {
+						s.a(" (" + dataField + op + " '" + op_left + exp1 + op_right + "' or " + dataField
+								+ " is null)");
+					}
 				} else {
-					s.a(" " + dataField + op + " '" + op_left + exp1 + op_right + "' ");
+					if (databaseType.equals("HSQLDB")) {
+						s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp1.toUpperCase() + op_right + "' ");
+					} else {
+						s.a(" " + dataField + op + " '" + op_left + exp1 + op_right + "' ");
+					}
 				}
 			}
 		}
