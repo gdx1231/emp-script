@@ -259,9 +259,6 @@ public class PageValue {
 	 * @return the _Length
 	 */
 	public int getLength() {
-		if (this._Length <= 0) {
-			this._Length = 4000;
-		}
 		return _Length;
 	}
 

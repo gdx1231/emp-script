@@ -3731,7 +3731,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="enus" Info="Cols" />
 						</DescriptionSet>
 					</Value>
-
+<Value Name="TextareaAuto" Type="group">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="Textarea 根据内容自动大小" />
+							<Set Lang="enus" Info="Textarea auto size by content" />
+						</DescriptionSet>
+					</Value>
 				</Values>
 			</XItemParameter>
 
@@ -4255,6 +4260,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			</XItemParameter>
 		</XItemParameters>
 		<XGroupValues>
+		
+		<XGroupValue Name="TextareaAuto" default="no" Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="否,是" />
+				</DescriptionSet>
+			</XGroupValue>
 			<XGroupValue Name="AllowJsonExport" default="no" Values="yes,no">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="是,否" />

@@ -117,7 +117,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 	public String createJsonContent() throws Exception {
 		MStr sb = new MStr();
 		RequestValue rv = super.getHtmlClass().getItemValues().getRequestValue();
-		String jsonName = super.getHtmlClass().getItemValues().getRequestValue().getString(FrameParameters.EWA_JSON_NAME);
+		String jsonName = super.getHtmlClass().getItemValues().getRequestValue()
+				.getString(FrameParameters.EWA_JSON_NAME);
 		if (jsonName != null) {
 			sb.append("" + Utils.textToJscript(jsonName) + "=");
 		}
@@ -194,8 +195,6 @@ public class FrameFrame extends FrameBase implements IFrame {
 
 		HtmlDocument doc = this.getHtmlClass().getDocument();
 
-		 
-
 		// 索引号错误（<0 或超出范围）index=0,size=0
 		// 当 从 ListFrame 修改成 Frame 时候
 		String userHtml = this.getUserHtml();
@@ -255,7 +254,6 @@ public class FrameFrame extends FrameBase implements IFrame {
 			doc.addScriptHtml(bottom);
 			doc.addFrameHtml(bottom);
 		}
-		 
 
 	}
 
@@ -355,7 +353,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 
 		MStr sb = new MStr();
 		UserConfig uc = this.getHtmlClass().getUserConfig();
-		String ewa_redraw = super.getHtmlClass().getItemValues().getRequestValue().getString(FrameParameters.EWA_REDRAW);
+		String ewa_redraw = super.getHtmlClass().getItemValues().getRequestValue()
+				.getString(FrameParameters.EWA_REDRAW);
 		// 重绘
 		if (ewa_redraw != null && ewa_redraw.equals("1") && uc.getUserPageItem().testName("RedrawJson")) {
 			String RedrawJson = uc.getUserPageItem().getSingleValue("RedrawJson");
@@ -1138,7 +1137,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 		if (this._ColSize == 0) {
 			int colSpan = 3;
 			// 用户指定参数 EWA_FRAME_COLS
-			String EWA_FRAME_COLS = super.getHtmlClass().getItemValues().getRequestValue().s(FrameParameters.EWA_FRAME_COLS);
+			String EWA_FRAME_COLS = super.getHtmlClass().getItemValues().getRequestValue()
+					.s(FrameParameters.EWA_FRAME_COLS);
 			if (EWA_FRAME_COLS == null) {
 				EWA_FRAME_COLS = super.getHtmlClass().getUserConfig().getUserPageItem().getSingleValue("Size",
 						"FrameCols");
@@ -1163,7 +1163,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 	 * @return 显示为1段
 	 */
 	public boolean isC11() {
-		String EWA_FRAME_COLS = super.getHtmlClass().getItemValues().getRequestValue().s(FrameParameters.EWA_FRAME_COLS);
+		String EWA_FRAME_COLS = super.getHtmlClass().getItemValues().getRequestValue()
+				.s(FrameParameters.EWA_FRAME_COLS);
 		if (EWA_FRAME_COLS == null) {
 			EWA_FRAME_COLS = super.getHtmlClass().getUserConfig().getUserPageItem().getSingleValue("Size", "FrameCols");
 		}
@@ -1219,6 +1220,16 @@ public class FrameFrame extends FrameBase implements IFrame {
 
 		// 配置文件xml的 hashCode
 		sJs.al(" o1._HASH = " + this.getHtmlClass().getUserConfig().getItemNodeXml().hashCode() + ";");
+
+		// textarea更加内容自动大小
+		UserXItemValue size = super.getHtmlClass().getUserConfig().getUserPageItem().getItem("Size").getItem(0);
+		if (size.testName("TextareaAuto")) {
+			String textareaAuto = size.getItem("TextareaAuto");
+			if ("yes".equalsIgnoreCase(textareaAuto)) {
+				sJs.al(" o1.textareaAutoSize();");
+			}
+		}
+
 		sJs.al(" o1 = null;");
 		sJs.al("})();");
 		// sJs.al(funName + ";");

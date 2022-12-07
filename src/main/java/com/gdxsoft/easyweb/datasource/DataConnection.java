@@ -1624,16 +1624,17 @@ public class DataConnection {
 		for (int i = 0; i < paras.size(); i++) {
 			String para = paras.get(i);
 			PageValue pv = this._RequestValue.getPageValues().getValue(para);
+			if (pv == null) {
+				// md5, sha1...
+				if (this._RequestValue.getOtherValue(para) != null) {
+					continue;
+				}
+			}
 			String v1 = null;
 			if (pv == null) {
 				// 获取根据类型的数据
 				pv = this.getParameterByEndWithType(para);
-				if (pv.getLength() == -1) {
-					String vOther = this._RequestValue.s(para);
-					if (vOther != null) {
-						v1 = vOther;
-					}
-				} else {
+				if (pv != null && pv.getLength() > -1) {
 					v1 = pv.getStringValue();
 				}
 			} else {
