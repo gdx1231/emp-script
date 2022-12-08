@@ -151,6 +151,40 @@ public class DataConnection {
 	}
 
 	/**
+	 * 获取数据量
+	 * 
+	 * @param tableName  表名
+	 * @param where      查询条件
+	 * @param configName
+	 * @param rv
+	 * @return =0 无数据，>0有数据，-1 执行错误
+	 */
+	public static int queryCount(String tableName, String where, String configName, RequestValue rv) {
+		DataConnection cnn = new DataConnection(configName, rv);
+		int count = cnn.executeQueryCount(tableName, where);
+		cnn.close();
+
+		return count;
+	}
+
+	/**
+	 * 检查数据是否存在
+	 * 
+	 * @param tableName  表名
+	 * @param where      查询条件
+	 * @param configName
+	 * @param rv
+	 * @return 有数据true,无数据和执行错误false
+	 */
+	public static boolean queryExists(String tableName, String where, String configName, RequestValue rv) {
+		DataConnection cnn = new DataConnection(configName, rv);
+		boolean exists = cnn.executeQueryExists(tableName, where);
+		cnn.close();
+
+		return exists;
+	}
+
+	/**
 	 * 批量执行更新并关闭连接
 	 * 
 	 * @param sqls       用;分割的sql字符串
@@ -780,6 +814,46 @@ public class DataConnection {
 			lst.add(ds);
 		}
 		return lst;
+	}
+
+	/**
+	 * 获取数据量
+	 * 
+	 * @param tableName 表名
+	 * @param where     查询条件
+	 * @return =0 无数据，>0有数据，-1 执行错误
+	 */
+	public int executeQueryCount(String tableName, String where) {
+		String sql = "select count(*) gdx from " + tableName + " where 1=1 and " + where;
+		DTTable tb = DTTable.getJdbcTable(sql, this);
+		if (tb.isOk()) {
+			return tb.getCell(0, 0).toInt();
+		} else {
+			// 执行错误
+			return -1;
+		}
+	}
+
+	/**
+	 * 检查数据是否存在
+	 * 
+	 * @param tableName 表名
+	 * @param where     查询条件
+	 * @return 有数据true,无数据和执行错误false
+	 */
+	public boolean executeQueryExists(String tableName, String where) {
+		String sql = "select 1 gdx from " + tableName + " where 1=1 and " + where;
+		DTTable tb = DTTable.getJdbcTable(sql, "gdx", 1, 1, this);
+		if (tb.isOk()) {
+			if (tb.getCount() == 0) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			// 执行错误
+			return false;
+		}
 	}
 
 	/**
@@ -1672,7 +1746,7 @@ public class DataConnection {
 	 * @param sql sql表达式
 	 * @return 替换后的sql
 	 */
-	private String replaceSqlParameters(String sql) {
+	public String replaceSqlParameters(String sql) {
 		String sql1 = sql;
 		MListStr al = Utils.getParameters(sql, "@");
 		for (int i = 0; i < al.size(); i++) {
@@ -1779,7 +1853,7 @@ public class DataConnection {
 	 * @param pst
 	 * @throws SQLException
 	 */
-	private void addSqlParameter(MListStr parameters, PreparedStatement pst) throws SQLException {
+	public void addSqlParameter(MListStr parameters, PreparedStatement pst) throws SQLException {
 		if (parameters == null || this._RequestValue == null) {
 			return;
 		}
@@ -1913,7 +1987,7 @@ public class DataConnection {
 		return pv;
 	}
 
-	private void addStatementParameter(PreparedStatement cst, String parameterName, int index) throws SQLException {
+	public void addStatementParameter(PreparedStatement cst, String parameterName, int index) throws SQLException {
 		String dt;
 		PageValue pv = this._RequestValue.getPageValues().getValue(parameterName);
 		if (pv == null) {

@@ -1276,6 +1276,18 @@ public class RequestValue implements Cloneable {
 	 * @return 添加的字段
 	 */
 	public List<String> addValues(JSONObject json) {
+
+		return this.addValues(json, null);
+	}
+
+	/**
+	 * 添加JSONObject到Rv中
+	 * 
+	 * @param json   JSONObject
+	 * @param prefix 名称前面加的前缀
+	 * @return 添加的字段
+	 */
+	public List<String> addValues(JSONObject json, String prefix) {
 		if (json == null) {
 			return null;
 		}
@@ -1283,20 +1295,20 @@ public class RequestValue implements Cloneable {
 		Iterator<?> it = json.keys();
 		while (it.hasNext()) {
 			String key = it.next().toString();
+			String key1 = prefix == null ? key : prefix + key;
+			this._ReqValues.remove(key1);
 			try {
 				Object val = json.get(key);
 				if (val == null) {
 					continue;
 				}
-				this._ReqValues.remove(key);
-
 				if (val instanceof JSONArray) {
 					JSONArray arr = (JSONArray) val;
 					byte[] bufs = new byte[arr.length()];
 					for (int i = 0; i < arr.length(); i++) {
 						bufs[i] = Byte.parseByte(arr.getInt(i) + "");
 					}
-					this.addValue(key, bufs, "binary", bufs.length);
+					this.addValue(key1, bufs, "binary", bufs.length);
 				} else {
 					String valStr = val.toString();
 					if (valStr.indexOf("##BINARY_FILE[") >= 0 && valStr.indexOf("]BINARY_FILE##") > 0) {
@@ -1304,13 +1316,13 @@ public class RequestValue implements Cloneable {
 						valStr = valStr.replace("##BINARY_FILE[", "").replace("]BINARY_FILE##", "");
 						byte[] bufs = getJsonFileRef(valStr);
 						if (bufs != null) {
-							this.addValue(key, bufs, "binary", bufs.length);
+							this.addValue(key1, bufs, "binary", bufs.length);
 						}
 					} else {
-						this.addValue(key, val);
+						this.addValue(key1, val);
 					}
 				}
-				addList.add(key);
+				addList.add(key1);
 			} catch (JSONException e) {
 			}
 		}
