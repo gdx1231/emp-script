@@ -4156,114 +4156,7 @@ EWA.F.FOS["@sys_frame_unid"].link = function(id) {
         var u = './?xmlname=@xmlname&itemname=define_tabs&a=gdx';
         window.parent.frames[1].location = u;
     }
-})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize/><ListUI/><MenuShow/><Menu/><Tree><Set AddPara1="" AddPara2="" AddPara3="" Key="key" Level="" LoadByLevel="1" MenuGroup="" Order="" ParentKey="ParentKey" RootId="" Text="name" Title=""/></Tree><HtmlFrame><Set FrameBorder="" FrameSize="200,*" FrameSubUrl="" FrameType="H"/></HtmlFrame><TreeIconSet><Set Close="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Filter=".doc\b" Open="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Test="Key"/><Set Close="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Filter=".doc\b" Open="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Test="Key"/></TreeIconSet><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnTreeNodeMore"><CallSet><Set CallIsChk="" CallName="获取子节点" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="" MethodName="getCfgsXml" Name="读取XML文件数据" XmlTag="TableViewList/Row"/><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@key,@linkType" MethodName="getMoreXml1" Name="获取子节点" XmlTag="TableViewList/Row"/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-01-07 17:01:20" Name="sql_create" UpdateDate="2021-12-11 15:06:36"><Page><Name><Set Name="sql_create"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="生成配置文件" Lang="zhcn" Memo=""/><Set Info="Build configuration files" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="450" HiddenCaption="1" VAlign="top" Width="820"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.css">
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CONFIG.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_DEFINE.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_DEFAULT.js"></script>
-<script type="text/javascript" src="@EWA.CP/EWA_DEFINE/cgi-bin/xml/?TYPE=CFG_XML&XMLNAME=EwaDefine.xml&MODE=JS&MODE_NAME=_CFG_DEFINE"></script>
-<script type="text/javascript" src="@EWA.CP/EWA_DEFINE/cgi-bin/xml/?TYPE=CFG_XML&XMLNAME=EwaConfig.xml&MODE=JS&MODE_NAME=_CFG_MAIN"></script>
-
-<table border=0 width=100% height=450 cellspacing=0 cellpadding=0>
-<tr>
-  <td height="430" valign="top">
-      <table border=0 width=100% height=100% cellspacing=0 cellpadding=0 id=STEP0>
-        <tr>
-          <td width=213 height="100%" id=tbSQL>
-            <iframe frameborder="0" width="100%" height="100%" 
-            src="./?xmlname=/ewa/ewa.xml&itemname=tabletree&EWA_FRAMESET_NO=1" ></iframe>
-          </td>
-          <td  height="100%">
-            <iframe frameborder="0" width="100%" height="100%" name="xml" src="about:blank"></iframe>
-          </td>
-        </tr>
-      </table>
-      <div id=STEP1 class=STEP style='display: none'></div>
-      <div id=STEP2 class=STEP style='display: none'></div>
-      <div id=STEP3 class=STEP style='display: none'></div>
-      <div id=STEP4 class=STEP style='display: none'></div>
-      <div id=STEP5 class=STEP style='display: none'></div>
-  </td>
-</tr>
-<tr>
-<td align=right height=30 style='border-top: 1px solid #ccc'>
-						<button id="butprev" disabled
-							onclick="define.Next(this,$X('butnext'),-1);">上一步</button>
-						<button id="butnext"
-							 onclick="define.Next($X('butprev'),this,1);">下一步</button>
-						|&nbsp;
-						<button onclick="define.CreateNewFrame();">确定</button>
-						<button type=button>关闭</button>
-						&nbsp;
-</td>
-</tr>
-</table>
-					
-          ]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow = 'hidden';]]></Top><Bottom><![CDATA[var xmlName = '@F_XMLNAME';
-var frameTag = '@FrameTag';
-var lang = "zhcn";
-var define;
-var timer1;
-var is_auto = "@auto";
-function load0() {
-  EWA.CP = "@SYS_ContextPath";
-  define = new EWA_DefineClass(frameTag);
-
-  if (is_auto) {
-      cfg="@cfg";
-      tablename="@tablename".split(';')[3];
-      var u=$U2("ewa|ewa.xml",'fields','cfg='+cfg+'&tablename='+tablename+'&EWA_FRAMESET_NO=1');
-      window.frames[1].location=u;
-    timer1 = window.setInterval(load_auto, 100);
-  } else {
-    var doc = window.frames[1].document;
-    doc.open();
-    doc.close();
-    doc.body.innerHTML = "<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><div align=center>请选择表</div>";
-
-    doc.body.innerHTML = define.GetMainInfo();
-    timer1 = window.setInterval(load1, 100);
-  }
-
-}
-function load1() {
-  if (typeof _EWA_DialogWnd == 'undefined') {
-    return;
-  }
-  window.clearInterval(timer1);
-  define.SetTitle();
-}
-
-function load_auto() {
-  var w = window.frames[1];
-  if (w.$X && w.document.readyState == 'complete') {
-    window.clearInterval(timer1);
-    define.SetTitle();
-    $X("butnext").click();
-    $('input[n1=M]').click();
-    $X("butnext").click();
-    $X("butnext").click();
-    $X("butnext").click();
-
-    define.CreateNewFrame();
-
-    $X("butnext").click();
-    $X("butnext").click();
-    $X("butnext").click();
-
-    define.CreateNewFrame();
-    if(parent.xml_create_ok){
-        parent.xml_create_ok(XMLS);
-    }
-  }
-}
-addEvent(window, 'load', load0);]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[
-            .STEP{
-	width:100%;
-	height:430px;
-	overflow-y:auto;
-	
-}
-          ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-04-07 15:02:57" Name="index" UpdateDate="2021-12-14 17:33:01"><Page><Name><Set Name="index"/></Name><FrameTag><Set FrameTag="Menu"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="GdxSoft EWA(v2.0b) IDE" Lang="zhcn" Memo="GdxSoft EWA(v2.0b) IDE"/><Set Info="GdxSoft EWA(v2.0b) IDE" Lang="enus" Memo="GdxSoft EWA(v2.0b) IDE"/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss/></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml/><PageSize/><ListUI/><MenuShow/><Menu/><Tree><Set AddPara1="" AddPara2="" AddPara3="" Key="key" Level="" LoadByLevel="1" MenuGroup="" Order="" ParentKey="ParentKey" RootId="" Text="name" Title=""/></Tree><HtmlFrame><Set FrameBorder="" FrameSize="200,*" FrameSubUrl="" FrameType="H"/></HtmlFrame><TreeIconSet><Set Close="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Filter=".doc\b" Open="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Test="Key"/><Set Close="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Filter=".doc\b" Open="@SYS_CONTEXTPATH/DEMO/IMAGES/TREE/word.jpg" Test="Key"/></TreeIconSet><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnTreeNodeMore"><CallSet><Set CallIsChk="" CallName="获取子节点" CallType="ClassSet" Test=""/></CallSet></Set></ActionSet><SqlSet/><JSONSet/><ClassSet><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="" MethodName="getCfgsXml" Name="读取XML文件数据" XmlTag="TableViewList/Row"/><Set ClassName="com.gdxsoft.easyweb.define.UserTableViewXmls" ConData="" MethodData="@key,@linkType" MethodName="getMoreXml1" Name="获取子节点" XmlTag="TableViewList/Row"/></ClassSet><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="读取XML文件数据" CallType="ClassSet" Test=""/></CallSet></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-04-07 15:02:57" Name="index" UpdateDate="2021-12-14 17:33:01"><Page><Name><Set Name="index"/></Name><FrameTag><Set FrameTag="Menu"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="GdxSoft EWA(v2.0b) IDE" Lang="zhcn" Memo="GdxSoft EWA(v2.0b) IDE"/><Set Info="GdxSoft EWA(v2.0b) IDE" Lang="enus" Memo="GdxSoft EWA(v2.0b) IDE"/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[
 
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
 <link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
@@ -8036,4 +7929,112 @@ AddEvent(window, 'load', function() {
 }
 #props .fa {
     font-family: FontAwesome !important;
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos><PageInfo Name="names"><Name><Set Name="names"/></Name><DescriptionSet><Set Info="视图,代码,资源,重绘,BOX,左引导,打开测试,XML" Lang="zhcn" Memo=""/><Set Info="View, Code, Resources, Redraw, BOX, left , Test, XML" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate></EasyWebTemplates>
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos><PageInfo Name="names"><Name><Set Name="names"/></Name><DescriptionSet><Set Info="视图,代码,资源,重绘,BOX,左引导,打开测试,XML" Lang="zhcn" Memo=""/><Set Info="View, Code, Resources, Redraw, BOX, left , Test, XML" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2009-01-07 17:01:20" Name="sql_create" UpdateDate="2022-12-15 11:12:29"><Page><Name><Set Name="sql_create"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="生成配置文件" Lang="zhcn" Memo=""/><Set Info="Build configuration files" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><RowAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="450" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="820"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.css">
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CONFIG.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_DEFINE.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_DEFAULT.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<script type="text/javascript" src="@EWA.CP/EWA_DEFINE/cgi-bin/xml/?TYPE=CFG_XML&XMLNAME=EwaDefine.xml&MODE=JS&MODE_NAME=_CFG_DEFINE"></script>
+<script type="text/javascript" src="@EWA.CP/EWA_DEFINE/cgi-bin/xml/?TYPE=CFG_XML&XMLNAME=EwaConfig.xml&MODE=JS&MODE_NAME=_CFG_MAIN"></script>
+
+<table border=0 width=100% height=450 cellspacing=0 cellpadding=0>
+<tr>
+  <td height="430" valign="top">
+      <table border=0 width=100% height=100% cellspacing=0 cellpadding=0 id=STEP0>
+        <tr>
+          <td width=213 height="100%" id=tbSQL>
+            <iframe frameborder="0" width="100%" height="100%" 
+            src="./?xmlname=/ewa/ewa.xml&itemname=tabletree&EWA_FRAMESET_NO=1" ></iframe>
+          </td>
+          <td  height="100%">
+            <iframe frameborder="0" width="100%" height="100%" name="xml" src="about:blank"></iframe>
+          </td>
+        </tr>
+      </table>
+      <div id=STEP1 class=STEP style='display: none'></div>
+      <div id=STEP2 class=STEP style='display: none'></div>
+      <div id=STEP3 class=STEP style='display: none'></div>
+      <div id=STEP4 class=STEP style='display: none'></div>
+      <div id=STEP5 class=STEP style='display: none'></div>
+  </td>
+</tr>
+<tr>
+<td align=right height=30 style='border-top: 1px solid #ccc'>
+						<button id="butprev" disabled
+							onclick="define.Next(this,$X('butnext'),-1);">上一步</button>
+						<button id="butnext"
+							 onclick="define.Next($X('butprev'),this,1);">下一步</button>
+						|&nbsp;
+						<button onclick="define.CreateNewFrame();">确定</button>
+						<button type=button>关闭</button>
+						&nbsp;
+</td>
+</tr>
+</table>
+					
+          ]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow = 'hidden';]]></Top><Bottom><![CDATA[var xmlName = '@F_XMLNAME';
+var frameTag = '@FrameTag';
+var lang = "zhcn";
+var define;
+var timer1;
+var is_auto = "@auto";
+function load0() {
+  EWA.CP = "@SYS_ContextPath";
+  define = new EWA_DefineClass(frameTag);
+
+  if (is_auto) {
+      cfg="@cfg";
+      tablename="@tablename".split(';')[3];
+      var u=$U2("ewa|ewa.xml",'fields','cfg='+cfg+'&tablename='+tablename+'&EWA_FRAMESET_NO=1');
+      window.frames[1].location=u;
+    timer1 = window.setInterval(load_auto, 100);
+  } else {
+    var doc = window.frames[1].document;
+    doc.open();
+    doc.close();
+    doc.body.innerHTML = "<p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><div align=center>请选择表</div>";
+
+    doc.body.innerHTML = define.GetMainInfo();
+    timer1 = window.setInterval(load1, 100);
+  }
+
+}
+function load1() {
+  if (typeof _EWA_DialogWnd == 'undefined') {
+    return;
+  }
+  window.clearInterval(timer1);
+  define.SetTitle();
+}
+
+function load_auto() {
+  var w = window.frames[1];
+  if (w.$X && w.document.readyState == 'complete') {
+    window.clearInterval(timer1);
+    define.SetTitle();
+    $X("butnext").click();
+    $('input[n1=M]').click();
+    $X("butnext").click();
+    $X("butnext").click();
+    $X("butnext").click();
+
+    define.CreateNewFrame();
+
+    $X("butnext").click();
+    $X("butnext").click();
+    $X("butnext").click();
+
+    define.CreateNewFrame();
+    if(parent.xml_create_ok){
+        parent.xml_create_ok(XMLS);
+    }
+  }
+}
+addEvent(window, 'load', load0);]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[
+            .STEP{
+	width:100%;
+	height:430px;
+	overflow-y:auto;
+	
+}
+          ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>
