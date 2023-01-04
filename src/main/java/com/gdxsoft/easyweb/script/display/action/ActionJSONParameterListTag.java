@@ -36,6 +36,8 @@ public class ActionJSONParameterListTag {
 	// 字段对应关系，key = json key, value = table fieldname
 	// 用于数据库save操作
 	private Map<String, String> fieldsMap = new HashMap<>();
+	
+	private Map<String, String> foreignKeys = new HashMap<>(); // 外键
 
 	/**
 	 * 保持数据的设置是否完整
@@ -101,6 +103,17 @@ public class ActionJSONParameterListTag {
 					String jsonKey = itfieldsMap.next();
 					String tableField = fieldsMap.optString(jsonKey);
 					this.fieldsMap.put(jsonKey, tableField);
+				}
+			} else if (key.equalsIgnoreCase("foreignKeys")) {
+				JSONObject h = obj.optJSONObject(key);
+				if(h !=null) {
+					JSONObject fksMap = obj.optJSONObject(key);
+					Iterator<String> itfksMap=fksMap.keys();
+					while(itfksMap.hasNext()) {
+						String jsonKey=itfksMap.next();
+						String fkName=fksMap.optString(jsonKey);
+						this.foreignKeys.put(jsonKey, fkName);
+					}
 				}
 			}
 		}
@@ -252,4 +265,15 @@ public class ActionJSONParameterListTag {
 	public Map<String, String> getFieldsMap() {
 		return fieldsMap;
 	}
+	
+
+
+	public Map<String, String> getForeignKeys() {
+		return foreignKeys;
+	}
+
+	public void setForeignKeys(Map<String, String> foreignKeys) {
+		this.foreignKeys = foreignKeys;
+	}
+
 }

@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
@@ -353,25 +354,25 @@ public class ActionJSON {
 		if ("GET".equalsIgnoreCase(param.getMethod())) {
 			result = net.doGet(url);
 		} else if ("POST".equalsIgnoreCase(param.getMethod())) {
-			if (StringUtils.isBlank(param.getBody())) {
+			if (!StringUtils.isBlank(param.getBody())) {
 				result = net.postMsg(url, param.getBody());
 			} else {
-				result = net.doPost(url, param.getData());
+				result = net.doPost(url, param.getData());				
 			}
 		} else if ("PUT".equalsIgnoreCase(param.getMethod())) {
-			if (StringUtils.isBlank(param.getBody())) {
+			if (!StringUtils.isBlank(param.getBody())) {
 				result = net.doPut(url, param.getBody());
 			} else {
 				result = net.doPut(url, param.getData());
 			}
 		} else if ("PATCH".equalsIgnoreCase(param.getMethod())) {
-			if (StringUtils.isBlank(param.getBody())) {
+			if (!StringUtils.isBlank(param.getBody())) {
 				result = net.doPatch(url, param.getBody());
 			} else {
 				result = net.doPatch(url, param.getData());
 			}
 		} else if ("DELETE".equalsIgnoreCase(param.getMethod())) {
-			if (StringUtils.isBlank(param.getBody())) {
+			if (!StringUtils.isBlank(param.getBody())) {
 				if (param.getBody().length() == 0) {
 					result = net.doDelete(url);
 				} else {
@@ -410,6 +411,9 @@ public class ActionJSON {
 		this.rv.addOrUpdateValue("REQ_UA", this.actionBase.getRequestValue().s("SYS_USER_AGENT"));
 		this.rv.addOrUpdateValue("REQ_IP", this.actionBase.getRequestValue().s("SYS_REMOTEIP"));
 		this.rv.addOrUpdateValue("REQ_JSP", this.actionBase.getRequestValue().s("SYS_REMOTE_URL_ALL"));
+
+		// jzp
+		this.rv.addOrUpdateValue("REQ_AGENT", this.actionBase.getRequestValue().s("REQ_AGENT"));
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("INSERT INTO _EWA_API_REQ_LOG(\n");
@@ -453,7 +457,10 @@ public class ActionJSON {
 		// "listTags": [{
 		// ...."tag": "products",
 		// ...."key": "PRODUCTCODE",
-		// ...."table": "PRODUCT"
+		// ...."table": "PRODUCT",
+		// ...."foreignKeys":{
+		// ...."contact": "ContactID"
+		// ....},
 		// ...."listTags": [{
 		// ........"tag": "images",
 		// ........"key": "id",
@@ -482,6 +489,32 @@ public class ActionJSON {
 			// 重建表字段名称索引
 			jsonTb.getColumns().refreshNamesIndex();
 		}
+		
+		// 获取关联表外键值，添加到当前jsonTb中
+		if(param.getForeignKeys().size()>0) {
+			Iterator<String> it = param.getForeignKeys().keySet().iterator();
+			while (it.hasNext()) {
+				String jsonKey = it.next();
+				String field = param.getForeignKeys().get(jsonKey);
+				if(jsonTb.getColumns().testName(jsonKey)) {
+					DTColumn col=new DTColumn();
+					col.setName(field);
+					jsonTb.getColumns().addColumn(col);
+					for(int i=0;i<jsonTb.getCount();i++) {
+						String ss=jsonTb.getCell(i, jsonKey).getString();
+						if(!StringUtils.isAllEmpty(ss)) {
+							JSONObject obj=new JSONObject(ss);
+							if(obj.has(field)) {
+								jsonTb.getCell(i, field).setValue(obj.optString(field));
+							}
+						}
+					}
+				}
+			}
+			// 重建表字段名称索引
+			jsonTb.getColumns().refreshNamesIndex();
+		}
+		
 
 		String key = param.getKey();
 		String table = param.getTable();
