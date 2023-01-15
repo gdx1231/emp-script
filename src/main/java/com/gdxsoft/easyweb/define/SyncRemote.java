@@ -102,6 +102,7 @@ public class SyncRemote {
 	 * @param root    根目录
 	 */
 	public void init(String filters, String root) {
+		LOGGER.info("开始扫描文件变化：{}, {}", root, filters);
 		_Filters = new HashMap<String, Boolean>();
 		_FilterString = filters;
 		String[] exps = filters.split(",");
