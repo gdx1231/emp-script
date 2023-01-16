@@ -1628,6 +1628,25 @@ public class DataConnection {
 	}
 
 	/**
+	 * 特殊的不需要替换为参数的参数名称，例如rownum<br>
+	 * <code>select user_id, @rownum := @rownum+1 from users b<br>
+	 * ,(select @rownum :=0) c
+	 * </code>
+	 * 
+	 * @param paramName
+	 * @return
+	 */
+	public boolean skipReplaceParameter(String paramName) {
+		if (paramName == null) {
+			return false;
+		}
+		if (paramName.toLowerCase().indexOf("rownum") == 0) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * 1. 合成SQL语句，如果参数名为XX_SPLIT，为分割参数, <br>
 	 * 例如 select * from users where id in(1,2,3) <br>
 	 * 2. SQL语句预替换，即在SQL语句执行前，替换SQL语句本身的参数 <br>
@@ -1697,6 +1716,10 @@ public class DataConnection {
 		MListStr paras = Utils.getParameters(sql, "@");
 		for (int i = 0; i < paras.size(); i++) {
 			String para = paras.get(i);
+			if (this.skipReplaceParameter(para)) {
+				// 特点的不替换参数名称
+				continue;
+			}
 			PageValue pv = this._RequestValue.getPageValues().getValue(para);
 			if (pv == null) {
 				// md5, sha1...
@@ -1751,7 +1774,7 @@ public class DataConnection {
 		MListStr al = Utils.getParameters(sql, "@");
 		for (int i = 0; i < al.size(); i++) {
 			String paramName = al.get(i);
-			if (paramName.toLowerCase().indexOf("rownum") == 0) {
+			if (skipReplaceParameter(paramName)) {
 				// 不替换rownum开头的参数，mysql使用
 				// select les_out_idx, @rownum := @rownum+1
 				// from camp_lesson_outline b ,(select @rownum :=0) c
@@ -1784,7 +1807,7 @@ public class DataConnection {
 			String paramName = al.get(i);
 			String paramValue = null;
 
-			if (paramName.toLowerCase().indexOf("rownum") == 0) {
+			if (skipReplaceParameter(paramName)) {
 				continue;
 			}
 			try {
@@ -1860,7 +1883,7 @@ public class DataConnection {
 		int index = 0;
 		for (int i = 0; i < parameters.size(); i++) {
 			String PKey = parameters.get(i).toUpperCase();
-			if (PKey.indexOf("ROWNUM") == 0) {
+			if (skipReplaceParameter(PKey)) {
 				// 不替换rownum开头的参数，mysql使用
 				// select les_out_idx, @rownum := @rownum+1
 				// from camp_lesson_outline b ,(select @rownum :=0) c
@@ -2136,7 +2159,7 @@ public class DataConnection {
 		for (int i = 0; i < parameters.size(); i++) {
 			String key = parameters.get(i).trim();
 			String key1 = key.toUpperCase();
-			if (key1.indexOf("ROWNUM") == 0) {
+			if (skipReplaceParameter(key1)) {
 				// 不替换rownum开头的参数，mysql使用
 				// select les_out_idx, @rownum := @rownum+1
 				// from camp_lesson_outline b ,(select @rownum :=0) c
