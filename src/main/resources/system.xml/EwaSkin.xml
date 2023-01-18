@@ -6,15 +6,15 @@
 <html  class="@ewa_lang">
 <head> 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="version" content="2022.07.07 h4">
+<meta name="version" content="2022.12.05 h4">
 <link rel="preload" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" />
-<link rel="stylesheet" rev="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v=20220707" type="text/css" />
+<link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" >
+<link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v20221205=1" type="text/css" >
 
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v=20220707"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v20221205=1"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.6.0.min.js'></script>
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/@EWA_LANG/resource.js"></script>
-
+<script type="text/javascript" src="@rv_ewa_style_path/third-party/autosize-master/dist/autosize.min.js"></script>
 <script type="text/javascript">
 window.EWA = window.EWA || {};
 EWA.CP = "@SYS_CONTEXTPATH";
@@ -27,14 +27,15 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 			<![CDATA[<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"  class="@ewa_lang">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="Version" content="2022.07.07 xhtml" />
-<link rel="preload" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin="anonymous">
+<meta name="Version" content="2022.12.05 xhtml" />
+<link rel="preload" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin="anonymous" />
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" />
-<link rel="stylesheet" rev="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v=20220707" type="text/css" />
+<link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v20221205=1" type="text/css" />
 
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v=20220707"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v20221205=1"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.6.0.min.js'></script>
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/@EWA_LANG/resource.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/third-party/autosize-master/dist/autosize.min.js"></script>
 
 <script type="text/javascript">
 window.EWA = window.EWA || {};
@@ -49,16 +50,17 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 <html class="@ewa_lang">
 <head> 
 <meta charset="UTF-8">
-<meta name="version" content="2022.07.07 h5">
+<meta name="version" content="2022.12.05 h5">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 <link rel="preload" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" />
-<link rel="stylesheet" rev="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v=20220707" type="text/css" />
+<link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" >
+<link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v20221205=1" type="text/css" >
 
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v=20220707"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v20221205=1"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.6.0.min.js'></script>
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/@EWA_LANG/resource.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/third-party/autosize-master/dist/autosize.min.js"></script>
 
 <script type="text/javascript">
 window.EWA = window.EWA || {};
@@ -73,16 +75,17 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 <html class="@ewa_lang">
 <head> 
 <meta charset="UTF-8">
-<meta name="version" content="2022.07.07 vue">
+<meta name="version" content="2022.12.05 vue">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
 <link rel="preload" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v=20220707">
+<link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v20221205=1">
 
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v=20220707"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v20221205=1"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.6.0.min.js'></script>
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/@EWA_LANG/resource.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/third-party/autosize-master/dist/autosize.min.js"></script>
 
 <script type="text/javascript">
 window.EWA = window.EWA || {};
@@ -107,11 +110,12 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 <link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/app2/css/app.min.css" />
 <link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/app2/css/app_ewa.min.css" />
 
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v=20220707"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v20221205=1"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.4.1.min.js'></script>
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/@EWA_LANG/resource.js"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/iscroll-master/build/iscroll-probe.js'></script>
 <script type="text/javascript" src='@rv_ewa_style_path/EWA_STYLE/app2/js/app2.min.js'></script>
+<script type="text/javascript" src="@rv_ewa_style_path/third-party/autosize-master/dist/autosize.min.js"></script>
 
 <script type="text/javascript">
 window.EWA = window.EWA || {};
@@ -170,7 +174,7 @@ EWA_App.showFrameAsMobile(EWA.F.FOS["@sys_frame_unid"] );
 	<Skin Name="EWA_DEFINE">
 		<FrameItem FrameType="All" description="不要修改名称">
 			<BodyStart><![CDATA[
-<link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v=20220707?v=20161212" type="text/css" />
+<link rel="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v20221205=1" type="text/css" />
 ]]>
 			</BodyStart>
 			<Script>

@@ -1,5 +1,6 @@
 package com.gdxsoft.easyweb.cache;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,7 +62,8 @@ public class SqlCached {
 		config.setMaxIdle(5);
 
 		// 获取连接时的最大等待毫秒数
-		config.setMaxWaitMillis(10001);
+		// config.setMaxWaitMillis(10001);
+		config.setMaxWait(Duration.ofMillis(10001));
 		config.setMaxIdle(10000);
 		// 在空闲时检查有效性,默认false
 

@@ -50,7 +50,7 @@ public class FrameCombine extends FrameBase implements IFrame {
 
 	public void createHtml() throws Exception {
 		_Rv = super.getHtmlClass().getSysParas().getRequestValue();
-		init_grp = _Rv.getString("EWA_INIT_GRP");
+		init_grp = _Rv.getString(FrameParameters.EWA_INIT_GRP);
 		if (init_grp == null) {
 			init_grp = "";
 		} else {
@@ -138,7 +138,7 @@ public class FrameCombine extends FrameBase implements IFrame {
 				}
 			} else {
 				if (_TopNav.indexOf("[" + grp + "]") < 0) {
-					String q = createQueryParameters("EWA_INIT_GRP");
+					String q = createQueryParameters(FrameParameters.EWA_INIT_GRP);
 					String lnk = "<a  [" + grp
 							+ "] class='crm_main_nav1' href='./?" + q
 							+ "&ewa_init_grp=" + grp + "'>" + des + "</a>";

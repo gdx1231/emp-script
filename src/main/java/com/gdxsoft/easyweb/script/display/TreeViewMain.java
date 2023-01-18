@@ -117,7 +117,9 @@ public class TreeViewMain {
 			UserXItem uxi = this._UserConfig.getUserXItems().getItem(i);
 			XItem xItem = HtmlUtils.getXItem(uxi);
 			String tag = xItem.getName();
-
+			if ("dataType".equalsIgnoreCase(tag)) {
+				continue; // 定义数据类型用的，无UI
+			}
 			treeClass.addDebug(this, "Item", "Create item " + uxi.getName() + "[" + tag + "]");
 
 			String col = this.createItemHtmlCell(uxi);
@@ -148,7 +150,9 @@ public class TreeViewMain {
 			UserXItem uxi = this._UserConfig.getUserXItems().getItem(i);
 			XItem xItem = HtmlUtils.getXItem(uxi);
 			String tag = xItem.getName();
-
+			if ("dataType".equalsIgnoreCase(tag)) {
+				continue; // 定义数据类型用的，无UI
+			}
 			this._FrameTree.addDebug(this, "Item", "Create item " + uxi.getName() + "[" + tag + "]");
 
 			String col = this.createItemHtmlCell(uxi);
@@ -475,9 +479,7 @@ public class TreeViewMain {
 			LOGGER.warn("主键和父键一致，弃用" + pid);
 			return;
 		}
-		
-		
-		
+
 //		if (this._IsLoadByLevel) {
 //			// 只显示第一级别，分层调用
 //			if (!(pid == null || pid.toUpperCase().trim().equals(
@@ -512,7 +514,7 @@ public class TreeViewMain {
 		String cmd = "link";
 		TreeViewNode tvNode = this.createTreeNode(key, pid, dispVal, menuGroup, cmd, title, nodesHsahMap);
 		// 2019-05-05 郭磊
-		if(key.equals(this._RootId)) {
+		if (key.equals(this._RootId)) {
 			LOGGER.warn("主键和主节点的值一致，弃用：" + tvNode);
 			return;
 		}

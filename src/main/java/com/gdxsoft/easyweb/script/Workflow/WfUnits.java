@@ -7,6 +7,7 @@ import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlClass;
 import com.gdxsoft.easyweb.script.display.ItemValues;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
@@ -97,7 +98,7 @@ public class WfUnits {
 		String tmp=rv.getRequest().getQueryString();
 		System.out.print(tmp);
 		//
-		String fromWfName = rv.getString("EWA_WF_NAME");
+		String fromWfName = rv.getString(FrameParameters.EWA_WF_NAME);
 		if (fromWfName == null) {
 			r.setIsOk(false);
 			r.setMsg("找不到EWA_WF_NAME");
@@ -139,7 +140,7 @@ public class WfUnits {
 		DTTable tb = (DTTable) iv.getDTTables().getLast();
 
 		// 传递过来的主键值
-		String keyValue = iv.getRequestValue().getString("EWA_ACTION_KEY");
+		String keyValue = iv.getRequestValue().getString(FrameParameters.EWA_ACTION_KEY);
 		if (keyValue == null) {
 			r.setIsOk(false);
 			r.setMsg("找不到keyValue");
@@ -195,7 +196,7 @@ public class WfUnits {
 		}
 		boolean yes = true;
 
-		String v = iv.getRequestValue().getString("EWA_WF_UOK");
+		String v = iv.getRequestValue().getString(FrameParameters.EWA_WF_UOK);
 		if (v == null) { // 没有交互先显示界面
 			String WfXmlName = pv.getSingleValue("Workflow", "WfXmlName");
 			String WfItemName = pv.getSingleValue("Workflow", "WfItemName");
@@ -215,7 +216,7 @@ public class WfUnits {
 			String u = "./?XMLNAME=" + WfXmlName + "&ITEMNAME=" + WfItemName
 					+ "&EWA_WF_NAME=" + cur.getName() + "&EWA_WF_TYPE="
 					+ cur.getWfType() + "&EWA_ACTION_KEY=" + keyValue
-					+ "&EWA_ID=" + rv.getString("EWA_ID") + "&EWA_WF_DES="
+					+ "&EWA_ID=" + rv.getString(FrameParameters.EWA_ID) + "&EWA_WF_DES="
 					+ des;
 			if (WfCallPara != null && WfCallPara.trim().length() > 0) {
 				u += "&" + WfCallPara.trim();
@@ -429,11 +430,11 @@ public class WfUnits {
 		String WfItemName = pv.getSingleValue("Workflow", "WfItemName");
 		String WfCallPara = pv.getSingleValue("Workflow", "WfCallPara");
 
-		String keyValue = rv.getString("EWA_ACTION_KEY");
-		String ewaWfCtrl = rv.getString("EWA_WF_CTRL");
+		String keyValue = rv.getString(FrameParameters.EWA_ACTION_KEY);
+		String ewaWfCtrl = rv.getString(FrameParameters.EWA_WF_CTRL);
 		String u = "./?XMLNAME=" + WfXmlName + "&ITEMNAME=" + WfItemName
 				+ "&EWA_ACTION_KEY=" + keyValue + "&EWA_WF_CTRL=" + ewaWfCtrl
-				+ "&EWA_ID=" + rv.getString("EWA_ID");
+				+ "&EWA_ID=" + rv.getString(FrameParameters.EWA_ID);
 		if (WfCallPara != null && WfCallPara.trim().length() > 0) {
 			u += "&" + WfCallPara.trim();
 		}

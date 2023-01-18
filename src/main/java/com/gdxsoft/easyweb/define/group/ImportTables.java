@@ -95,28 +95,55 @@ public class ImportTables {
 	}
 
 	/**
-	 * CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW
+	 * CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER
+	 * VIEW
 	 * 
 	 * @return
 	 */
 	private String replaceMysqlDefiner(String sourceSql) {
+		// DEFINER=root@localhost
+		String replaceStart = "DEFINER=";
+		String s = this.replaceString(sourceSql, replaceStart);
+
+		// ALGORITHM=UNDEFINED
+		String replaceStart1 = "ALGORITHM=";
+		s = this.replaceString(s, replaceStart1);
+
+		String replaceStart2 = "SQL SECURITY DEFINER";
+		s = this.replaceString(s, replaceStart2);
+		return s;
+	}
+
+	private String replaceString(String sourceSql, String replaceStart) {
 		String s = sourceSql;
-		String su = s.toUpperCase();
-		int loc0 = su.indexOf("DEFINER=");
-		int skip = 8;
-		if (loc0 > 0) {
-			int loc1 = -1;
-			for (int i = loc0 + skip; i < su.length(); i++) {
-				String c = su.substring(i, i + 1);
-				if (c.equals(" ") || c.equals("\t") || c.equals("\n") || c.equals("\r")) {
-					loc1 = i - 1;
-					break;
-				}
+		String su = s.toLowerCase();
+
+		int loc0 = su.indexOf(replaceStart.toLowerCase());
+		if (loc0 == -1) {
+			return sourceSql;
+		}
+		int skip = replaceStart.length();
+
+		if (!replaceStart.endsWith("=")) {// 和替换字符串一致
+			int loc1 = loc0 + skip;
+			String tag = s.substring(loc0, loc1 + 1);
+			s = s.replace(tag, "/* " + tag + " */ ");
+			return s;
+		}
+
+		// ALGORITHM=UNDEFINED
+		// DEFINER=root@localhost
+		int loc1 = -1;
+		for (int i = loc0 + skip; i < su.length(); i++) {
+			String c = su.substring(i, i + 1);
+			if (c.equals(" ") || c.equals("\t") || c.equals("\n") || c.equals("\r")) {
+				loc1 = i - 1;
+				break;
 			}
-			if (loc1 > loc0) {
-				String tag = s.substring(loc0, loc1 + 1);
-				s = s.replace(tag, "/* DEL " + tag.substring(7) + " */ ");
-			}
+		}
+		if (loc1 > loc0) {
+			String tag = s.substring(loc0, loc1 + 1);
+			s = s.replace(tag, "/* " + tag + " */ ");
 		}
 
 		return s;
@@ -252,18 +279,24 @@ public class ImportTables {
 	private String createDatabaseViews(HashMap<String, SqlTable> maps) {
 		StringBuilder sb = new StringBuilder();
 		// 处理视图
+		String targetDatabase = this._Conn.getDatabaseType();
 		maps.forEach((key, t) -> {
 			if (!"VIEW".equalsIgnoreCase(t.getTable().getTableType())) {
 				return;
 			}
 
+			String sourceDatabase = t.getTable().getDatabaseType();
 			String ddl = t.getCreate();
 			ddl = ddl.replace("{SCHMEA}", this._Conn.getSchemaName());
 			ddl = this.replaceMetaOrWorkDatabaseName(ddl);
 
-			if ("mysql".equalsIgnoreCase(this._Conn.getDatabaseType())) {
-				// CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW
+			if ("mysql".equalsIgnoreCase(sourceDatabase)) {
+				// CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER
+				// VIEW
 				ddl = this.replaceMysqlDefiner(ddl); // 删除root标记信息
+				if (!targetDatabase.equals(sourceDatabase)) {
+					ddl = ddl.replace("`", "");
+				}
 			}
 
 			LOGGER.info("Create the view {}", t.getTable().getName());

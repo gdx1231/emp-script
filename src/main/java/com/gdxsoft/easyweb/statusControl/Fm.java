@@ -4,6 +4,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
@@ -27,9 +28,9 @@ public class Fm {
 				s._Name = val.trim().toUpperCase();
 			} else if (tag.equals("des")) {
 				s._Des = val;
-			} else if (tag.equals("xmlname")) {
+			} else if (tag.equalsIgnoreCase(FrameParameters.XMLNAME)) {
 				s._XmlName = val;
-			} else if (tag.equals("itemname")) {
+			} else if (tag.equalsIgnoreCase(FrameParameters.ITEMNAME)) {
 				s._ItemName = val;
 			}
 		}

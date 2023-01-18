@@ -35,6 +35,7 @@ import com.gdxsoft.easyweb.cache.SqlCached;
 import com.gdxsoft.easyweb.cache.SqlCachedValue;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -800,6 +801,38 @@ public class DTTable implements Serializable {
 	}
 
 	/**
+	 * 根据fieldName转换成Map，无重复数据
+	 * 
+	 * @param fieldName 字段名称
+	 * @return null字段不存在
+	 */
+	public Map<String, Boolean> toMap(String fieldName) {
+		int colIndex = this.getColumns().getNameIndex(fieldName);
+		return toMap(colIndex);
+	}
+
+	/**
+	 * 根据字段位置转换成Map，无重复数据
+	 * 
+	 * @param colIndex 字段位置
+	 * @return null字段不存在
+	 */
+	public Map<String, Boolean> toMap(int colIndex) {
+		if (colIndex == -1 || colIndex > this.getColumns().getCount()) {
+			return null; // "FIELD NOT FOUNDED"
+		}
+		Map<String, Boolean> map = new HashMap<String, Boolean>();
+		for (int i = 0; i < this.getCount(); i++) {
+			String id = this.getCell(i, colIndex).toString();
+			if (map.containsKey(id)) {
+				continue;
+			}
+			map.put(id, true);
+		}
+		return map;
+	}
+
+	/**
 	 * 创建JSON时，获取Cell值的方法
 	 * 
 	 * @param cell        the table cell
@@ -892,10 +925,10 @@ public class DTTable implements Serializable {
 
 		int field_name_case = 0; // 原始
 		if (rv != null) {
-			if (rv.s("EWA_JSON_FIELD_CASE") != null) {
-				if (rv.s("EWA_JSON_FIELD_CASE").equalsIgnoreCase("upper")) {
+			if (rv.s(FrameParameters.EWA_JSON_FIELD_CASE) != null) {
+				if (rv.s(FrameParameters.EWA_JSON_FIELD_CASE).equalsIgnoreCase("upper")) {
 					field_name_case = 1; // 大写字段
-				} else if (rv.s("EWA_JSON_FIELD_CASE").equalsIgnoreCase("lower")) {
+				} else if (rv.s(FrameParameters.EWA_JSON_FIELD_CASE).equalsIgnoreCase("lower")) {
 					field_name_case = 2; // 小写字段
 				}
 			}
@@ -1942,8 +1975,8 @@ public class DTTable implements Serializable {
 	 * @return
 	 */
 	public String joinIds(String fieldName, boolean addQuotationMarks) {
-		int colIndx = this.getColumns().getNameIndex(fieldName);
-		if (colIndx == -1) {
+		int colIndex = this.getColumns().getNameIndex(fieldName);
+		if (colIndex == -1) {
 			return "FIELD NOT FOUNDED";
 		}
 		StringBuilder sbIds = new StringBuilder();
@@ -1951,7 +1984,7 @@ public class DTTable implements Serializable {
 		int inc = 0;
 		for (int i = 0; i < this.getCount(); i++) {
 
-			String id = this.getCell(i, colIndx).toString();
+			String id = this.getCell(i, colIndex).toString();
 			if (id == null) {
 				continue;
 			}

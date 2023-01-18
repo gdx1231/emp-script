@@ -27,6 +27,16 @@ import com.gdxsoft.easyweb.utils.Utils;
  */
 public class EwaWebSocketBus {
 	private static Logger LOGGER = LoggerFactory.getLogger(EwaWebSocketBus.class);
+	private static String ID;
+	static {
+		if (ID == null) {
+			ID = Utils.randomStr(5);
+			// 用于跟踪
+			LOGGER.info("INIT ID: {}", ID);
+		} else {
+			LOGGER.error("EXISTS ????? ID: {}", ID);
+		}
+	}
 
 	/**
 	 * 在程序中提交handler，默认是通过ewa_conf.xml中进行配置

@@ -2,6 +2,8 @@ package com.gdxsoft.easyweb.data;
 
 import java.io.Reader;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Clob;
 import java.util.ArrayList;
 import java.util.Date;
@@ -211,7 +213,7 @@ public class DTCell implements Serializable {
 		}
 	}
 
-	public java.lang.Double toDouble() {
+	public Double toDouble() {
 		if (this._Value == null) {
 			return null;
 		}
@@ -253,6 +255,32 @@ public class DTCell implements Serializable {
 			return -1;
 		}
 		return d.getTime();
+	}
+
+	/**
+	 * 获取BigDecimal
+	 * 
+	 * @return
+	 */
+	public BigDecimal toBigDecimal() {
+		if (this._Value == null) {
+			return null;
+		}
+
+		return new BigDecimal(this._Value.toString());
+	}
+
+	/**
+	 * 获取BigInteger
+	 * 
+	 * @return
+	 */
+	public BigInteger toBigInteger() {
+		if (this._Value == null) {
+			return null;
+		}
+		String v = (this._Value.toString().split("\\.")[0]).replace(",", "");
+		return new BigInteger(v);
 	}
 
 	public String toString() {

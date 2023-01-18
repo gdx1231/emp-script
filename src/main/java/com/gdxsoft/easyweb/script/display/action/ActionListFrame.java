@@ -26,8 +26,10 @@ import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.datasource.SearchParameter;
 import com.gdxsoft.easyweb.datasource.SearchParameterInit;
 import com.gdxsoft.easyweb.datasource.SqlPart;
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
@@ -152,7 +154,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 
 			String sqlType = sqlItem.getItem("SqlType");
 			if (sqlType.equals("query") && !executedSplitSql && DataConnection.checkIsSelect(sql)
-					&& sql.toLowerCase().indexOf("ewa_err_out") == -1) {
+					&& sql.toLowerCase().indexOf(FrameParameters.EWA_ERR_OUT) == -1) {
 				// 执行分页查询
 				executedSplitSql = true; // 分页只执行1次
 				this.executeSplitSql(sql, conn, rv, name);
@@ -194,7 +196,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 			throw new Exception("查询语句中应包含WHERE条件, (" + sql + ")");
 		}
 		String sql1 = this.createSqListFrame(sql, conn);
-		String ajax = super.getRequestValue().getString("EWA_AJAX");
+		String ajax = super.getRequestValue().getString(FrameParameters.EWA_AJAX);
 		if (ajax == null) {
 			ajax = "";
 		} else {
@@ -207,7 +209,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 				rv.addValue(key, dataName);
 			}
 		} else if (ajax.equalsIgnoreCase("JSON") || ajax.equalsIgnoreCase("JSON_ALL")) {
-			boolean useSplit = rv.getString("EWA_PAGESIZE") != null;
+			boolean useSplit = rv.getString(FrameParameters.EWA_PAGESIZE) != null;
 			DTTable tb = this.executeSqlWithPageSplit(sql1, conn, rv, useSplit);
 			tb.setName(name);
 			if (tb.isOk()) {
@@ -257,7 +259,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 	private String createDownloadData(String sql) throws Exception {
 		RequestValue rv = super.getRequestValue();
 		String lang = rv.getLang();
-		String downType = rv.s("EWA_AJAX_DOWN_TYPE");
+		String downType = rv.s(FrameParameters.EWA_AJAX_DOWN_TYPE);
 		// 允许导出的模式
 		String allowExport = super.getPageItemValue("PageSize", "AllowExport");
 		if (allowExport == null || allowExport.trim().length() == 0) {
@@ -294,7 +296,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 		File ff;
 		String exportPathAndName = upload + "/download_datas/" + rv.s("EWA.ID");
 		try {
-			if (isExcel && !rv.s("EWA_AJAX_DOWN_TYPE").equals("XLS_OLD")) {
+			if (isExcel && !"XLS_OLD".equals(rv.s(FrameParameters.EWA_AJAX_DOWN_TYPE))) {
 				// 下载 字段显示成为配置的信息，去掉未显示的内容
 				DTTable tbExport = this.createDownloadTable(rs);
 				ff = exp.export(tbExport, exportPathAndName);
@@ -375,15 +377,11 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @throws Exception
 	 */
 	private String createSqlOrder() throws Exception {
-		DataConnection conn = super.getItemValues().getSysParas().getDataConn();
-		boolean isMySqlOrder = false;
-		if (conn != null && conn.getCurrentConfig().getType().equalsIgnoreCase("MYSQL")) {
-			isMySqlOrder = true;
-		}
+
 		RequestValue rv = super.getItemValues().getRequestValue();
 		UserConfig uc = super.getUserConfig();
 
-		String userOrder = rv.getString("EWA_LF_ORDER");
+		String userOrder = rv.getString(FrameParameters.EWA_LF_ORDER);
 		if (userOrder == null || userOrder.trim().length() == 0) {
 			return "";
 
@@ -400,6 +398,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 			return "";
 		}
 
+		DataConnection conn = super.getItemValues().getSysParas().getDataConn();
+		// 数据库类型
+		String dbType = conn == null ? "" : conn.getCurrentConfig().getType();
 		// 排序字段
 		String s1 = uxi.getItem("DataItem").getItem(0).getItem("DataField");
 		String dt = uxi.getItem("DataItem").getItem(0).getItem("DataType");
@@ -413,10 +414,8 @@ public class ActionListFrame extends ActionBase implements IAction {
 				s1 = orderExp;
 			}
 		}
-		// mysql utf8 的中文排序
-		if (isMySqlOrder && this.mysqlGbk(dt) && s1.indexOf("(") == -1) {
-			s1 = "CONVERT( " + s1 + " USING gbk )";
-		}
+		s1 = SqlUtils.replaceChnOrder(dbType, s1, dt);
+
 		if (userOrder.indexOf(" ") > 0) {
 			s1 += " DESC";
 		}
@@ -444,32 +443,16 @@ public class ActionListFrame extends ActionBase implements IAction {
 				// 已经在表达式上面了
 				continue;
 			}
-			if (isMySqlOrder && uc.getUserXItems().testName(key)) {
+			if (uc.getUserXItems().testName(key)) {
 				uxi = uc.getUserXItems().getItem(name);
-				dt = uxi.getItem("DataItem").getItem(0).getItem("DataType");
-				if (this.mysqlGbk(dt)) {
-					key = "CONVERT( " + key + " USING gbk )";
-				}
+				String keydt = uxi.getItem("DataItem").getItem(0).getItem("DataType");
+				key = SqlUtils.replaceChnOrder(dbType, key, keydt);
 			}
+
 			userOrder += "," + key + desc;
 		}
 		// System.out.println(userOrder);
 		return userOrder;
-	}
-
-	/**
-	 * 排序字段字段是否使用 USING gbk
-	 * 
-	 * @param dt
-	 * @return
-	 */
-	private boolean mysqlGbk(String dt) {
-		if (dt.equalsIgnoreCase("bigint") || dt.equalsIgnoreCase("int") || dt.equalsIgnoreCase("number")
-				|| dt.equalsIgnoreCase("date") || dt.equalsIgnoreCase("time") || dt.equalsIgnoreCase("binary")) {
-			return false;
-		} else {
-			return true;
-		}
 	}
 
 	/**
@@ -482,7 +465,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 	private String createSqlSearchInit(DataConnection conn) throws Exception {
 		RequestValue rv = super.getItemValues().getRequestValue();
 
-		String ewa_search = rv.getString("ewa_search");
+		String ewa_search = rv.getString(FrameParameters.EWA_SEARCH);
 		if (ewa_search == null || ewa_search.trim().length() == 0) {
 			return "";
 		}
@@ -615,21 +598,34 @@ public class ActionListFrame extends ActionBase implements IAction {
 			} else {
 				sb.append(" AND (");
 				String exp = lsp.getPara1();
-				if (databaseType.equals("HSQLDB")) {
-					sb.al(" UPPER(" + dataField + ")");
-					exp = exp.toUpperCase();
-				} else {
-					sb.al(dataField);
-				}
 				String exp1 = parameterStringExp(exp, conn);
-				if (lsp.getTag().equalsIgnoreCase("nlk")) { // not like
-					sb.al(" not like '%" + exp1 + "%')");
-				} else if (lsp.getTag().equalsIgnoreCase("llk")) { // 左 like
-					sb.al(" like '" + exp1 + "%')");
-				} else if (lsp.getTag().equalsIgnoreCase("rlk")) { // 右 like
-					sb.al(" like '%" + exp1 + "')");
-				} else { // lk
-					sb.al(" like '%" + exp1 + "%')");
+				if (dataField.indexOf("(") >= 0) {
+					// 例如全文检索的用法 contains(字段, @q)
+					// SQLServer 的 contains(字段, '北京')
+					String searchFunc = this.searchFuncion(dataField, exp1);
+
+					if (lsp.getTag().equalsIgnoreCase("nlk")) { // not like
+						sb.al(" not " + searchFunc + ")");
+					} else { // 不区分包含方式
+						sb.al(" " + searchFunc + ")");
+					}
+				} else {
+					if (databaseType.equals("HSQLDB")) {
+						sb.al(" UPPER(" + dataField + ")");
+						exp = exp.toUpperCase();
+					} else {
+						sb.al(dataField);
+					}
+
+					if (lsp.getTag().equalsIgnoreCase("nlk")) { // not like
+						sb.al(" not like '%" + exp1 + "%')");
+					} else if (lsp.getTag().equalsIgnoreCase("llk")) { // 左 like
+						sb.al(" like '" + exp1 + "%')");
+					} else if (lsp.getTag().equalsIgnoreCase("rlk")) { // 右 like
+						sb.al(" like '%" + exp1 + "')");
+					} else { // lk
+						sb.al(" like '%" + exp1 + "%')");
+					}
 				}
 			}
 		}
@@ -664,7 +660,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 	private String createSqlSearch(DataConnection conn) throws Exception {
 		RequestValue rv = super.getItemValues().getRequestValue();
 
-		String userSearch = rv.getString("EWA_LF_SEARCH");
+		String userSearch = rv.getString(FrameParameters.EWA_LF_SEARCH);
 		if (userSearch == null || userSearch.trim().length() == 0) {
 			return "";
 		}
@@ -772,6 +768,25 @@ public class ActionListFrame extends ActionBase implements IAction {
 		return exp;
 	}
 
+	private String searchFuncion(String dataField, String exp1) throws Exception {
+		String searchFunc;
+		DataConnection conn = this.getItemValues().getDataConn();
+		if ("MSSQL".equalsIgnoreCase(conn.getDatabaseType())) {
+			if (dataField.trim().startsWith("contains")) {
+				exp1 = "\"" + exp1.replace("\"", "\"\"") + "\"";
+			}
+		}
+		if (dataField.indexOf("@q") > 0) {
+			searchFunc = dataField.replace("@q", "'" + exp1 + "'");
+		} else if (dataField.indexOf("@Q") > 0) {
+			searchFunc = dataField.replace("@Q", "'" + exp1 + "'");
+		} else {
+			throw new Exception("SearchExp error, MUST have @q or @Q. (" + dataField + ")");
+		}
+
+		return searchFunc;
+	}
+
 	/**
 	 * 创建检索的文字查询
 	 * 
@@ -791,10 +806,24 @@ public class ActionListFrame extends ActionBase implements IAction {
 		}
 		String opTag = lsp.getTag();
 
+		// 例如全文检索的用法 contains(字段, @q)
+		// SQLServer 的 contains(字段, '北京')
+		boolean isFunc = dataField.toLowerCase().indexOf("contains") >=0
+				&& dataField.toLowerCase().indexOf("@q") >=0
+				&& dataField.indexOf("(") >= 0;
+				
 		if (opTag.equals("blk")) {// 空白
-			return " (" + dataField + " = '' or " + dataField + " is null)";
+			if (isFunc) {
+				return null;
+			} else {
+				return " (" + dataField + " = '' or " + dataField + " is null)";
+			}
 		} else if (opTag.equals("nblk")) {// 非空白
-			return " " + dataField + " != '' ";
+			if (isFunc) {
+				return null;
+			} else {
+				return " " + dataField + " != '' ";
+			}
 		}
 		String op = " like ";
 		String op_left = "%";
@@ -834,22 +863,41 @@ public class ActionListFrame extends ActionBase implements IAction {
 				continue;
 			}
 			if (s.length() > 0) {
-				s.a(" OR ");
+				if (opTag.equals("uneq") || opTag.equals("nlk")) {
+					s.a(" AND ");
+				} else {
+					s.a(" OR ");
+				}
 			}
 			String exp1 = this.parameterStringExp(exp, conn);
-			if (opTag.equals("uneq") || opTag.equals("nlk")) {
-				// 不等于和不包含将null值包含进来
-				if (databaseType.equals("HSQLDB")) {
-					s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp1.toUpperCase() + op_right + "' or "
-							+ dataField + " is null)");
-				} else {
-					s.a(" (" + dataField + op + " '" + op_left + exp1 + op_right + "' or " + dataField + " is null)");
+			if (isFunc) {
+				try {
+					String search = this.searchFuncion(dataField, exp1);
+					if (opTag.equals("uneq") || opTag.equals("nlk")) {
+						s.a(" not ").a(search);
+					} else {
+						s.a(search);
+					}
+				} catch (Exception e) {
+					LOG.warn(e.getMessage());
+					return null;
 				}
 			} else {
-				if (databaseType.equals("HSQLDB")) {
-					s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp1.toUpperCase() + op_right + "' ");
+				if (opTag.equals("uneq") || opTag.equals("nlk")) {
+					// 不等于和不包含将null值包含进来
+					if (databaseType.equals("HSQLDB")) {
+						s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp1.toUpperCase() + op_right + "' or "
+								+ dataField + " is null)");
+					} else {
+						s.a(" (" + dataField + op + " '" + op_left + exp1 + op_right + "' or " + dataField
+								+ " is null)");
+					}
 				} else {
-					s.a(" " + dataField + op + " '" + op_left + exp1 + op_right + "' ");
+					if (databaseType.equals("HSQLDB")) {
+						s.a(" UPPER(" + dataField + ") " + op + " '" + op_left + exp1.toUpperCase() + op_right + "' ");
+					} else {
+						s.a(" " + dataField + op + " '" + op_left + exp1 + op_right + "' ");
+					}
 				}
 			}
 		}
@@ -1008,11 +1056,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @throws Exception
 	 */
 	private String createSqListFrame(String sql, DataConnection conn) throws Exception {
-		// mysql中文排序
-		boolean isMySqlOrder = false;
-		if (conn != null && conn.getCurrentConfig().getType().equalsIgnoreCase("MYSQL")) {
-			isMySqlOrder = true;
-		}
+		// 数据库类型
+		String dbType = conn == null ? "" : conn.getCurrentConfig().getType();
+
 		sql = super.getSql(sql);
 
 		String userOrder = this.createSqlOrder();
@@ -1023,7 +1069,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 		}
 		SqlPart sp = new SqlPart();
 		sp.setSql(sql);
-		sql = sp.rebuildSql(userOrder, userSearch, isMySqlOrder);
+
+		String temp = SqlUtils.chnOrderTemplate(dbType);
+		sql = sp.rebuildSql(userOrder, userSearch, temp);
 		return sql;
 	}
 

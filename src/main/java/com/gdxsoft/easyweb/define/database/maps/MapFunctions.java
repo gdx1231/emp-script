@@ -3,7 +3,7 @@ package com.gdxsoft.easyweb.define.database.maps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-
+import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -17,7 +17,7 @@ import com.gdxsoft.easyweb.utils.UXml;
  */
 public class MapFunctions {
 
-	private static HashMap<String, HashMap<String, MapFunction>> DATABASETYPE_MAPS = new HashMap<String, HashMap<String, MapFunction>>();
+	private static Map<String, HashMap<String, MapFunction>> DATABASETYPE_MAPS = new java.util.concurrent.ConcurrentHashMap<>();
 	private HashMap<String, MapFunction> _FunctionMaps;
 
 	/**

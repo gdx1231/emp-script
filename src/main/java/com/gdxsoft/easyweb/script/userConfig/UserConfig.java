@@ -226,6 +226,16 @@ public class UserConfig implements Serializable, Cloneable {
 
 		IConfig iConfig = getConfig(xmlName, itemName);
 
+		if (iConfig == null) {
+			String msg = "Can't find the IConfig from ->" + xmlName + ", " + itemName;
+			LOGGER.error(msg);
+			
+			if (debugFrames != null) {
+				debugFrames.addDebug(uc, "instance", msg);
+			}
+			throw new Exception(msg);
+		}
+
 		if (debugFrames != null) {
 			debugFrames.addDebug(uc, "instance", "Get the IConfig instance from ->" + xmlName + ", " + iConfig);
 		}
@@ -620,21 +630,21 @@ public class UserConfig implements Serializable, Cloneable {
 			this._DebugFrames.addDebug(this, "配置", "结束加载配 Charts. (" + nl.getLength() + ")");
 	}
 
-	
 	/**
 	 * 根据SqlSet的callName修改Action的Sql
+	 * 
 	 * @param callName 例如：OnPageLoad Sql
-	 * @param newSql 需要修改的SQL
+	 * @param newSql   需要修改的SQL
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean changeSqlSetSql(String callName, String newSql) throws Exception{
+	public boolean changeSqlSetSql(String callName, String newSql) throws Exception {
 		UserXItem action = this.getUserActionItem();
 
 		UserXItemValues actionSet = action.getItem("ActionSet");
 		for (int i = 0; i < actionSet.count(); i++) {
 			UserXItemValue actionItem = actionSet.getItem(i);
-			 
+
 			java.util.Iterator<String> it1 = actionItem.getChildren().keySet().iterator();
 			UserXItemValues callSet1 = null;
 			while (it1.hasNext()) {
@@ -650,8 +660,8 @@ public class UserConfig implements Serializable, Cloneable {
 			UserXItemValue callItem1 = callSet1.getItem(0);
 			String callType = callItem1.getItem("CallType");
 			String callName1 = callItem1.getItem("CallName");
-			//System.out.println(callType + ", " + callName);
-			if("SqlSet".equals(callType) && callName.equalsIgnoreCase(callName1) ){
+			// System.out.println(callType + ", " + callName);
+			if ("SqlSet".equals(callType) && callName.equalsIgnoreCase(callName1)) {
 				UserXItemValues sqlset = this.getUserActionItem().getItem("SqlSet");
 				UserXItemValue sqlItem = sqlset.getItem(callName1);
 				sqlItem.addObject(newSql, "Sql");
@@ -660,6 +670,7 @@ public class UserConfig implements Serializable, Cloneable {
 		}
 		return false;
 	}
+
 	/**
 	 * 初始化用户配置中的XItems/XItem中当前XItem信息
 	 * 

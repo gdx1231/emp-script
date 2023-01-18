@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.gdxsoft.easyweb.script.*;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 
@@ -68,8 +69,8 @@ public class ServletCode extends HttpServlet {
 		ServletOutputStream output = response.getOutputStream();
 
 		RequestValue rv = new RequestValue(request);
-		String xmlName = rv.s("xmlname");
-		String itemname = rv.s("itemname");
+		String xmlName = rv.s(FrameParameters.XMLNAME);
+		String itemname = rv.s(FrameParameters.ITEMNAME);
 		boolean is_ok = false;
 		if (xmlName != null && itemname != null) {
 			try {

@@ -1,6 +1,5 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,6 +36,7 @@ import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
 import com.gdxsoft.easyweb.utils.ULogic;
+import com.gdxsoft.easyweb.utils.UUrl;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -51,6 +51,10 @@ public class FrameBase {
 	private String[] _Html5FrameSet;
 	// 需要隐藏的字段集合
 	private MTable _HiddenFields = null;
+
+	public FrameBase getFrameBase() {
+		return this;
+	}
 
 	/**
 	 * 检查是否为隐含字段，在Page的LogicShow中定义
@@ -72,7 +76,7 @@ public class FrameBase {
 	/**
 	 * 初始化隐含的字段
 	 */
-	private void initHiddenFields() {
+	public void initHiddenFields() {
 		UserXItem page = this.getHtmlClass().getUserConfig().getUserPageItem();
 		this._HiddenFields = new MTable();
 		ItemValues iv = this.getHtmlClass().getItemValues();
@@ -118,6 +122,25 @@ public class FrameBase {
 			}
 		} catch (Exception e) {
 			LOGGER.error("initial the hidden fields (dataType) error: {}", e.getMessage());
+		}
+
+		// 通过参数传递需要隐藏的字段表达式，用,分割
+		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
+		if (rv.s(FrameParameters.EWA_HIDDEN_FIELDS) != null) {
+			String[] fields = rv.s(FrameParameters.EWA_HIDDEN_FIELDS).split(",");
+			if (fields.length > 300) {
+				LOGGER.warn("EWA_HIDDEN_FIELDS fields over 300");
+				return;
+			}
+			for (int i = 0; i < fields.length; i++) {
+				String field = fields[i].trim().toUpperCase();
+				if (field.length() == 0) {
+					continue;
+				}
+				if (!this._HiddenFields.containsKey(field)) {
+					this._HiddenFields.add(field, true);
+				}
+			}
 		}
 	}
 
@@ -191,7 +214,7 @@ public class FrameBase {
 	 */
 	public boolean isHiddenCaption() {
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
-		String paraIsHidden = rv.s("EWA_IS_HIDDEN_CAPTION");
+		String paraIsHidden = rv.s(FrameParameters.EWA_IS_HIDDEN_CAPTION);
 		if (paraIsHidden != null) {
 			if ("yes".equals(paraIsHidden) || "1".equals(paraIsHidden) || "true".equals(paraIsHidden)) {
 				return true;
@@ -229,10 +252,10 @@ public class FrameBase {
 		UserConfig uc = this.getHtmlClass().getUserConfig();
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
 
-		String select_id = rv.s("ewa_reload_id");
+		String select_id = rv.s(FrameParameters.EWA_RELOAD_ID);
 		if (select_id == null) {
 			// 原来的拼写错误
-			select_id = rv.s("ewa_reaload_id");
+			select_id = rv.s(FrameParameters.EWA_RELOAD_ID);
 		}
 		if (select_id == null) {
 			rst.put("RST", false);
@@ -279,8 +302,8 @@ public class FrameBase {
 		ele.setAttribute("Type", _HtmlClass.getSysParas().getFrameType());
 		ele.setAttribute("ClassName", "__EWA_F_" + frameUuid);
 
-		ele.setAttribute("XmlName", uc.getXmlName());
-		ele.setAttribute("ItemName", uc.getItemName());
+		ele.setAttribute(FrameParameters.XMLNAME, uc.getXmlName());
+		ele.setAttribute(FrameParameters.ITEMNAME, uc.getItemName());
 		ele.setAttribute("Description",
 				HtmlUtils.getDescription(uc.getUserPageItem().getItem("DescriptionSet"), "Info", lang));
 
@@ -594,27 +617,6 @@ public class FrameBase {
 		String css1 = this._HtmlClass.getItemValues().replaceParameters(sb.toString(), true);
 		doc.addCss(css1);
 
-		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
-
-		String ewa_added_resources = rv.s("ewa_added_resources");
-		List<ConfAddedResource> al = StringUtils.isBlank(ewa_added_resources)
-				? ConfAddedResources.getInstance().getDefaultResList(false)
-				: ConfAddedResources.getInstance().getResList(ewa_added_resources, false);
-
-		if (al.size() > 0) {
-			MStr sbCss = new MStr();
-			MStr sbJs = new MStr();
-			for (int i = 0; i < al.size(); i++) {
-				ConfAddedResource r = al.get(i);
-				if (r.getSrc().toLowerCase().endsWith(".css")) {
-					sbCss.al(r.toCss());
-				} else {
-					sbJs.al(r.toJs());
-				}
-			}
-			doc.addHeader(sbCss.toString());
-			doc.addHeader(sbJs.toString());
-		}
 	}
 
 	/**
@@ -647,14 +649,6 @@ public class FrameBase {
 		}
 	}
 
-	private String encodeUrl(String s) {
-		try {
-			return java.net.URLEncoder.encode(s, "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			return s;
-		}
-	}
-
 	/**
 	 * 获取页面的URL的JS表达式
 	 * 
@@ -662,101 +656,50 @@ public class FrameBase {
 	 */
 	public String getUrlJs() {
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
-		String q;
-		String callMethod = rv.getString("EWA_CALL_METHOD");
 
 		String url;
-		// //INNER_CALL 调用模式，表示为ewaconfigitem或 JSp程序调用
-		if (callMethod != null && callMethod.equalsIgnoreCase("INNER_CALL")) {
-			MTable map = new MTable();
-			map.put("XMLNAME", encodeUrl(rv.getString("xmlname")));
-			map.put("ITEMNAME", encodeUrl(rv.getString("itemname")));
+		UUrl uu = new UUrl(rv.getRequest());
 
-			// htmlcontrol传递的参数
-			MTable qvsHtmlControl = rv.getPageValues().getTagValues(PageValueTag.HTML_CONTROL_PARAS);
-			if (qvsHtmlControl != null) {
-				for (int i = 0; i < qvsHtmlControl.getCount(); i++) {
-					String key = qvsHtmlControl.getKey(i).toString().trim().toUpperCase();
-					if (!map.containsKey(key)) {
-						PageValue o = (PageValue) qvsHtmlControl.get(key);
-						String val = o.getStringValue();
-						if (val != null) {
-							map.put(key, encodeUrl(val));
-						}
-					}
-				}
-			}
+		String callMethod = rv.s(FrameParameters.EWA_CALL_METHOD);
+		// INNER_CALL 调用模式，表示为ewaconfigitem或 JSp程序调用
+		if (FrameParameters.INNER_CALL.equalsIgnoreCase(callMethod)) {
+			uu.setPath(rv.getContextPath());
+			uu.setName("/EWA_STYLE/cgi-bin/");
 
-			// query传递的参数
-			MTable qvs = rv.getPageValues().getQueryValues();
-			for (int i = 0; i < qvs.getCount(); i++) {
-				String key = qvs.getKey(i).toString().trim().toUpperCase();
-				if (!map.containsKey(key)) {
-					PageValue o = (PageValue) qvs.get(key);
-					String val = o.getStringValue();
-					if (val != null) {
-						map.put(key, encodeUrl(val));
-					}
-				}
-			}
-
-			MStr sb = new MStr();
-			for (int i = 0; i < map.getCount(); i++) {
-				String key = map.getKey(i).toString().trim().toUpperCase();
-				if (map.get(key) == null) {
-					continue;
-				}
-				String val = map.get(key).toString();
-				if (sb.length() > 0) {
-					sb.append("&");
-				}
-				sb.append(key + "=" + val);
-			}
-			q = sb.toString();
-			url = rv.getContextPath() + "/EWA_STYLE/cgi-bin/?" + Utils.textToJscript(q);
-		} else {
-			q = rv.getRequest() == null ? null : rv.getRequest().getQueryString();
-			StringBuilder sb = new StringBuilder();
-			if (rv.getRequest() != null) {
-				sb.append(rv.getContextPath());
-				sb.append(rv.getRequest().getServletPath());
-			}
-			boolean ismark = false;
-			if (q != null) {
-				sb.append("?");
-				sb.append(Utils.textToJscript(q));
-				ismark = true;
-			}
-			// 来自HtmlControl的参数放到 PageValueTag.HTML_CONTROL_PARAS 中
-			MTable paras = rv.getPageValues().getTagValues(PageValueTag.HTML_CONTROL_PARAS);
-			if (paras != null) {
-				for (int i = 0; i < paras.getCount(); i++) {
-					String key = paras.getKey(i).toString();
-					Object val = paras.getByIndex(i);
-					PageValue pv = (PageValue) val;
-					String sval = pv.getStringValue();
-					if (sval == null) {
-						continue;
-					}
-					if (sval.length() > 1000) { // 太长了，抛弃
-						continue;
-					}
-					if (ismark) {
-						sb.append("&");
-					} else {
-						sb.append("?");
-						ismark = true;
-					}
-					sb.append(encodeUrl(key));
-					sb.append("=");
-					sb.append(encodeUrl(sval));
-				}
-			}
-
-			url = sb.toString();
+			uu.add(FrameParameters.XMLNAME, rv.s(FrameParameters.XMLNAME));
+			uu.add(FrameParameters.ITEMNAME, rv.s(FrameParameters.ITEMNAME));
 		}
-		return url == null ? null : url.replace("@", "%40");
+		// 来自HtmlControl的参数放到 PageValueTag.HTML_CONTROL_PARAS 中
+		// 覆盖queryString
+		this.attachHtmlControlParas(uu, rv);
+		url = uu.getUrl();
+		return url == null ? null : url.replace("@", "%40").replace("+", "%20");
+	}
 
+	/**
+	 * 来自HtmlControl的参数放到 PageValueTag.HTML_CONTROL_PARAS 中
+	 * 
+	 * @param uu
+	 * @param rv
+	 */
+	private void attachHtmlControlParas(UUrl uu, RequestValue rv) {
+		MTable paras = rv.getPageValues().getTagValues(PageValueTag.HTML_CONTROL_PARAS);
+		if (paras == null) {
+			return;
+		}
+		for (int i = 0; i < paras.getCount(); i++) {
+			String key = paras.getKey(i).toString();
+			Object val = paras.getByIndex(i);
+			PageValue pv = (PageValue) val;
+			String sval = pv.getStringValue();
+			if (sval == null) {
+				continue;
+			}
+			if (sval.length() > 1000) { // 太长了，抛弃
+				continue;
+			}
+			uu.add(key, sval);
+		}
 	}
 
 	/**
@@ -778,26 +721,16 @@ public class FrameBase {
 
 		// 增加附加的资源
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
-		String ewa_added_resources = rv.s("ewa_added_resources");
+		String ewa_added_resources = rv.s(FrameParameters.EWA_ADDED_RESOURCES);
 		List<ConfAddedResource> al = StringUtils.isBlank(ewa_added_resources)
 				? ConfAddedResources.getInstance().getDefaultResList(true)
 				: ConfAddedResources.getInstance().getResList(ewa_added_resources, true);
-
-		if (al.size() > 0) {
-			MStr sbCss = new MStr();
-			MStr sbJs = new MStr();
-			for (int i = 0; i < al.size(); i++) {
-				ConfAddedResource r = al.get(i);
-				if (r.getSrc().toLowerCase().endsWith(".css")) {
-					LOGGER.warn("The css put on bottom, " + r.getSrc());
-					sbCss.al(r.toCss());
-				} else {
-					sbJs.al(r.toJs());
-				}
+		al.forEach(r -> {
+			if ("css".equals(r.getResourceType())) {
+				LOGGER.warn("The css put on bottom, " + r.getName());
 			}
-			doc.addBodyHtml(sbCss.toString(), false);
-			doc.addBodyHtml(sbJs.toString(), false);
-		}
+			doc.addScriptHtml(r.toString());
+		});
 	}
 
 	private String[] createH5FrameSet() {
@@ -899,8 +832,8 @@ public class FrameBase {
 
 		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
 		String lang = this._HtmlClass.getItemValues().getSysParas().getLang();
-		if (rv.s("EWA_MTYPE") != null) {
-			String EWA_MTYPE_tag = "EWA_MTYPE_" + rv.s("EWA_MTYPE").toUpperCase();
+		if (rv.s(FrameParameters.EWA_MTYPE) != null) {
+			String EWA_MTYPE_tag = "EWA_MTYPE_" + rv.s(FrameParameters.EWA_MTYPE).toUpperCase();
 			if (EwaGlobals.instance().getEwaInfos().testName(EWA_MTYPE_tag)) {
 				try {
 					EwaInfo b = EwaGlobals.instance().getEwaInfos().getItem(EWA_MTYPE_tag);
@@ -933,6 +866,18 @@ public class FrameBase {
 		bs = bs.replace("!!>", attrs + ">");
 
 		doc.addBodyHtml(bs, true);
+
+		ConfAddedResources res = ConfAddedResources.getInstance();
+		if (res != null) {
+			String ewa_added_resources = rv.s(FrameParameters.EWA_ADDED_RESOURCES);
+			List<ConfAddedResource> al = StringUtils.isBlank(ewa_added_resources)
+					? ConfAddedResources.getInstance().getDefaultResList(false)
+					: ConfAddedResources.getInstance().getResList(ewa_added_resources, false);
+			al.forEach(r -> {
+				doc.addScriptHtml(r.toString());
+			});
+		}
+
 		if (this.isUseTest1Table()) {
 			doc.addScriptHtml("<div id='EWA_FRAME_MAIN' _s='主框架开始'>", "主框架开始");
 		}
@@ -943,7 +888,7 @@ public class FrameBase {
 		if (this.isUseTest1Table()) {
 			this.createTest1Table(doc, skinName); // <table id='Test1'
 		}
-		if (this._HtmlClass.getItemValues().getRequestValue().s("ewa_in_dialog") != null) {
+		if (this._HtmlClass.getItemValues().getRequestValue().s(FrameParameters.EWA_IN_DIALOG) != null) {
 			doc.addScriptHtml("<div class='ewa-in-dialog'>");
 		}
 		doc.addScriptHtml(this._HtmlClass.getSkinFrameAll().getTop());
@@ -1038,7 +983,7 @@ public class FrameBase {
 	 */
 	public boolean isUseTest1Table() {
 		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
-		if (rv.s("ewa_skip_test1") != null) {
+		if (rv.s(FrameParameters.EWA_SKIP_TEST1) != null) {
 			return false;
 		}
 		if (!this._HtmlClass.getSysParas().isPc()) {
@@ -1069,12 +1014,14 @@ public class FrameBase {
 		String mainWidth = null;
 
 		// 用户参数指定宽度
-		if (rv.s("EWA_WIDTH") != null) {
-			sizeW = rv.s("EWA_WIDTH").replace("'", "").replace("\"", "").replace(">", "").replace("<", "");
+		if (rv.s(FrameParameters.EWA_WIDTH) != null) {
+			sizeW = rv.s(FrameParameters.EWA_WIDTH).replace("'", "").replace("\"", "").replace(">", "").replace("<",
+					"");
 		}
 		// 用户参数指定的高度
-		if (rv.s("EWA_HEIGHT") != null) {
-			sizeH = rv.s("EWA_HEIGHT").replace("'", "").replace("\"", "").replace(">", "").replace("<", "");
+		if (rv.s(FrameParameters.EWA_HEIGHT) != null) {
+			sizeH = rv.s(FrameParameters.EWA_HEIGHT).replace("'", "").replace("\"", "").replace(">", "").replace("<",
+					"");
 		}
 		if (sizeW != null && sizeW.trim().length() > 0) {
 			try {
@@ -1149,7 +1096,7 @@ public class FrameBase {
 			doc.addFrameHtml(pageAddBottom);
 		}
 		// 在对话框的类结束
-		if (this._HtmlClass.getItemValues().getRequestValue().s("ewa_in_dialog") != null) {
+		if (this._HtmlClass.getItemValues().getRequestValue().s(FrameParameters.EWA_IN_DIALOG) != null) {
 			doc.addScriptHtml("</div><!-- end of ewa-in-dialog -->");
 		}
 		if (this.isUseTest1Table()) {

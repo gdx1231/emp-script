@@ -39,7 +39,7 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 
 		DTTable multiDimTable = new DTTable(); // 填充数据用临时表
 
-		String EWA_GRID_TRANS = super.getHtmlClass().getItemValues().getRequestValue().getString("EWA_GRID_TRANS");
+		String EWA_GRID_TRANS = super.getHtmlClass().getItemValues().getRequestValue().getString(FrameParameters.EWA_GRID_TRANS);
 		MStr[] heads;
 		MStr[] leftRows;
 		boolean isTrans = false;
@@ -207,7 +207,7 @@ public class FrameMultiGrid extends FrameBase implements IFrame {
 
 		String html = "";
 
-		String EWA_GRID_TRANS = super.getHtmlClass().getSysParas().getRequestValue().getString("EWA_GRID_TRANS");
+		String EWA_GRID_TRANS = super.getHtmlClass().getSysParas().getRequestValue().getString(FrameParameters.EWA_GRID_TRANS);
 		boolean isTrans = false;
 		if (EWA_GRID_TRANS != null && EWA_GRID_TRANS.equals("1")) {
 			isTrans = true;

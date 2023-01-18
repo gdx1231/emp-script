@@ -10,14 +10,21 @@ import com.gdxsoft.easyweb.utils.Utils;
 
 public class DefineAcl extends SampleAcl implements IAcl {
 
+	public PageValue getAdmin() {
+		PageValue pv = super.getRequestValue().getPageValues().getValue(DefineParameters.EWA_ADMIN_ID);
+		// EWA_ADMIN_ID 不在seesion中
+		if (pv == null || pv.getPVTag() != PageValueTag.SESSION) {
+			return null;
+		}
+		return pv;
+	}
+
 	public boolean canRun() {
 		if (!ConfDefine.isAllowDefine()) {
 			return false;
 		}
-		PageValue pv = super.getRequestValue().getPageValues().getValue("EWA_ADMIN_ID");
-
-		// EWA_ADMIN_ID 不在seesion中
-		if (pv == null || pv.getPVTag() != PageValueTag.SESSION) {
+		PageValue pv = this.getAdmin();
+		if (pv == null) {
 			UUrl url = new UUrl(super.getRequestValue().getRequest());
 			String ref = url.getUrl();
 			String goToUrl = super.getRequestValue().getContextPath()

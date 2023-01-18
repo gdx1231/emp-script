@@ -169,7 +169,7 @@ public class UpdateXmlImpl extends UpdateXmlBase implements IUpdateXml {
 	public int deleteBaks(String xmlname) {
 		String path = this.configType.getScriptPath().getPath() + UserConfig.filterXmlName(xmlname);
 
-		if (xmlname.equals("EWA_TREE_ROOT")) { // 根节点
+		if (xmlname.equals("EWA_TREE_ROOT")) { // 根节点????
 			path = this.configType.getScriptPath().getPath();
 		}
 

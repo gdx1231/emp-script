@@ -17,6 +17,7 @@ import org.w3c.dom.NodeList;
 import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
@@ -194,7 +195,7 @@ public class ConfigUtils {
 		JdbcConfigOperation op = new JdbcConfigOperation(sp);
 		DTTable tb = op.getAllXmlnames();
 		for (int ia = 0; ia < tb.getCount(); ia++) {
-			String xmlName = tb.getCell(ia, "XMLNAME").toString();
+			String xmlName = tb.getCell(ia,FrameParameters.XMLNAME).toString();
 			String xml = op.getXml(xmlName);
 			Document doc = UXml.asDocument(xml);
 			NodeList nl = doc.getElementsByTagName("DopListShow");

@@ -29,6 +29,7 @@ import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.ItemValues;
 import com.gdxsoft.easyweb.script.display.SysParameters;
 import com.gdxsoft.easyweb.script.display.items.IItem;
+import com.gdxsoft.easyweb.script.display.items.ItemEwaConfigItem;
 import com.gdxsoft.easyweb.script.display.items.ItemImage;
 import com.gdxsoft.easyweb.script.html.HtmlDocument;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
@@ -124,11 +125,10 @@ public class FrameList extends FrameBase implements IFrame {
 		// 页面脚本初始化ListFrame
 		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
 		String gunid = super.getHtmlClass().getSysParas().getFrameUnid();
-		String lang = super.getHtmlClass().getSysParas().getLang();
 
 		String url = super.getUrlJs();
 
-		String userSort = rv.getString("EWA_LF_ORDER");
+		String userSort = rv.getString(FrameParameters.EWA_LF_ORDER);
 		if (userSort == null) {
 			userSort = "";
 		}
@@ -138,12 +138,13 @@ public class FrameList extends FrameBase implements IFrame {
 		String pageDescription = super.getPageJsTitle();
 
 		MStr sJs = new MStr();
+		String lang = super.getHtmlClass().getSysParas().getLang();
 		sJs.al("EWA.LANG='" + lang.toLowerCase() + "';");
-		String ewaPath = rv.s("rv_ewa_style_path");
-		if (StringUtils.isBlank(ewaPath)) {
-			ewaPath = "/EmpScriptV2"; // default static url prefix
-		}
-		sJs.al("EWA.RV_STATIC_PATH = \"" + ewaPath + "\";");
+//		String ewaPath = rv.s("rv_ewa_style_path");
+//		if (StringUtils.isBlank(ewaPath)) {
+//			ewaPath = "/EmpScriptV2"; // default static url prefix
+//		}
+//		sJs.al("EWA.RV_STATIC_PATH = \"" + ewaPath + "\";");
 		// String funName = "EWA_F" + gunid + "()";
 		sJs.al("(function() {");
 		// sJs.al("function "+funName+" {");
@@ -173,19 +174,19 @@ public class FrameList extends FrameBase implements IFrame {
 		// sJs.al(funName + ";");
 
 		String fname = "EWA.F.FOS['" + gunid + "']";
-		if (this._IsLuButtons && !"NO".equalsIgnoreCase(rv.s("EWA_LU_BUTTONS"))) {
+		if (this._IsLuButtons && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_BUTTONS))) {
 			String js = fname + ".ReShow();";
 			sJs.al(js);
 			// MStr bt = this.getHtmlClass().getDocument().getBodyTop();
 			// bt.replace("<body", "<body style='overflow:hidden'");
 		}
-		if (this._IsLuSearch && !"NO".equalsIgnoreCase(rv.s("EWA_LU_SEARCH"))) {
+		if (this._IsLuSearch && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_SEARCH))) {
 			boolean compose = this._ComposeSearchTexts; // 合并搜索
 			String js = fname + ".ShowSearch(" + compose + ");";
 			sJs.al(js);
 		}
 
-		if (this._LuSelect.length() > 0 && !"NO".equalsIgnoreCase(rv.s("EWA_LU_SELECT"))) {
+		if (this._LuSelect.length() > 0 && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_SELECT))) {
 			if (this._LuSelect.equals("S")) { // 单选
 				String js = fname + ".SelectSingle();";
 				sJs.al(js);
@@ -194,7 +195,7 @@ public class FrameList extends FrameBase implements IFrame {
 				sJs.al(js);
 			}
 		}
-		if (this._IsLuDblClick && !"NO".equalsIgnoreCase(rv.s("EWA_LU_DBL_CLICK"))) {
+		if (this._IsLuDblClick && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_DBL_CLICK))) {
 			String js = fname + ".DblClick(" + this._LuDblClickIdx + ");";
 			sJs.al(js);
 		}
@@ -283,23 +284,23 @@ public class FrameList extends FrameBase implements IFrame {
 		if (LeftJson != null && LeftJson.trim().length() > 0) {
 			LeftJson = LeftJson.replace("@", IItem.REP_AT_STR);
 			sJs.al(fname + ".LeftJson=" + LeftJson);
-			sJs.al(fname + ".LeftJson.XMLNAME=\"" + rv.s("xmlname") + "\";");
-			sJs.al(fname + ".LeftJson.ITEMNAME=\"" + rv.s("itemname") + "\";");
+			sJs.al(fname + ".LeftJson.XMLNAME=\"" + rv.s(FrameParameters.XMLNAME) + "\";");
+			sJs.al(fname + ".LeftJson.ITEMNAME=\"" + rv.s(FrameParameters.ITEMNAME) + "\";");
 		}
 		// show box
-		if (super.getHtmlClass().getSysParas().getRequestValue().getString("EWA_BOX") != null) {
+		if (super.getHtmlClass().getSysParas().getRequestValue().getString(FrameParameters.EWA_BOX) != null) {
 			sJs.al(fname + ".BOX_CLASS=new EWA_UI_BoxClass();");
 			sJs.al(fname + ".BOX_CLASS.Create(" + fname + ".BoxJson);");
 		}
 
 		// show left
-		if (super.getHtmlClass().getSysParas().getRequestValue().getString("EWA_LEFT") != null) {
+		if (super.getHtmlClass().getSysParas().getRequestValue().getString(FrameParameters.EWA_LEFT) != null) {
 			sJs.al(fname + ".LEFT_CLASS=new EWA_UI_LeftClass();");
 			sJs.al(fname + ".LEFT_CLASS.Create(" + fname + ".LeftJson);");
 		}
 		try {
 			String recycle = super.getPageItemValue("PageSize", "recycle");
-			if (recycle != null && recycle.equals("1") && !"NO".equalsIgnoreCase(rv.s("EWA_RECYCLE"))) {
+			if (recycle != null && recycle.equals("1") && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_RECYCLE))) {
 				sJs.al(fname + ".ShowRecycle();");
 			}
 
@@ -371,9 +372,9 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 
 		// 重绘为box
-		String box = super.getHtmlClass().getSysParas().getRequestValue().getString("EWA_BOX");
+		String box = super.getHtmlClass().getSysParas().getRequestValue().getString(FrameParameters.EWA_BOX);
 		// 重绘为左引导
-		String left = super.getHtmlClass().getSysParas().getRequestValue().getString("EWA_LEFT");
+		String left = super.getHtmlClass().getSysParas().getRequestValue().getString(FrameParameters.EWA_LEFT);
 
 		try {
 			if (box == null && left == null) {
@@ -457,14 +458,14 @@ public class FrameList extends FrameBase implements IFrame {
 		UserXItemValue x = uv.getItem(0);
 
 		// 重绘按钮
-		if (x.checkItemExists("luButtons") && !("no").equals(rv.s("EWA_LU_BUTTONS"))) {
+		if (x.checkItemExists("luButtons") && !("no".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_BUTTONS)))) {
 			String v1 = x.getItem("luButtons");
 			if (v1.equals("1")) {
 				this._IsLuButtons = true;
 			}
 		}
 		// 重绘搜索
-		if (x.checkItemExists("luSearch") && !("no").equals(rv.s("EWA_LU_SEARCH"))) {
+		if (x.checkItemExists("luSearch") && !("no".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_SEARCH)))) {
 			String v1 = x.getItem("luSearch");
 			if (v1.equals("1")) {
 				this._IsLuSearch = true;
@@ -474,13 +475,13 @@ public class FrameList extends FrameBase implements IFrame {
 			}
 		}
 		// 单选多选
-		if (x.checkItemExists("luSelect") && !("no").equals(rv.s("EWA_LU_SELECT"))) {
+		if (x.checkItemExists("luSelect") && !("no".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_SELECT)))) {
 			String v1 = x.getItem("luSelect");
 			this._LuSelect = v1;
 		}
 
 		// 行上双击
-		if (x.checkItemExists("luDblClick") && !("no").equals(rv.s("EWA_LU_DBLCLICK"))) {
+		if (x.checkItemExists("luDblClick") && !("no".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_DBLCLICK)))) {
 			String v1 = x.getItem("luDblClick");
 			if (v1.equals("1")) {
 				this._IsLuDblClick = true;
@@ -495,6 +496,24 @@ public class FrameList extends FrameBase implements IFrame {
 			String v1 = x.getItem("luAddPreRowFunc");
 			this._LuAddPreRowFunc = v1.trim();
 		}
+	}
+
+	/**
+	 * 是否使用FrameHtml模板
+	 * 
+	 * @return
+	 */
+	public boolean isUsingTemplate() {
+		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
+		// 是否使用模板
+		String frameTemplate = super.getPageItemValue("FrameHtml", "FrameHtml");
+		if (frameTemplate == null || frameTemplate.trim().length() == 0) {
+			return false;
+		}
+		if (rv.s(FrameParameters.EWA_LF_TEMP_NO) == null || rv.s(FrameParameters.EWA_TEMP_NO) == null) {
+			return true;
+		}
+		return false;
 	}
 
 	/*
@@ -512,10 +531,10 @@ public class FrameList extends FrameBase implements IFrame {
 		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
 
 		// 是否来自App调用，如果是的话，取消 onmouseover...的事件
-		String paraEwaApp = rv.s("EWA_APP");
+		String paraEwaApp = rv.s(FrameParameters.EWA_APP);
 		boolean isApp = paraEwaApp == null ? false : true;
 		// 列表每行所有TD字符串进行md5签名，用于刷新数据 refreshPage or replaceRowsData 的比对
-		boolean ewaRowSign = Utils.cvtBool(rv.s("EWA_ROW_SIGN"));
+		boolean ewaRowSign = Utils.cvtBool(rv.s(FrameParameters.EWA_ROW_SIGN));
 
 		HtmlDocument doc = this.getHtmlClass().getDocument();
 
@@ -584,11 +603,9 @@ public class FrameList extends FrameBase implements IFrame {
 			MStr sb = new MStr();
 
 			// 是否使用模板
-			boolean isUseTemplate = false;
+			boolean isUseTemplate = this.isUsingTemplate();
 			String frameTemplate = super.getPageItemValue("FrameHtml", "FrameHtml");
-			if (frameTemplate != null && frameTemplate.trim().length() > 0 && rv.s("EWA_TEMP_NO") == null) {
-				isUseTemplate = true;
-			}
+
 			MStr rowContents = new MStr();
 			for (int i = 0; i < tb.getCount(); i++) {
 				tb.getRow(i); // 将数据移动到当前行
@@ -598,7 +615,7 @@ public class FrameList extends FrameBase implements IFrame {
 				String[] rowAttrExp = this.createRowAttrs(uc);
 				String rowAttrs = rowAttrExp[0]; // 属性表达式
 				String rowClassName = rowAttrExp[1]; // 类表达式 class
-				
+
 				String rowHtml = isUseTemplate ? this.createItemHtmlsByFrameHtml(frameTemplate, "FrameList")
 						: this.createItemHtmls();
 				String groupHtml = this.createFrameGroup(flGroup);
@@ -606,11 +623,11 @@ public class FrameList extends FrameBase implements IFrame {
 
 				if (colSizeInc == 1 || colSize == 1) {
 					sb.a("<tr ").a(keyExp).a(" class=\"ewa-lf-data-row");
-					if(StringUtils.isNotBlank(rowClassName)) {
+					if (StringUtils.isNotBlank(rowClassName)) {
 						sb.a(" ").a(rowClassName);// class
 					}
 					sb.a("\" ");
-					if(StringUtils.isNotBlank(rowAttrs)) {
+					if (StringUtils.isNotBlank(rowAttrs)) {
 						sb.a(rowAttrs);
 					}
 					rowContents = new MStr();
@@ -730,20 +747,19 @@ public class FrameList extends FrameBase implements IFrame {
 			return returns;
 		}
 		ItemValues iv = super.getHtmlClass().getItemValues();
-		
-		MStr sbPageAttr = new MStr(); //属性表达式
+
+		MStr sbPageAttr = new MStr(); // 属性表达式
 		String className = ""; // CSS类名称
-		
+
 		UserXItemValues u = uc.getUserPageItem().getItem("RowAttributeSet");
 		Map<String, Boolean> map = new HashMap<>();
 		for (int i = 0; i < u.count(); i++) {
 			UserXItemValue u0 = u.getItem(i);
-			
-			
+
 			String logic = u0.getItem("RowAttLogic").trim();
 			if (StringUtils.isNotBlank(logic)) {
-				//逻辑判断，如果有逻辑判断，则执行，否则不进行判断
-				
+				// 逻辑判断，如果有逻辑判断，则执行，否则不进行判断
+
 				String logic1 = iv.replaceLogicParameters(logic);
 				if (!ULogic.runLogic(logic1)) {
 					continue;
@@ -789,7 +805,8 @@ public class FrameList extends FrameBase implements IFrame {
 	 */
 	public boolean isSplitPage() {
 		// 用户定义参数 EWA_IS_SPLIT_PAGE yes表示分页，no表示不分页
-		String paramIsSplit = super.getHtmlClass().getItemValues().getRequestValue().getString("EWA_IS_SPLIT_PAGE");
+		String paramIsSplit = super.getHtmlClass().getItemValues().getRequestValue()
+				.getString(FrameParameters.EWA_IS_SPLIT_PAGE);
 		if (paramIsSplit != null) {
 			return Utils.cvtBool(paramIsSplit);
 		}
@@ -926,7 +943,8 @@ public class FrameList extends FrameBase implements IFrame {
 		MStr sb = new MStr();
 		// header信息
 		String header = super.createSkinFCHeader();
-		String userOrder = super.getHtmlClass().getItemValues().getRequestValue().getString("EWA_LF_ORDER");
+		String userOrder = super.getHtmlClass().getItemValues().getRequestValue()
+				.getString(FrameParameters.EWA_LF_ORDER);
 		String fUnid = super.getHtmlClass().getSysParas().getFrameUnid();
 		sb.appendLine("<tr class='ewa-lf-header' EWA_TAG='HEADER'>");
 		for (int i = 0; i < super.getHtmlClass().getUserConfig().getUserXItems().count(); i++) {
@@ -1230,8 +1248,14 @@ public class FrameList extends FrameBase implements IFrame {
 			IItem item = super.getHtmlClass().getItem(uxi);
 			this._LastItem = item;
 
+			this.setItemEwaConfigItemUnidPrefix(item);
+
 			String itemHtml = item.createItemHtml();
 
+			if (itemHtml.indexOf("@") >= 0) {
+				// 替换其它@参数
+				itemHtml = super.getHtmlClass().getItemValues().replaceParameters(itemHtml, false, false);
+			}
 			cellData.put(uxi.getName().toUpperCase(), itemHtml);
 		}
 
@@ -1364,7 +1388,7 @@ public class FrameList extends FrameBase implements IFrame {
 			DTRow row = tb.getRow(i); // 将数据移动到当前行
 			String keyExp = this.createItemKeys();
 			JSONObject rowJson = this.createJsonRow(row);
-			rowJson.put("EWA_KEY", keyExp);
+			rowJson.put(FrameParameters.EWA_KEY, keyExp);
 			arr.put(rowJson);
 		}
 		return arr.toString();
@@ -1613,6 +1637,19 @@ public class FrameList extends FrameBase implements IFrame {
 	}
 
 	/**
+	 * 设置 ItemEwaConfigItem的 FrameUnid前缀
+	 * 
+	 * @param item
+	 */
+	private void setItemEwaConfigItemUnidPrefix(IItem item) {
+		if ("ItemEwaConfigItem".equals(item.getClass().getSimpleName())) {
+			ItemEwaConfigItem item0 = (ItemEwaConfigItem) item;
+			String key = this.createItemKeys();
+			item0.setFrameUnidPrefix("IECI_" + key + "_");
+		}
+	}
+
+	/**
 	 * 生成列表的每个单元格数据
 	 * 
 	 * @param uxi 配置单元
@@ -1625,6 +1662,8 @@ public class FrameList extends FrameBase implements IFrame {
 		IItem item = super.getHtmlClass().getItem(uxi);
 
 		this._LastItem = item;
+
+		this.setItemEwaConfigItemUnidPrefix(item);
 
 		String parentHtml = super.createItemParentHtml(uxi); // 皮肤定义的页面样式
 

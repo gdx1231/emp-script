@@ -12,6 +12,7 @@ import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpointConfig;
 import javax.websocket.server.ServerEndpointConfig.Configurator;
 
+import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 
 /**
@@ -25,6 +26,8 @@ public class EwaWebSocketConfigure extends Configurator {
 	public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
 		// httpsession
 		HttpSession httpSession = (HttpSession) request.getHttpSession();
+		RequestValue rv = new RequestValue();
+
 		Cookie[] cookies = null;
 		Map<String, String> headers = new HashMap<String, String>();
 		for (String key : request.getHeaders().keySet()) {
@@ -32,11 +35,13 @@ public class EwaWebSocketConfigure extends Configurator {
 			if (key.equalsIgnoreCase("cookie")) {
 				cookies = this.getCookies(lst);
 			} else {
+				// Websocket 通过header传递的参数
+				rv.addValue(key, lst.get(0), PageValueTag.OTHER);
 				headers.put(key, lst.get(0));
 			}
 		}
-		
-		RequestValue rv = new RequestValue();
+
+		// 增加header的别名
 		rv.initParametersByHeaders(headers);
 		rv.reloadSessions(httpSession);
 		rv.reloadCookies(cookies);

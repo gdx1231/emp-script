@@ -15,6 +15,11 @@ import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
+/**
+ * 定义的附加资源
+ * @author admin
+ *
+ */
 public class ConfAddedResources {
 	private static Logger LOGGER = LoggerFactory.getLogger(ConfAddedResources.class);
 	private static ConfAddedResources INST = null;
@@ -35,10 +40,12 @@ public class ConfAddedResources {
 
 	private synchronized static ConfAddedResources createConfs() {
 		// <addedResources>
-		// <addedResource src="/static/add_0.js" name="addjs0"></addedResource>
-		// <addedResource src="https://www.gdxsoft.com/js/add_1.js" name="addjs1"></addedResource>
+		// <addedResource src="/static/add_0.js" name="addjs0" defaultConf="true" last="true"></addedResource>
+		// <addedResource src="https://www.gdxsoft.com/js/add_1.js"
+		// name="addjs1"></addedResource>
 		// <addedResource src="/static/add_0.css" name="addcss0"></addedResource>
-		// <addedResource src="https://www.gdxsoft.com/css/add_1.css" name="addcss1"></addedResource>
+		// <addedResource src="https://www.gdxsoft.com/css/add_1.css"
+		// name="addcss1"></addedResource>
 		// </addedResources>
 
 		ConfAddedResources sps = new ConfAddedResources();
@@ -62,12 +69,25 @@ public class ConfAddedResources {
 			uo.setObject(sp);
 			uo.setAllValue(item);
 			sp.setXml(UXml.asXml(item));
-			if (sp.getName() == null || sp.getName().trim().length() == 0 || sp.getSrc() == null
-					|| sp.getSrc().trim().length() == 0) {
+
+			if (sp.getName() == null || sp.getName().trim().length() == 0) {
 				LOGGER.warn("Invalid addedResource cfg ->" + sp.getXml());
 				continue;
 			}
 
+			if (sp.getSrc() == null || sp.getSrc().trim().length() == 0) {
+				sp.setContent(item.getTextContent());
+				if (sp.getResourceType() == null) {
+					LOGGER.warn("Content undefined resourceType, set js. ->" + sp.getXml());
+					sp.setResourceType("js");
+				}
+			} else if (sp.getResourceType() == null) {
+				if (sp.getSrc().toLowerCase().endsWith(".css")) {
+					sp.setResourceType("css");
+				} else {
+					sp.setResourceType("js");
+				}
+			}
 			sps.getResources().put(sp.getName(), sp);
 			LOGGER.debug(sp.getXml());
 		}

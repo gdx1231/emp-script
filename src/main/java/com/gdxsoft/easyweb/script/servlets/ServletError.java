@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
+import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ServletError extends HttpServlet {
@@ -55,11 +57,11 @@ public class ServletError extends HttpServlet {
 		response.setHeader("EWA", "V2.2;gdxsoft.com");
 
 		PrintWriter o = response.getWriter();
-		String ajax = request.getParameter("EWA_AJAX");
+		String ajax = request.getParameter(FrameParameters.EWA_AJAX);
 
 		RequestValue rv = new RequestValue(request, request.getSession());
-		String ewa_path_root = rv.getString("RV_EWA_STYLE_PATH");
-		String ewa_path = ewa_path_root;
+		String ewa_path_root = rv.getString(FrameParameters.RV_EWA_STYLE_PATH);
+		String ewa_path = Utils.textToInputValue(ewa_path_root);
 		if (ewa_path_root == null) {
 			ewa_path = "/EmpScriptV2/";
 		}

@@ -30,6 +30,7 @@ import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.display.action.ActionBase;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.*;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -43,12 +44,169 @@ import com.gdxsoft.easyweb.utils.msnet.MTable;
  * 
  */
 public class RequestValue implements Cloneable {
+	/**
+	 * 用户代理，浏览器的user-agent头
+	 */
+	public static final String SYS_USER_AGENT = "SYS_USER_AGENT";
+	/**
+	 * 用户请求来源参考
+	 */
+	public static final String SYS_REMOTE_REFERER = "SYS_REMOTE_REFERER";
+	/**
+	 * 用户IP地址
+	 */
+	public static final String SYS_REMOTEIP = "SYS_REMOTEIP";
+	/**
+	 * 用户请求地址，不包含查询，例如: https://gdxsoft.com/users/userinfo.jsp
+	 */
+	public static final String SYS_REMOTE_URL = "SYS_REMOTE_URL";
+	/**
+	 * 用户请求地址，包含查询，例如:
+	 * https://gdxsoft.com/users/userinfo.jsp?user_id=1&type=2&ewa_ajax=json
+	 */
+	public static final String SYS_REMOTE_URL_ALL = "SYS_REMOTE_URL_ALL";
+	/**
+	 * 实例每次创建的UNID，同 EWA.ID
+	 */
+	public static final String SYS_UNID = "SYS_UNID";
+	/**
+	 * 实例每次创建的UNID，同 SYS_UNID
+	 */
+	public static final String EWAdotID = "EWA.ID";
+	/**
+	 * 实例每次创建的当前时间，同EWAdotDATE
+	 */
+	public static final String SYS_DATE = "SYS_DATE";
+	/**
+	 * 实例每次创建的当前时间，同SYS_DATE
+	 */
+	public static final String EWAdotDATE = "EWA.DATE";
+	/**
+	 * 实例每次创建的当前时间的日
+	 */
+	public static final String EWAdotDATEdotDAY = "EWA.DATE.DAY";
+	/**
+	 * 实例每次创建的当前时间的小时（24小时）
+	 */
+	public static final String EWAdotDATEdotHOUR = "EWA.DATE.HOUR";
+	/**
+	 * 实例每次创建的当前时间的分钟
+	 */
+	public static final String EWAdotDATEdotMINUTE = "EWA.DATE.MINUTE";
+	/**
+	 * 实例每次创建的当前时间的月 1-12
+	 */
+	public static final String EWAdotDATEdotMONTH = "EWA.DATE.MONTH";
+	/**
+	 * 实例每次创建的当前时间的秒
+	 */
+	public static final String EWAdotDATEdotSECOND = "EWA.DATE.SECOND";
+	/**
+	 * 实例每次创建的当前时间的日期字符串，例如：12:39:12
+	 */
+	public static final String EWAdotDATEdotTIME = "EWA.DATE.TIME";
+	/**
+	 * 实例每次创建的当前时间的日期字符串，例如：2012-12-02
+	 */
+	public static final String EWAdotDATEdotSTR = "EWA.DATE.STR";
+	/**
+	 * 实例每次创建的当前时间的日期和时间字符串，同EWA.DATETIME.STR，例如： 2012-12-02 11:30:03
+	 */
+	public static final String EWAdotDATEdotSTR1 = "EWA.DATE.STR1";
+	/**
+	 * 实例每次创建的当前时间的日期和时间字符串，同EWA.DATE.STR1，例如： 2012-12-02 11:30:03
+	 */
+	public static final String EWAdotDATETIMEdotSTR = "EWA.DATETIME.STR";
+	/**
+	 * 实例每次创建的当前时间的年，例如：2012
+	 */
+	public static final String EWAdotDATEdotYEAR = "EWA.DATE.YEAR";
+	/**
+	 * WEB服务当前项目目录，例如 /users，同EWACP
+	 */
+	public static final String SYS_CONTEXTPATH = "SYS_CONTEXTPATH";
+
+	/**
+	 * WEB服务当前项目目录，例如 /users，同SYS_CONTEXTPATH
+	 */
+	public static final String EWAdotCP = "EWA.CP";
+
+	/**
+	 * 当前请求的servlet名称，例如: /users/userinfo.jsp
+	 */
+	public static final String EWAdotCPF = "EWA.CPF";
+	/**
+	 * 当前请求的servlet名称和查询地址，例如: /users/userinfo.jsp?user_id=1&type=2&ewa_ajax=json
+	 */
+	public static final String EWAdotCPF_ALL = "EWA.CPF_ALL";
+	/**
+	 * 请求地址的查询，不包含EWA系统参数，例如：user_id=1&type=2
+	 */
+	public static final String EWA_QUERY = "EWA_QUERY";
+	/**
+	 * 请求地址的查询，包含EWA系统参数，例如：user_id=1&type=2&ewa_ajax=json
+	 */
+	public static final String EWA_QUERY_ALL = "EWA_QUERY_ALL";
+
+	/**
+	 * 系统内置参数，数据库表数据中二进制临时存储文件路径，<br>
+	 * 例如：/var/lib/ewa_page_cached/cached/_EWA_TMP_/IMG/
+	 */
+	public static final String EWAdotPATH_IMG_CACHE = "EWA.PATH_IMG_CACHE";
+	/**
+	 * 系统内置参数，数据库表数据中二进制临时存储文件路径映射到url路径<br>
+	 * 例如：/cached/_EWA_TMP_/IMG/
+	 */
+	public static final String EWAdotPATH_IMG_CACHE_URL = "EWA.PATH_IMG_CACHE_URL";
+	/**
+	 * 系统内置参数，用户上传文件物理路径<br>
+	 * 例如：/var/lib/ewa_page_cached/cached
+	 */
+	public static final String EWAdotPATH_UPLOAD = "EWA.PATH_UPLOAD";
+	/**
+	 * 系统内置参数，用户上传文件物理路径映射到url路径<br>
+	 * 例如：/var/lib/ewa_page_cached/cached
+	 */
+	public static final String EWAdotPATH_UPLOAD_URL = "EWA.PATH_UPLOAD_URL";
+	/**
+	 * 系统内置参数，项目classes所在目录<br>
+	 * 例如：/var/lib/project/users/WEB-INF/classes
+	 */
+	public static final String EWAdotREALdotPATH = "EWA.REAL.PATH";
+
+	/**
+	 * 系统内置参数，配置项目导入、导出目录
+	 */
+	public static final String EWAdotGROUPdotPATH = "EWA.GROUP.PATH";
+
+	public static final String EWAdotHOST = "EWA.HOST";
+	/**
+	 * 网站地址，例如：https://www.gdxsoft.com
+	 */
+	public static final String EWAdotHTTP = "EWA.HTTP";
+
+	/**
+	 * 网站的BASE地址
+	 */
+	public static final String EWAdotHOST_BASE = "EWA.HOST_BASE";
+
+	/**
+	 * 网站的端口
+	 */
+	public static final String EWAdotHOST_PORT = "EWA.HOST_PORT";
+	/**
+	 * 网站的协议
+	 */
+	public static final String EWAdotHOST_PROTOCOL = "EWA.HOST_PROTOCOL"; // 协议
+	/**
+	 * WEB服务当前项目目录，例如 /users，同EWACP
+	 */
+	public static final String EWAdotHOST_CONTEXT = "EWA.HOST_CONTEXT";
+
+	/**
+	 * 日志
+	 */
 	private static Logger LOGGER = LoggerFactory.getLogger(RequestValue.class);
-	public static String HOST_BASE; // 网站的BASE地址
-	public static String HOST; // 网站的域名
-	public static int HOST_PORT; // 端口
-	public static String HOST_PROTOCOL; // 协议
-	public static String HOST_CONTEXT;
 
 	private PageValues _ReqValues = new PageValues();
 	private HttpServletRequest _Request;
@@ -74,9 +232,9 @@ public class RequestValue implements Cloneable {
 	 */
 	public String getLang() {
 		// 字符集
-		String lang = this.s("EWA_LANG");
+		String lang = this.s(FrameParameters.EWA_LANG);
 		if (lang == null || lang.trim().length() == 0) {
-			lang = this.s("SYS_EWA_LANG"); // 从session取
+			lang = this.s(FrameParameters.SYS_EWA_LANG); // 从session取
 		}
 		// //避免跨站脚本攻击漏洞 2015-2-4
 		// 因为 FrameFrame.createJsFramePage sJs.append("\r\nEWA.LANG='" +
@@ -105,7 +263,7 @@ public class RequestValue implements Cloneable {
 			s.a(Utils.toJsonPair(key.toString(), pv.getStringValue()));
 			s.a(",");
 		}
-		s.a(Utils.toJsonPair("SYS_UNID", this.getString("SYS_UNID")));
+		s.a(Utils.toJsonPair(SYS_UNID, this.getString(SYS_UNID)));
 		s.a("}");
 		return s.toString();
 	}
@@ -116,18 +274,20 @@ public class RequestValue implements Cloneable {
 	 */
 	public void initSysParameters() {
 
-		this._ReqValues.addValue("EWA.GROUP.PATH", UPath.getGroupPath(), PageValueTag.SYSTEM);
-		this._ReqValues.addValue("EWA.SCRIPT.PATH", UPath.getScriptPath(), PageValueTag.SYSTEM);
-		this._ReqValues.addValue("EWA.CONFIG.PATH", UPath.getConfigPath(), PageValueTag.SYSTEM);
-		this._ReqValues.addValue("EWA.PATH_UPLOAD_URL", UPath.getPATH_UPLOAD_URL(), PageValueTag.SYSTEM);
+		this._ReqValues.addValue(EWAdotGROUPdotPATH, UPath.getGroupPath(), PageValueTag.SYSTEM);
+		// this._ReqValues.addValue(EWAdotSCRIPTdotPATH, UPath.getScriptPath(),
+		// PageValueTag.SYSTEM);
+		// this._ReqValues.addValue("EWA.CONFIG.PATH", UPath.getConfigPath(),
+		// PageValueTag.SYSTEM);
+		this._ReqValues.addValue(EWAdotPATH_UPLOAD_URL, UPath.getPATH_UPLOAD_URL(), PageValueTag.SYSTEM);
 
-		this._ReqValues.addValue("EWA.PATH_UPLOAD", UPath.getPATH_UPLOAD(), PageValueTag.SYSTEM);
+		this._ReqValues.addValue(EWAdotPATH_UPLOAD, UPath.getPATH_UPLOAD(), PageValueTag.SYSTEM);
 
-		this._ReqValues.addValue("EWA.PATH_IMG_CACHE_URL", UPath.getPATH_IMG_CACHE_URL(), PageValueTag.SYSTEM);
-		this._ReqValues.addValue("EWA.PATH_IMG_CACHE", UPath.getPATH_IMG_CACHE(), PageValueTag.SYSTEM);
+		this._ReqValues.addValue(EWAdotPATH_IMG_CACHE_URL, UPath.getPATH_IMG_CACHE_URL(), PageValueTag.SYSTEM);
+		this._ReqValues.addValue(EWAdotPATH_IMG_CACHE, UPath.getPATH_IMG_CACHE(), PageValueTag.SYSTEM);
 
 		// src 所在目录
-		this._ReqValues.addValue("EWA.REAL.PATH", UPath.getRealPath(), PageValueTag.SYSTEM);
+		this._ReqValues.addValue(EWAdotREALdotPATH, UPath.getRealPath(), PageValueTag.SYSTEM);
 
 		// 在 ewa_conf中的全局参数,可以被系统调用
 		// <requestValuesGlobal>
@@ -156,43 +316,46 @@ public class RequestValue implements Cloneable {
 
 		// year
 		String y = cal.get(Calendar.YEAR) + "";
-		this._ReqValues.addOrUpdateValue("EWA.DATE.YEAR", y, PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(EWAdotDATEdotYEAR, y, PageValueTag.SYSTEM);
 
 		// month
 		int m = cal.get(Calendar.MONTH) + 1;
 		String mstr = m < 10 ? "0" + m : m + "";
-		this._ReqValues.addOrUpdateValue("EWA.DATE.MONTH", mstr, PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(EWAdotDATEdotMONTH, mstr, PageValueTag.SYSTEM);
 
 		// day of month
 		int d = cal.get(Calendar.DAY_OF_MONTH);
 		String dstr = d < 10 ? "0" + d : d + "";
-		this._ReqValues.addOrUpdateValue("EWA.DATE.DAY", dstr, PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(EWAdotDATEdotDAY, dstr, PageValueTag.SYSTEM);
 
 		// hour
 		int h = cal.get(Calendar.HOUR_OF_DAY);
 		String hstr = h < 10 ? "0" + h : h + "";
-		this._ReqValues.addOrUpdateValue("EWA.DATE.HOUR", hstr, PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(EWAdotDATEdotHOUR, hstr, PageValueTag.SYSTEM);
 
 		// minute
 		int mm = cal.get(Calendar.MINUTE);
 		String mmstr = mm < 10 ? "0" + mm : mm + "";
-		this._ReqValues.addOrUpdateValue("EWA.DATE.MINUTE", mmstr, PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(EWAdotDATEdotMINUTE, mmstr, PageValueTag.SYSTEM);
 
-		// senond
+		// second
 		int ss = cal.get(Calendar.SECOND);
 		String ssstr = ss < 10 ? "0" + ss : ss + "";
-		this._ReqValues.addOrUpdateValue("EWA.DATE.SECOND", ssstr, PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(EWAdotDATEdotSECOND, ssstr, PageValueTag.SYSTEM);
 
+		// 时间字符串
+		String time = hstr + ":" + mmstr + ":" + ssstr;
+		this._ReqValues.addOrUpdateValue(EWAdotDATEdotTIME, time, PageValueTag.SYSTEM);
 		// date
 		PageValue pv = new PageValue();
-		pv.setName("SYS_DATE");
+		pv.setName(SYS_DATE);
 		pv.setValue(cal.getTime());
 		pv.setDataType("Date");
 		pv.setPVTag(PageValueTag.SYSTEM);
 		this._ReqValues.addOrUpdateValue(pv);
 
 		PageValue pv1 = new PageValue();
-		pv1.setName("EWA.DATE");
+		pv1.setName(EWAdotDATE);
 		pv1.setValue(cal.getTime());
 		pv1.setDataType("Date");
 		pv1.setPVTag(PageValueTag.SYSTEM);
@@ -200,11 +363,13 @@ public class RequestValue implements Cloneable {
 
 		// date str
 		String dateStr = y + "-" + mstr + "-" + dstr;
-		this._ReqValues.addOrUpdateValue("EWA.DATE.STR", dateStr, PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(EWAdotDATEdotSTR, dateStr, PageValueTag.SYSTEM);
 
 		// date str
-		String dateStr1 = dateStr + " " + h + ":" + mm + ":" + ss;
-		this._ReqValues.addOrUpdateValue("EWA.DATE.STR1", dateStr1, PageValueTag.SYSTEM);
+		String dateStr1 = dateStr + " " + time;
+		this._ReqValues.addOrUpdateValue(EWAdotDATEdotSTR1, dateStr1, PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(EWAdotDATETIMEdotSTR, dateStr1, PageValueTag.SYSTEM);
+
 	}
 
 	/**
@@ -212,8 +377,8 @@ public class RequestValue implements Cloneable {
 	 */
 	public void resetSysUnid() {
 		String guid = Utils.getGuid();
-		this._ReqValues.addOrUpdateValue("SYS_UNID", guid, PageValueTag.SYSTEM);
-		this._ReqValues.addOrUpdateValue("EWA.ID", guid, PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(SYS_UNID, guid, PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(EWAdotID, guid, PageValueTag.SYSTEM);
 	}
 
 	/**
@@ -257,17 +422,7 @@ public class RequestValue implements Cloneable {
 	public String getOtherValue(String name) {
 		String name1 = name.toUpperCase().trim();
 		String v = null;
-		if (name1.equals("EWA.HOST")) {
-			v = HOST;
-		} else if (name1.equals("EWA.HOST_PORT")) {
-			v = HOST_PORT + "";
-		} else if (name1.equals("EWA.HOST_PROTOCOL")) {
-			v = HOST_PROTOCOL;
-		} else if (name1.equals("EWA.HOST_BASE")) {
-			v = HOST_BASE;
-		} else if (name1.equals("EWA.HOST.CONTEXT")) {
-			v = HOST_CONTEXT;
-		} else if (name1.endsWith(".HASH")) {
+		if (name1.endsWith(".HASH")) {
 			String name2 = name1.substring(0, name1.length() - 5);
 			PageValue pv = this._ReqValues.getPageValue(name2);
 			if (pv == null || pv.getValue() == null) {
@@ -614,7 +769,7 @@ public class RequestValue implements Cloneable {
 			parameters.append("=");
 			parameters.append(v1);
 
-			if (key.equalsIgnoreCase("XMLNAME") || key.equalsIgnoreCase("ITEMNAME")
+			if (key.equalsIgnoreCase(FrameParameters.XMLNAME) || key.equalsIgnoreCase(FrameParameters.ITEMNAME)
 					|| key.toUpperCase().startsWith("EWA_")) {
 				continue;
 			}
@@ -626,8 +781,8 @@ public class RequestValue implements Cloneable {
 
 			parameters1.append(v1);
 		}
-		this.addValue("EWA_QUERY_ALL", parameters.toString());
-		this.addValue("EWA_QUERY", parameters1.toString());
+		this.addValue(EWA_QUERY_ALL, parameters.toString());
+		this.addValue(EWA_QUERY, parameters1.toString());
 	}
 
 	public void reloadQueryValues(String queryString) {
@@ -688,7 +843,7 @@ public class RequestValue implements Cloneable {
 
 		String ctx = req.getContextPath();
 		int inc = 0;
-		// 避免 http://gezz.cn/////////ex/grd.jsp?js_debug=1 情况出现
+		// 避免 http://www.gdxsoft.com/////////users/////////userinfo.jsp?js_debug=1 情况出现
 		while (ctx.startsWith("//")) {
 			ctx = ctx.replace("//", "/");
 			inc++;
@@ -698,8 +853,9 @@ public class RequestValue implements Cloneable {
 		}
 		_ContextPath = ctx;
 
-		this._ReqValues.addValue("SYS_CONTEXTPATH", ctx, PageValueTag.SYSTEM);
-		this._ReqValues.addValue("EWA.CP", ctx, PageValueTag.SYSTEM);
+		this._ReqValues.addValue(SYS_CONTEXTPATH, ctx, PageValueTag.SYSTEM);
+		this._ReqValues.addValue(EWAdotCP, ctx, PageValueTag.SYSTEM);
+		this._ReqValues.addValue(EWAdotHOST_CONTEXT, ctx, PageValueTag.SYSTEM);
 
 		Enumeration<?> enums = _Request.getHeaderNames();
 		int inc1 = 0;
@@ -717,24 +873,34 @@ public class RequestValue implements Cloneable {
 
 		this.initParametersByHeaders(headers);
 
-		if (this.s("SYS_REMOTEIP") == null) {
+		if (this.s(SYS_REMOTEIP) == null) {
 			// 从header未取得 X-Real-IP和X-Forwarded-For
 			String ip = req.getRemoteAddr();
-			this._ReqValues.addValue("SYS_REMOTEIP", ip, PageValueTag.SYSTEM);
+			this._ReqValues.addValue(SYS_REMOTEIP, ip, PageValueTag.SYSTEM);
 		}
 
 		UUrl uu = new UUrl(req);
 
-		// 网址,例如 http://www.oneworld.cc/
-		this._ReqValues.addValue("EWA.HTTP", uu.getRoot(), PageValueTag.SYSTEM);
+		// 域名
+		this._ReqValues.addValue(EWAdotHOST, req.getServerName(), PageValueTag.SYSTEM);
 
-		this._ReqValues.addValue("EWA.CPF", uu.getUrl(false), PageValueTag.SYSTEM);
-		this._ReqValues.addValue("EWA.CPF_ALL", uu.getUrl(true), PageValueTag.SYSTEM);
+		// 网站的BASE地址
+		this._ReqValues.addValue(EWAdotHOST_BASE, uu.getRoot() + req.getContextPath() + "/", PageValueTag.SYSTEM);
+
+		this._ReqValues.addValue(EWAdotHOST_PORT, req.getServerPort(), PageValueTag.SYSTEM);
+
+		this._ReqValues.addValue(EWAdotHOST_PROTOCOL, uu.getRoot().startsWith("https") ? "https" : "http",
+				PageValueTag.SYSTEM);
+		// 网址,例如 https://www.gdxsoft.com
+		this._ReqValues.addValue(EWAdotHTTP, uu.getRoot(), PageValueTag.SYSTEM);
+
+		this._ReqValues.addValue(EWAdotCPF, uu.getUrl(false), PageValueTag.SYSTEM);
+		this._ReqValues.addValue(EWAdotCPF_ALL, uu.getUrl(true), PageValueTag.SYSTEM);
 
 		// 全网址，不含 querystring
 		// String s1 = req.getRequestURL().toString();
-		this._ReqValues.addValue("SYS_REMOTE_URL", uu.getUrlWithDomain(false), PageValueTag.SYSTEM);
-		this._ReqValues.addValue("SYS_REMOTE_URL_ALL", uu.getUrlWithDomain(true), PageValueTag.SYSTEM);
+		this._ReqValues.addValue(SYS_REMOTE_URL, uu.getUrlWithDomain(false), PageValueTag.SYSTEM);
+		this._ReqValues.addValue(SYS_REMOTE_URL_ALL, uu.getUrlWithDomain(true), PageValueTag.SYSTEM);
 
 		this.addQueryValues(_Request.getQueryString());
 
@@ -756,9 +922,9 @@ public class RequestValue implements Cloneable {
 		for (String key : headers.keySet()) {
 			String val = headers.get(key);
 			if (key.equalsIgnoreCase("referer")) {
-				this._ReqValues.addValue("SYS_REMOTE_REFERER", val, PageValueTag.SYSTEM);
+				this._ReqValues.addValue(SYS_REMOTE_REFERER, val, PageValueTag.SYSTEM);
 			} else if (key.equalsIgnoreCase("user-agent")) {
-				this._ReqValues.addValue("SYS_USER_AGENT", val, PageValueTag.SYSTEM);
+				this._ReqValues.addValue(SYS_USER_AGENT, val, PageValueTag.SYSTEM);
 			} else if (key.equalsIgnoreCase("X-Real-IP")) {
 				this._ReqValues.addValue("SYS_x-real-ip", val, PageValueTag.SYSTEM);
 				x_real_ip = val;
@@ -782,19 +948,10 @@ public class RequestValue implements Cloneable {
 		}
 
 		if (x_forwarded_for.length() > 0) {
-			this._ReqValues.addValue("SYS_REMOTEIP", x_forwarded_for, PageValueTag.SYSTEM);
+			this._ReqValues.addValue(SYS_REMOTEIP, x_forwarded_for, PageValueTag.SYSTEM);
 		} else if (x_real_ip.length() > 0) {
-			this._ReqValues.addValue("SYS_REMOTEIP", x_real_ip, PageValueTag.SYSTEM);
+			this._ReqValues.addValue(SYS_REMOTEIP, x_real_ip, PageValueTag.SYSTEM);
 		}
-
-	}
-
-	private synchronized void loadHost(HttpServletRequest req) {
-		HOST = req.getServerName();
-		HOST_PORT = req.getServerPort();
-		HOST_PROTOCOL = req.getScheme();
-		HOST_BASE = HOST_PROTOCOL + "://" + HOST + ":" + HOST_PORT + "/";
-		HOST_CONTEXT = req.getContextPath();
 
 	}
 
@@ -823,9 +980,7 @@ public class RequestValue implements Cloneable {
 	}
 
 	private void addParameter(HttpServletRequest req) {
-		if (HOST == null || HOST.equals("localhost") || HOST.equals("127.0.0.1")) {
-			this.loadHost(req);
-		}
+
 		Enumeration<?> ee = req.getParameterNames();
 		MTable mt = new MTable();
 		while (ee.hasMoreElements()) {
@@ -969,7 +1124,7 @@ public class RequestValue implements Cloneable {
 
 			// 过滤掉所有以EWA_开头的cookie,不应存在的数据
 			// 时差可以放到 cookie 里
-			if (key.startsWith("EWA_") && !key.endsWith(ckPrefix) && !key.equals("EWA_TIMEDIFF")) {
+			if (key.startsWith("EWA_") && !key.endsWith(ckPrefix) && !key.equals(FrameParameters.EWA_TIMEDIFF)) {
 				continue;
 			}
 
@@ -1000,7 +1155,7 @@ public class RequestValue implements Cloneable {
 		boolean ewaEncrypted = key.endsWith(ActionBase.COOKIE_NAME_PREFIX);
 		// 过滤掉所有以EWA_开头的cookie,不应存在的数据
 		// 时差可以放到 cookie 里
-		if (key.startsWith("EWA_") && !ewaEncrypted && !key.equals("EWA_TIMEDIFF")) {
+		if (key.startsWith("EWA_") && !ewaEncrypted && !key.equals(FrameParameters.EWA_TIMEDIFF)) {
 			return;
 		}
 
@@ -1071,12 +1226,68 @@ public class RequestValue implements Cloneable {
 	}
 
 	/**
+	 * 添加参数表达式到Rv中 PageValueTag.OTHER
+	 * 
+	 * @param params 字符串表达式a=1&b=2&c=%20abc
+	 * @return 添加的参数名称列表
+	 */
+	public List<String> addValues(String params) {
+		return this.addValues(params, PageValueTag.OTHER);
+	}
+
+	/**
+	 * 添加参数表达式到Rv中
+	 * 
+	 * @param params       字符串表达式a=1&b=2&c=%20abc
+	 * @param pageValueTag 添加的类别
+	 * @return 添加的参数名称列表
+	 */
+	public List<String> addValues(String params, PageValueTag pageValueTag) {
+		if (params == null) {
+			return null;
+		}
+		List<String> addList = new ArrayList<String>();
+		if (params.trim().length() == 0) {
+			return addList;
+		}
+		String[] ps = params.split("\\&");
+		for (int i = 0; i < ps.length; i++) {
+			String[] pp = ps[i].split("=");
+			if (pp.length == 1 || pp.length > 2) {
+				continue;
+			}
+			String key = pp[0].trim();
+			if (key.length() == 0) {
+				continue;
+			}
+			String val = Utils.urlToText(pp[1]);
+			this.addValue(key, val, pageValueTag);
+
+			addList.add(key);
+		}
+
+		return addList;
+	}
+
+	/**
 	 * 添加JSONObject到Rv中
 	 * 
 	 * @param json JSONObject
 	 * @return 添加的字段
 	 */
 	public List<String> addValues(JSONObject json) {
+
+		return this.addValues(json, null);
+	}
+
+	/**
+	 * 添加JSONObject到Rv中
+	 * 
+	 * @param json   JSONObject
+	 * @param prefix 名称前面加的前缀
+	 * @return 添加的字段
+	 */
+	public List<String> addValues(JSONObject json, String prefix) {
 		if (json == null) {
 			return null;
 		}
@@ -1084,20 +1295,20 @@ public class RequestValue implements Cloneable {
 		Iterator<?> it = json.keys();
 		while (it.hasNext()) {
 			String key = it.next().toString();
+			String key1 = prefix == null ? key : prefix + key;
+			this._ReqValues.remove(key1);
 			try {
 				Object val = json.get(key);
 				if (val == null) {
 					continue;
 				}
-				this._ReqValues.remove(key);
-
 				if (val instanceof JSONArray) {
 					JSONArray arr = (JSONArray) val;
 					byte[] bufs = new byte[arr.length()];
 					for (int i = 0; i < arr.length(); i++) {
 						bufs[i] = Byte.parseByte(arr.getInt(i) + "");
 					}
-					this.addValue(key, bufs, "binary", bufs.length);
+					this.addValue(key1, bufs, "binary", bufs.length);
 				} else {
 					String valStr = val.toString();
 					if (valStr.indexOf("##BINARY_FILE[") >= 0 && valStr.indexOf("]BINARY_FILE##") > 0) {
@@ -1105,13 +1316,13 @@ public class RequestValue implements Cloneable {
 						valStr = valStr.replace("##BINARY_FILE[", "").replace("]BINARY_FILE##", "");
 						byte[] bufs = getJsonFileRef(valStr);
 						if (bufs != null) {
-							this.addValue(key, bufs, "binary", bufs.length);
+							this.addValue(key1, bufs, "binary", bufs.length);
 						}
 					} else {
-						this.addValue(key, val);
+						this.addValue(key1, val);
 					}
 				}
-				addList.add(key);
+				addList.add(key1);
 			} catch (JSONException e) {
 			}
 		}

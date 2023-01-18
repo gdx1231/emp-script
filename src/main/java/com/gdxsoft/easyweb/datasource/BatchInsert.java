@@ -1,12 +1,17 @@
 package com.gdxsoft.easyweb.datasource;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.utils.Utils;
+import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 /***
@@ -22,6 +27,11 @@ public class BatchInsert {
 
 	private String errors;
 
+	private PreparedStatement ps;
+	private MListStr al;
+
+	private int batchCount;
+
 	/**
 	 * Initial class
 	 * 
@@ -31,6 +41,80 @@ public class BatchInsert {
 	public BatchInsert(DataConnection cnn, boolean transcation) {
 		this.cnn = cnn;
 		this.transcation = transcation;
+	}
+
+	public boolean batchStart(String sql) {
+		al = Utils.getParameters(sql, "@");
+		batchCount = 0;
+		this.cnn.connect();
+		String sql1 = this.cnn.replaceSqlParameters(sql);
+		try {
+			ps = this.cnn.getConnection().prepareStatement(sql1);
+			if (this.transcation) {
+				if (cnn.transBegin()) {
+					return true;
+				} else {
+					errors = cnn.getErrorMsg();
+					LOGGER.error(errors);
+					return false;
+				}
+			}
+			return true;
+		} catch (SQLException e) {
+			errors = e.getMessage();
+			LOGGER.error(errors);
+			return false;
+		}
+	}
+
+	public boolean batchAddData(RequestValue rv) {
+		RequestValue old = cnn.getRequestValue();
+		cnn.setRequestValue(rv);
+		try {
+			cnn.addSqlParameter(al, ps);
+			ps.addBatch();
+			batchCount++;
+			return true;
+		} catch (SQLException e) {
+			if (this.transcation) {
+				cnn.transRollback();
+			}
+			errors = cnn.getErrorMsg();
+			LOGGER.error(errors);
+
+			return false;
+		} finally {
+			cnn.setRequestValue(old);
+		}
+
+	}
+
+	public int[] batchExceute() {
+		int[] results = null;
+		try {
+			if (batchCount > 0) {
+				results = ps.executeBatch();
+			}
+			if (this.transcation) {
+				cnn.transCommit();
+			}
+			return results;
+		} catch (SQLException e) {
+			this.errors = e.getMessage();
+			LOGGER.error(errors);
+			return null;
+		} finally {
+			if (this.transcation) {
+				cnn.transRollback();
+			}
+			try {
+				ps.close();
+				ps = null;
+			} catch (SQLException e) {
+				LOGGER.warn(errors);
+			}
+
+		}
 	}
 
 	/**
@@ -126,8 +210,10 @@ public class BatchInsert {
 				this.cnn.clearErrorMsg();
 			}
 		}
-		this.cnn.transCommit();
-		this.cnn.transClose();
+		if (this.transcation) {
+			this.cnn.transCommit();
+			this.cnn.transClose();
+		}
 
 		return sbError.toString();
 	}
@@ -135,7 +221,8 @@ public class BatchInsert {
 	/**
 	 * MYSQL Batch insert
 	 * 
-	 * @param insertHeader insertHeader then insert SQL header, e.g. insert into tb_a(a,b) values
+	 * @param insertHeader insertHeader then insert SQL header, e.g. insert into
+	 *                     tb_a(a,b) values
 	 * @param values       the list of values e.g. (0,'a')(1,'b')
 	 * @return
 	 */
@@ -302,10 +389,12 @@ public class BatchInsert {
 			tmp.a(" FROM DUAL");
 
 			// ORACLE插入字符串不能大于32k ？
-			// 根据Oracle文档描述，在Oracle9i中，SQL Statement Length - Maximum length of statements - 64 K maximum; particular
+			// 根据Oracle文档描述，在Oracle9i中，SQL Statement Length - Maximum length of statements -
+			// 64 K maximum; particular
 			// tools may impose lower limits。
 			// 这里的64K限制实际上并不确切，很多更长的SQL也可以执行，在Oracle10g的文档中，记录如下定义：
-			// The limit on how long a SQL statement can be depends on many factors, including database configuration,
+			// The limit on how long a SQL statement can be depends on many factors,
+			// including database configuration,
 			// disk space, and memory。
 			// 判断是否超过sql包字节限制
 			if (inc > 0 && this.checkPackageSizeOver(batSql, tmp)) { // 超过数据包的字节限制
@@ -418,6 +507,27 @@ public class BatchInsert {
 	 */
 	public void setCnn(DataConnection cnn) {
 		this.cnn = cnn;
+	}
+
+	/**
+	 * @return the errors
+	 */
+	public String getErrors() {
+		return errors;
+	}
+
+	/**
+	 * @return the ps
+	 */
+	public PreparedStatement getPs() {
+		return ps;
+	}
+
+	/**
+	 * @return the batchCount
+	 */
+	public int getBatchCount() {
+		return batchCount;
 	}
 
 }

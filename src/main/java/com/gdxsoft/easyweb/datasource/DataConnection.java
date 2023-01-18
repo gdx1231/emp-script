@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConfExtraGlobal;
+import com.gdxsoft.easyweb.conf.ConfExtraGlobals;
 import com.gdxsoft.easyweb.conf.ConnectionConfig;
 import com.gdxsoft.easyweb.conf.ConnectionConfigs;
 import com.gdxsoft.easyweb.data.DTTable;
@@ -27,6 +29,8 @@ import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
+import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
@@ -105,8 +109,82 @@ public class DataConnection {
 		return rst;
 	}
 
+	/**
+	 * 新建记录并返回自增字段，数据库连接自动关闭
+	 * 
+	 * @param sql
+	 * @param configName
+	 * @param rv
+	 * @return
+	 */
+	public static long insertAndReturnAutoIdLong(String sql, String configName, RequestValue rv) {
+		DataConnection cnn = new DataConnection(configName, rv);
+		Object v1 = cnn.executeUpdateReturnAutoIncrementObject(sql);
+		cnn.close();
+		if (cnn.getErrorMsg() != null) {
+			return -1L;
+		}
+		if (v1 == null) {
+			return 0L;
+		} else {
+			return Long.parseLong(v1.toString());
+		}
+	}
+
+	/**
+	 * 新建记录并返回自增字段，数据库连接自动关闭
+	 * 
+	 * @param sql
+	 * @param configName
+	 * @param rv
+	 * @return
+	 */
+	public static int insertAndReturnAutoIdInt(String sql, String configName, RequestValue rv) {
+		DataConnection cnn = new DataConnection(configName, rv);
+		int id = cnn.executeUpdateReturnAutoIncrement(sql);
+		cnn.close();
+		if (cnn.getErrorMsg() != null) {
+			return -1;
+		}
+		return id;
+	}
+
 	public static String updateAndClose(StringBuilder sb, String configName, RequestValue rv) {
 		return updateAndClose(sb.toString(), configName, rv);
+	}
+
+	/**
+	 * 获取数据量
+	 * 
+	 * @param tableName  表名
+	 * @param where      查询条件
+	 * @param configName
+	 * @param rv
+	 * @return =0 无数据，>0有数据，-1 执行错误
+	 */
+	public static int queryCount(String tableName, String where, String configName, RequestValue rv) {
+		DataConnection cnn = new DataConnection(configName, rv);
+		int count = cnn.executeQueryCount(tableName, where);
+		cnn.close();
+
+		return count;
+	}
+
+	/**
+	 * 检查数据是否存在
+	 * 
+	 * @param tableName  表名
+	 * @param where      查询条件
+	 * @param configName
+	 * @param rv
+	 * @return 有数据true,无数据和执行错误false
+	 */
+	public static boolean queryExists(String tableName, String where, String configName, RequestValue rv) {
+		DataConnection cnn = new DataConnection(configName, rv);
+		boolean exists = cnn.executeQueryExists(tableName, where);
+		cnn.close();
+
+		return exists;
 	}
 
 	/**
@@ -742,6 +820,46 @@ public class DataConnection {
 	}
 
 	/**
+	 * 获取数据量
+	 * 
+	 * @param tableName 表名
+	 * @param where     查询条件
+	 * @return =0 无数据，>0有数据，-1 执行错误
+	 */
+	public int executeQueryCount(String tableName, String where) {
+		String sql = "select count(*) gdx from " + tableName + " where 1=1 and " + where;
+		DTTable tb = DTTable.getJdbcTable(sql, this);
+		if (tb.isOk()) {
+			return tb.getCell(0, 0).toInt();
+		} else {
+			// 执行错误
+			return -1;
+		}
+	}
+
+	/**
+	 * 检查数据是否存在
+	 * 
+	 * @param tableName 表名
+	 * @param where     查询条件
+	 * @return 有数据true,无数据和执行错误false
+	 */
+	public boolean executeQueryExists(String tableName, String where) {
+		String sql = "select 1 gdx from " + tableName + " where 1=1 and " + where;
+		DTTable tb = DTTable.getJdbcTable(sql, "gdx", 1, 1, this);
+		if (tb.isOk()) {
+			if (tb.getCount() == 0) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			// 执行错误
+			return false;
+		}
+	}
+
+	/**
 	 * 执行查询
 	 * 
 	 * @param sql
@@ -861,7 +979,7 @@ public class DataConnection {
 			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);
 		} else { // 默认模式
 			sb.append(sql);
-			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);			
+			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);
 		}
 		String sqla = sb.toString();
 		return this.executeQuery(sqla, sql);
@@ -934,7 +1052,7 @@ public class DataConnection {
 		}
 
 		try {
-			if (!haveData) { // 有数据
+			if (haveData) { // 有数据
 				stmt.executeBatch();
 				if (transcation) {
 					this.transCommit();
@@ -1487,9 +1605,9 @@ public class DataConnection {
 
 	private void writeDebug(Object obj, String eventName, String des) {
 		this.showSqlDebug(obj.toString() + ": " + des);
-		if (this._RequestValue != null && this._RequestValue.getString("EWA_DB_LOG") != null) {
-			String x = this._RequestValue.getString("xmlname");
-			String i = this._RequestValue.getString("itemname");
+		if (this._RequestValue != null && this._RequestValue.getString(FrameParameters.EWA_DB_LOG) != null) {
+			String x = this._RequestValue.getString(FrameParameters.XMLNAME);
+			String i = this._RequestValue.getString(FrameParameters.ITEMNAME);
 			String COMBINE_ID = this._RequestValue.getString("COMBINE_ID");
 			// if (x != null && i != null && des.indexOf("executeUpdate") > 0) {
 			String log = "X=" + x + ", I=" + i + ", COMBINE_ID=" + (COMBINE_ID == null ? "" : COMBINE_ID) + " : " + des;
@@ -1510,6 +1628,25 @@ public class DataConnection {
 		if (this._DebugFrames == null)
 			return;
 		this._DebugFrames.addDebug(obj, eventName, des);
+	}
+
+	/**
+	 * 特殊的不需要替换为参数的参数名称，例如rownum<br>
+	 * <code>select user_id, @rownum := @rownum+1 from users b<br>
+	 * ,(select @rownum :=0) c
+	 * </code>
+	 * 
+	 * @param paramName
+	 * @return
+	 */
+	public boolean skipReplaceParameter(String paramName) {
+		if (paramName == null) {
+			return false;
+		}
+		if (paramName.toLowerCase().indexOf("rownum") == 0) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -1582,11 +1719,36 @@ public class DataConnection {
 		MListStr paras = Utils.getParameters(sql, "@");
 		for (int i = 0; i < paras.size(); i++) {
 			String para = paras.get(i);
-			if (para.toUpperCase().indexOf("_SPLIT") < 0)
+			if (this.skipReplaceParameter(para)) {
+				// 特点的不替换参数名称
 				continue;
-			String v1 = this._RequestValue.getString(para.toUpperCase());
-			StringBuilder sb = new StringBuilder();
-			if (v1 != null) {
+			}
+			PageValue pv = this._RequestValue.getPageValues().getValue(para);
+			if (pv == null) {
+				// md5, sha1...
+				if (this._RequestValue.getOtherValue(para) != null) {
+					continue;
+				}
+			}
+			String v1 = null;
+			if (pv == null) {
+				// 获取根据类型的数据
+				pv = this.getParameterByEndWithType(para);
+				if (pv != null && pv.getLength() > -1) {
+					v1 = pv.getStringValue();
+				}
+			} else {
+				v1 = pv.getStringValue();
+			}
+			if (v1 == null) {
+				// postgresql $1 is null could not determine data type of parameter $1
+				// NULL 值在SQL里提前替换
+				sql1 = sql1.replaceFirst("@" + para, " null ");
+				continue;
+			}
+			if (para.toUpperCase().indexOf("_SPLIT") > 0) {
+				// 逗号分割的字符串
+				StringBuilder sb = new StringBuilder();
 				String[] v2 = v1.split(",");
 				for (int m = 0; m < v2.length; m++) {
 					String v3 = this.sqlParameterStringExp(v2[m]);
@@ -1597,10 +1759,9 @@ public class DataConnection {
 						sb.append(v3);
 					}
 				}
-			} else {
-				sb.append("null");
+				sql1 = sql1.replace("@" + para, sb.toString());
 			}
-			sql1 = sql1.replace("@" + para, sb.toString());
+
 		}
 		return sql1;
 	}
@@ -1611,18 +1772,19 @@ public class DataConnection {
 	 * @param sql sql表达式
 	 * @return 替换后的sql
 	 */
-	private String replaceSqlParameters(String sql) {
+	public String replaceSqlParameters(String sql) {
 		String sql1 = sql;
 		MListStr al = Utils.getParameters(sql, "@");
 		for (int i = 0; i < al.size(); i++) {
 			String paramName = al.get(i);
-			if (paramName.toLowerCase().indexOf("rownum") == 0) {
+			if (skipReplaceParameter(paramName)) {
 				// 不替换rownum开头的参数，mysql使用
 				// select les_out_idx, @rownum := @rownum+1
 				// from camp_lesson_outline b ,(select @rownum :=0) c
 				continue;
 			}
-			sql1 = sql1.replaceFirst("@" + al.get(i), "?");
+			String parameterTag = "?";
+			sql1 = sql1.replaceFirst("@" + al.get(i), parameterTag);
 		}
 
 		// 保留@符号
@@ -1648,7 +1810,7 @@ public class DataConnection {
 			String paramName = al.get(i);
 			String paramValue = null;
 
-			if (paramName.toLowerCase().indexOf("rownum") == 0) {
+			if (skipReplaceParameter(paramName)) {
 				continue;
 			}
 			try {
@@ -1678,13 +1840,11 @@ public class DataConnection {
 	 */
 	private String getReplaceParameterValueExp(String paramName) {
 		PageValue pv = this._RequestValue.getPageValues().getValue(paramName);
+
 		if (pv == null || pv.getValue() == null) {
-			String vOther = this._RequestValue.s(paramName);
-			if (vOther == null) {
+			pv = this.getParameterByEndWithType(paramName);
+			if (pv == null) {
 				return "null";
-			} else {
-				String vOtherExp = this.sqlParameterStringExp(vOther);
-				return vOtherExp.replace("@", "{@}");
 			}
 		}
 
@@ -1696,17 +1856,11 @@ public class DataConnection {
 
 		String v1 = pv.getStringValue();
 		if (dt.equals("INT")) {
-			if (v1.trim().length() > 0) {
-				return Integer.parseInt(v1.split("\\.")[0]) + "";
-			} else {
-				return "null";
-			}
-		} else if (dt.equals("NUMBER")) {
-			if (v1.trim().length() > 0) {
-				return Double.parseDouble(v1) + "";
-			} else {
-				return "null";
-			}
+			return this.getParaInteger(pv).toString();
+		} else if (dt.equals("LONG") || dt.equals("BIGINT")) {
+			return this.getParaLong(pv).toString();
+		} else if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("FLOAT")) {
+			return this.getParaBigDecimal(pv).toPlainString();
 		} else if (dt.equals("DATE")) {
 			return null;
 		} else {
@@ -1725,14 +1879,14 @@ public class DataConnection {
 	 * @param pst
 	 * @throws SQLException
 	 */
-	private void addSqlParameter(MListStr parameters, PreparedStatement pst) throws SQLException {
+	public void addSqlParameter(MListStr parameters, PreparedStatement pst) throws SQLException {
 		if (parameters == null || this._RequestValue == null) {
 			return;
 		}
 		int index = 0;
 		for (int i = 0; i < parameters.size(); i++) {
 			String PKey = parameters.get(i).toUpperCase();
-			if (PKey.indexOf("ROWNUM") == 0) {
+			if (skipReplaceParameter(PKey)) {
 				// 不替换rownum开头的参数，mysql使用
 				// select les_out_idx, @rownum := @rownum+1
 				// from camp_lesson_outline b ,(select @rownum :=0) c
@@ -1812,31 +1966,83 @@ public class DataConnection {
 		return pv.toBigDecimal();
 	}
 
-	private void addStatementParameter(PreparedStatement cst, String parameterName, int index) throws SQLException {
+	public PageValue getParameterByEndWithType(String parameterName) {
+		PageValue pv = null;
+		String dt = null;
+		String pname = parameterName.toLowerCase();
+		if (pname.endsWith(".int")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 4);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "int";
+		} else if (pname.endsWith(".bigint")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 7);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "bigint";
+		} else if (pname.endsWith(".long")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 5);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "bigint";
+		} else if (pname.endsWith(".date")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 5);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "date";
+		} else if (pname.endsWith(".number")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 7);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "number";
+		} else if (pname.endsWith(".double")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 7);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "double";
+		} else if (pname.endsWith(".binary")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 7);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "binary";
+		} else if (pname.endsWith(".bin")) {
+			String name1 = parameterName.substring(0, parameterName.length() - 4);
+			pv = this._RequestValue.getPageValues().getValue(name1);
+			dt = "binary";
+		}
+		if (pv != null) {
+			pv.setDataType(dt);
+		} else {
+			pv = new PageValue();
+			pv.setDataType(dt);
+			pv.setLength(-1);
+		}
+		return pv;
+	}
+
+	public void addStatementParameter(PreparedStatement cst, String parameterName, int index) throws SQLException {
+		String dt;
 		PageValue pv = this._RequestValue.getPageValues().getValue(parameterName);
 		if (pv == null) {
-			// hash, md5 ...
-			String othVal = this._RequestValue.getOtherValue(parameterName);
-			if (othVal == null) {
-				cst.setObject(index, null);
-				this.writeDebug(this, "添加参数(Object)" + index, parameterName + "=null");
-			} else {
-				if (parameterName.endsWith(".HASH")) { // hashCode
-					Integer intVal = Integer.parseInt(othVal);
-					cst.setInt(index, intVal);
-					this.writeDebug(this, "添加参数(INTEGER)" + index, parameterName + "=" + intVal);
+			pv = this.getParameterByEndWithType(parameterName);
+			dt = pv.getDataType();
+			if (pv.getLength() == -1) { // 不是扩展类型数据
+				// hash, md5 ...
+				String othVal = this._RequestValue.getOtherValue(parameterName);
+				if (othVal == null) {
+					cst.setObject(index, null);
+					this.writeDebug(this, "添加参数(Object)" + index, parameterName + "=null");
 				} else {
-					cst.setString(index, othVal);
-					String des1 = parameterName + "=" + othVal;
-					this.writeDebug(this, "添加参数(String)" + index, des1);
+					if (parameterName.endsWith(".HASH")) { // hashCode
+						Integer intVal = Integer.parseInt(othVal);
+						cst.setInt(index, intVal);
+						this.writeDebug(this, "添加参数(INTEGER)" + index, parameterName + "=" + intVal);
+					} else {
+						cst.setString(index, othVal);
+						String des1 = parameterName + "=" + othVal;
+						this.writeDebug(this, "添加参数(String)" + index, des1);
+					}
 				}
+				return;
 			}
-			return;
 		}
-
-		String dt = pv.getDataType();
+		dt = pv.getDataType();
 		dt = (dt == null ? (pv.getValue() == null ? "STRING" : pv.getValue().getClass().getName()) : dt).toUpperCase()
 				.trim();
+
 		String v1 = pv.getStringValue();
 		if ("JAVA.LANG.STRING".equals(dt) || "STRING".equals(dt)) {
 			// 字符串
@@ -1956,7 +2162,7 @@ public class DataConnection {
 		for (int i = 0; i < parameters.size(); i++) {
 			String key = parameters.get(i).trim();
 			String key1 = key.toUpperCase();
-			if (key1.indexOf("ROWNUM") == 0) {
+			if (skipReplaceParameter(key1)) {
 				// 不替换rownum开头的参数，mysql使用
 				// select les_out_idx, @rownum := @rownum+1
 				// from camp_lesson_outline b ,(select @rownum :=0) c
@@ -2428,9 +2634,20 @@ public class DataConnection {
 	 * @return
 	 */
 	public java.sql.Timestamp getTimestamp(String s1) {
-		String lang = this._RequestValue != null ? this._RequestValue.getString("ewa_lang") : "zhcn";
-		boolean isUKFormat = this._RequestValue != null && this._RequestValue.getString("SYS_EWA_ENUS_YMD") != null
-				&& this._RequestValue.getString("SYS_EWA_ENUS_YMD").toLowerCase().equals("dd/mm/yyyy");
+		String lang = this._RequestValue != null ? this._RequestValue.getLang() : "zhcn";
+		// 是否为英式日期格式
+		boolean isUKFormat = false;
+		if ("enus".equalsIgnoreCase(lang)) {
+			ConfExtraGlobal extra = ConfExtraGlobals.getInstance().getConfExtraGlobalByLang(lang);
+			if (extra.getDate() != null && extra.getDate().equalsIgnoreCase(UFormat.DATE_FROMAT_ENUS)) {
+				// 通过在ewa_conf.xml中定义 global lang=enus date=dd/MM/yyyy
+				isUKFormat = true;
+			} else if (this._RequestValue != null) {
+				// 通过参数SYS_EWA_ENUS_YMD定义
+				isUKFormat = UFormat.DATE_FROMAT_ENUS.equalsIgnoreCase(this._RequestValue.s("SYS_EWA_ENUS_YMD"));
+			}
+		}
+
 		return Utils.getTimestamp(s1, lang, isUKFormat);
 	}
 

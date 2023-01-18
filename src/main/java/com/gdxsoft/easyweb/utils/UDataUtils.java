@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.data.DTColumns;
 import com.gdxsoft.easyweb.data.DTRow;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 
 public class UDataUtils {
 	private static Logger LOGGER = LoggerFactory.getLogger(Utils.class);
@@ -31,7 +32,7 @@ public class UDataUtils {
 		for (int i = 0; i < rowFrom.getCount(); i++) {
 			Object o1 = rowFrom.getCell(i).getValue();
 			String field_name = fromCols.getColumn(i).getName();
-			if (field_name.equalsIgnoreCase("EWA_KEY")) {
+			if (field_name.equalsIgnoreCase(FrameParameters.EWA_KEY)) {
 				continue;
 			}
 			if (!toCols.testName(field_name)) {// 目的表中字段不存在
@@ -46,7 +47,7 @@ public class UDataUtils {
 
 			try {
 				if (!checkEquals(o1, o2)) {
- 					alNotEuals.add(field_name);
+					alNotEuals.add(field_name);
 				}
 			} catch (Exception err) {
 				LOGGER.error("Check row equals. {},{},{}", o1, o2, err.getMessage());
@@ -71,7 +72,7 @@ public class UDataUtils {
 		for (int i = 0; i < rowFrom.getCount(); i++) {
 			Object from = rowFrom.getCell(i).getValue();
 			String field_name = fromCols.getColumn(i).getName();
-			if (field_name.equalsIgnoreCase("EWA_KEY")) {
+			if (field_name.equalsIgnoreCase(FrameParameters.EWA_KEY)) {
 				continue;
 			}
 			if (!toCols.testName(field_name)) {// 目的表中字段不存在

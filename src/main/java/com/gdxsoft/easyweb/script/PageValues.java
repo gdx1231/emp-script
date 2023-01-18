@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
@@ -125,7 +126,7 @@ public class PageValues {
 		}
 		pv.setTag(pv.getPVTag().toString());
 
-		if ("EWA_MTYPE".equalsIgnoreCase(pv.getName())) {
+		if (FrameParameters.EWA_MTYPE.equalsIgnoreCase(pv.getName())) {
 			String val = pv.getStringValue();
 			// 避免非法字符例如，',",< ...
 			if (!StringUtils.isAlpha(val) || val.length() > 1) {
@@ -159,23 +160,36 @@ public class PageValues {
 		// paramName, paramType
 		String paramType = UPath.getRvTypes().get(key);
 		String paramValue = pv.getStringValue();
-		if (paramValue != null && "int".equals(paramType)) {
+		if (paramValue == null) {
+			pv.setDataType(paramType);
+			return;
+		}
+		if ("int".equals(paramType)) {
 			// 测试整型
 			try {
 				int intVal = Integer.parseInt(paramValue);
 				pv.setValue(intVal);
 				pv.setDataType(paramType);
 			} catch (Exception err) {
-
+				// 非整形
 			}
-		} else if (paramValue != null && "number".equals(paramType)) {
+		} else if ("number".equals(paramType)) {
 			// 测试数字
 			try {
 				double douVal = Double.parseDouble(paramValue);
 				pv.setValue(douVal);
 				pv.setDataType(paramType);
 			} catch (Exception err) {
-
+				// 非双精度
+			}
+		} else if ("bigint".equals(paramType)) {
+			// 测试长整型
+			try {
+				Long longVal = Long.parseLong(paramValue);
+				pv.setValue(longVal);
+				pv.setDataType(paramType);
+			} catch (Exception err) {
+				// 非长整型
 			}
 		} else {
 			pv.setDataType(paramType);

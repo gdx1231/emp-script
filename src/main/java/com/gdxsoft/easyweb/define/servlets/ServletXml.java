@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,20 +25,24 @@ import com.gdxsoft.easyweb.SystemXmlUtils;
 import com.gdxsoft.easyweb.conf.ConfDefine;
 import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
+import com.gdxsoft.easyweb.data.DTColumn;
+import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.define.CodeFormat;
 import com.gdxsoft.easyweb.define.ConfigUtils;
+import com.gdxsoft.easyweb.define.DefineAcl;
 import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UpdateXmlBase;
 import com.gdxsoft.easyweb.define.UserDirXmls;
 import com.gdxsoft.easyweb.define.database.SqlSyntaxCheck;
 import com.gdxsoft.easyweb.script.PageValue;
-import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.servlets.GZipOut;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UFile;
+import com.gdxsoft.easyweb.utils.UJSon;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UUrl;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -145,16 +150,16 @@ public class ServletXml extends HttpServlet {
 			return;
 		}
 
-		PageValue pvAdmin = rv.getPageValues().getPageValue("EWA_ADMIN_ID");
-
-		// not login
-		if (pvAdmin == null || (pvAdmin.getPVTag() != PageValueTag.SESSION)) {
+		DefineAcl acl = new DefineAcl();
+		acl.setRequestValue(rv);
+		if (!acl.canRun()) { // not login
 			JSONObject rst = new JSONObject();
 			rst.put("RST", false);
 			rst.put("ERR", "deny! request login");
 			response.getWriter().println(rst);
 			return;
 		}
+		PageValue pvAdmin = acl.getAdmin();
 
 		if (oType == null) {
 			cnt = this.handleNull(rv, response);
@@ -165,9 +170,13 @@ public class ServletXml extends HttpServlet {
 			this.setOutType(response, "html");
 			cnt = this.handleSqls(rv, pvAdmin);
 		} else if (oType.equals("SAVE")) {
-			this.handleSave(rv, pvAdmin);
-			this.setOutType(response, "html");
-			cnt = "alert('ok')";
+			try {
+				this.handleSave(rv, pvAdmin);
+				this.setOutType(response, "html");
+				cnt = "alert('ok')";
+			} catch (Exception err) {
+				cnt = err.getMessage();
+			}
 		} else if (oType.equals("VIEW")) {
 			cnt = this.handleView(rv);
 		} else if (oType.equals("CFG_XML")) {// 调用配置文件
@@ -210,12 +219,119 @@ public class ServletXml extends HttpServlet {
 		} else if (oType.toUpperCase().equals("IMPORT_XML")) {
 			cnt = this.handleImportXml(rv, pvAdmin);
 			this.setOutType(response, "json");
-		} else if (oType.toUpperCase().equals("SAVE_JAVA")) {// 保存java代码
+		} else if (oType.toUpperCase().equals("SAVE_JAVA")) {
+			// 保存java代码
 			JSONObject rst = this.saveJavaCode(rv);
+			cnt = rst.toString();
+			this.setOutType(response, "json");
+		} else if ("selectSql2DTTable".equalsIgnoreCase(oType)) {
+			// sql 语句转换为 DTTable的java代码
+			JSONObject rst = this.handleSelectSql2DTTable(rv);
 			cnt = rst.toString();
 			this.setOutType(response, "json");
 		}
 		this.outContent(request, response, cnt);
+	}
+
+	/**
+	 * sql 语句转换为 DTTable的java代码
+	 * 
+	 * @param rv
+	 * @return
+	 */
+	private JSONObject handleSelectSql2DTTable(RequestValue rv) {
+		JSONObject obj = UJSon.rstTrue();
+
+		String sql = rv.s("SQL");
+		String configName = rv.s("CONFIG_NAME");
+		if (configName == null) {
+			configName = "";
+		}
+		String prefix = rv.s("PREFIX");
+		if (prefix == null) {
+			prefix = "";
+		}
+		obj.put("SQL", sql);
+		obj.put("CONFIG_NAME", configName);
+		obj.put("PREFIX", prefix);
+		String sql1 = "select a.* from (" + sql + ")a where 1=2";
+		DTTable tb = DTTable.getJdbcTable(sql1, configName);
+
+		if (!tb.isOk()) {
+			UJSon.rstSetFalse(obj, tb.getErrorInfo());
+			return obj;
+		}
+		MStr sb = new MStr();
+		sb.setNewLine("\n");
+		sb.al("StringBuilder " + prefix + "Sb = new StringBuilder();");
+		String[] sqls = sql.split("\n");
+		for (int i = 0; i < sqls.length; i++) {
+			String s = sqls[i];
+			if (s.trim().length() == 0) {
+				continue;
+			}
+			s = s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\t", "    ");
+			sb.al(prefix + "Sb.append(\"" + s + "\\n\");");
+		}
+		sb.al("DTTable " + prefix + "Tb = DTTable.getJdbcTable(" + prefix + "Sb.toString(), \"" + configName
+				+ "\", rv);");
+		sb.al("for (int i = 0; i < " + prefix + "Tb.getCount(); i++) {");
+		JSONArray columns = new JSONArray();
+		for (int i = 0; i < tb.getColumns().getCount(); i++) {
+			DTColumn col = tb.getColumns().getColumn(i);
+			JSONObject colJson = new JSONObject(col);
+			columns.put(colJson);
+			String name = this.field2ClassName(col.getName());
+			String code;
+			if ("java.lang.String".equalsIgnoreCase(col.getClassName())) {
+				code = "String " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toString();";
+			} else if ("java.lang.Integer".equalsIgnoreCase(col.getClassName())) {
+				code = "Integer " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toInt();";
+			} else if ("java.lang.Long".equalsIgnoreCase(col.getClassName())) {
+				code = "Long " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toLong();";
+			} else if ("java.lang.Double".equalsIgnoreCase(col.getClassName())) {
+				code = "Double " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toDouble();";
+			} else if ("java.sql.Timestamp".equalsIgnoreCase(col.getClassName())) {
+				code = "Date " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").toDate();";
+			} else if ("java.math.BigDecimal".equalsIgnoreCase(col.getClassName())) {
+				code = "BigDecimal " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName()
+						+ "\").toBigDecimal();";
+			} else if ("java.math.BigInteger".equalsIgnoreCase(col.getClassName())) {
+				code = "BigInteger " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName()
+						+ "\").toBigInteger();";
+			} else {
+				code = "Object " + name + " = " + prefix + "Tb.getCell(i, \"" + col.getName() + "\").getValue();";
+			}
+
+			sb.al("    " + code);
+		}
+		sb.al("}");
+		obj.put("JAVA", sb.toString());
+		obj.put("COLUMNS", columns);
+		return obj;
+	}
+
+	private String field2ClassName(String field) {
+		String[] names = field.split("\\_");
+		MStr s = new MStr();
+		for (int i = 0; i < names.length; i++) {
+			String name = names[i];
+			if (name.length() == 0) {
+				s.a("_");
+				continue;
+			}
+			String firstAlpha = name.substring(0, 1);
+			if (i == 0) {
+				s.a(firstAlpha.toLowerCase());
+			} else {
+				s.a(firstAlpha.toUpperCase());
+			}
+			if (name.length() > 1) {
+				String others = name.substring(1);
+				s.a(others.toLowerCase());
+			}
+		}
+		return s.toString();
 	}
 
 	/**
@@ -239,18 +355,19 @@ public class ServletXml extends HttpServlet {
 	 * @return
 	 */
 	private String handleSqls(RequestValue rv, PageValue pvAdmin) {
-		String xmlName = rv.getString("XMLNAME");
+		String xmlName = rv.getString(FrameParameters.XMLNAME);
 		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 		String sqls = up.getSqls();
 		return sqls;
 	}
 
 	private boolean handleSave(RequestValue rv, PageValue pvAdmin) {
-		String xmlName = rv.getString("XMLNAME");
-		String itemName = rv.getString("ITEMNAME");
+		String xmlName = rv.getString(FrameParameters.XMLNAME);
+		String itemName = rv.getString(FrameParameters.ITEMNAME);
 		String xml = rv.getString("XML");
 		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 		return up.updateItem(itemName, xml);
+
 	}
 
 	private String handleNull(RequestValue rv, HttpServletResponse response) {
@@ -281,8 +398,8 @@ public class ServletXml extends HttpServlet {
 
 	private String handleAll(RequestValue rv, PageValue pvAdmin) {
 		MStr s = new MStr();
-		String xmlName = rv.getString("XMLNAME");
-		String itemName = rv.getString("ITEMNAME");
+		String xmlName = rv.getString(FrameParameters.XMLNAME);
+		String itemName = rv.getString(FrameParameters.ITEMNAME);
 		try {
 			IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 			String xml;
@@ -319,7 +436,7 @@ public class ServletXml extends HttpServlet {
 	 * @return
 	 */
 	private String handleCfgXml(RequestValue rv, HttpServletResponse response) {
-		String xmlName = rv.getString("XMLNAME");
+		String xmlName = rv.getString(FrameParameters.XMLNAME);
 		String name = xmlName;
 		String xml = null;
 		String modeName = rv.getString("MODE_NAME");
@@ -342,8 +459,8 @@ public class ServletXml extends HttpServlet {
 	}
 
 	private void handleRemove(RequestValue rv, PageValue pvAdmin) {
-		String xmlName = rv.getString("XMLNAME");
-		String itemName = rv.getString("ITEMNAME");
+		String xmlName = rv.getString(FrameParameters.XMLNAME);
+		String itemName = rv.getString(FrameParameters.ITEMNAME);
 		IUpdateXml up = this.getUpdateXml(xmlName, pvAdmin.getStringValue());
 		up.removeItem(itemName);
 	}
@@ -368,7 +485,7 @@ public class ServletXml extends HttpServlet {
 	 * @return the removes count
 	 */
 	private int handleDeleteBaks(RequestValue rv, PageValue pvAdmin) {
-		String xmlname = rv.getString("xmlname");
+		String xmlname = rv.getString(FrameParameters.XMLNAME);
 		IUpdateXml up = this.getUpdateXml(xmlname, pvAdmin.getStringValue());
 		int bakFilesCount = up.deleteBaks(xmlname);
 
@@ -418,7 +535,7 @@ public class ServletXml extends HttpServlet {
 
 	private void handleGetDocXml(RequestValue rv, HttpServletResponse response, PageValue pvAdmin) throws IOException {
 		// 获取整个配置文件
-		String xmlname = rv.getString("xmlname");
+		String xmlname = rv.getString(FrameParameters.XMLNAME);
 		IUpdateXml up = this.getUpdateXml(xmlname, pvAdmin.getStringValue());
 		String cnt = up.getDocXml();
 
@@ -444,7 +561,7 @@ public class ServletXml extends HttpServlet {
 		String sourceXmlFilePath = UPath.getPATH_UPLOAD() + rv.s("UP_NAME");
 
 		String path = rv.s("path");
-		String xmlname = rv.s("xmlname");
+		String xmlname = rv.s(FrameParameters.XMLNAME);
 
 		IUpdateXml up = this.getUpdateXml(path, pvAdmin.getStringValue());
 		JSONObject rst = up.importXml(path, xmlname, sourceXmlFilePath);
@@ -482,7 +599,7 @@ public class ServletXml extends HttpServlet {
 	 * @return
 	 */
 	private String handleEwacDdlReload(RequestValue rv, PageValue pvAdmin) {
-		String ewascriptpath = rv.s("EWA_SCRIPT_PATH");
+		String ewascriptpath = rv.s(FrameParameters.EWA_SCRIPT_PATH);
 		ConfScriptPath sp = ConfScriptPaths.getInstance().getScriptPath(ewascriptpath);
 
 		if (sp == null) {
@@ -629,7 +746,8 @@ public class ServletXml extends HttpServlet {
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and copyright.
+	 * Returns information about the servlet, such as author, version, and
+	 * copyright.
 	 *
 	 * @return String information about this servlet
 	 */

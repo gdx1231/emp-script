@@ -5,6 +5,7 @@ import java.util.HashMap;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class SysParameters {
@@ -35,7 +36,7 @@ public class SysParameters {
 	private String _FrameType;// 显示类型
 
 	private String _FrameUnid;
-
+	private String _FrameUnidPrefix;
 	private String _ActionName;
 
 	private RequestValue _RequestValue;
@@ -105,26 +106,26 @@ public class SysParameters {
 		this.initTimeDiffMinitus(rv);
 
 		// 是否为XHTML输出
-		String isXHTML = rv.getString("EWA_XHTML");
+		String isXHTML = rv.getString(FrameParameters.EWA_XHTML);
 		if (isXHTML != null && isXHTML.equalsIgnoreCase("yes")) {
 			this._IsXhtml = true;
 		} else {
 			this._IsXhtml = false;
 		}
-		
+
 		// Default is h5
-		String isH5 = rv.getString("EWA_H5");
+		String isH5 = rv.getString(FrameParameters.EWA_H5);
 		if ("no".equalsIgnoreCase(isH5)) {
 			this._IsH5 = false;
 		}
-		
+
 		// 输出为手机显示模式， 参数 EWA_MOBILE=1
-		if (rv.s("EWA_MOBILE") != null) {
+		if (rv.s(FrameParameters.EWA_MOBILE) != null) {
 			this._IsShowAsMobile = true;
 		}
 
 		// 输出为VUE格式
-		if (rv.s("EWA_VUE") != null) {
+		if (rv.s(FrameParameters.EWA_VUE) != null) {
 			this._IsVue = true;
 		}
 	}
@@ -153,7 +154,7 @@ public class SysParameters {
 
 	private void initAction(RequestValue rv) {
 		// 事件调用名称
-		String actionType = rv.getString("EWA_ACTION");
+		String actionType = rv.getString(FrameParameters.EWA_ACTION);
 		if (actionType == null || actionType.length() == 0) {
 			String typeName = "OnPageLoad";
 			if (isPagePost()) {
@@ -174,8 +175,17 @@ public class SysParameters {
 		int iFrameUnid = frameUnid.hashCode();
 		frameUnid = (iFrameUnid + "").replace("-", "G");
 
-		if (rv.s("SYS_FRAME_UNID") != null) {
-			rv.getPageValues().remove("SYS_FRAME_UNID");
+		if (rv.s(FrameParameters.SYS_FRAME_UNID) != null) {
+			rv.getPageValues().remove(FrameParameters.SYS_FRAME_UNID);
+		}
+		// Frame的唯一编号的前缀
+		String prefix = this._FrameUnidPrefix;
+		if (prefix == null) {
+			// 通过参数传递的前缀
+			prefix = rv.s(FrameParameters.FRAME_UNID_PREFIX);
+		}
+		if (prefix != null && prefix.trim().length() > 0) {
+			frameUnid = prefix + frameUnid;
 		}
 		rv.addValue("SYS_FRAME_UNID", frameUnid);
 		setFrameUnid(frameUnid);
@@ -183,28 +193,28 @@ public class SysParameters {
 
 	private void initCallType(RequestValue rv) {
 		// 是否Ajax调用
-		if (rv.getString("EWA_AJAX") != null) {
+		if (rv.getString(FrameParameters.EWA_AJAX) != null) {
 			// Ajax调用方式 XML为显示XML；
 			// HAVE_DATA显示是否有数据;
 			// BIN_FILE 则表示为二进制文件
 			setIsAjaxCall(true);
-			setAjaxCallType(rv.getString("EWA_AJAX"));
+			setAjaxCallType(rv.getString(FrameParameters.EWA_AJAX));
 		}
 
 		// 是否post提交
-		if (rv.getString("EWA_POST") != null) {
+		if (rv.getString(FrameParameters.EWA_POST) != null) {
 			setIsPagePost(true);
 		}
 
 		// 不显示内容
-		String noContent = rv.getString("EWA_NO_CONTENT");
+		String noContent = rv.getString(FrameParameters.EWA_NO_CONTENT);
 		if (noContent == null || !noContent.equals("1")) {
 			setIsNoContent(false);
 		} else {
 			setIsNoContent(true);
 		}
 		// 提交后行为 EWA_P_BEHAVIOR
-		_Behavior = rv.getString("EWA_P_BEHAVIOR");
+		_Behavior = rv.getString(FrameParameters.EWA_P_BEHAVIOR);
 	}
 
 	/**
@@ -213,11 +223,12 @@ public class SysParameters {
 	 * @param rv
 	 */
 	private void initTimeDiffMinitus(RequestValue rv) {
-		if (rv == null || rv.s("EWA_TIMEDIFF") == null || rv.s("EWA_TIMEDIFF").trim().length() == 0) {
+		if (rv == null || rv.s(FrameParameters.EWA_TIMEDIFF) == null
+				|| rv.s(FrameParameters.EWA_TIMEDIFF).trim().length() == 0) {
 			return;
 		}
 		try {
-			int diff = rv.getInt("EWA_TIMEDIFF");
+			int diff = rv.getInt(FrameParameters.EWA_TIMEDIFF);
 			this._TimeDiffMinutes = diff;
 		} catch (Exception err) {
 			System.out.println(this);
@@ -233,17 +244,17 @@ public class SysParameters {
 	private void initLang(RequestValue rv) {
 		// 字符集
 		String lang = rv.getLang();
-		rv.addValue("EWA_LANG", lang);
+		rv.addValue(FrameParameters.EWA_LANG, lang);
 		if (rv.getSession() != null) {// 保存到Session
-			rv.getSession().setAttribute("SYS_EWA_LANG", lang);
+			rv.getSession().setAttribute(FrameParameters.SYS_EWA_LANG, lang);
 
 			// 写入 rv的 SYS_EWA_LANG guolei 2017-04-27
-			rv.getPageValues().getSessionValues().removeKey("SYS_EWA_LANG");
+			rv.getPageValues().getSessionValues().removeKey(FrameParameters.SYS_EWA_LANG);
 			rv.getPageValues().addValue("SYS_EWA_LANG", lang, PageValueTag.SESSION);
 		} else {
 			// 写入 rv的 SYS_EWA_LANG guolei 2017-04-27
 
-			rv.getPageValues().remove("SYS_EWA_LANG");
+			rv.getPageValues().remove(FrameParameters.SYS_EWA_LANG);
 			rv.addValue("SYS_EWA_LANG", lang);
 		}
 
@@ -664,6 +675,24 @@ public class SysParameters {
 	 */
 	public void setVue(boolean vue) {
 		this._IsVue = vue;
+	}
+
+	/**
+	 * FrameUnid 前缀修正名称，避免同一个对象多次调用
+	 * 
+	 * @return
+	 */
+	public String getFrameUnidPrefix() {
+		return _FrameUnidPrefix;
+	}
+
+	/**
+	 * FrameUnid 前缀修正名称，避免同一个对象多次调用
+	 * 
+	 * @param frameUnidPrefix
+	 */
+	public void setFrameUnidPrefix(String frameUnidPrefix) {
+		this._FrameUnidPrefix = frameUnidPrefix;
 	}
 
 }

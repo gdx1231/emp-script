@@ -10,15 +10,14 @@ import org.w3c.dom.NodeList;
 import com.gdxsoft.easyweb.utils.UPath;
 
 /**
- * 文档转换服务的OpenOffice /LibreOffice配置
- * &lt;sOffice sofficePath="c:/Program Files/LibreOffice/" ports="8100,8101,8102" /&gt;
+ * 文档转换服务的OpenOffice /LibreOffice配置 &lt;sOffice sofficePath="c:/Program
+ * Files/LibreOffice/" ports="8100,8101,8102" /&gt;
  *
  */
 public class ConfSOffice {
 	private static Logger LOGGER = LoggerFactory.getLogger(ConfSecurities.class);
 	private static ConfSOffice INST = null;
 	private static long PROP_TIME = 0;
-
 
 	/**
 	 * Return the instance of define
@@ -47,13 +46,17 @@ public class ConfSOffice {
 		NodeList nl = UPath.getCfgXmlDoc().getElementsByTagName("sOffice");
 		if (nl.getLength() == 0) {
 			// 老的方法
-			INST.sofficePath =  UPath.getCVT_OPENOFFICE_HOME();
+			INST.sofficePath = UPath.getCVT_OPENOFFICE_HOME();
 			return;
 		}
 		Element item = (Element) nl.item(0);
 
 		// 文档转换服务的OpenOffice /LibreOffice安装路径
-		INST.sofficePath = item.getAttribute("sofficePath");
+		INST.sofficePath = item.getAttribute("path");
+		if (INST.sofficePath == null || INST.sofficePath.trim().length() == 0) {
+			// 老方法的定义
+			INST.sofficePath = item.getAttribute("sofficePath");
+		}
 		setPorts(item);
 
 	}
@@ -95,7 +98,7 @@ public class ConfSOffice {
 		}
 	}
 
-	//文档转换服务的OpenOffice /LibreOffice配置
+	// 文档转换服务的OpenOffice /LibreOffice配置
 	private String sofficePath;
 
 	// 启动服务的端口，默认8100，多个端口意味者多个服务
@@ -103,6 +106,7 @@ public class ConfSOffice {
 
 	/**
 	 * 文档转换服务的OpenOffice /LibreOffice安装路径
+	 * 
 	 * @return
 	 */
 	public String getSofficePath() {
@@ -111,6 +115,7 @@ public class ConfSOffice {
 
 	/**
 	 * 启动服务的端口，默认8100，多个端口意味者多个服务
+	 * 
 	 * @return
 	 */
 	public int[] getPorts() {

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.script.HtmlControl;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 
 /**
  * 执行EWA
@@ -29,8 +30,8 @@ public class HandleEwaImpl extends Thread implements IHandleMsg {
 		this.socket_ = socket;
 		this.command_ = command;
 
-		this.xmlName_ = command.optString("XMLNAME");
-		this.itemName_ = command.optString("ITEMNAME");
+		this.xmlName_ = command.optString(FrameParameters.XMLNAME);
+		this.itemName_ = command.optString(FrameParameters.ITEMNAME);
 		this.params_ = command.optString("PARAMS");
 
 	}

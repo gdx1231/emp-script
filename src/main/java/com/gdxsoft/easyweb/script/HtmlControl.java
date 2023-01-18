@@ -17,6 +17,7 @@ import com.gdxsoft.easyweb.debug.DebugInfo;
 import com.gdxsoft.easyweb.debug.DebugRecord;
 import com.gdxsoft.easyweb.debug.DebugRecords;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.servlets.FileOut;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
@@ -196,9 +197,13 @@ public class HtmlControl {
 	 * @param session
 	 * @param response
 	 */
-	private void initHtmlCreator(HtmlCreator hc) {
+	public void initHtmlCreator(HtmlCreator hc) {
 		StringBuilder sb = new StringBuilder();
 
+		// FrameUnid 前缀修正名称，避免同一个对象多次调用
+		if (this._FrameUnidPrefix != null && this._FrameUnidPrefix.trim().length() > 0) {
+			hc.getSysParas().setFrameUnidPrefix(_FrameUnidPrefix);
+		}
 		boolean isDebug = false; // 是否显示跟踪信息在页面
 		boolean paraNotDebug = false; // 是否参数指定了不跟踪
 
@@ -269,7 +274,7 @@ public class HtmlControl {
 				}
 			}
 
-			String debugKey = hc.getRequestValue().s("EWA_DEBUG_KEY");
+			String debugKey = hc.getRequestValue().s(FrameParameters.EWA_DEBUG_KEY);
 			String frameUnid = this._HtmlCreator.getHtmlClass().getSysParas().getFrameUnid();
 			if (frameUnid != null && frameUnid.equals(debugKey)) {
 				// 记录到数据库中
@@ -304,14 +309,7 @@ public class HtmlControl {
 			// 记录到数据库中
 			di.recordToHsql();
 		}
-
-		// FrameUnid 前缀修正名称，避免同一个对象多次调用
-		if (this._FrameUnidPrefix != null && this._FrameUnidPrefix.trim().length() > 0) {
-			String unid = hc.getRequestValue().getString("SYS_FRAME_UNID");
-			this.Html = sb.toString().replace(unid, this._FrameUnidPrefix.trim() + unid);
-		} else {
-			this.Html = sb.toString();
-		}
+		this.Html = sb.toString();
 	}
 
 	/**
@@ -330,7 +328,7 @@ public class HtmlControl {
 		if (this.isError) {
 			return Utils.textToInputValue(this.Html);
 		}
- 
+
 		// 当输出 ValidCode时
 		if (this.Html == null) {
 			return null;

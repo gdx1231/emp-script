@@ -312,14 +312,18 @@ public class Exchange {
 			}
 		}
 
+		String targetDatabaseType = this._Conn.getDatabaseType();
 		// 转换不同类型数据库的 SQL function
 		try {
 			MapFunctions funcs = Maps.instance().getMapFunctions();
-			HashMap<String, MapFunction> types = funcs.getTypes(this._Conn.getDatabaseType());
+			HashMap<String, MapFunction> types = funcs.getTypes(targetDatabaseType);
 
 			for (int i = 0; i < al.size(); i++) {
 				CDATASection sec = al.get(i);
 				String sql = sec.getTextContent();
+				if (sql == null || sql.trim().length() == 0) {
+					continue;
+				}
 				Iterator<String> it = types.keySet().iterator();
 				while (it.hasNext()) {
 					MapFunction map = types.get(it.next());
@@ -458,7 +462,7 @@ public class Exchange {
 			String where = UXml.retNodeValue(node, "ExportWhere");
 
 			// 视图 VIEW 不输出数据
-			if (IsExport.equals("true") && !"VIEW".equals(tableType)) {
+			if (IsExport.equals("true")) {
 				this.exportData(table, where);
 			}
 		}
@@ -560,6 +564,10 @@ public class Exchange {
 		String exportDefaultItmename = UXml.retNodeValue(cfgEle, "ExportDefaultItmename");
 
 		UserXmls ux = new UserXmls(xmlName);
+		if (ux.getUpdateXml() == null) {
+			LOGGER.warn("Can't get conf: {}", xmlName);
+			return;
+		}
 		ux.initXml();
 		List<UserXml> al = ux.getXmls();
 		String itemName1 = itemName.trim().toUpperCase();

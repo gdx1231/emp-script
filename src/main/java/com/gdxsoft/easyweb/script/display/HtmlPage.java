@@ -11,6 +11,7 @@ import com.gdxsoft.easyweb.acl.SampleAcl;
 import com.gdxsoft.easyweb.debug.DebugInfo;
 import com.gdxsoft.easyweb.debug.DebugRecord;
 import com.gdxsoft.easyweb.debug.DebugRecords;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.html.HtmlDocument;
 
 /**
@@ -43,8 +44,7 @@ public class HtmlPage {
 	private DebugInfo _DebugInfo;
 	private HtmlCreator _HtmlCreator;
 
-	public HtmlPage(HttpServletRequest req, HttpSession session,
-			HttpServletResponse response, boolean isXhtml) {
+	public HtmlPage(HttpServletRequest req, HttpSession session, HttpServletResponse response, boolean isXhtml) {
 		this._Request = req;
 		this._Session = session;
 		this._Response = response;
@@ -59,9 +59,9 @@ public class HtmlPage {
 
 		boolean isDebug = false; // 是否显示跟踪信息在页面
 		boolean paraNotDebug = false; // 是否参数指定了不跟踪
-		String ewaDebugNo = _Request.getParameter("EWA_DEBUG_NO"); // 参数设置是否不跟踪
+		String ewaDebugNo = _Request.getParameter(FrameParameters.EWA_DEBUG_NO); // 参数设置是否不跟踪
 
-		if ((ewaDebugNo == null || !ewaDebugNo.equals("1") || _Request.getQueryString().indexOf("ewa.xml")>0)
+		if ((ewaDebugNo == null || !ewaDebugNo.equals("1") || _Request.getQueryString().indexOf("ewa.xml") > 0)
 				&& clientIp.equals(debugIp)) {
 			// 本地ip可以页面显示跟踪信息
 			isDebug = true;
@@ -93,15 +93,14 @@ public class HtmlPage {
 			_HtmlCreator.setAcl(acl);
 		}
 
-		if (_HtmlCreator.getAjaxCallType() != null
-				&& _HtmlCreator.getAjaxCallType().equalsIgnoreCase("XML")) {
+		if (_HtmlCreator.getAjaxCallType() != null && _HtmlCreator.getAjaxCallType().equalsIgnoreCase("XML")) {
 			_IsXml = true;
 		}
 
 	}
-	
-	public HtmlDocument getDocument(){
-		 return this._HtmlCreator.getDocument();
+
+	public HtmlDocument getDocument() {
+		return this._HtmlCreator.getDocument();
 	}
 
 	public void show() throws IOException {
@@ -163,10 +162,9 @@ public class HtmlPage {
 	void initRecord(String debugStr, boolean isError) {
 		if (_Record == null)
 			return;
-		String xmlName = _HtmlCreator.getRequestValue().getString("xmlname");
+		String xmlName = _HtmlCreator.getRequestValue().getString(FrameParameters.XMLNAME);
 		_Record.setXmlName(xmlName);
-		_Record.setItemName(_HtmlCreator.getRequestValue()
-				.getString("itemname"));
+		_Record.setItemName(_HtmlCreator.getRequestValue().getString(FrameParameters.ITEMNAME));
 		_Record.setParameters(_HtmlCreator.getRequestValue().listValues(false));
 		_Record.setRunSeq(_HtmlCreator.getDebugFrames().listDebugHtml());
 		_Record.setAll(debugStr);

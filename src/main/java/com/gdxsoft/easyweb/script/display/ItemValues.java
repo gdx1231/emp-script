@@ -9,11 +9,13 @@ import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.SqlPart;
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.PageValues;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.action.CommonSqls;
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.display.items.ItemImage;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
@@ -132,7 +134,7 @@ public class ItemValues {
 				exp = exp + "::KEY=" + keys[i];
 			}
 			// EWA_R 强制刷新数据
-			if (this.getRequestValue().getString("EWA_R") == null) {
+			if (this.getRequestValue().getString(FrameParameters.EWA_R) == null) {
 				CachedValue c = CachedValueManager.getValue(exp);
 				if (c != null) {
 					return (DTTable) c.getValue();
@@ -154,18 +156,17 @@ public class ItemValues {
 				return dt;
 			}
 		} else { // 标准SQL查询
-
-			if (this.getDataConn().getDatabaseType().equals("MYSQL")) {
+			if (SqlUtils.checkChnOrderByDatabase(this.getDataConn().getDatabaseType())) {
 				// 处理中文排序 CONVERT(username USING gbk)
 				SqlPart sp = new SqlPart();
 				try {
 					sp.setSql(sql);
-					sql = sp.rebuildSql(null, null, true);
+					sql = sp.rebuildSql(null, null, this.getDataConn().getDatabaseType());
 				} catch (Exception err) {
 					// 可能没有 where条件
 				}
 			}
-			if (this.getRequestValue().getString("EWA_R") == null && sql.toLowerCase().indexOf("bas_tag") > 0) { // bas_tag
+			if (this.getRequestValue().getString(FrameParameters.EWA_R) == null && sql.toLowerCase().indexOf("bas_tag") > 0) { // bas_tag
 				try {
 					dt = DTTable.getCachedTable(sql, 100, this.getDataConn());
 				} catch (IOException e) {
@@ -636,7 +637,7 @@ public class ItemValues {
 			}
 		}
 		RequestValue rv = this._HtmlClass.getHtmlCreator().getRequestValue();
-		String binType = rv.s("EWA_BIN_TYPE");
+		String binType = rv.s(FrameParameters.EWA_BIN_TYPE);
 		// 从所有Table中获取数据
 		for (int i = 0; i < this._DTTables.size(); i++) {
 			DTTable tb = (DTTable) this._DTTables.get(i);
