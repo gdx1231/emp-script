@@ -2104,6 +2104,12 @@ public class DataConnection {
 			}
 			return;
 		}
+		if (dt.equals("BOOL") || dt.equals("BOOLEAN") || dt.equals("JAVA.LANG.BOOLEAN")) {
+			boolean v = Utils.cvtBool(v1);
+			cst.setBoolean(index, v);
+			this.writeDebug(this, "添加参数(Bool)" + index, parameterName + "=v");
+			return;
+		}
 		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT64".equals(dt) || "UINT64".equals(dt)) {
 			UInt64 uint64 = (UInt64) pv.getValue();
 			cst.setBigDecimal(index, new BigDecimal(uint64.bigInteger()));
