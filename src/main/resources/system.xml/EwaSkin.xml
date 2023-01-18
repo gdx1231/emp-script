@@ -55,11 +55,9 @@ EWA.RV_STATIC_PATH = "@rv_ewa_style_path";
 <link rel="preload" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0" as="font" type="font/woff2" crossorigin="anonymous">
 <link rel="stylesheet" href="@rv_ewa_style_path/third-party/font-awesome/font-awesome-4.7.0/css/font-awesome.min.css" />
 <link rel="stylesheet" rev="stylesheet" href="@rv_ewa_style_path/EWA_STYLE/skins/default/css.min.css?v=20220707" type="text/css" />
-<link rel="stylesheet" href="/static/prj/erp_aus/css/aus.css?v=221119" />
 
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/ewa.min.js?v=20220707"></script>
 <script type="text/javascript" src='@rv_ewa_style_path/third-party/jquery/jquery-3.6.0.min.js'></script>
-<script type="text/javascript" src='/static/prj/erp_aus/js/aus.js?v=221120'></script>
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/@EWA_LANG/resource.js"></script>
 
 <script type="text/javascript">
