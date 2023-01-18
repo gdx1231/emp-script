@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import com.gdxsoft.easyweb.EwaWebPage;
 import com.gdxsoft.easyweb.conf.ConfAdmins;
 import com.gdxsoft.easyweb.conf.ConfDefine;
+import com.gdxsoft.easyweb.conf.ConfExtraGlobal;
+import com.gdxsoft.easyweb.conf.ConfExtraGlobals;
 import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.define.EwaConfHelpHSqlServer;
 import com.gdxsoft.easyweb.global.EwaGlobals;
@@ -26,6 +28,7 @@ import com.gdxsoft.easyweb.script.ValidCode1;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.script.template.Skin;
+import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
@@ -120,7 +123,19 @@ public class ServletMain extends HttpServlet {
 		} catch (Exception err) {
 			LOGGER.error("Initialize valid fonts error, {}", err.getMessage());
 		}
-		 
+
+		// 设定日期格式，解决英式格式的问题
+		try {
+			ConfExtraGlobals extras = ConfExtraGlobals.getInstance();
+			ConfExtraGlobal extra = extras.getConfExtraGlobalByLang("enus");
+			if (extra != null && extra.getDate() != null && extra.getDate().trim().length() > 0) {
+				UFormat.DATE_FROMAT_ENUS = extra.getDate();
+				EwaGlobals.instance().getEwaSettings().getItem("enus").setDate(extra.getDate());
+			}
+		} catch (Exception err) {
+			LOGGER.error("Initialize valid fonts error, {}", err.getMessage());
+		}
+
 	}
 
 	/**
@@ -309,7 +324,8 @@ public class ServletMain extends HttpServlet {
 			ewaPath = "/EmpScriptV2"; // default static url prefix
 		}
 
-		if (rv.s(FrameParameters.EWA_JS_DEBUG) != null && cnt1.indexOf("<script") > 0 && cnt1.indexOf("ewa.min.js") > 0) {
+		if (rv.s(FrameParameters.EWA_JS_DEBUG) != null && cnt1.indexOf("<script") > 0
+				&& cnt1.indexOf("ewa.min.js") > 0) {
 			cnt1 = cnt1.replace("ewa.min.js", "fas.js");
 			String debugScripts = this.createJsDebug(ewaPath);
 			cnt1 = cnt1.replace("</head>", debugScripts);

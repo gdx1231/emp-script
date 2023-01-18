@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConfExtraGlobal;
+import com.gdxsoft.easyweb.conf.ConfExtraGlobals;
 import com.gdxsoft.easyweb.conf.ConnectionConfig;
 import com.gdxsoft.easyweb.conf.ConnectionConfigs;
 import com.gdxsoft.easyweb.data.DTTable;
@@ -28,6 +30,7 @@ import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
+import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
@@ -2632,8 +2635,19 @@ public class DataConnection {
 	 */
 	public java.sql.Timestamp getTimestamp(String s1) {
 		String lang = this._RequestValue != null ? this._RequestValue.getLang() : "zhcn";
-		boolean isUKFormat = this._RequestValue != null && this._RequestValue.getString("SYS_EWA_ENUS_YMD") != null
-				&& this._RequestValue.getString("SYS_EWA_ENUS_YMD").toLowerCase().equals("dd/mm/yyyy");
+		// 是否为英式日期格式
+		boolean isUKFormat = false;
+		if ("enus".equalsIgnoreCase(lang)) {
+			ConfExtraGlobal extra = ConfExtraGlobals.getInstance().getConfExtraGlobalByLang(lang);
+			if (extra.getDate() != null && extra.getDate().equalsIgnoreCase(UFormat.DATE_FROMAT_ENUS)) {
+				// 通过在ewa_conf.xml中定义 global lang=enus date=dd/MM/yyyy
+				isUKFormat = true;
+			} else if (this._RequestValue != null) {
+				// 通过参数SYS_EWA_ENUS_YMD定义
+				isUKFormat = UFormat.DATE_FROMAT_ENUS.equalsIgnoreCase(this._RequestValue.s("SYS_EWA_ENUS_YMD"));
+			}
+		}
+
 		return Utils.getTimestamp(s1, lang, isUKFormat);
 	}
 
