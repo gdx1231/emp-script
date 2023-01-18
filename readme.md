@@ -20,6 +20,25 @@ String root = "/Users/guolei/project/user.config.xml";
 f2j.startConvert(root);
 ```
 
+## 英式日期格式定义
+```xml
+<!-- 全局变量定义 -->
+<globals>
+		<!-- 覆盖EwaGlobal.xml的定义 -->
+		<!-- 日期格式 -->
+		<global lang="enus" date="dd/MM/yyyy"></global>
+</globals>
+
+<addedResources>
+		<addedResource name="ukdateformat" resourceType="js" defaultConf="true" last="false">
+<![CDATA[
+_EWA_G_SETTINGS.DATE_old = _EWA_G_SETTINGS.DATE;	
+_EWA_G_SETTINGS.DATE = 'dd/MM/yyyy'; //英国
+]]>
+		</addedResource>
+</addedResources>
+```
+
 ## Create a EWA tables （MYSQL）
 
 ```sql
