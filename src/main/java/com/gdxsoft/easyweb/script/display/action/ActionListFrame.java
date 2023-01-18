@@ -808,7 +808,10 @@ public class ActionListFrame extends ActionBase implements IAction {
 
 		// 例如全文检索的用法 contains(字段, @q)
 		// SQLServer 的 contains(字段, '北京')
-		boolean isFunc = dataField.indexOf("(") >= 0;
+		boolean isFunc = dataField.toLowerCase().indexOf("contains") >=0
+				&& dataField.toLowerCase().indexOf("@q") >=0
+				&& dataField.indexOf("(") >= 0;
+				
 		if (opTag.equals("blk")) {// 空白
 			if (isFunc) {
 				return null;
