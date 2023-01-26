@@ -1736,6 +1736,12 @@ public class DataConnection {
 			} else {
 				v1 = pv.getStringValue();
 			}
+			
+			//是EwaFunctions的参数
+			if(v1 == null && esf.getTempData().containsKey(para)) {
+				v1 = esf.getTempData().get(para).toString();
+			}
+			
 			String paraName = "@" + para;
 			if (v1 == null) {
 				// postgresql $1 is null could not determine data type of parameter $1
