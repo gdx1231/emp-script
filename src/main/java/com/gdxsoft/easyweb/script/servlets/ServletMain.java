@@ -127,10 +127,12 @@ public class ServletMain extends HttpServlet {
 		// 设定日期格式，解决英式格式的问题
 		try {
 			ConfExtraGlobals extras = ConfExtraGlobals.getInstance();
-			ConfExtraGlobal extra = extras.getConfExtraGlobalByLang("enus");
-			if (extra != null && extra.getDate() != null && extra.getDate().trim().length() > 0) {
-				UFormat.DATE_FROMAT_ENUS = extra.getDate();
-				EwaGlobals.instance().getEwaSettings().getItem("enus").setDate(extra.getDate());
+			if (extras != null) {
+				ConfExtraGlobal extra = extras.getConfExtraGlobalByLang("enus");
+				if (extra != null && extra.getDate() != null && extra.getDate().trim().length() > 0) {
+					UFormat.DATE_FROMAT_ENUS = extra.getDate();
+					EwaGlobals.instance().getEwaSettings().getItem("enus").setDate(extra.getDate());
+				}
 			}
 		} catch (Exception err) {
 			LOGGER.error("Initialize valid fonts error, {}", err.getMessage());
