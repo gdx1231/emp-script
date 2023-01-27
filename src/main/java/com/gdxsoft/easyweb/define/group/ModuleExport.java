@@ -114,7 +114,11 @@ public class ModuleExport extends ModuleBase {
 		this.createNode(eleDes, "Email", tbMod.getCell(0, "mod_email").toString());
 		this.createNode(eleDes, "Website", tbMod.getCell(0, "mod_web").toString());
 		this.createNode(eleDes, "OpenSource", tbMod.getCell(0, "mod_open_source").toString());
-
+		// meta库名称
+		this.createNode(eleDes, "metaDatabase", tbMod.getCell(0, "MOD_META_DB_NAME").toString());
+		// 工作库名称
+		this.createNode(eleDes, "workDatabase", tbMod.getCell(0, "MOD_WORK_DB_NAME").toString());
+		
 		this.createNodeCData(eleDes, "Description", tbMod.getCell(0, "mod_memo").toString());
 		this.createNodeCData(eleDes, "DescriptionEn", tbMod.getCell(0, "mod_memo_en").toString());
 		this.createNodeCData(eleDes, "Copyright", tbMod.getCell(0, "mod_osp").toString());

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -15,10 +16,12 @@ import org.w3c.dom.NodeList;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.BatchInsert;
 import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.define.database.Field;
 import com.gdxsoft.easyweb.define.database.Table;
 import com.gdxsoft.easyweb.define.database.maps.MapFieldType;
 import com.gdxsoft.easyweb.define.database.maps.Maps;
+import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
@@ -41,6 +44,43 @@ public class ImportTables {
 
 	private int batInsertCount = 100;
 
+	// 模块说明信息，主要用到 metaDatabase meta库名称和 workDatabase工作库名称
+	private ModuleDescription moduleDescription;
+
+	// All SQLS and ERRORS
+	private MStr sqls = new MStr();
+
+	/**
+	 * 所有的DDL、SQL和错误信息
+	 * 
+	 * @return
+	 */
+	public MStr getSqls() {
+		return sqls;
+	}
+
+	/**
+	 * 模块说明信息，主要用到<br>
+	 * metaDatabase meta库名称<br>
+	 * workDatabase工作库名称
+	 * 
+	 * @return
+	 */
+	public ModuleDescription getModuleDescription() {
+		return moduleDescription;
+	}
+
+	/**
+	 * 模块说明信息，主要用到<br>
+	 * metaDatabase meta库名称<br>
+	 * workDatabase工作库名称
+	 * 
+	 * @param moduleDescription
+	 */
+	public void setModuleDescription(ModuleDescription moduleDescription) {
+		this.moduleDescription = moduleDescription;
+	}
+
 	public ImportTables(Document docTable, Document docData, DataConnection conn) {
 		this._DocTable = docTable;
 		this._DocData = docData;
@@ -53,6 +93,9 @@ public class ImportTables {
 		this._Tables = new Table[nl.getLength()];
 		for (int i = 0; i < nl.getLength(); i++) {
 			Table table = this.initTable(nl.item(i));
+			table.setImportTables(this);
+			table.setReplaceMetaDatabaseName(this.replaceMetaDatabaseName);
+			table.setReplaceWorkDatabaseName(this.replaceWorkDatabaseName);
 			this._Tables[i] = table;
 		}
 	}
@@ -200,7 +243,7 @@ public class ImportTables {
 	private String createDatabaseTables(HashMap<String, SqlTable> maps) {
 		Iterator<String> it = maps.keySet().iterator();
 		StringBuilder sb = new StringBuilder();
-
+		boolean isTargetMysql = SqlUtils.isMySql(_Conn);
 		while (it.hasNext()) {
 			SqlTable t = maps.get(it.next());
 			if ("VIEW".equalsIgnoreCase(t.getTable().getTableType())) {
@@ -210,7 +253,7 @@ public class ImportTables {
 
 			s = this.replaceMetaOrWorkDatabaseName(s);
 
-			if (this._Conn.getDatabaseType().equalsIgnoreCase("mysql")) {
+			if (isTargetMysql) {
 				// 删除mysql8带有的 COLLATE
 				s = this.replaceMysql8Collates(s);
 			}
@@ -218,9 +261,12 @@ public class ImportTables {
 			LOGGER.info("Create the table {}", t.getTable().getName());
 			// 表结构
 			LOGGER.debug("TABLE DDL -> {}", s);
+			sqls.al("/* " + t.getTable().getName() + ", DDL:  */");
+			sqls.al(s); // ddl
 			this._Conn.executeUpdateNoParameter(s);
 			if (this._Conn.getErrorMsg() != null) {
 				sb.append(this._Conn.getErrorMsg() + "\n");
+				sqls.al("/* ERROR:" + this._Conn.getErrorMsg() + " */");
 				this._Conn.clearErrorMsg();
 			}
 
@@ -229,40 +275,54 @@ public class ImportTables {
 			if (pkSql != null && pkSql.trim().length() > 0) {
 				pkSql = this.replaceMetaOrWorkDatabaseName(pkSql);
 				LOGGER.debug("TABLE PK -> {}", pkSql);
+				sqls.al("/* " + t.getTable().getName() + ", PK:  */");
+				sqls.al(pkSql);
+
 				this._Conn.executeUpdateNoParameter(pkSql);
 				if (this._Conn.getErrorMsg() != null) {
 					sb.append(this._Conn.getErrorMsg() + "\n");
+					sqls.al("/* ERROR:" + this._Conn.getErrorMsg() + " */");
 					this._Conn.clearErrorMsg();
 				}
 			}
 
 			// 字段备注
 			ArrayList<String> s2 = t.getComments();
-			for (int i = 0; i < s2.size(); i++) {
-				String sql = s2.get(i);
-				sql = sql.replace("{SCHMEA}", this._Conn.getSchemaName());
-				sql = this.replaceMetaOrWorkDatabaseName(sql);
+			if (s2.size() > 0) {
+				sqls.al("/* " + t.getTable().getName() + ", COMMENT:  */");
+				for (int i = 0; i < s2.size(); i++) {
+					String sql = s2.get(i);
+					sql = sql.replace("{SCHMEA}", this._Conn.getSchemaName());
+					sql = this.replaceMetaOrWorkDatabaseName(sql);
 
-				LOGGER.debug("TABLE COMMENT -> {}", sql);
+					LOGGER.debug("TABLE COMMENT -> {}", sql);
 
-				this._Conn.executeUpdateNoParameter(sql);
-				if (this._Conn.getErrorMsg() != null) {
-					sb.append(this._Conn.getErrorMsg() + "\n");
-					this._Conn.clearErrorMsg();
+					sqls.al(sql);
+					this._Conn.executeUpdateNoParameter(sql);
+					if (this._Conn.getErrorMsg() != null) {
+						sb.append(this._Conn.getErrorMsg() + "\n");
+						sqls.al("/* ERROR:" + this._Conn.getErrorMsg() + " */");
+						this._Conn.clearErrorMsg();
+					}
 				}
 			}
-
 			// 索引
 			ArrayList<String> s1 = t.getIndexes();
-			for (int i = 0; i < s1.size(); i++) {
-				String sqlIndex = s1.get(i);
-				sqlIndex = this.replaceMetaOrWorkDatabaseName(sqlIndex);
-				LOGGER.debug("TABLE INDEX -> {}", sqlIndex);
-				this._Conn.executeUpdateNoParameter(s1.get(i));
-				if (this._Conn.getErrorMsg() != null) {
-					// sb.append(this._Conn.getErrorMsg() + "\n");
-					LOGGER.warn(this._Conn.getErrorMsg());
-					this._Conn.clearErrorMsg();
+			if (s1.size() > 0) {
+				sqls.al("/* " + t.getTable().getName() + ", INDEXES:  */");
+				for (int i = 0; i < s1.size(); i++) {
+					String sqlIndex = s1.get(i);
+					sqlIndex = this.replaceMetaOrWorkDatabaseName(sqlIndex);
+					LOGGER.debug("TABLE INDEX -> {}", sqlIndex);
+					sqls.al(s1.get(i));
+
+					this._Conn.executeUpdateNoParameter(s1.get(i));
+					if (this._Conn.getErrorMsg() != null) {
+						// sb.append(this._Conn.getErrorMsg() + "\n");
+						LOGGER.warn(this._Conn.getErrorMsg());
+						sqls.al("/* ERROR:" + this._Conn.getErrorMsg() + " */");
+						this._Conn.clearErrorMsg();
+					}
 				}
 			}
 		}
@@ -280,6 +340,7 @@ public class ImportTables {
 		StringBuilder sb = new StringBuilder();
 		// 处理视图
 		String targetDatabase = this._Conn.getDatabaseType();
+		boolean isMySqlTarget = SqlUtils.isSqlServer(targetDatabase);
 		maps.forEach((key, t) -> {
 			if (!"VIEW".equalsIgnoreCase(t.getTable().getTableType())) {
 				return;
@@ -290,21 +351,29 @@ public class ImportTables {
 			ddl = ddl.replace("{SCHMEA}", this._Conn.getSchemaName());
 			ddl = this.replaceMetaOrWorkDatabaseName(ddl);
 
-			if ("mysql".equalsIgnoreCase(sourceDatabase)) {
+			if (SqlUtils.isMySql(sourceDatabase)) {
 				// CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER
 				// VIEW
 				ddl = this.replaceMysqlDefiner(ddl); // 删除root标记信息
 				if (!targetDatabase.equals(sourceDatabase)) {
 					ddl = ddl.replace("`", "");
 				}
+			} else if (SqlUtils.isSqlServer(sourceDatabase) && isMySqlTarget) {
+				// 源数据库是sqlserver，目标数据库是mysql
+				ddl = StringUtils.replaceIgnoreCase(ddl, "isnull(", "ifnull(");
+				ddl = StringUtils.replaceIgnoreCase(ddl, "getdate()", "now()");
 			}
 
 			LOGGER.info("Create the view {}", t.getTable().getName());
 			LOGGER.debug("VIEW DDL -> {}", ddl);
+			sqls.al("/*  " + t.getTable().getName() + ", VIEW DDL:  */");
+			sqls.al(ddl);
 
 			this._Conn.executeUpdateNoParameter(ddl);
 			if (this._Conn.getErrorMsg() != null) {
 				sb.append(this._Conn.getErrorMsg() + "\n");
+				sqls.al("/* ERROR:" + this._Conn.getErrorMsg() + " */");
+
 				this._Conn.clearErrorMsg();
 			}
 		});
@@ -364,16 +433,41 @@ public class ImportTables {
 		if (_TablesInsertFix == null) {
 			_TablesInsertFix = new HashMap<String, List<Object>>();
 		}
-		boolean isSqlServer = this._Conn.getDatabaseType().equalsIgnoreCase("MSSQL");
-		try {
-			for (int i = 0; i < nl.getLength(); i++) {
-				Node node = nl.item(i);
-				String name = UXml.retNodeValue(node, "Name");
-				Table t = this._SqlTables.get(name).getTable();
-				this.createInsertFix(t);
+		// this._Conn.getDatabaseType().equalsIgnoreCase("MSSQL");
+		boolean isSqlServer = SqlUtils.isSqlServer(_Conn);
+		sqls.al("/* import data */");
 
+		for (int i = 0; i < nl.getLength(); i++) {
+			Node node = nl.item(i);
+			if (node.getChildNodes().getLength() == 0) {
+				// 没有数据节点
+				continue;
+			}
+			Table data = new Table();
+			UObjectValue.fromXml(node, data);
+			// 避免表和视图重名
+			String key = this.getTableKey(data);
+			SqlTable st = this._SqlTables.get(key);
+			Table t = null;
+			if (st == null) { // 老数据，没有扩展属性
+				for (int m = 0; m < this._Tables.length; i++) {
+					if (this._Tables[m].getName().equals(data.getName())) {
+						t = this._Tables[m];
+						break;
+					}
+				}
+			} else {
+				t = st.getTable();
+			}
+			if (t == null) {
+				LOGGER.warn("Can't fund the table {}", key);
+				continue;
+			}
+			try {
+				this.createInsertFix(t);
 				if (isSqlServer) {
 					String sql = "set IDENTITY_INSERT " + t.getName() + " on";
+					sqls.al(sql);
 					this._Conn.executeUpdateNoParameter(sql);
 				}
 
@@ -382,15 +476,21 @@ public class ImportTables {
 
 				if (isSqlServer) {
 					String sql = "set IDENTITY_INSERT " + t.getName() + " off";
+					sqls.al(sql);
 					this._Conn.executeUpdateNoParameter(sql);
 				}
+			} catch (Exception e) {
+				LOGGER.warn(e.getLocalizedMessage());
 			}
-		} catch (Exception e) {
-			LOGGER.warn(e.getLocalizedMessage());
-		} finally {
-			_Conn.close();
 		}
+		_Conn.close();
 		return sb.toString();
+	}
+
+	private String getTableKey(Table table) {
+		String key = table.getName() + "," + table.getTableType() + "," + table.getCatalogName() + ","
+				+ table.getSchemaName();
+		return key;
 	}
 
 	/**
@@ -400,12 +500,20 @@ public class ImportTables {
 	 * @throws Exception
 	 */
 	private void createInsertFix(Table t) throws Exception {
-		if (_TablesInsertFix.containsKey(t.getName())) {
+		String key = getTableKey(t);
+		if (_TablesInsertFix.containsKey(key)) {
 			return;
 		}
 		List<Object> lst = new ArrayList<Object>();
 		MStr sb = new MStr();
-		sb.a("INSERT INTO " + t.getName() + " (");
+
+		FixTableOrField fix = FixTableOrField.getInstance(_Conn);
+
+		sb.a("INSERT INTO ").a(t.getDatabasePrefix(this._Conn.getDatabaseType())) // 数据库前缀
+				.a(fix.getFixCharBefore()) // 前缀
+				.a(t.getName()) // 表名称
+				.a(fix.getFixCharAfter()) // 后缀
+				.a(" (");
 		Field[] fs = new Field[t.getFields().size()];
 		MapFieldType[] dts = new MapFieldType[t.getFields().size()];
 
@@ -418,7 +526,9 @@ public class ImportTables {
 			if (i > 0) {
 				sb.append(", ");
 			}
-			sb.append(f.getName());
+			sb.a(fix.getFixCharBefore()) // 前缀
+					.a(f.getName()) // 字段名称
+					.a(fix.getFixCharAfter()); // 后缀
 			fs[i] = f;
 			String dtType = f.getDatabaseType().toUpperCase();
 			if (dtType.indexOf(" ") > 0) { // int identity
@@ -433,7 +543,7 @@ public class ImportTables {
 		lst.add(fs);
 		lst.add(dts);
 
-		_TablesInsertFix.put(t.getName(), lst);
+		_TablesInsertFix.put(key, lst);
 	}
 
 	/**
@@ -444,10 +554,12 @@ public class ImportTables {
 	 * @return
 	 */
 	private String importTableRows(Table t, Node node) {
-		List<Object> lst = this._TablesInsertFix.get(t.getName());
+		String key = this.getTableKey(t);
+		List<Object> lst = this._TablesInsertFix.get(key);
 
 		// insert into tb_a(f_aa, f_bb) values
 		String insertTableSql = lst.get(0).toString();
+		sqls.al(insertTableSql);
 		// 字段
 		Field[] fs = (Field[]) lst.get(1);
 		// 数据类型
@@ -464,6 +576,7 @@ public class ImportTables {
 			// values 表达式，例如：(0, 'a')
 			String sqlValues = this.createInsertSql(fs, dts, row);
 			values.add(sqlValues);
+			sqls.al(sqlValues);
 		}
 		BatchInsert bi = new BatchInsert(this._Conn, false);
 		// 批量插入数据的数量
@@ -487,10 +600,11 @@ public class ImportTables {
 	private String createInsertSql(Field[] fs, MapFieldType[] dts, Node row) {
 		MStr sb1 = new MStr();
 		sb1.append("(");
+		boolean isMysql = SqlUtils.isMySql(this._Conn);
 		for (int m = 0; m < fs.length; m++) {
 			Field f = fs[m];
 			MapFieldType dt = dts[m];
-			String prefix = dt == null ? "'" : dt.getEwa().getInsertPrefix();
+			// String prefix = dt == null ? "'" : dt.getEwa().getInsertPrefix();
 			String v1 = getNodeAtt(row, f.getName());
 			if (m > 0) {
 				sb1.append(", ");
@@ -500,7 +614,7 @@ public class ImportTables {
 				continue;
 			}
 			if (dt == null) {
-				sb1.a("'" + v1.replace("'", "''") + "'");
+				sb1.a(this._Conn.sqlParameterStringExp(v1));
 				continue;
 			}
 
@@ -514,14 +628,15 @@ public class ImportTables {
 				LOGGER.warn("The convert {} -> {} error ,{}", this._Conn.getDatabaseType(), dts[m].getDatabaseName(),
 						err.getMessage());
 			}
-			boolean isMysql = target != null && target.getDatabaseName().equalsIgnoreCase("mysql");
+			// boolean isMysql = target != null &&
+			// SqlUtils.isMySql(target.getDatabaseName());
 
 			if (covert != null && covert.equals("BIN") && isMysql) {// 二进制转换
 				sb1.a("x'");
 				sb1.a(v1.replace("'", "''"));
 				sb1.a("'");
-			} else if (dt.getName().equals("BIT") && dt.getDatabaseName().equalsIgnoreCase("mysql")
-					&& this._Conn.getDatabaseType().equalsIgnoreCase("MSSQL")) {
+			} else if (dt.getName().equals("BIT") && SqlUtils.isMySql(dt.getDatabaseName())
+					&& SqlUtils.isSqlServer(this._Conn)) {
 				if (v1.equalsIgnoreCase("true")) {
 					sb1.append("1");
 				} else {
@@ -535,12 +650,14 @@ public class ImportTables {
 					sb1.append(v2);
 				}
 			} else {
-				String value = v1.replace("'", "''");
-				if (isMysql) {
-					// 替换转义符
-					value = value.replace("\\", "\\\\");
-				}
-				sb1.a(prefix + value + prefix);
+				String value = this._Conn.sqlParameterStringExp(v1);
+				sb1.a(value);
+//				String value =v1.replace("'", "''");
+//				if (isMysql) {
+//					// 替换转义符
+//					value = value.replace("\\", "\\\\");
+//				}
+// 				sb1.a(prefix + value + prefix);
 			}
 		}
 		sb1.append(")");
@@ -562,8 +679,11 @@ public class ImportTables {
 
 		for (int i = 0; i < this._Tables.length; i++) {
 			SqlTable t = new SqlTable();
+
 			t.createSqlTable(this._Tables[i], databaseType);
-			String key = this._Tables[i].getName();
+
+			// 避免表和视图重名
+			String key = this.getTableKey(this._Tables[i]);
 			_SqlTables.put(key, t);
 		}
 		return _SqlTables;

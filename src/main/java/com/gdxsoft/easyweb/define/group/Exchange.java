@@ -37,6 +37,7 @@ import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UJSon;
+import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -62,6 +63,31 @@ public class Exchange {
 
 	private String replaceMetaDatabaseName;
 	private String replaceWorkDatabaseName;
+
+	// 模块说明信息，主要用到 metaDatabase meta库名称和 workDatabase工作库名称
+	private ModuleDescription moduleDescription;
+
+	/**
+	 * 模块说明信息，主要用到<br>
+	 * metaDatabase meta库名称<br>
+	 * workDatabase工作库名称
+	 * 
+	 * @return
+	 */
+	public ModuleDescription getModuleDescription() {
+		return moduleDescription;
+	}
+
+	/**
+	 * 模块说明信息，主要用到<br>
+	 * metaDatabase meta库名称<br>
+	 * workDatabase工作库名称
+	 * 
+	 * @param moduleDescription
+	 */
+	public void setModuleDescription(ModuleDescription moduleDescription) {
+		this.moduleDescription = moduleDescription;
+	}
 
 	// 导入或导出的表列表
 	private List<Table> tables = new ArrayList<>();
@@ -117,6 +143,13 @@ public class Exchange {
 		this._DocRes = this.readXmlDoc(XML_RESOURCES);
 		this._DocDes = this.readXmlDoc(XML_DES);
 
+		NodeList nl = this._DocDes.getElementsByTagName("Description");
+		this.moduleDescription = new ModuleDescription();
+		if (nl.getLength() > 0) {
+			Element eleDescription = (Element) nl.item(0);
+			UObjectValue.fromXmlNodes(eleDescription, moduleDescription);
+		}
+
 		this._Conn = new DataConnection();
 		this._Conn.setConfigName(this._ConnectionString);
 	}
@@ -163,6 +196,8 @@ public class Exchange {
 		StringBuilder sbErr = new StringBuilder();
 		ImportTables importTables = new ImportTables(this._DocTable, this._DocData, this._Conn);
 
+		importTables.setModuleDescription(this.getModuleDescription());
+
 		importTables.setReplaceMetaDatabaseName(this.replaceMetaDatabaseName);
 		importTables.setReplaceWorkDatabaseName(this.replaceWorkDatabaseName);
 		if (importTbs) {
@@ -178,6 +213,14 @@ public class Exchange {
 			}
 			String s1 = importTables.importDatas();
 			sbErr.append(s1);
+		}
+		String logs = importTables.getSqls().toString();
+		String logName = UPath.getGroupPath() + "/log/import_" + System.currentTimeMillis() + ".sql";
+		try {
+			UFile.createNewTextFile(logName, logs);
+			LOGGER.info("LOG: {}", logName);
+		} catch (IOException err) {
+			LOGGER.warn("write log {}, {}", logName, err.getMessage());
 		}
 		return sbErr.toString();
 	}

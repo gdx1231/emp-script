@@ -946,27 +946,33 @@ public class DataConnection {
 			}
 			/// 20190816
 			/*
-			 * if (sp.getOrderBy().length() > 0) { sqlTmp.append("\r\n ORDER BY " + sp.getOrderBy()); } sb.insert(0,
-			 * "SELECT TOP " + currentPage * pageSize + " "); sb.append(sp.getFields()); sb.append("\r\n FROM ");
-			 * sb.append(sp.getTableName()); if (currentPage == 1) { sb.append("\r\n WHERE " + sp.getWhere());
-			 * sb.append(sqlTmp.toString()); } else { String pk = "GGDDXX." + pkFieldName; String pk1 = pkFieldName; if
-			 * (pkFieldName.indexOf(",") > 0) { String[] pks = pkFieldName.split(","); String tmp = ""; String tmp1 =
-			 * ""; for (int i = 0; i < pks.length; i++) { if (i > 0) { tmp += " + '~`" + i + "!' + "; tmp1 += " + '~`" +
-			 * i + "!' + "; } String[] filedName = pks[i].trim().split("\\."); String name = "GGDDXX.[" +
-			 * filedName[filedName.length - 1] + "]"; tmp += "ISNULL(CONVERT(VARCHAR(222)," + name + "),'--null--')";
-			 * tmp1 += "ISNULL(CONVERT(VARCHAR(222), " + pks[i].trim() + "),'--null--')"; } pk = tmp; pk1 = tmp1; } else
-			 * { String[] filedName = pkFieldName.trim().split("\\."); pk = "GGDDXX." + filedName[filedName.length - 1];
+			 * if (sp.getOrderBy().length() > 0) { sqlTmp.append("\r\n ORDER BY " +
+			 * sp.getOrderBy()); } sb.insert(0, "SELECT TOP " + currentPage * pageSize +
+			 * " "); sb.append(sp.getFields()); sb.append("\r\n FROM ");
+			 * sb.append(sp.getTableName()); if (currentPage == 1) { sb.append("\r\n WHERE "
+			 * + sp.getWhere()); sb.append(sqlTmp.toString()); } else { String pk =
+			 * "GGDDXX." + pkFieldName; String pk1 = pkFieldName; if
+			 * (pkFieldName.indexOf(",") > 0) { String[] pks = pkFieldName.split(",");
+			 * String tmp = ""; String tmp1 = ""; for (int i = 0; i < pks.length; i++) { if
+			 * (i > 0) { tmp += " + '~`" + i + "!' + "; tmp1 += " + '~`" + i + "!' + "; }
+			 * String[] filedName = pks[i].trim().split("\\."); String name = "GGDDXX.[" +
+			 * filedName[filedName.length - 1] + "]"; tmp += "ISNULL(CONVERT(VARCHAR(222),"
+			 * + name + "),'--null--')"; tmp1 += "ISNULL(CONVERT(VARCHAR(222), " +
+			 * pks[i].trim() + "),'--null--')"; } pk = tmp; pk1 = tmp1; } else { String[]
+			 * filedName = pkFieldName.trim().split("\\."); pk = "GGDDXX." +
+			 * filedName[filedName.length - 1];
 			 * 
 			 * }
 			 * 
-			 * StringBuilder where = new StringBuilder(); where.append("SELECT TOP " + (currentPage - 1) * pageSize +
-			 * " "); where.append(pk1 + " FROM "); where.append(sp.getTableName()); where.append("\r\n WHERE " +
-			 * sp.getWhere()); where.append(sqlTmp.toString());
+			 * StringBuilder where = new StringBuilder(); where.append("SELECT TOP " +
+			 * (currentPage - 1) * pageSize + " "); where.append(pk1 + " FROM ");
+			 * where.append(sp.getTableName()); where.append("\r\n WHERE " + sp.getWhere());
+			 * where.append(sqlTmp.toString());
 			 * 
 			 * sb.append(" WHERE " + sp.getWhere()); sb.append(sqlTmp.toString());
 			 * 
-			 * sb.insert(0, "SELECT * FROM(\r\n"); sb.append(") GGDDXX\r\n WHERE NOT " + pk + " IN (\r\n\t");
-			 * sb.append(where.toString()); sb.append(")"); }
+			 * sb.insert(0, "SELECT * FROM(\r\n"); sb.append(") GGDDXX\r\n WHERE NOT " + pk
+			 * + " IN (\r\n\t"); sb.append(where.toString()); sb.append(")"); }
 			 */
 
 		} else if (this._DatabaseType.equals("HSQLDB") || this._DatabaseType.equals("MYSQL")) {
@@ -1736,12 +1742,12 @@ public class DataConnection {
 			} else {
 				v1 = pv.getStringValue();
 			}
-			
-			//是EwaFunctions的参数
-			if(v1 == null && esf.getTempData().containsKey(para)) {
+
+			// 是EwaFunctions的参数
+			if (v1 == null && esf.getTempData().containsKey(para)) {
 				v1 = esf.getTempData().get(para).toString();
 			}
-			
+
 			String paraName = "@" + para;
 			if (v1 == null) {
 				// postgresql $1 is null could not determine data type of parameter $1
@@ -2158,9 +2164,10 @@ public class DataConnection {
 
 	/**
 	 * 设置SQL参数 CallableStatement <br>
-	 * 对象为所有的DBMS 提供了一种以标准形式调用已储存过程的方法。已储 存过程储存在数据库中。对已储存过程的调用是 CallableStatement对象所含的内容。这种调用是
-	 * 用一种换码语法来写的，有两种形式：一种形式带结果参，另一种形式不带结果参数。结果参数是 一种输出 (OUT) 参数，是已储存过程的返回值。两种形式都可带有数量可变的输入（IN 参数）、 输出（OUT
-	 * 参数）或输入和输出（INOUT 参数）的参数。问号将用作参数的占位符。
+	 * 对象为所有的DBMS 提供了一种以标准形式调用已储存过程的方法。已储 存过程储存在数据库中。对已储存过程的调用是
+	 * CallableStatement对象所含的内容。这种调用是 用一种换码语法来写的，有两种形式：一种形式带结果参，另一种形式不带结果参数。结果参数是
+	 * 一种输出 (OUT) 参数，是已储存过程的返回值。两种形式都可带有数量可变的输入（IN 参数）、 输出（OUT 参数）或输入和输出（INOUT
+	 * 参数）的参数。问号将用作参数的占位符。
 	 * 
 	 * @param parameters
 	 * @param cst
@@ -2567,8 +2574,8 @@ public class DataConnection {
 		}
 		parameter = parameter.replace("'", "''");
 		if (this.getDatabaseType() != null) {
-			boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
-			boolean isSqlServer = this.getDatabaseType().equalsIgnoreCase("MSSQL");
+			boolean isMysql = SqlUtils.isMySql(this);// this.getDatabaseType().equalsIgnoreCase("MYSQL");
+			boolean isSqlServer = SqlUtils.isSqlServer(this);// this.getDatabaseType().equalsIgnoreCase("MSSQL");
 			if (isMysql) {
 				// MySql字符转义符 反斜线(‘\’)开始，
 				parameter = parameter.replace("\\", "\\\\");

@@ -13,6 +13,46 @@ public class SqlUtils {
 	public final static String[] CHN_TEMPLATES = { "convert([FIELD] using gbk)", "convert([FIELD] using gbk)",
 			"convert_to([FIELD],'gb18030')" };
 
+	public static boolean isMySql(String databaseType) {
+		return "mysql".equalsIgnoreCase(databaseType) || "MariaDB".equalsIgnoreCase(databaseType);
+	}
+
+	public static boolean isMySql(DataConnection cnn) {
+		return isMySql(cnn.getDatabaseType());
+	}
+
+	public static boolean isSqlServer(String databaseType) {
+		return "mssql".equalsIgnoreCase(databaseType) || "sqlServer".equalsIgnoreCase(databaseType);
+	}
+
+	public static boolean isSqlServer(DataConnection cnn) {
+		return isSqlServer(cnn.getDatabaseType());
+	}
+
+	public static boolean isPostgreSql(String databaseType) {
+		return "PostgreSql".equalsIgnoreCase(databaseType);
+	}
+
+	public static boolean isPostgreSql(DataConnection cnn) {
+		return isPostgreSql(cnn.getDatabaseType());
+	}
+
+	public static boolean isOracle(String databaseType) {
+		return "Oracle".equalsIgnoreCase(databaseType);
+	}
+
+	public static boolean isOracle(DataConnection cnn) {
+		return isOracle(cnn.getDatabaseType());
+	}
+
+	public static boolean isHsqlDb(String databaseType) {
+		return "HSQLDB".equalsIgnoreCase(databaseType) || "H2".equalsIgnoreCase(databaseType);
+	}
+
+	public static boolean isHsqlDb(DataConnection cnn) {
+		return isHsqlDb(cnn.getDatabaseType());
+	}
+
 	/**
 	 * 根据数据库类型判断是否采用中文排序表达式
 	 * 

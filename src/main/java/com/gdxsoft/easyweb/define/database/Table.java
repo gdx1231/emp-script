@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -17,11 +18,13 @@ import org.w3c.dom.NodeList;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.define.database.maps.MapFieldType;
 import com.gdxsoft.easyweb.define.database.maps.MapFieldTypes;
 import com.gdxsoft.easyweb.define.database.maps.MapSqlTemplate;
 import com.gdxsoft.easyweb.define.database.maps.MapSqlTemplates;
 import com.gdxsoft.easyweb.define.database.maps.Maps;
+import com.gdxsoft.easyweb.define.group.ImportTables;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -60,9 +63,102 @@ public class Table {
 	private String refId; // 来源参考
 
 	private String sourceXml;
-	
+
+	private ImportTables importTables;
+
+	public ImportTables getImportTables() {
+		return importTables;
+	}
+
+	public void setImportTables(ImportTables importTables) {
+		this.importTables = importTables;
+	}
+
 	public Table() {
 
+	}
+
+	/**
+	 * 替换数据前缀，例如：my_work.dbo. (sqlserver), my_work.
+	 * 
+	 * @param table
+	 * @param targetDatabaseType
+	 * @return
+	 */
+	public String getDatabasePrefix(String targetDatabaseType) {
+		if (this.getReplaceMetaDatabaseName() == null && this.getReplaceMetaDatabaseName().trim().length() == 0) {
+			return "";
+		}
+		boolean isSqlServer = SqlUtils.isSqlServer(targetDatabaseType);
+		StringBuilder sb = new StringBuilder();
+		if (this.fromMetaDatabase()) {
+			sb.append(this.getReplaceMetaDatabaseName());
+			if (isSqlServer) {
+				sb.append(".dbo.");
+			} else {
+				sb.append(".");
+			}
+
+		} else if (this.fromWorkDatabase()) {
+			sb.append(this.getReplaceWorkDatabaseName());
+			if (isSqlServer) {
+				sb.append(".dbo.");
+			} else {
+				sb.append(".");
+			}
+		}
+		return sb.toString();
+	}
+
+	private String fromSourceDatabase() {
+		// 来源表是否是SQLSERVER
+		boolean isSourceSqlServer = SqlUtils.isSqlServer(this.getDatabaseType());
+
+		String sourceDatabase = null;
+		if (isSourceSqlServer) {
+			sourceDatabase = this.getCatalogName();
+		} else {
+			sourceDatabase = this.getSchemaName();
+		}
+		return sourceDatabase;
+	}
+
+	/**
+	 * 来源表/视图是否为meta库
+	 * 
+	 * @param table
+	 * @return
+	 */
+	public boolean fromMetaDatabase() {
+		String sourceDatabase = fromSourceDatabase();
+		if (sourceDatabase == null) {
+			return false;
+		}
+		if (getImportTables() == null || getImportTables().getModuleDescription() == null) {
+			return false;
+		}
+
+		String sourceMeta = getImportTables().getModuleDescription().getMetaDatabase();
+		return sourceDatabase.equalsIgnoreCase(sourceMeta);
+	}
+
+	/**
+	 * 来源表/视图是否为work库
+	 * 
+	 * @param table
+	 * @return
+	 */
+	public boolean fromWorkDatabase() {
+		String sourceDatabase = fromSourceDatabase();
+		if (sourceDatabase == null) {
+			return false;
+		}
+		if (getImportTables() == null || getImportTables().getModuleDescription() == null) {
+			return false;
+		}
+
+		String sourceWork = getImportTables().getModuleDescription().getWorkDatabase();
+		return sourceDatabase.equalsIgnoreCase(sourceWork);
 	}
 
 	public void writeDataToXml(String where) {
@@ -74,6 +170,14 @@ public class Table {
 
 	}
 
+	private void writeTableAttritubes(Element e) {
+		e.setAttribute("Name", this._Name);
+		e.setAttribute("DatabaseType", this._DatabaseType);
+		e.setAttribute("SchamaName", this._SchemaName);
+		e.setAttribute("CatalogName", this._CatalogName);
+		e.setAttribute("TableType", this._TableType);
+	}
+
 	/**
 	 * 填写数据到xml
 	 * 
@@ -82,19 +186,28 @@ public class Table {
 	 * @throws Exception
 	 */
 	public void writeDataToXml(String where, Element parent) throws Exception {
+		LOGGER.info("Start export {} data to xml", this._Name);
+		long t0 = System.currentTimeMillis();
 		this._Doc = parent.getOwnerDocument();
 		String sql = "SELECT * FROM " + this._Name + " WHERE " + where;
-		DataConnection conn = new DataConnection();
-		conn.setConfigName(_ConnectionConfigName);
-		conn.executeQuery(sql);
-		ResultSet rs = conn.getLastResult().getResultSet();
+		
 		MapFieldTypes maps;
 		maps = Maps.instance().getMapFieldTypes();
-		HashMap<String, MapFieldType> map = maps.getTypes(conn.getDatabaseType());
+		
 		Element e = this._Doc.createElement("Data");
-		e.setAttribute("Name", this._Name);
+		this.writeTableAttritubes(e);
+		
+		String xmlData = UXml.asXml(e);
+		LOGGER.info("{}", xmlData);
+		
 		parent.appendChild(e);
+		
+		DataConnection conn = new DataConnection();
+		conn.setConfigName(_ConnectionConfigName);
+		HashMap<String, MapFieldType> map = maps.getTypes(conn.getDatabaseType());
 		try {
+			conn.executeQuery(sql);
+			ResultSet rs = conn.getLastResult().getResultSet();
 			while (rs.next()) {
 				Element row = this._Doc.createElement("Row");
 				e.appendChild(row);
@@ -119,7 +232,6 @@ public class Table {
 						v1 = UXml.filterInvalidXMLcharacter(v1);
 						row.setAttribute(f.getName(), v1);
 					}
-
 				}
 			}
 		} catch (Exception err) {
@@ -127,6 +239,8 @@ public class Table {
 		} finally {
 			conn.close();
 		}
+		long t1 = System.currentTimeMillis() - t0;
+		LOGGER.info("End export {} data to xml, {}ms", this._Name, t1);
 	}
 
 	public void initBlankFrame() {
@@ -153,11 +267,7 @@ public class Table {
 		this._Doc = parent.getOwnerDocument();
 		Element e = this._Doc.createElement("Table");
 		parent.appendChild(e);
-		e.setAttribute("Name", this._Name);
-		e.setAttribute("DatabaseType", this._DatabaseType);
-		e.setAttribute("SchamaName", this._SchemaName);
-		e.setAttribute("CatalogName", this._CatalogName);
-		e.setAttribute("TableType", this._TableType);
+		this.writeTableAttritubes(e);
 
 		Element eFields = this._Doc.createElement("Fields");
 		e.appendChild(eFields);
@@ -212,11 +322,12 @@ public class Table {
 
 	/**
 	 * 从XML对象返回 Table
+	 * 
 	 * @param eleTable
 	 */
 	public void fromXml(Element eleTable) {
 		this.sourceXml = UXml.asXmlPretty(eleTable);
-		
+
 		NodeList nlFields = UXml.retNodeList(eleTable, "Fields/Field");
 		this.initBlankFrame();
 		UObjectValue.fromXml(eleTable, this);
@@ -230,7 +341,7 @@ public class Table {
 
 		Node nPk = UXml.retNode(eleTable, "Pk");
 		UObjectValue.fromXml(nPk, this._Pk);
-		NodeList nlPk = UXml.retNodeList(nPk, "Field");
+		NodeList nlPk = UXml.retNodeList(nPk, "PkField");
 		for (int i = 0; i < nlPk.getLength(); i++) {
 			Field f = new Field();
 			this._Pk.getPkFields().add(f);
@@ -255,8 +366,7 @@ public class Table {
 			String ddl = ddlNode.item(0).getTextContent();
 			this._SqlTable = ddl;
 		}
-		
-		
+
 	}
 
 	public Table(String tableName, String schemaName, String tableType, String connectionConfigName) {
@@ -340,6 +450,11 @@ public class Table {
 
 	}
 
+	/**
+	 * 获取创建表或视图的DDL语句
+	 * 
+	 * @param conn
+	 */
 	private void initTableOrViewDDL(DataConnection conn) {
 		boolean isView = "VIEW".equalsIgnoreCase(this._TableType);
 		String tempName = isView ? "ViewDDL" : "TableDDL";
@@ -353,6 +468,9 @@ public class Table {
 			LOGGER.error(conn.getErrorMsg());
 			return;
 		}
+
+		boolean isSqlServer = "MSSQL".equalsIgnoreCase(conn.getCurrentConfig().getType())
+				|| "SqlServer".equalsIgnoreCase(conn.getCurrentConfig().getType());
 
 		DTTable tb = new DTTable();
 		tb.initData(conn.getLastResult().getResultSet());
@@ -377,23 +495,58 @@ public class Table {
 				sb.append(tb.getColumns().getColumn(i).getName());
 			}
 			LOGGER.error("NOT defined the DDL column name from {}", sb.toString());
+			return;
 		}
 
+		String ddl = null;
+		StringBuilder sbDdl = new StringBuilder();
 		try {
-			String ddl = tb.getCell(0, colName).toString();
-			if (isView) {
-				if (this.replaceMetaDatabaseName != null) {
-					// 替换元数据库的前缀
-					ddl = ddl.replace(replaceMetaDatabaseName, REPLACE_META_DATABASE_NAME);
-				}
-				if (this.replaceWorkDatabaseName != null) {
-					// 替换工作数据库前缀
-					ddl = ddl.replace(replaceWorkDatabaseName, REPLACE_WORK_DATABASE_NAME);
-				}
+
+			for (int i = 0; i < tb.getCount(); i++) {
+				String s = tb.getCell(i, colName).toString();
+				sbDdl.append(s);
 			}
-			this.setSqlTable(ddl);
+			ddl = sbDdl.toString();
 		} catch (Exception e) {
+			LOGGER.error("{}", e.getMessage());
+			return;
 		}
+		if (!isView) { // 表
+			this.setSqlTable(ddl);
+			return;
+		}
+
+		// 视图替换数据库名称
+		if (this.replaceMetaDatabaseName != null) {
+			// 替换元数据库的前缀
+			// ddl = ddl.replace(replaceMetaDatabaseName, REPLACE_META_DATABASE_NAME);
+			if (isSqlServer) {
+				ddl = StringUtils.replaceIgnoreCase(ddl, replaceMetaDatabaseName + "..",
+						REPLACE_META_DATABASE_NAME + ".");
+				ddl = StringUtils.replaceIgnoreCase(ddl, replaceMetaDatabaseName + ".dbo.",
+						REPLACE_META_DATABASE_NAME + ".");
+			} else {
+				ddl = StringUtils.replaceIgnoreCase(ddl, replaceMetaDatabaseName, REPLACE_META_DATABASE_NAME);
+			}
+		}
+		if (this.replaceWorkDatabaseName != null) {
+			// 替换工作数据库前缀
+			// ddl = ddl.replace(replaceWorkDatabaseName, REPLACE_WORK_DATABASE_NAME);
+			if (isSqlServer) {
+				ddl = StringUtils.replaceIgnoreCase(ddl, replaceWorkDatabaseName + "..",
+						REPLACE_WORK_DATABASE_NAME + ".");
+				ddl = StringUtils.replaceIgnoreCase(ddl, replaceWorkDatabaseName + ".dbo.",
+						REPLACE_WORK_DATABASE_NAME + ".");
+			} else {
+				ddl = StringUtils.replaceIgnoreCase(ddl, replaceWorkDatabaseName, REPLACE_WORK_DATABASE_NAME);
+			}
+		}
+		if (isSqlServer) {
+			ddl = ddl.replace("[", "").replace("]", "").replace("dbo.", "");
+			ddl = StringUtils.replaceIgnoreCase(ddl, "CREATE VIEW", "CREATE VIEW " + REPLACE_WORK_DATABASE_NAME + ".",
+					1);
+		}
+		this.setSqlTable(ddl);
 
 	}
 
@@ -464,6 +617,11 @@ public class Table {
 
 	}
 
+	/**
+	 * 初始化字段信息
+	 * 
+	 * @param dataMeta
+	 */
 	private void initFields(DatabaseMetaData dataMeta) {
 		ResultSet rs = null;
 		boolean isMySql = false;
@@ -483,7 +641,6 @@ public class Table {
 				} else {
 					name = md.getColumnName(i);
 				}
-
 				String nameLabel = md.getColumnLabel(i);
 				if (nameLabel != null) {
 					name = nameLabel; // 出现在mysql中
@@ -499,6 +656,7 @@ public class Table {
 				f1.setDatabaseType(rs.getString("TYPE_NAME"));
 				String[] names = rs.getString("TYPE_NAME").split(" ");
 				if (names.length == 2 && names[1].toLowerCase().indexOf("identity") == 0) {
+					// sqlserver
 					f1.setIdentity(true);
 				}
 				if (fieldsMap.containsKey("IS_AUTOINCREMENT")) {
@@ -540,7 +698,6 @@ public class Table {
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -1048,10 +1205,11 @@ public class Table {
 		this.refId = refId;
 	}
 
-	 /**
-	  * 来源的xml内容
-	  * @return
-	  */
+	/**
+	 * 来源的xml内容
+	 * 
+	 * @return
+	 */
 	public String getSourceXml() {
 		return sourceXml;
 	}

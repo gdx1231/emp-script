@@ -9,13 +9,14 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.define.database.Field;
 import com.gdxsoft.easyweb.define.database.IndexField;
 import com.gdxsoft.easyweb.define.database.Table;
 import com.gdxsoft.easyweb.define.database.TableIndex;
+import com.gdxsoft.easyweb.define.database.maps.MapFieldType;
 import com.gdxsoft.easyweb.define.database.maps.MapSqlTemplate;
 import com.gdxsoft.easyweb.define.database.maps.MapSqlTemplates;
-import com.gdxsoft.easyweb.define.database.maps.MapFieldType;
 import com.gdxsoft.easyweb.define.database.maps.Maps;
 
 /**
@@ -24,12 +25,23 @@ import com.gdxsoft.easyweb.define.database.maps.Maps;
  */
 public class SqlTable {
 	private static Logger LOGGER = LoggerFactory.getLogger(SqlTable.class);
+
 	private Maps _Maps;
 	private String _Create;
 	private String _Pk;
 	private ArrayList<String> _Indexes;
 	private ArrayList<String> _Comments;
 	private Table _Table;
+	private String databaseType;
+	private FixTableOrField fix;
+
+	public String getDatabaseType() {
+		return databaseType;
+	}
+
+	public void setDatabaseType(String databaseType) {
+		this.databaseType = databaseType;
+	}
 
 	public SqlTable() {
 		this._Indexes = new ArrayList<String>();
@@ -37,7 +49,7 @@ public class SqlTable {
 		try {
 			this._Maps = Maps.instance();
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		}
 	}
 
@@ -51,6 +63,9 @@ public class SqlTable {
 	 */
 	public void createSqlTable(Table table, String databaseType) throws Exception {
 		this.setTable(table);
+		this.setDatabaseType(databaseType);
+		this.fix = FixTableOrField.getInstance(databaseType);
+
 		boolean sameDatebaseType = databaseType != null && databaseType.equalsIgnoreCase(table.getDatabaseType());
 		LOGGER.info("Create {} {} DDL from {} to {}", table.getTableType(), table.getName(), table.getDatabaseType(),
 				databaseType);
@@ -74,20 +89,16 @@ public class SqlTable {
 		HashMap<String, MapFieldType> alFrom = _Maps.getMapFieldTypes().getTypes(table.getDatabaseType());
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sbPk = new StringBuilder();
-		String fixCharBefore = "";
-		String fixCharAfter = "";
-		// if (table.getDatabaseType().equalsIgnoreCase("MSSQL")) {
-		// fixCharBefore = "[";
-		// fixCharAfter = "]";
-		// }
-		if (databaseType.equalsIgnoreCase("MSSQL")) {
-			fixCharBefore = "[";
-			fixCharAfter = "]";
-		}
-		boolean isPostgresql = databaseType.equalsIgnoreCase("POSTGRESQL");
-		boolean isMySql = databaseType.equalsIgnoreCase("MYSQL");
-		boolean isSqlServer = databaseType.equalsIgnoreCase("MYSQL");
-		sb.append("CREATE TABLE " + fixCharBefore + table.getName() + fixCharAfter + "(\r\n");
+
+		sb.append("CREATE TABLE ");
+
+		// 替换数据前缀，例如：my_work.dbo. (sqlserver), my_work.
+		sb.append(this.getDatabasePrefix());
+
+		sb.append(fix.getFixCharBefore());
+		sb.append(table.getName());
+		sb.append(fix.getFixCharAfter());
+		sb.append("(\n");
 		for (int i = 0; i < table.getFields().size(); i++) {
 			Field f = table.getFields().get(table.getFields().getFieldList().get(i));
 			if (f.isPk()) {
@@ -96,79 +107,138 @@ public class SqlTable {
 				}
 				sbPk.append(f.getName());
 			}
-			String fieldType = f.getDatabaseType().toUpperCase();
-
-			if (fieldType.endsWith("IDENTITY")) {
-				fieldType = fieldType.replace("IDENTITY", "").replace("(", "").replace(")", "").trim();
-			}
-			MapFieldType mapTo;
-
-			MapFieldType mapType = alFrom.get(fieldType);
-			if (mapType == null) {
-				throw new Exception("数据类型：" + fieldType + "未定义");
-			}
-			if (mapType.getDatabaseName().equalsIgnoreCase(databaseType)) {
-				// 数据库类型一致的话则保持原始数据类型，不用转换
-				mapTo = mapType;
-			} else {
-				MapFieldType[] b = mapType.getEwa().getMapTo().get(databaseType);
-
-				if (b.length == 0) {
-					throw new Exception("数据类型：" + fieldType + "未找到对应的类型《" + databaseType + "》！");
-				}
-				mapTo = b[0];
-			}
 			if (i > 0) {
 				sb.append(",\n");
 			}
-			String fieldType1 = mapTo.getName();
-			if (f.isIdentity() && isPostgresql) {
-				fieldType1=" serial ";
-				if("bigint".equals(mapTo.getName())) {
-					fieldType1= " bigserial "; 
-				} else if("smallint".equals(mapTo.getName())) {
-					fieldType1= " smallserial ";
-				}
-			}
-			sb.append("\t" + fixCharBefore + f.getName() + fixCharAfter + " " + fieldType1);
-			if (mapTo.getEwa().getCreateNumber() == 1) {
-				int len = f.getColumnSize() * mapType.getScale() / mapTo.getScale();
-				String lenDes = len + "";
-				if ((len < 0 || len == 2147483647 || len == 2147483647 / 2)
-						&& table.getDatabaseType().equalsIgnoreCase("MSSQL")) {
-					lenDes = "MAX";
-				}
-				sb.append("(" + lenDes + ")");
-			} else if (mapTo.getEwa().getCreateNumber() == 2) {
-				sb.append("(" + f.getColumnSize() + "," + f.getDecimalDigits() + ")");
-			}
-			if (f.isIdentity() && isSqlServer) {
-				sb.append(" IDENTITY(1,1) ");
-			}
-
-			if (!f.isNull() || f.isPk()) {
-				sb.append(" NOT NULL");
-			} else {
-				sb.append(" NULL");
-			}
-			if (f.isIdentity() && isMySql) {
-				sb.append(" AUTO_INCREMENT, PRIMARY KEY(`" + f.getName() + "`) ");
-			}
-			// 如果是mysql的话，在建表过程中，将注解建好
-			if (isMySql) {
-				sb.append(" COMMENT '" + f.getDescription().replace("'", "''") + "' ");
-			}
+			this.createTableField(f, alFrom);
 		}
-		sb.append(")");
-		this._Pk = this.createPrimaryKey(table, databaseType, sbPk.toString());
 
-		this.setCreate(sb.toString().toUpperCase());
+		// 主键表达式
+		if (table.getPk() != null && table.getPk().getPkFields().size() > 0) {
+			ArrayList<Field> pks = table.getPk().getPkFields();
+			sb.append("    , constraint " + table.getPk().getPkName() + " primary key(");
+			for (int i = 0; i < pks.size(); i++) {
+				Field f = pks.get(i);
+				if (i > 0) {
+					sb.append("\n, ");
+				}
+				sb.append(f.getName());
+			}
+			sb.append(")\n");
+		}
+		sb.append(")\n");
+		// this._Pk = this.createPrimaryKey(table, databaseType, sbPk.toString());
 
-		this.createSqlIndexes(table);
-		this.createTableComment(table, databaseType);
+		this.setCreate(sb.toString());
+
+		this.createSqlIndexes();
+		this.createTableComment();
 	}
 
-	private String createPrimaryKey(Table table, String databaseType, String sPk) {
+	/**
+	 * 创建表字段表达式
+	 * 
+	 * @param f
+	 * @param alFrom
+	 * @return
+	 * @throws Exception
+	 */
+	private String createTableField(Field f, HashMap<String, MapFieldType> alFrom) throws Exception {
+		StringBuilder sb = new StringBuilder();
+		boolean isPostgresql = SqlUtils.isPostgreSql(databaseType);
+		boolean isMySql = SqlUtils.isMySql(databaseType);
+		boolean isSqlServer = SqlUtils.isSqlServer(databaseType);
+
+		String fieldType = f.getDatabaseType().toUpperCase();
+
+		if (fieldType.endsWith("IDENTITY")) {
+			fieldType = fieldType.replace("IDENTITY", "").replace("(", "").replace(")", "").trim();
+		}
+		MapFieldType mapTo;
+
+		MapFieldType mapType = alFrom.get(fieldType);
+		if (mapType == null) {
+			throw new Exception("数据类型：" + fieldType + "未定义");
+		}
+		if (mapType.getDatabaseName().equalsIgnoreCase(databaseType)) {
+			// 数据库类型一致的话则保持原始数据类型，不用转换
+			mapTo = mapType;
+		} else {
+			MapFieldType[] b = mapType.getEwa().getMapTo().get(databaseType);
+
+			if (b.length == 0) {
+				throw new Exception("数据类型：" + fieldType + "未找到对应的类型《" + databaseType + "》！");
+			}
+			mapTo = b[0];
+		}
+
+		String fieldType1 = mapTo.getName();
+		if (f.isIdentity() && isPostgresql) {
+			fieldType1 = " serial ";
+			if ("bigint".equals(mapTo.getName())) {
+				fieldType1 = " bigserial ";
+			} else if ("smallint".equals(mapTo.getName())) {
+				fieldType1 = " smallserial ";
+			}
+		}
+		sb.append("\t");
+		sb.append(fix.getFixCharBefore());
+		sb.append(f.getName());
+		sb.append(fix.getFixCharAfter());
+		sb.append(" ");
+		sb.append(fieldType1);
+		if (mapTo.getEwa().getCreateNumber() == 1) {
+			int len = f.getColumnSize() * mapType.getScale() / mapTo.getScale();
+			String lenDes = len + "";
+			if ((len < 0 || len == 2147483647 || len == 2147483647 / 2)
+					&& SqlUtils.isSqlServer(_Table.getDatabaseType())) {
+				lenDes = "MAX";
+			}
+			sb.append("(" + lenDes + ")");
+		} else if (mapTo.getEwa().getCreateNumber() == 2) {
+			sb.append("(" + f.getColumnSize() + "," + f.getDecimalDigits() + ")");
+		}
+		if (f.isIdentity() && isSqlServer) {
+			sb.append(" IDENTITY(1,1) ");
+		}
+
+		if (!f.isNull() || f.isPk()) {
+			sb.append(" NOT NULL");
+		} else {
+			sb.append(" NULL");
+		}
+		if (f.isIdentity() && isMySql) {
+			sb.append(" AUTO_INCREMENT ");
+		}
+		// 如果是mysql的话，在建表过程中，将注解建好
+		if (isMySql) {
+			sb.append(" COMMENT '" + f.getDescription().replace("'", "''") + "' ");
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * 替换数据前缀，例如：my_work.dbo. (sqlserver), my_work.
+	 * 
+	 * @param table
+	 * @param databaseType
+	 * @return
+	 */
+	private String getDatabasePrefix() {
+		return this._Table.getDatabasePrefix(databaseType);
+	}
+
+	/**
+	 * 不用了
+	 * 
+	 * @param table
+	 * @param databaseType
+	 * @param sPk
+	 * @return
+	 */
+	@Deprecated
+	String createPrimaryKey(Table table, String databaseType, String sPk) {
 		if (sPk.trim().length() == 0) {
 			return "";
 		}
@@ -193,31 +263,64 @@ public class SqlTable {
 	/**
 	 * 生成表索引
 	 * 
-	 * @param table
+	 * @param table         表
+	 * @param databaseType  目标数据库类型
+	 * @param fixCharBefore 表名限定字符前缀
+	 * @param fixCharAfter  表名限定字符后缀
 	 */
-	private void createSqlIndexes(Table table) {
+	private void createSqlIndexes() {
 		this.setIndexes(new ArrayList<String>());
-		for (int i = 0; i < table.getIndexes().size(); i++) {
-			StringBuilder sb = new StringBuilder();
-			TableIndex idx = table.getIndexes().get(i);
+		for (int i = 0; i < _Table.getIndexes().size(); i++) {
+			TableIndex idx = _Table.getIndexes().get(i);
 			if (idx.isUnique() && idx.getIndexName().toLowerCase().startsWith("pk_")
 					|| idx.getIndexName().toLowerCase().endsWith("_pk")) {
 				// 主键已经创建
 				continue;
 			}
 
-			sb.append("CREATE " + (idx.isUnique() ? "UNIQUE" : "") + " INDEX " + idx.getIndexName() + " ON "
-					+ table.getName() + "(");
-			for (int m = 0; m < idx.getIndexFields().size(); m++) {
-				if (m > 0) {
-					sb.append(", ");
-				}
-				IndexField f = idx.getIndexFields().get(m);
-				sb.append(f.getName() + (f.isAsc() ? "" : " DESC"));
-			}
-			sb.append(")");
-			this.getIndexes().add(sb.toString().toUpperCase());
+			String indexDdl = this.createSqlIndex(idx);
+
+			this.getIndexes().add(indexDdl);
 		}
+	}
+
+	/**
+	 * 创建索引 DDL
+	 * 
+	 * @param table                表
+	 * @param idx                  索引
+	 * @param databaseType         目标数据库类型
+	 * @param fixCharBefore        表名限定字符前缀
+	 * @param fixCharAfter表名限定字符后缀
+	 * @return DDL
+	 */
+	private String createSqlIndex(TableIndex idx) {
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("CREATE ");
+		sb.append((idx.isUnique() ? "UNIQUE" : ""));
+		sb.append(" INDEX ");
+		sb.append(idx.getIndexName());
+		sb.append(" ON ");
+		sb.append(this.getDatabasePrefix());
+		sb.append(fix.getFixCharBefore());
+		sb.append(_Table.getName());
+		sb.append(fix.getFixCharAfter());
+		sb.append("(\n");
+		for (int m = 0; m < idx.getIndexFields().size(); m++) {
+			if (m > 0) {
+				sb.append("\n  , ");
+			}
+			IndexField f = idx.getIndexFields().get(m);
+			sb.append(fix.getFixCharBefore());
+			sb.append(f.getName());
+			sb.append(fix.getFixCharAfter());
+			sb.append((f.isAsc() ? "" : " DESC"));
+		}
+		sb.append(")\n");
+
+		return sb.toString();
 	}
 
 	/**
@@ -226,7 +329,7 @@ public class SqlTable {
 	 * @param table
 	 * @param databaseType
 	 */
-	private void createTableComment(Table table, String databaseType) {
+	private void createTableComment() {
 		MapSqlTemplates c = this._Maps.getMapSqlTemplates();
 		MapSqlTemplate c1 = c.getSqlTemplate(databaseType);
 		if (c1 == null) {
@@ -237,13 +340,13 @@ public class SqlTable {
 		if (s == null || s.trim().length() == 0) {
 			return;
 		}
-		for (int i = 0; i < table.getFields().size(); i++) {
-			Field f = table.getFields().get(table.getFields().getFieldList().get(i));
+		for (int i = 0; i < _Table.getFields().size(); i++) {
+			Field f = _Table.getFields().get(_Table.getFields().getFieldList().get(i));
 			if (f.getDescription().equals(f.getName())) {
 				continue;
 			}
 			String sql = s;
-			sql = sql.replace("{TABLE_NAME}", table.getName());
+			sql = sql.replace("{TABLE_NAME}", _Table.getName());
 			sql = sql.replace("{FIELD_NAME}", f.getName());
 			sql = sql.replace("{COMMENT}", f.getDescription());
 

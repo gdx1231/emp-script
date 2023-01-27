@@ -32,7 +32,7 @@ import com.gdxsoft.easyweb.utils.types.UInt64;
  * Reflect the class by name
  */
 public class UObjectValue {
-
+	public static final String CAST_ERROR = "___UObjectValue______CAST_ERROR_______UObjectValue____";
 	public static Map<String, Integer> GLOBL_CACHED = new ConcurrentHashMap<>();
 	private static Logger LOGGER = LoggerFactory.getLogger(UObjectValue.class);
 
@@ -188,9 +188,13 @@ public class UObjectValue {
 		Object[] newVals = new Object[method.getParameterTypes().length];
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
 			newVals[i] = convert(method.getParameterTypes()[i], para[i]);
+			if(newVals[i]!=null && newVals[i].toString().equals(CAST_ERROR)) {
+				return CAST_ERROR;
+			}
 			if (newVals[i] != null && newVals[i].toString().equals("[com.gdxsoft.easyweb.script.RequestValue]")) {
 				newVals[i] = para[i]; // 恢复rv
 			}
+			 
 		}
 		try {
 			method.invoke(instance, newVals);
@@ -251,7 +255,8 @@ public class UObjectValue {
 			Object o = t.cast(src);
 			return o;
 		} catch (Exception e) {
-			return e.getMessage();
+			LOGGER.info("cast error {}", e.getMessage());
+			return CAST_ERROR;
 		}
 	}
 
