@@ -814,7 +814,7 @@ public class EwaWfMain {
 			}
 		}
 
-		String sql = "SELECT * FROM _EWA_WF_DLV WHERE WF_ID=@WF_ID AND (WF_REF_ID=@G_SUP_UNID or WF_REF_ID=CONVERT(VARCHAR(50),@G_SUP_ID)) ";
+		String sql = "SELECT * FROM _EWA_WF_DLV WHERE WF_ID=@WF_ID AND WF_REF_ID=@G_SUP_UNID ";
 		if (version > 0) {
 			sql += " AND DLV_VER = " + version;
 		} else {
