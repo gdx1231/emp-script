@@ -14,6 +14,7 @@ import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UObjectValue;
@@ -492,11 +493,11 @@ public class EwaWfMain {
 		sb.append(",\r\n\"ST\":");
 		sql = o.getSql("WF_LOG_GET");
 
-		if(StringUtils.isBlank(sql)) {
+		if (StringUtils.isBlank(sql)) {
 			LOGGER.error("找不到WF_LOG_GET在ewa_conf.xml的工作流配置中");
-			throw new Exception ("Can't found WF_LOG_GET node in the ewa_conf.xml's workflow");
+			throw new Exception("Can't found WF_LOG_GET node in the ewa_conf.xml's workflow");
 		}
-		
+
 		DTTable table = DTTable.getJdbcTable(sql, cnn);
 		cnn.close();
 
@@ -925,19 +926,24 @@ public class EwaWfMain {
 	 * 发布版本
 	 */
 	public boolean delived(String wfId, String refId, String targetDatabaseName) {
+		DataConnection cnn = new DataConnection();
+		cnn.setConfigName("");
+
+		RequestValue rv = new RequestValue();
+		rv.addValue("sup_id", refId);
+		rv.addValue("WF_ID", wfId);
+		cnn.setRequestValue(rv);
+
 		String dbName = "";
 		if (targetDatabaseName != null) {
-			dbName = targetDatabaseName + "..";
+			if (SqlUtils.isSqlServer(cnn)) {
+				dbName = targetDatabaseName + "..";
+			} else {
+				dbName = targetDatabaseName + ".";
+			}
 		}
 		// System.out.println("WF_ID=" + wfId);
 		this.init(wfId, refId);
-
-		DataConnection cnn = new DataConnection();
-		cnn.setConfigName("");
-		RequestValue rv = new RequestValue();
-		rv.addValue("WF_ID", this._Wf.getWfId());
-		rv.addValue("sup_id", refId);
-		cnn.setRequestValue(rv);
 
 		String sql1 = "SELECT A.WF_UNIT_ID FROM _EWA_WF_UNIT A"
 				+ " INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@SUP_ID " + " WHERE A.WF_ID=@WF_ID"
@@ -957,23 +963,52 @@ public class EwaWfMain {
 		// 生成验证码，如果节点数量和编号未变化+ 连接数量和前后关系没变化
 		String code = unitCode + "|" + cnnCode;
 
-		sql1 = "SELECT A.* FROM _EWA_WF_UNIT A" + " INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@SUP_ID "
-				+ " WHERE A.WF_ID=@WF_ID" + " ORDER BY WF_UNIT_ID";
+		StringBuilder sbUnit = new StringBuilder();
+		sbUnit.append("SELECT A.* FROM _EWA_WF_UNIT A  \n");
+		sbUnit.append(" INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@SUP_ID  \n");
+		sbUnit.append(" WHERE A.WF_ID=@WF_ID  \n");
+		sbUnit.append(" ORDER BY WF_UNIT_ID ");
+		sql1 = sbUnit.toString();
 		DTTable tbUnit = DTTable.getJdbcTable(sql1, cnn);
 
-		String sqlUnitHis = "INSERT INTO _EWA_WF_UNIT_HIS(WF_UNIT_ID, WF_ID, WF_REF_ID, WF_UNIT_NAME, WF_UNIT_MEMO)"
-				+ "	SELECT WF_UNIT_ID, WF_ID, WF_REF_ID, WF_UNIT_NAME, WF_UNIT_MEMO FROM _EWA_WF_UNIT A"
-				+ " WHERE NOT EXISTS(" + "	SELECT * FROM _EWA_WF_UNIT_his b where a.wf_id=b.wf_id "
-				+ "		and a.wf_unit_id=b.wf_unit_id" + "		 and a.wf_ref_id=b.wf_ref_id"
-				+ ") AND A.WF_REF_ID=@SUP_ID AND A.WF_ID=@WF_ID;" + "\r\n " + "UPDATE _EWA_WF_UNIT_HIS SET "
-				+ "		_EWA_WF_UNIT_HIS.WF_UNIT_NAME=A.WF_UNIT_NAME,"
-				+ "		_EWA_WF_UNIT_HIS.WF_UNIT_MEMO=A.WF_UNIT_MEMO " + "FROM _EWA_WF_UNIT A "
-				+ "WHERE _EWA_WF_UNIT_HIS.WF_ID=A.WF_ID" + "	AND _EWA_WF_UNIT_HIS.WF_UNIT_ID=A.WF_UNIT_ID"
-				+ "	AND _EWA_WF_UNIT_HIS.WF_REF_ID=A.WF_REF_ID" + "	AND _EWA_WF_UNIT_HIS.WF_ID=@WF_ID"
-				+ "	AND _EWA_WF_UNIT_HIS.WF_REF_ID=@SUP_ID";
+		StringBuilder sbHis = new StringBuilder();
+		sbHis.append("INSERT INTO _EWA_WF_UNIT_HIS(WF_UNIT_ID, WF_ID, WF_REF_ID, WF_UNIT_NAME, WF_UNIT_MEMO)  \n");
+		sbHis.append("	SELECT WF_UNIT_ID, WF_ID, WF_REF_ID, WF_UNIT_NAME, WF_UNIT_MEMO FROM _EWA_WF_UNIT A  \n");
+		sbHis.append(" WHERE NOT EXISTS(  \n");
+		sbHis.append("	SELECT * FROM _EWA_WF_UNIT_his b where a.wf_id=b.wf_id  \n");
+		sbHis.append("		and a.wf_unit_id=b.wf_unit_id  \n");
+		sbHis.append("		 and a.wf_ref_id=b.wf_ref_id  \n");
+		sbHis.append(") AND A.WF_REF_ID=@SUP_ID AND A.WF_ID=@WF_ID;");
+		sbHis.append("\r\n ");
+		if (SqlUtils.isSqlServer(cnn)) {
+			sbHis.append("UPDATE _EWA_WF_UNIT_HIS SET  \n");
+			sbHis.append("		_EWA_WF_UNIT_HIS.WF_UNIT_NAME=A.WF_UNIT_NAME,  \n");
+			sbHis.append("		_EWA_WF_UNIT_HIS.WF_UNIT_MEMO=A.WF_UNIT_MEMO  \n");
+			sbHis.append("FROM _EWA_WF_UNIT A  \n");
+			sbHis.append("WHERE _EWA_WF_UNIT_HIS.WF_ID=A.WF_ID  \n");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_UNIT_ID=A.WF_UNIT_ID  \n");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_REF_ID=A.WF_REF_ID  \n");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_ID=@WF_ID  \n");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_REF_ID=@SUP_ID");
+		} else {
+			sbHis.append("UPDATE _EWA_WF_UNIT_HIS INNER JOIN _EWA_WF_UNIT A \n");
+			sbHis.append(" ON _EWA_WF_UNIT_HIS.WF_ID=A.WF_ID \n");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_UNIT_ID=A.WF_UNIT_ID  \n");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_REF_ID=A.WF_REF_ID  \n");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_ID=@WF_ID  \n");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_REF_ID=@SUP_ID  \n");
+			sbHis.append("SET	_EWA_WF_UNIT_HIS.WF_UNIT_NAME=A.WF_UNIT_NAME, \n");
+			sbHis.append("		_EWA_WF_UNIT_HIS.WF_UNIT_MEMO=A.WF_UNIT_MEMO \n");
 
-		sql2 = "SELECT A.* FROM _EWA_WF_CNN A" + " INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@SUP_ID "
-				+ " WHERE A.WF_ID=@WF_ID" + " ORDER BY WF_UNIT_FROM, WF_UNIT_TO";
+		}
+		String sqlUnitHis = sbHis.toString();
+
+		StringBuilder sb2 = new StringBuilder();
+		sb2.append("SELECT A.* FROM _EWA_WF_CNN A");
+		sb2.append(" INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@SUP_ID ");
+		sb2.append(" WHERE A.WF_ID = @WF_ID");
+		sb2.append(" ORDER BY WF_UNIT_FROM, WF_UNIT_TO");
+		sql2 = sb2.toString();
 
 		DTTable tbCnn = DTTable.getJdbcTable(sql2, cnn);
 
