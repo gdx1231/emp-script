@@ -2,14 +2,17 @@ package com.gdxsoft.easyweb.define.group;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 import org.json.JSONObject;
 
 import com.gdxsoft.easyweb.conf.ConfScriptPaths;
-import com.gdxsoft.easyweb.data.DTTable;
-import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.define.ConfigUtils;
 import com.gdxsoft.easyweb.define.IUpdateXml;
+import com.gdxsoft.easyweb.define.group.dao.EwaModDownload;
+import com.gdxsoft.easyweb.define.group.dao.EwaModDownloadDao;
+import com.gdxsoft.easyweb.define.group.dao.EwaModImportLog;
+import com.gdxsoft.easyweb.define.group.dao.EwaModImportLogDao;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UJSon;
@@ -28,6 +31,12 @@ public class ModuleImport extends ModuleBase {
 	private boolean importTables; // 导入表
 	private boolean importData; // 导入数据
 	private boolean importXItems; // 导入配置项
+
+	private Exchange exchange;
+
+	public Exchange getExchange() {
+		return exchange;
+	}
 
 	public ModuleImport(String moduleCode, String moduleVersion, String importDataConn, String replaceMetaDatabaseName,
 			String replaceWorkDatabaseName) {
@@ -60,15 +69,56 @@ public class ModuleImport extends ModuleBase {
 	}
 
 	public JSONObject importModuleFromDownloadModule(int modDlId, RequestValue rv) {
-		String sql = "select * from ewa_mod_download where mod_dl_id = " + modDlId;
-		DTTable tb = DTTable.getJdbcTable(sql, this.jdbcConfigName);
-		if (tb.getCount() == 0) {
+		// 记录导入DDL到日志中
+		EwaModImportLogDao dao = new EwaModImportLogDao();
+		dao.setConfigName(jdbcConfigName);
+
+		EwaModImportLog log = new EwaModImportLog();
+		log.setLogBegin(new Date());
+		log.setModDlId(modDlId);
+
+		log.setLogIp(rv.s(RequestValue.SYS_REMOTEIP));
+		log.setLogRef(rv.s(RequestValue.SYS_REMOTE_REFERER, 1000));
+		log.setLogUa(rv.s(RequestValue.SYS_USER_AGENT, 500));
+		log.setLogStatus("USED");
+		
+		EwaModDownloadDao dao1 = new EwaModDownloadDao();
+		dao1.setConfigName(jdbcConfigName);
+		EwaModDownload mod = dao1.getRecord(modDlId);
+		
+		if (mod == null) {
+			log.setLogErrors("No data");
+			log.setLogContent("No data");
+			log.setLogEnd(new Date());
+			dao.newRecord(log);
 			return UJSon.rstFalse("No data");
 		}
 
-		String sql1 = "update ewa_mod_download set import_data_conn=@import_data_conn, replace_meta_databaseName=@replace_meta_databaseName, replace_work_databaseName=@replace_work_databaseName where mod_dl_id = "
-				+ modDlId;
-		DataConnection.updateAndClose(sql1, this.jdbcConfigName, rv);
+		/*
+		 * String sql = "select * from ewa_mod_download where mod_dl_id = " + modDlId;
+		 * DTTable tb = DTTable.getJdbcTable(sql, this.jdbcConfigName); if
+		 * (tb.getCount() == 0) { log.setLogErrors("No data");
+		 * log.setLogContent("No data"); log.setLogEnd(new Date()); dao.newRecord(log);
+		 * return UJSon.rstFalse("No data"); }
+		 */
+
+		mod.startRecordChanged();
+		mod.setImportDataConn(rv.s("import_data_conn"));
+		mod.setReplaceMetaDatabasename(rv.s("replace_meta_databaseName"));
+		mod.setReplaceWorkDatabasename(rv.s("replace_work_databaseName"));
+
+		dao1.updateRecord(mod, mod.getMapFieldChanged());
+
+		log.setModCode(mod.getModCode());
+		log.setModName(mod.getModName());
+		log.setModVer(mod.getModVer());
+		log.setImportDataConn(mod.getImportDataConn());
+		log.setReplaceMetaDatabasename(mod.getReplaceMetaDatabasename());
+		log.setReplaceWorkDatabasename(mod.getReplaceWorkDatabasename());
+
+//		String sql1 = "update ewa_mod_download set import_data_conn=@import_data_conn, replace_meta_databaseName=@replace_meta_databaseName, replace_work_databaseName=@replace_work_databaseName where mod_dl_id = "
+//				+ modDlId;
+//		DataConnection.updateAndClose(sql1, this.jdbcConfigName, rv);
 
 		File tempFile;
 		try {
@@ -78,7 +128,8 @@ public class ModuleImport extends ModuleBase {
 		}
 		byte[] buf;
 		try {
-			buf = (byte[]) tb.getCell(0, "pkg_file").getValue();
+			// buf = (byte[]) tb.getCell(0, "pkg_file").getValue();
+			buf = mod.getPkgFile();
 		} catch (Exception e) {
 			return UJSon.rstFalse(e.getMessage());
 		}
@@ -88,7 +139,15 @@ public class ModuleImport extends ModuleBase {
 			return UJSon.rstFalse(e.getMessage());
 		}
 
-		return this.importModule(tempFile.getAbsolutePath());
+		JSONObject result = this.importModule(tempFile.getAbsolutePath());
+		String ddlLog = exchange.getImportTables().getSqls().toString();
+		log.setLogEnd(new Date());
+		log.setLogContent(ddlLog);
+		log.setLogResult(result.toString());
+
+		dao.newRecord(log);
+
+		return result;
 
 	}
 
@@ -110,8 +169,9 @@ public class ModuleImport extends ModuleBase {
 		result.put("importTables", importTables);
 		result.put("importData", importData);
 		result.put("importDataConn", importDataConn);
-		
+
 		Exchange ex = new Exchange(id, this.importDataConn);
+		this.exchange = ex;
 		ex.setReplaceMetaDatabaseName(this.replaceMetaDatabaseName);
 		ex.setReplaceWorkDatabaseName(this.replaceWorkDatabaseName);
 

@@ -110,7 +110,8 @@ public class SqlTable {
 			if (i > 0) {
 				sb.append(",\n");
 			}
-			this.createTableField(f, alFrom);
+			String fieldExp = this.createTableField(f, alFrom);
+			sb.append(fieldExp);
 		}
 
 		// 主键表达式

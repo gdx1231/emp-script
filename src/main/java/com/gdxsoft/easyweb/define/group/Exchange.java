@@ -67,6 +67,12 @@ public class Exchange {
 	// 模块说明信息，主要用到 metaDatabase meta库名称和 workDatabase工作库名称
 	private ModuleDescription moduleDescription;
 
+	private ImportTables importTables;
+
+	public ImportTables getImportTables() {
+		return importTables;
+	}
+
 	/**
 	 * 模块说明信息，主要用到<br>
 	 * metaDatabase meta库名称<br>
@@ -194,7 +200,7 @@ public class Exchange {
 	 */
 	public String importTableAndData(boolean importTbs, boolean importData) throws Exception {
 		StringBuilder sbErr = new StringBuilder();
-		ImportTables importTables = new ImportTables(this._DocTable, this._DocData, this._Conn);
+		this.importTables = new ImportTables(this._DocTable, this._DocData, this._Conn);
 
 		importTables.setModuleDescription(this.getModuleDescription());
 

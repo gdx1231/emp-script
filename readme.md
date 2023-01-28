@@ -13,15 +13,15 @@ The goal of the development system is to reduce the development cycle by 80%, de
 该开发系统的目标是降低80%部分的开发周期，将大量的低技术含量的工作通过XML配置文件进行部署，解放工程师的时间，使其将主要精力放到数据库架构设计和核心业务逻辑上，同时减少开发时间和开发成本。
 ## 转换文件配置到数据库配置
 
-```java
+java
 // ewa 是在ewa_conf.xml的 <scriptPath name="ewa" path="jdbc:ewa" />
 FileConf2JdbcConf f2j = new FileConf2JdbcConf("ewa");
 String root = "/Users/guolei/project/user.config.xml";
 f2j.startConvert(root);
-```
+
 
 ## 英式日期格式定义
-```xml
+xml
 <!-- 全局变量定义 -->
 <globals>
 		<!-- 覆盖EwaGlobal.xml的定义 -->
@@ -37,11 +37,11 @@ _EWA_G_SETTINGS.DATE = 'dd/MM/yyyy'; //英国
 ]]>
 		</addedResource>
 </addedResources>
-```
+
 
 ## Create a EWA tables （MYSQL）
 
-```sql
+sql
 CREATE TABLE ewa_cfg (
   XMLNAME varchar(200) NOT NULL,
   ITEMNAME varchar(100) NOT NULL,
@@ -109,11 +109,11 @@ CREATE TABLE ewa_cfg_tree (
   EDIT_STATUS varchar(10) DEFAULT NULL COMMENT '编辑状态',
   PRIMARY KEY (XMLNAME)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-```
+
 
 ## RESTful tables （MYSQL）
 
-```sql
+sql
 CREATE TABLE ewa_restful (
   rs_uid varchar(36) CHARACTER SET latin1 NOT NULL COMMENT '请求编号',
   cat_uid varchar(36) CHARACTER SET latin1 NOT NULL COMMENT '目录编号',
@@ -161,11 +161,11 @@ CREATE TABLE ewa_restful_catalog (
   KEY ewa_restful_catalog_p0_IDX (p0,p1,p2,p3,p4,p5,p6,p7,p8,p9) USING BTREE,
   KEY idx_ewa_restful_catalog (cat_status,p0,p1,p2,p3,p4,p5,p6,p7,p8,p9)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-```
+
 
 ## RESTful tables （HSQLDB）
 
-```sql
+sql
 CREATE TABLE EWA_RESTFUL (
  RS_UID VARCHAR(36) NOT NULL,
  CAT_UID VARCHAR(36) NOT NULL,
@@ -213,11 +213,11 @@ CREATE TABLE EWA_RESTFUL_CATALOG (
 CREATE INDEX IDX_EWA_RESTFUL_CATALOG ON EWA_RESTFUL_CATALOG (CAT_STATUS,P0,P1,P2,P3,P4,P5,P6,P7,P8,P9);
 CREATE INDEX IDX_EWA_RESTFUL_CATALOG_CAT_PUID ON EWA_RESTFUL_CATALOG (CAT_PUID);
 CREATE INDEX IDX_EWA_RESTFUL_CATALOG_P0 ON EWA_RESTFUL_CATALOG (P0,P1,P2,P3,P4,P5,P6,P7,P8,P9);
-```
+
 
 ## Module 导入/导出 tables （MYSQL）
 
-```sql
+sql
 create table ewa_mod (
   mod_code varchar(100) not null comment '模块编码',
   mod_name varchar(100) not null comment '模块名称',
@@ -401,11 +401,34 @@ create table ewa_mod_download (
   replace_work_databasename varchar(64) default null comment '替换工作据库名称',
   primary key (mod_dl_id)
 ) engine=innodb default charset=utf8mb4 comment '下载的模块包';
-```
+
+
+CREATE TABLE ewa_mod_import_log (
+  log_id int NOT NULL AUTO_INCREMENT COMMENT '日志编号',
+  mod_dl_id int DEFAULT NULL COMMENT '下载序号',
+  mod_code varchar(100) DEFAULT NULL COMMENT '模块编码',
+  mod_ver varchar(30) DEFAULT NULL COMMENT '模块版本',
+  mod_name varchar(100) DEFAULT NULL COMMENT '模块名称',
+  import_data_conn varchar(50) DEFAULT NULL COMMENT '导入数据的连接名称',
+  replace_meta_databasename varchar(64) DEFAULT NULL COMMENT '替换元数据库名称',
+  replace_work_databasename varchar(64) DEFAULT NULL COMMENT '替换工作据库名称',
+  log_begin datetime DEFAULT NULL COMMENT '开始时间',
+  log_end datetime DEFAULT NULL COMMENT '结束时间',
+  log_content longtext COMMENT '日志内容',
+  log_errors longtext COMMENT '日志错误',
+  log_result longtext COMMENT '执行结果记录',
+  log_ip varchar(40) DEFAULT NULL COMMENT 'ip地址',
+  log_ua varchar(500) DEFAULT NULL COMMENT 'UA',
+  log_ref varchar(1000) DEFAULT NULL COMMENT 'referer',
+  log_status varchar(4) DEFAULT NULL COMMENT '状态',
+  PRIMARY KEY (log_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='导入日志';
+
+
 
 ## Create a EWA tables （HSQLDB）
 
-```sql
+sql
 CREATE TABLE EWA_MOD (
  MOD_CODE VARCHAR(100) NOT NULL,
  MOD_NAME VARCHAR(100) NOT NULL,
@@ -594,11 +617,11 @@ CREATE TABLE EWA_MOD_VER (
  CONSTRAINT PK_EWA_MOD_VER PRIMARY KEY (MOD_VER_ID)
 );
 
-```
+
 
 ## Create a EWA tables （SQLSERVER）
 
-```sql
+sql
 CREATE TABLE EWA_CFG (
  XMLNAME varchar(200) NOT NULL,
  ITEMNAME varchar(100) NOT NULL,
@@ -667,15 +690,15 @@ CREATE TABLE EWA_CFG_TREE (
  EDIT_STATUS varchar(10) NULL,
  CONSTRAINT PK_EWA_CFG_TREE PRIMARY KEY (XMLNAME)
 );
-```
+
 
 ## Maven
 
-```xml
+xml
 <!-- https://mvnrepository.com/artifact/com.gdxsoft.easyweb/emp-script -->
 <dependency>
     <groupId>com.gdxsoft.easyweb</groupId>
     <artifactId>emp-script</artifactId>
     <version>1.1.5</version>
 </dependency>
-```
+
