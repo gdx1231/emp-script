@@ -26,6 +26,10 @@ public class FileOut {
 	public static Map<String, String> MAP = new ConcurrentHashMap<String, String>();
 	public static String DEF_DOWNLOAD_TYPE = "application/octet-stream";
 	static {
+		
+		MAP.put("avif", "image/avif"); //浏览器最新格式
+		MAP.put("heic", "image/heic"); //苹果格式
+		
 		MAP.put("123", "application/vnd.lotus-1-2-3");
 		MAP.put("3dml", "text/vnd.in3d.3dml");
 		MAP.put("3ds", "image/x-3ds");

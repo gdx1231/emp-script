@@ -114,16 +114,23 @@ public class SqlTable {
 			sb.append(fieldExp);
 		}
 
+		boolean isMySql = SqlUtils.isMySql(databaseType);
 		// 主键表达式
 		if (table.getPk() != null && table.getPk().getPkFields().size() > 0) {
 			ArrayList<Field> pks = table.getPk().getPkFields();
-			sb.append("    , constraint " + table.getPk().getPkName() + " primary key(");
+			sb.append(",\n\t");
+			if (!isMySql) {
+				sb.append(" constraint " + fix.getFixCharBefore() + table.getPk().getPkName() + fix.getFixCharAfter());
+			}
+			sb.append(" primary key(");
 			for (int i = 0; i < pks.size(); i++) {
 				Field f = pks.get(i);
 				if (i > 0) {
 					sb.append("\n, ");
 				}
+				sb.append(fix.getFixCharBefore());
 				sb.append(f.getName());
+				sb.append(fix.getFixCharAfter());
 			}
 			sb.append(")\n");
 		}
@@ -134,6 +141,23 @@ public class SqlTable {
 
 		this.createSqlIndexes();
 		this.createTableComment();
+	}
+
+	private MapFieldType getMapTo(String fieldType, HashMap<String, MapFieldType> alFrom) throws Exception {
+		MapFieldType mapType = alFrom.get(fieldType);
+		if (mapType == null) {
+			throw new Exception("数据类型：" + fieldType + "未定义");
+		}
+		if (mapType.getDatabaseName().equalsIgnoreCase(databaseType)) {
+			// 数据库类型一致的话则保持原始数据类型，不用转换
+			return mapType;
+		}
+		MapFieldType[] b = mapType.getEwa().getMapTo().get(databaseType);
+		if (b.length == 0) {
+			throw new Exception("数据类型：" + fieldType + "未找到对应的类型《" + databaseType + "》！");
+		}
+		return b[0];
+
 	}
 
 	/**
@@ -150,30 +174,23 @@ public class SqlTable {
 		boolean isMySql = SqlUtils.isMySql(databaseType);
 		boolean isSqlServer = SqlUtils.isSqlServer(databaseType);
 
+		// 来源是否为SQLServer
+		boolean isSourceSqlServer = SqlUtils.isSqlServer(this._Table.getDatabaseType());
+
+		// INT , NVARCHAR, CHAR , DATETIME ...
 		String fieldType = f.getDatabaseType().toUpperCase();
 
-		if (fieldType.endsWith("IDENTITY")) {
+		if (isSourceSqlServer && fieldType.endsWith("IDENTITY")) {
 			fieldType = fieldType.replace("IDENTITY", "").replace("(", "").replace(")", "").trim();
 		}
-		MapFieldType mapTo;
 
-		MapFieldType mapType = alFrom.get(fieldType);
-		if (mapType == null) {
-			throw new Exception("数据类型：" + fieldType + "未定义");
-		}
-		if (mapType.getDatabaseName().equalsIgnoreCase(databaseType)) {
-			// 数据库类型一致的话则保持原始数据类型，不用转换
-			mapTo = mapType;
-		} else {
-			MapFieldType[] b = mapType.getEwa().getMapTo().get(databaseType);
+		// 映射的对象
+		MapFieldType mapTo = this.getMapTo(fieldType, alFrom);
 
-			if (b.length == 0) {
-				throw new Exception("数据类型：" + fieldType + "未找到对应的类型《" + databaseType + "》！");
-			}
-			mapTo = b[0];
-		}
-
+		// 映射的字段类型
 		String fieldType1 = mapTo.getName();
+
+		// 自增序列
 		if (f.isIdentity() && isPostgresql) {
 			fieldType1 = " serial ";
 			if ("bigint".equals(mapTo.getName())) {
@@ -182,22 +199,43 @@ public class SqlTable {
 				fieldType1 = " smallserial ";
 			}
 		}
+
+		// 不需要长度表达式
+		boolean noLenExp = false;
+		if ("varchar".equalsIgnoreCase(fieldType1) || "nvarchar".equalsIgnoreCase(fieldType1)) { // sqlserver max 转换为
+			int len = f.getColumnSize();
+			if (len == 2147483647 || len == 2147483647 / 2) {
+				MapFieldType mapTo1 = this.getMapTo("NVARCHAR_MAX", alFrom);
+				fieldType1 = mapTo1.getName();
+				noLenExp = true;
+			}
+		} else if ("varbinary".equalsIgnoreCase(fieldType1)) { // sqlserver max 转换为
+			int len = f.getColumnSize();
+			if (len == 2147483647 || len == 2147483647 / 2) {
+				MapFieldType mapTo1 = this.getMapTo("VARBINARY_MAX", alFrom);
+				fieldType1 = mapTo1.getName();
+				noLenExp = true;
+			}
+		}
+
 		sb.append("\t");
 		sb.append(fix.getFixCharBefore());
 		sb.append(f.getName());
 		sb.append(fix.getFixCharAfter());
 		sb.append(" ");
 		sb.append(fieldType1);
-		if (mapTo.getEwa().getCreateNumber() == 1) {
-			int len = f.getColumnSize() * mapType.getScale() / mapTo.getScale();
-			String lenDes = len + "";
-			if ((len < 0 || len == 2147483647 || len == 2147483647 / 2)
-					&& SqlUtils.isSqlServer(_Table.getDatabaseType())) {
-				lenDes = "MAX";
+
+		if (!noLenExp) { // 不需要长度表达式
+			if (mapTo.getEwa().getCreateNumber() == 1) {
+				int len = f.getColumnSize();
+				String lenDes = len + "";
+				if ((len < 0 || len == 2147483647 || len == 2147483647 / 2) && isSqlServer) {
+					lenDes = "MAX";
+				}
+				sb.append("(" + lenDes + ")");
+			} else if (mapTo.getEwa().getCreateNumber() == 2) {
+				sb.append("(" + f.getColumnSize() + "," + f.getDecimalDigits() + ")");
 			}
-			sb.append("(" + lenDes + ")");
-		} else if (mapTo.getEwa().getCreateNumber() == 2) {
-			sb.append("(" + f.getColumnSize() + "," + f.getDecimalDigits() + ")");
 		}
 		if (f.isIdentity() && isSqlServer) {
 			sb.append(" IDENTITY(1,1) ");

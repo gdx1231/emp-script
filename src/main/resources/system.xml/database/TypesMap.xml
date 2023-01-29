@@ -50,10 +50,28 @@
 				<MapTo Name="CLOB" />
 			</Database>
 			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="LONGTEXT" />
 				<MapTo Name="TEXT" />
 				<MapTo Name="MEDIUMTEXT" />
-				<MapTo Name="LONGTEXT" />
 				<MapTo Name="LONG VARCHAR" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="CLOB" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="TEXT" />
+			</Database>
+		</Map>
+		<Map Name="NVARCHAR_MAX" CreateNumber="0" InsertPrefix="'" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="nvarchar(max)" />
+				<MapTo Name="NVARCHAR_MAX" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="CLOB" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="LONGTEXT" />
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
 				<MapTo Name="CLOB" />
@@ -90,7 +108,8 @@
 				<MapTo Name="INT" />
 			</Database>
 		</Map>
-		<Map Name="BIGINT UNSIGNED" CreateNumber="0" InsertPrefix="" Desc="">
+		<Map Name="BIGINT UNSIGNED" CreateNumber="0" InsertPrefix=""
+			Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="BIGINT" />
 			</Database>
@@ -200,7 +219,8 @@
 				<MapTo Name="NUMERIC" />
 			</Database>
 		</Map>
-		<Map Name="BINARY" CreateNumber="1" InsertPrefix="" InsertCovert="BIN" Desc="">
+		<Map Name="BINARY" CreateNumber="1" InsertPrefix=""
+			InsertCovert="BIN" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="BINARY" />
 			</Database>
@@ -217,7 +237,8 @@
 				<MapTo Name="BYTEA" />
 			</Database>
 		</Map>
-		<Map Name="VARBINARY" CreateNumber="1" InsertPrefix="" InsertCovert="BIN" Desc="">
+		<Map Name="VARBINARY" CreateNumber="1" InsertPrefix=""
+			InsertCovert="BIN" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="VARBINARY" />
 			</Database>
@@ -234,7 +255,8 @@
 				<MapTo Name="BYTEA" />
 			</Database>
 		</Map>
-		<Map Name="IMAGE" CreateNumber="0" InsertPrefix="" InsertCovert="BIN" Desc="">
+		<Map Name="IMAGE" CreateNumber="0" InsertPrefix=""
+			InsertCovert="BIN" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="IMAGE" />
 			</Database>
@@ -255,16 +277,38 @@
 				<MapTo Name="BYTEA" />
 			</Database>
 		</Map>
-
-		<Map Name="DATETIME" CreateNumber="0" InsertCovert="DATE" InsertPrefix="" Desc="">
+		<Map Name="VARBINARY_MAX" CreateNumber="0" InsertPrefix="'"
+			Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="VARBINARY(MAX)" />
+				<MapTo Name="VARBINARY_MAX" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="BLOB" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="LONGBLOB" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="BLOB" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="BYTEA" />
+			</Database>
+		</Map>
+		<Map Name="DATETIME" CreateNumber="0" InsertCovert="DATE"
+			InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
-				<MapTo Name="SMALLDATETIME" InsertCovert="replace('@val', 'T',' ')" />
+				<MapTo Name="SMALLDATETIME"
+					InsertCovert="replace('@val', 'T',' ')" />
 				<MapTo Name="DATE" InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
 			<Database Name="ORACLE" Desc="ORACLE">
-				<MapTo Name="DATE" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
-				<MapTo Name="TIME" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+				<MapTo Name="DATE"
+					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+				<MapTo Name="TIME"
+					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
 			</Database>
 			<Database Name="MYSQL" Desc="MySQL">
 				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
@@ -276,24 +320,31 @@
 				<MapTo Name="DATETIME" InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
 			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
-				<MapTo Name="TIMESTAMP" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+				<MapTo Name="TIMESTAMP"
+					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
 			</Database>
 		</Map>
-		<Map Name="TIMESTAMP" CreateNumber="0" InsertCovert="DATE" InsertPrefix="" Desc="">
+		<Map Name="TIMESTAMP" CreateNumber="0" InsertCovert="DATE"
+			InsertPrefix="" Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
-				<MapTo Name="TIMESTAMP" InsertCovert="replace('@val', 'T',' ')" />
+				<MapTo Name="TIMESTAMP"
+					InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
 			<Database Name="ORACLE" Desc="ORACLE">
-				<MapTo Name="TIMESTAMP" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+				<MapTo Name="TIMESTAMP"
+					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
 			</Database>
 			<Database Name="MYSQL" Desc="MySQL">
-				<MapTo Name="TIMESTAMP" InsertCovert="replace('@val', 'T',' ')" />
+				<MapTo Name="TIMESTAMP"
+					InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
 			<Database Name="HSQLDB" Desc="HSQLDB">
-				<MapTo Name="TIMESTAMP" InsertCovert="replace('@val', 'T',' ')" />
+				<MapTo Name="TIMESTAMP"
+					InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
 			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
-				<MapTo Name="TIMESTAMP" InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
+				<MapTo Name="TIMESTAMP"
+					InsertCovert="to_date(replace('@val','T',' '), 'YYYY-MM-DD HH24:MI:SS')" />
 			</Database>
 		</Map>
 		<Map Name="BIT" CreateNumber="0" InsertPrefix="" Desc="">
@@ -314,7 +365,8 @@
 			</Database>
 		</Map>
 
-		<Map Name="uniqueidentifier" CreateNumber="0" InsertPrefix="'" Desc="">
+		<Map Name="uniqueidentifier" CreateNumber="0" InsertPrefix="'"
+			Desc="">
 			<Database Name="MSSQL" Desc="微软SQL SERVER">
 				<MapTo Name="uniqueidentifier" />
 			</Database>
@@ -484,7 +536,7 @@ FROM dba_tab_columns A
 				<![CDATA[COMMENT ON COLUMN {TABLE_NAME}.{FIELD_NAME} IS '{COMMENT}']]>
 			</FieldCommentSet>
 		</SqlTemplate>
-		
+
 		<SqlTemplate Name="POSTGRESQL">
 			<PrimaryKey>
 				<![CDATA[ALTER TABLE {TABLE_NAME} ADD CONSTRAINT pk_{TABLE_NAME} PRIMARY KEY ({FIELD_NAMES})]]>
