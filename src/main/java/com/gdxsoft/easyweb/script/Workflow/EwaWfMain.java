@@ -578,7 +578,7 @@ public class EwaWfMain {
 			String startAdmin, DataConnection cnn) {
 		String sqlAdms = "select adm_id, adm_name from adm_user where sup_id=@g_sup_id and adm_id=@g_adm_id and adm_id in ";
 		String sqlDept = "select dep_id, dep_name from adm_dept where sup_id=@g_sup_id and dep_id=@g_dep_id and dep_id in ";
-		String sqlPost = "select dep_pos_id, dep_pos_name from ADM_R_DEPT_POST where (dep_pos_id=@G_POST_ID or dep_pos_id=@G_POS_ID) and dep_pos_id in  ";
+		String sqlPost = "select dep_pos_id from adm_r_udp where (adm_id=@G_ADM_ID) and dep_pos_id in  ";
 
 		StringBuilder sb1 = new StringBuilder();
 		if (WF_UNIT_ADM == null || WF_UNIT_ADM.trim().length() == 0 || WF_UNIT_ADM.trim().equals("null")) {
