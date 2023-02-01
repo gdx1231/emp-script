@@ -279,9 +279,9 @@ public class HtmlCreator {
 		this._Log = new Log();
 		this._Log.setItemName(itemName);
 		this._Log.setXmlName(xmlName);
-		this._Log.setIp(this._RequestValue.getString("SYS_REMOTEIP"));
-		this._Log.setUrl(this._RequestValue.getString("SYS_REMOTE_URL"));
-		this._Log.setRefererUrl(this._RequestValue.getString("SYS_REMOTE_REFERER"));
+		this._Log.setIp(this._RequestValue.s(RequestValue.SYS_REMOTEIP));
+		this._Log.setUrl(this._RequestValue.s(RequestValue.SYS_REMOTE_URL));
+		this._Log.setRefererUrl(this._RequestValue.s(RequestValue.SYS_REMOTE_REFERER));
 		this._Log.setRequestValue(_RequestValue);
 
 		_DebugFrames.addDebug(this, "INIT", "开始读取用户模板 XMLNAME=" + xmlName + ",ITEMNAME=" + itemName);
@@ -2206,7 +2206,7 @@ public class HtmlCreator {
 		logInterface.setCreator(this);
 		logInterface.setLog(this._Log);
 		try {
-			logInterface.Write();
+			logInterface.write();
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage(), e);
 		}
@@ -2222,23 +2222,30 @@ public class HtmlCreator {
 		if (!this._UserConfig.getUserPageItem().checkItemExists(logName)) {
 			return null;
 		}
+		String logClassName = null;
 		try {
 			UserXItemValues a = this._UserConfig.getUserPageItem().getItem(logName);
 			if (a.count() == 0) {
 				return null;
 			} else {
-				String logClassName = a.getItem(0).getItem("Log");
-				if (logClassName.trim().length() == 0) {
-					return null;
-				}
-				UObjectValue ov = new UObjectValue();
-				Object o = ov.loadClass(logClassName, null);
-				return (ILog) o;
+				logClassName = a.getItem(0).getItem(logName);
 			}
 		} catch (Exception e) {
+			LOGGER.warn("The Log instance error, {}", e.getLocalizedMessage());
 			return null;
 		}
-
+		
+		if (logClassName == null || logClassName.trim().length() == 0) {
+			return null;
+		}
+		UObjectValue ov = new UObjectValue();
+		try {
+			Object o = ov.loadClass(logClassName, null);
+			return (ILog) o;
+		} catch (Exception e) {
+			LOGGER.warn("The Log {} not instanced, {}", logClassName, e.getLocalizedMessage());
+			return null;
+		}
 	}
 
 	/**

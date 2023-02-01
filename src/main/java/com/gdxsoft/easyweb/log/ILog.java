@@ -3,8 +3,9 @@ package com.gdxsoft.easyweb.log;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
 
 public interface ILog {
+ 
 
-	/**
+	/**" 
 	 * 写入日志信息，参考SQL脚本<br>
 	 * 
 	 * CREATE TABLE LOG_MAIN( LOG_ID INT IDENTITY, USER_ID INT, LOG_MSG
@@ -13,8 +14,7 @@ public interface ILog {
 	 * VARCHAR(233), LOG_URL varchar(1500), LOG_REFERER varchar(1500), LOG_DES
 	 * nvarchar(200) )
 	 */
-	public abstract void Write();
-
+	public abstract void write();
 	 
 	public abstract Log getLog();
 

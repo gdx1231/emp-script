@@ -153,7 +153,14 @@ public class EwaWfMain {
 		// 将节点的操作类型和操作者放到参数中，用于程序调用
 		rv.addValue("WF_UNIT_NAME", unitNext.getWfUnitName());
 		rv.addValue("WF_UNIT_ADM", unitNext.getWfUnitAdm());
-		rv.addValue("WF_UNIT_ADM_LST", unitNext.getWfUnitAdmLst());
+
+		// 部门经理
+		if ("WF_ADM_MANAGER".equalsIgnoreCase(unitNext.getWfUnitAdm())) {
+			unitNext.setWfUnitAdmLst("0");
+		}
+		if (unitNext.getWfUnitAdmLst() != null && unitNext.getWfUnitAdmLst().trim().length() > 0) {
+			rv.addValue("WF_UNIT_ADM_LST", unitNext.getWfUnitAdmLst());
+		}
 		// 是否本部门
 		rv.addValue("WF_UNIT_SELF_DEPT", unitNext.getWfUnitSelfDept());
 
@@ -935,7 +942,7 @@ public class EwaWfMain {
 		cnn.setRequestValue(rv);
 
 		String dbName = "";
-		if (targetDatabaseName != null) {
+		if (targetDatabaseName != null && targetDatabaseName.trim().length() > 0) {
 			if (SqlUtils.isSqlServer(cnn)) {
 				dbName = targetDatabaseName + "..";
 			} else {

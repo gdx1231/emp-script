@@ -1366,6 +1366,26 @@ public class RequestValue implements Cloneable {
 	}
 
 	/**
+	 * 添加字符串到其他数据组（PageValueTag.OTHER），并根据limitLength截断长度
+	 * 
+	 * @param key         参数名称，大小写无关
+	 * @param val         内容
+	 * @param limitLength 限制的长度，小于等于0表示无限制
+	 */
+	public void addValueByTruncate(String key, String val, int limitLength) {
+		if (val == null || limitLength <= 0) {
+			this.addValue(key, val);
+			return;
+		}
+		if (val.length() > limitLength) {
+			this.addValue(key, val.substring(0, limitLength));
+		} else {
+			this.addValue(key, val);
+		}
+
+	}
+
+	/**
 	 * 增加参数到其他数据组（PageValueTag.OTHER）
 	 * 
 	 * @param key

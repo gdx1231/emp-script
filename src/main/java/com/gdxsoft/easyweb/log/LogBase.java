@@ -37,4 +37,16 @@ public class LogBase {
 		this._Creator = creator;
 	}
 
+	/**
+	 * 兼容老的日志调用
+	 */
+	public void write() {
+		
+		this.Write();
+	}
+
+	public void Write() {
+
+	}
+
 }

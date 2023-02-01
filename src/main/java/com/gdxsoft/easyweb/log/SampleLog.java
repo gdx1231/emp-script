@@ -20,14 +20,14 @@ public class SampleLog extends LogBase implements ILog {
 	 * 
 	 * @see com.gdxsoft.easyweb.log.ILog#Write()
 	 */
-	public void Write() {
+	public void write() {
 		if (super.getLog().getMsg() == null || super.getLog().getMsg().trim().length() == 0) {
 			return;
 		}
 		String msg = super.getLog().getXmlName() + ", " + super.getLog().getItemName() + ", " + super.getLog().getMsg()
 				+ ", " + super.getLog().getRunTime() + ", " + super.getLog().getDate();
 		System.out.println(msg);
-		this.WriteToLog();
+		this.writeToLog();
 	}
 
 	/**
@@ -39,7 +39,7 @@ public class SampleLog extends LogBase implements ILog {
 	 * VARCHAR(233), LOG_URL varchar(1500), LOG_REFERER varchar(1500), LOG_DES
 	 * nvarchar(200) )
 	 */
-	private void WriteToLog() {
+	private void writeToLog() {
 		int abc = 0;
 		if (1 == abc) {
 			return;

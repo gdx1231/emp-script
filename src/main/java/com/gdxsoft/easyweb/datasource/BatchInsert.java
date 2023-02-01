@@ -130,10 +130,9 @@ public class BatchInsert {
 			return null;
 		}
 
-		boolean mysql = "mysql".equalsIgnoreCase(this.cnn.getDatabaseType());
-		boolean sqlserver = "sqlserver".equalsIgnoreCase(this.cnn.getDatabaseType())
-				|| "mssql".equalsIgnoreCase(this.cnn.getDatabaseType());
-		boolean oracle = "oracle".equalsIgnoreCase(this.cnn.getDatabaseType());
+		boolean mysql = SqlUtils.isMySql(cnn);// "mysql".equalsIgnoreCase(this.cnn.getDatabaseType());
+		boolean sqlserver = SqlUtils.isSqlServer(cnn);// "sqlserver".equalsIgnoreCase(this.cnn.getDatabaseType())
+		boolean oracle = SqlUtils.isOracle(cnn);// "oracle".equalsIgnoreCase(this.cnn.getDatabaseType());
 
 		if (this.transcation) {
 			this.cnn.transBegin();

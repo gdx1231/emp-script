@@ -113,4 +113,14 @@ public class DebugFrames extends ArrayList<DebugFrame> {
 	public void setRunTimeException(Exception runTimeException) {
 		_RunTimeException = runTimeException;
 	}
+
+	/**
+	 * 跟踪开始时间
+	 * @return the _CurrentTime
+	 */
+	public long getCurrentTime() {
+		return _CurrentTime;
+	}
+
+	 
 }
