@@ -320,6 +320,8 @@ public class Exchange {
 			UFile.createNewTextFile(temp.getAbsolutePath(), cfgsXml);
 			LOGGER.info("Import cfg file {}", temp.getAbsolutePath());
 
+			// 导入时，忽略已经存在的配置
+			ux.setSkipExistsItem(true); 
 			// 导入配置
 			JSONObject rst = ux.importXml("", importXmlName, temp.getAbsolutePath());
 			LOGGER.info("Import result: {}", rst);

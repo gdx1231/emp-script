@@ -142,6 +142,7 @@ public class UpdateXmlJdbcImpl extends UpdateXmlBase implements IUpdateXml {
 		}
 
 		try {
+			op.setSkipExistsItem(super.isSkipExistsItem());
 			op.importXml(file, xmlname);
 			obj.put("RST", true);
 

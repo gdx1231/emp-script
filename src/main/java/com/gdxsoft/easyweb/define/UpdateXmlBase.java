@@ -31,6 +31,8 @@ public class UpdateXmlBase {
 	String _FrameType;
 	private String _XmlFilePath;
 
+	boolean skipExistsItem; // 导入时，是否忽略已经存在的配置
+
 	public String getXmlFilePath() {
 		if (StringUtils.isBlank(_XmlFilePath) && configType != null) {
 			String path = configType.getPath();
@@ -198,5 +200,23 @@ public class UpdateXmlBase {
 
 	public void setConfigType(IConfig configType) {
 		this.configType = configType;
+	}
+
+	/**
+	 * 导入时，是否忽略已经存在的配置，仅对jdbc配置管理有效
+	 * 
+	 * @return
+	 */
+	public boolean isSkipExistsItem() {
+		return skipExistsItem;
+	}
+
+	/**
+	 * 导入时，是否忽略已经存在的配置，仅对jdbc配置管理有效
+	 * 
+	 * @param skipExistsItem the skipExistsItem to set
+	 */
+	public void setSkipExistsItem(boolean skipExistsItem) {
+		this.skipExistsItem = skipExistsItem;
 	}
 }

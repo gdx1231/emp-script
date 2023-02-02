@@ -10,6 +10,20 @@ import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 
 public interface IUpdateXml {
+	/**
+	 * 导入时，是否忽略已经存在的配置，仅对jdbc配置管理有效
+	 * 
+	 * @return
+	 */
+	boolean isSkipExistsItem();
+
+	/**
+	 * 导入时，是否忽略已经存在的配置，仅对jdbc配置管理有效
+	 * 
+	 * @param skipExistsItem the skipExistsItem to set
+	 */
+	void setSkipExistsItem(boolean skipExistsItem);
+
 	String deleteFile(String xmlName);
 
 	String createNewXml(String xmlName, String path) throws IOException;

@@ -39,13 +39,16 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 
 	private boolean isImportMethod = false;
 
+	// 导入时，是否忽略已经存在的配置
+	private boolean skipExistsItem = false;
+
 	public JdbcConfigOperation(ConfScriptPath scriptPath) {
 		this.scriptPath = scriptPath;
 	}
 
-	 
 	/**
 	 * 查询时大小写敏感
+	 * 
 	 * @return
 	 */
 	public boolean isCaseSensitive() {
@@ -608,6 +611,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 			String sql = sb1.toString();
 			update(sql, rv);
 			LOGER.info("NEW: " + xmlName + ", " + itemname + ", " + hashCode + ", " + md5);
+		} else if (skipExistsItem) {
+			LOGER.info("SKIP: " + xmlName + ", " + itemname + ", " + hashCode + ", " + md5);
 		} else {
 			try {
 				// 检查md5是否发生变化
@@ -982,7 +987,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		rv.addOrUpdateValue(FrameParameters.ITEMNAME, itemname);
 
 		if (this.isCaseSensitive()) {
-			sb.append("select 1 a from EWA_CFG where lower(xmlname)=lower(@xmlNameJdbc) and lower(itemname)=lower(@itemname)");
+			sb.append(
+					"select 1 a from EWA_CFG where lower(xmlname)=lower(@xmlNameJdbc) and lower(itemname)=lower(@itemname)");
 		} else {
 			sb.append("select 1 a from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
 		}
@@ -1008,7 +1014,8 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 
 		StringBuilder sb = new StringBuilder();
 		if (this.isCaseSensitive()) {
-			sb.append("select * from EWA_CFG where lower(xmlname)=lower(@xmlNameJdbc) and lower(itemname)= lower(@itemname)");
+			sb.append(
+					"select * from EWA_CFG where lower(xmlname)=lower(@xmlNameJdbc) and lower(itemname)= lower(@itemname)");
 		} else {
 			sb.append("select * from EWA_CFG where xmlname=@xmlNameJdbc and itemname=@itemname");
 		}
@@ -1092,4 +1099,21 @@ public class JdbcConfigOperation implements Serializable, Cloneable {
 		return this.scriptPath.getJdbcConfigName();
 	}
 
+	/**
+	 * 导入时，是否忽略已经存在的配置
+	 * 
+	 * @return
+	 */
+	public boolean isSkipExistsItem() {
+		return skipExistsItem;
+	}
+
+	/**
+	 * 导入时，是否忽略已经存在的配置
+	 * 
+	 * @param skipExistsItem the skipExistsItem to set
+	 */
+	public void setSkipExistsItem(boolean skipExistsItem) {
+		this.skipExistsItem = skipExistsItem;
+	}
 }
