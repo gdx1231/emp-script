@@ -127,7 +127,11 @@ public class ModuleExport extends ModuleBase {
 		this.createNodeCData(eleDes, "VersionMemo", tbModVer.getCell(0, "mod_ver_memo").toString());
 		this.createNodeCData(eleDes, "VersionMemoEn", tbModVer.getCell(0, "mod_ver_memo_en").toString());
 
+		// 来源的主数据库类型，未完成，等有时间2023-02-01
+		
 	}
+	
+	 
 
 	private void createNode(Element parent, String tagName, String innerText) {
 		if (innerText == null) {

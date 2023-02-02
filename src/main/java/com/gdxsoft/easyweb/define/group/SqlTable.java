@@ -6,6 +6,7 @@ package com.gdxsoft.easyweb.define.group;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +68,12 @@ public class SqlTable {
 		this.fix = FixTableOrField.getInstance(databaseType);
 
 		boolean sameDatebaseType = databaseType != null && databaseType.equalsIgnoreCase(table.getDatabaseType());
+
+		boolean isSourceMysql = SqlUtils.isMySql(table.getDatabaseType());
+		boolean isSourceSqlServer = SqlUtils.isSqlServer(table.getDatabaseType());
+		boolean isMysql = SqlUtils.isMySql(databaseType);
+		boolean isSqlServer = SqlUtils.isSqlServer(databaseType);
+
 		LOGGER.info("Create {} {} DDL from {} to {}", table.getTableType(), table.getName(), table.getDatabaseType(),
 				databaseType);
 		// 数据库一致而且带有创建对象的DDL语句
@@ -79,8 +86,20 @@ public class SqlTable {
 		}
 
 		if ("VIEW".equalsIgnoreCase(table.getTableType())) { // 视图
-			if (table.getSqlTable() != null && table.getSqlTable().trim().length() > 0) {
+			String viewDdl = table.getSqlTable();
+			if (viewDdl != null && viewDdl.trim().length() > 0) {
 				LOGGER.info("The view DDL maybe error, you should fixed this");
+				if (isSourceSqlServer && isMysql) {
+					// 来源是SQLServer，目标数据库是 MYSQL
+					viewDdl = StringUtils.replaceIgnoreCase(viewDdl, "isnull(", "ifnull(");
+					viewDdl = StringUtils.replaceIgnoreCase(viewDdl, "getdate()", "now()");
+					viewDdl = viewDdl.replace("[", "`").replace("]", "`");
+				} else if (isSourceMysql && isSqlServer) {
+					// 来源是MYSQL，目标数据库是SQLServer
+					viewDdl = StringUtils.replaceIgnoreCase(viewDdl, "ifnull(", "ISNULL(");
+					viewDdl = StringUtils.replaceIgnoreCase(viewDdl, "now()", "GETDATE()");
+					viewDdl = viewDdl.replace("`", "");
+				}
 				this.setCreate(table.getSqlTable());
 				return;
 			}
