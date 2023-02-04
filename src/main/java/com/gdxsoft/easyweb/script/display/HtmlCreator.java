@@ -3,6 +3,7 @@ package com.gdxsoft.easyweb.script.display;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -426,6 +427,23 @@ public class HtmlCreator {
 						try {
 							maxLength = Integer.parseInt(mlen);
 						} catch (Exception err) {
+						}
+					}
+				}
+
+				// 计算数字除以比例后的数值
+				if (uxv.getItem(0).testName("NumberScale")) {
+					String scale = uxv.getItem(0).getItem("NumberScale");
+					if (scale.trim().length() > 0) {
+						try {
+							BigDecimal numberScale = new BigDecimal(scale);
+							if (numberScale.longValue() > 0) {
+								BigDecimal val1 = new BigDecimal(val);
+								BigDecimal d1 = val1.multiply(numberScale);;
+								val = d1.toPlainString();
+							}
+						} catch (Exception err) {
+							val = "ERR:" + err.getMessage();
 						}
 					}
 				}
@@ -2234,7 +2252,7 @@ public class HtmlCreator {
 			LOGGER.warn("The Log instance error, {}", e.getLocalizedMessage());
 			return null;
 		}
-		
+
 		if (logClassName == null || logClassName.trim().length() == 0) {
 			return null;
 		}

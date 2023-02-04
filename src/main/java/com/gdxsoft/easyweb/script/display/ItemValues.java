@@ -1,6 +1,7 @@
 package com.gdxsoft.easyweb.script.display;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 import com.gdxsoft.easyweb.cache.CachedValue;
 import com.gdxsoft.easyweb.cache.CachedValueManager;
@@ -228,7 +229,7 @@ public class ItemValues {
 		String dataFieldName = name;
 		String dataType = "string";
 		String format = "";
-		double numberScale = 1;
+		BigDecimal numberScale = new BigDecimal("1");
 		if (userXItem.testName("DataItem")) {
 			UserXItemValues us = userXItem.getItem("DataItem");
 			if (us.count() > 0) {
@@ -246,7 +247,7 @@ public class ItemValues {
 					String scale = u.getItem("NumberScale");
 					if (scale.trim().length() > 0) {
 						try {
-							numberScale = Double.parseDouble(scale);
+							numberScale = new BigDecimal(scale);
 						} catch (Exception err) {
 
 						}
@@ -273,7 +274,7 @@ public class ItemValues {
 				Object ot = Utils.getTimeDiffValue(o, timeDiffMinutes);
 				this._LastValue = ot;
 			} else {
-				if (numberScale > 1) {
+				if (numberScale.longValue() > 1) {
 					o = calcNumberScale(o, numberScale);
 				}
 
@@ -290,7 +291,7 @@ public class ItemValues {
 				Object ot = Utils.getTimeDiffValue(val, timeDiffMinutes);
 				this._LastValue = ot;
 			} else {
-				if (numberScale > 1) {
+				if (numberScale.longValue() > 1) {
 					o = calcNumberScale(val, numberScale);
 					this._LastValue = o;
 				} else {
@@ -307,7 +308,7 @@ public class ItemValues {
 				Object ot = Utils.getTimeDiffValue(val, timeDiffMinutes);
 				this._LastValue = ot;
 			} else {
-				if (numberScale > 1) {
+				if (numberScale.longValue() > 1) {
 					o = calcNumberScale(val, numberScale);
 					this._LastValue = o;
 				} else {
@@ -326,13 +327,14 @@ public class ItemValues {
 	 * @param numberScale 百/千/万/十万/百万/千万
 	 * @return
 	 */
-	public Object calcNumberScale(Object ori, double numberScale) {
-		if (ori == null || numberScale == 1) {
+	public Object calcNumberScale(Object ori,  BigDecimal numberScale) {
+		if (ori == null || numberScale.longValue() == 1) {
 			return ori;
 		}
 		try {
-			double d1 = Double.parseDouble(ori.toString()) / numberScale;
-			return d1;
+			BigDecimal v1 = new BigDecimal(ori.toString());
+			v1 = v1.divide(numberScale);
+			return v1.longValue();
 		} catch (Exception err) {
 			return ori;
 		}
