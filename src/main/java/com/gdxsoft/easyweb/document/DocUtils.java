@@ -9,25 +9,30 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 
 public class DocUtils {
+	private static Logger LOGGER = LoggerFactory.getLogger(DocUtils.class);
 
 	public static boolean compress(String exportFilePathAndName, String sourcePath) {
-		String os = System.getProperty("os.name");
-		if (os != null && os.toUpperCase().indexOf("WINDOWS") >= 0) {
+		// String os = System.getProperty("os.name");
+		if ("7z".equals(UPath.getInitPara("documentCompress"))) {
+			// if (os != null && os.toUpperCase().indexOf("delWINDOWS") >= 0) {
 			// windows下用原生的程序压缩docx或odt文件会出现word文件不认的情况，原因未知
 			return zipWith7zip(exportFilePathAndName, sourcePath);
 		}
 		// 非windows系统
 		try {
+			LOGGER.info("Compress {} to {}", sourcePath, exportFilePathAndName);
 			UFile.zipPaths(sourcePath, exportFilePathAndName);
 			return true;
 		} catch (Exception err) {
-			System.out.println("DocUtils.compress: " + err.getMessage());
+			LOGGER.error("DocUtils.compress: " + err.getMessage());
 			return false;
 		}
 	}
@@ -40,9 +45,9 @@ public class DocUtils {
 	 * @return
 	 */
 	public static boolean zipWith7zip(String exportFilePathAndName, String sourcePath) {
-		String cmd = "7z a -r -tzip " + exportFilePathAndName + " " + sourcePath
+		String cmd = "7z a -r -tzip \"" + exportFilePathAndName + "\" " + sourcePath
 				+ (sourcePath.endsWith(java.io.File.separatorChar + "") ? "" : java.io.File.separatorChar) + "*.*";
-		System.out.println(cmd);
+		LOGGER.info(cmd);
 
 		CommandLine commandLine = CommandLine.parse(cmd);
 		DefaultExecutor executor = new DefaultExecutor();
@@ -61,14 +66,14 @@ public class DocUtils {
 			executor.execute(commandLine);
 			String s = outputStream.toString();
 			outputStream.close();
-			System.out.println(s);
+			LOGGER.info(s);
 
 			return true;
 		} catch (ExecuteException e) {
-			System.out.println("zipWith7zip: " + e.getMessage());
+			LOGGER.error("zipWith7zip: " + e.getMessage());
 			return false;
 		} catch (IOException e) {
-			System.out.println("zipWith7zip: " + e.getMessage());
+			LOGGER.error("zipWith7zip: " + e.getMessage());
 			return false;
 		}
 	}

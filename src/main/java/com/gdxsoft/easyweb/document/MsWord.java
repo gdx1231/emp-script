@@ -2,6 +2,7 @@ package com.gdxsoft.easyweb.document;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -23,12 +24,9 @@ public class MsWord implements IWord {
 	/**
 	 * 生成文件
 	 * 
-	 * @param tmplate
-	 *            模板
-	 * @param exportName
-	 *            输出文件名
-	 * @param rv
-	 *            参数表
+	 * @param tmplate    模板
+	 * @param exportName 输出文件名
+	 * @param rv         参数表
 	 * @return
 	 * @throws Exception
 	 */
@@ -45,20 +43,76 @@ public class MsWord implements IWord {
 		this.exportName = rootParent + "/" + name;
 
 		String xml = rv.getString("xml");
+		
+		// 删除 table 的空表，即没有w:p的和空内容的，避免word打不开文档
+		Document doc = UXml.asDocument(xml);
+		NodeList nl = doc.getElementsByTagName("w:tbl");
+		List<Element> notTrs = new ArrayList<Element>();
+		for (int i = 0; i < nl.getLength(); i++) {
+			Element item = (Element) nl.item(i);
+			if (item.getElementsByTagName("w:p").getLength() == 0) {
+				notTrs.add(item);
+				continue;
+			}
+			String text = item.getTextContent();
+			if(text.length() == 0) {
+				notTrs.add(item);
+				continue;
+			}
+			
+			NodeList nlTr = doc.getElementsByTagName("w:tr");
+			for(int m=0;m<nlTr.getLength();m++) {
+				Element tr = (Element) nlTr.item(m);
+				if (tr.getElementsByTagName("w:p").getLength() == 0) {
+					notTrs.add(tr);
+					continue;
+				}
+				String text1 = tr.getTextContent();
+				if(text1.length() == 0) {
+					notTrs.add(tr);
+				}
+			}
+		}
+
+		for (int i = 0; i < notTrs.size(); i++) {
+			Element item = notTrs.get(i);
+			try {
+				item.getParentNode().removeChild(item);
+			} catch (Exception err) {
+
+			}
+		}
+
+		xml = UXml.asXml(doc);
+
 		String pics = rv.getString("pics");
 		createMedia(pics);
 
 		String docmentName = this.rootPath + "/word/document.xml";
 		String cnt = UFile.readFileText(docmentName);
-		int loc0 = cnt.indexOf("<w:sectPr");
-		int loc1 = cnt.indexOf("</w:sectPr>");
-		String wsetcPr = cnt.substring(loc0, loc1 + "</w:sectPr>".length());
 
-		int loca0 = xml.indexOf("</w:body");
+		int locTemplateBodyStart = cnt.indexOf("<w:body>") + "<w:body>".length();
+		int locTemplateBodyEnd = cnt.indexOf("</w:body>");
+		// 模板文档描述部分 <w:document xmlns ...
+		String docTemplateMeta = cnt.substring(0, locTemplateBodyStart);
+		// 模板文档结束部分 </w:document>
+		String docTemplateEnd = cnt.substring(locTemplateBodyEnd);
+
+		int loc0 = cnt.indexOf("<w:sectPr");
+		int loc1 = cnt.indexOf("</w:sectPr>") + "</w:sectPr>".length();
+		// 模板文档w:sectPr部分
+		String wsetcPr = cnt.substring(loc0, loc1);
+
+		int locBodyStart = xml.indexOf("<w:body>") + "<w:body>".length();
+		int locaBodyEnd = xml.indexOf("</w:body>");
+		// 提交的文档正文部分，不包含w:body
+		String documentContent = xml.substring(locBodyStart, locaBodyEnd);
+
 		StringBuilder sb = new StringBuilder();
-		sb.append(xml.substring(0, loca0));
+		sb.append(docTemplateMeta);
+		sb.append(documentContent);
 		sb.append(wsetcPr);
-		sb.append(xml.substring(loca0));
+		sb.append(docTemplateEnd);
 
 		UFile.createNewTextFile(docmentName, sb.toString());
 
@@ -251,12 +305,13 @@ public class MsWord implements IWord {
 		String tmpName = DocUtils.builderTempPath(this.templateName);
 		List<String> lst = UFile.unZipFile(tmpName);
 		String root = "";
-
+		int length = Integer.MAX_VALUE;
 		for (int i = 0; i < lst.size(); i++) {
-			if (i == 0) {
-				File f1 = new File(lst.get(0));
+			File f1 = new File(lst.get(i));
+			// 查找最短的路径
+			if (f1.getParent().length() < length) {
 				root = f1.getParent();
-				break;
+				length = f1.getParent().length();
 			}
 		}
 		return root;
