@@ -439,7 +439,8 @@ public class HtmlCreator {
 							BigDecimal numberScale = new BigDecimal(scale);
 							if (numberScale.longValue() > 0) {
 								BigDecimal val1 = new BigDecimal(val);
-								BigDecimal d1 = val1.multiply(numberScale);;
+								BigDecimal d1 = val1.multiply(numberScale);
+								;
 								val = d1.toPlainString();
 							}
 						} catch (Exception err) {
@@ -1995,6 +1996,7 @@ public class HtmlCreator {
 		this._DebugFrames.addDebug(this, "ACT", "开始执行Action (" + _SysParas.getActionName() + ")");
 
 		actionItem = this.queryActionItem(actionName);
+
 		boolean isTreeGetStatus = false;
 		if (actionItem == null && frameType.equalsIgnoreCase("Tree")) {
 			// Tree的调用子节点没有定义，使用内部默认的SQL
@@ -2010,6 +2012,13 @@ public class HtmlCreator {
 		if (actionItem == null) {// actionName not defined
 			this._DebugFrames.addDebug(this, "ACT", "没有可执行的Action (" + _SysParas.getActionName() + ")");
 			return returnValue;
+		}
+
+		// 是否需要事务，总开关
+		boolean actionSetTranscation = false;
+		if (actionItem.checkItemExists("transcation")) {
+			String v = actionItem.getItem("transcation");
+			actionSetTranscation = "yes".equalsIgnoreCase(v);
 		}
 
 		// 设置日志信息
@@ -2044,32 +2053,45 @@ public class HtmlCreator {
 		int m = 0;
 		int index = 0;
 
-		while (true) {
-			m++;
-			rst = this.executeCallItem(callItem);
-			if (m > 100) {// m>100 循环调用？
-				break;
+		try {
+			if (actionSetTranscation) {
+				_SysParas.getDataConn().transBegin();
 			}
-			if (rst.indexOf("__EWA__STOP__") == 0) {
-				returnValue = rst.split("\\$")[1];
-				break;
-			}
-			if (rst.equals("")) {
-				index++;
-				if (index == callSet.count()) { // 没有更多的可执行部分
+			while (true) {
+				m++;
+				rst = this.executeCallItem(callItem);
+				if (m > 100) {// m>100 循环调用？
 					break;
 				}
-				callItem = callSet.getItem(index);
-			} else {
-				callItem = callSet.getItem(rst);
+				if (rst.indexOf("__EWA__STOP__") == 0) {
+					returnValue = rst.split("\\$")[1];
+					break;
+				}
+				if (rst.equals("")) {
+					index++;
+					if (index == callSet.count()) { // 没有更多的可执行部分
+						break;
+					}
+					callItem = callSet.getItem(index);
+				} else {
+					callItem = callSet.getItem(rst);
+				}
 			}
-		}
-
-		if (_SysParas.getDataConn() != null && _SysParas.getDataConn().isTrans()) {
-			_SysParas.getDataConn().transCommit();// 提交事物
+			if (actionSetTranscation) {
+				_SysParas.getDataConn().transCommit();
+			}
+		} catch (Exception err) {
+			if (actionSetTranscation) {
+				_SysParas.getDataConn().transRollback();
+			}
+		} finally {
+			if (_SysParas.getDataConn() != null) {
+				_SysParas.getDataConn().close();
+			}
 		}
 
 		// 提交页面消息，用于前台
+		// 已经取消 2023-02-07
 		if (actionItem.checkItemExists("IsPostMsg")) {
 			String v = actionItem.getItem("IsPostMsg");
 			if (v != null && v.trim().equalsIgnoreCase("yes")) {

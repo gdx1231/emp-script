@@ -137,12 +137,12 @@ public class ActionListFrame extends ActionBase implements IAction {
 		String sqlExp = sqlItem.getItem("Sql");
 		String[] sqlArray = sqlExp.split(";");
 
-		String transType = sqlItem.getItem("TransType");
-		boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
+		//String transType = sqlItem.getItem("TransType");
+		//boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
 		DataConnection conn = super.getItemValues().getSysParas().getDataConn();
-		if (isTrans) {
-			conn.transBegin();
-		}
+//		if (isTrans) {
+//			conn.transBegin();
+//		}
 
 		RequestValue rv = super.getRequestValue();
 		boolean executedSplitSql = false;
@@ -162,23 +162,23 @@ public class ActionListFrame extends ActionBase implements IAction {
 				super.executeSql(sql, sqlType, name);
 			}
 			if (StringUtils.isNotBlank(conn.getErrorMsg())) {
-				if (isTrans) {
-					conn.transRollback();
-				}
-				conn.close();
+//				if (isTrans) {
+//					conn.transRollback();
+//				}
+//				conn.close();
 				throw new Exception(conn.getErrorMsg());
 			}
 			if (StringUtils.isNotBlank(this.getChkErrorMsg())) { // 出现用户定义错误，退出执行
-				if (isTrans) {
-					conn.transRollback();
-				}
-				conn.close();
+//				if (isTrans) {
+//					conn.transRollback();
+//				}
+//				conn.close();
 				return;
 			}
 		}
-		if (isTrans) {
-			conn.transCommit();
-		}
+//		if (isTrans) {
+//			conn.transCommit();
+//		}
 		this.executeSessionsCookies(sqlItem);
 	}
 

@@ -70,7 +70,7 @@ public class ActionBase {
 		UserXItemValue sqlItem = sqlset.getItem(name);
 		ActionSqlSetItem a = new ActionSqlSetItem();
 		a.setUserXItemValue(sqlItem);
-		a.setTransType(sqlItem.getItem("TransType"));
+		//a.setTransType(sqlItem.getItem("TransType"));
 
 		String sqlExp = sqlItem.getItem("Sql");
 		String[] sqlArray = sqlExp.split(";");
@@ -623,13 +623,13 @@ public class ActionBase {
 	public void executeCallSql(String name) throws Exception {
 		ActionSqlSetItem sqlItem = this.retActionSqlSetItem(name);
 		String[] sqlArray = sqlItem.getSqlArray();
-		String transType = sqlItem.getTransType();
-		boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
+		// String transType = sqlItem.getTransType();
+		//boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
 		DataConnection cnn = this.getItemValues().getSysParas().getDataConn();
 
-		if (isTrans) {
-			cnn.transBegin();
-		}
+		/*
+		 * if (isTrans) { cnn.transBegin(); }
+		 */
 		for (int i = 0; i < sqlArray.length; i++) {
 			String sql = sqlArray[i].trim();
 			if (sql.length() == 0) {// 空语句
@@ -639,23 +639,23 @@ public class ActionBase {
 
 			this.executeSql(sql, sqlType, name);
 			if (StringUtils.isNotBlank(cnn.getErrorMsg())) {
-				if (isTrans) {
-					cnn.transRollback();
-				}
-				cnn.close();
+//				if (isTrans) {
+//					cnn.transRollback();
+//				}
+//				cnn.close();
 				throw new Exception(cnn.getErrorMsg());
 			}
 			if (StringUtils.isNotBlank(this.getChkErrorMsg())) { // 检查执行提交时返回的错误判断
-				if (isTrans) { // 事务回滚
-					cnn.transRollback();
-				}
-				cnn.close();
+//				if (isTrans) { // 事务回滚
+//					cnn.transRollback();
+//				}
+//				cnn.close();
 				return;
 			}
 		}
-		if (isTrans) {
-			cnn.transCommit();
-		}
+//		if (isTrans) {
+//			cnn.transCommit();
+//		}
 		this.executeSessionsCookies(sqlItem.getUserXItemValue());
 	}
 

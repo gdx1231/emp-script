@@ -30,12 +30,14 @@ public class ActionSqlSetItem {
 	/**
 	 * @return the _TransType
 	 */
+	@Deprecated
 	public String getTransType() {
 		return _TransType;
 	}
 	/**
 	 * @param transType the _TransType to set
 	 */
+	@Deprecated
 	public void setTransType(String transType) {
 		_TransType = transType;
 	}

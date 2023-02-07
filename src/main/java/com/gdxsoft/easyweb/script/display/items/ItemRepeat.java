@@ -110,6 +110,7 @@ public class ItemRepeat extends ItemBase {
 				String title = row.getCell(this._Title).getValue() == null ? "" : row.getCell(this._Title).toString();
 				obj.put("TT", title);
 			}
+			obj.put("json", row.toJson().toString());
 
 			arr.put(obj);
 

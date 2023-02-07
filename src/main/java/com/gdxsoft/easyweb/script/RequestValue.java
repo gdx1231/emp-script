@@ -408,7 +408,7 @@ public class RequestValue implements Cloneable {
 	}
 
 	/**
-	 * 获取其它值 EWA.HOST，EWA.HOST_PORT，EWA.HOST_PROTOCOL，EWA.HOST_BASE，EWA.HOST.CONTEXT
+	 * 获取其它值  
 	 * <br>
 	 * xxxx.HASH 参数xxxx的 hashCode <br>
 	 * xxxx.MD5 参数xxxx的md5值 <br>
@@ -416,18 +416,25 @@ public class RequestValue implements Cloneable {
 	 * xxxx.SHA256 参数xxxx的sha256值 <br>
 	 * xxxx.SM3 参数xxxx的sm3值 <br>
 	 * 
+	 * json对象的值
+	 * 
 	 * @param name
 	 * @return
 	 */
 	public String getOtherValue(String name) {
 		String name1 = name.toUpperCase().trim();
 		String v = null;
-		if (name1.endsWith(".HASH")) {
-			String name2 = name1.substring(0, name1.length() - 5);
-			PageValue pv = this._ReqValues.getPageValue(name2);
-			if (pv == null || pv.getValue() == null) {
-				return null;
-			}
+		int lastDot = name.lastIndexOf(".");
+		if (lastDot == -1) {
+			return v;
+		}
+		String tag = name.substring(lastDot);
+		String name2 = name1.substring(0, lastDot);
+		PageValue pv = this._ReqValues.getPageValue(name2);
+		if (pv == null || pv.getValue() == null) {
+			return null;
+		}
+		if (tag.equalsIgnoreCase(".HASH")) {
 			String dt = pv.getDataType();
 			dt = dt == null ? "STRING" : dt.toUpperCase().trim();
 			String v1;
@@ -444,20 +451,15 @@ public class RequestValue implements Cloneable {
 			if (v1 != null) {
 				v = v1.hashCode() + "";
 			}
-		} else if (name1.endsWith(".MD5") || name1.endsWith(".SHA1") || name1.endsWith(".SHA256")
-				|| name1.endsWith(".SM3")) {
-			String name2 = name1.substring(0, name1.length() - 4);
-			PageValue pv = this._ReqValues.getPageValue(name2);
-			if (pv == null || pv.getValue() == null) {
-				return null;
-			}
+		} else if (tag.equalsIgnoreCase(".MD5") || tag.equalsIgnoreCase(".SHA1") || tag.equalsIgnoreCase(".SHA256")
+				|| tag.equalsIgnoreCase(".SM3")) {
 			byte[] buf = this.getPvBytes(pv);
 			try {
-				if (name1.endsWith(".SHA1")) {
+				if (tag.equalsIgnoreCase(".SHA1")) {
 					v = UDigest.digestHex(buf, "sha1");
-				} else if (name1.endsWith(".SHA256")) {
+				} else if (tag.equalsIgnoreCase(".SHA256")) {
 					v = UDigest.digestHex(buf, "sha256");
-				} else if (name1.endsWith(".SM3")) {
+				} else if (tag.equalsIgnoreCase(".SM3")) {
 					v = UDigest.digestHex(buf, "sm3"); // 国密3
 				} else {
 					v = UDigest.digestHex(buf, "md5");
@@ -465,6 +467,19 @@ public class RequestValue implements Cloneable {
 			} catch (Exception err) {
 				v = err.getMessage();
 			}
+		} else if (pv.getValue() instanceof org.json.JSONObject) {
+			org.json.JSONObject json = (org.json.JSONObject) pv.getValue();
+			String key = tag.substring( 1);// 删掉.
+			if (json.has(key)) {
+				return json.optString(key);
+			} 
+			// 按照大小写无关处理json
+			for(String key0:json.keySet()) {
+				if(key0.equalsIgnoreCase(key)) {
+					return json.optString(key0);
+				}
+			}
+			
 		}
 		return v;
 	}
@@ -856,7 +871,8 @@ public class RequestValue implements Cloneable {
 		this._ReqValues.addValue(SYS_CONTEXTPATH, ctx, PageValueTag.SYSTEM);
 		this._ReqValues.addValue(EWAdotCP, ctx, PageValueTag.SYSTEM);
 		this._ReqValues.addValue(EWAdotHOST_CONTEXT, ctx, PageValueTag.SYSTEM);
-
+		//兼容过去的老方法
+		this._ReqValues.addValue("EWA.HOST.CONTEXT", ctx, PageValueTag.SYSTEM);
 		Enumeration<?> enums = _Request.getHeaderNames();
 		int inc1 = 0;
 		Map<String, String> headers = new HashMap<String, String>();

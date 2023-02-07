@@ -1727,9 +1727,12 @@ public class DataConnection {
 			}
 			PageValue pv = this._RequestValue.getPageValues().getValue(para);
 			if (pv == null) {
-				// md5, sha1...
-				if (this._RequestValue.getOtherValue(para) != null) {
-					continue;
+				// md5, sha1，json...
+				String otherValue = this._RequestValue.getOtherValue(para);
+				if (otherValue != null) {
+					pv = new PageValue();
+					pv.setValue(otherValue);
+					pv.setDataType("string");
 				}
 			}
 			String v1 = null;
@@ -1857,20 +1860,29 @@ public class DataConnection {
 	private String getReplaceParameterValueExp(String paramName) {
 		PageValue pv = this._RequestValue.getPageValues().getValue(paramName);
 
+		String v1 = null;
+		if (pv == null || pv.getValue() == null) {
+			String otherValue = this._RequestValue.getOtherValue(paramName);
+			if (otherValue != null) {
+				pv = new PageValue();
+				pv.setValue(otherValue);
+				pv.setDataType("string");
+			}
+		}
 		if (pv == null || pv.getValue() == null) {
 			pv = this.getParameterByEndWithType(paramName);
-			if (pv == null) {
+			if (pv == null || pv.getValue() == null) {
 				return "null";
 			}
 		}
 
-		String dt = pv.getDataType();
+		String dt = pv == null ? "String" : pv.getDataType();
 		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
 		if (dt.equals("BINARY") || dt.equals("B[")) {
 			return null;
 		}
 
-		String v1 = pv.getStringValue();
+		v1 = pv.getStringValue();
 		if (dt.equals("INT")) {
 			return this.getParaInteger(pv).toString();
 		} else if (dt.equals("LONG") || dt.equals("BIGINT")) {
