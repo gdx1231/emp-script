@@ -23,11 +23,17 @@ public class ItemSwitch extends ItemBase {
 		}
 		// 打开开关的值
 		String swtOnValue = super.getUserXItem().getSingleValue("Switch", "SwtOnValue");
-		if (val.length() > 0 && val.equals(swtOnValue == null ? "" : swtOnValue.trim())) {
-			html = html.replace("[checked]", "checked");
-		} else {
-			html = html.replace("[checked]", "");
+		swtOnValue = swtOnValue == null ? "" : swtOnValue.trim();
+
+		String checked = "";
+		if (val.length() > 0) {
+			if (val.trim().equals(swtOnValue)) {
+				checked = "checked";
+			} else if (swtOnValue.equalsIgnoreCase("not_blank")) { //非空白
+				checked = "checked";
+			}
 		}
+		html = html.replace("[checked]", checked);
 		// 替@
 		html = html.replace(SkinFrame.TAG_VAL, Utils.textToInputValue(val.replace("@", REP_AT_STR)));
 

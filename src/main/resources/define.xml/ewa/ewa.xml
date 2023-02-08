@@ -4655,349 +4655,6 @@ addEvent(window, 'load', init_define_set_value);]]></Bottom></Set></AddScript><A
 }
 .dark #markdown_html * {
     color: #fff;
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-05-06 17:48:10" Name="define_code" UpdateDate="2022-05-16 16:14:35"><Page><Name><Set Name="define_code"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="code editor!" Lang="zhcn" Memo=""/><Set Info="code editor!" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.css">
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_FUNCTIONS.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CM.js"></script>
-<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.js"></script>
-
-<table border=0 width=100% style="height:100vh">
-    <tr>
-        <td class='btns-code' height=20 style='border-bottom:1px solid black'>
-            <select id=code onchange="bb(this)"></select>
-            <input class='js' type=button id='butJs' onclick='formatCode()' value='格式化JS' />
-
-            <button class='js' onclick='EWAC_FUNCTIONS.showFunctions();'>代码片段</button>
-            <span class="js">Action:
-                <select id=selAction onchange="EWAC_FUNCTIONS.setAction(this.value)">
-                    <option></option>
-                </select>
-            </span>
-            <input class='sql' type=button id='butSql' onclick='formatCodeSQL()' value='格式化SQL' />
-            <input class='sql' type=button id='butChkSql' onclick='checkSQL()' value='检查SQL语法' />
-            <input class='html' type=button id='butHtml' onclick='formatCodeHtml()' value='格式化Html' />
-            <button class='html' onclick='ConvertHtml();'>转换自定义框架</button>
-            <button class='html' onclick='AddDownHead();'>下载数据头</button>
-            字体： <select id='editor_font_size' onclick="change_editor_font_size()">
-                <option value='9px'>9px</option>
-                <option value='10px'>10px</option>
-                <option value='11px'>11px</option>
-                <option value='12px' selected>12px</option>
-                <option value='13px'>13px</option>
-                <option value='14px'>14px</option>
-                <option value='15px'>15px</option>
-                <option value='16px'>16px</option>
-                <option value='16px'>17px</option>
-                <option value='16px'>18px</option>
-            </select>
-
-            | <span id=msg></span>
-        </td>
-    </tr>
-    <tr>
-        <td  height="100%">
-            <iframe frameborder=0 width=100% height=100% src='./?xmlname=@xmlname&ITEMNAME=define_edit_value&max=1'></iframe>
-        </td>
-    </tr>
-</table>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[$('body').css('background', 'transparent').css('margin', 0);
-document.body.style.overflow = 'hidden';
-
-var inputs = [];
-
-function aa() {
-    var w = window.frames[0];
-    var tb = w.$X('Test1');
-    inputs = [];
-    selectedIndex = null;
-
-    tb.style.width = '100%';
-    tb.style.height = '100%';
-
-    var tb1 = tb.getElementsByTagName('table')[0];
-    tb1.style.width = '100%';
-    tb1.style.height = '100%';
-    tb1.rows[3].style.display = 'none';
-
-    var s = $X('code');
-    s.innerHTML = "";
-
-    //js
-    aa0(window.parent.$X('PAGE$AddScript$Bottom'));
-    aa0(window.parent.$X('PAGE$AddScript$Top'));
-
-    // sql
-    aa1();
-
-    //html
-    aa0(window.parent.$X('PAGE$AddHtml$Top'));
-    aa0(window.parent.$X('PAGE$AddHtml$Bottom'));
-    // 自定义框架
-    aa0(window.parent.$X('PAGE$FrameHtml$FrameHtml'));
-    //css
-    aa0(window.parent.$X('PAGE$AddCss$AddCss'));
-
-    initJsonCall();
-
-    //this config memo
-    aa0(window.parent.$X('PAGE$ConfigMemo$ConfigMemo'));
-
-    bb(s);
-}
-var lastOptionType = "";
-
-function aa0(obj) {
-    if (!obj) {
-        return;
-    }
-    //PAGE$AddHtml$Top
-    var id = obj.id;
-    var o = obj;
-    var t = o.tagName.toUpperCase() == 'INPUT' ? o.getAttribute('EWA_COLOR_TYPE') : o['EWA_COLOR_TYPE'];
-    var txt = o.tagName.toUpperCase() == 'INPUT' ? o.getAttribute('EWA_VALUE') : o['EWA_VALUE'];
-
-    var s = document.getElementById('code');
-
-    if (t != lastOptionType) {
-        $(s).append('<optgroup label="--------- ' + t + ' ---------"></optgroup>');
-        lastOptionType = t;
-    }
-
-    s.options[s.options.length] = new Option(id + ' (' + t + ')', '');
-    var oo = s.options[s.options.length - 1];
-    if (t == 'jscript') {
-        //oo.style.color = 'darkblue';
-    } else if (t == 'html') {
-        //oo.style.color = 'red';
-        //oo.fontWeight = 'bold';
-    }
-    if (s.options.length == 1) {
-        oo.selected = true;
-    }
-    inputs.push(o);
-}
-
-function aa1() {
-    var t = window.parent._EWAC_UI._UserClass.ActionTables.Tables.GetItem('SQLSET');
-    for (var i = 0; i < t.Rows.length; i++) {
-        var row = t.Rows[i];
-        var o = {};
-        o.getAttribute = function(name) {
-            return this[name];
-        }
-        o.setAttribute = function(name, val) {
-            this[name] = val;
-        }
-        o.id = 'SQL$' + row.Fields[0];
-        o.EWA_VALUE = row.Fields[3];
-        o.EWA_COLOR_TYPE = 'sql';
-        o.tagName = 'SQL';
-        o.row = row;
-        aa0(o);
-    }
-}
-function initJsonCall() {
-    var t = window.parent._EWAC_UI._UserClass.ActionTables.Tables.GetItem('JSONSET');
-    for (var i = 0; i < t.Rows.length; i++) {
-        var row = t.Rows[i];
-        var o = {};
-        o.getAttribute = function(name) {
-            //console.log(name, this);
-            return this[name];
-        }
-        o.setAttribute = function(name, val) {
-            console.log(name, val,this);
-            this[name] = val;
-            if(name == "EWA_VALUE"){
-                this.row.Fields[1] = val;
-            }
-        }
-        o.id = 'JSON$' + row.Fields[0];
-        o.EWA_VALUE = row.Fields[1];
-        o.EWA_COLOR_TYPE = 'json';
-        o.tagName = 'JSON';
-        o.row = row;
-        aa0(o);
-    }
-}
-var selectedIndex;
-
-function loadEWAFunction(a) {
-    if (window.EWA_FUN != null) {
-        return;
-    }
-
-    EWAC_FUNCTIONS.setJs = function(v) {
-        window.frames[0].frames[0].setText('\n' + v);
-        formatCode();
-    };
-
-    window.$Tip1 = $Tip; //避免出现“验证码错误提示” at this.ValidCodeError
-    $Tip = function(a) {
-        console.log(a);
-    };
-
-    window.EWA_FUN = new EWA_Function();
-    EWA_FUN.AddTopObject(EWA, "EWA");
-    EWA_FUN.LoadFunctions();
-    var tagName = a[4]._UserClass.PageTables.Tables.GetItem('FrameTag').GetSingleValue();
-    EWA_FUN.LoadResources(a[4]._UserClass.PageInfosTablesSet, tagName);
-    var dataTable = a[4]._UserClass.ActionTables.Tables.GetItem("ActionSet");
-
-    function loadAction(dataTable) {
-        var sel = $X('selAction');
-        var typeIndex = dataTable.Columns.GetIndex("Type");
-        for (var i = 0; i < dataTable.Rows.length; i += 1) {
-            var v = dataTable.Rows[i].Fields[typeIndex];
-            sel.options[sel.options.length] = new Option(v, v);
-        }
-    }
-    loadAction(dataTable);
-
-    $Tip = $Tip1;
-}
-
-function bb(selectObj) {
-    if (selectedIndex != null) {
-        var txt = window.frames[0].frames[0].getText();
-        inputs[selectedIndex].setAttribute('EWA_VALUE', txt);
-    }
-    selectedIndex = selectObj.selectedIndex;
-    var obj = inputs[selectedIndex];
-
-    var a = [];
-    a[0] = obj;
-    a[1] = obj;
-    a[3] = obj.getAttribute('EWA_COLOR_TYPE');
-
-
-
-    $('.btns-code').removeClass('js').removeClass('sql').removeClass('html');
-    if (a[3] == 'jscript') {
-        $('.btns-code').addClass('js');
-    } else if (a[3] == 'sql') {
-        $('.btns-code').addClass('sql');
-    } else if (a[3] == 'html') {
-        $('.btns-code').addClass('html');
-    } else {
-        $('#butJs').hide();
-        $('#butSql').hide();
-        $('#butHtml').hide();
-        $('#butChkSql').hide();
-    }
-    a[4] = window.parent._EWAC_UI;
-    window.frames[0].init(a);
-
-    console.log(a);
-    try {
-        loadEWAFunction(a);
-    } catch (e) {
-        console.error(e);
-    }
-}
-var pp = [];
-
-function showCode(opt) {
-    pp[3] = t;
-    pp[1] = opt;
-}
-
-function save() {
-    try {
-        window.parent.$X('EWAC_SELECT_TYPE').value = 'Page';
-        window.parent._EWAC_UI.ChangeType('Page');
-    } catch (e) {}
-    var txt = window.frames[0].frames[0].getText();
-    inputs[selectedIndex].setAttribute('EWA_VALUE', txt);
-
-    var s = document.getElementById('code');
-    for (var i = 0; i < inputs.length; i++) {
-        var ipt = inputs[i];
-        if (!saveToXml(ipt)) {
-            $X('msg').innerHTML = '<font color=red>请切换到Page页面,然后保存</font>';
-            return;
-        }
-    }
-    $X('msg').innerHTML = '保存完毕！'
-}
-
-function saveToXml(ipt) {
-    var txt = ipt.getAttribute('EWA_VALUE');
-    if (ipt.tagName == 'INPUT') {
-        if (ipt.parentNode.parentNode.parentNode.parentNode.style.display == 'none') {
-            alert('请切换到Page页面,然后再保存');
-            return false;
-        }
-        ipt.title = txt;
-        ipt.value = txt;
-        ipt.setAttribute("EWA_OLD_VALUE", ipt.value);
-        ipt.onblur();
-    } else {
-        ipt.row.Fields[3] = txt;
-    }
-    return true;
-}]]></Top><Bottom><![CDATA[function formatCode() {
-    window.frames[0].frames[0].beautify_code(); //defined in EWA_DEFINE/js/CodeMirror/index.html
-}
-
-function formatCodeSQL() {
-    window.frames[0].frames[0].beautify_code();
-}
-
-function formatCodeHtml() {
-    window.frames[0].frames[0].beautify_code();
-
-}
-
-function checkSQL() {
-    window.frames[0].frames[0].checkSQL();
-}
-
-function AddDownHead() {
-    let ss = [];
-    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('XLS')\" value=\"导出XLS文件\">");
-    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('DBF')\" value=\"导出DBF文件\">");
-    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('TXT')\" value=\"导出TXT文件\">");
-    window.frames[0].frames[0].setText(ss.join('\n'));
-    formatCodeHtml();
-}
-
-function ConvertHtml() {
-    var win = window._EWA_DialogWnd ? _EWA_DialogWnd._OpenerWindow : window.parent;
-    console.log(win.location.href);
-    var s1 = win._EWAC_UISkin.CreateFrameHtml();
-    window.frames[0].frames[0].setText(s1);
-    formatCodeHtml();
-}
-//更改编辑器文字的大小
-function change_editor_font_size() {
-    var fontsize = $('#editor_font_size').val();
-    window.frames[0].frames[0].editor.setOption('fontSize', fontsize);
-    window.localStorage.EWA_CODE_FONTSIZE = fontsize;
-}
-
-
-//更改编辑器文字的大小
-(function() {
-    document.body.style.overflow = 'hidden';
-    if (window.localStorage.EWA_CODE_FONTSIZE) {
-        $('#editor_font_size').val(window.localStorage.EWA_CODE_FONTSIZE);
-    }
-})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.btns-code .js,
-.btns-code .html,
-.btns-code .sql {
-    display: none;
-}
-
-.btns-code.js .js {
-    display: inline-block;
-}
-
-.btns-code.html .html {
-    display: inline-block;
-}
-
-.btns-code.sql .sql {
-    display: inline-block;
 }]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-04-07 16:11:41" Name="about" UpdateDate="2022-05-18 10:24:16"><Page><Name><Set Name="about"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl=""/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="关于开发者" Lang="zhcn" Memo=""/><Set Info="About us" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="C1" HAlign="center" Height="" HiddenCaption="1" VAlign="top" Width="300"/></Size><AddHtml><Set><Top><![CDATA[<div style='margin:10px;width:100%'>
     <p>
         项目发起者：
@@ -5029,427 +4686,7 @@ function change_editor_font_size() {
 </div>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[document.body.style.overflow  = 'hidden';]]></Top><Bottom/></Set></AddScript><AddCss><Set><AddCss><![CDATA[p {
     margin: 0px;
     font-size: 14.8px;
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2021-03-05 12:41:08" Name="define_code_editor" UpdateDate="2022-05-19 11:18:48"><Page><Name><Set Name="define_code_editor"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="code editor!" Lang="zhcn" Memo=""/><Set Info="code editor!" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<script src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js" type="text/javascript"></script>
-<script src="@rv_ewa_style_path/third-party/ace/v1.4.12/src-min/ace.js" type="text/javascript"></script>
-<script src="@rv_ewa_style_path/third-party/ace/v1.4.12/src-min/ext-language_tools.js" type="text/javascript"></script>
-<script src="@rv_ewa_style_path/third-party/js-beautify/v1.13.0/lib/beautify.js"></script>
-<script src="@rv_ewa_style_path/third-party/js-beautify/v1.13.0/lib/beautify-css.js"></script>
-<script src="@rv_ewa_style_path/third-party/js-beautify/v1.13.0/lib/beautify-html.js"></script>
-<script src="@rv_ewa_style_path/third-party/jquery/jquery-3.6.0.min.js"></script>
-<script src="@rv_ewa_style_path/third-party/raphael-master/raphael.min.js"></script>
-<script src="@rv_ewa_style_path/third-party/flowchart.js-master/release/flowchart.min.js"></script>
-<script src="@rv_ewa_style_path/third-party/markdown-editor-master/markdown-it.js" type="text/javascript"></script>
-<script src="@rv_ewa_style_path/third-party/markdown-editor-master/highlight.pack.js" type="text/javascript"></script>
-<script src="@rv_ewa_style_path/third-party/markdown-editor-master/markdown-it-footnote.js" type="text/javascript"></script>
-<pre id="code"></pre>
-<div id='status'>
-    <a href="javascript:beautify_code()" title="(Cmd+Shift+F)">格式化代码</a> <a id='check_sql' href="javascript: checkSQL()">检查SQL语法</a>
-    <span style='float: right'> <a>Theme:</a> <select id="theme" size="1" onchange="change_code_theme(this)">
-				<optgroup label="Bright">
-					<option value="ace/theme/chrome">Chrome</option>
-					<option value="ace/theme/clouds">Clouds</option>
-					<option value="ace/theme/crimson_editor">Crimson Editor</option>
-					<option value="ace/theme/dawn">Dawn</option>
-					<option value="ace/theme/dreamweaver">Dreamweaver</option>
-					<option value="ace/theme/eclipse">Eclipse</option>
-					<option value="ace/theme/github">GitHub</option>
-					<option value="ace/theme/iplastic">IPlastic</option>
-					<option value="ace/theme/solarized_light">Solarized Light</option>
-					<option value="ace/theme/textmate">TextMate</option>
-					<option value="ace/theme/tomorrow">Tomorrow</option>
-					<option value="ace/theme/xcode">XCode</option>
-					<option value="ace/theme/kuroir">Kuroir</option>
-					<option value="ace/theme/katzenmilch">KatzenMilch</option>
-					<option value="ace/theme/sqlserver">SQL Server</option>
-				</optgroup>
-				<optgroup label="Dark">
-					<option value="ace/theme/ambiance">Ambiance</option>
-					<option value="ace/theme/chaos">Chaos</option>
-					<option value="ace/theme/clouds_midnight">Clouds Midnight</option>
-					<option value="ace/theme/cobalt" selected>Cobalt</option>
-					<option value="ace/theme/gruvbox">Gruvbox</option>
-					<option value="ace/theme/idle_fingers">idle Fingers</option>
-					<option value="ace/theme/kr_theme">krTheme</option>
-					<option value="ace/theme/merbivore">Merbivore</option>
-					<option value="ace/theme/merbivore_soft">Merbivore Soft</option>
-					<option value="ace/theme/mono_industrial">Mono Industrial</option>
-					<option value="ace/theme/monokai">Monokai</option>
-					<option value="ace/theme/pastel_on_dark">Pastel on dark</option>
-					<option value="ace/theme/solarized_dark">Solarized Dark</option>
-					<option value="ace/theme/terminal">Terminal</option>
-					<option value="ace/theme/tomorrow_night">Tomorrow Night</option>
-					<option value="ace/theme/tomorrow_night_blue">Tomorrow Night Blue</option>
-					<option value="ace/theme/tomorrow_night_bright">Tomorrow Night Bright</option>
-					<option value="ace/theme/tomorrow_night_eighties">Tomorrow Night 80s</option>
-					<option value="ace/theme/twilight">Twilight</option>
-					<option value="ace/theme/vibrant_ink">Vibrant Ink</option>
-				</optgroup>
-		</select></span>
-</div>
-
- ]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[ var editor, aceBeautify, markType;
-
- function aa() {
-     if (!window.parent.__TYPE__) {
-         return;
-     }
-     editor = null;
-     markType = window.parent.__TYPE__;
-
-     var val = window.parent.__VAL__;
-     if (val == null) {
-         val = "";
-     }
-     //console.log(markType,val);
-     mode = 'ace/mode/html';
-     document.getElementById('check_sql').style.display = 'none';
-     if (markType == 'sql') {
-         mode = 'ace/mode/sql';
-         document.getElementById('check_sql').style.display = '';
-     } else if (markType == 'jscript' || markType == 'js') {
-         mode = 'ace/mode/javascript';
-     } else if (markType == 'xml') {
-         mode = 'ace/mode/xml';
-     } else if (markType == 'css') {
-         mode = 'ace/mode/css';
-     } else if (markType == 'json') {
-         mode = 'ace/mode/json';
-     } else if (markType == 'md') {
-         mode = 'ace/mode/markdown';
-     }
-     if (document.getElementById('code')) {
-         $('#code').remove();
-         var pre = document.createElement('pre');
-         pre.id = 'code';
-         document.body.appendChild(pre);
-     }
-
-     ace.require("ace/ext/language_tools");
-
-     editor = ace.edit("code");
-
-     var theme_code = "ace/theme/cobalt";
-     if (window.localStorage && window.localStorage["EWA_CODE_THENE"]) {
-         var v = window.localStorage["EWA_CODE_THENE"];
-         var obj = document.getElementById('theme');
-         for (var i = 0; i < theme.options.length; i++) {
-             var v1 = obj.options[i].value;
-             if (v1 == v) {
-                 theme_code = v1;
-                 obj.value = v1;
-                 break;
-             }
-         }
-     }
-
-     editor.setTheme(theme_code);
-     editor.session.setMode(mode);
-     editor.getSession().setUseWrapMode(true);
-
-     editor.setOptions({
-         enableBasicAutocompletion: true,
-         enableSnippets: true,
-         enableLiveAutocompletion: true
-     });
-     if (window.localStorage && window.localStorage.EWA_CODE_FONTSIZE) {
-         editor.setOption('fontSize', window.localStorage.EWA_CODE_FONTSIZE);
-     }
-     editor.commands.addCommand({
-         name: 'myCommand',
-         bindKey: {
-             win: 'Ctrl-Shift-F',
-             mac: 'Command-Shift-F'
-         },
-         exec: function(editor) {
-             beautify_code();
-         },
-         readOnly: true
-     });
-     editor.commands.addCommand({
-         name: 'myCommandSave',
-         bindKey: {
-             win: 'Ctrl-S',
-             mac: 'Command-S'
-         },
-         exec: function(editor) {
-             try {
-                 parent.parent.save();
-                 top.saveXml();
-             } catch (e) {
-                 console.log(e);
-             }
-         },
-         readOnly: true
-     });
-     editor.$blockScrolling = Infinity;
-
-     editor.setValue(val, 1);
-     editor.selection.clearSelection();
-     if (markType == 'xml') {
-         editor.setOption('readOnly', true);
-     }
-     if (markType == 'json') {
-         beautify_code();
-     }
-
-     var iframes = window.parent.document.getElementsByTagName('iframe');
-     for (var i = 0; i < iframes.length; i++) {
-         var o = iframes[i];
-         if (o.contentWindow == window) {
-             if (markType == 'md') {
-                 o.style.cssText = 'left:0;width:50%;top:0;bottom:0;position:absolute;';
-                 var s = '<div id="markdown_html" class="ewa-mark-down" style="white-space:normal;overflow:auto;left:50%;right:0;top:0;bottom:0;position:absolute;padding:10px;box-sizing:border-box;"></div>';
-                 window.parent.$(o.parentNode).append(s);
-                 init_editor_markdown();
-                 updateMarkDown();
-             } else {
-                 o.style.cssText = 'width:100%';
-                 window.parent.$("#markdown_html").remove();
-             }
-             break;
-         }
-     }
- }
-
- function init_editor_markdown() {
-     var languageOverrides = {
-         js: 'javascript',
-         html: 'xml'
-     };
-     var flow_opt = {
-         'x': 0,
-         'y': 0,
-         'line-width': 2,
-         'line-length': 50,
-         'text-margin': 10,
-         'font-size': 14,
-         'font-color': 'black',
-         'line-color': 'black',
-         'element-color': 'black',
-         'fill': 'white',
-         'yes-text': 'yes',
-         'no-text': 'no',
-         'arrow-end': 'block',
-         'scale': 1,
-         // style symbol types
-         'symbols': {
-             'start': {
-                 'font-color': 'red',
-                 'element-color': 'green',
-                 'fill': 'yellow'
-             },
-             'end': {
-                 'class': 'end-element'
-             }
-         },
-         // even flowstate support ;-)
-         'flowstate': {
-             // 'past' : { 'fill' : '#CCCCCC', 'font-size' : 12},
-             // 'current' : {'fill' : 'yellow', 'font-color' : 'red', 'font-weight' : 'bold'},
-             // 'future' : { 'fill' : '#FFFF99'},
-             'request': {
-                 'fill': 'blue'
-             }
-             //,
-             // 'invalid': {'fill' : '#444444'},
-             // 'approved' : { 'fill' : '#58C4A3', 'font-size' : 12, 'yes-text' : 'APPROVED', 'no-text' : 'n/a' },
-             // 'rejected' : { 'fill' : '#C45879', 'font-size' : 12, 'yes-text' : 'n/a', 'no-text' : 'REJECTED' }
-         }
-     };
-     md = markdownit({
-         html: true,
-         highlight: function(code, lang) {
-             if (languageOverrides[lang])
-                 lang = languageOverrides[lang];
-             if (lang && hljs.getLanguage(lang)) {
-                 try {
-                     return hljs.highlight(lang, code).value;
-                 } catch (e) {}
-             }
-             if (lang && lang == 'flow') {
-                 try {
-                     if (map_svg[code]) {
-                         return map_svg[code];
-                     }
-                     var diagram = flowchart.parse(code, flow_opt);
-                     var id = 'flow-' + Math.random();
-                     obj.id = id;
-                     var h = "<div id='" + id + "'></div>";
-                     setTimeout(function() {
-                         diagram.drawSVG(document.getElementById(id));
-
-                         if (parent_textarea_html) {
-                             parent_textarea_html.value = document.getElementById('out').innerHTML;
-                         }
-                         map_svg[code] = document.getElementById(id).outerHTML;
-
-                     }, 1);
-                     return h;
-                 } catch (e) {
-                     return e;
-                 }
-             }
-             return '';
-         }
-     }).use(markdownitFootnote);
-     editor.getSession().on('change', function(e) {
-         updateMarkDown();
-     });
- }
-
- function updateMarkDown() {
-     if (markType == 'md') {
-         var mdCnt = getText();
-         var html = md.render(mdCnt);
-         window.parent.$("#markdown_html").html(html);
-     }
- }
-
- function beautify_code() {
-     /* 效果不好 
-     if(!aceBeautify){
-     	aceBeautify= ace.require("ace/ext/beautify");
-     }
-     aceBeautify.beautify(editor.session); */
-     var p = editor.getCursorPosition();
-     var s;
-     if (mode == 'ace/mode/javascript' || mode == 'ace/mode/json') {
-         s = js_beautify(getText());
-     } else if (mode == 'ace/mode/html' || mode == 'ace/mode/xml') {
-         s = html_beautify(getText());
-     } else if (mode == 'ace/mode/css') {
-         s = css_beautify(getText());
-     } else if (mode == 'ace/mode/sql') {
-         beautify_code_sql();
-         return;
-     } else {
-         $Tip('不支持类型格式化');
-         return;
-     }
-     editor.setValue(s, 1);
-     editor.moveCursorToPosition(p);
-     editor.selection.clearSelection();
- }
-
- function beautify_code_sql() {
-     var p = editor.getCursorPosition();
-     var txt = getText();
-     var u = '@EWA.CP/EWA_DEFINE/cgi-bin/xml/?type=format&mode=sql';
-     var ajax = new top.EWA_AjaxClass();
-     ajax.AddParameter('code', txt);
-     ajax.PostNew(u, function() {
-         if (ajax.IsRunEnd()) {
-             var rst;
-             eval('rst=' + ajax.GetRst());
-             var txt = rst['text'];
-             editor.setValue(txt, 1);
-             editor.moveCursorToPosition(p);
-             editor.selection.clearSelection();
-         }
-     });
- }
-
- function checkSQL() {
-     var sql = getText();
-     var u = '@EWA.CP/EWA_DEFINE/cgi-bin/xml/?type=CHECK_SQL';
-     let win = null;
-     if (parent._EWA_DialogWnd) { // 在对话框内
-         win = parent._EWA_DialogWnd._OpenerWindow;
-     } else {
-         win = parent.parent.parent;
-     }
-     let data = {
-         sql: sql,
-         db: win.$X('PAGE$DataSource$DataSource').value
-     };
-     $JP(u, data, function(rst) {
-         var ok = rst['RST'];
-         if (ok) {
-             $Tip('ok');
-         } else {
-             $Tip(rst['ERR']);
-         }
-     });
- }
-
- function getText() {
-     return editor.getValue();
- }
-
- function setText(t) {
-     editor.setValue(editor.getValue() + t, 1);
- }
-
- function change_code_theme(obj) {
-     editor.setTheme(obj.value);
-     window.localStorage["EWA_CODE_THENE"] = obj.value;
- }
- aa();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[#code {
-	margin: 0;
-	position: absolute;
-	top: 0px;
-	bottom: 20px;
-	left: 0;
-	right: 0;
-}
-body {
-    background: transparent;
-}
-.ace_replace_form {
-	display: block !important;
-}
-
-#status {
-	position: absolute;
-	bottom: 0;
-	height: 20px;
-	left: 0;
-	width: 100%;
-	font-size: 12px;
-	font-family: "Microsoft YaHei", "微软雅黑", tahoma, Verdana, Arial, sans-serif, arial, STHeiti, 宋体;
-	line-height: 20px;
-	overflow: hidden;
-}
-
-.light #status a {
-	color: #333;
-}
-
-.light #status a:hover {
-	color: #08c;
-}
-
-#status a {
-	color: #f1f1f1;
-	text-decoration: none;
-	margin-left: 10px;
-}
-
-#status a:hover {
-	color: red;
-}
-
-body {
-	overflow: hidden;
-}
-
-::-webkit-scrollbar {
-	width: 6px;
-	height: 8px;
-}
-
-::-webkit-scrollbar-track {
-	background-color: #000000;
-} /* 滚动条的滑轨背景颜色 */
-::-webkit-scrollbar-thumb {
-	background-color: rgba(155, 155, 155, 0.4);
-} /* 滑块颜色 */
-::-webkit-scrollbar-button {
-	background-color: red;
-} /* 滑轨两头的监听按钮颜色 */
-::-webkit-scrollbar-corner {
-	background-color: rgba(77, 77, 77, 0.4);
-} /* 横向滚动条和纵向滚动条相交处尖角的颜色 */]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2011-12-03 10:47:31" Name="select_create_sql" UpdateDate="2022-06-23 16:49:09"><Page><Name><Set Name="select_create_sql"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="列表助手" Lang="zhcn" Memo=""/><Set Info="List of assistants" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="" HiddenCaption="1" VAlign="top" Width="700px"/></Size><AddHtml><Set><Top><![CDATA[<script language="javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_COLOR_MARK.js"></script> 
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2011-12-03 10:47:31" Name="select_create_sql" UpdateDate="2022-06-23 16:49:09"><Page><Name><Set Name="select_create_sql"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached/><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log/><DescriptionSet><Set Info="列表助手" Lang="zhcn" Memo=""/><Set Info="List of assistants" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="" HiddenCaption="1" VAlign="top" Width="700px"/></Size><AddHtml><Set><Top><![CDATA[<script language="javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_COLOR_MARK.js"></script> 
 <!--<script language="javascript" src="@rv_ewa_style_path/EWA_STYLE/js/js_jquery/EWA_ALL.js"></script> -->
 ]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[var enBasTab = true;
 var tbs;
@@ -8037,4 +7274,769 @@ addEvent(window, 'load', load0);]]></Bottom></Set></AddScript><AddCss><Set><AddC
 	overflow-y:auto;
 	
 }
-          ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>
+          ]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2021-03-05 12:41:08" Name="define_code_editor" UpdateDate="2023-02-07 18:28:09"><Page><Name><Set Name="define_code_editor"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="code editor!" Lang="zhcn" Memo=""/><Set Info="code editor!" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><RowAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<script src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js" type="text/javascript"></script>
+<script src="@rv_ewa_style_path/third-party/ace/v1.4.12/src-min/ace.js" type="text/javascript"></script>
+<script src="@rv_ewa_style_path/third-party/ace/v1.4.12/src-min/ext-language_tools.js" type="text/javascript"></script>
+<script src="@rv_ewa_style_path/third-party/js-beautify/v1.13.0/lib/beautify.js"></script>
+<script src="@rv_ewa_style_path/third-party/js-beautify/v1.13.0/lib/beautify-css.js"></script>
+<script src="@rv_ewa_style_path/third-party/js-beautify/v1.13.0/lib/beautify-html.js"></script>
+<script src="@rv_ewa_style_path/third-party/jquery/jquery-3.6.0.min.js"></script>
+<script src="@rv_ewa_style_path/third-party/raphael-master/raphael.min.js"></script>
+<script src="@rv_ewa_style_path/third-party/flowchart.js-master/release/flowchart.min.js"></script>
+<script src="@rv_ewa_style_path/third-party/markdown-editor-master/markdown-it.js" type="text/javascript"></script>
+<script src="@rv_ewa_style_path/third-party/markdown-editor-master/highlight.pack.js" type="text/javascript"></script>
+<script src="@rv_ewa_style_path/third-party/markdown-editor-master/markdown-it-footnote.js" type="text/javascript"></script>
+<pre id="code"></pre>
+<div id='status'>
+    <a href="javascript:beautify_code()" title="(Cmd+Shift+F)">格式化代码</a> <a id='check_sql' href="javascript: checkSQL()">检查SQL语法</a>
+    <span style='float: right'> <a>Theme:</a> <select id="theme" size="1" onchange="change_code_theme(this)">
+				<optgroup label="Bright">
+					<option value="ace/theme/chrome">Chrome</option>
+					<option value="ace/theme/clouds">Clouds</option>
+					<option value="ace/theme/crimson_editor">Crimson Editor</option>
+					<option value="ace/theme/dawn">Dawn</option>
+					<option value="ace/theme/dreamweaver">Dreamweaver</option>
+					<option value="ace/theme/eclipse">Eclipse</option>
+					<option value="ace/theme/github">GitHub</option>
+					<option value="ace/theme/iplastic">IPlastic</option>
+					<option value="ace/theme/solarized_light">Solarized Light</option>
+					<option value="ace/theme/textmate">TextMate</option>
+					<option value="ace/theme/tomorrow">Tomorrow</option>
+					<option value="ace/theme/xcode">XCode</option>
+					<option value="ace/theme/kuroir">Kuroir</option>
+					<option value="ace/theme/katzenmilch">KatzenMilch</option>
+					<option value="ace/theme/sqlserver">SQL Server</option>
+				</optgroup>
+				<optgroup label="Dark">
+					<option value="ace/theme/ambiance">Ambiance</option>
+					<option value="ace/theme/chaos">Chaos</option>
+					<option value="ace/theme/clouds_midnight">Clouds Midnight</option>
+					<option value="ace/theme/cobalt" selected>Cobalt</option>
+					<option value="ace/theme/gruvbox">Gruvbox</option>
+					<option value="ace/theme/idle_fingers">idle Fingers</option>
+					<option value="ace/theme/kr_theme">krTheme</option>
+					<option value="ace/theme/merbivore">Merbivore</option>
+					<option value="ace/theme/merbivore_soft">Merbivore Soft</option>
+					<option value="ace/theme/mono_industrial">Mono Industrial</option>
+					<option value="ace/theme/monokai">Monokai</option>
+					<option value="ace/theme/pastel_on_dark">Pastel on dark</option>
+					<option value="ace/theme/solarized_dark">Solarized Dark</option>
+					<option value="ace/theme/terminal">Terminal</option>
+					<option value="ace/theme/tomorrow_night">Tomorrow Night</option>
+					<option value="ace/theme/tomorrow_night_blue">Tomorrow Night Blue</option>
+					<option value="ace/theme/tomorrow_night_bright">Tomorrow Night Bright</option>
+					<option value="ace/theme/tomorrow_night_eighties">Tomorrow Night 80s</option>
+					<option value="ace/theme/twilight">Twilight</option>
+					<option value="ace/theme/vibrant_ink">Vibrant Ink</option>
+				</optgroup>
+		</select></span>
+</div>
+
+ ]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[var editor, aceBeautify, markType;
+
+function aa() {
+    if (!window.parent.__TYPE__) {
+        return;
+    }
+    editor = null;
+    markType = window.parent.__TYPE__;
+
+    var val = window.parent.__VAL__;
+    if (val == null) {
+        val = "";
+    }
+    //console.log(markType,val);
+    mode = 'ace/mode/html';
+    document.getElementById('check_sql').style.display = 'none';
+    if (markType == 'sql') {
+        mode = 'ace/mode/sql';
+        document.getElementById('check_sql').style.display = '';
+    } else if (markType == 'jscript' || markType == 'js') {
+        mode = 'ace/mode/javascript';
+    } else if (markType == 'xml') {
+        mode = 'ace/mode/xml';
+    } else if (markType == 'css') {
+        mode = 'ace/mode/css';
+    } else if (markType == 'json') {
+        mode = 'ace/mode/json';
+    } else if (markType == 'md') {
+        mode = 'ace/mode/markdown';
+    }
+    if (document.getElementById('code')) {
+        $('#code').remove();
+        var pre = document.createElement('pre');
+        pre.id = 'code';
+        document.body.appendChild(pre);
+    }
+
+    ace.require("ace/ext/language_tools");
+
+    editor = ace.edit("code");
+
+    var theme_code = "ace/theme/cobalt";
+    if (window.localStorage && window.localStorage["EWA_CODE_THENE"]) {
+        var v = window.localStorage["EWA_CODE_THENE"];
+        var obj = document.getElementById('theme');
+        for (var i = 0; i < theme.options.length; i++) {
+            var v1 = obj.options[i].value;
+            if (v1 == v) {
+                theme_code = v1;
+                obj.value = v1;
+                break;
+            }
+        }
+    }
+
+    editor.setTheme(theme_code);
+    editor.session.setMode(mode);
+    editor.getSession().setUseWrapMode(true);
+
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true
+    });
+    if (window.localStorage && window.localStorage.EWA_CODE_FONTSIZE) {
+        editor.setOption('fontSize', window.localStorage.EWA_CODE_FONTSIZE);
+    }
+    editor.commands.addCommand({
+        name: 'myCommand',
+        bindKey: {
+            win: 'Ctrl-Shift-F',
+            mac: 'Command-Shift-F'
+        },
+        exec: function(editor) {
+            beautify_code();
+        },
+        readOnly: true
+    });
+    editor.commands.addCommand({
+        name: 'myCommandSave',
+        bindKey: {
+            win: 'Ctrl-S',
+            mac: 'Command-S'
+        },
+        exec: function(editor) {
+            try {
+                parent.parent.save();
+                top.saveXml();
+            } catch (e) {
+                console.log(e);
+            }
+        },
+        readOnly: true
+    });
+    editor.$blockScrolling = Infinity;
+
+    editor.setValue(val, 1);
+    editor.selection.clearSelection();
+    if (markType == 'xml') {
+        editor.setOption('readOnly', true);
+    }
+    if (markType == 'json') {
+        beautify_code();
+    }
+
+    var iframes = window.parent.document.getElementsByTagName('iframe');
+    for (var i = 0; i < iframes.length; i++) {
+        var o = iframes[i];
+        if (o.contentWindow == window) {
+            if (markType == 'md') {
+                o.style.cssText = 'left:0;width:50%;top:0;bottom:0;position:absolute;';
+                var s = '<div id="markdown_html" class="ewa-mark-down" style="white-space:normal;overflow:auto;left:50%;right:0;top:0;bottom:0;position:absolute;padding:10px;box-sizing:border-box;"></div>';
+                window.parent.$(o.parentNode).append(s);
+                init_editor_markdown();
+                updateMarkDown();
+            } else {
+                o.style.cssText = 'width:100%';
+                window.parent.$("#markdown_html").remove();
+            }
+            break;
+        }
+    }
+}
+
+function init_editor_markdown() {
+    var languageOverrides = {
+        js: 'javascript',
+        html: 'xml'
+    };
+    var flow_opt = {
+        'x': 0,
+        'y': 0,
+        'line-width': 2,
+        'line-length': 50,
+        'text-margin': 10,
+        'font-size': 14,
+        'font-color': 'black',
+        'line-color': 'black',
+        'element-color': 'black',
+        'fill': 'white',
+        'yes-text': 'yes',
+        'no-text': 'no',
+        'arrow-end': 'block',
+        'scale': 1,
+        // style symbol types
+        'symbols': {
+            'start': {
+                'font-color': 'red',
+                'element-color': 'green',
+                'fill': 'yellow'
+            },
+            'end': {
+                'class': 'end-element'
+            }
+        },
+        // even flowstate support ;-)
+        'flowstate': {
+            // 'past' : { 'fill' : '#CCCCCC', 'font-size' : 12},
+            // 'current' : {'fill' : 'yellow', 'font-color' : 'red', 'font-weight' : 'bold'},
+            // 'future' : { 'fill' : '#FFFF99'},
+            'request': {
+                'fill': 'blue'
+            }
+            //,
+            // 'invalid': {'fill' : '#444444'},
+            // 'approved' : { 'fill' : '#58C4A3', 'font-size' : 12, 'yes-text' : 'APPROVED', 'no-text' : 'n/a' },
+            // 'rejected' : { 'fill' : '#C45879', 'font-size' : 12, 'yes-text' : 'n/a', 'no-text' : 'REJECTED' }
+        }
+    };
+    md = markdownit({
+        html: true,
+        highlight: function(code, lang) {
+            if (languageOverrides[lang])
+                lang = languageOverrides[lang];
+            if (lang && hljs.getLanguage(lang)) {
+                try {
+                    return hljs.highlight(lang, code).value;
+                } catch (e) {}
+            }
+            if (lang && lang == 'flow') {
+                try {
+                    if (map_svg[code]) {
+                        return map_svg[code];
+                    }
+                    var diagram = flowchart.parse(code, flow_opt);
+                    var id = 'flow-' + Math.random();
+                    obj.id = id;
+                    var h = "<div id='" + id + "'></div>";
+                    setTimeout(function() {
+                        diagram.drawSVG(document.getElementById(id));
+
+                        if (parent_textarea_html) {
+                            parent_textarea_html.value = document.getElementById('out').innerHTML;
+                        }
+                        map_svg[code] = document.getElementById(id).outerHTML;
+
+                    }, 1);
+                    return h;
+                } catch (e) {
+                    return e;
+                }
+            }
+            return '';
+        }
+    }).use(markdownitFootnote);
+    editor.getSession().on('change', function(e) {
+        updateMarkDown();
+    });
+}
+
+function updateMarkDown() {
+    if (markType == 'md') {
+        var mdCnt = getText();
+        var html = md.render(mdCnt);
+        window.parent.$("#markdown_html").html(html);
+    }
+}
+
+function beautify_code() {
+    /* 效果不好 
+    if(!aceBeautify){
+    	aceBeautify= ace.require("ace/ext/beautify");
+    }
+    aceBeautify.beautify(editor.session); */
+    var p = editor.getCursorPosition();
+    var s;
+    if (mode == 'ace/mode/javascript' || mode == 'ace/mode/json') {
+        s = js_beautify(getText());
+    } else if (mode == 'ace/mode/html' || mode == 'ace/mode/xml') {
+        s = html_beautify(getText());
+    } else if (mode == 'ace/mode/css') {
+        s = css_beautify(getText());
+    } else if (mode == 'ace/mode/sql') {
+        beautify_code_sql();
+        return;
+    } else {
+        $Tip('不支持类型格式化');
+        return;
+    }
+    editor.setValue(s, 1);
+    editor.moveCursorToPosition(p);
+    editor.selection.clearSelection();
+}
+
+function beautify_code_sql() {
+    var p = editor.getCursorPosition();
+    var txt = getText();
+    var u = '@EWA.CP/EWA_DEFINE/cgi-bin/xml/?type=format&mode=sql';
+    var ajax = new top.EWA_AjaxClass();
+    ajax.AddParameter('code', txt);
+    ajax.PostNew(u, function() {
+        if (ajax.IsRunEnd()) {
+            var rst;
+            eval('rst=' + ajax.GetRst());
+            var txt = rst['text'];
+            editor.setValue(txt, 1);
+            editor.moveCursorToPosition(p);
+            editor.selection.clearSelection();
+        }
+    });
+}
+
+function checkSQL() {
+    var sql = getText();
+    var u = '@EWA.CP/EWA_DEFINE/cgi-bin/xml/?type=CHECK_SQL';
+    let win = null;
+    if (parent._EWA_DialogWnd) { // 在对话框内
+        win = parent._EWA_DialogWnd._OpenerWindow;
+    } else {
+        win = parent.parent.parent;
+    }
+    let data = {
+        sql: sql,
+        db: win.$X('PAGE$DataSource$DataSource').value
+    };
+    $JP(u, data, function(rst) {
+        var ok = rst['RST'];
+        if (ok) {
+            $Tip('ok');
+        } else {
+            $Tip(rst['ERR']);
+        }
+    });
+}
+
+function getText() {
+    return editor.getValue();
+}
+
+function setText(t) {
+    editor.setValue(editor.getValue() + t, 1);
+}
+
+function change_code_theme(obj) {
+    editor.setTheme(obj.value);
+    window.localStorage["EWA_CODE_THENE"] = obj.value;
+}
+aa();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[#code {
+	margin: 0;
+	position: absolute;
+	top: 0px;
+	bottom: 20px;
+	left: 0;
+	right: 0;
+}
+body {
+    background: transparent;
+}
+.ace_replace_form {
+	display: block !important;
+}
+
+#status {
+	position: absolute;
+	bottom: 0;
+	height: 20px;
+	left: 0;
+	width: 100%;
+	font-size: 12px;
+	font-family: "Microsoft YaHei", "微软雅黑", tahoma, Verdana, Arial, sans-serif, arial, STHeiti, 宋体;
+	line-height: 20px;
+	overflow: hidden;
+}
+
+.light #status a {
+	color: #333;
+}
+
+.light #status a:hover {
+	color: #08c;
+}
+
+#status a {
+	color: #f1f1f1;
+	text-decoration: none;
+	margin-left: 10px;
+}
+
+#status a:hover {
+	color: red;
+}
+
+body {
+	overflow: hidden;
+}
+
+::-webkit-scrollbar {
+	width: 6px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background-color: #000000;
+} /* 滚动条的滑轨背景颜色 */
+::-webkit-scrollbar-thumb {
+	background-color: rgba(155, 155, 155, 0.4);
+} /* 滑块颜色 */
+::-webkit-scrollbar-button {
+	background-color: red;
+} /* 滑轨两头的监听按钮颜色 */
+::-webkit-scrollbar-corner {
+	background-color: rgba(77, 77, 77, 0.4);
+} /* 横向滚动条和纵向滚动条相交处尖角的颜色 */]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-05-06 17:48:10" Name="define_code" UpdateDate="2023-02-07 18:28:43"><Page><Name><Set Name="define_code"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="code editor!" Lang="zhcn" Memo=""/><Set Info="code editor!" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><RowAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.css">
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_FUNCTIONS.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CM.js"></script>
+<script type="text/javascript" src="@rv_ewa_style_path/EWA_STYLE/js/EWA_ALL.js"></script>
+
+<table border=0 width=100% style="height:100vh">
+    <tr>
+        <td class='btns-code' height=20 style='border-bottom:1px solid black'>
+            <select id=code onchange="bb(this)"></select>
+            <input class='js' type=button id='butJs' onclick='formatCode()' value='格式化JS' />
+
+            <button class='js' onclick='EWAC_FUNCTIONS.showFunctions();'>代码片段</button>
+            <span class="js">Action:
+                <select id=selAction onchange="EWAC_FUNCTIONS.setAction(this.value)">
+                    <option></option>
+                </select>
+            </span>
+            <input class='sql' type=button id='butSql' onclick='formatCodeSQL()' value='格式化SQL' />
+            <input class='sql' type=button id='butChkSql' onclick='checkSQL()' value='检查SQL语法' />
+            <input class='html' type=button id='butHtml' onclick='formatCodeHtml()' value='格式化Html' />
+            <button class='html' onclick='ConvertHtml();'>转换自定义框架</button>
+            <button class='html' onclick='AddDownHead();'>下载数据头</button>
+            字体： <select id='editor_font_size' onclick="change_editor_font_size()">
+                <option value='9px'>9px</option>
+                <option value='10px'>10px</option>
+                <option value='11px'>11px</option>
+                <option value='12px' selected>12px</option>
+                <option value='13px'>13px</option>
+                <option value='14px'>14px</option>
+                <option value='15px'>15px</option>
+                <option value='16px'>16px</option>
+                <option value='16px'>17px</option>
+                <option value='16px'>18px</option>
+            </select>
+
+            | <span id=msg></span>
+        </td>
+    </tr>
+    <tr>
+        <td  height="100%">
+            <iframe frameborder=0 width=100% height=100% src='./?xmlname=@xmlname&ITEMNAME=define_edit_value&max=1'></iframe>
+        </td>
+    </tr>
+</table>]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[$('body').css('background', 'transparent').css('margin', 0);
+document.body.style.overflow = 'hidden';
+
+var inputs = [];
+
+function aa() {
+    var w = window.frames[0];
+    var tb = w.$X('Test1');
+    inputs = [];
+    selectedIndex = null;
+
+    tb.style.width = '100%';
+    tb.style.height = '100%';
+
+    var tb1 = tb.getElementsByTagName('table')[0];
+    tb1.style.width = '100%';
+    tb1.style.height = '100%';
+    tb1.rows[3].style.display = 'none';
+
+    var s = $X('code');
+    s.innerHTML = "";
+
+    //js
+    aa0(window.parent.$X('PAGE$AddScript$Bottom'));
+    aa0(window.parent.$X('PAGE$AddScript$Top'));
+
+    // sql
+    aa1();
+
+    //html
+    aa0(window.parent.$X('PAGE$AddHtml$Top'));
+    aa0(window.parent.$X('PAGE$AddHtml$Bottom'));
+    // 自定义框架
+    aa0(window.parent.$X('PAGE$FrameHtml$FrameHtml'));
+    //css
+    aa0(window.parent.$X('PAGE$AddCss$AddCss'));
+
+    initJsonCall();
+
+    //this config memo
+    aa0(window.parent.$X('PAGE$ConfigMemo$ConfigMemo'));
+
+    bb(s);
+}
+var lastOptionType = "";
+
+function aa0(obj) {
+    if (!obj) {
+        return;
+    }
+    //PAGE$AddHtml$Top
+    var id = obj.id;
+    var o = obj;
+    var t = o.tagName.toUpperCase() == 'INPUT' ? o.getAttribute('EWA_COLOR_TYPE') : o['EWA_COLOR_TYPE'];
+    var txt = o.tagName.toUpperCase() == 'INPUT' ? o.getAttribute('EWA_VALUE') : o['EWA_VALUE'];
+
+    var s = document.getElementById('code');
+
+    if (t != lastOptionType) {
+        $(s).append('<optgroup label="--------- ' + t + ' ---------"></optgroup>');
+        lastOptionType = t;
+    }
+
+    s.options[s.options.length] = new Option(id + ' (' + t + ')', '');
+    var oo = s.options[s.options.length - 1];
+    if (t == 'jscript') {
+        //oo.style.color = 'darkblue';
+    } else if (t == 'html') {
+        //oo.style.color = 'red';
+        //oo.fontWeight = 'bold';
+    }
+    if (s.options.length == 1) {
+        oo.selected = true;
+    }
+    inputs.push(o);
+}
+
+function aa1() {
+    var t = window.parent._EWAC_UI._UserClass.ActionTables.Tables.GetItem('SQLSET');
+    let sqlIndex = t.Columns.GetIndex("SQL");
+    for (var i = 0; i < t.Rows.length; i++) {
+        var row = t.Rows[i];
+        var o = {};
+        o.getAttribute = function(name) {
+            return this[name];
+        }
+        o.setAttribute = function(name, val) {
+            this[name] = val;
+        }
+        o.id = 'SQL$' + row.Fields[0];
+        o.EWA_VALUE = row.Fields[sqlIndex];
+        o.EWA_COLOR_TYPE = 'sql';
+        o.tagName = 'SQL';
+        o.row = row;
+        o.sqlIndex = sqlIndex;
+        aa0(o);
+    }
+}
+function initJsonCall() {
+    var t = window.parent._EWAC_UI._UserClass.ActionTables.Tables.GetItem('JSONSET');
+    for (var i = 0; i < t.Rows.length; i++) {
+        var row = t.Rows[i];
+        var o = {};
+        o.getAttribute = function(name) {
+            //console.log(name, this);
+            return this[name];
+        }
+        o.setAttribute = function(name, val) {
+            console.log(name, val,this);
+            this[name] = val;
+            if(name == "EWA_VALUE"){
+                this.row.Fields[1] = val;
+            }
+        }
+        o.id = 'JSON$' + row.Fields[0];
+        o.EWA_VALUE = row.Fields[1];
+        o.EWA_COLOR_TYPE = 'json';
+        o.tagName = 'JSON';
+        o.row = row;
+        aa0(o);
+    }
+}
+var selectedIndex;
+
+function loadEWAFunction(a) {
+    if (window.EWA_FUN != null) {
+        return;
+    }
+
+    EWAC_FUNCTIONS.setJs = function(v) {
+        window.frames[0].frames[0].setText('\n' + v);
+        formatCode();
+    };
+
+    window.$Tip1 = $Tip; //避免出现“验证码错误提示” at this.ValidCodeError
+    $Tip = function(a) {
+        console.log(a);
+    };
+
+    window.EWA_FUN = new EWA_Function();
+    EWA_FUN.AddTopObject(EWA, "EWA");
+    EWA_FUN.LoadFunctions();
+    var tagName = a[4]._UserClass.PageTables.Tables.GetItem('FrameTag').GetSingleValue();
+    EWA_FUN.LoadResources(a[4]._UserClass.PageInfosTablesSet, tagName);
+    var dataTable = a[4]._UserClass.ActionTables.Tables.GetItem("ActionSet");
+
+    function loadAction(dataTable) {
+        var sel = $X('selAction');
+        var typeIndex = dataTable.Columns.GetIndex("Type");
+        for (var i = 0; i < dataTable.Rows.length; i += 1) {
+            var v = dataTable.Rows[i].Fields[typeIndex];
+            sel.options[sel.options.length] = new Option(v, v);
+        }
+    }
+    loadAction(dataTable);
+
+    $Tip = $Tip1;
+}
+
+function bb(selectObj) {
+    if (selectedIndex != null) {
+        var txt = window.frames[0].frames[0].getText();
+        inputs[selectedIndex].setAttribute('EWA_VALUE', txt);
+    }
+    selectedIndex = selectObj.selectedIndex;
+    var obj = inputs[selectedIndex];
+
+    var a = [];
+    a[0] = obj;
+    a[1] = obj;
+    a[3] = obj.getAttribute('EWA_COLOR_TYPE');
+
+
+
+    $('.btns-code').removeClass('js').removeClass('sql').removeClass('html');
+    if (a[3] == 'jscript') {
+        $('.btns-code').addClass('js');
+    } else if (a[3] == 'sql') {
+        $('.btns-code').addClass('sql');
+    } else if (a[3] == 'html') {
+        $('.btns-code').addClass('html');
+    } else {
+        $('#butJs').hide();
+        $('#butSql').hide();
+        $('#butHtml').hide(); 
+        $('#butChkSql').hide();
+    }
+    a[4] = window.parent._EWAC_UI;
+    window.frames[0].init(a);
+
+    try {
+        loadEWAFunction(a);
+    } catch (e) {
+        console.error(e);
+    }
+}
+var pp = [];
+
+function showCode(opt) {
+    pp[3] = t;
+    pp[1] = opt;
+}
+
+function save() {
+    try {
+        window.parent.$X('EWAC_SELECT_TYPE').value = 'Page';
+        window.parent._EWAC_UI.ChangeType('Page');
+    } catch (e) {}
+    var txt = window.frames[0].frames[0].getText();
+    inputs[selectedIndex].setAttribute('EWA_VALUE', txt);
+
+    var s = document.getElementById('code');
+    for (var i = 0; i < inputs.length; i++) {
+        var ipt = inputs[i];
+        if (!saveToXml(ipt)) {
+            $X('msg').innerHTML = '<font color=red>请切换到Page页面,然后保存</font>';
+            return;
+        }
+    }
+    $X('msg').innerHTML = '保存完毕！'
+}
+
+function saveToXml(ipt) {
+    var txt = ipt.getAttribute('EWA_VALUE');
+    if (ipt.tagName == 'INPUT') {
+        if (ipt.parentNode.parentNode.parentNode.parentNode.style.display == 'none') {
+            alert('请切换到Page页面,然后再保存');
+            return false;
+        }
+        ipt.title = txt;
+        ipt.value = txt;
+        ipt.setAttribute("EWA_OLD_VALUE", ipt.value);
+        ipt.onblur();
+    } else {
+        // sql
+        ipt.row.Fields[ipt.sqlIndex] = txt;
+    }
+    return true;
+}]]></Top><Bottom><![CDATA[function formatCode() {
+    window.frames[0].frames[0].beautify_code(); //defined in EWA_DEFINE/js/CodeMirror/index.html
+}
+
+function formatCodeSQL() {
+    window.frames[0].frames[0].beautify_code();
+}
+
+function formatCodeHtml() {
+    window.frames[0].frames[0].beautify_code();
+
+}
+
+function checkSQL() {
+    window.frames[0].frames[0].checkSQL();
+}
+
+function AddDownHead() {
+    let ss = [];
+    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('XLS')\" value=\"导出XLS文件\">");
+    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('DBF')\" value=\"导出DBF文件\">");
+    ss.push("<input type=\"button\" onclick=\"EWA.F.FOS['@sys_frame_unid'].DownlodData('TXT')\" value=\"导出TXT文件\">");
+    window.frames[0].frames[0].setText(ss.join('\n'));
+    formatCodeHtml();
+}
+
+function ConvertHtml() {
+    var win = window._EWA_DialogWnd ? _EWA_DialogWnd._OpenerWindow : window.parent;
+    console.log(win.location.href);
+    var s1 = win._EWAC_UISkin.CreateFrameHtml();
+    window.frames[0].frames[0].setText(s1);
+    formatCodeHtml();
+}
+//更改编辑器文字的大小
+function change_editor_font_size() {
+    var fontsize = $('#editor_font_size').val();
+    window.frames[0].frames[0].editor.setOption('fontSize', fontsize);
+    window.localStorage.EWA_CODE_FONTSIZE = fontsize;
+}
+
+
+//更改编辑器文字的大小
+(function() {
+    document.body.style.overflow = 'hidden';
+    if (window.localStorage.EWA_CODE_FONTSIZE) {
+        $('#editor_font_size').val(window.localStorage.EWA_CODE_FONTSIZE);
+    }
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.btns-code .js,
+.btns-code .html,
+.btns-code .sql {
+    display: none;
+}
+
+.btns-code.js .js {
+    display: inline-block;
+}
+
+.btns-code.html .html {
+    display: inline-block;
+}
+
+.btns-code.sql .sql {
+    display: inline-block;
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>

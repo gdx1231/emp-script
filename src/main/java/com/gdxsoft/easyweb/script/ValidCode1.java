@@ -269,7 +269,12 @@ public class ValidCode1 {
 
 	private String getRandFont() {
 		if (FONT_NAMES.size() == 0) {
-			return FONT_NAMES.get(0);
+			try {
+				initializeFonts();
+			} catch (Exception e) {
+				LOGGER.error("Can't initlized fonts. {}", e.getLocalizedMessage());
+				return null;
+			}
 		}
 		int index = random.nextInt(FONT_NAMES.size());
 		if (index == FONT_NAMES.size()) {
