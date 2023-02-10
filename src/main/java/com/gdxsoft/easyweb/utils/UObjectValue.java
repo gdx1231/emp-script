@@ -188,13 +188,13 @@ public class UObjectValue {
 		Object[] newVals = new Object[method.getParameterTypes().length];
 		for (int i = 0; i < method.getParameterTypes().length; i++) {
 			newVals[i] = convert(method.getParameterTypes()[i], para[i]);
-			if(newVals[i]!=null && newVals[i].toString().equals(CAST_ERROR)) {
+			if (newVals[i] != null && newVals[i].toString().equals(CAST_ERROR)) {
 				return CAST_ERROR;
 			}
 			if (newVals[i] != null && newVals[i].toString().equals("[com.gdxsoft.easyweb.script.RequestValue]")) {
 				newVals[i] = para[i]; // 恢复rv
 			}
-			 
+
 		}
 		try {
 			method.invoke(instance, newVals);
@@ -267,7 +267,8 @@ public class UObjectValue {
 	private String _LastErrMsg;
 	private RequestValue _Rv;
 	private Method[] _MethodsSuper;
-
+	private Method[] _MethodsSuper2;
+	private Method[] _MethodsSuper3;
 	// 未找到的方法名称
 	private List<KeyValuePair<String, Object>> _NotFinds;
 
@@ -429,42 +430,67 @@ public class UObjectValue {
 		if (GLOBL_CACHED.containsKey(cachedkey)) {
 			return this._Methods[GLOBL_CACHED.get(cachedkey)];
 		}
-
 		// 获取super的模式
 		String cachedkeySupper = this.createMethodCachedKey("getPropertyMethod-from-supper-" + methodName,
 				methodValues);
 		if (this._MethodsSuper != null && GLOBL_CACHED.containsKey(cachedkeySupper)) {
 			return this._MethodsSuper[GLOBL_CACHED.get(cachedkeySupper)];
 		}
+		// 获取super的模式
+		String cachedkeySupper2 = this.createMethodCachedKey("getPropertyMethod-from-supper2-" + methodName,
+				methodValues);
+		
+		if (this._MethodsSuper2 != null && GLOBL_CACHED.containsKey(cachedkeySupper2)) {
+			return this._MethodsSuper2[GLOBL_CACHED.get(cachedkeySupper2)];
+		}
 
+		String cachedkeySupper3 = this.createMethodCachedKey("getPropertyMethod-from-supper3-" + methodName,
+				methodValues);
+		if (this._MethodsSuper3 != null && GLOBL_CACHED.containsKey(cachedkeySupper3)) {
+			return this._MethodsSuper3[GLOBL_CACHED.get(cachedkeySupper3)];
+		}
+
+		Method m0 = getMethod(this._Methods, methodName, 0, cachedkeySupper);
+		if (m0 != null) {
+			return m0;
+		}
+		if (this._MethodsSuper == null) { // 获取super的模式
+			return null;
+		}
+		Method m1 = getMethod(this._MethodsSuper, methodName, 0, cachedkeySupper);
+		if (m1 != null) {
+			return m1;
+		}
+		if (this._MethodsSuper2 == null) { // 获取super2的模式
+			return null;
+		}
+		Method m2 = getMethod(this._MethodsSuper2, methodName, 0, cachedkeySupper2);
+		if (m2 != null) {
+			return m2;
+		}
+		if (this._MethodsSuper3 == null) { // 获取super3的模式
+			return null;
+		}
+		Method m3 = getMethod(this._MethodsSuper3, methodName, 0, cachedkeySupper3);
+
+		return m3;
+
+	}
+
+	private Method getMethod(Method[] methods, String methodName, int getParametersLength, String cachedkey) {
 		String name1 = methodName.toLowerCase().trim().replace("_", "");
-		for (int i = 0; i < this._Methods.length; i++) {
-			Method m = this._Methods[i];
-			if (m.getParameterTypes().length != 0) {
+		for (int i = 0; i < methods.length; i++) {
+			Method m = methods[i];
+			if (m.getParameterTypes().length != getParametersLength) {
 				continue;
 			}
 			String name = m.getName().toLowerCase();
 			if (!(("get" + name1).equals(name) || ("is" + name1).equals(name))) {
 				continue;
 			}
+
 			GLOBL_CACHED.put(cachedkey, i);
-
 			return m;
-		}
-		if (this._MethodsSuper != null) { // 获取super的模式
-			for (int i = 0; i < this._MethodsSuper.length; i++) {
-				Method m = this._MethodsSuper[i];
-				if (m.getParameterTypes().length != 1) {
-					continue;
-				}
-				String name = m.getName().toLowerCase();
-				if (!(("get" + name1).equals(name) || ("is" + name1).equals(name))) {
-					continue;
-				}
-
-				GLOBL_CACHED.put(cachedkeySupper, i);
-				return m;
-			}
 		}
 		return null;
 	}
@@ -548,6 +574,14 @@ public class UObjectValue {
 		Class<?> sup = _object.getClass().getSuperclass();
 		if (sup != null) {
 			this._MethodsSuper = sup.getDeclaredMethods();
+			Class<?> sup2 = sup.getSuperclass();
+			if (sup2 != null) {
+				this._MethodsSuper2 = sup2.getDeclaredMethods();
+				Class<?> sup3 = sup2.getSuperclass();
+				if (sup3 != null) {
+					this._MethodsSuper3 = sup3.getDeclaredMethods();
+				}
+			}
 		}
 		this._GetterMethods = new ArrayList<Method>();
 
