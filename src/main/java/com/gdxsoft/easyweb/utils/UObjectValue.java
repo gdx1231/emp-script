@@ -418,6 +418,18 @@ public class UObjectValue {
 		return this.invoke(this.getObject(), m, methodValues);
 	}
 
+	private Method getPropertyMethodFromCached(String cachedkey, Method[] methods) {
+		if (methods == null) {
+			return null;
+		}
+		if (!GLOBL_CACHED.containsKey(cachedkey)) {
+			return null;
+		}
+		int methodIndex = GLOBL_CACHED.get(cachedkey);
+		return methods[methodIndex];
+
+	}
+
 	/**
 	 * 获取属性对应的方法
 	 * 
@@ -427,30 +439,31 @@ public class UObjectValue {
 	public Method getPropertyMethod(String methodName) {
 		Object[] methodValues = new Object[0];
 		String cachedkey = this.createMethodCachedKey("getPropertyMethod-" + methodName, methodValues);
-		if (GLOBL_CACHED.containsKey(cachedkey)) {
-			return this._Methods[GLOBL_CACHED.get(cachedkey)];
-		}
-		// 获取super的模式
-		String cachedkeySupper = this.createMethodCachedKey("getPropertyMethod-from-supper-" + methodName,
-				methodValues);
-		if (this._MethodsSuper != null && GLOBL_CACHED.containsKey(cachedkeySupper)) {
-			return this._MethodsSuper[GLOBL_CACHED.get(cachedkeySupper)];
-		}
-		// 获取super的模式
-		String cachedkeySupper2 = this.createMethodCachedKey("getPropertyMethod-from-supper2-" + methodName,
-				methodValues);
+		String cachedkeySupper = this.createMethodCachedKey("getPropertyMethod-supper-" + methodName, methodValues);
+		String cachedkeySupper2 = this.createMethodCachedKey("getPropertyMethod-supper2-" + methodName, methodValues);
+		String cachedkeySupper3 = this.createMethodCachedKey("getPropertyMethod-supper3-" + methodName, methodValues);
 		
-		if (this._MethodsSuper2 != null && GLOBL_CACHED.containsKey(cachedkeySupper2)) {
-			return this._MethodsSuper2[GLOBL_CACHED.get(cachedkeySupper2)];
+		Method m = getPropertyMethodFromCached(cachedkey, this._Methods);
+		if (m != null) {
+			return m;
+		}
+		// 获取super的模式
+		m = getPropertyMethodFromCached(cachedkeySupper, this._MethodsSuper);
+		if (m != null) {
+			return m;
+		}
+		// 获取super的super模式
+		m = getPropertyMethodFromCached(cachedkeySupper2, this._MethodsSuper2);
+		if (m != null) {
+			return m;
+		}
+		// 获取super的super的super模式
+		m = getPropertyMethodFromCached(cachedkeySupper3, this._MethodsSuper3);
+		if (m != null) {
+			return m;
 		}
 
-		String cachedkeySupper3 = this.createMethodCachedKey("getPropertyMethod-from-supper3-" + methodName,
-				methodValues);
-		if (this._MethodsSuper3 != null && GLOBL_CACHED.containsKey(cachedkeySupper3)) {
-			return this._MethodsSuper3[GLOBL_CACHED.get(cachedkeySupper3)];
-		}
-
-		Method m0 = getMethod(this._Methods, methodName, 0, cachedkeySupper);
+		Method m0 = getMethod(this._Methods, methodName, 0, cachedkey);
 		if (m0 != null) {
 			return m0;
 		}
