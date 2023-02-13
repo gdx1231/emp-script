@@ -19,7 +19,6 @@ import com.gdxsoft.easyweb.cache.CachedValueManager;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
-import com.gdxsoft.easyweb.datasource.DataResult;
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.Workflow.OrgSqls;
@@ -28,6 +27,7 @@ import com.gdxsoft.easyweb.script.Workflow.WfUnits;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.ItemValues;
 import com.gdxsoft.easyweb.script.display.SysParameters;
+import com.gdxsoft.easyweb.script.display.action.ActionListFrame;
 import com.gdxsoft.easyweb.script.display.items.IItem;
 import com.gdxsoft.easyweb.script.display.items.ItemEwaConfigItem;
 import com.gdxsoft.easyweb.script.display.items.ItemImage;
@@ -89,29 +89,37 @@ public class FrameList extends FrameBase implements IFrame {
 	private String[] _KeyFileds;
 
 	public int queryRecords() {
-
+		DataConnection conn = super.getHtmlClass().getItemValues().getSysParas().getDataConn();
 		try {
 			MList tbs = super.getHtmlClass().getAction().getDTTables();
-			if (tbs.size() > 0) {
-				DTTable tb = (DTTable) super.getHtmlClass().getAction().getDTTables().getLast();
+			for(int i=0;i<tbs.size();i++) {
+				DTTable tb = (DTTable) tbs.get(i);
 				if (tb.getAttsTable().containsKey("RECORDS")) {
 					// 从JSON调用创建的表返回 记录总数
 					// ActionBase.executeCallJSon
 					this._ListFrameRecordCount = Integer.parseInt(tb.getAttsTable().get("RECORDS").toString());
 					return this._ListFrameRecordCount;
 				}
+				
+				if(!tb.getAttsTable().containsKey( ActionListFrame.EXECUTE_SPLIT_SQL)) {
+					continue;
+				}
+				
+				_ListFrameRecordCount = conn.getRecordCount(tb.getAttsTable().get("sql").toString());
+				tb.getAttsTable().put("RECORDS", _ListFrameRecordCount);
+				return _ListFrameRecordCount;
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
 		}
 
-		DataConnection conn = super.getHtmlClass().getItemValues().getDataConn();
+		
 
 		// 获取所有记录数，根据执行的最后的select语句获取
-		if (conn != null && conn.getResultSetList().size() > 0) {
-			DataResult ds = (DataResult) conn.getResultSetList().getLast();
-			_ListFrameRecordCount = conn.getRecordCount(ds.getSqlOrigin());
-		}
+//		if (conn != null && conn.getResultSetList().size() > 0) {
+//			DataResult ds = (DataResult) conn.getResultSetList().getLast();
+//			_ListFrameRecordCount = conn.getRecordCount(ds.getSqlOrigin());
+//		}
 
 		return _ListFrameRecordCount;
 	}

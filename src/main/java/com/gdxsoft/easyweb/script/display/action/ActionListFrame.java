@@ -42,6 +42,7 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ActionListFrame extends ActionBase implements IAction {
 	private static Logger LOG = LoggerFactory.getLogger(ActionListFrame.class);
+	public static final String EXECUTE_SPLIT_SQL = "EXECUTE_SPLIT_SQL";
 
 	public void executeCallClass(String name) throws Exception {
 
@@ -214,6 +215,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 			tb.setName(name);
 			if (tb.isOk()) {
 				super.getDTTables().add(tb);
+				tb.getAttsTable().add(EXECUTE_SPLIT_SQL, "1");
+				tb.getAttsTable().add("sql", sql);
+				
 				// 加载Hor数据
 				super.executeExtOpt(sql, tb);
 			}
@@ -222,6 +226,10 @@ public class ActionListFrame extends ActionBase implements IAction {
 			tb.setName(name);
 			if (tb.isOk()) {
 				super.getDTTables().add(tb);
+				
+				tb.getAttsTable().add(EXECUTE_SPLIT_SQL, "1");
+				tb.getAttsTable().add("sql", sql);
+				
 				// 加载Hor数据
 				super.executeExtOpt(sql, tb);
 				super.checkActionErrorOutInTable(tb);
