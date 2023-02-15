@@ -1074,41 +1074,54 @@ public class HtmlCreator {
 		}
 	}
 
+	private String getJsonName() {
+		String jsonName = this._RequestValue.getString(FrameParameters.EWA_JSON_NAME);
+		if (jsonName != null && jsonName.length() > 0) {
+			// 避免xss注入
+			if (jsonName.indexOf("<") >= 0 || jsonName.indexOf("&") >= 0 || jsonName.indexOf("#") >= 0
+					|| jsonName.indexOf("(") >= 0 || jsonName.indexOf(";") >= 0 || jsonName.indexOf("\n") >= 0
+					|| jsonName.indexOf("\r") >= 0 || jsonName.indexOf("=") >= 0 || jsonName.indexOf(" ") >= 0
+					|| jsonName.indexOf("\t") >= 0) {
+				jsonName = "ni_nong_sha_lei";
+			}
+			// user.info = [{}];
+			return jsonName;
+		} else {
+			return null;
+		}
+	}
+
 	public String createPageJson() throws Exception {
 		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
 		if ("no".equals(allowJsonExport)) {
 			return "['AllowJsonExport=no']";
 		}
 		MStr sb = new MStr();
-		String jsonName = this._RequestValue.getString(FrameParameters.EWA_JSON_NAME);
+		String jsonName = this.getJsonName();
 		if (jsonName != null) {
-			// 避免xss注入
-			if (jsonName.indexOf("<") >= 0 || jsonName.indexOf("&") >= 0 || jsonName.indexOf("#") >= 0
-					|| jsonName.indexOf("(") >= 0 || jsonName.indexOf(";") >= 0 || jsonName.indexOf("\n") >= 0
-					|| jsonName.indexOf("=") >= 0 || jsonName.indexOf(" ") >= 0 || jsonName.indexOf("\t") >= 0
-					|| jsonName.indexOf("-") >= 0) {
-				jsonName = "ni_nong_sha_lei";
-			}
-			sb.append("" + Utils.textToJscript(jsonName) + "=");
+			sb.append(Utils.textToJscript(jsonName) + " = ");
 		}
 		int len = this._ItemValues.getDTTables().size();
 		if (len == 0) {
-
 			if (this._ItemValues.getJSONObjects().size() > 0) {
 				// 有json objects
 				return this._ItemValues.getJSONObjects().getLast().toString();
 			}
-
 			sb.a("[]");
 			return sb.toString();
 		}
 		DTTable dt = (DTTable) this._ItemValues.getDTTables().get(len - 1);
 		// 时差
 		dt.setTimeDiffMinutes(this._HtmlClass.getSysParas().getTimeDiffMinutes());
-
-		String s1 = dt.toJson(this._RequestValue);
-		sb.a(s1);
-
+		// 输出json时候忽略null值，即不输出 addr: null
+		boolean skipNullField = this.getRequestValue().s(FrameParameters.EWA_JSON_SKIP_NULL) != null;
+		if (skipNullField) {
+			String s1 = dt.toJSONArray().toString();
+			sb.a(s1);
+		} else {
+			String s1 = dt.toJson(this._RequestValue);
+			sb.a(s1);
+		}
 		return sb.toString();
 	}
 
@@ -1243,9 +1256,17 @@ public class HtmlCreator {
 	 */
 	public String createPageJsonAll() {
 		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
-		if ("no".equals(allowJsonExport)) {
-			return "[['AllowJsonExport=no']]";
+		MStr sb = new MStr();
+		String jsonName = this.getJsonName();
+		if (jsonName != null) {
+			sb.append(Utils.textToJscript(jsonName) + " = ");
 		}
+
+		if ("no".equals(allowJsonExport)) {
+			sb.a("[['AllowJsonExport=no']]");
+			return sb.toString();
+		}
+
 		int len = this._ItemValues.getDTTables().size();
 		if (len == 0) {
 			JSONArray arr = new JSONArray();
@@ -1256,10 +1277,12 @@ public class HtmlCreator {
 				Object o = this._ItemValues.getJSONObjects().get(i);
 				arr.put(o);
 			}
-
-			return arr.toString();
+			sb.a(arr.toString());
+			return sb.toString();
 		}
-		MStr sb = new MStr();
+		// 输出json时候忽略null值，即不输出 addr: null
+		boolean skipNullField = this.getRequestValue().s(FrameParameters.EWA_JSON_SKIP_NULL) != null;
+
 		sb.a("[");
 		for (int i = 0; i < len; i++) {
 			if (i > 0) {
@@ -1267,9 +1290,14 @@ public class HtmlCreator {
 			}
 			DTTable dt = (DTTable) this._ItemValues.getDTTables().get(i);
 			dt.setTimeDiffMinutes(this._HtmlClass.getSysParas().getTimeDiffMinutes());
-			String s1 = dt.toJson(this._RequestValue);
-			sb.a(s1);
-
+			if (skipNullField) {
+				// 输出json时候忽略null值，即不输出 addr: null
+				String s1 = dt.toJSONArray().toString();
+				sb.a(s1);
+			} else {
+				String s1 = dt.toJson(this._RequestValue);
+				sb.a(s1);
+			}
 		}
 		sb.a("]");
 		return sb.toString();

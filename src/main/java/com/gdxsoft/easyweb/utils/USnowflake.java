@@ -5,6 +5,14 @@ import com.gdxsoft.easyweb.function.Snowflake;
 
 public class USnowflake {
 	private static Snowflake SF;
+	/**
+	 * The default workId
+	 */
+	public static final long DEF_WORK_ID = 31;
+	/**
+	 * The default datacenterId
+	 */
+	public static final long DEF_DATACENTER_ID = 31;
 
 	/**
 	 * Create a new snowflake instance
@@ -14,12 +22,14 @@ public class USnowflake {
 	public static synchronized Snowflake getInstance() {
 		if (SF == null) {
 			ConfShowflake conf = ConfShowflake.getInstance();
-
-			if (conf == null) {
-				return null;
+			long workId = DEF_WORK_ID;  
+			long datacenterId = DEF_DATACENTER_ID;
+			if (conf != null) {
+				workId = conf.getWorkId();
+				datacenterId = conf.getDatacenterId();
 			}
 
-			SF = new Snowflake(conf.getWorkId(), conf.getDatacenterId());
+			SF = new Snowflake(workId, datacenterId);
 		}
 
 		return SF;

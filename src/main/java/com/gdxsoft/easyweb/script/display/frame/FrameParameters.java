@@ -1,7 +1,7 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
 public class FrameParameters {
-
+	
 	/**
 	 * 隐藏Frame字段的字符串表达式，用,分割
 	 */
@@ -87,7 +87,11 @@ public class FrameParameters {
 	 * 
 	 */
 	public static final String EWA_JSON_FIELD_CASE = "EWA_JSON_FIELD_CASE";
-
+	
+	/**
+	 * 当Frame输出json时候忽略null值，即不输出 addr: null
+	 */
+	public static final String EWA_JSON_SKIP_NULL="EWA_JSON_SKIP_NULL";
 	/**
 	 * Tree加载分层数据 EWA_TREE_MORE=1起作用
 	 */
