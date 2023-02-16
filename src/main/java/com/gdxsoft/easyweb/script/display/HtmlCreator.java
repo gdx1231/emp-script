@@ -19,7 +19,10 @@ import com.gdxsoft.easyweb.acl.IAcl;
 import com.gdxsoft.easyweb.acl.IAcl2;
 import com.gdxsoft.easyweb.cache.CacheEwaScript;
 import com.gdxsoft.easyweb.cache.CacheLoadResult;
+import com.gdxsoft.easyweb.data.Bin2Base64BinaryHandle;
+import com.gdxsoft.easyweb.data.Bin2HexBinaryHandle;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.data.IBinaryHandle;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.global.EwaGlobals;
@@ -1113,8 +1116,22 @@ public class HtmlCreator {
 		DTTable dt = (DTTable) this._ItemValues.getDTTables().get(len - 1);
 		// 时差
 		dt.setTimeDiffMinutes(this._HtmlClass.getSysParas().getTimeDiffMinutes());
+		
 		// 输出json时候忽略null值，即不输出 addr: null
 		boolean skipNullField = this.getRequestValue().s(FrameParameters.EWA_JSON_SKIP_NULL) != null;
+		
+		// 处理二进制的方式
+		String convertBinMethod = this.getRequestValue().s(FrameParameters.EWA_JSON_BIN_METHOD);
+		IBinaryHandle binHandle = null;
+		if ("hex".equalsIgnoreCase(convertBinMethod)) {
+			binHandle = new Bin2HexBinaryHandle();
+		} else if ("base64".equalsIgnoreCase(convertBinMethod)) {
+			binHandle = new Bin2Base64BinaryHandle();
+		}
+		if (binHandle != null) {
+			dt.setJsonBinaryHandle(binHandle);
+		}
+		
 		if (skipNullField) {
 			String s1 = dt.toJSONArray().toString();
 			sb.a(s1);
@@ -1283,12 +1300,23 @@ public class HtmlCreator {
 		// 输出json时候忽略null值，即不输出 addr: null
 		boolean skipNullField = this.getRequestValue().s(FrameParameters.EWA_JSON_SKIP_NULL) != null;
 
+		// 处理二进制的方式
+		String convertBinMethod = this.getRequestValue().s(FrameParameters.EWA_JSON_BIN_METHOD);
+		IBinaryHandle binHandle = null;
+		if ("hex".equalsIgnoreCase(convertBinMethod)) {
+			binHandle = new Bin2HexBinaryHandle();
+		} else if ("base64".equalsIgnoreCase(convertBinMethod)) {
+			binHandle = new Bin2Base64BinaryHandle();
+		}
 		sb.a("[");
 		for (int i = 0; i < len; i++) {
 			if (i > 0) {
 				sb.al(",");
 			}
 			DTTable dt = (DTTable) this._ItemValues.getDTTables().get(i);
+			if (binHandle != null) {
+				dt.setJsonBinaryHandle(binHandle);
+			}
 			dt.setTimeDiffMinutes(this._HtmlClass.getSysParas().getTimeDiffMinutes());
 			if (skipNullField) {
 				// 输出json时候忽略null值，即不输出 addr: null

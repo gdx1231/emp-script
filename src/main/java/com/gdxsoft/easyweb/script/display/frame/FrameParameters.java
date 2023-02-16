@@ -1,12 +1,12 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
 public class FrameParameters {
-	
+
 	/**
 	 * 隐藏Frame字段的字符串表达式，用,分割
 	 */
-	public static final String EWA_HIDDEN_FIELDS="EWA_HIDDEN_FIELDS";
-	
+	public static final String EWA_HIDDEN_FIELDS = "EWA_HIDDEN_FIELDS";
+
 	/**
 	 * 更改FrameUnid的前缀
 	 */
@@ -87,11 +87,15 @@ public class FrameParameters {
 	 * 
 	 */
 	public static final String EWA_JSON_FIELD_CASE = "EWA_JSON_FIELD_CASE";
-	
+
 	/**
 	 * 当Frame输出json时候忽略null值，即不输出 addr: null
 	 */
-	public static final String EWA_JSON_SKIP_NULL="EWA_JSON_SKIP_NULL";
+	public static final String EWA_JSON_SKIP_NULL = "EWA_JSON_SKIP_NULL";
+	/**
+	 * 当Frame输出json时，处理bin模式，HEX, BASE64, IMAGE(default)
+	 */
+	public static final String EWA_JSON_BIN_METHOD = "EWA_JSON_BIN_METHOD";
 	/**
 	 * Tree加载分层数据 EWA_TREE_MORE=1起作用
 	 */
