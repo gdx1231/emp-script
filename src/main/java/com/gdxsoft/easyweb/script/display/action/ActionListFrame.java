@@ -138,15 +138,15 @@ public class ActionListFrame extends ActionBase implements IAction {
 		String sqlExp = sqlItem.getItem("Sql");
 		String[] sqlArray = sqlExp.split(";");
 
-		//String transType = sqlItem.getItem("TransType");
-		//boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
+		// String transType = sqlItem.getItem("TransType");
+		// boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
 		DataConnection conn = super.getItemValues().getSysParas().getDataConn();
 //		if (isTrans) {
 //			conn.transBegin();
 //		}
 
 		RequestValue rv = super.getRequestValue();
-		boolean executedSplitSql = false;
+		boolean executedSplitSql = super.getItemValues().getListFrameTable() != null;
 		for (int i = 0; i < sqlArray.length; i++) {
 			String sql = sqlArray[i].trim();
 			if (sql.length() == 0) {// 空语句
@@ -155,7 +155,8 @@ public class ActionListFrame extends ActionBase implements IAction {
 
 			String sqlType = sqlItem.getItem("SqlType");
 			if (sqlType.equals("query") && !executedSplitSql && DataConnection.checkIsSelect(sql)
-					&& sql.toLowerCase().indexOf(FrameParameters.EWA_ERR_OUT) == -1) {
+					&& sql.toUpperCase().indexOf(FrameParameters.EWA_ERR_OUT) == -1
+					&& sql.toUpperCase().indexOf(FrameParameters.EWA_SQL_SPLIT_NO) == -1) {
 				// 执行分页查询
 				executedSplitSql = true; // 分页只执行1次
 				this.executeSplitSql(sql, conn, rv, name);
@@ -215,9 +216,6 @@ public class ActionListFrame extends ActionBase implements IAction {
 			tb.setName(name);
 			if (tb.isOk()) {
 				super.getDTTables().add(tb);
-				tb.getAttsTable().add(EXECUTE_SPLIT_SQL, "1");
-				tb.getAttsTable().add("sql", sql);
-				
 				// 加载Hor数据
 				super.executeExtOpt(sql, tb);
 			}
@@ -226,17 +224,23 @@ public class ActionListFrame extends ActionBase implements IAction {
 			tb.setName(name);
 			if (tb.isOk()) {
 				super.getDTTables().add(tb);
-				
-				tb.getAttsTable().add(EXECUTE_SPLIT_SQL, "1");
-				tb.getAttsTable().add("sql", sql);
-				
 				// 加载Hor数据
 				super.executeExtOpt(sql, tb);
 				super.checkActionErrorOutInTable(tb);
+
 			}
 		}
 	}
 
+	/**
+	 * 执行分页查询
+	 * 
+	 * @param sql1     SQL
+	 * @param conn
+	 * @param rv
+	 * @param useSplit 是否使用分页
+	 * @return
+	 */
 	private DTTable executeSqlWithPageSplit(String sql1, DataConnection conn, RequestValue rv, boolean useSplit) {
 		if (useSplit) { // 分页
 			int iPageSize = this.getUserSettingPageSize();
@@ -252,6 +256,11 @@ public class ActionListFrame extends ActionBase implements IAction {
 			conn.getLastResult().getResultSet().close();
 		} catch (SQLException e) {
 			LOG.warn("Close the resultSet. {}, {}", e.getMessage(), sql1);
+		}
+		if (tb.isOk()) {
+			tb.getAttsTable().add(EXECUTE_SPLIT_SQL, "1");
+			tb.getAttsTable().add("sql", sql1);
+			super.getItemValues().setListFrameTable(tb);
 		}
 
 		return tb;
@@ -816,10 +825,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 
 		// 例如全文检索的用法 contains(字段, @q)
 		// SQLServer 的 contains(字段, '北京')
-		boolean isFunc = dataField.toLowerCase().indexOf("contains") >=0
-				&& dataField.toLowerCase().indexOf("@q") >=0
+		boolean isFunc = dataField.toLowerCase().indexOf("contains") >= 0 && dataField.toLowerCase().indexOf("@q") >= 0
 				&& dataField.indexOf("(") >= 0;
-				
+
 		if (opTag.equals("blk")) {// 空白
 			if (isFunc) {
 				return null;

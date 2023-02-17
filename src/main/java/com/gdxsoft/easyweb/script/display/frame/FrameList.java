@@ -49,7 +49,7 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 public class FrameList extends FrameBase implements IFrame {
 	private static Logger LOGGER = LoggerFactory.getLogger(FrameList.class);
 
-	int _ListFrameRecordCount = 0;
+	int _ListFrameRecordCount = -1;
 
 	private UserXItem _GroupUserXItem;
 	private MStr _SearchExp = new MStr();
@@ -88,38 +88,51 @@ public class FrameList extends FrameBase implements IFrame {
 
 	private String[] _KeyFileds;
 
-	public int queryRecords() {
-		DataConnection conn = super.getHtmlClass().getItemValues().getSysParas().getDataConn();
+	/**
+	 * 获取分页的TABLE （EXECUTE_SPLIT_SQL标记）
+	 * 
+	 * @return
+	 */
+	public DTTable getSplitPageTable() {
+		MList tbs;
 		try {
-			MList tbs = super.getHtmlClass().getAction().getDTTables();
-			for(int i=0;i<tbs.size();i++) {
+			tbs = super.getHtmlClass().getAction().getDTTables();
+			for (int i = 0; i < tbs.size(); i++) {
 				DTTable tb = (DTTable) tbs.get(i);
-				if (tb.getAttsTable().containsKey("RECORDS")) {
-					// 从JSON调用创建的表返回 记录总数
-					// ActionBase.executeCallJSon
-					this._ListFrameRecordCount = Integer.parseInt(tb.getAttsTable().get("RECORDS").toString());
-					return this._ListFrameRecordCount;
+
+				if (tb.getAttsTable().containsKey(ActionListFrame.EXECUTE_SPLIT_SQL)) {
+					return tb;
 				}
-				
-				if(!tb.getAttsTable().containsKey( ActionListFrame.EXECUTE_SPLIT_SQL)) {
-					continue;
-				}
-				
-				_ListFrameRecordCount = conn.getRecordCount(tb.getAttsTable().get("sql").toString());
-				tb.getAttsTable().put("RECORDS", _ListFrameRecordCount);
-				return _ListFrameRecordCount;
 			}
 		} catch (Exception e) {
-			LOGGER.error(e.getLocalizedMessage());
+			LOGGER.warn("getSplitPageTable: {}", e.getLocalizedMessage());
+		}
+		return null;
+	}
+
+	/**
+	 * 查询数据总数
+	 * 
+	 * @return
+	 */
+	public int queryRecords() {
+		if (this._ListFrameRecordCount >= 0) {
+			return this._ListFrameRecordCount;
+		}
+		DTTable tb = this.getSplitPageTable();
+		if (tb == null) {
+			this._ListFrameRecordCount = -1;
+			return this._ListFrameRecordCount;
 		}
 
-		
-
-		// 获取所有记录数，根据执行的最后的select语句获取
-//		if (conn != null && conn.getResultSetList().size() > 0) {
-//			DataResult ds = (DataResult) conn.getResultSetList().getLast();
-//			_ListFrameRecordCount = conn.getRecordCount(ds.getSqlOrigin());
+//		if (tb.getAttsTable().containsKey("RECORDS")) {
+//			this._ListFrameRecordCount = Integer.parseInt(tb.getAttsTable().get("RECORDS").toString());
+//			return this._ListFrameRecordCount;
 //		}
+		DataConnection conn = super.getHtmlClass().getItemValues().getSysParas().getDataConn();
+		_ListFrameRecordCount = conn.getRecordCount(tb.getAttsTable().get("sql").toString());
+		tb.getAttsTable().put("RECORDS", _ListFrameRecordCount);
+		conn.close();
 
 		return _ListFrameRecordCount;
 	}
@@ -571,7 +584,12 @@ public class FrameList extends FrameBase implements IFrame {
 			createItemHtmls(false);
 			doc.addScriptHtml("<!-- no data -->");
 		} else {
-			DTTable tb = (DTTable) tbs.get(tbs.size() - 1);
+			DTTable tb = this.getSplitPageTable();
+			
+			if (tb == null) {
+				tb = (DTTable) tbs.get(tbs.size() - 1);
+			}
+			
 			super.getHtmlClass().getItemValues().setListFrameTable(tb);
 
 			if (this.isSplitPage()) { // 分页

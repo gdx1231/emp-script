@@ -482,6 +482,11 @@ public class FrameParameters {
 	public static final String EWA_KEY = "EWA_KEY";
 
 	/**
+	 * ListFrame分页查询时跳过的select语句
+	 */
+	public static final String EWA_SQL_SPLIT_NO = "EWA_SQL_SPLIT_NO";
+
+	/**
 	 * shortName
 	 */
 	public static String $S = "$S";
