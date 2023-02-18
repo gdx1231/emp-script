@@ -234,6 +234,9 @@ public class UObjectValue {
 		}
 		String name = t.getName();
 		if (name.equals("com.gdxsoft.easyweb.script.RequestValue")) {
+			if (src.getClass().getName().equalsIgnoreCase("com.gdxsoft.easyweb.script.RequestValue")) {
+				return src;
+			}
 			return "[com.gdxsoft.easyweb.script.RequestValue]";
 		}
 		if (name.equals("int")) {
@@ -442,7 +445,7 @@ public class UObjectValue {
 		String cachedkeySupper = this.createMethodCachedKey("getPropertyMethod-supper-" + methodName, methodValues);
 		String cachedkeySupper2 = this.createMethodCachedKey("getPropertyMethod-supper2-" + methodName, methodValues);
 		String cachedkeySupper3 = this.createMethodCachedKey("getPropertyMethod-supper3-" + methodName, methodValues);
-		
+
 		Method m = getPropertyMethodFromCached(cachedkey, this._Methods);
 		if (m != null) {
 			return m;
@@ -700,7 +703,9 @@ public class UObjectValue {
 			for (int i = 0; i < types.length; i++) {
 				Class<?> t = types[i];
 				newParas[i] = convert(t, constructorParameters[i]);
-				if (newParas[i] != null && newParas[i].toString().equals("[com.gdxsoft.easyweb.script.RequestValue]")) {
+				if (newParas[i] != null
+						&& (newParas[i].getClass().getName().equals("com.gdxsoft.easyweb.script.RequestValue")
+								|| newParas[i].toString().equals("[com.gdxsoft.easyweb.script.RequestValue]"))) {
 					newParas[i] = this._Rv;
 				}
 			}

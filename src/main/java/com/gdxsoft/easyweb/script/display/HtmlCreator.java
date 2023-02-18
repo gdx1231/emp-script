@@ -331,6 +331,8 @@ public class HtmlCreator {
 
 		// System.out.println(this._RequestValue.listValues(false));
 
+		// 2023-02-18传递HtmlCreator参数到rv，用于EwaSqlFuctions调用
+		this._RequestValue.setHtmlCreator(this);
 	}
 
 	/**

@@ -57,8 +57,14 @@ public class EwaSqlFunctions {
 
 			for (int i = 0; i < v.getMethodParameters().size(); i++) {
 				String parameter = v.getMethodParameters().get(i);
-				String result = rv.replaceParameters(parameter);
-				methodParameters[i] = result;
+				if ("rv".equalsIgnoreCase(parameter)) {
+					methodParameters[i] = rv;
+				} else if ("hc".equalsIgnoreCase(parameter)) { // HtmlCreator
+					methodParameters[i] = rv.getHtmlCreator();
+				} else {
+					String result = rv.replaceParameters(parameter);
+					methodParameters[i] = result;
+				}
 			}
 			Object executeResult = null;
 			if (v.isStaticCall()) {
@@ -67,8 +73,12 @@ public class EwaSqlFunctions {
 				Object[] valsConstruct = new Object[v.getConstructorParameters().size()];
 				for (int i = 0; i < v.getConstructorParameters().size(); i++) {
 					String parameter = v.getConstructorParameters().get(i);
-					String result = rv.replaceParameters(parameter);
-					valsConstruct[i] = result;
+					if ("rv".equalsIgnoreCase(parameter)) {
+						methodParameters[i] = rv;
+					} else {
+						String result = rv.replaceParameters(parameter);
+						valsConstruct[i] = result;
+					}
 				}
 				executeResult = EwaFunctions.executeFunction(v.getFunctionName(), valsConstruct, methodParameters);
 			}

@@ -29,6 +29,7 @@ import com.gdxsoft.easyweb.conf.ConfRequestValuesGlobal;
 import com.gdxsoft.easyweb.conf.ConfSecurities;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.script.display.HtmlCreator;
 import com.gdxsoft.easyweb.script.display.action.ActionBase;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.*;
@@ -221,6 +222,8 @@ public class RequestValue implements Cloneable {
 
 	private boolean jsonBodyParameters;
 
+	private HtmlCreator htmlCreator;
+	
 	public RequestValue() {
 		initSysParameters();
 	}
@@ -1692,5 +1695,19 @@ public class RequestValue implements Cloneable {
 
 	public void setJsonBodyParameters(boolean jsonBodyParameters) {
 		this.jsonBodyParameters = jsonBodyParameters;
+	}
+
+	/**
+	 * @return the htmlCreator
+	 */
+	public HtmlCreator getHtmlCreator() {
+		return htmlCreator;
+	}
+
+	/**
+	 * @param htmlCreator the htmlCreator to set
+	 */
+	public void setHtmlCreator(HtmlCreator htmlCreator) {
+		this.htmlCreator = htmlCreator;
 	}
 }
