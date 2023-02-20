@@ -32,8 +32,7 @@ public class EwaWebPage {
 
 	private final RequestValue _Rv;
 
-	public EwaWebPage(HttpServletRequest req, HttpSession session,
-			HttpServletResponse response) {
+	public EwaWebPage(HttpServletRequest req, HttpSession session, HttpServletResponse response) {
 		this._PageRequest = req;
 		this._PageSession = session;
 		this._PageResponse = response;
@@ -71,17 +70,13 @@ public class EwaWebPage {
 	}
 
 	private void runEwaScript() {
-		String clientIp = _PageRequest.getRemoteAddr();
-		String xip = _PageRequest.getHeader("X-Real-IP");
-		if (xip != null) {
-			clientIp = xip;
-		}
+		String clientIp = this._Rv.s(RequestValue.SYS_REMOTEIP);
 		String ewaDebugNo = this._Rv.getString(FrameParameters.EWA_DEBUG_NO);
 		String q = _PageRequest.getQueryString();
 		if (q == null)
 			q = "";
 		if ((ewaDebugNo != null && ewaDebugNo.equals("1"))
-				|| this._Rv.getString(FrameParameters.EWA_P_BEHAVIOR) != null
+				// || this._Rv.getString(FrameParameters.EWA_P_BEHAVIOR) != null
 				|| q.indexOf("ewa.xml") > 0) {
 			// 参数设置不跟踪
 			// 弹出窗体不显示Debug
@@ -112,8 +107,7 @@ public class EwaWebPage {
 				ajaxType = "";
 			}
 
-			if (ajaxType.equalsIgnoreCase("XML")
-					|| ajaxType.equalsIgnoreCase("XMLDATA")) {
+			if (ajaxType.equalsIgnoreCase("XML") || ajaxType.equalsIgnoreCase("XMLDATA")) {
 				this._PageContentType = "text/xml";
 				isXml = true;
 			} else if (ajaxType.equalsIgnoreCase("JSON")) {
@@ -132,20 +126,17 @@ public class EwaWebPage {
 //			int loc1=_PageContent.toString().indexOf("\";",loc0);
 //			String tmp=_PageContent.toString().substring(loc0,loc1);
 //			System.out.println(tmp);
-			
+
 			this._DebugInfo.setDebugFrames(_HtmlCreator.getDebugFrames());
 			this._DebugInfo.setRequestValue(_HtmlCreator.getRequestValue());
 			debugStr = this._DebugInfo.getDebugPage();
 
 			// debug信息，用于后台跟踪
 			if (record != null) {
-				String xmlName = _HtmlCreator.getRequestValue().getString(
-						FrameParameters.XMLNAME);
+				String xmlName = _HtmlCreator.getRequestValue().getString(FrameParameters.XMLNAME);
 				record.setXmlName(xmlName);
-				record.setItemName(_HtmlCreator.getRequestValue().getString(
-						FrameParameters.ITEMNAME));
-				record.setParameters(_HtmlCreator.getRequestValue().listValues(
-						false));
+				record.setItemName(_HtmlCreator.getRequestValue().getString(FrameParameters.ITEMNAME));
+				record.setParameters(_HtmlCreator.getRequestValue().listValues(false));
 				record.setRunSeq(_HtmlCreator.getDebugFrames().listDebugHtml());
 				record.setAll(debugStr);
 				record.setRunTime(_HtmlCreator.getDebugFrames().getRunTime());
@@ -173,13 +164,10 @@ public class EwaWebPage {
 
 		// //debug信息，用于后台跟踪
 		if (record != null) {
-			String xmlName = _HtmlCreator.getRequestValue()
-					.getString(FrameParameters.XMLNAME);
+			String xmlName = _HtmlCreator.getRequestValue().getString(FrameParameters.XMLNAME);
 			record.setXmlName(xmlName);
-			record.setItemName(_HtmlCreator.getRequestValue().getString(
-					FrameParameters.ITEMNAME));
-			record.setParameters(_HtmlCreator.getRequestValue().listValues(
-					false));
+			record.setItemName(_HtmlCreator.getRequestValue().getString(FrameParameters.ITEMNAME));
+			record.setParameters(_HtmlCreator.getRequestValue().listValues(false));
 			record.setRunSeq(_HtmlCreator.getDebugFrames().listDebugHtml());
 			record.setIsError(true);
 			record.setAll(debugStr);

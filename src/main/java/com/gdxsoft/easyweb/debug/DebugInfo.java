@@ -80,26 +80,12 @@ public class DebugInfo {
 	}
 
 	public String getDebugPage() {
-		MStr u1sb = new MStr();
-		u1sb.append("XMLNAME=ewa|ewa.xml&ITEMNAME=define_right&D_XMLNAME=");
-		u1sb.append(_RequestValue.getString(FrameParameters.XMLNAME));
-		u1sb.append("&D_ITEMNAME=");
-		u1sb.append(_RequestValue.getString(FrameParameters.ITEMNAME));
-		String u1 = u1sb.toString();
-		String u2 = "";
-		try {
-			u2 = java.net.URLEncoder.encode(u1, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-
-		}
+		 
 		MStr sb = new MStr();
 		sb.al("<div id='__EWA_DEBUG'><div style='font-size:9px;color:#dcdcdc' ");
 		sb.al("onclick=\"var o1=$X('__EWA_DEBUG_INFO');");
 		sb.al("if(o1.style.display==''){o1.style.display='none'}else{o1.style.display=''};");
 		sb.al("\">DEBUG INFO</div><div id='__EWA_DEBUG_INFO' style='display:none'>");
-		if (u2.length() > 0) {
-			sb.al("<div><a href='./?XMLNAME=ewa|ewa.xml&ITEMNAME=index&op=" + u2 + "' target=a1>修改</a></div>");
-		}
 		sb.al(this.getRequestInfo(true));
 		sb.al(this.getDebugInfo(true));
 		sb.al("</div></div>");
