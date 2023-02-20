@@ -19,6 +19,7 @@ import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
 import com.gdxsoft.easyweb.utils.Utils;
+import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ItemRepeat extends ItemBase {
@@ -97,17 +98,24 @@ public class ItemRepeat extends ItemBase {
 			} catch (Exception e) {
 			}
 		}
-
+		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
+		String lang = rv.getLang();
+		boolean isEn = "enus".equalsIgnoreCase(lang);
 		for (int i = 0; i < this._Table.getCount(); i++) {
 			DTRow row = this._Table.getRow(i);
-			String v = row.getCell(this._Value).getValue() == null ? "" : row.getCell(this._Value).toString();
-
-			String t = row.getCell(this._Text).getValue() == null ? "" : row.getCell(this._Text).toString();
+			// String v = row.getCell(this._Value).getValue() == null ? "" :
+			// row.getCell(this._Value).toString();
+			// String t = row.getCell(this._Text).getValue() == null ? "" :
+			// row.getCell(this._Text).toString();
+			String v = this.createOptionText(row, this._Value, isEn);
+			String t = this.createOptionText(row, this._Text, isEn);
 			JSONObject obj = new JSONObject();
 			obj.put("T", t);
 			obj.put("V", v);
 			if (this._Title != null && this._Title.length() > 0) {
-				String title = row.getCell(this._Title).getValue() == null ? "" : row.getCell(this._Title).toString();
+				// String title = row.getCell(this._Title).getValue() == null ? "" :
+				// row.getCell(this._Title).toString();
+				String title = this.createOptionText(row, this._Title, isEn);
 				obj.put("TT", title);
 			}
 			obj.put("json", row.toJson().toString());
@@ -283,8 +291,8 @@ public class ItemRepeat extends ItemBase {
 		}
 
 		DTTable tb1 = new DTTable();
-		tb1.setColumns( this._Table.getColumns() );
-		
+		tb1.setColumns(this._Table.getColumns());
+
 		tb1.initData(arr);
 
 		this._Table = tb1;
@@ -347,23 +355,12 @@ public class ItemRepeat extends ItemBase {
 		// 英文的标记处理
 		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
 		String lang = rv.getLang();
-		if (lang != null && lang.toUpperCase().trim().equals("ENUS")) {
-			if (this._Table.getColumns().testName(this._Text + "_EN")) {
-				this._Text = this._Text + "_EN";
-			} else if (this._Table.getColumns().testName(this._Text + "EN")) {
-				this._Text = this._Text + "EN";
-			} else if (this._Table.getColumns().testName(this._Text + "_ENUS")) {
-				this._Text = this._Text + "_ENUS";
-			} else if (this._Table.getColumns().testName(this._Text + "ENUS")) {
-				this._Text = this._Text + "ENUS";
-			}
-		}
+		boolean isEn = "enus".equalsIgnoreCase(lang);
 
 		String parentField = null;
 		if (xItem.getName().equalsIgnoreCase("select") && listXItem.testName("ParentField")) {
 			try {
 				parentField = listXItem.getItem("ParentField").trim();
-
 			} catch (Exception e) {
 			}
 		}
@@ -405,9 +402,15 @@ public class ItemRepeat extends ItemBase {
 				}
 				last_groupValue = grpValue;
 			}
-			String v = row.getCell(this._Value).getValue() == null ? "" : row.getCell(this._Value).toString();
+			// String v = row.getCell(this._Value).getValue() == null ? "" :
+			// row.getCell(this._Value).toString();
+			// String t = row.getCell(this._Text).getValue() == null ? "" :
+			// row.getCell(this._Text).toString();
 
-			String t = row.getCell(this._Text).getValue() == null ? "" : row.getCell(this._Text).toString();
+			// 根据表达式生成表达内容，例如 @ADM_NAME(@DEP_NAME)
+			String v = this.createOptionText(row, this._Value, isEn);
+			String t = this.createOptionText(row, this._Text, isEn);
+
 			// 过滤<符号
 			v = Utils.textToInputValue(v);
 			t = Utils.textToInputValue(t);
@@ -417,7 +420,10 @@ public class ItemRepeat extends ItemBase {
 
 			String title = "";
 			if (this._Title.length() > 0) {
-				title = row.getCell(_Title).getValue() == null ? "" : row.getCell(_Title).toString();
+				// title = row.getCell(_Title).getValue() == null ? "" :
+				// row.getCell(_Title).toString();
+				title = createOptionText(row, this._Title, isEn);
+				title = Utils.textToInputValue(title);
 			}
 			String s2 = repeatHtml.replace(SkinFrame.TAG_LST_VAL, v);
 			s2 = s2.replace(SkinFrame.TAG_LST_TXT, t);
@@ -444,6 +450,70 @@ public class ItemRepeat extends ItemBase {
 			sb.al("</optgroup>");
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * 根据表达式生成option选项内容<br>
+	 * 1、 @ADM_NAME(@DEP_NAME)<br>
+	 * 2、传统模式，字段名称
+	 * 
+	 * @param row
+	 * @param textExp
+	 * 
+	 * @return
+	 */
+	private String createOptionText(DTRow row, String textExp, boolean isEn) {
+		MListStr a = Utils.getParameters(textExp, "@");
+		if (a.size() == 0) {
+			int textIndex = this.tryGetFieldIndex(row.getTable(), textExp, isEn);
+			if (textIndex >= 0) {
+				// 传统模式，返回字段内容
+				return row.getCell(textIndex).getValue() == null ? "" : row.getCell(textIndex).toString();
+			} else {
+				return textExp;
+			}
+		}
+
+		// 表达式模式
+		MStr sb = new MStr(textExp);
+		for (int i = 0; i < a.size(); i++) {
+			String name = a.get(i);
+			int nameIndex = this.tryGetFieldIndex(row.getTable(), name, isEn);
+			if (nameIndex == -1) {
+				continue;
+			}
+			String val = row.getCell(nameIndex).getValue() == null ? "" : row.getCell(nameIndex).toString();
+
+			String find = "@" + name;
+			// 替换一次
+			sb.replace(find, val);
+		}
+		return sb.toString();
+
+	}
+
+	/**
+	 * 试图获取字段，如果是英文的话，则尝试在多个字段中获取
+	 * 
+	 * @param tb
+	 * @param fieldName
+	 * @param isEn
+	 * @return
+	 */
+	private int tryGetFieldIndex(DTTable tb, String fieldName, boolean isEn) {
+		if (!isEn) {
+			return tb.getColumns().getNameIndex(fieldName);
+		}
+
+		String[] names = { fieldName + "_EN", fieldName + "EN", fieldName + "_ENUS", fieldName + "ENUS",
+				"EN_" + fieldName, "EN" + fieldName, fieldName };
+		for (int i = 0; i < names.length; i++) {
+			int index = tb.getColumns().getNameIndex(names[i]);
+			if (index >= 0) {
+				return index;
+			}
+		}
+		return -1;
 	}
 
 	/**
