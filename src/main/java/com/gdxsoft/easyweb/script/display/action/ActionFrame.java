@@ -76,21 +76,22 @@ public class ActionFrame extends ActionBase implements IAction {
 
 	/**
 	 * 生成上传文件参数，用于数据库保存
+	 * @throws Exception 
 	 */
-	void createUploadsParas() {
+	void createUploadsParas() throws Exception {
 		RequestValue rv = super.getRequestValue();
 		if (rv.getString("____createUploadPara____") != null) {
 			return;
 		}
 		for (int i = 0; i < this._Uploads.getCount(); i++) {
 			UserXItem item = (UserXItem) this._Uploads.getByIndex(i);
-			try {
+			//try {
 				this.createUploadPara(item);
-			} catch (Exception err) {
-				removeUpload(item);
-				LOGGER.warn("Create upload parameters err: {}", err.getMessage());
-				return;
-			}
+			//} catch (Exception err) {
+			//	removeUpload(item);
+			//	LOGGER.warn("Create upload parameters err: {}", err.getMessage());
+			//	return;
+			//}
 		}
 	}
 
@@ -115,8 +116,9 @@ public class ActionFrame extends ActionBase implements IAction {
 		String uploadName = item.getName();
 		UserXItemValue u = item.getItem("Upload").getItem(0);
 		String p = Upload.DEFAULT_UPLOAD_PATH;
+		String p1 = Upload.DEFAULT_UPLOAD_PATH;
 		if (u.testName("UpPath")) {
-			String p1 = u.getItem("UpPath");
+			p1 = u.getItem("UpPath");
 			if (p1.trim().length() > 0) {
 				p = super.getItemValues().replaceParameters(p1, false);
 			}
@@ -211,12 +213,28 @@ public class ActionFrame extends ActionBase implements IAction {
 		// 添加增加标识
 		rv.addValue("____createUploadPara____", "ADDED");
 
-		if (!(f.exists() && f.isFile() && f.canRead())) {
+		if (!f.exists()) {
 			// 文件被删除- 配置项指定了 删除文件
 			// 保留上传的json参数
 			if (arr != null) {
 				rv.addValue(uploadName + "_JSON", arr.toString());
 			}
+			LOGGER.warn("The uploaded file not exists: {}", f.getAbsolutePath());
+			LOGGER.warn("Pls check item defined UpPath = {}", p1);
+			throw new Exception("The uploaded file not exists: " + f.getAbsolutePath() + ", UpPath=" + p1);
+		}
+		if (!f.isFile()) {
+			if (arr != null) {
+				rv.addValue(uploadName + "_JSON", arr.toString());
+			}
+			LOGGER.warn("The uploaded file is DIRECTORY: {}", f.getAbsolutePath());
+			return;
+		}
+		if (!f.canRead()) {
+			if (arr != null) {
+				rv.addValue(uploadName + "_JSON", arr.toString());
+			}
+			LOGGER.warn("The uploaded file CAN'T READ: {}", f.getAbsolutePath());
 			return;
 		}
 
@@ -265,13 +283,13 @@ public class ActionFrame extends ActionBase implements IAction {
 		// 去除UPath.getPATH_UPLOAD() 的路径
 		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_PATH_SHORT=" + shortPath);
 		rv.addValue(uploadName + "_PATH_SHORT", shortPath);
-		
+
 		// 文件字节 length/size
 		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_SIZE=" + f.length());
 		rv.addValue(uploadName + "_SIZE", f.length());
 		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_LENGTH=" + f.length());
 		rv.addValue(uploadName + "_LENGTH", f.length());
-		
+
 		// 文件扩展名
 		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_EXT=" + UFile.getFileExt(f.getName()));
 		rv.addValue(uploadName + "_EXT", UFile.getFileExt(f.getName()));
@@ -283,7 +301,7 @@ public class ActionFrame extends ActionBase implements IAction {
 			// 文件URL
 			super.getDebugFrames().addDebug(this, "Upload", uploadName + "_URL=" + item1.getString("UP_URL"));
 			rv.addValue(uploadName + "_URL", item1.getString("UP_URL"));
-			
+
 			// 上传文件的Url前缀
 			super.getDebugFrames().addDebug(this, "Upload", uploadName + "_CT=" + item1.getString("CT"));
 			rv.addValue(uploadName + "_CT", item1.getString("CT"));

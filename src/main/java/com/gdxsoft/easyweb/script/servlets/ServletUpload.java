@@ -66,7 +66,9 @@ public class ServletUpload extends HttpServlet {
 
 		PrintWriter out = response.getWriter();
 
+		// 这样初始化的话，参数不完整，需要在下面继续提取。
 		RequestValue rv = new RequestValue(request, request.getSession());
+
 		Upload up = new Upload();
 		up.setRv(rv);
 		try {
@@ -80,13 +82,11 @@ public class ServletUpload extends HttpServlet {
 		DiskFileItemFactory factory = new DiskFileItemFactory();
 		// 设置内存缓冲区，超过后写入临时文件
 		int bufferSize = 1024 * 1024 * 10; // 10M
-
 		factory.setSizeThreshold(bufferSize);// 设置缓冲区大小，这里是10M
 		// 设置临时文件存储位置
 		File tempPath = new File(UPath.getPATH_UPLOAD() + "/" + Upload.DEFAULT_UPLOAD_PATH);
 		factory.setRepository(tempPath);
 		ServletFileUpload upload = new ServletFileUpload(factory);
-
 		long maxSize = 1024 * 1024 * 1024 * 2; // 2g
 		upload.setSizeMax(maxSize);
 
@@ -96,6 +96,7 @@ public class ServletUpload extends HttpServlet {
 			for (int i = 0; i < items.size(); i++) {
 				FileItem item = (FileItem) items.get(i);
 				if (item.isFormField()) {
+					// 重点，提取出上传的参数放到rv中
 					rv.addValue(item.getFieldName(), item.getString());
 				} else {
 					// this is a file
@@ -107,7 +108,7 @@ public class ServletUpload extends HttpServlet {
 			LOGGER.error(err.getMessage());
 			return;
 		}
-
+		
 		up.setUploadItems(items);
 
 		try {
@@ -137,7 +138,8 @@ public class ServletUpload extends HttpServlet {
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and copyright.
+	 * Returns information about the servlet, such as author, version, and
+	 * copyright.
 	 * 
 	 * @return String information about this servlet
 	 */

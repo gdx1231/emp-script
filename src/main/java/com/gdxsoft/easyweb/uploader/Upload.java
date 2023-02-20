@@ -38,8 +38,15 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class Upload {
 	private static Logger LOGGER = LoggerFactory.getLogger(Upload.class);
+	/**
+	 * 上传路径的最大长度限制 255，可以修改
+	 */
+	public static int UPLOAD_PATH_MAX_CHARS = 255;
 
-	public static String DEFAULT_UPLOAD_PATH = "upload_files";
+	/**
+	 * 默认的上传路径upload_files，不可修改
+	 */
+	public static final String DEFAULT_UPLOAD_PATH = "upload_files";
 	static char[] hex = "0123456789ABCDEF".toCharArray();
 
 	// private HttpServletRequest _request;
@@ -182,17 +189,8 @@ public class Upload {
 		if (u.testName("UpPath")) {
 			String p = u.getItem("UpPath");
 			if (!p.trim().equals("")) {
-				p = iv.replaceParameters(p, false);
-				if (p.indexOf("..") >= 0) { // 避免出现 ../../../root的风险
-					LOGGER.warn(this + "上传路径出现‘..’，被替换（" + p + "）-->");
-					p = p.replace("..", "");
-					LOGGER.warn(p);
-				}
-				if (p.length() > 255) { // 避免路嘉过长，超过系统限制
-					LOGGER.warn(this + "上传路径长度超过255，被替换（" + p + "）-->");
-					p = DEFAULT_UPLOAD_PATH;
-					LOGGER.warn(p);
-				}
+				// p = iv.replaceParameters(p, false);
+				//替换参数在upload中调用，因为此时的rv数据不完整
 				_uploadDir = p;
 			}
 		}
@@ -292,11 +290,6 @@ public class Upload {
 		_uploadRealDir = root + "/" + _uploadDir;
 		_uploadTempDir = root + "/_temp_";
 
-		File f1 = new File(this._uploadRealDir);
-		_uploadRealDir = f1.getAbsolutePath();
-		if (!f1.exists()) {
-			f1.mkdirs();
-		}
 		File f2 = new File(this._uploadTempDir);
 		_uploadTempDir = f2.getAbsolutePath();
 		if (!f2.exists()) {
@@ -344,12 +337,12 @@ public class Upload {
 		// _request = request;
 		RequestValue rv = this._Rv;
 		// 从tomcat 7.6以上版本，|符号不能之间传递，必须转义，否则抛出400错误
-		String xmlName = decode(rv.getString(FrameParameters.XMLNAME));
-		String itemName = decode(rv.getString(FrameParameters.ITEMNAME));
-		String name = decode(this._Rv.getString("NAME"));
+		String xmlName = decode(rv.s(FrameParameters.XMLNAME));
+		String itemName = decode(rv.s(FrameParameters.ITEMNAME));
+		String name = decode(this._Rv.s("NAME"));
 		if (xmlName == null || itemName == null || name == null) {
-			System.err.println("上传配置失败：参数未传递(XMLNAME,ITEMNAME, NAME)");
-			return;
+			LOGGER.error("上传配置失败：参数未传递(XMLNAME,ITEMNAME, NAME)");
+			throw new Exception("上传配置失败：参数未传递(XMLNAME,ITEMNAME, NAME)");
 		}
 
 		this.init(xmlName, itemName, name);
@@ -396,7 +389,19 @@ public class Upload {
 		if (_uploadDir == null) {
 			throw new Exception("The upload dir not defined ");
 		}
-
+		// 替换路径的参数
+		this._uploadDir = this._Rv.replaceParameters(_uploadDir);
+		if (this._uploadDir.indexOf("..") >= 0) { // 避免出现 ../../../root的风险
+			LOGGER.error("Invalid char '..' in upload dir, {}", _uploadDir);
+			throw new Exception("Invalid char '..' in upload dir, " + this._uploadDir);
+		}
+		if (this._uploadDir.length() > UPLOAD_PATH_MAX_CHARS) { // 避免路径过长，超过系统限制
+			LOGGER.error("Upload dir full name limit {} chars, {}", UPLOAD_PATH_MAX_CHARS, this._uploadDir);
+			throw new Exception("Upload dir  full name limit " + UPLOAD_PATH_MAX_CHARS + " chars, " + this._uploadDir);
+		}
+		this._uploadRealDir = this._Rv.replaceParameters(_uploadRealDir);
+		UFile.buildPaths(this._uploadRealDir);
+		
 		int m = 0;
 		if (this._UploadItems != null) { // 处理文件上传
 			for (int i = 0; i < this._UploadItems.size(); i++) {
@@ -978,7 +983,7 @@ public class Upload {
 		if (itemobj instanceof String) {
 			name = (Math.random() + "").replace(".", "_") + ".jpg";
 			fu.setLength(itemobj.toString().length() / 3);
-			fu.setContextType("image/jpg");
+			fu.setContextType("image/jpeg");
 		} else {
 			FileItem item = (FileItem) itemobj;
 			try {
