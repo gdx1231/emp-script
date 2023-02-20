@@ -23,6 +23,7 @@ public class SqlSyntaxCheck {
 
 	/**
 	 * 检查SQL语法
+	 * 
 	 * @return
 	 */
 	public String checkSyntax() {
@@ -52,23 +53,22 @@ public class SqlSyntaxCheck {
 			if (s.length() == 0) {
 				continue;
 			}
-			if (s.toUpperCase().indexOf("SELECT") == 0) {
-				this._Cnn.executeQuery(sql);
+			if (DataConnection.checkIsSelect(s)) {
+				this._Cnn.executeQuery(s);
 			} else {
-				this._Cnn.executeUpdate(sql);
+				this._Cnn.executeUpdate(s);
 			}
 			if (_Cnn.getErrorMsg() != null) {
 				String err = _Cnn.getErrorMsg();
 				_Cnn.clearErrorMsg();
-				_Cnn.executeUpdate("SET NOEXEC OFF;");
 				JSONObject json = new JSONObject();
 
 				json.put("ERR", err.split("<br>")[1]);
 				json.put("RST", false);
-				
+
 				_Cnn.transRollback();
 				_Cnn.transClose();
-				
+
 				return json.toString();
 
 			}
