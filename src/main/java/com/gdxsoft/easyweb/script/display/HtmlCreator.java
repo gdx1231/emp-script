@@ -2142,6 +2142,7 @@ public class HtmlCreator {
 			if (actionSetTranscation) {
 				_SysParas.getDataConn().transRollback();
 			}
+			throw err;
 		} finally {
 			if (_SysParas.getDataConn() != null) {
 				_SysParas.getDataConn().close();
