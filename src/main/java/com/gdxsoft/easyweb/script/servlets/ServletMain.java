@@ -337,9 +337,17 @@ public class ServletMain extends HttpServlet {
 		if (p.isPageDebug()) {// 是否Debug状态
 			if ((ct != null && ct.equals("text/xml")) || p.getHtmlCreator().getAjaxCallType() != null) {
 				// 不输出
-			} else {
-				// 输出Debug内容
-				cnt.a(p.getPageDeubgInfo());
+			} else { // 输出Debug内容
+				String debug = p.getPageDeubgInfo();
+				if (rv.s(FrameParameters.EWA_PARENT_FRAME) != null) {
+					StringBuilder sb = new StringBuilder();
+					sb.append("<div><style>#__EWA_DEBUG{position: absolute;left:0;bottom:0}");
+					sb.append("#__EWA_DEBUG_INFO{background-color:#fff;width:100vw;height: calc(100vh - 50px);overflow: auto;}</style>");
+					sb.append(debug).append("</div>");
+					cnt.a(sb.toString());
+				} else {
+					cnt.a(debug);
+				}
 			}
 		}
 		this.outContent(request, response, cnt.toString());
