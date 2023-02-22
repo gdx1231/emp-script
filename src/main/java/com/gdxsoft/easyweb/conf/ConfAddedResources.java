@@ -90,6 +90,7 @@ public class ConfAddedResources {
 			}
 			sps.getResources().put(sp.getName(), sp);
 			LOGGER.debug(sp.getXml());
+			LOGGER.info("Added resource: {}, {}, {}", sp.getName(), sp.getResourceType(), sp.getSrc());
 		}
 
 		return sps;

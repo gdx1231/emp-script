@@ -69,6 +69,8 @@ public class ConfRedises {
 			sp.setHosts(hosts.trim());
 
 			sps.lst.add(sp);
+			
+			LOGGER.info("Add Redis: {}, {}, {}", sp.getName(), sp.getMethod(), sp.getHosts() );
 		}
 
 		return sps;

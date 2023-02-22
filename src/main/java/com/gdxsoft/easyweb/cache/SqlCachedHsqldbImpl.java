@@ -15,12 +15,12 @@ import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MTableStr;
 
 public class SqlCachedHsqldbImpl implements ISqlCached {
-	private static Logger LOGGER = LoggerFactory.getLogger(SqlCachedHsqldbImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SqlCachedHsqldbImpl.class);
 	private static SqlCachedHsqldbImpl INSTANCE;
 
-	public static String CONN_STR = "____ewa_cached_hsqldb__"; // 必须小写
+	public static final String CONN_STR = "____ewa_cached_hsqldb__"; // 必须小写
 
-	private static String CONN_URL = "jdbc:hsqldb:mem:EWA_CACHED";
+	private static final String CONN_URL = "jdbc:hsqldb:mem:EWA_CACHED";
 
 	public static Boolean DEBUG = false;
 
@@ -328,7 +328,7 @@ public class SqlCachedHsqldbImpl implements ISqlCached {
 			poolParams.put("maxIdle", 100);
 
 			poolCfg.setPool(poolParams);
-			c1.put(CONN_STR, poolCfg);
+			c1.addCfg(poolCfg);
 
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());

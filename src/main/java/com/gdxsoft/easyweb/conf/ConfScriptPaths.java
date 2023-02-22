@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -13,7 +15,7 @@ import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
 public class ConfScriptPaths {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ConfScriptPaths.class);
 	private static ConfScriptPaths INST = null;
 
 	private static long PROP_TIME = 0;
@@ -30,8 +32,8 @@ public class ConfScriptPaths {
 
 	private synchronized static ConfScriptPaths createNewScriptPaths() {
 		/*
-		 * <scriptPaths> <scriptPath name="/ewa" path="resources:/user.xml/ewa" /> <scriptPath name="/" path="jdbc:ewa"
-		 * /> </scriptPaths>
+		 * <scriptPaths> <scriptPath name="/ewa" path="resources:/user.xml/ewa" />
+		 * <scriptPath name="/" path="jdbc:ewa" /> </scriptPaths>
 		 */
 		ConfScriptPaths sps = new ConfScriptPaths();
 
@@ -64,6 +66,7 @@ public class ConfScriptPaths {
 				ResourceConfig.initializeResouces(sp);
 			}
 			sps.lst.add(sp);
+			LOGGER.info("ScriptPath: {}, {}", sp.getName(), sp.getPath());
 		}
 
 		return sps;
@@ -71,7 +74,8 @@ public class ConfScriptPaths {
 
 	private static ConfScriptPath getCompatibleConf() {
 		// Compatible
-		// <path des="用户配置文件目录" Name="script_path" Value="/Volumes/b2b/user.config.xml" />
+		// <path des="用户配置文件目录" Name="script_path" Value="/Volumes/b2b/user.config.xml"
+		// />
 		// <path des="用户配置文件目录" Name="script_path" Value="jdbc:ewa" />
 		NodeList nl = UPath.getCfgXmlDoc().getElementsByTagName("path");
 		for (int i = 0; i < nl.getLength(); i++) {

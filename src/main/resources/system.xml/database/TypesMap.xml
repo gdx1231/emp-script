@@ -303,6 +303,7 @@
 				<MapTo Name="SMALLDATETIME"
 					InsertCovert="replace('@val', 'T',' ')" />
 				<MapTo Name="DATE" InsertCovert="replace('@val', 'T',' ')" />
+				<MapTo Name="DATETIME2" InsertCovert="replace('@val', 'T',' ')" />
 			</Database>
 			<Database Name="ORACLE" Desc="ORACLE">
 				<MapTo Name="DATE"

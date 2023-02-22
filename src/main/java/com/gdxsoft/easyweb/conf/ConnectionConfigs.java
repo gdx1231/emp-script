@@ -10,6 +10,8 @@ import java.util.HashMap;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -23,13 +25,14 @@ import com.gdxsoft.easyweb.utils.UXml;
  * 
  */
 public class ConnectionConfigs extends HashMap<String, ConnectionConfig> {
-
+	private static Logger LOGGER = LoggerFactory.getLogger(ConnectionConfigs.class);
 	/**
 	 * 
 	 */
 	private static ConnectionConfigs CNNS;
-	private static int LAST_CODE;
 	private static final long serialVersionUID = 1914850112639586466L;
+
+	private static long PROP_TIME = 0;
 
 	private ArrayList<String> _ListNames;
 
@@ -42,14 +45,12 @@ public class ConnectionConfigs extends HashMap<String, ConnectionConfig> {
 	 * @throws IOException
 	 */
 	public static ConnectionConfigs instance() throws ParserConfigurationException, SAXException, IOException {
-		if (CNNS == null) {
-			initNew();
-		} else if (!StringUtils.isBlank(UPath.getDATABASEXML())) {
-			int code = UPath.getDATABASEXML().hashCode();
-			if (code != LAST_CODE) {
-				// ewa_conf.xml changed
-				initNew();
+		if (CNNS != null) {
+			if (UPath.getPropTime() == PROP_TIME) {
+				return CNNS;
 			}
+		} else {
+			initNew();
 		}
 		return CNNS;
 	}
@@ -68,31 +69,45 @@ public class ConnectionConfigs extends HashMap<String, ConnectionConfig> {
 	}
 
 	private void initDataSource() throws ParserConfigurationException, SAXException, IOException {
-
-		if (StringUtils.isBlank(UPath.getDATABASEXML())) {
+		String xml = UPath.getDATABASEXML();
+		if (StringUtils.isBlank(xml)) {
+			PROP_TIME = 0;
 			return;
 		}
 
-		String xml = UPath.getDATABASEXML();
-		LAST_CODE = xml.hashCode();
+		_ListNames.clear();
+		super.clear();
+
+		PROP_TIME = UPath.getPropTime();
+
 		Document doc = UXml.asDocument(xml);
 		NodeList nl = doc.getElementsByTagName("database");
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node node = nl.item(i);
+			// System.out.println(UXml.asXmlPretty(node));
+
 			ConnectionConfig cc = new ConnectionConfig(node);
 			addCfg(cc);
 		}
 	}
 
-	public void addCfg(ConnectionConfig cc) {
-		super.put(cc.getName(), cc);
-		_ListNames.add(cc.getName());
+	private void addCfg(int index, ConnectionConfig cc) {
+		String key = cc.getName();
+		if (super.containsKey(key)) {
+			LOGGER.info("{}. Skipt repeat ConCfg: {}, {}, {} ", index, key, cc.getType(), cc.getConnectionString());
+			return;
+		}
+		super.put(key, cc);
+		_ListNames.add(key);
+		LOGGER.info("{}. Added ConCfg: {}, {}, {}", index, key, cc.getType(), cc.getConnectionString());
 	}
-	
-	private ConnectionConfigs() throws ParserConfigurationException, SAXException, IOException {
-		_ListNames = new ArrayList<String>();
-		initDataSource();
 
+	public void addCfg(ConnectionConfig cc) {
+		this.addCfg(_ListNames.size(), cc);
+	}
+
+	private ConnectionConfigs() {
+		_ListNames = new ArrayList<String>();
 	}
 
 	public ConnectionConfig getConfig(int cfgIndex) {

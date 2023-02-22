@@ -16,11 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.EwaWebPage;
+import com.gdxsoft.easyweb.cache.SqlCached;
+import com.gdxsoft.easyweb.cache.SqlCachedHsqldbImpl;
 import com.gdxsoft.easyweb.conf.ConfAdmins;
 import com.gdxsoft.easyweb.conf.ConfDefine;
 import com.gdxsoft.easyweb.conf.ConfExtraGlobal;
 import com.gdxsoft.easyweb.conf.ConfExtraGlobals;
 import com.gdxsoft.easyweb.conf.ConfSecurities;
+import com.gdxsoft.easyweb.conf.ConnectionConfigs;
 import com.gdxsoft.easyweb.define.EwaConfHelpHSqlServer;
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.script.RequestValue;
@@ -77,7 +80,7 @@ public class ServletMain extends HttpServlet {
 		super();
 	}
 
-	public static void initEwaInstances() {
+	public synchronized static void initEwaInstances() {
 		try {
 			EwaConfig.instance();
 			LOGGER.info("EwaConfig instance");
@@ -107,6 +110,15 @@ public class ServletMain extends HttpServlet {
 		} catch (Exception e) {
 			LOGGER.error("ConfSecurities instance, {}", e.getMessage());
 		}
+
+		//数据库连接池初始化
+		try {
+			ConnectionConfigs.instance();
+			LOGGER.info("ConnectionConfigs inst");
+		} catch (Exception e) {
+			LOGGER.error("ConnectionConfigs instance, {}", e.getMessage());
+		}
+
 		try {
 			if (ConfDefine.isAllowDefine()) {
 				// start the EWA_DEFINE instances
@@ -116,12 +128,6 @@ public class ServletMain extends HttpServlet {
 			}
 		} catch (Exception err) {
 			LOGGER.error("define ServletIndex static, {}", err.getMessage());
-		}
-		// 加载字体
-		try {
-			new ValidCode1();
-		} catch (Exception err) {
-			LOGGER.error("Initialize valid fonts error, {}", err.getMessage());
 		}
 
 		// 设定日期格式，解决英式格式的问题
@@ -138,6 +144,25 @@ public class ServletMain extends HttpServlet {
 			LOGGER.error("Initialize valid fonts error, {}", err.getMessage());
 		}
 
+		try {
+			// 保存DebugInfo使用该hsql连接池 ____ewa_cached_hsqldb__
+			SqlCachedHsqldbImpl.getInstance();
+		} catch (Exception err) {
+			LOGGER.error("Initialize SqlCachedHsqldbImpl error, {}", err.getMessage());
+		}
+
+		try {
+			SqlCached.getInstance();
+		} catch (Exception err) {
+			LOGGER.error("Initialize SqlCached error, {}", err.getMessage());
+		}
+
+		// 加载字体
+		try {
+			new ValidCode1();
+		} catch (Exception err) {
+			LOGGER.error("Initialize valid fonts error, {}", err.getMessage());
+		}
 	}
 
 	/**
@@ -148,6 +173,7 @@ public class ServletMain extends HttpServlet {
 	public void init() throws ServletException {
 		// servlet init一个生命周期执行1次
 		super.init();
+		LOGGER.info("{}, {}", super.getServletConfig().getServletContext().getContextPath(), super.getServletConfig().getServletName());
 
 		// 从web.xml中获取 init-param参数
 		Enumeration<String> names = this.getInitParameterNames();
@@ -342,7 +368,8 @@ public class ServletMain extends HttpServlet {
 				if (rv.s(FrameParameters.EWA_PARENT_FRAME) != null) {
 					StringBuilder sb = new StringBuilder();
 					sb.append("<div><style>#__EWA_DEBUG{position: absolute;left:0;bottom:0}");
-					sb.append("#__EWA_DEBUG_INFO{background-color:#fff;width:100vw;height: calc(100vh - 50px);overflow: auto;}</style>");
+					sb.append(
+							"#__EWA_DEBUG_INFO{background-color:#fff;width:100vw;height: calc(100vh - 50px);overflow: auto;}</style>");
 					sb.append(debug).append("</div>");
 					cnt.a(sb.toString());
 				} else {

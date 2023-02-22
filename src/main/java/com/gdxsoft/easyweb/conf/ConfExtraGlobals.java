@@ -35,10 +35,6 @@ public class ConfExtraGlobals {
 	}
 
 	private synchronized static ConfExtraGlobals createConfs() {
-		/*
-		 * <scriptPaths> <scriptPath name="/ewa" path="resources:/user.xml/ewa" />
-		 * <scriptPath name="/" path="jdbc:ewa" /> </scriptPaths>
-		 */
 		ConfExtraGlobals sps = new ConfExtraGlobals();
 
 		if (UPath.getCfgXmlDoc() == null) {

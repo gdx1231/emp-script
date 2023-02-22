@@ -56,7 +56,8 @@ public class ConfSqlCached {
 				LOGGER.warn("SqlCached change to default HSQLDB");
 			}
 		}
-
+		LOGGER.info("SqlCached, cachedMethod: {}, redisName: {}, debug: {}", o.getCachedMethod(),
+				o.getRedisName() == null ? "" : o.getRedisName(), o.isDebug());
 		return o;
 	}
 

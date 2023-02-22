@@ -51,6 +51,7 @@ public class ConfHandleWebSocketMessages {
 			ConfHandleWebSocketMessage sp = createConfFromXml(item);
 			if (sp != null) {
 				sps.handles.put(sp.getMethod(), sp);
+				LOGGER.info("Added WS: {}, {}", sp.getMethod(), sp.getMapClass());
 			}
 		}
 	}

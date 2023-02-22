@@ -101,6 +101,8 @@ public class ConfAdmins {
 				sp.setPassword(randomPassword);
 				LOGGER.info("管理员：" + sp.getLoginId() + ", 临时密码：" + sp.getPassword());
 				LOGGER.info("Admin: " + sp.getLoginId() + ", temp password is: " + sp.getPassword());
+			} else {
+				LOGGER.info("Added admin: " + sp.getLoginId());
 			}
 
 			sps.lst.add(sp);

@@ -2,12 +2,16 @@ package com.gdxsoft.easyweb.conf;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
 
 public class ConfRequestValuesGlobal {
+	private static Logger LOGGER = LoggerFactory.getLogger(ConfRequestValuesGlobal.class);
 	private static ConfRequestValuesGlobal INST = null;
 
 	private static long PROP_TIME = 0;
@@ -39,6 +43,7 @@ public class ConfRequestValuesGlobal {
 			ConfNameValuePair p = new ConfNameValuePair();
 			UObjectValue.fromXml(nl.item(i), p);
 			cvg.lst.add(p);
+			LOGGER.info("RequestValuesGlobal[{}]={}", p.getName(), p.getValue());
 		}
 		return cvg;
 	}
