@@ -123,16 +123,18 @@ public class EwaWfMain {
 		cnn.close();
 		if (!is_can_run) {
 			StringBuilder err1 = new StringBuilder();
-			err1.append("审批权限不对：WfUnitAdm=");
+			err1.append("审批权限不对：WfUnitAdm = ");
 			err1.append(unitCur.getWfUnitAdm());
-			err1.append(",WfUnitAdmLst=");
+			err1.append(", WfUnitAdmLst = ");
 			err1.append(unitCur.getWfUnitAdmLst());
-			err1.append(",WfUnitSelfDept=");
+			err1.append(", WfUnitSelfDept =");
 			err1.append(unitCur.getWfUnitSelfDept());
-			err1.append(",startAdmin=");
+			err1.append(", startAdmin =");
 			err1.append(startAdmin);
 			String msg = err1.toString();
-			System.err.println(msg);
+
+			LOGGER.error(msg);
+
 			throw new Exception(msg);
 		}
 		// 查找是否流程完成，完成条件是找不到以下一个节点开始的连接，即有输入无输出
@@ -220,10 +222,10 @@ public class EwaWfMain {
 			 * curUnitNext + ",不合法"); }
 			 */
 
-			// 执行前检查
+			// 执行前检查，循环检查返回表，如果有数据表示有错。
 			String strBeforeOk = this.runActBefore(cnn, curUnit, rv);
 			if (strBeforeOk != null) {
-				throw new Exception("不能执行\r\n" + strBeforeOk);
+				throw new Exception("不能执行 \n " + strBeforeOk);
 			}
 
 			String sqlUpdate = sqls.getSql("WF_LOG_NEW");
@@ -350,15 +352,27 @@ public class EwaWfMain {
 		}
 	}
 
+	/**
+	 * 执行后处理
+	 * @param conn
+	 * @param curUnit
+	 * @param rv
+	 * @throws Exception
+	 */
 	private void runActAfter(DataConnection conn, EwaWfUnit curUnit, RequestValue rv) throws Exception {
 		// 执行对应的编号（WF_FUC_ID）
 		String fucId = curUnit.getWfUnitPara3();
 		if (fucId == null || fucId.trim().length() == 0) {
 			return;
 		}
-		String sql = "SELECT WF_FUC_SQL,WF_FUC_ID, WF_ID, WF_FUC_NAME, WF_FUC_MEMO, WF_FUC_TAG "
-				+ " FROM _EWA_WF_FUNC WHERE WF_FUC_TAG='WF_ACT_AFT' AND WF_ID=@WF_ID" + " and WF_FUC_ID='"
-				+ fucId.replace("'", "''") + "'";
+		rv.addOrUpdateValue("WF_FUC_ID_AFTER", fucId);
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("-- 执行后对处理，对应的编号 WF_FUC_ID: " + fucId.replace("@", "at") + " \n");
+		sb.append("SELECT WF_FUC_SQL,WF_FUC_ID, WF_ID, WF_FUC_NAME, WF_FUC_MEMO, WF_FUC_TAG ");
+		sb.append(" FROM _EWA_WF_FUNC WHERE WF_FUC_TAG='WF_ACT_AFT' AND WF_ID=@WF_ID");
+		sb.append(" and WF_FUC_ID = @WF_FUC_ID_AFTER");
+		String sql = sb.toString();
 		DTTable tbActions = DTTable.getJdbcTable(sql, "", rv);
 
 		// no check
@@ -372,15 +386,31 @@ public class EwaWfMain {
 		}
 	}
 
+	/**
+	 * 执行前检查，循环检查返回表，如果有数据表示有错。
+	 * @param conn 
+	 * @param curUnit 当前的节点
+	 * @param rv
+	 * @return
+	 * @throws Exception
+	 */
 	private String runActBefore(DataConnection conn, EwaWfUnit curUnit, RequestValue rv) throws Exception {
 		// 执行前检查对应的编号（WF_FUC_ID）
 		String fucId = curUnit.getWfUnitPara4();
 		if (fucId == null || fucId.trim().length() == 0) {
 			return null;
 		}
-		String sql = "SELECT WF_FUC_SQL,WF_FUC_ID, WF_ID, WF_FUC_NAME, WF_FUC_MEMO, WF_FUC_TAG "
-				+ " FROM _EWA_WF_FUNC WHERE WF_FUC_TAG='WF_ACT_BEF' AND WF_ID=@WF_ID" + " and WF_FUC_ID='"
-				+ fucId.replace("'", "''") + "'";
+		
+		rv.addOrUpdateValue("WF_FUC_ID_BEFORE", fucId);
+		
+		StringBuilder sb1 = new StringBuilder();
+		sb1.append("-- 执行前检查，对应的编号 WF_FUC_ID: " + fucId.replace("@", "at") + " \n");
+		sb1.append("SELECT WF_FUC_SQL,WF_FUC_ID, WF_ID, WF_FUC_NAME, WF_FUC_MEMO, WF_FUC_TAG \n");
+		sb1.append("FROM _EWA_WF_FUNC WHERE WF_FUC_TAG = 'WF_ACT_BEF' \n");
+		sb1.append(" 	AND WF_ID = @WF_ID \n");
+		sb1.append(" 	AND WF_FUC_ID = @WF_FUC_ID_BEFORE");
+		String sql = sb1.toString();
+		
 		DTTable tbActions = DTTable.getJdbcTable(sql, "", rv);
 
 		// no check
@@ -415,6 +445,13 @@ public class EwaWfMain {
 		return null;
 	}
 
+	/**
+	 * 执行Action
+	 * @param conn
+	 * @param sql
+	 * @return 所有的表
+	 * @throws Exception
+	 */
 	private ArrayList<DTTable> executeAct(DataConnection conn, String sql) throws Exception {
 		String[] sqls = sql.split(";");
 		ArrayList<DTTable> al = new ArrayList<DTTable>();
@@ -424,10 +461,13 @@ public class EwaWfMain {
 				continue;
 			}
 			// s = conn.rebuildSql(s);
-			if (s.toUpperCase().startsWith("SELECT")) {
+			if (DataConnection.checkIsSelect(s)) {
 				DTTable tb = DTTable.getJdbcTable(s, conn);
 				if (tb != null && tb.isOk()) {
 					al.add(tb);
+				}
+				if(tb.getCount() == 0) {
+					conn.getRequestValue().addValues(tb);
 				}
 			} else {
 				conn.executeUpdate(s);
@@ -487,17 +527,17 @@ public class EwaWfMain {
 
 		sb.insert(0, "{\"CNN\":");
 		sb.append(tbDlv.getCell(0, "DLV_JSON_CNN").toString());
-		sb.append(",\r\n\"UNIT\":");
+		sb.append(", \n \"UNIT\":");
 		sb.append(tbDlv.getCell(0, "DLV_JSON_UNIT").toString());
 
 		// 英文节点名称 2016-10-27
 		String sqlEn = "SELECT WF_UNIT_ID, WF_UNIT_NAME_EN,WF_UNIT_MEMO_EN FROM _ewa_wf_unit WHERE WF_ID=@WF_ID AND (WF_REF_ID=@G_SUP_UNID  )";
 		DTTable tbEN = DTTable.getJdbcTable(sqlEn, cnn);
 
-		sb.append(",\r\n\"EN\":");
+		sb.append(", \n \"EN\":");
 		sb.append(tbEN.toJson(rv));
 
-		sb.append(",\r\n\"ST\":");
+		sb.append(", \n \"ST\":");
 		sql = o.getSql("WF_LOG_GET");
 
 		if (StringUtils.isBlank(sql)) {
@@ -512,21 +552,21 @@ public class EwaWfMain {
 		sb.append(j);
 
 		/*
-		 * 角色数据 sb.append(",\r\n\"ROLES\":"); sql = o.getSql("WF_ROLE"); table =
+		 * 角色数据 sb.append(", \n \"ROLES\":"); sql = o.getSql("WF_ROLE"); table =
 		 * DTTable.getJdbcTable(sql, cnn); cnn.close();
 		 * 
 		 * sb.append(table.toJson(rv));
 		 */
 
-		sb.append(",\r\n \"WF_CUR\":\"" + Utils.textToJscript(rv.getString("APP_WF_UNIT_CUR")) + "\"");
-		sb.append(",\r\n \"WF_DLV_VER\":\"" + version + "\"");
+		sb.append(", \n  \"WF_CUR\":\"" + Utils.textToJscript(rv.getString("APP_WF_UNIT_CUR")) + "\"");
+		sb.append(", \n  \"WF_DLV_VER\":\"" + version + "\"");
 
 		sql = "SELECT  XITEMS FROM _EWA_WF_SHOW WHERE  1=1 " + " AND WF_ID=@WF_ID "
 				+ " AND ( WF_REF_ID=@G_SUP_UNID) AND WF_UNIT_ID=@APP_WF_UNIT_CUR";
 
 		DTTable tableSHOW = DTTable.getJdbcTable(sql, cnn);
 
-		sb.append(",\r\n \"WF_SHOW\":" + tableSHOW.toJson(rv) + "");
+		sb.append(", \n  \"WF_SHOW\":" + tableSHOW.toJson(rv) + "");
 		sb.append("}");
 		cnn.close();
 
@@ -668,12 +708,12 @@ public class EwaWfMain {
 			String key = it.next();
 			String json = this._Cnns.get(key).toJSON().toString();
 			if (inc > 0) {
-				sb.append(",\r\n");
+				sb.append(", \n ");
 			}
 			sb.append(json);
 			inc++;
 		}
-		sb.append("],\r\n\"UNIT\":[");
+		sb.append("], \n \"UNIT\":[");
 
 		it = this._Units.keySet().iterator();
 		inc = 0;
@@ -681,12 +721,12 @@ public class EwaWfMain {
 			String key = it.next();
 			String json = this._Units.get(key).toJson();
 			if (inc > 0) {
-				sb.append(",\r\n");
+				sb.append(", \n ");
 			}
 			sb.append(json);
 			inc++;
 		}
-		sb.append("],\r\n\"ST\":");
+		sb.append("], \n \"ST\":");
 
 		// status
 		OrgSqls o = OrgSqls.instance();
@@ -704,17 +744,17 @@ public class EwaWfMain {
 		// DTTable table1 = DTTable.getJdbcTable(sql, cnn);
 		// cnn.close();
 		//
-		// sb.append(",\r\nLG:");
+		// sb.append(", \n LG:");
 		// String logicJson = table1.toJson(rv);
 		// sb.append(logicJson);
-		sb.append(",\r\n\"ROLES\":");
+		sb.append(", \n \"ROLES\":");
 		sql = o.getSql("WF_ROLE");
 		table = DTTable.getJdbcTable(sql, cnn);
 		cnn.close();
 
 		sb.append(table.toJson(rv));
 
-		sb.append(",\r\n \"WF_CUR\":\"" + Utils.textToJscript(rv.getString("APP_WF_UNIT_CUR")) + "\"");
+		sb.append(", \n  \"WF_CUR\":\"" + Utils.textToJscript(rv.getString("APP_WF_UNIT_CUR")) + "\"");
 		sb.append("}");
 		return sb.toString();
 	}
@@ -912,7 +952,7 @@ public class EwaWfMain {
 			boolean rst = this.delived(r.getCell(0).toString(), refId);
 			s.al(r.getCell(1).toString() + ", " + rst);
 		}
-		System.out.println(s.toString());
+		LOGGER.info(s.toString());
 		return s.toString();
 	}
 
@@ -925,7 +965,7 @@ public class EwaWfMain {
 			boolean rst = this.delived(r.getCell(0).toString(), refId, targetDatabaseName);
 			s.al(r.getCell(1).toString() + ", " + rst);
 		}
-		System.out.println(s.toString());
+		LOGGER.info(s.toString());
 		return s.toString();
 	}
 
@@ -937,7 +977,7 @@ public class EwaWfMain {
 		cnn.setConfigName("");
 
 		RequestValue rv = new RequestValue();
-		rv.addValue("sup_id", refId);
+		rv.addValue("ref_id", refId);
 		rv.addValue("WF_ID", wfId);
 		cnn.setRequestValue(rv);
 
@@ -952,16 +992,24 @@ public class EwaWfMain {
 		// System.out.println("WF_ID=" + wfId);
 		this.init(wfId, refId);
 
-		String sql1 = "SELECT A.WF_UNIT_ID FROM _EWA_WF_UNIT A"
-				+ " INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@SUP_ID " + " WHERE A.WF_ID=@WF_ID"
-				+ " ORDER BY WF_UNIT_ID";
+		// 获取所有单元，按照id排序
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT A.WF_UNIT_ID FROM _EWA_WF_UNIT A");
+		sb.append(" INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@REF_ID ");
+		sb.append(" WHERE A.WF_ID=@WF_ID");
+		sb.append(" ORDER BY WF_UNIT_ID");
+		String sql1 = sb.toString();
 		DTTable tbUnitCode = DTTable.getJdbcTable(sql1, cnn);
 		String jsonUnit = tbUnitCode.toJson(rv);
 		String unitCode = jsonUnit.hashCode() + "";
 
-		String sql2 = "SELECT WF_UNIT_FROM, WF_UNIT_TO FROM _EWA_WF_CNN A"
-				+ " INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@SUP_ID " + " WHERE A.WF_ID=@WF_ID"
-				+ " ORDER BY WF_UNIT_FROM, WF_UNIT_TO";
+		// 获取所有连接，按照form，to排序
+		StringBuilder sb2a = new StringBuilder();
+		sb2a.append("SELECT WF_UNIT_FROM, WF_UNIT_TO FROM _EWA_WF_CNN A");
+		sb2a.append(" INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@REF_ID ");
+		sb2a.append(" WHERE A.WF_ID=@WF_ID");
+		sb2a.append(" ORDER BY WF_UNIT_FROM, WF_UNIT_TO");
+		String sql2 = sb2a.toString();
 
 		DTTable tbCnnCode = DTTable.getJdbcTable(sql2, cnn);
 		String jsonCnn = tbCnnCode.toJson(rv);
@@ -972,9 +1020,9 @@ public class EwaWfMain {
 
 		StringBuilder sbUnit = new StringBuilder();
 		sbUnit.append("SELECT A.* FROM _EWA_WF_UNIT A  \n");
-		sbUnit.append(" INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@SUP_ID  \n");
-		sbUnit.append(" WHERE A.WF_ID=@WF_ID  \n");
-		sbUnit.append(" ORDER BY WF_UNIT_ID ");
+		sbUnit.append(" INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@REF_ID  \n");
+		sbUnit.append(" WHERE A.WF_ID = @WF_ID \n");
+		sbUnit.append("  ORDER BY WF_UNIT_ID");
 		sql1 = sbUnit.toString();
 		DTTable tbUnit = DTTable.getJdbcTable(sql1, cnn);
 
@@ -985,8 +1033,7 @@ public class EwaWfMain {
 		sbHis.append("	SELECT * FROM _EWA_WF_UNIT_his b where a.wf_id=b.wf_id  \n");
 		sbHis.append("		and a.wf_unit_id=b.wf_unit_id  \n");
 		sbHis.append("		 and a.wf_ref_id=b.wf_ref_id  \n");
-		sbHis.append(") AND A.WF_REF_ID=@SUP_ID AND A.WF_ID=@WF_ID;");
-		sbHis.append("\r\n ");
+		sbHis.append(") AND A.WF_REF_ID=@REF_ID AND A.WF_ID=@WF_ID \n; ");
 		if (SqlUtils.isSqlServer(cnn)) {
 			sbHis.append("UPDATE _EWA_WF_UNIT_HIS SET  \n");
 			sbHis.append("		_EWA_WF_UNIT_HIS.WF_UNIT_NAME=A.WF_UNIT_NAME,  \n");
@@ -995,34 +1042,33 @@ public class EwaWfMain {
 			sbHis.append("WHERE _EWA_WF_UNIT_HIS.WF_ID=A.WF_ID  \n");
 			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_UNIT_ID=A.WF_UNIT_ID  \n");
 			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_REF_ID=A.WF_REF_ID  \n");
-			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_ID=@WF_ID  \n");
-			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_REF_ID=@SUP_ID");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_ID = @WF_ID  \n");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_REF_ID=@REF_ID");
 		} else {
 			sbHis.append("UPDATE _EWA_WF_UNIT_HIS INNER JOIN _EWA_WF_UNIT A \n");
 			sbHis.append(" ON _EWA_WF_UNIT_HIS.WF_ID=A.WF_ID \n");
 			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_UNIT_ID=A.WF_UNIT_ID  \n");
 			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_REF_ID=A.WF_REF_ID  \n");
-			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_ID=@WF_ID  \n");
-			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_REF_ID=@SUP_ID  \n");
-			sbHis.append("SET	_EWA_WF_UNIT_HIS.WF_UNIT_NAME=A.WF_UNIT_NAME, \n");
-			sbHis.append("		_EWA_WF_UNIT_HIS.WF_UNIT_MEMO=A.WF_UNIT_MEMO \n");
-
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_ID = @WF_ID  \n");
+			sbHis.append("	AND _EWA_WF_UNIT_HIS.WF_REF_ID = @REF_ID  \n");
+			sbHis.append("SET _EWA_WF_UNIT_HIS.WF_UNIT_NAME=A.WF_UNIT_NAME, \n");
+			sbHis.append("	_EWA_WF_UNIT_HIS.WF_UNIT_MEMO=A.WF_UNIT_MEMO \n");
 		}
 		String sqlUnitHis = sbHis.toString();
 
 		StringBuilder sb2 = new StringBuilder();
 		sb2.append("SELECT A.* FROM _EWA_WF_CNN A");
-		sb2.append(" INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@SUP_ID ");
+		sb2.append(" INNER JOIN _EWA_WF B ON A.WF_ID=B.WF_ID AND WF_REF_ID=@REF_ID ");
 		sb2.append(" WHERE A.WF_ID = @WF_ID");
 		sb2.append(" ORDER BY WF_UNIT_FROM, WF_UNIT_TO");
 		sql2 = sb2.toString();
 
 		DTTable tbCnn = DTTable.getJdbcTable(sql2, cnn);
 
-		String sql3 = "SELECT * FROM _EWA_WF_UNIT_ADM WHERE WF_ID=@WF_ID AND WF_REF_ID=@SUP_ID ";
+		String sql3 = "SELECT * FROM _EWA_WF_UNIT_ADM WHERE WF_ID=@WF_ID AND WF_REF_ID=@REF_ID ";
 		DTTable tbADM = DTTable.getJdbcTable(sql3, cnn);
 
-		String sql4 = "SELECT * FROM _EWA_WF_UNIT_LOGIC WHERE WF_ID=@WF_ID AND WF_REF_ID=@SUP_ID ";
+		String sql4 = "SELECT * FROM _EWA_WF_UNIT_LOGIC WHERE WF_ID=@WF_ID AND WF_REF_ID=@REF_ID ";
 		DTTable tbLOGIC = DTTable.getJdbcTable(sql4, cnn);
 
 		rv.addValue("dlv_ver", -1);
@@ -1033,32 +1079,58 @@ public class EwaWfMain {
 
 		rv.addValue("DLV_CODE", code);
 
-		sql1 = "SELECT DLV_VER FROM _EWA_WF_DLV WHERE WF_ID=@WF_ID AND WF_REF_ID=@SUP_ID AND DLV_CODE=@DLV_CODE";
+		int dlvVer = -1231;
+		// 查找已经发布的相同的版本
+		sql1 = "SELECT DLV_VER FROM _EWA_WF_DLV WHERE WF_ID=@WF_ID AND WF_REF_ID=@REF_ID AND DLV_CODE=@DLV_CODE";
 		DTTable tbLast = DTTable.getJdbcTable(sql1, cnn);
 		String sql = "";
-		boolean isNew = true;
 		if (tbLast.getCount() == 0) {
-			sql = "INSERT INTO _EWA_WF_DLV(WF_ID, WF_REF_ID, DLV_VER, DLV_JSON_UNIT, DLV_CUR,DLV_UNID,"
-					+ "\r\nDLV_JSON_CNN, DLV_JSON_ADM, DLV_JSON_LOGIC, DLV_DATE, DLV_CODE)"
-					+ "\r\n VALUES(@WF_ID, @SUP_ID, @DLV_VER, @DLV_JSON_UNIT, 'Y',@SYS_UNID, "
-					+ "\r\n@DLV_JSON_CNN, @DLV_JSON_ADM, @DLV_JSON_LOGIC, @SYS_DATE, @DLV_CODE)";
+			// 该版本没有发布，找已发布的最大版本号
+			String sqlMaxDlv = "select max(dlv_ver) from  _EWA_WF_DLV WHERE WF_ID=@WF_ID AND WF_REF_ID=@REF_ID";
+			DTTable tbMaxDlv = DTTable.getJdbcTable(sqlMaxDlv, cnn);
+
+			if (tbMaxDlv.getCount() == 0 || tbMaxDlv.getCell(0, 0).isNull()) {
+				// 版本号从1开始
+				dlvVer = 1;
+				rv.addValue("dlv_ver", 1);
+			} else {
+				dlvVer = tbMaxDlv.getCell(0, 0).toInt();
+				if (dlvVer == -1) { // 以前遗留的bug
+					dlvVer = 2;
+				} else {
+					dlvVer = dlvVer + 1;
+				}
+			}
+			rv.addOrUpdateValue("DLV_VER", dlvVer);
+
+			StringBuilder sba = new StringBuilder();
+			sba.append("INSERT INTO _EWA_WF_DLV(WF_ID, WF_REF_ID, DLV_VER, DLV_JSON_UNIT, DLV_CUR,DLV_UNID,");
+			sba.append(" \n DLV_JSON_CNN, DLV_JSON_ADM, DLV_JSON_LOGIC, DLV_DATE, DLV_CODE)");
+			sba.append(" \n VALUES(@WF_ID, @REF_ID, @DLV_VER, @DLV_JSON_UNIT, 'Y',@SYS_UNID, ");
+			sba.append(" \n @DLV_JSON_CNN, @DLV_JSON_ADM, @DLV_JSON_LOGIC, @SYS_DATE, @DLV_CODE)");
+			sql = sba.toString();
 
 		} else {
-			sql = "UPDATE _EWA_WF_DLV SET DLV_JSON_UNIT=@DLV_JSON_UNIT," + "\r\n DLV_JSON_CNN=@DLV_JSON_CNN, "
-					+ "\r\n DLV_JSON_ADM=@DLV_JSON_ADM, " + "\r\n DLV_JSON_LOGIC=@DLV_JSON_LOGIC, "
-					+ "\r\n DLV_DATE=@SYS_DATE,DLV_CUR='Y'," + "\r\n DLV_UNID=@SYS_UNID "
-					+ "\r\n WHERE WF_ID=@WF_ID AND WF_REF_ID=@SUP_ID AND DLV_CODE=@DLV_CODE";
-			isNew = false;
+
+			dlvVer = tbLast.getCell(0, 0).toInt();
+
+			// 相同的版本更新数据，例如角色，前后执行等
+			StringBuilder sbb = new StringBuilder();
+			sbb.append("UPDATE _EWA_WF_DLV SET DLV_JSON_UNIT=@DLV_JSON_UNIT,");
+			sbb.append(" \n  DLV_JSON_CNN = @DLV_JSON_CNN, ");
+			sbb.append(" \n  DLV_JSON_ADM = @DLV_JSON_ADM, ");
+			sbb.append(" \n  DLV_JSON_LOGIC = @DLV_JSON_LOGIC, ");
+			sbb.append(" \n  DLV_DATE = @SYS_DATE, DLV_CUR='Y' ");
+			sbb.append(" \n  WHERE WF_ID=@WF_ID AND WF_REF_ID=@ref_id AND DLV_CODE=@DLV_CODE");
+			sql = sbb.toString();
 		}
-		sql1 = "UPDATE _EWA_WF_DLV SET DLV_CUR='N' WHERE DLV_UNID<>@SYS_UNID"
-				+ " AND WF_ID=@WF_ID AND WF_REF_ID=@SUP_ID";
-		if (isNew) {
-			sql2 = "UPDATE _EWA_WF_DLV SET DLV_VER=ISNULL(A,0)+1 FROM ("
-					+ "\r\n SELECT COUNT(*) A FROM _EWA_WF_DLV WHERE WF_ID=@WF_ID" + "\r\n 	AND WF_REF_ID=@SUP_ID"
-					+ "\r\n) AA WHERE DLV_UNID = @SYS_UNID";
-		} else {
-			sql2 = "";
-		}
+		rv.addValue("WF_DLV_VER", dlvVer);
+
+		StringBuilder sbc = new StringBuilder();
+		sbc.append("UPDATE _EWA_WF_DLV SET DLV_CUR='N' WHERE DLV_VER != @WF_DLV_VER");
+		sbc.append(" AND WF_ID=@WF_ID AND WF_REF_ID=@ref_id");
+		sql1 = sbc.toString();
+
 		OrgSqls sqls = OrgSqls.instance();
 		String sqlUpdateFlow = sqls.getSql("WF_DLV_UPDATE_FLOW");
 		sqlUpdateFlow = sqlUpdateFlow.replace("{dbname}", dbName);
@@ -1066,21 +1138,18 @@ public class EwaWfMain {
 		try {
 			this.executeAct(cnn, sql);
 			this.executeAct(cnn, sql1);
-			if (sql2.length() > 0)
-				this.executeAct(cnn, sql2);
 
-			sql = "SELECT DLV_VER FROM _EWA_WF_DLV WHERE DLV_UNID = @SYS_UNID";
-			int DLV_VER = Integer.parseInt(this.executeAct(cnn, sql).get(0).getCell(0, 0).toString());
-			rv.addValue("WF_DLV_VER", DLV_VER);
-
+			rv.addValue("sup_id", refId);
 			this.executeAct(cnn, sqlUpdateFlow);
 
 			// 记录节点的历史信息
 			this.executeAct(cnn, sqlUnitHis);
+			LOGGER.info("{}, {}, {}", wfId, refId, dlvVer);
 			// cnn.transCommit();
 			return true;
 		} catch (Exception err) {
 			// cnn.transRollback();
+			LOGGER.error(err.getMessage());
 			return false;
 		} finally {
 			cnn.close();

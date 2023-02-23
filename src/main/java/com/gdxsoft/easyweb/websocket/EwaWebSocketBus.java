@@ -76,7 +76,7 @@ public class EwaWebSocketBus {
 	@OnOpen
 	public void onOpen(Session session) {
 		// 每个会话有一个唯一id
-		this.unid_ = System.currentTimeMillis() + "." + Utils.getGuid();
+		this.unid_ = session.getId();// System.currentTimeMillis() + "." + Utils.getGuid();
 		this.session = session;
 
 		Map<String, Object> props = session.getUserProperties();
