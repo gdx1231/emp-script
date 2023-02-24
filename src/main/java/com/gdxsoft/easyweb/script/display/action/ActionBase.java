@@ -70,7 +70,7 @@ public class ActionBase {
 		UserXItemValue sqlItem = sqlset.getItem(name);
 		ActionSqlSetItem a = new ActionSqlSetItem();
 		a.setUserXItemValue(sqlItem);
-		//a.setTransType(sqlItem.getItem("TransType"));
+		// a.setTransType(sqlItem.getItem("TransType"));
 
 		String sqlExp = sqlItem.getItem("Sql");
 		String[] sqlArray = sqlExp.split(";");
@@ -386,7 +386,7 @@ public class ActionBase {
 			String v = val.getStringValue();
 			if (v != null) {
 				String val_name = val.getName();
-				if (val_name.toUpperCase().equals(FrameParameters.XMLNAME) 
+				if (val_name.toUpperCase().equals(FrameParameters.XMLNAME)
 						|| val_name.toUpperCase().equals(FrameParameters.ITEMNAME)
 						|| val_name.toUpperCase().equals(FrameParameters.EWA_AJAX)) {
 					continue;
@@ -624,7 +624,7 @@ public class ActionBase {
 		ActionSqlSetItem sqlItem = this.retActionSqlSetItem(name);
 		String[] sqlArray = sqlItem.getSqlArray();
 		// String transType = sqlItem.getTransType();
-		//boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
+		// boolean isTrans = transType.equalsIgnoreCase("yes") ? true : false;
 		DataConnection cnn = this.getItemValues().getSysParas().getDataConn();
 
 		/*
@@ -761,7 +761,10 @@ public class ActionBase {
 	 */
 	private void executeSession(UserXItemValue uxv) throws Exception {
 		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
-
+		if (rv.getSession() == null) {
+			LOGGER.warn("No session");
+			return;
+		}
 		String name = uxv.getItem("Name").trim().toUpperCase();
 		String option = uxv.getItem("Option");
 		String paraName = uxv.getItem("ParaName");
