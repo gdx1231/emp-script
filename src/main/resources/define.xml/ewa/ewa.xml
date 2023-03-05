@@ -7402,7 +7402,299 @@ body {
 } /* 滑轨两头的监听按钮颜色 */
 ::-webkit-scrollbar-corner {
 	background-color: rgba(77, 77, 77, 0.4);
-} /* 横向滚动条和纵向滚动条相交处尖角的颜色 */]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-05-06 17:48:10" Name="define_code" UpdateDate="2023-02-07 18:28:43"><Page><Name><Set Name="define_code"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="code editor!" Lang="zhcn" Memo=""/><Set Info="code editor!" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><RowAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.css">
+} /* 横向滚动条和纵向滚动条相交处尖角的颜色 */]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2022-07-26 09:44:27" Name="classCode" UpdateDate="2023-02-10 14:59:17"><Page><Name><Set Name="classCode"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="Class code" Lang="zhcn" Memo=""/><Set Info="System cache" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><RowAttributeSet/><GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet><Size><Set FrameCols="C1" HAlign="center" Height="100%" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
+
+<script src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js" type="text/javascript"></script>
+
+<script src="@rv_ewa_style_path/third-party/ace/v1.4.12/src-min/ace.js" type="text/javascript"></script>
+<script src="@rv_ewa_style_path/third-party/ace/v1.4.12/src-min/ext-language_tools.js" type="text/javascript"></script>
+<script src="@rv_ewa_style_path/third-party/js-beautify/v1.13.0/lib/beautify.js"></script>
+]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[(function() {
+    let ewa = EWA.F.FOS["@sys_frame_unid"];
+    var editor, mode;
+
+    function saveJava() {
+        let o = $('#f_@sys_frame_unid');
+        var name = o.find("input[name=name]").val();
+        var packagename = o.find("input[name=package]").val();
+        var path = o.find("input[name=path]").val();
+
+        if (!path) {
+            alert('Save path must set');
+            return;
+        }
+
+        var java = o.find("input[name=java]").val();
+
+        var u = EWA.CP + "/EWA_DEFINE/cgi-bin/xml/";
+        var data = {
+            name: name,
+            packagename: packagename,
+            path: path,
+            java: java,
+            TYPE: "SAVE_JAVA"
+        }
+        $JP(u, data, function(rst) {
+            if (!rst.RST) {
+                alert(rst.ERR);
+            } else {
+                $Tip("Ok");
+            }
+        });
+        return false;
+    }
+
+    function beautify_code() {
+        var p = editor.getCursorPosition();
+        var s;
+        if (mode == 'ace/mode/javascript') {
+            s = js_beautify(getText());
+        } else if (mode == 'ace/mode/html' || mode == 'ace/mode/xml') {
+            s = html_beautify(getText());
+        } else if (mode == 'ace/mode/css') {
+            s = css_beautify(getText());
+        } else if (mode == 'ace/mode/sql') {
+            beautify_code_sql();
+            return;
+        } else {
+            $Tip('不支持类型格式化');
+            return;
+        }
+        editor.setValue(s, 1);
+        editor.moveCursorToPosition(p);
+        editor.selection.clearSelection();
+    }
+
+    function getText() {
+        return editor.getValue();
+    }
+
+    function setCode(code, type) {
+        $('#div_@sys_frame_unid').attr('lang', type)
+        if (type == 'sql') {
+            mode = 'ace/mode/sql';
+        } else {
+            mode = 'ace/mode/java';
+            code = js_beautify(code);
+        }
+        editor.session.setMode(mode);
+
+        editor.setValue(code, 1);
+        $('#f_@sys_frame_unid [name=java]').val(code);
+        if (type == 'sql') {
+            beautify_code_sql();
+        }
+    }
+
+    function change_code_theme(obj) {
+        editor.setTheme(obj.value);
+        window.localStorage["EWA_CODE_THENE"] = obj.value;
+    }
+
+    function change_font_size(obj) {
+        editor.setFontSize(obj.value);
+        window.localStorage["EWA_CODE_FONTSIZE"] = obj.value;
+    }
+
+    function getSetting(tag) {
+        if (window.localStorage && window.localStorage[tag]) {
+            return window.localStorage[tag];
+        }
+    }
+
+    function setSetting(tag, value) {
+        if (window.localStorage) {
+            window.localStorage[tag] = value;
+        }
+    }
+
+    function beautify_code_sql() {
+        let txt = getText();
+        let u = '@EWA.CP/EWA_DEFINE/cgi-bin/xml/?type=format&mode=sql';
+        let data = {
+            code: txt
+        };
+        $JP(u, data, function(rst) {
+            let code = rst['text'];
+            editor.setValue(code, 1);
+            $('#f_@sys_frame_unid [name=java]').val(code);
+        });
+    }
+
+    (function() {
+        ace.require("ace/ext/language_tools");
+        editor = ace.edit("code");
+        var theme_code = "ace/theme/cobalt";
+        if (window.localStorage && window.localStorage["EWA_CODE_THENE"]) {
+            let v = window.localStorage["EWA_CODE_THENE"];
+            let obj = document.getElementById('theme');
+            for (let i = 0; i < theme.options.length; i++) {
+                let v1 = obj.options[i].value;
+                if (v1 == v) {
+                    theme_code = v1;
+                    obj.value = v1;
+                    break;
+                }
+            }
+        }
+        editor.setTheme(theme_code);
+
+        // 设置字体大小
+        if (window.localStorage && window.localStorage["EWA_CODE_FONTSIZE"]) {
+            let v = window.localStorage["EWA_CODE_FONTSIZE"];
+            let selectFontsize = document.getElementById('editor_font_size');
+            if (v) {
+                selectFontsize.value = v;
+                editor.setFontSize(v);
+            }
+        }
+        editor.getSession().setUseWrapMode(true);
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true
+        });
+
+        editor.setOption('readOnly', true);
+        editor.$blockScrolling = Infinity;
+
+        let p = $('#f_@sys_frame_unid');
+        var v = getSetting('EWA_DEFINE_JAVA_SAVED_PATH');
+        p.find('input[name=path]').on('blur', function(e) {
+            setSetting('EWA_DEFINE_JAVA_SAVED_PATH', this.value);
+        }).val(v);
+        var v1 = getSetting('EWA_DEFINE_JAVA_PACKAGE');
+        p.find('input[name=package]').on('blur', function(e) {
+            setSetting('EWA_DEFINE_JAVA_PACKAGE', this.value);
+        }).val(v1);
+        p.find("#Save").on("click", function(e) {
+            return saveJava();
+        });
+    })();
+
+    ewa.setSetting = setSetting;
+    ewa.getSetting = getSetting;
+
+    ewa.editor = editor;
+    ewa.getText = getText;
+    ewa.setCode = setCode;
+    ewa.change_code_theme = change_code_theme;
+    ewa.change_font_size = change_font_size;
+
+    window.ewa = ewa;
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[body{
+    overflow: hidden;
+    margin: 0;
+}
+#f_@SYS_FRAME_UNID .EWA_TD_M {
+    width: 33%;
+}
+
+#f_@SYS_FRAME_UNID input {
+    font-size: 20px;
+    height:36px;
+}
+
+#f_@SYS_FRAME_UNID {
+    display: none;
+}
+
+[lang=java] #f_@SYS_FRAME_UNID {
+    display: block;
+    height: 40px;
+}
+
+#code {
+    height: calc(100vh - 20px);
+}
+
+[lang=java] #code {
+    height: calc(100vh - 20px - 40px);
+}
+
+#status {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    line-height: 20px;
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson><Set><RedrawJson/></Set></RedrawJson><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml><![CDATA[<div id="div_@SYS_FRAME_UNID" style="height:100vh;width:100vw">
+    <form autocomplete="off" id="f_@SYS_FRAME_UNID" method="post">
+        <table id="EWA_FRAME_@SYS_FRAME_UNID" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="EWA_TD_B">
+                    {Save#ITEM}
+                </td>
+                <td class="EWA_TD_M">{package#ITEM}</td>
+                <td class="EWA_TD_M">{name#ITEM}</td>
+                <td class="EWA_TD_M">{path#ITEM}</td>
+            </tr>
+        </table>
+        <input type="hidden" name="java">
+    </form>
+    
+    <div id='code'></div>
+
+    <div id='status'>
+        <span><a>Font:</a> <select id='editor_font_size' 
+            onchange="EWA.F.FOS['@SYS_FRAME_UNID'].change_font_size(this)">
+                <option value='9px'>9px</option>
+                <option value='10px'>10px</option>
+                <option value='11px'>11px</option>
+                <option value='12px' selected>12px</option>
+                <option value='13px'>13px</option>
+                <option value='14px'>14px</option>
+                <option value='15px'>15px</option>
+                <option value='16px'>16px</option>
+                <option value='16px'>17px</option>
+                <option value='16px'>18px</option>
+            </select>
+        </span>
+        <span> <a>Theme:</a>
+            <select id="theme" size="1" onchange="EWA.F.FOS['@SYS_FRAME_UNID'].change_code_theme(this)">
+                <optgroup label="Bright">
+                    <option value="ace/theme/chrome">Chrome</option>
+                    <option value="ace/theme/clouds">Clouds</option>
+                    <option value="ace/theme/crimson_editor">Crimson Editor</option>
+                    <option value="ace/theme/dawn">Dawn</option>
+                    <option value="ace/theme/dreamweaver">Dreamweaver</option>
+                    <option value="ace/theme/eclipse">Eclipse</option>
+                    <option value="ace/theme/github">GitHub</option>
+                    <option value="ace/theme/iplastic">IPlastic</option>
+                    <option value="ace/theme/solarized_light">Solarized Light</option>
+                    <option value="ace/theme/textmate">TextMate</option>
+                    <option value="ace/theme/tomorrow">Tomorrow</option>
+                    <option value="ace/theme/xcode">XCode</option>
+                    <option value="ace/theme/kuroir">Kuroir</option>
+                    <option value="ace/theme/katzenmilch">KatzenMilch</option>
+                    <option value="ace/theme/sqlserver">SQL Server</option>
+                </optgroup>
+                <optgroup label="Dark">
+                    <option value="ace/theme/ambiance">Ambiance</option>
+                    <option value="ace/theme/chaos">Chaos</option>
+                    <option value="ace/theme/clouds_midnight">Clouds Midnight</option>
+                    <option value="ace/theme/cobalt" selected>Cobalt</option>
+                    <option value="ace/theme/gruvbox">Gruvbox</option>
+                    <option value="ace/theme/idle_fingers">idle Fingers</option>
+                    <option value="ace/theme/kr_theme">krTheme</option>
+                    <option value="ace/theme/merbivore">Merbivore</option>
+                    <option value="ace/theme/merbivore_soft">Merbivore Soft</option>
+                    <option value="ace/theme/mono_industrial">Mono Industrial</option>
+                    <option value="ace/theme/monokai">Monokai</option>
+                    <option value="ace/theme/pastel_on_dark">Pastel on dark</option>
+                    <option value="ace/theme/solarized_dark">Solarized Dark</option>
+                    <option value="ace/theme/terminal">Terminal</option>
+                    <option value="ace/theme/tomorrow_night">Tomorrow Night</option>
+                    <option value="ace/theme/tomorrow_night_blue">Tomorrow Night Blue</option>
+                    <option value="ace/theme/tomorrow_night_bright">Tomorrow Night Bright</option>
+                    <option value="ace/theme/tomorrow_night_eighties">Tomorrow Night 80s</option>
+                    <option value="ace/theme/twilight">Twilight</option>
+                    <option value="ace/theme/vibrant_ink">Vibrant Ink</option>
+                </optgroup>
+            </select></span>
+    </div>
+</div>]]></FrameHtml></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="OnNew SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='N' or '@EWA_MTYPE'='C'"/><Set CallIsChk="" CallName="OnModify SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M'"/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct0"><CallSet><Set CallIsChk="" CallName="UAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct1"><CallSet><Set CallIsChk="" CallName="UAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct0"><CallSet><Set CallIsChk="" CallName="SAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct1"><CallSet><Set CallIsChk="" CallName="SAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="CheckError"><CallSet><Set CallIsChk="" CallName="CheckError SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="OnNew SQL" SqlType="update" TransType="no"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="OnModify SQL" SqlType="update" TransType="no"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="UAct0 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- write your sql]]></Sql><CSSet/></Set><Set Name="UAct1 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- write your sql]]></Sql><CSSet/></Set><Set Name="SAct0 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- SELECT ...]]></Sql><CSSet/></Set><Set Name="SAct1 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- SELECT ...]]></Sql><CSSet/></Set><Set Name="CheckError SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"/></CallSet></Action><XItems><XItem Name="package"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="package"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="包名" Lang="zhcn" Memo=""/><Set Info="Package name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="package" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="path"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="path"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="保存路径" Lang="zhcn" Memo=""/><Set Info="Save path" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="path" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="name"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="name"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="类名" Lang="zhcn" Memo=""/><Set Info="name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="name" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="java"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="hidden"/></Tag><Name><Set Name="java"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="java" Lang="zhcn" Memo=""/><Set Info="java" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength><Set MaxLength="16777216" MinLength=""/></MaxMinLength><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="java" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="Save"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="Save"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="保存代码" Lang="zhcn" Memo=""/><Set Info="Save" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="Save" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem></XItems><Menus/><Charts/><PageInfos><PageInfo Name="msg0"><Name><Set Name="msg0"/></Name><DescriptionSet><Set Info="消息0" Lang="zhcn" Memo=""/><Set Info="Msg0" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg1"><Name><Set Name="msg1"/></Name><DescriptionSet><Set Info="消息1" Lang="zhcn" Memo=""/><Set Info="Msg1" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg2"><Name><Set Name="msg2"/></Name><DescriptionSet><Set Info="消息2" Lang="zhcn" Memo=""/><Set Info="Msg2" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2010-05-06 17:48:10" Name="define_code" UpdateDate="2023-03-03 16:18:04"><Page><Name><Set Name="define_code"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType="none"/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="code editor!" Lang="zhcn" Memo=""/><Set Info="code editor!" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="class" PageAttValue="dark"/></PageAttributeSet><RowAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="100%" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.css">
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js"></script>
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_FUNCTIONS.js"></script>
 <script type="text/javascript" src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC_CM.js"></script>
@@ -7425,7 +7717,7 @@ body {
             <input class='html' type=button id='butHtml' onclick='formatCodeHtml()' value='格式化Html' />
             <button class='html' onclick='ConvertHtml();'>转换自定义框架</button>
             <button class='html' onclick='AddDownHead();'>下载数据头</button>
-            字体： <select id='editor_font_size' onclick="change_editor_font_size()">
+            字体： <select id='editor_font_size' onchange="change_editor_font_size()">
                 <option value='9px'>9px</option>
                 <option value='10px'>10px</option>
                 <option value='11px'>11px</option>
@@ -7747,296 +8039,4 @@ function change_editor_font_size() {
 
 .btns-code.sql .sql {
     display: inline-block;
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="gl" CreateDate="2022-07-26 09:44:27" Name="classCode" UpdateDate="2023-02-10 14:59:17"><Page><Name><Set Name="classCode"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource=""/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="Class code" Lang="zhcn" Memo=""/><Set Info="System cache" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><RowAttributeSet/><GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet><Size><Set FrameCols="C1" HAlign="center" Height="100%" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[<link rel="stylesheet" href="@rv_ewa_style_path/EWA_DEFINE/css/define.min.css">
-
-<script src="@rv_ewa_style_path/EWA_DEFINE/js/EWAC.js" type="text/javascript"></script>
-
-<script src="@rv_ewa_style_path/third-party/ace/v1.4.12/src-min/ace.js" type="text/javascript"></script>
-<script src="@rv_ewa_style_path/third-party/ace/v1.4.12/src-min/ext-language_tools.js" type="text/javascript"></script>
-<script src="@rv_ewa_style_path/third-party/js-beautify/v1.13.0/lib/beautify.js"></script>
-]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[(function() {
-    let ewa = EWA.F.FOS["@sys_frame_unid"];
-    var editor, mode;
-
-    function saveJava() {
-        let o = $('#f_@sys_frame_unid');
-        var name = o.find("input[name=name]").val();
-        var packagename = o.find("input[name=package]").val();
-        var path = o.find("input[name=path]").val();
-
-        if (!path) {
-            alert('Save path must set');
-            return;
-        }
-
-        var java = o.find("input[name=java]").val();
-
-        var u = EWA.CP + "/EWA_DEFINE/cgi-bin/xml/";
-        var data = {
-            name: name,
-            packagename: packagename,
-            path: path,
-            java: java,
-            TYPE: "SAVE_JAVA"
-        }
-        $JP(u, data, function(rst) {
-            if (!rst.RST) {
-                alert(rst.ERR);
-            } else {
-                $Tip("Ok");
-            }
-        });
-        return false;
-    }
-
-    function beautify_code() {
-        var p = editor.getCursorPosition();
-        var s;
-        if (mode == 'ace/mode/javascript') {
-            s = js_beautify(getText());
-        } else if (mode == 'ace/mode/html' || mode == 'ace/mode/xml') {
-            s = html_beautify(getText());
-        } else if (mode == 'ace/mode/css') {
-            s = css_beautify(getText());
-        } else if (mode == 'ace/mode/sql') {
-            beautify_code_sql();
-            return;
-        } else {
-            $Tip('不支持类型格式化');
-            return;
-        }
-        editor.setValue(s, 1);
-        editor.moveCursorToPosition(p);
-        editor.selection.clearSelection();
-    }
-
-    function getText() {
-        return editor.getValue();
-    }
-
-    function setCode(code, type) {
-        $('#div_@sys_frame_unid').attr('lang', type)
-        if (type == 'sql') {
-            mode = 'ace/mode/sql';
-        } else {
-            mode = 'ace/mode/java';
-            code = js_beautify(code);
-        }
-        editor.session.setMode(mode);
-
-        editor.setValue(code, 1);
-        $('#f_@sys_frame_unid [name=java]').val(code);
-        if (type == 'sql') {
-            beautify_code_sql();
-        }
-    }
-
-    function change_code_theme(obj) {
-        editor.setTheme(obj.value);
-        window.localStorage["EWA_CODE_THENE"] = obj.value;
-    }
-
-    function change_font_size(obj) {
-        editor.setFontSize(obj.value);
-        window.localStorage["EWA_CODE_FONTSIZE"] = obj.value;
-    }
-
-    function getSetting(tag) {
-        if (window.localStorage && window.localStorage[tag]) {
-            return window.localStorage[tag];
-        }
-    }
-
-    function setSetting(tag, value) {
-        if (window.localStorage) {
-            window.localStorage[tag] = value;
-        }
-    }
-
-    function beautify_code_sql() {
-        let txt = getText();
-        let u = '@EWA.CP/EWA_DEFINE/cgi-bin/xml/?type=format&mode=sql';
-        let data = {
-            code: txt
-        };
-        $JP(u, data, function(rst) {
-            let code = rst['text'];
-            editor.setValue(code, 1);
-            $('#f_@sys_frame_unid [name=java]').val(code);
-        });
-    }
-
-    (function() {
-        ace.require("ace/ext/language_tools");
-        editor = ace.edit("code");
-        var theme_code = "ace/theme/cobalt";
-        if (window.localStorage && window.localStorage["EWA_CODE_THENE"]) {
-            let v = window.localStorage["EWA_CODE_THENE"];
-            let obj = document.getElementById('theme');
-            for (let i = 0; i < theme.options.length; i++) {
-                let v1 = obj.options[i].value;
-                if (v1 == v) {
-                    theme_code = v1;
-                    obj.value = v1;
-                    break;
-                }
-            }
-        }
-        editor.setTheme(theme_code);
-
-        // 设置字体大小
-        if (window.localStorage && window.localStorage["EWA_CODE_FONTSIZE"]) {
-            let v = window.localStorage["EWA_CODE_FONTSIZE"];
-            let selectFontsize = document.getElementById('editor_font_size');
-            if (v) {
-                selectFontsize.value = v;
-                editor.setFontSize(v);
-            }
-        }
-        editor.getSession().setUseWrapMode(true);
-        editor.setOptions({
-            enableBasicAutocompletion: true,
-            enableSnippets: true,
-            enableLiveAutocompletion: true
-        });
-
-        editor.setOption('readOnly', true);
-        editor.$blockScrolling = Infinity;
-
-        let p = $('#f_@sys_frame_unid');
-        var v = getSetting('EWA_DEFINE_JAVA_SAVED_PATH');
-        p.find('input[name=path]').on('blur', function(e) {
-            setSetting('EWA_DEFINE_JAVA_SAVED_PATH', this.value);
-        }).val(v);
-        var v1 = getSetting('EWA_DEFINE_JAVA_PACKAGE');
-        p.find('input[name=package]').on('blur', function(e) {
-            setSetting('EWA_DEFINE_JAVA_PACKAGE', this.value);
-        }).val(v1);
-        p.find("#Save").on("click", function(e) {
-            return saveJava();
-        });
-    })();
-
-    ewa.setSetting = setSetting;
-    ewa.getSetting = getSetting;
-
-    ewa.editor = editor;
-    ewa.getText = getText;
-    ewa.setCode = setCode;
-    ewa.change_code_theme = change_code_theme;
-    ewa.change_font_size = change_font_size;
-
-    window.ewa = ewa;
-})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[body{
-    overflow: hidden;
-    margin: 0;
-}
-#f_@SYS_FRAME_UNID .EWA_TD_M {
-    width: 33%;
-}
-
-#f_@SYS_FRAME_UNID input {
-    font-size: 20px;
-    height:36px;
-}
-
-#f_@SYS_FRAME_UNID {
-    display: none;
-}
-
-[lang=java] #f_@SYS_FRAME_UNID {
-    display: block;
-    height: 40px;
-}
-
-#code {
-    height: calc(100vh - 20px);
-}
-
-[lang=java] #code {
-    height: calc(100vh - 20px - 40px);
-}
-
-#status {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 20px;
-    line-height: 20px;
-}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson><Set><RedrawJson/></Set></RedrawJson><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml><![CDATA[<div id="div_@SYS_FRAME_UNID" style="height:100vh;width:100vw">
-    <form autocomplete="off" id="f_@SYS_FRAME_UNID" method="post">
-        <table id="EWA_FRAME_@SYS_FRAME_UNID" border="0" cellpadding="0" cellspacing="0">
-            <tr>
-                <td class="EWA_TD_B">
-                    {Save#ITEM}
-                </td>
-                <td class="EWA_TD_M">{package#ITEM}</td>
-                <td class="EWA_TD_M">{name#ITEM}</td>
-                <td class="EWA_TD_M">{path#ITEM}</td>
-            </tr>
-        </table>
-        <input type="hidden" name="java">
-    </form>
-    
-    <div id='code'></div>
-
-    <div id='status'>
-        <span><a>Font:</a> <select id='editor_font_size' 
-            onchange="EWA.F.FOS['@SYS_FRAME_UNID'].change_font_size(this)">
-                <option value='9px'>9px</option>
-                <option value='10px'>10px</option>
-                <option value='11px'>11px</option>
-                <option value='12px' selected>12px</option>
-                <option value='13px'>13px</option>
-                <option value='14px'>14px</option>
-                <option value='15px'>15px</option>
-                <option value='16px'>16px</option>
-                <option value='16px'>17px</option>
-                <option value='16px'>18px</option>
-            </select>
-        </span>
-        <span> <a>Theme:</a>
-            <select id="theme" size="1" onchange="EWA.F.FOS['@SYS_FRAME_UNID'].change_code_theme(this)">
-                <optgroup label="Bright">
-                    <option value="ace/theme/chrome">Chrome</option>
-                    <option value="ace/theme/clouds">Clouds</option>
-                    <option value="ace/theme/crimson_editor">Crimson Editor</option>
-                    <option value="ace/theme/dawn">Dawn</option>
-                    <option value="ace/theme/dreamweaver">Dreamweaver</option>
-                    <option value="ace/theme/eclipse">Eclipse</option>
-                    <option value="ace/theme/github">GitHub</option>
-                    <option value="ace/theme/iplastic">IPlastic</option>
-                    <option value="ace/theme/solarized_light">Solarized Light</option>
-                    <option value="ace/theme/textmate">TextMate</option>
-                    <option value="ace/theme/tomorrow">Tomorrow</option>
-                    <option value="ace/theme/xcode">XCode</option>
-                    <option value="ace/theme/kuroir">Kuroir</option>
-                    <option value="ace/theme/katzenmilch">KatzenMilch</option>
-                    <option value="ace/theme/sqlserver">SQL Server</option>
-                </optgroup>
-                <optgroup label="Dark">
-                    <option value="ace/theme/ambiance">Ambiance</option>
-                    <option value="ace/theme/chaos">Chaos</option>
-                    <option value="ace/theme/clouds_midnight">Clouds Midnight</option>
-                    <option value="ace/theme/cobalt" selected>Cobalt</option>
-                    <option value="ace/theme/gruvbox">Gruvbox</option>
-                    <option value="ace/theme/idle_fingers">idle Fingers</option>
-                    <option value="ace/theme/kr_theme">krTheme</option>
-                    <option value="ace/theme/merbivore">Merbivore</option>
-                    <option value="ace/theme/merbivore_soft">Merbivore Soft</option>
-                    <option value="ace/theme/mono_industrial">Mono Industrial</option>
-                    <option value="ace/theme/monokai">Monokai</option>
-                    <option value="ace/theme/pastel_on_dark">Pastel on dark</option>
-                    <option value="ace/theme/solarized_dark">Solarized Dark</option>
-                    <option value="ace/theme/terminal">Terminal</option>
-                    <option value="ace/theme/tomorrow_night">Tomorrow Night</option>
-                    <option value="ace/theme/tomorrow_night_blue">Tomorrow Night Blue</option>
-                    <option value="ace/theme/tomorrow_night_bright">Tomorrow Night Bright</option>
-                    <option value="ace/theme/tomorrow_night_eighties">Tomorrow Night 80s</option>
-                    <option value="ace/theme/twilight">Twilight</option>
-                    <option value="ace/theme/vibrant_ink">Vibrant Ink</option>
-                </optgroup>
-            </select></span>
-    </div>
-</div>]]></FrameHtml></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set IsPostMsg="" LogMsg="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="OnNew SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='N' or '@EWA_MTYPE'='C'"/><Set CallIsChk="" CallName="OnModify SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M'"/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct0"><CallSet><Set CallIsChk="" CallName="UAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="UAct1"><CallSet><Set CallIsChk="" CallName="UAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct0"><CallSet><Set CallIsChk="" CallName="SAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="SAct1"><CallSet><Set CallIsChk="" CallName="SAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set IsPostMsg="" LogMsg="" Type="CheckError"><CallSet><Set CallIsChk="" CallName="CheckError SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query" TransType="no"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="OnNew SQL" SqlType="update" TransType="no"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="OnModify SQL" SqlType="update" TransType="no"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="UAct0 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- write your sql]]></Sql><CSSet/></Set><Set Name="UAct1 SQL" SqlType="update" TransType="no"><Sql><![CDATA[-- write your sql]]></Sql><CSSet/></Set><Set Name="SAct0 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- SELECT ...]]></Sql><CSSet/></Set><Set Name="SAct1 SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- SELECT ...]]></Sql><CSSet/></Set><Set Name="CheckError SQL" SqlType="query" TransType="no"><Sql><![CDATA[-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"/></CallSet></Action><XItems><XItem Name="package"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="package"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="包名" Lang="zhcn" Memo=""/><Set Info="Package name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="package" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="path"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="path"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="保存路径" Lang="zhcn" Memo=""/><Set Info="Save path" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="path" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="name"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="name"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="类名" Lang="zhcn" Memo=""/><Set Info="name" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="name" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="java"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="hidden"/></Tag><Name><Set Name="java"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="java" Lang="zhcn" Memo=""/><Set Info="java" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength><Set MaxLength="16777216" MinLength=""/></MaxMinLength><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="java" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="Save"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="Save"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="保存代码" Lang="zhcn" Memo=""/><Set Info="Save" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="Save" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem></XItems><Menus/><Charts/><PageInfos><PageInfo Name="msg0"><Name><Set Name="msg0"/></Name><DescriptionSet><Set Info="消息0" Lang="zhcn" Memo=""/><Set Info="Msg0" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg1"><Name><Set Name="msg1"/></Name><DescriptionSet><Set Info="消息1" Lang="zhcn" Memo=""/><Set Info="Msg1" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg2"><Name><Set Name="msg2"/></Name><DescriptionSet><Set Info="消息2" Lang="zhcn" Memo=""/><Set Info="Msg2" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate></EasyWebTemplates>
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet/><SqlSet/><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet/></Action><XItems/><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate></EasyWebTemplates>
