@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -379,6 +378,12 @@ public class ItemBase implements IItem {
 			refVal = this.checkHtmlScript(refVal);
 		} else {
 			refVal = Utils.textToInputValue(refVal.trim());
+		}
+		
+		UserXItemValue vs = _UserXItem.getItem("Tag").getItem(0);
+		String tag = vs.getItem("Tag");
+		if("checkboxgrid".equalsIgnoreCase(tag) || "radiogrid".equalsIgnoreCase(tag)){
+			return refVal;
 		}
 		String st = refShowStype == null || refShowStype.trim().length() == 0 ? ""
 				: row.getCell(refShowStype).getString();
