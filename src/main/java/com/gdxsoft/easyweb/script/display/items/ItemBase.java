@@ -380,6 +380,12 @@ public class ItemBase implements IItem {
 		} else {
 			refVal = Utils.textToInputValue(refVal.trim());
 		}
+		
+		UserXItemValue vs = _UserXItem.getItem("Tag").getItem(0);
+		String tag = vs.getItem("Tag");
+		if("checkboxgrid".equalsIgnoreCase(tag) || "radiogrid".equalsIgnoreCase(tag)){
+			return refVal;
+		}
 		String st = refShowStype == null || refShowStype.trim().length() == 0 ? ""
 				: row.getCell(refShowStype).getString();
 		String span = "<span class=\"" + st + "\" ref_key=\"" + Utils.textToInputValue(val) + "\" ";
