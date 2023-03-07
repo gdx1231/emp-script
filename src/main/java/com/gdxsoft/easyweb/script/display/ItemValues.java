@@ -334,7 +334,7 @@ public class ItemValues {
 		try {
 			BigDecimal v1 = new BigDecimal(ori.toString());
 			v1 = v1.divide(numberScale);
-			return v1.longValue();
+			return v1.doubleValue();
 		} catch (Exception err) {
 			return ori;
 		}

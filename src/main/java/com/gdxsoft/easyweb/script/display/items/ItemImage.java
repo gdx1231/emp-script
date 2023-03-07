@@ -166,7 +166,9 @@ public class ItemImage extends ItemBase {
 					&& a1.substring(0, rvEwaStylePath.length()).equals(rvEwaStylePath)) {
 				v = a1;
 			} else {
-				if (a1.startsWith("http:") || a1.startsWith("https:")) {
+				if (a1.startsWith("data:image/")) { // base64
+					v = a1;
+				} else if (a1.startsWith("http:") || a1.startsWith("https:")) {
 					v = a1;
 				} else {
 					a1 = a1.replace("\\", "/"); // 替换windows 目录分隔符 2018-02-13
@@ -175,10 +177,17 @@ public class ItemImage extends ItemBase {
 			}
 			image = v;
 		}
-		html = html.replace(SkinFrame.TAG_VAL, image);
-		// 后加载先不显示背景图
-		String background = isLazyLoad ? "" : "background-image:url('" + image + "')";
-		html = html.replace("{__BACKGROUND_IMAGE__}", background);
+		if(isLazyLoad) {
+			// ori_src=
+			html = html.replace(SkinFrame.TAG_VAL, image);
+			// 后加载先不显示背景图
+			html = html.replace("{__BACKGROUND_IMAGE__}", "");
+		} else {
+			// ori_src=
+			html = html.replace(SkinFrame.TAG_VAL, image);
+			String background =   "background-image:url('" + image + "')";
+			html = html.replace("{__BACKGROUND_IMAGE__}", background);
+		}
 		html = html.replace("{__IS_LAZY_LOAD__}", isLazyLoad + "");
 
 		return html;
