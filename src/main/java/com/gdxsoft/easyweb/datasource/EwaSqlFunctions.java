@@ -132,7 +132,7 @@ public class EwaSqlFunctions {
 
 		EwaSqlFunction f = new EwaSqlFunction();
 		// 方法名称
-		String funcName = sql1.substring(locStart, locFirst).trim();
+		String funcName = sql.substring(locStart, locFirst).trim();
 		f.setFunctionName(funcName);
 		f.setStaticCall(true);
 
@@ -148,12 +148,12 @@ public class EwaSqlFunctions {
 			return sql;
 		}
 
-		String group0 = sql1.substring(locFirst + 1, locFirstEnd);
+		String group0 = sql.substring(locFirst + 1, locFirstEnd);
 		f.setGroupMethodParameters(group0);
 
 		int loFristDot = -1;
-		for (int i = locFirstEnd + 1; i < sql1.length(); i++) {
-			char c = sql1.charAt(i);
+		for (int i = locFirstEnd + 1; i < sql.length(); i++) {
+			char c = sql.charAt(i);
 			if (!Character.isWhitespace(c) && c != '.') {
 				break;
 			}
@@ -180,7 +180,7 @@ public class EwaSqlFunctions {
 
 		// 查找动态构造方法
 		int locSecondFrist = -1;
-		for (int i = loFristDot + 1; i < sql1.length(); i++) {
+		for (int i = loFristDot + 1; i < sql.length(); i++) {
 			char c = sql1.charAt(i);
 			if (!Character.isWhitespace(c) && c != '(') {
 				break;
@@ -194,7 +194,7 @@ public class EwaSqlFunctions {
 			return sql2;
 		}
 		int locSecondEnd = -1;
-		for (int i = locSecondFrist + 1; i < sql1.length(); i++) {
+		for (int i = locSecondFrist + 1; i < sql.length(); i++) {
 			char c = sql1.charAt(i);
 			if (c == ')') { // 找到第一个)
 				locSecondEnd = i;

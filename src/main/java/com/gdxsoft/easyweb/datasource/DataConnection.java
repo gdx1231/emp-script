@@ -725,6 +725,9 @@ public class DataConnection {
 	 * @return
 	 */
 	private boolean executeQuery(String sql, String oriSql) {
+		if(sql == null || oriSql == null) {
+			return false;
+		}
 		if (this._RequestValue == null)
 			return this.executeQueryNoParameter(sql);
 
@@ -1662,6 +1665,9 @@ public class DataConnection {
 	 * @throws Exception
 	 */
 	public String rebuildSql(String sql) throws Exception {
+		if(sql == null) {
+			return null;
+		}
 		String sql1 = sql;
 		// SQL语句预替换，即在SQL语句执行前，替换SQL语句本身的参数
 		// 例如 SELECT * FROM ~TB, 如参数TB是 USERS 则替换成 SELECT * FROM USERS

@@ -21,7 +21,7 @@ import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.script.RequestValue;
-import com.gdxsoft.easyweb.script.Workflow.OrgSqls;
+import com.gdxsoft.easyweb.script.Workflow.EwaWfMain;
 import com.gdxsoft.easyweb.script.Workflow.WfUnit;
 import com.gdxsoft.easyweb.script.Workflow.WfUnits;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
@@ -585,11 +585,11 @@ public class FrameList extends FrameBase implements IFrame {
 			doc.addScriptHtml("<!-- no data -->");
 		} else {
 			DTTable tb = this.getSplitPageTable();
-			
+
 			if (tb == null) {
 				tb = (DTTable) tbs.get(tbs.size() - 1);
 			}
-			
+
 			super.getHtmlClass().getItemValues().setListFrameTable(tb);
 
 			if (this.isSplitPage()) { // 分页
@@ -1534,18 +1534,11 @@ public class FrameList extends FrameBase implements IFrame {
 		RequestValue rv = super.getHtmlClass().getItemValues().getRequestValue();
 		DataConnection cnn = super.getHtmlClass().getItemValues().getDataConn();
 		String gunid = super.getHtmlClass().getSysParas().getFrameUnid();
+		 
 
-		/*
-		 * String APP_REF_TAG = super.getPageItemValue("Workflow", "WfRefTag");
-		 * 
-		 * if (APP_REF_TAG == null || APP_REF_TAG.length() == 0) { throw new
-		 * Exception("WfRefTag在Page未定义"); }
-		 */
-
-		OrgSqls sqls = OrgSqls.instance();
-		String sql = sqls.getSql("WF_APP_GET");
-
-		DTTable tb = DTTable.getJdbcTable(sql, cnn);
+		// 工作量应用表 （_EWA_WF_APP）
+		DTTable tb = EwaWfMain.getAppTable(super.getHtmlClass().getSysParas().getXmlName(),
+				super.getHtmlClass().getSysParas().getItemName(), cnn);
 
 		if (tb == null) {
 			this._WorkFlowBut = null;

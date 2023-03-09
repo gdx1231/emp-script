@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,33 +28,71 @@ public class EwaWfMain {
 	/**
 	 * 当前节点
 	 */
-	public static String UNIT_CUR_ID = "SYS_STA_TAG";
+	public static final String UNIT_CUR_ID = "SYS_STA_TAG";
 	/**
 	 * 下个节点
 	 */
-	public static String UNIT_NEXT_ID = "SYS_STA_VAL";
+	public static final String UNIT_NEXT_ID = "SYS_STA_VAL";
 	/**
 	 * 来源编号
 	 */
-	public static String WF_REF_ID = "SYS_STA_RID";
+	public static final String WF_REF_ID = "SYS_STA_RID";
 	/**
 	 * 来源
 	 */
-	public static String WF_REF_TABLE = "SYS_STA_TABLE";
+	public static final String WF_REF_TABLE = "SYS_STA_TABLE";
 	/**
 	 * 发布版本号
 	 */
-	public static String WF_VERSION = "EWA_WF_DLV_VER";
-
+	public static final String WF_VERSION = "EWA_WF_DLV_VER";
 	/**
 	 * 是否流程完成标准名称
 	 */
-	public static String WF_IS_END = "EWA_WF_IS_END";
+	public static final String WF_IS_END = "EWA_WF_IS_END";
 
 	/**
 	 * 下个节点标准名称
 	 */
-	public static String WF_NEXT = "EWA_WF_NEXT";
+	public static final String WF_NEXT = "EWA_WF_NEXT";
+
+	/**
+	 * 流程到下一步
+	 * 
+	 * @param workflowId  工作流编号
+	 * @param curUnit     当前节点
+	 * @param nextUnit    下一个节点
+	 * @param taskPks     任务的主键值
+	 * @param appItemname 任务配置信息的ITEMNAME
+	 * @param rv          rv
+	 * @return
+	 */
+	public static String flowNext(String workflowId, String curUnit, String nextUnit, String taskPks,
+			String appItemname, RequestValue rv) {
+		EwaWfMain main = new EwaWfMain();
+		JSONObject obj = new JSONObject();
+		try {
+			main.initDlv(workflowId, rv);
+			main.doPost(curUnit, nextUnit, taskPks, appItemname);
+			obj.put("RST", true);
+			return obj.toString();
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			try {
+				obj.put("RST", false);
+				obj.put("ERR", e.getMessage());
+				return obj.toString();
+			} catch (JSONException e1) {
+				LOGGER.error(e1.getMessage());
+				return "{\"RST\":false,ERR:\"???\"}";
+			}
+		}
+	}
+
+	public static DTTable getAppTable(String xmlName, String itemName, DataConnection cnn) {
+		String sql = "SELECT * FROM _EWA_WF_APP where APP_ITEMNAME=" + cnn.sqlParameterStringExp(itemName);
+		DTTable tableApp = DTTable.getJdbcTable(sql, cnn);
+		return tableApp;
+	}
 
 	private HashMap<String, EwaWfUnit> _Units = new HashMap<String, EwaWfUnit>();
 	private HashMap<String, EwaWfCnn> _Cnns = new HashMap<String, EwaWfCnn>();
@@ -61,96 +100,146 @@ public class EwaWfMain {
 	private EwaWf _Wf;
 	// private DTTable _TbDlv; // 流程发布数据
 
-	public void doPost(RequestValue rv) throws Exception {
-		String flowIsEnd = "Y";
-		OrgSqls sqls = OrgSqls.instance();
+	private EwaWfUnit unitCur;
+	private EwaWfUnit unitNext;
+	private RequestValue rv;
 
-		String curUnitName = rv.getString(UNIT_CUR_ID).trim();
+	private String flowIsEnd;
+
+	/**
+	 * 执行提交，rv包含数据：<br>
+	 * SYS_STA_TAG 当前节点<br>
+	 * SYS_STA_VAL 下个节点<br>
+	 * SYS_STA_RID 来源编号<br>
+	 * SYS_STA_TABLE 来源<br>
+	 * APP_XMLNAME<br>
+	 * APP_ITEMNAME<br>
+	 * 
+	 * @param rv
+	 * @throws Exception
+	 */
+	public void doPost() throws Exception {
+		// 当前节点
+		String curUnitName = rv.s(UNIT_CUR_ID).trim();
+		// 参数下一个节点 SYS_STA_VAL
+		String nextUnitName = rv.s(UNIT_NEXT_ID).trim();
+
+		String pks = this.rv.s(WF_REF_ID);
+		String appItemname = this.rv.s("APP_ITEMNAME");
+
+		this.doPost(curUnitName, nextUnitName, pks, appItemname);
+	}
+
+	/**
+	 * 执行下一步
+	 * 
+	 * @param curUnit  当前节点
+	 * @param nextUnit 下一个节点
+	 * @param taskPks  任务数据的主键
+	 * @param rv       RequestValue
+	 * @throws Exception
+	 */
+	public void doPost(String curUnit, String nextUnit, String taskPks) throws Exception {
+		this.doPost(curUnit, nextUnit, taskPks, null);
+	}
+
+	/**
+	 * 执行下一步
+	 * 
+	 * @param curUnit     当前节点
+	 * @param nextUnit    下一个节点
+	 * @param taskPks     任务数据的主键
+	 * @param appItemname 任务配置信息的ITEMNAME
+	 * @throws Exception
+	 */
+	public void doPost(String curUnit, String nextUnit, String taskPks, String appItemname) throws Exception {
+		DataConnection cnn = new DataConnection();
+		cnn.setRequestValue(rv);
+
+		this.initUnitCurAndNext(curUnit, nextUnit);
+		// 是否能执行到下一步
+		this.checkCanRunByFlow(cnn, unitCur);
+
+		String sql = "SELECT * FROM _EWA_WF_APP where wf_id=" + cnn.sqlParameterStringExp(this._Wf.getWfId());
+		DTTable tableApp = DTTable.getJdbcTable(sql, cnn);
+		cnn.close();
+
+		if (tableApp.getCount() == 0) {
+			throw new Exception("获取APP-无数据");
+		}
+		DTRow rowApp = null;
+		if (tableApp.getCount() == 1 && StringUtils.isBlank(appItemname)) {
+			rowApp = tableApp.getRow(0);
+		} else {
+			for (int i = 0; i < tableApp.getCount(); i++) {
+				String appItemname0 = tableApp.getCell(i, "APP_ITEMNAME").toString();
+				if (appItemname.equalsIgnoreCase(appItemname0)) {
+					rowApp = tableApp.getRow(i);
+				}
+			}
+		}
+		if (rowApp == null) {
+			throw new Exception("获取APP-找不到：" + appItemname);
+		}
+
+		// 更新业务表的状态
+		String sqlMainStatus = this.createUpdateTaskStatus(rowApp, cnn, taskPks);
+		this.rv.addOrUpdateValue(WF_REF_TABLE , this._Wf.getWfId()); //WF_REF_TABLE
+		this.rv.addOrUpdateValue(UNIT_CUR_ID, curUnit);
+		this.rv.addOrUpdateValue(UNIT_NEXT_ID, nextUnit);
+		this.rv.addOrUpdateValue(WF_REF_ID, taskPks);
+		
+		// 事物开始
+		cnn.transBegin();
+		try {
+			this.executeFlowData(cnn, sqlMainStatus);
+			cnn.transCommit();
+		} catch (Exception err) {
+			// 回滚
+			cnn.transRollback();
+			throw err;
+		} finally {
+			cnn.transClose();
+			cnn.close();
+		}
+	}
+
+	/**
+	 * 初始化当前节点和下一个节点
+	 * 
+	 * @param curUnitName  当前节点
+	 * @param nextUnitName 下个节点
+	 * @throws Exception
+	 */
+	private void initUnitCurAndNext(String curUnitName, String nextUnitName) throws Exception {
 		if (curUnitName == null) {
 			throw new Exception("参数当前节点" + UNIT_CUR_ID + "没有传递");
 		}
-		EwaWfUnit unitCur = this._Units.get(curUnitName);
+		unitCur = this._Units.get(curUnitName);
 		if (unitCur == null) {
 			throw new Exception("参数当前节点" + UNIT_CUR_ID + "不存在");
 		}
 
-		// 参数下一个节点
-		String curUnitNext = rv.getString(UNIT_NEXT_ID).trim();
-		if (curUnitNext == null) {
+		// 参数下一个节点 SYS_STA_VAL
+		if (nextUnitName == null) {
 			throw new Exception("参数下一个节点" + UNIT_CUR_ID + "没有传递");
 		}
-		EwaWfUnit unitNext = this._Units.get(curUnitNext);
+		unitNext = this._Units.get(nextUnitName);
 		if (unitNext == null) {
-			throw new Exception("参数下一个节点" + curUnitNext + "不存在");
+			throw new Exception("参数下一个节点" + nextUnitName + "不存在");
 		}
-
-		// boolean is_back_router = false;
-		// 检查流转是否合法
-		// String cnnKey = curUnitName + "|" + curUnitNext;
-		// if (!this._Cnns.containsKey(cnnKey)) {
-		// String cnnKeyback = curUnitNext + "|" + curUnitName; // 打回操作
-		// if (this._Cnns.containsKey(cnnKeyback)) {
-		// // is_back_router = true;
-		// } else {
-		// throw new Exception("没有从" + curUnitName + "到" + curUnitNext +
-		// "流转的定义");
-		// }
-		// }
-
 		// 检查流转的定义
 		if (!this.checkFlowValid(unitCur, unitNext)) {
-			throw new Exception("没有从" + curUnitName + "到" + curUnitNext + "流转的定义");
+			throw new Exception("没有从" + curUnitName + "到" + nextUnitName + "流转的定义");
 		}
 
-		DataConnection cnn = new DataConnection();
-		cnn.setRequestValue(rv);
-
-		OrgSqls o = OrgSqls.instance();
-		String sql = o.getSql("WF_LOG_GET");
-
-		DTTable table = DTTable.getJdbcTable(sql, cnn);
-		cnn.close();
-
-		String startAdmin = null;
-		if (table.getCount() > 0) {
-			startAdmin = table.getCell(0, "adm_id").toString();
-		}
-		// 检查是否可流转
-		boolean is_can_run = false;
-		is_can_run = this.checkIsCanRun1(unitCur.getWfUnitAdm(), unitCur.getWfUnitAdmLst(), unitCur.getWfUnitSelfDept(),
-				startAdmin, cnn);
-
-		cnn.close();
-		if (!is_can_run) {
-			StringBuilder err1 = new StringBuilder();
-			err1.append("审批权限不对：WfUnitAdm = ");
-			err1.append(unitCur.getWfUnitAdm());
-			err1.append(", WfUnitAdmLst = ");
-			err1.append(unitCur.getWfUnitAdmLst());
-			err1.append(", WfUnitSelfDept =");
-			err1.append(unitCur.getWfUnitSelfDept());
-			err1.append(", startAdmin =");
-			err1.append(startAdmin);
-			String msg = err1.toString();
-
-			LOGGER.error(msg);
-
-			throw new Exception(msg);
-		}
 		// 查找是否流程完成，完成条件是找不到以下一个节点开始的连接，即有输入无输出
-		Iterator<String> it = this._Cnns.keySet().iterator();
-		while (it.hasNext()) {
-			String key = it.next();
-			if (key.indexOf(curUnitNext + "|") == 0) {
-				flowIsEnd = null;
-				break;
-			}
-		}
 		// 设置标准名称，是否流程完成，用于程序调用
+		this.flowIsEnd = this.checkflowEnd(this.unitNext.getWfUnitId()) ? "Y" : null;
 		rv.addValue(WF_IS_END, flowIsEnd);
 
 		// 设置标准名称，参数下一个节点，用于程序调用
-		rv.addValue(WF_NEXT, curUnitNext);
+		rv.addValue(WF_NEXT, this.unitNext.getWfUnitId());
 
 		// 将节点的操作类型和操作者放到参数中，用于程序调用
 		rv.addValue("WF_UNIT_NAME", unitNext.getWfUnitName());
@@ -166,25 +255,20 @@ public class EwaWfMain {
 		// 是否本部门
 		rv.addValue("WF_UNIT_SELF_DEPT", unitNext.getWfUnitSelfDept());
 
-		// String sqlCurStatus = sqls.getSql("WF_LOG_GET");
+	}
 
-		// 获取流程的SQL
-		String sqla = sqls.getSql("WF_APP_GET");
-		DTTable tableApp = DTTable.getJdbcTable(sqla, cnn);
-		cnn.close();
-
-		// 当前节点
-		EwaWfUnit curUnit = this.getUnit(curUnitName);
-		if (cnn.getErrorMsg() != null) {
-			throw new Exception(cnn.getErrorMsg());
-		}
-		if (tableApp.getCount() == 0) {
-			throw new Exception("获取APP-无数据");
-		}
-
-		String appTable = tableApp.getCell(0, "APP_WF_TABLE").toString();
-		String appField = tableApp.getCell(0, "APP_WF_FIELD").toString();
-		String appPks = tableApp.getCell(0, "APP_WF_PKS").toString();
+	/**
+	 * 更新业务表的状态
+	 * 
+	 * @param tableApp
+	 * @param cnn
+	 * @return
+	 * @throws Exception
+	 */
+	private String createUpdateTaskStatus(DTRow rowApp, DataConnection cnn, String taskPks) throws Exception {
+		String appTable = rowApp.getCell("APP_WF_TABLE").toString();
+		String appField = rowApp.getCell("APP_WF_FIELD").toString();
+		String appPks = rowApp.getCell("APP_WF_PKS").toString();
 		if (appTable == null || appTable.trim().length() == 0) {
 			throw new Exception("APP_TABLE未定义");
 		}
@@ -195,7 +279,9 @@ public class EwaWfMain {
 			throw new Exception("APP_PKS未定义");
 		}
 		String[] pks = appPks.split(",");
-		String[] vals = rv.getString(WF_REF_ID).split(",");
+
+		// SYS_STA_RID
+		String[] vals = taskPks.split(",");
 		if (pks.length != vals.length) {
 			throw new Exception("APP_PKS定义和参数值不一致" + appPks + "|" + rv.getString(WF_REF_ID));
 		}
@@ -204,76 +290,135 @@ public class EwaWfMain {
 			throw new Exception("生成索引数据脚本未定义");
 		}
 
-		String sqlMainStatus = "UPDATE " + appTable + " SET " + appField + "='" + curUnitNext.replace("'", "''").trim()
-				+ "' WHERE ";
+		// 更新业务表的字段状态
+		StringBuilder sb = new StringBuilder();
+		sb.append("UPDATE ");
+		sb.append(appTable);
+		sb.append(" SET ");
+		sb.append(appField);
+		sb.append(" = ");
+		sb.append(cnn.sqlParameterStringExp(this.unitNext.getWfUnitId().trim()));
+		sb.append(" WHERE ");
+
 		for (int i = 0; i < pks.length; i++) {
 			String v = vals[i].replace("'", "''").trim();
-			sqlMainStatus += pks[i] + "='" + v + "'";
+			sb.append(pks[i]);
+			sb.append(" = ");
+			sb.append(cnn.sqlParameterStringExp(v));
 		}
 
-		try {
+		String sqlMainStatus = sb.toString();
 
-			// boolean isOk = false;
+		return sqlMainStatus;
+	}
 
-			/*
-			 * for (int i = 0; i < curUnit.getFromCnns().size(); i++) { EwaWfCnn c =
-			 * curUnit.getFromCnns().get(i); if (c.getWfUnitTo().trim().equals(curUnitNext))
-			 * { isOk = true; break; } } if (!isOk) { throw new Exception("下一步" +
-			 * curUnitNext + ",不合法"); }
-			 */
+	/**
+	 * 执行流程数据
+	 * 
+	 * @param cnn
+	 * @param tableApp
+	 * @throws Exception
+	 */
+	private void executeFlowData(DataConnection cnn, String sqlMainStatus) throws Exception {
+		OrgSqls sqls = OrgSqls.instance();
 
-			// 执行前检查，循环检查返回表，如果有数据表示有错。
-			String strBeforeOk = this.runActBefore(cnn, curUnit, rv);
-			if (strBeforeOk != null) {
-				throw new Exception("不能执行 \n " + strBeforeOk);
-			}
-
-			String sqlUpdate = sqls.getSql("WF_LOG_NEW");
-			// 更新日志索引
-			String sqlIdxCheck = sqls.getSql("WF_LOG_IDX_CHECK");
-			DTTable tbIdxCheck = this.executeAct(cnn, sqlIdxCheck).get(0);
-
-			// 事物开始
-			cnn.transBegin();
-			try {
-				// 更新主表 状态
-				this.executeAct(cnn, sqlMainStatus);
-
-				// 写日志
-				ArrayList<DTTable> al = this.executeAct(cnn, sqlUpdate);
-				int sysStaId = Integer.parseInt(al.get(0).getCell(0, 0).toString());
-
-				rv.addValue("EWA_WF_LOG_ID", sysStaId);
-
-				// 写日志索引
-				if (tbIdxCheck.getCount() == 0) {
-					String sqlIdxNew = sqls.getSql("WF_LOG_IDX_NEW").replace("[LOG_SQL]", this._Wf.getWfPara0());
-					this.executeAct(cnn, sqlIdxNew);
-
-				}
-
-				// 更新日志状态
-				String sqlLogUpdate = sqls.getSql("WF_LOG_IDX_UPDATE");
-
-				this.executeAct(cnn, sqlLogUpdate);
-				this.runActAfter(cnn, curUnit, rv);
-
-				cnn.transCommit();
-
-				this.notification(rv, unitCur, unitNext, flowIsEnd);
-			} catch (Exception e2) {
-				// 回滚
-				cnn.transRollback();
-				throw e2;
-			}
-
-		} catch (Exception err) {
-			throw err;
-		} finally {
-			cnn.transClose();
-			cnn.close();
+		// 执行前检查，循环检查返回表，如果有数据表示有错。
+		String strBeforeOk = this.runActBefore(cnn, unitCur, rv);
+		if (strBeforeOk != null) {
+			throw new Exception("不能执行 \n " + strBeforeOk);
 		}
 
+		String sqlUpdate = sqls.getSql("WF_LOG_NEW");
+		// 更新日志索引
+		String sqlIdxCheck = sqls.getSql("WF_LOG_IDX_CHECK");
+		DTTable tbIdxCheck = this.executeAct(cnn, sqlIdxCheck).get(0);
+
+		// 更新业务表的状态
+		this.executeAct(cnn, sqlMainStatus);
+
+		// 写日志
+		ArrayList<DTTable> al = this.executeAct(cnn, sqlUpdate);
+		int sysStaId = Integer.parseInt(al.get(0).getCell(0, 0).toString());
+
+		rv.addValue("EWA_WF_LOG_ID", sysStaId);
+
+		// 写日志索引
+		if (tbIdxCheck.getCount() == 0) {
+			String sqlIdxNew = sqls.getSql("WF_LOG_IDX_NEW").replace("[LOG_SQL]", this._Wf.getWfPara0());
+			this.executeAct(cnn, sqlIdxNew);
+
+		}
+
+		// 更新日志状态
+		String sqlLogUpdate = sqls.getSql("WF_LOG_IDX_UPDATE");
+
+		this.executeAct(cnn, sqlLogUpdate);
+		this.runActAfter(cnn, unitCur, rv);
+
+		this.notification(rv, unitCur, unitNext, flowIsEnd);
+
+	}
+
+	/**
+	 * 检查是否可以执行到下一步
+	 * 
+	 * @param cnn
+	 * @param unitCur
+	 * @throws Exception
+	 */
+	private void checkCanRunByFlow(DataConnection cnn, EwaWfUnit unitCur) throws Exception {
+
+		OrgSqls o = OrgSqls.instance();
+		String sql = o.getSql("WF_LOG_GET");
+
+		DTTable table = DTTable.getJdbcTable(sql, cnn);
+		cnn.close();
+
+		String startAdmin = null;
+		if (table.getCount() > 0) {
+			startAdmin = table.getCell(0, "adm_id").toString();
+		}
+		// 检查是否可流转
+		boolean isCanRun = false;
+		isCanRun = this.checkIsCanRun1(unitCur.getWfUnitAdm(), unitCur.getWfUnitAdmLst(), unitCur.getWfUnitSelfDept(),
+				startAdmin, cnn);
+		cnn.close();
+		if (!isCanRun) {
+			StringBuilder err1 = new StringBuilder();
+			err1.append("审批权限不对：WfUnitAdm = ");
+			err1.append(unitCur.getWfUnitAdm());
+			err1.append(", WfUnitAdmLst = ");
+			err1.append(unitCur.getWfUnitAdmLst());
+			err1.append(", WfUnitSelfDept =");
+			err1.append(unitCur.getWfUnitSelfDept());
+			err1.append(", startAdmin =");
+			err1.append(startAdmin);
+			String msg = err1.toString();
+
+			LOGGER.error(msg);
+
+			throw new Exception(msg);
+		}
+	}
+
+	/**
+	 * 查找是否流程完成，完成条件是找不到以下一个节点开始的连接，即有输入无输出
+	 * 
+	 * @param curUnitNext
+	 * @return
+	 */
+	private boolean checkflowEnd(String curUnitNext) {
+		String check = curUnitNext + "|";
+		// 查找是否流程完成，完成条件是找不到以下一个节点开始的连接，即有输入无输出
+		Iterator<String> it = this._Cnns.keySet().iterator();
+		while (it.hasNext()) {
+			String key = it.next();
+			if (key.indexOf(check) == 0) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -354,6 +499,7 @@ public class EwaWfMain {
 
 	/**
 	 * 执行后处理
+	 * 
 	 * @param conn
 	 * @param curUnit
 	 * @param rv
@@ -366,7 +512,7 @@ public class EwaWfMain {
 			return;
 		}
 		rv.addOrUpdateValue("WF_FUC_ID_AFTER", fucId);
-		
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("-- 执行后对处理，对应的编号 WF_FUC_ID: " + fucId.replace("@", "at") + " \n");
 		sb.append("SELECT WF_FUC_SQL,WF_FUC_ID, WF_ID, WF_FUC_NAME, WF_FUC_MEMO, WF_FUC_TAG ");
@@ -388,7 +534,8 @@ public class EwaWfMain {
 
 	/**
 	 * 执行前检查，循环检查返回表，如果有数据表示有错。
-	 * @param conn 
+	 * 
+	 * @param conn
 	 * @param curUnit 当前的节点
 	 * @param rv
 	 * @return
@@ -400,9 +547,9 @@ public class EwaWfMain {
 		if (fucId == null || fucId.trim().length() == 0) {
 			return null;
 		}
-		
+
 		rv.addOrUpdateValue("WF_FUC_ID_BEFORE", fucId);
-		
+
 		StringBuilder sb1 = new StringBuilder();
 		sb1.append("-- 执行前检查，对应的编号 WF_FUC_ID: " + fucId.replace("@", "at") + " \n");
 		sb1.append("SELECT WF_FUC_SQL,WF_FUC_ID, WF_ID, WF_FUC_NAME, WF_FUC_MEMO, WF_FUC_TAG \n");
@@ -410,7 +557,7 @@ public class EwaWfMain {
 		sb1.append(" 	AND WF_ID = @WF_ID \n");
 		sb1.append(" 	AND WF_FUC_ID = @WF_FUC_ID_BEFORE");
 		String sql = sb1.toString();
-		
+
 		DTTable tbActions = DTTable.getJdbcTable(sql, "", rv);
 
 		// no check
@@ -447,6 +594,7 @@ public class EwaWfMain {
 
 	/**
 	 * 执行Action
+	 * 
 	 * @param conn
 	 * @param sql
 	 * @return 所有的表
@@ -466,7 +614,7 @@ public class EwaWfMain {
 				if (tb != null && tb.isOk()) {
 					al.add(tb);
 				}
-				if(tb.getCount() == 0) {
+				if (tb.getCount() == 0) {
 					conn.getRequestValue().addValues(tb);
 				}
 			} else {
@@ -845,6 +993,7 @@ public class EwaWfMain {
 	 * @throws Exception
 	 */
 	public void initDlv(String wfId, RequestValue rv) throws Exception {
+		this.rv = rv;
 		EwaWfDao daoWf = new EwaWfDao();
 		_Wf = daoWf.getRecord(wfId);
 		int version = -1;
@@ -861,7 +1010,8 @@ public class EwaWfMain {
 			}
 		}
 
-		String sql = "SELECT * FROM _EWA_WF_DLV WHERE WF_ID=@WF_ID AND WF_REF_ID=@G_SUP_UNID ";
+		String sql = "SELECT * FROM _EWA_WF_DLV WHERE WF_ID='" + wfId.replace("'", "''")
+				+ "' AND WF_REF_ID=@G_SUP_UNID ";
 		if (version > 0) {
 			sql += " AND DLV_VER = " + version;
 		} else {
@@ -869,8 +1019,8 @@ public class EwaWfMain {
 		}
 		DTTable tbDlv = DTTable.getJdbcTable(sql, "", rv);
 		if (!tbDlv.isOk() || tbDlv.getCount() == 0) {
-			String ss = "未发现当前的流程版本《" + rv.getString("WF_ID") + "》";
-			System.err.println(ss);
+			String ss = "未发现当前的流程版本《" + wfId + "》";
+			LOGGER.error(ss);
 
 			throw new Exception(ss);
 		}
