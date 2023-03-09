@@ -112,7 +112,7 @@ public class ServletWorkflow extends HttpServlet {
 			try {
 				String wfId = rv.getString("WF_ID");
 				main.initDlv(wfId, rv);
-				main.doPost(rv);
+				main.doPost();
 				obj.put("RST", true);
 				s = obj.toString();
 			} catch (Exception e) {
