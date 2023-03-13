@@ -223,7 +223,7 @@ public class RequestValue implements Cloneable {
 	private boolean jsonBodyParameters;
 
 	private HtmlCreator htmlCreator;
-	
+
 	public RequestValue() {
 		initSysParameters();
 	}
@@ -413,7 +413,9 @@ public class RequestValue implements Cloneable {
 	/**
 	 * 获取其它值
 	 * 
-	 * @param name xxxx.HASH 参数xxxx的 hashCode <br>
+	 * @param name xxxx.QUERY 从query中获取参数xxxx <br>
+	 *             xxxx.FORM 从form中获取参数xxxx <br>
+	 *             xxxx.HASH 参数xxxx的 hashCode <br>
 	 *             xxxx.MD5 参数xxxx的md5值 <br>
 	 *             xxxx.SHA1 参数xxxx的sha1值 <br>
 	 *             xxxx.SHA256 参数xxxx的sha256值 <br>
@@ -432,6 +434,14 @@ public class RequestValue implements Cloneable {
 
 		String tag = name.substring(lastDot + 1);
 		String name2 = name1.substring(0, lastDot);
+		if (tag.equalsIgnoreCase("QUERY") || tag.equalsIgnoreCase("FROM")) {
+			if (tag.equalsIgnoreCase("QUERY")) {
+				v = this.getPageValues().getQueryValue(name2);
+			} else if (tag.equalsIgnoreCase("SHA256")) {
+				v = this.getPageValues().getFormValue(name2);
+			}
+			return v;
+		}
 		PageValue pv = this._ReqValues.getPageValue(name2);
 		if (pv == null || pv.getValue() == null) {
 			return null;
@@ -470,6 +480,7 @@ public class RequestValue implements Cloneable {
 			} catch (Exception err) {
 				v = err.getMessage();
 			}
+
 		} else if (pv.getValue() instanceof org.json.JSONObject) {
 			org.json.JSONObject json = (org.json.JSONObject) pv.getValue();
 			if (json.has(tag)) {
