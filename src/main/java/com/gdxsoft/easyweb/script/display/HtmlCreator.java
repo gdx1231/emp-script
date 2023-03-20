@@ -598,7 +598,7 @@ public class HtmlCreator {
 				this._Acl2 = (IAcl2) o;
 				this._Acl2.setXmlName(this._UserConfig.getXmlName());
 				this._Acl2.setItemName(this._UserConfig.getItemName());
-				this._Acl.setRequestValue(this.getRequestValue());
+				this._Acl2.setRequestValue(this.getRequestValue());
 				this._Acl2.setHtmlCreator(this);
 			}
 			_DebugFrames.addDebug(this, "INIT", "加载了权限控制(" + o.getClass().getName() + ")");
@@ -958,7 +958,7 @@ public class HtmlCreator {
 
 				if (returnValue != null && returnValue.equals("[NOT RUN]")) {
 					if (_SysParas.isAjaxCall()) {
-						this._PageHtml = "alert(\"" + this._Acl2.getNotRunTitle() + "\");";
+						this._PageHtml = "DENY";
 					} else {
 						this._PageHtml = "<h1>" + this._Acl2.getNotRunTitle() + "</h1>";
 					}
