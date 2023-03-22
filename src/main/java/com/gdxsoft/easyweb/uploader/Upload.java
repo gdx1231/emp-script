@@ -381,11 +381,10 @@ public class Upload {
 	}
 
 	/**
-	 * 处理文件上传
-	 * 
+	 * 替换上传路径的参数
 	 * @throws Exception
 	 */
-	public String upload() throws Exception {
+	public void replaceUploadPathParameters() throws Exception {
 		if (_uploadDir == null) {
 			throw new Exception("The upload dir not defined ");
 		}
@@ -401,6 +400,15 @@ public class Upload {
 		}
 		this._uploadRealDir = this._Rv.replaceParameters(_uploadRealDir);
 		UFile.buildPaths(this._uploadRealDir);
+	}
+	
+	/**
+	 * 处理文件上传
+	 * 
+	 * @throws Exception
+	 */
+	public String upload() throws Exception {
+		 this.replaceUploadPathParameters();
 		
 		int m = 0;
 		if (this._UploadItems != null) { // 处理文件上传

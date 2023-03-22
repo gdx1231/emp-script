@@ -3437,20 +3437,32 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				</DescriptionSet>
 			</XGroupValue>
 			<XGroupValue Name="Format" Default="0"
-				Values=", Date, ShortDate, Time,ShortTime, DateTime, DateShortTime
+				Values=", Date, ShortDate, Time, ShortTime, DateTime, DateShortTime
 				, ShortDateTime, Week, Age, Int, Money,  Fixed2, Percent, LeastMoney, LeastDecimal
 				, ChineseMoney
+				, date_zh, date_zh1
+				, DateShortTime_zh,DateShortTime_zh1
+				, DateTime_zh, DateTime_zh1
+				, ShortTime_zh, ShortTime_zh1, Time_zh, Time_zh1
 				 ">
 				<DescriptionSet>
 					<Set Lang="zhcn"
 						Info=",日期,短日期,时间,短时间,日期和时间,日期和短时间
 						,短日期和时间,周几,年龄, 整型,货币,保留2位小数,百分比,最短货币(千位分隔),最短小数
 						, 中文大写货币
+						, 中文日期(2003年09月01日), 中文日期1(2003年9月1日)
+						, 中文日期短时间(2003年09月01日 09点07分), 中文日期1(2003年9月1日 9点7分)
+						, 中文日期时间(2003年09月01日 09点07分00秒), 中文日期时间1(2003年9月1日 9点7分0秒)
+						, 中文短时间(09点07分), 中文短时间1(9点7分), 中文时间(09点07分00秒), 中文时间1(9点7分0秒)
 						 " />
 					<Set Lang="enus"
 						Info=", Date, ShortDate, Time,ShortTime, DateTime, DateShortTime
 						, ShortDateTime, DayName, Age, Int, Money, Fixed2, Percent, LeastMoney, LeastDecimal
 						, Chinese Moeny
+						, 中文日期(2003年09月01日), 中文日期1(2003年9月1日)
+						, 中文日期短时间(2003年09月01日 09点07分), 中文日期1(2003年9月1日 9点7分)
+						, 中文日期时间(2003年09月01日 09点07分00秒), 中文日期时间1(2003年9月1日 9点7分0秒)
+						, 中文短时间(09点07分), 中文短时间1(9点7分), 中文时间(09点07分00秒), 中文时间1(9点7分0秒)
 						 " />
 				</DescriptionSet>
 			</XGroupValue>
