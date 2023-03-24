@@ -184,11 +184,11 @@ public class EwaWfMain {
 
 		// 更新业务表的状态
 		String sqlMainStatus = this.createUpdateTaskStatus(rowApp, cnn, taskPks);
-		this.rv.addOrUpdateValue(WF_REF_TABLE , this._Wf.getWfId()); //WF_REF_TABLE
+		this.rv.addOrUpdateValue(WF_REF_TABLE, this._Wf.getWfId()); // WF_REF_TABLE
 		this.rv.addOrUpdateValue(UNIT_CUR_ID, curUnit);
 		this.rv.addOrUpdateValue(UNIT_NEXT_ID, nextUnit);
 		this.rv.addOrUpdateValue(WF_REF_ID, taskPks);
-		
+
 		// 事物开始
 		cnn.transBegin();
 		try {
@@ -382,23 +382,73 @@ public class EwaWfMain {
 		boolean isCanRun = false;
 		isCanRun = this.checkIsCanRun1(unitCur.getWfUnitAdm(), unitCur.getWfUnitAdmLst(), unitCur.getWfUnitSelfDept(),
 				startAdmin, cnn);
-		cnn.close();
-		if (!isCanRun) {
-			StringBuilder err1 = new StringBuilder();
-			err1.append("审批权限不对：WfUnitAdm = ");
-			err1.append(unitCur.getWfUnitAdm());
-			err1.append(", WfUnitAdmLst = ");
-			err1.append(unitCur.getWfUnitAdmLst());
-			err1.append(", WfUnitSelfDept =");
-			err1.append(unitCur.getWfUnitSelfDept());
-			err1.append(", startAdmin =");
-			err1.append(startAdmin);
-			String msg = err1.toString();
 
-			LOGGER.error(msg);
-
-			throw new Exception(msg);
+		if (isCanRun) {
+			cnn.close();
+			return;
 		}
+
+		StringBuilder err1 = new StringBuilder();
+		err1.append("审批权限不对：");
+		if ("WF_ADM_POST".equalsIgnoreCase(unitCur.getWfUnitAdm())) {
+			String sqlPost = "select dep_pos_id, dep_pos_name, dep_pos_name_en from adm_r_dept_post where dep_pos_id in  ("
+					+ unitCur.getWfUnitAdmLst() + ")";
+
+			DTTable tbPost = DTTable.getJdbcTable(sqlPost, cnn);
+			if (tbPost.getCount() == 0) {
+				err1.append("<br>没有岗位数据，其定义为: (").append(unitCur.getWfUnitAdmLst()).append(")");
+			} else {
+				String allowPosts = tbPost.joinIds("dep_pos_name", false);
+				String posts = tbPost.joinIds("dep_pos_id", false);
+
+				// 岗位关联的用户
+				String sqlAdms = "select distinct  b.ADM_NAME  from adm_r_udp a \n"
+						+ "inner join adm_user b on a.ADM_ID = b.ADM_ID and ADM_USR_STA_TAG='OK'"
+						+ " and a.dep_pos_id in (" + posts + ")";
+				DTTable tbAdms = DTTable.getJdbcTable(sqlAdms, cnn);
+				String allowAdms = tbAdms.joinIds("adm_name", false);
+				err1.append("<br>应为岗位：").append(allowPosts).append("<br>用户为：").append(allowAdms);
+			}
+
+		} else if ("WF_ADM_POST".equalsIgnoreCase(unitCur.getWfUnitAdm())) {
+			String sqlAdms = "select adm_id, adm_name from adm_user where sup_id=@g_sup_id and adm_id in ("
+					+ unitCur.getWfUnitAdmLst() + ")";
+			DTTable tbAdms = DTTable.getJdbcTable(sqlAdms, cnn);
+			String allowAdms = tbAdms.joinIds("adm_name", false);
+			err1.append("<br>应为用户：").append(allowAdms);
+		} else if ("WF_ADM_DEPT".equalsIgnoreCase(unitCur.getWfUnitAdm())) {
+			String sqlDept = "select dep_id, dep_name from adm_dept where sup_id=@g_sup_id and dep_id in ("
+					+ unitCur.getWfUnitAdmLst() + ")";
+			DTTable tbDept = DTTable.getJdbcTable(sqlDept, cnn);
+			String allowDept = tbDept.joinIds("adm_name", false);
+			err1.append("<br>应为部门：").append(allowDept);
+		} else if ("WF_ADM_START".equalsIgnoreCase(unitCur.getWfUnitAdm())) {
+			// 启动者
+			String sqlAdms = "select adm_id, adm_name from adm_user where sup_id=@g_sup_id and adm_id=" + startAdmin;
+			DTTable tbAdms = DTTable.getJdbcTable(sqlAdms, cnn);
+			String allowAdms = tbAdms.joinIds("adm_name", false);
+			err1.append("<br>应为启动者：").append(allowAdms);
+		} else if ("WF_ADM_MANAGER".equalsIgnoreCase(unitCur.getWfUnitAdm())) {
+			err1.append("<br>应为部门经理");
+		}
+		if ("Y".equalsIgnoreCase(unitCur.getWfUnitSelfDept())) {
+			err1.append("<br>同时须是本部门");
+		}
+		cnn.close();
+
+//		err1.append("审批权限不对：WfUnitAdm = ");
+//		err1.append(unitCur.getWfUnitAdm());
+//		err1.append(", WfUnitAdmLst = ");
+//		err1.append(unitCur.getWfUnitAdmLst());
+//		err1.append(", WfUnitSelfDept =");
+//		err1.append(unitCur.getWfUnitSelfDept());
+//		err1.append(", startAdmin =");
+//		err1.append(startAdmin);
+		String msg = err1.toString();
+
+		LOGGER.error(msg);
+
+		throw new Exception(msg);
 	}
 
 	/**
@@ -576,12 +626,13 @@ public class EwaWfMain {
 			int inc = 1;
 			// 循环检查返回表，如果有数据表示有错。
 			for (int m = 0; m < al.size(); m++) {
-				if (al.get(m).getCount() > 0) {
-					String rst = al.get(m).getCell(0, 0).toString();
-					if (rst == null) {
-						rst = "NULL";
+				DTTable tb = al.get(m);
+				for (int k = 0; k < tb.getCount(); k++) {
+					String err = tb.getCell(k, 0).toString();
+					if (err == null) {
+						err = "NULL";
 					}
-					sb.a("<br>" + inc + ". " + rst);
+					sb.a("<br>" + inc + ". " + err);
 					inc++;
 				}
 			}
