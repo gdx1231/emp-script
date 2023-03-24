@@ -167,7 +167,8 @@ public class ItemValues {
 					// 可能没有 where条件
 				}
 			}
-			if (this.getRequestValue().getString(FrameParameters.EWA_R) == null && sql.toLowerCase().indexOf("bas_tag") > 0) { // bas_tag
+			if (this.getRequestValue().getString(FrameParameters.EWA_R) == null
+					&& sql.toLowerCase().indexOf("bas_tag") > 0) { // bas_tag
 				try {
 					dt = DTTable.getCachedTable(sql, 100, this.getDataConn());
 				} catch (IOException e) {
@@ -327,7 +328,7 @@ public class ItemValues {
 	 * @param numberScale 百/千/万/十万/百万/千万
 	 * @return
 	 */
-	public Object calcNumberScale(Object ori,  BigDecimal numberScale) {
+	public Object calcNumberScale(Object ori, BigDecimal numberScale) {
 		if (ori == null || numberScale.longValue() == 1) {
 			return ori;
 		}
@@ -537,6 +538,7 @@ public class ItemValues {
 			return s1;
 		MListStr a = Utils.getParameters(s1, "@");
 		MStr sb = new MStr(s1);
+		
 		for (int i = 0; i < a.size(); i++) {
 			String name = a.get(i);
 			String val = null;
@@ -545,10 +547,8 @@ public class ItemValues {
 			} catch (Exception e) {
 				val = e.getLocalizedMessage();
 			}
+			 
 			val = Utils.textToJscript(val);
-			if (val == null) {
-				continue;
-			}
 			String find = "@" + name;
 			sb.replace(find, val);
 		}

@@ -188,6 +188,18 @@ public class SysParameters {
 			frameUnid = prefix + frameUnid;
 		}
 		rv.addValue("SYS_FRAME_UNID", frameUnid);
+		
+		String ewafos = "EWA.F.FOS[\"" + frameUnid + "\"]";
+		String ewafos1 = "EWA.F.FOS['" + frameUnid + "']";
+		String ewafos2 = "EWA.F.FOS[&quot;" + frameUnid + "&quot;]";
+		rv.addValue("EWA.FOS", ewafos);
+		rv.addValue("EWA.FOS1", ewafos1);
+		rv.addValue("EWA.FOS2", ewafos2);
+		
+		String ewaCssLf = "#EWA_LF_"+frameUnid;
+		String ewaCssFrame = "#f_"+frameUnid;
+		rv.addValue("EWA.CSS.LF", ewaCssLf);
+		rv.addValue("EWA.CSS.F", ewaCssFrame);
 		setFrameUnid(frameUnid);
 	}
 
