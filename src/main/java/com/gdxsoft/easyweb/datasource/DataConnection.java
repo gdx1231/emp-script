@@ -72,6 +72,8 @@ public class DataConnection {
 
 	private EwaSqlFunctions ewaSqlFunctions;
 
+	// 批处理更新返回的表
+	private List<DTTable> updateBatchTables;
 	/**
 	 * 用户和系统的时差(分钟)
 	 * 
@@ -1125,6 +1127,9 @@ public class DataConnection {
 	 */
 	public int executeUpdateBatch(List<String> sqls) {
 		int runInc = 0;
+		
+		this.updateBatchTables = new ArrayList<>();
+		
 		for (int i = 0; i < sqls.size(); i++) {
 			String sql = sqls.get(i);
 			if (sql == null) {
@@ -1147,6 +1152,8 @@ public class DataConnection {
 				tb.initData(this.getLastResult().getResultSet());
 				try {
 					this.getLastResult().getResultSet().close();
+					
+					updateBatchTables.add(tb);
 				} catch (SQLException e) {
 					LOGGER.warn(sql, e.getMessage());
 				}
@@ -1180,7 +1187,7 @@ public class DataConnection {
 	}
 
 	/**
-	 * 批处理执行sql语句，sql语句用 ; 分割
+	 * 批处理执行sql语句，sql语句用 ; 分割，getUpdateBatchTables获取执行国产中的所有表
 	 * 
 	 * @param sqls sql语句用 ; 分割
 	 * @return -1 有错误
@@ -2786,5 +2793,13 @@ public class DataConnection {
 	 */
 	public void setDataHelper(DataHelper dataHelper) {
 		this._ds = dataHelper;
+	}
+
+	/**
+	 * executeUpdateBatch 批处理更新后产生的所有表
+	 * @return the updateBatchTables
+	 */
+	public List<DTTable> getUpdateBatchTables() {
+		return updateBatchTables;
 	}
 }

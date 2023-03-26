@@ -83,6 +83,10 @@ public class RequestValue implements Cloneable {
 	 */
 	public static final String EWAdotDATE = "EWA.DATE";
 	/**
+	 * 实例每次创建的当前季度
+	 */
+	public static final String EWAdotDATEdotSEASON = "EWA.DATE.SEASON";
+	/**
 	 * 实例每次创建的当前时间的日
 	 */
 	public static final String EWAdotDATEdotDAY = "EWA.DATE.DAY";
@@ -323,6 +327,20 @@ public class RequestValue implements Cloneable {
 
 		// month
 		int m = cal.get(Calendar.MONTH) + 1;
+
+		int season = 0;
+		if (m <= 3) {
+			season = 1;
+		} else if (m <= 6) {
+			season = 2;
+		} else if (m <= 9) {
+			season = 3;
+		} else {
+			season = 4;
+		}
+		// 季度
+		this._ReqValues.addOrUpdateValue(EWAdotDATEdotSEASON, season, PageValueTag.SYSTEM);
+
 		String mstr = m < 10 ? "0" + m : m + "";
 		this._ReqValues.addOrUpdateValue(EWAdotDATEdotMONTH, mstr, PageValueTag.SYSTEM);
 
