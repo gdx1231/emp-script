@@ -665,8 +665,12 @@ public class EwaWfMain {
 				if (tb != null && tb.isOk()) {
 					al.add(tb);
 				}
-				if (tb.getCount() == 0) {
-					conn.getRequestValue().addValues(tb);
+				if (tb.getCount() == 1) {
+					if(tb.getColumns().testName(WF_REF_ID)) {//SYS_STA_RID
+						// 避免和参数"SYS_STA_RID"冲突
+					} else {
+						conn.getRequestValue().addValues(tb);
+					}
 				}
 			} else {
 				conn.executeUpdate(s);
