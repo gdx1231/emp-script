@@ -1,7 +1,8 @@
 package com.gdxsoft.easyweb.script.display;
 
 import java.io.IOException;
-import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.gdxsoft.easyweb.cache.CachedValue;
 import com.gdxsoft.easyweb.cache.CachedValueManager;
@@ -42,6 +43,8 @@ public class ItemValues {
 	private Object _LastValue;
 	private MList _JSONObjects;
 	private MTable _RefTables;
+
+	private Map<UserXItem, ItemFormat> formatMap = new HashMap<>();
 
 	/**
 	 * 获取上次提取的数据
@@ -223,122 +226,60 @@ public class ItemValues {
 		return null;
 	}
 
+	/**
+	 * 获取Format对象
+	 * @param userXItem
+	 * @return
+	 */
+	public ItemFormat getItemFormat(UserXItem userXItem) {
+		if (this.formatMap.containsKey(userXItem)) {
+			return this.formatMap.get(userXItem);
+		}
+
+		ItemFormat f = new ItemFormat();
+		// 用户和系统的时区差值
+		int timeDiffMinutes = _HtmlClass.getSysParas().getTimeDiffMinutes();
+		f.init(userXItem, timeDiffMinutes);
+
+		this.formatMap.put(userXItem, f);
+		return f;
+	}
+
 	public String getValue(UserXItem userXItem) throws Exception {
 		this._LastValue = null;
 
-		String name = userXItem.getName();
-		String dataFieldName = name;
-		String dataType = "string";
-		String format = "";
-		BigDecimal numberScale = new BigDecimal("1");
-		if (userXItem.testName("DataItem")) {
-			UserXItemValues us = userXItem.getItem("DataItem");
-			if (us.count() > 0) {
-				UserXItemValue u = us.getItem(0);
-				if (u.testName("DataField") && u.getItem("DataField").trim().length() > 0) {
-					dataFieldName = u.getItem("DataField");
-				}
-				if (u.testName("DataType")) {
-					dataType = u.getItem("DataType");
-				}
-				if (u.testName("Format")) {
-					format = u.getItem("Format");
-				}
-				if (u.testName("NumberScale")) {
-					String scale = u.getItem("NumberScale");
-					if (scale.trim().length() > 0) {
-						try {
-							numberScale = new BigDecimal(scale);
-						} catch (Exception err) {
+		ItemFormat f = this.getItemFormat(userXItem);
 
-						}
-					}
-				}
-			}
-		}
-
-		String val = this.getCacheValue(name, dataFieldName);
+		String val = this.getCacheValue(f.getName(), f.getDataFieldName());
 		if (val != null)
 			return val;
 
-		// 是否是处理为日期
-		boolean isDate = format != null
-				&& (format.toUpperCase().indexOf("DATE") >= 0 || format.toUpperCase().indexOf("TIME") >= 0);
-
-		// 用户和系统的时区差值
-		int timeDiffMinutes = _HtmlClass.getSysParas().getTimeDiffMinutes();
+		String lang = this._HtmlClass.getSysParas().getLang();
 
 		// 来源数据库的数据
-		Object o = this.getTableValue(dataFieldName, dataType);
+		Object o = this.getTableValue(f.getDataFieldName(), f.getDataType());
 		if (o != null) {
-			if (isDate && timeDiffMinutes != 0) {
-				Object ot = Utils.getTimeDiffValue(o, timeDiffMinutes);
-				this._LastValue = ot;
-			} else {
-				if (numberScale.longValue() > 1) {
-					o = calcNumberScale(o, numberScale);
-				}
-
-				this._LastValue = o;
-			}
-
-			return HtmlUtils.formatValue(format, this._LastValue, this._HtmlClass.getSysParas().getLang());
+			String v = f.formatValue(o, lang);
+			this._LastValue = v;
+			return v;
 		}
 
 		// 来源类的数据
-		val = this.getClassValue(name, dataFieldName);
+		val = this.getClassValue(f.getName(), f.getDataFieldName());
 		if (val != null) {
-			if (isDate && timeDiffMinutes != 0) {
-				Object ot = Utils.getTimeDiffValue(val, timeDiffMinutes);
-				this._LastValue = ot;
-			} else {
-				if (numberScale.longValue() > 1) {
-					o = calcNumberScale(val, numberScale);
-					this._LastValue = o;
-				} else {
-					this._LastValue = val;
-				}
-			}
-			return HtmlUtils.formatValue(format, this._LastValue, this._HtmlClass.getSysParas().getLang());
+			String v = f.formatValue(val, lang);
+			this._LastValue = v;
+			return v;
 		}
 
 		// 来源RequestValue的数据
-		val = this.getRvValue(name, dataFieldName);
+		val = this.getRvValue(f.getName(), f.getDataFieldName());
 		if (val != null) {
-			if (isDate && timeDiffMinutes != 0) {
-				Object ot = Utils.getTimeDiffValue(val, timeDiffMinutes);
-				this._LastValue = ot;
-			} else {
-				if (numberScale.longValue() > 1) {
-					o = calcNumberScale(val, numberScale);
-					this._LastValue = o;
-				} else {
-					this._LastValue = val;
-				}
-			}
-			return HtmlUtils.formatValue(format, this._LastValue, this._HtmlClass.getSysParas().getLang());
+			String v = f.formatValue(val, lang);
+			this._LastValue = v;
+			return v;
 		}
 		return null;
-	}
-
-	/**
-	 * 计算数字除以比例后的数值
-	 * 
-	 * @param ori
-	 * @param numberScale 百/千/万/十万/百万/千万
-	 * @return
-	 */
-	public Object calcNumberScale(Object ori, BigDecimal numberScale) {
-		if (ori == null || numberScale.longValue() == 1) {
-			return ori;
-		}
-		try {
-			BigDecimal v1 = new BigDecimal(ori.toString());
-			v1 = v1.divide(numberScale);
-			return v1.doubleValue();
-		} catch (Exception err) {
-			return ori;
-		}
 	}
 
 	public Object getTableValue(UserXItem userXItem) throws Exception {
@@ -538,7 +479,7 @@ public class ItemValues {
 			return s1;
 		MListStr a = Utils.getParameters(s1, "@");
 		MStr sb = new MStr(s1);
-		
+
 		for (int i = 0; i < a.size(); i++) {
 			String name = a.get(i);
 			String val = null;
@@ -547,7 +488,7 @@ public class ItemValues {
 			} catch (Exception e) {
 				val = e.getLocalizedMessage();
 			}
-			 
+
 			val = Utils.textToJscript(val);
 			String find = "@" + name;
 			sb.replace(find, val);

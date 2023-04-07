@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.data.DTCell;
 import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.data.export.TxtExport;
@@ -29,6 +30,7 @@ import com.gdxsoft.easyweb.datasource.SqlPart;
 import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
+import com.gdxsoft.easyweb.script.display.ItemFormat;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
@@ -351,7 +353,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 			if (super.getHtmlClass().getSysParas().isHiddenColumn(uxi.getName())) {
 				continue;
 			}
-			String name = uxi.getName().toUpperCase();
+			String name = uxi.getName().toUpperCase().trim();
 			mapOrder.put(name, order);
 			map.put(name, uxi);
 			order++;
@@ -361,19 +363,20 @@ public class ActionListFrame extends ActionBase implements IAction {
 		int total_export_fields = 0;
 		for (int i = 0; i < tb.getColumns().getCount(); i++) {
 			DTColumn col = tb.getColumns().getColumn(i);
-			if (col.getName() != null && map.containsKey(col.getName().toUpperCase())) {
-				String name = col.getName().toUpperCase();
-				UserXItem uxi = map.get(name);
-				String des = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Info", lang);// 描述
-				// 设置描述
-				col.setDescription(des);
-				// 设置排序
-				col.setOrder(mapOrder.get(name));
-				total_export_fields++;
-			} else {
-				// 去掉未显示的内容
+			String name = col.getName() == null ? null : col.getName().toUpperCase();
+			if (name == null || !map.containsKey(name)) {
 				col.setHidden(true);
+				continue;
 			}
+			UserXItem uxi = map.get(name);
+			String des = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Info", lang);// 描述
+			// 设置描述
+			col.setDescription(des);
+			// 设置排序
+			col.setOrder(mapOrder.get(name));
+			total_export_fields++;
+
+			this.setFormatValueOfTable(tb, i, uxi);
 		}
 
 		// 如果导出的字段数量小于 2 个，则恢复所有字段，避免因自定义导出语句和配置定义完全不一致
@@ -383,8 +386,46 @@ public class ActionListFrame extends ActionBase implements IAction {
 				col.setHidden(false);
 			}
 		}
-
+		tb.getAttsTable().add("mapFields", map);
 		return tb;
+	}
+
+	/**
+	 * 设置格式化后的字段值
+	 * 
+	 * @param tb       表
+	 * @param colIndex 字段位置
+	 * @param uxi      配置信息
+	 */
+	private void setFormatValueOfTable(DTTable tb, int colIndex, UserXItem uxi) {
+		if (!uxi.testName("DataItem")) {
+			return;
+		}
+		String lang = super.getHtmlClass().getSysParas().getLang();
+		// 用户和系统的时区差值
+		int timeDiffMinutes = super.getHtmlClass().getSysParas().getTimeDiffMinutes();
+
+		ItemFormat itemFormat = new ItemFormat();
+		itemFormat.init(uxi, timeDiffMinutes);
+		if (itemFormat.isDate()) {
+			// 不处理日期
+			return;
+		}
+		
+		for (int i = 0; i < tb.getCount(); i++) {
+			DTCell c = tb.getRow(i).getCell(colIndex);
+			Object ori = c.getValue();
+			c.setAttachement(ori);
+			if (ori == null) {
+				continue;
+			}
+
+			try {
+				Object o = itemFormat.formatValue(c.getValue(), lang);
+				c.setValue(o);
+			} catch (Exception e) {
+			}
+		}
 	}
 
 	/**

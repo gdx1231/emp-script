@@ -134,7 +134,9 @@ public class ExcelExport implements IExport {
 			throws RowsExceededException, WriteException, Exception {
 		if (v1 == null)
 			return;
-		if (type.indexOf("NUM") >= 0 || type.indexOf("INT") >= 0 || type.equalsIgnoreCase("MONEY")) {
+		if (type.indexOf("NUM") >= 0 || type.indexOf("INT") >= 0 || type.equalsIgnoreCase("double")
+				|| type.equalsIgnoreCase("float") || type.equalsIgnoreCase("DECIMAL")
+				|| type.equalsIgnoreCase("MONEY")) {
 			String ori_val = v1.toString();
 			double ff = Double.parseDouble(ori_val);
 			jxl.write.Number num = new jxl.write.Number(colIndex, rowIndex, ff);
