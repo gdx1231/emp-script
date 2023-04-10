@@ -228,6 +228,7 @@ public class ItemValues {
 
 	/**
 	 * 获取Format对象
+	 * 
 	 * @param userXItem
 	 * @return
 	 */
@@ -239,8 +240,11 @@ public class ItemValues {
 		ItemFormat f = new ItemFormat();
 		// 用户和系统的时区差值
 		int timeDiffMinutes = _HtmlClass.getSysParas().getTimeDiffMinutes();
+		String lang = _HtmlClass.getSysParas().getLang();
+		f.setLang(lang);
 		f.init(userXItem, timeDiffMinutes);
-
+		f.setItemValues(this);
+		
 		this.formatMap.put(userXItem, f);
 		return f;
 	}
@@ -254,12 +258,10 @@ public class ItemValues {
 		if (val != null)
 			return val;
 
-		String lang = this._HtmlClass.getSysParas().getLang();
-
 		// 来源数据库的数据
 		Object o = this.getTableValue(f.getDataFieldName(), f.getDataType());
 		if (o != null) {
-			String v = f.formatValue(o, lang);
+			String v = f.formatValue(o);
 			this._LastValue = v;
 			return v;
 		}
@@ -267,7 +269,7 @@ public class ItemValues {
 		// 来源类的数据
 		val = this.getClassValue(f.getName(), f.getDataFieldName());
 		if (val != null) {
-			String v = f.formatValue(val, lang);
+			String v = f.formatValue(val);
 			this._LastValue = v;
 			return v;
 		}
@@ -275,7 +277,7 @@ public class ItemValues {
 		// 来源RequestValue的数据
 		val = this.getRvValue(f.getName(), f.getDataFieldName());
 		if (val != null) {
-			String v = f.formatValue(val, lang);
+			String v = f.formatValue(val);
 			this._LastValue = v;
 			return v;
 		}

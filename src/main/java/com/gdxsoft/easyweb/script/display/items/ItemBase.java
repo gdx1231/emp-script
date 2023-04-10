@@ -1,20 +1,22 @@
 package com.gdxsoft.easyweb.script.display.items;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.data.DTCell;
 import com.gdxsoft.easyweb.data.DTRow;
-import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.global.EwaEvents;
 import com.gdxsoft.easyweb.script.InitValues;
 import com.gdxsoft.easyweb.script.display.HtmlClass;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
+import com.gdxsoft.easyweb.script.display.ItemFormat;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
 import com.gdxsoft.easyweb.script.template.XItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
@@ -26,12 +28,12 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class ItemBase implements IItem {
 	private static Logger LOGGER = LoggerFactory.getLogger(ItemBase.class);
-	
+
 	/**
 	 * 定义数据类型的 Item tag=dataType
 	 */
 	public final static String TAG_DATA_TYPE = "dataType";
-	
+
 	/**
 	 * 属性表达式保存的名称，用于Frame的removeAttrByLogic
 	 */
@@ -290,80 +292,35 @@ public class ItemBase implements IItem {
 		if (val == null) {
 			return val;
 		}
-		if (!_UserXItem.testName("DataRef")) {
-			this._UserXItem.setUsingRef(false);
+		ItemFormat f = this._HtmlClass.getItemValues().getItemFormat(_UserXItem);
+		if (!f.isRef()) {
 			return val;
 		}
-		try {
-			if (_UserXItem.getItem("DataRef").count() == 0) {
-				this._UserXItem.setUsingRef(false);
-				return val;
-			}
-			UserXItemValue vs = _UserXItem.getItem("DataRef").getItem(0);
-			String refSql = vs.getItem("RefSql");
-			String refKey = vs.getItem("RefKey");
-			String refShow = vs.getItem("RefShow");
+		List<Pair<String, DTRow>> al = f.getRefRows(val);
 
-			String refShowType = vs.getItem("RefShowType");
-			String refShowStype = vs.getItem("RefShowStyle");
-			if (refSql == null || refKey == null || refShow == null || refSql.trim().length() == 0
-					|| refKey.trim().length() == 0 || refShow.trim().length() == 0) {
-				this._UserXItem.setUsingRef(false);
-				return val;
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < al.size(); i++) {
+			Pair<String, DTRow> item = al.get(i);
+			if (i > 0) {
+				sb.append(", ");
 			}
-			if (this._UserXItem.getUsingRef() == null) {
-				this._UserXItem.setUsingRef(true);
-			}
+			String html;
+			DTRow row = item.getValue();
+			String key = item.getKey();
 
-			// 是否多个ID的匹配，例如：CAMP_OPT_TSG,CAMP_OPT_LQC,CAMP_OPT_ZQC
-			boolean refShowMulti = "yes".equals(vs.checkItemExists("RefMulti") ? vs.getItem("RefMulti") : "");
-
-			String[] refKeys = new String[1];
-			refKeys[0] = refKey;
-			DTTable dt = this._HtmlClass.getItemValues().getRefTable(refSql, refKeys);
-			if (dt == null) {
-				return val;
+			if (row == null) {
+				sb.append(key);
+				continue;
 			}
-
-			if (this._HtmlClass.getSysParas().getLang().equalsIgnoreCase("enus")) {
-				if (dt.getColumns().testName(refShow + "_en")) {
-					refShow += "_en";
-				} else if (dt.getColumns().testName(refShow + "en")) {
-					refShow += "en";
-				} else if (dt.getColumns().testName(refShow + "_enus")) {
-					refShow += "_enus";
-				} else if (dt.getColumns().testName(refShow + "enus")) {
-					refShow += "enus";
-				}
+			try {
+				html = this.createRefHtml(row, f.getRefShowStyle(), f.getRefShow(),
+						f.getShowCellFieldName(row.getTable()), key);
+			} catch (Exception e) {
+				html = key;
 			}
-
-			if (!refShowMulti) { // 单个id匹配
-				DTRow row = dt.getRowByKey(refKey, val);
-				return this.createRefHtml(row, refShowStype, refShowType, refShow, val);
-			}
-
-			// 多个ID的匹配， 例如 CAMP_OPT_TSG,CAMP_OPT_LQC,CAMP_OPT_ZQC
-			// 字符串分割字符，默认英文逗号
-			String splitChar = vs.checkItemExists("RefMultiSplit") ? vs.getItem("RefMultiSplit").trim() : ",";
-			if (splitChar.length() == 0) {
-				splitChar = ","; // 默认英文逗号
-			}
-			String[] vals = val.split(splitChar); // 正则表达式需要用户定义
-			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < vals.length; i++) {
-				String v = vals[i].trim();
-				DTRow row = dt.getRowByKey(refKey, v);
-				if (i > 0) {
-					sb.append(", ");
-				}
-				String html = this.createRefHtml(row, refShowStype, refShowType, refShow, v);
-				sb.append(html);
-			}
-			return sb.toString();
-
-		} catch (Exception e) {
-			return e.getMessage();
+			sb.append(html);
 		}
+		return sb.toString();
 
 	}
 
@@ -379,10 +336,10 @@ public class ItemBase implements IItem {
 		} else {
 			refVal = Utils.textToInputValue(refVal.trim());
 		}
-		
+
 		UserXItemValue vs = _UserXItem.getItem("Tag").getItem(0);
 		String tag = vs.getItem("Tag");
-		if("checkboxgrid".equalsIgnoreCase(tag) || "radiogrid".equalsIgnoreCase(tag)){
+		if ("checkboxgrid".equalsIgnoreCase(tag) || "radiogrid".equalsIgnoreCase(tag)) {
 			return refVal;
 		}
 		String st = refShowStype == null || refShowStype.trim().length() == 0 ? ""
@@ -407,53 +364,13 @@ public class ItemBase implements IItem {
 	}
 
 	private String createJsonRefValue(String val) {
-		if (!_UserXItem.testName("DataRef")) {
+		ItemFormat f = this._HtmlClass.getItemValues().getItemFormat(_UserXItem);
+		if (!f.isRef()) {
 			return val;
 		}
-		try {
-			if (_UserXItem.getItem("DataRef").count() == 0) {
-				return val;
-			}
-			UserXItemValue vs = _UserXItem.getItem("DataRef").getItem(0);
-			String refSql = vs.getItem("RefSql");
-			String refKey = vs.getItem("RefKey");
-			String refShow = vs.getItem("RefShow");
-			if (refSql == null || refKey == null || refShow == null || refSql.trim().length() == 0
-					|| refKey.trim().length() == 0 || refShow.trim().length() == 0) {
-				return val;
-			}
-			String[] refKeys = new String[1];
-			refKeys[0] = refKey;
-			DTTable dt = this._HtmlClass.getItemValues().getRefTable(refSql, refKeys);
-			if (dt == null) {
-				return val;
-			}
+		String refVal = f.getRefValue(val);
+		return val + "~!@`" + refVal;
 
-			DTRow row = dt.getRowByKey(refKey, val);
-			if (row == null) {
-				return val;
-			}
-
-			if (this._HtmlClass.getSysParas().getLang().equalsIgnoreCase("enus")) {
-				if (dt.getColumns().testName(refShow + "_en")) {
-					refShow += "_en";
-				} else if (dt.getColumns().testName(refShow + "en")) {
-					refShow += "en";
-				} else if (dt.getColumns().testName(refShow + "_enus")) {
-					refShow += "_enus";
-				} else if (dt.getColumns().testName(refShow + "enus")) {
-					refShow += "enus";
-				}
-			}
-
-			DTCell refValCell = row.getCell(refShow);
-			String refVal = refValCell == null ? "" : refValCell.getString();
-			refVal = refVal == null ? "" : refVal.trim();
-
-			return val + "~!@`" + refVal;
-		} catch (Exception e) {
-			return e.getMessage();
-		}
 	}
 
 	/**
@@ -876,13 +793,13 @@ public class ItemBase implements IItem {
 				v = v.replace("@", ItemBase.REP_AT_STR);
 			}
 			v = Utils.textToInputValue(v);
-			html.replace( "@" + key, v);
+			html.replace("@" + key, v);
 			// h1 = h1.replaceFirst("@" + key, Matcher.quoteReplacement(v));
 			paras.put(key, v);
-			
+
 			isOk = true;
 		}
-		if(!isOk) {
+		if (!isOk) {
 			return null;
 		}
 

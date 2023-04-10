@@ -401,17 +401,13 @@ public class ActionListFrame extends ActionBase implements IAction {
 		if (!uxi.testName("DataItem")) {
 			return;
 		}
-		String lang = super.getHtmlClass().getSysParas().getLang();
-		// 用户和系统的时区差值
-		int timeDiffMinutes = super.getHtmlClass().getSysParas().getTimeDiffMinutes();
+		ItemFormat itemFormat = super.getHtmlClass().getItemValues().getItemFormat(uxi);
 
-		ItemFormat itemFormat = new ItemFormat();
-		itemFormat.init(uxi, timeDiffMinutes);
 		if (itemFormat.isDate()) {
 			// 不处理日期
 			return;
 		}
-		
+
 		for (int i = 0; i < tb.getCount(); i++) {
 			DTCell c = tb.getRow(i).getCell(colIndex);
 			Object ori = c.getValue();
@@ -419,11 +415,15 @@ public class ActionListFrame extends ActionBase implements IAction {
 			if (ori == null) {
 				continue;
 			}
-
-			try {
-				Object o = itemFormat.formatValue(c.getValue(), lang);
+			if (itemFormat.isRef()) {
+				Object o = itemFormat.getRefValue(ori.toString());
 				c.setValue(o);
-			} catch (Exception e) {
+			} else {
+				try {
+					Object o = itemFormat.formatValue(c.getValue());
+					c.setValue(o);
+				} catch (Exception e) {
+				}
 			}
 		}
 	}
