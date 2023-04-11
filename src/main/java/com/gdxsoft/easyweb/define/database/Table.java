@@ -190,18 +190,18 @@ public class Table {
 		long t0 = System.currentTimeMillis();
 		this._Doc = parent.getOwnerDocument();
 		String sql = "SELECT * FROM " + this._Name + " WHERE " + where;
-		
+
 		MapFieldTypes maps;
 		maps = Maps.instance().getMapFieldTypes();
-		
+
 		Element e = this._Doc.createElement("Data");
 		this.writeTableAttritubes(e);
-		
+
 		String xmlData = UXml.asXml(e);
 		LOGGER.info("{}", xmlData);
-		
+
 		parent.appendChild(e);
-		
+
 		DataConnection conn = new DataConnection();
 		conn.setConfigName(_ConnectionConfigName);
 		HashMap<String, MapFieldType> map = maps.getTypes(conn.getDatabaseType());
@@ -511,13 +511,9 @@ public class Table {
 			LOGGER.error("{}", e.getMessage());
 			return;
 		}
-		if (!isView) { // 表
-			this.setSqlTable(ddl);
-			return;
-		}
-
+		 
 		// 视图替换数据库名称
-		if (this.replaceMetaDatabaseName != null) {
+		if (isView && this.replaceMetaDatabaseName != null) {
 			// 替换元数据库的前缀
 			// ddl = ddl.replace(replaceMetaDatabaseName, REPLACE_META_DATABASE_NAME);
 			if (isSqlServer) {
@@ -529,7 +525,7 @@ public class Table {
 				ddl = StringUtils.replaceIgnoreCase(ddl, replaceMetaDatabaseName, REPLACE_META_DATABASE_NAME);
 			}
 		}
-		if (this.replaceWorkDatabaseName != null) {
+		if (isView && this.replaceWorkDatabaseName != null) {
 			// 替换工作数据库前缀
 			// ddl = ddl.replace(replaceWorkDatabaseName, REPLACE_WORK_DATABASE_NAME);
 			if (isSqlServer) {
@@ -541,11 +537,27 @@ public class Table {
 				ddl = StringUtils.replaceIgnoreCase(ddl, replaceWorkDatabaseName, REPLACE_WORK_DATABASE_NAME);
 			}
 		}
-		if (isSqlServer) {
+		if (isView && isSqlServer) {
 			ddl = ddl.replace("[", "").replace("]", "").replace("dbo.", "");
-			ddl = StringUtils.replaceIgnoreCase(ddl, "CREATE VIEW", "CREATE VIEW " + REPLACE_WORK_DATABASE_NAME + ".",
-					1);
+			// ddl = StringUtils.replaceIgnoreCase(ddl, "CREATE VIEW", "CREATE VIEW " +
+			// REPLACE_WORK_DATABASE_NAME + ".",
+			// 1);
 		}
+
+		if (this._SchemaName.equalsIgnoreCase(this.replaceMetaDatabaseName)) {
+			if (isView) {
+				ddl = StringUtils.replaceIgnoreCase(ddl, " VIEW ", " VIEW " + REPLACE_META_DATABASE_NAME + ".", 1);
+			} else {
+				ddl = StringUtils.replaceIgnoreCase(ddl, " TABLE ", " TABLE " + REPLACE_META_DATABASE_NAME + ".", 1);
+			}
+		} else if (this._SchemaName.equalsIgnoreCase(this.replaceWorkDatabaseName)) {
+			if (isView) {
+				ddl = StringUtils.replaceIgnoreCase(ddl, " VIEW ", " VIEW " + REPLACE_WORK_DATABASE_NAME + ".", 1);
+			} else {
+				ddl = StringUtils.replaceIgnoreCase(ddl, " TABLE ", " TABLE " + REPLACE_WORK_DATABASE_NAME + ".", 1);
+			}
+		}
+
 		this.setSqlTable(ddl);
 
 	}
@@ -562,7 +574,7 @@ public class Table {
 		if (tb.getCount() == 0) {
 			return;
 		}
-
+		
 		try {
 			this._CatalogName = tb.getCell(0, "TABLE_CATALOG").toString();
 		} catch (Exception e) {
