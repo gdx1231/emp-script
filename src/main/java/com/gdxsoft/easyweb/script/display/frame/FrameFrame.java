@@ -1076,8 +1076,12 @@ public class FrameFrame extends FrameBase implements IFrame {
 		for (int i = 0; i < uc.getUserXItems().count(); i++) {
 			UserXItem uxi = uc.getUserXItems().getItem(i);
 			XItem xItem = HtmlUtils.getXItem(uxi);
+			
 			if (!(xItem.getName().equalsIgnoreCase("button") || xItem.getName().equalsIgnoreCase("submit"))) {
 				continue;
+			}
+			if (super.isHiddenField(uxi.getName())) {
+				continue; // 隐含字段
 			}
 			IItem item = super.getHtmlClass().getItem(uxi);
 			String s1 = item.createItemHtml();
