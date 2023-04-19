@@ -26,6 +26,7 @@ import com.gdxsoft.easyweb.utils.Utils;
 
 public class HtmlUtils {
 	private static Logger LOGGER = LoggerFactory.getLogger(HtmlUtils.class);
+
 	/**
 	 * 如果名称为空的话，根据值表达式，生成属性名称，例如：@USER_NAME = data-user-name<br>
 	 * name = "" and value = "" return null<br>
@@ -47,6 +48,7 @@ public class HtmlUtils {
 			return name;
 		}
 	}
+
 	/**
 	 * 处理签名数据，将imageBase64转换为二进制
 	 * 
@@ -73,31 +75,37 @@ public class HtmlUtils {
 			return false;
 		}
 		UserXItemValues uxv = uxi.getItem("signature");
-		// 保存路径
-		String signPath = uxv.getItem(0).getItem("SignPath");
-
+		String signPath = "";
+		if (uxv.count() > 0) {
+			// 保存路径
+			signPath = uxv.getItem(0).getItem("SignPath");
+		}
+		signPath = signPath.trim();
+		 
 		// data:image/jpeg;base64,
 		String metaData = imageBase64.substring(0, loc);
 		String ext = metaData.split("\\:")[1].split("\\;")[0].split("\\/")[1];
 		String base64 = imageBase64.substring(loc + 1);
-		String keyBuf = key + "_BIN";
-		String keyLength = key + "_LENGTH";
-		String keyExt = key + "_EXT";
+
 		byte[] buf = null;
 		String md5 = null;
 		try {
 			buf = UConvert.FromBase64String(base64);
 			md5 = Utils.md5(buf);
 			// 转成的二进制文件
+			String keyBuf = key + "_BIN";
 			PageValue pv = new PageValue(keyBuf, "binary", buf, buf.length);
 			pv.setPVTag(PageValueTag.SYSTEM);
 			rv.getPageValues().remove(keyBuf);
 			rv.addValue(pv);
 
 			// 增加数据的长度
+			String keyLength = key + "_LENGTH";
 			rv.getPageValues().remove(keyLength);
 			rv.addValue(keyLength, buf.length, PageValueTag.SYSTEM);
+
 			// 增加扩展名
+			String keyExt = key + "_EXT";
 			rv.getPageValues().remove(keyExt);
 			rv.addValue(keyExt, ext, PageValueTag.SYSTEM);
 
