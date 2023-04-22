@@ -134,11 +134,16 @@ public class ExcelExport implements IExport {
 			throws RowsExceededException, WriteException, Exception {
 		if (v1 == null)
 			return;
-		if (type.indexOf("NUM") >= 0 || type.indexOf("INT") >= 0 || type.equalsIgnoreCase("double")
+		if ("BIGINT".equals(type)) {
+			// 转为数值会损失精度，用字符串处理
+			Label lbl = new Label(colIndex, rowIndex, v1.toString());
+			this._Sheet.addCell(lbl);
+		} else if (type.indexOf("NUM") >= 0 || type.indexOf("INT") >= 0 || type.equalsIgnoreCase("double")
 				|| type.equalsIgnoreCase("float") || type.equalsIgnoreCase("DECIMAL")
 				|| type.equalsIgnoreCase("MONEY")) {
 			String ori_val = v1.toString();
 			double ff = Double.parseDouble(ori_val);
+
 			jxl.write.Number num = new jxl.write.Number(colIndex, rowIndex, ff);
 			this._Sheet.addCell(num);
 		} else if (type.indexOf("DATE") >= 0 || type.indexOf("TIME") >= 0) {
@@ -217,7 +222,7 @@ public class ExcelExport implements IExport {
 			}
 		});
 
-		this._Max = 5000;
+		// this._Max = 5000;
 		int writeRows = _Max;
 		int m = 1;
 		try {
@@ -265,7 +270,7 @@ public class ExcelExport implements IExport {
 				return writeRows;
 			}
 			// 因为第一行是标题，因此数据行+1
-			int rowIndex = m + 1;
+			int rowIndex = m + 1 - start;
 			for (int i = 0; i < listColumns.size(); i++) {
 				DTColumn col = listColumns.get(i);
 				String type = col.getTypeName().toUpperCase();
