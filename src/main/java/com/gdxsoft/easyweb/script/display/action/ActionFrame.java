@@ -219,6 +219,12 @@ public class ActionFrame extends ActionBase implements IAction {
 			if (arr != null) {
 				rv.addValue(uploadName + "_JSON", arr.toString());
 			}
+			if(u.testName("UpDelete")) {
+				String isDel=u.getItem("UpDelete");
+				if("yes".equalsIgnoreCase(isDel)) {
+					return;
+				}
+			}
 			LOGGER.warn("The uploaded file not exists: {}", f.getAbsolutePath());
 			LOGGER.warn("Pls check item defined UpPath = {}", p1);
 			throw new Exception("The uploaded file not exists: " + f.getAbsolutePath() + ", UpPath=" + p1);
