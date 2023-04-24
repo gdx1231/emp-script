@@ -26,10 +26,10 @@ public class FileOut {
 	public static Map<String, String> MAP = new ConcurrentHashMap<String, String>();
 	public static String DEF_DOWNLOAD_TYPE = "application/octet-stream";
 	static {
-		
-		MAP.put("avif", "image/avif"); //浏览器最新格式
-		MAP.put("heic", "image/heic"); //苹果格式
-		
+
+		MAP.put("avif", "image/avif"); // 浏览器最新格式
+		MAP.put("heic", "image/heic"); // 苹果格式
+
 		MAP.put("123", "application/vnd.lotus-1-2-3");
 		MAP.put("3dml", "text/vnd.in3d.3dml");
 		MAP.put("3ds", "image/x-3ds");
@@ -1171,7 +1171,7 @@ public class FileOut {
 	}
 
 	public void outContetType() {
-		if(file == null) {
+		if (file == null) {
 			return;
 		}
 		String ext = UFile.getFileExt(file.getName()).toLowerCase();
@@ -1195,7 +1195,7 @@ public class FileOut {
 	}
 
 	public boolean chcekIfNotModified() {
-		if(file == null) {
+		if (file == null) {
 			return false;
 		}
 		String lastModified = Utils.getDateGMTString(new Date(file.lastModified()));
@@ -1214,8 +1214,8 @@ public class FileOut {
 	 * @param downloadName
 	 */
 
-	public int download(String downloadName) {
-		if(this.file == null) {
+	public long download(String downloadName) {
+		if (this.file == null) {
 			return -1;
 		}
 		String name = file.getName();
@@ -1239,21 +1239,25 @@ public class FileOut {
 
 		response.setHeader("Location", name);
 		response.setHeader("Cache-Control", "max-age=0");
-		response.setHeader("Content-Disposition", "attachment; filename=" + name);
-
-		//response.setContentType("image/oct");
+		if (request != null && request.getHeader("user-agent") != null
+				&& request.getHeader("user-agent").contains("MSIE")) {
+			response.setHeader("Content-Disposition", "attachment; filename=" + name);
+		} else {
+			response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + name);
+		}
+		// response.setContentType("image/oct");
 		outContetType();
 
 		return this.outFileBytesToClient();
 	}
 
 	/**
-	 * Out file bytes in-line, e.g. image, pdf, and check the header flag If-Modified(304) and output the header
-	 * Cache-control(OneWeek)
+	 * Out file bytes in-line, e.g. image, pdf, and check the header flag
+	 * If-Modified(304) and output the header Cache-control(OneWeek)
 	 * 
 	 * @return The length of the file
 	 */
-	public int outFileBytesInline() {
+	public long outFileBytesInline() {
 		long oneWeek = 604800L; // seconds
 		return this.outFileBytesInline(true, oneWeek);
 	}
@@ -1265,7 +1269,7 @@ public class FileOut {
 	 * @param cacheLife       Whether to output the Cache-Control header
 	 * @return The length of the file
 	 */
-	public int outFileBytesInline(boolean checkIfModified, Long cacheLife) {
+	public long outFileBytesInline(boolean checkIfModified, Long cacheLife) {
 
 		// check If-Modified-Since 304
 		if (checkIfModified && chcekIfNotModified()) {
@@ -1282,7 +1286,7 @@ public class FileOut {
 
 	}
 
-	public int outFileBytesInline(RestfulResult<Object> result, boolean checkIfModified, Long cacheLife) {
+	public long outFileBytesInline(RestfulResult<Object> result, boolean checkIfModified, Long cacheLife) {
 		if (httpStatusCode != 200) {
 			result.setHttpStatusCode(httpStatusCode);
 			result.setSuccess(false);
@@ -1300,7 +1304,7 @@ public class FileOut {
 		addCacheControl(cacheLife);
 
 		// Out the file's bytes to user client
-		int length = this.outFileBytesToClient();
+		long length = this.outFileBytesToClient();
 		if (length == -1) {
 			result.setCode(500);
 			result.setHttpStatusCode(500);
@@ -1320,14 +1324,53 @@ public class FileOut {
 	 * @param response HttpServletResponse
 	 * @return out bytes length
 	 */
-	public int outFileBytesToClient() {
-		if(file == null) {
+	public long outFileBytesToClient() {
+		if (file == null) {
 			return -1;
 		}
 		FileInputStream input = null;
 		try {
 			input = new FileInputStream(file);
-			return IOUtils.copy(input, response.getOutputStream());
+		} catch (Exception err) {
+			response.setStatus(500);
+			LOGGER.error("out image: {}, {}", file.getAbsolutePath(), err.getMessage());
+			return -1;
+		}
+		long total = file.length();
+		// Safari无法播放MP4文件流 Range分段请求相关
+		// 第一次请求 range: bytes=0-1
+		if (this.request != null && this.request.getHeader("range") != null) {
+			String range = request.getHeader("range");
+			String[] ranges = (range + " ").split("-");
+			if (range.startsWith("bytes=") && ranges.length == 2) {
+
+				try {
+					long start = Long.parseLong(ranges[0].replace("bytes=", ""));
+					long end;
+					if (ranges[1].trim().length() == 0) {
+						end = total - 1;
+					} else {
+						end = Long.parseLong(ranges[1].trim());
+					}
+					long length = end - start + 1;
+
+					response.setStatus(206);
+					response.setHeader("content-range", "bytes " + start + "-" + end + "/" + total);
+
+					long rangeBytes = IOUtils.copyLarge(input, response.getOutputStream(), start, length);
+					IOUtils.close(input);
+
+					return rangeBytes;
+				} catch (Exception err) {
+					response.setStatus(500);
+					LOGGER.error("out image: {}, {}", file.getAbsolutePath(), err.getMessage());
+					return -1;
+				}
+			}
+		}
+
+		try {
+			return IOUtils.copyLarge(input, response.getOutputStream(), 0, total);
 		} catch (Exception err) {
 			response.setStatus(500);
 			LOGGER.error("out image: {}, {}", file.getAbsolutePath(), err.getMessage());
