@@ -179,7 +179,7 @@ public class ItemBase implements IItem {
 	 */
 	private String handleSpanTitle(String s1, String val) {
 		Object title = this._HtmlClass.getItemValues().getLastValue();
-		if (title == null || title.toString().equals(val)) {
+		if (title == null  ) {
 			return s1;
 		}
 		// 引用
