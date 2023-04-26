@@ -82,11 +82,15 @@ public class ServletGroup extends HttpServlet {
 		String replaceMetaDatabaseName = rv.s("replace_meta_databaseName");// "`visa_main_data`";
 		String replaceWorkDatabaseName = rv.s("replace_work_databaseName"); // "`visa`";
 
-		ModuleCopy moduleCopy = new ModuleCopy(replaceMetaDatabaseName, replaceWorkDatabaseName);
+		String metaDataConn = rv.s("meta_data_conn"); // "`visa`";
+		String workDataConn = rv.s("work_data_conn"); // "`visa`";
+
+		ModuleCopy moduleCopy = new ModuleCopy(metaDataConn, replaceMetaDatabaseName, workDataConn,
+				replaceWorkDatabaseName);
 
 		int mod_dl_id = rv.getInt("mod_dl_id");
 		JSONObject result = moduleCopy.copyDownloadModule(mod_dl_id, rv);
-		
+
 		return result;
 	}
 

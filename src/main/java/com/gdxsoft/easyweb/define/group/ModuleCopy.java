@@ -32,14 +32,28 @@ public class ModuleCopy extends ModuleBase {
 
 	private String importDataConn;
 	private String jdbcConfigName;
+	private DataConnection metaDataConn;
+	private DataConnection workDataConn;
+	private String metaDataConnString;
 	private EwaMod ewaMod;
 	private EwaModVer ewaModVer;
 	private Map<String, Element> tableMap;
+	private String workDataConnString;
 
-	public ModuleCopy(String replaceMetaDatabaseName, String replaceWorkDatabaseName) {
+	/**
+	 * 复制module
+	 * 
+	 * @param metaDataConnString      元数据库连接
+	 * @param replaceMetaDatabaseName 元数据库名称
+	 * @param workDataConnString      工作数据库连接
+	 * @param replaceWorkDatabaseName 工作数据库名称
+	 */
+	public ModuleCopy(String metaDataConnString, String replaceMetaDatabaseName, String workDataConnString,
+			String replaceWorkDatabaseName) {
 		this.replaceMetaDatabaseName = replaceMetaDatabaseName;
 		this.replaceWorkDatabaseName = replaceWorkDatabaseName;
-
+		this.metaDataConnString = metaDataConnString;
+		this.workDataConnString = workDataConnString;
 		ConfScriptPaths.getInstance().getLst().forEach(conf -> {
 			if (this.jdbcConfigName == null && conf.isJdbc()) {
 				// 获取第一个jdbc连接池
@@ -47,6 +61,12 @@ public class ModuleCopy extends ModuleBase {
 			}
 		});
 
+		DataConnection cnn = new DataConnection();
+		cnn.setConfigName(metaDataConnString);
+		this.metaDataConn = cnn;
+
+		this.workDataConn = new DataConnection();
+		this.workDataConn.setConfigName(workDataConnString);
 	}
 
 	private EwaMod getOrNewMyEwaMod(EwaModDownload mod) {
@@ -59,7 +79,7 @@ public class ModuleCopy extends ModuleBase {
 		ewaMod = new EwaMod();
 		ewaMod.setModCode(this.moduleCode);
 		ewaMod.setModCdate(mod.getModCdate());
-		ewaMod.setModMdate(mod.getModMdate());
+		ewaMod.setModMdate(new Date());
 		ewaMod.setModCompany(mod.getModCompany());
 		ewaMod.setModName(mod.getModName());
 		ewaMod.setModNameEn(mod.getModNameEn());
@@ -113,43 +133,41 @@ public class ModuleCopy extends ModuleBase {
 	}
 
 	private EwaModDdl addTable(Table table) {
-		String ewaConn = table.fromMetaDatabase() ? this.replaceMetaDatabaseName : this.replaceWorkDatabaseName;
-
-		boolean isSourceSqlServer = SqlUtils.isSqlServer(table.getDatabaseType());
-		boolean isSourceMySql = SqlUtils.isMySql(table.getDatabaseType());
-
+		boolean isMeta = table.fromMetaDatabase();
+		String database = isMeta ? this.replaceMetaDatabaseName : this.replaceWorkDatabaseName;
+		String ewaConnString = isMeta ? this.metaDataConnString : this.workDataConnString;
+		DataConnection ewaConn = isMeta ? this.metaDataConn : this.workDataConn;
 		EwaModDdlDao d = new EwaModDdlDao();
 		d.setConfigName(jdbcConfigName);
 
-		String w = "MOD_VER_ID=" + this.ewaModVer.getModVerId() + " and EMD_EWA_CONN='" + ewaConn.replace("'", "''")
-				+ "' and TABLE_NAME='" + table.getName().replace("'", "''") + "'";
+		String w = "MOD_VER_ID=" + this.ewaModVer.getModVerId() + " and EMD_EWA_CONN='"
+				+ ewaConnString.replace("'", "''") + "' and TABLE_NAME='" + table.getName().replace("'", "''") + "'";
 		ArrayList<EwaModDdl> al = d.getRecords(w);
 		if (al.size() > 0) {
 			return al.get(0);
 		}
-		DataConnection cnn = new DataConnection();
-		cnn.setConfigName(ewaConn);
-		boolean isTargetSqlServer = SqlUtils.isSqlServer(cnn);
-		boolean isTargetMySql = SqlUtils.isMySql(cnn);
+
+		boolean isTargetSqlServer = SqlUtils.isSqlServer(ewaConn);
 
 		EwaModDdl ddl = new EwaModDdl();
-		ddl.setEmdDatabaseType(cnn.getDatabaseType());
+		ddl.setEmdDatabaseType(ewaConn.getDatabaseType());
 		ddl.setEmdAdmId(0);
 		ddl.setEmdSupId(0);
 		ddl.setEmdCdate(new Date());
 		ddl.setEmdMdate(new Date());
 		ddl.setModVerId(this.ewaModVer.getModVerId());
-		ddl.setEmdEwaConn(ewaConn);
+		ddl.setEmdEwaConn(ewaConnString);
 		ddl.setTableName(table.getName());
 		ddl.setEmdType(table.getTableType());
 
-		if (isTargetSqlServer && isSourceSqlServer || isTargetMySql && isSourceMySql) {
-			ddl.setTableCatalog(table.getCatalogName() == null ? "" : table.getCatalogName());
-			ddl.setTableSchema(table.getSchemaName() == null ? "" : table.getSchemaName());
+		if (isTargetSqlServer) {
+			ddl.setTableCatalog(database);
+			ddl.setTableSchema("");
 		} else {
-			ddl.setTableSchema(table.getCatalogName() == null ? "" : table.getCatalogName());
-			ddl.setTableCatalog(table.getSchemaName() == null ? "" : table.getSchemaName());
+			ddl.setTableSchema(database);
+			ddl.setTableCatalog("");
 		}
+
 		String export = "false"; // 导出数据
 		String exportWhere = "1=2"; // 导出数据的where条件
 
@@ -169,10 +187,17 @@ public class ModuleCopy extends ModuleBase {
 	}
 
 	private EwaModCfgs importCfg(Element cfg) {
+		String defaultXmlName = cfg.getAttribute("ExportDefaultXmlname");
+		defaultXmlName = UserConfig.filterXmlName(defaultXmlName);
 		String defaultItmename = cfg.getAttribute("ExportDefaultItmename");
 
-		String defaultXmlName = cfg.getAttribute("ExportDefaultXmlname");
-		defaultXmlName = UserConfig.filterXmlNameByJdbc(defaultXmlName);
+		EwaModCfgsDao d = new EwaModCfgsDao();
+		d.setConfigName(jdbcConfigName);
+
+		EwaModCfgs o = d.getRecord(this.ewaModVer.getModVerId(), defaultXmlName, defaultItmename);
+		if (o != null) {
+			return o;
+		}
 
 		String description = "";
 		NodeList nl = cfg.getElementsByTagName("DescriptionSet");
@@ -185,13 +210,8 @@ public class ModuleCopy extends ModuleBase {
 			}
 		}
 
-		EwaModCfgsDao d = new EwaModCfgsDao();
-		EwaModCfgs o = d.getRecord(this.ewaModVer.getModVerId(), defaultXmlName, defaultXmlName);
-		if (o != null) {
-			return o;
-		}
-
 		o = new EwaModCfgs();
+		o.setModVerId(this.ewaModVer.getModVerId());
 		o.setXmlname(defaultXmlName);
 		o.setItemname(defaultItmename);
 
@@ -199,6 +219,8 @@ public class ModuleCopy extends ModuleBase {
 		o.setEmcDefItemname(defaultItmename);
 
 		o.setEmcCdate(new Date());
+		o.setEmcMdate(new Date());
+
 		o.setDescription(description);
 		o.setEmcSupId(0);
 		o.setEmcAdmId(0);
@@ -292,11 +314,14 @@ public class ModuleCopy extends ModuleBase {
 			ImportTables importTables = new ImportTables(ex.getDocTable(), ex.getDocData(), null);
 			importTables.setReplaceMetaDatabaseName(this.replaceMetaDatabaseName);
 			importTables.setReplaceWorkDatabaseName(this.replaceWorkDatabaseName);
+			importTables.setModuleDescription(ex.getModuleDescription());
 
 			importTables.readTables();
 
 			for (int i = 0; i < importTables.getTables().length; i++) {
 				Table table = importTables.getTables()[i];
+				table.setImportTables(importTables);
+
 				addTable(table);
 			}
 

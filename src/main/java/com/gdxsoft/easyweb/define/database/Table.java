@@ -110,7 +110,7 @@ public class Table {
 		return sb.toString();
 	}
 
-	private String fromSourceDatabase() {
+	public String fromSourceDatabase() {
 		// 来源表是否是SQLSERVER
 		boolean isSourceSqlServer = SqlUtils.isSqlServer(this.getDatabaseType());
 
