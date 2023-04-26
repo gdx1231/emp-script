@@ -346,6 +346,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 		Map<String, UserXItem> map = new HashMap<String, UserXItem>();
 		Map<String, Integer> mapOrder = new HashMap<String, Integer>();
 		int order = 0;
+		String seqIdField = ""; // 自动排序字段
 		for (int i = 0; i < uc.getUserXItems().count(); i++) {
 			UserXItem uxi = uc.getUserXItems().getItem(i);
 
@@ -353,7 +354,18 @@ public class ActionListFrame extends ActionBase implements IAction {
 			if (super.getHtmlClass().getSysParas().isHiddenColumn(uxi.getName())) {
 				continue;
 			}
+
 			String name = uxi.getName().toUpperCase().trim();
+
+			if (seqIdField.length() == 0 && uxi.testName("InitValue")) {
+				UserXItemValues uxvs = uxi.getItem("InitValue");
+				if (uxvs.count() > 0) {
+					String initValue = uxvs.getItem(0).getItem(0);
+					if ("SEQID".equalsIgnoreCase(initValue)) {
+						seqIdField = name;
+					}
+				}
+			}
 			mapOrder.put(name, order);
 			map.put(name, uxi);
 			order++;
@@ -375,8 +387,12 @@ public class ActionListFrame extends ActionBase implements IAction {
 			// 设置排序
 			col.setOrder(mapOrder.get(name));
 			total_export_fields++;
-
-			this.setFormatValueOfTable(tb, i, uxi);
+			if (name.equals(seqIdField)) { 
+				// seq字段
+				this.setSeqValueOfTable(tb, i);
+			} else { // 格式化字段
+				this.setFormatValueOfTable(tb, i, uxi);
+			}
 		}
 
 		// 如果导出的字段数量小于 2 个，则恢复所有字段，避免因自定义导出语句和配置定义完全不一致
@@ -388,6 +404,25 @@ public class ActionListFrame extends ActionBase implements IAction {
 		}
 		tb.getAttsTable().add("mapFields", map);
 		return tb;
+	}
+
+	/**
+	 * seq字段
+	 * 
+	 * @param tb
+	 * @param colIndex
+	 */
+	private void setSeqValueOfTable(DTTable tb, int colIndex) {
+
+		int inc = 1;
+		for (int i = 0; i < tb.getCount(); i++) {
+			DTCell c = tb.getRow(i).getCell(colIndex);
+			Object ori = c.getValue();
+			c.setAttachement(ori);
+			c.setValue(inc);
+			inc++;
+
+		}
 	}
 
 	/**
