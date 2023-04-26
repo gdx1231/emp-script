@@ -38,6 +38,19 @@ public class ModuleImport extends ModuleBase {
 		return exchange;
 	}
 
+	public ModuleImport(String replaceMetaDatabaseName, String replaceWorkDatabaseName) {
+		this.replaceMetaDatabaseName = replaceMetaDatabaseName;
+		this.replaceWorkDatabaseName = replaceWorkDatabaseName;
+
+		ConfScriptPaths.getInstance().getLst().forEach(conf -> {
+			if (this.jdbcConfigName == null && conf.isJdbc()) {
+				// 获取第一个jdbc连接池
+				this.jdbcConfigName = conf.getJdbcConfigName();
+			}
+		});
+
+	}
+
 	public ModuleImport(String moduleCode, String moduleVersion, String importDataConn, String replaceMetaDatabaseName,
 			String replaceWorkDatabaseName) {
 		this.moduleCode = moduleCode;
@@ -67,6 +80,28 @@ public class ModuleImport extends ModuleBase {
 			}
 		});
 	}
+ 
+	public byte[] downloadPublishedModuleAsFile(int modDlId, RequestValue rv) {
+		EwaModDownloadDao dao1 = new EwaModDownloadDao();
+		dao1.setConfigName(jdbcConfigName);
+		EwaModDownload mod = dao1.getRecord(modDlId);
+
+		if (mod == null) {
+			return null;
+		}
+		this.moduleCode = mod.getModCode();
+		this.moduleVersion = mod.getModVer();
+		
+		byte[] buf;
+		try {
+			// buf = (byte[]) tb.getCell(0, "pkg_file").getValue();
+			buf = mod.getPkgFile();
+			return buf;
+		} catch (Exception e) {
+			return null;
+		}
+		 
+	}
 
 	public JSONObject importModuleFromDownloadModule(int modDlId, RequestValue rv) {
 		// 记录导入DDL到日志中
@@ -81,11 +116,11 @@ public class ModuleImport extends ModuleBase {
 		log.setLogRef(rv.s(RequestValue.SYS_REMOTE_REFERER, 1000));
 		log.setLogUa(rv.s(RequestValue.SYS_USER_AGENT, 500));
 		log.setLogStatus("USED");
-		
+
 		EwaModDownloadDao dao1 = new EwaModDownloadDao();
 		dao1.setConfigName(jdbcConfigName);
 		EwaModDownload mod = dao1.getRecord(modDlId);
-		
+
 		if (mod == null) {
 			log.setLogErrors("No data");
 			log.setLogContent("No data");

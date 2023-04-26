@@ -28,10 +28,12 @@ import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UpdateXmlImpl;
 import com.gdxsoft.easyweb.define.UpdateXmlJdbcImpl;
 import com.gdxsoft.easyweb.define.group.Exchange;
+import com.gdxsoft.easyweb.define.group.ModuleCopy;
 import com.gdxsoft.easyweb.define.group.ModuleExport;
 import com.gdxsoft.easyweb.define.group.ModuleImport;
 import com.gdxsoft.easyweb.define.group.ModulePublish;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.servlets.FileOut;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UJSon;
@@ -67,6 +69,51 @@ public class ServletGroup extends HttpServlet {
 	 */
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.show(request, response);
+	}
+
+	/**
+	 * 复制已下载的模块为自己的模块
+	 * 
+	 * @param rv
+	 * @return
+	 */
+	private JSONObject copyPublishedModule(RequestValue rv) {
+
+		String replaceMetaDatabaseName = rv.s("replace_meta_databaseName");// "`visa_main_data`";
+		String replaceWorkDatabaseName = rv.s("replace_work_databaseName"); // "`visa`";
+
+		ModuleCopy moduleCopy = new ModuleCopy(replaceMetaDatabaseName, replaceWorkDatabaseName);
+
+		int mod_dl_id = rv.getInt("mod_dl_id");
+		JSONObject result = moduleCopy.copyDownloadModule(mod_dl_id, rv);
+		
+		return result;
+	}
+
+	/**
+	 * 将已经下载的模块作为文件下载到本地
+	 * 
+	 * @param rv
+	 * @param response
+	 * @throws IOException
+	 */
+	private void downloadPublishedModuleAsFile(RequestValue rv, HttpServletResponse response) throws IOException {
+		ModuleImport moduleImport = new ModuleImport(null, null, null);
+		int mod_dl_id = rv.getInt("mod_dl_id");
+		byte[] buf = moduleImport.downloadPublishedModuleAsFile(mod_dl_id, rv);
+
+		if (buf == null) {
+			response.setStatus(404);
+		}
+
+		String id = moduleImport.getModuleCode() + "_" + moduleImport.getModuleVersion();
+		response.setHeader("Location", id + ".zip");
+		response.setHeader("Cache-Control", "max-age=0");
+		response.setHeader("Content-Disposition", "attachment; filename=" + id + ".zip");
+		response.setContentType("image/oct");
+		response.setContentLength(buf.length);
+		response.getOutputStream().write(buf);
+		response.getOutputStream().close();
 	}
 
 	/**
@@ -257,6 +304,21 @@ public class ServletGroup extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		response.setCharacterEncoding("utf-8");
 
+		// 复制下载的模块到本地的发布 2023新方法
+		if (oType.equalsIgnoreCase("publish_module_copy")) {
+			JSONObject result = this.copyPublishedModule(rv);
+			response.getWriter().println(result.toString());
+			return;
+		}
+		// 下载的模块导出为文件 2023新方法
+		if (oType.equalsIgnoreCase("publish_module_download_as_file")) {
+			try {
+				this.downloadPublishedModuleAsFile(rv, response);
+			} catch (Exception err) {
+				response.getWriter().println(UJSon.rstFalse(err.getMessage()));
+			}
+			return;
+		}
 		// 导入已经下载的模块 2021新方法
 		if (oType.equalsIgnoreCase("publish_module_import")) {
 			JSONObject result = this.importDownloadedPublishedModule(rv);
@@ -498,7 +560,8 @@ public class ServletGroup extends HttpServlet {
 	}
 
 	/**
-	 * Returns information about the servlet, such as author, version, and copyright.
+	 * Returns information about the servlet, such as author, version, and
+	 * copyright.
 	 * 
 	 * @return String information about this servlet
 	 */
