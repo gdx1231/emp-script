@@ -309,6 +309,17 @@ public class ActionJSON {
 		return expireLong;
 	}
 
+	private void addSign(UNet net ,ActionJSONParameter param) {
+		if(param.getSign() == null) {
+			return;
+		}
+		ActionJSONSign sign = new ActionJSONSign();
+		sign.initCfg(param.getSign() );
+		String signed = sign.doSign( );
+		
+		net.addHeader(sign.getHeader(), signed);
+	}
+	
 	/**
 	 * 发送RSETful请求
 	 * 
@@ -338,10 +349,15 @@ public class ActionJSON {
 		if (!haveAccept.containsKey("accept")) {
 			net.addHeader("accept", "application/json");
 		}
+		
+		// 设置签名
+		this.addSign(net, param);
+		
 		if (param.isDebug()) {
 			net.setIsShowLog(true);
 		}
 
+		
 		UUrl u = new UUrl(param.getUrl());
 		param.getQueries().forEach((k, v) -> {
 			u.add(k, v);

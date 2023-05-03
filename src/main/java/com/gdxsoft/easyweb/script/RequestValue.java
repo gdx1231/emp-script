@@ -78,6 +78,8 @@ public class RequestValue implements Cloneable {
 	 * 实例每次创建的当前时间，同EWAdotDATE
 	 */
 	public static final String SYS_DATE = "SYS_DATE";
+
+	public static final String SYS_MILLIS = "SYS_MILLIS";
 	/**
 	 * 实例每次创建的当前时间，同SYS_DATE
 	 */
@@ -374,6 +376,13 @@ public class RequestValue implements Cloneable {
 		pv.setDataType("Date");
 		pv.setPVTag(PageValueTag.SYSTEM);
 		this._ReqValues.addOrUpdateValue(pv);
+
+		PageValue pvMillis = new PageValue();
+		pvMillis.setName(SYS_MILLIS);
+		pvMillis.setValue(System.currentTimeMillis());
+		pvMillis.setDataType("BIGINT");
+		pvMillis.setPVTag(PageValueTag.SYSTEM);
+		this._ReqValues.addOrUpdateValue(pvMillis);
 
 		PageValue pv1 = new PageValue();
 		pv1.setName(EWAdotDATE);

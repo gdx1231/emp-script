@@ -45,6 +45,8 @@ public class ActionJSONParameter {
 
 	private boolean asLfData = false; // 作为列表数据
 
+	private JSONObject sign; // 签名算法
+
 	public void init(String jsonStr) throws Exception {
 		JSONObject obj = new JSONObject(jsonStr);
 		this.init(obj);
@@ -109,6 +111,8 @@ public class ActionJSONParameter {
 				if (arr != null) {
 					this.listTag(arr);
 				}
+			} else if (key.equalsIgnoreCase("sign")) {
+				this.sign = obj.optJSONObject(key);
 			}
 		}
 		if (StringUtils.isNotBlank(this.connConfigName)) {
@@ -387,6 +391,14 @@ public class ActionJSONParameter {
 	 */
 	public void setAsLfData(boolean asLfData) {
 		this.asLfData = asLfData;
+	}
+
+	/**
+	 * 签名算法
+	 * @return the sign
+	 */
+	public JSONObject getSign() {
+		return sign;
 	}
 
 }
