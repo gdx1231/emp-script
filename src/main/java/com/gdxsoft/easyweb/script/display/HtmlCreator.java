@@ -1118,10 +1118,10 @@ public class HtmlCreator {
 		DTTable dt = (DTTable) this._ItemValues.getDTTables().get(len - 1);
 		// 时差
 		dt.setTimeDiffMinutes(this._HtmlClass.getSysParas().getTimeDiffMinutes());
-		
+
 		// 输出json时候忽略null值，即不输出 addr: null
 		boolean skipNullField = this.getRequestValue().s(FrameParameters.EWA_JSON_SKIP_NULL) != null;
-		
+
 		// 处理二进制的方式
 		String convertBinMethod = this.getRequestValue().s(FrameParameters.EWA_JSON_BIN_METHOD);
 		IBinaryHandle binHandle = null;
@@ -1133,7 +1133,7 @@ public class HtmlCreator {
 		if (binHandle != null) {
 			dt.setJsonBinaryHandle(binHandle);
 		}
-		
+
 		if (skipNullField) {
 			String s1 = dt.toJSONArray().toString();
 			sb.a(s1);
@@ -2334,7 +2334,7 @@ public class HtmlCreator {
 			return null;
 		}
 
-		if (logClassName == null || logClassName.trim().length() == 0) {
+		if (logClassName == null || logClassName.trim().length() < 5) {
 			return null;
 		}
 		UObjectValue ov = new UObjectValue();
