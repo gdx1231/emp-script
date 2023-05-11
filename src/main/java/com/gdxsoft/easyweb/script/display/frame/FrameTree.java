@@ -17,6 +17,10 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 public class FrameTree extends FrameBase implements IFrame {
 	private TreeViewMain _TreeViewMain;
 
+	public TreeViewMain getTreeViewMain() {
+		return _TreeViewMain;
+	}
+
 	public void createJsFramePage() throws Exception {
 		// 页面脚本初始化ListFrame
 		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();

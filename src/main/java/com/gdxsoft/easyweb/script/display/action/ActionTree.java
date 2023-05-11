@@ -2,8 +2,13 @@ package com.gdxsoft.easyweb.script.display.action;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.gdxsoft.easyweb.data.DTCell;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.SqlPart;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
@@ -12,6 +17,40 @@ import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
 
 public class ActionTree extends ActionBase implements IAction {
+	private static Logger LOGGER = LoggerFactory.getLogger(ActionTree.class);
+
+	/**
+	 * 执行sql语句
+	 * 
+	 * @param sql
+	 * @param sqlType
+	 * @param name
+	 * @return false = 检查执行提交时返回的错误判断
+	 */
+	public boolean executeSql(String sql, String sqlType, String name) {
+		boolean isSelect = DataConnection.checkIsSelect(sql);
+		if (sqlType.equals("procedure")) {
+			this.executeSqlProcdure(sql);
+			// 检查执行提交时返回的错误判断
+			return StringUtils.isBlank(this.getChkErrorMsg());
+		} else if (isSelect) { // 不再判断 sqlType = query or update
+			// 查询
+			try {
+				sql = this.createSql(sql);
+			} catch (Exception e) {
+				LOGGER.error("{0}, {1}, {2}, {3}", sql, sqlType, name, e.getMessage());
+			}
+
+			DTTable dt = this.executeSqlQuery(sql);
+			dt.setName(name);
+			// 检查执行提交时返回的错误判断
+			return StringUtils.isBlank(this.getChkErrorMsg());
+		} else {// 更新
+			this.executeSqlUpdate(sql);
+			return true;
+		}
+	}
+
 	/**
 	 * 生成分级加载SQL
 	 * 
