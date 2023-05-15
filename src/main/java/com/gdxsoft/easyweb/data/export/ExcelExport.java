@@ -142,6 +142,11 @@ public class ExcelExport implements IExport {
 				|| type.equalsIgnoreCase("float") || type.equalsIgnoreCase("DECIMAL")
 				|| type.equalsIgnoreCase("MONEY")) {
 			String ori_val = v1.toString();
+
+			if (type.equalsIgnoreCase("MONEY")) {
+				ori_val = ori_val.replace(",", "");
+			}
+
 			double ff = Double.parseDouble(ori_val);
 
 			jxl.write.Number num = new jxl.write.Number(colIndex, rowIndex, ff);
