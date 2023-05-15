@@ -21,9 +21,11 @@ import com.gdxsoft.easyweb.utils.Utils;
 
 import jxl.CellView;
 import jxl.Workbook;
+import jxl.biff.DisplayFormat;
 import jxl.format.Alignment;
 import jxl.format.VerticalAlignment;
 import jxl.write.Label;
+import jxl.write.NumberFormats;
 import jxl.write.WritableCellFormat;
 import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
@@ -134,42 +136,58 @@ public class ExcelExport implements IExport {
 			throws RowsExceededException, WriteException, Exception {
 		if (v1 == null)
 			return;
+		String ori_val = v1.toString();
 		if ("BIGINT".equals(type)) {
 			// 转为数值会损失精度，用字符串处理
-			Label lbl = new Label(colIndex, rowIndex, v1.toString());
+			Label lbl = new Label(colIndex, rowIndex, ori_val);
 			this._Sheet.addCell(lbl);
 		} else if (type.indexOf("NUM") >= 0 || type.indexOf("INT") >= 0 || type.equalsIgnoreCase("double")
 				|| type.equalsIgnoreCase("float") || type.equalsIgnoreCase("DECIMAL")
 				|| type.equalsIgnoreCase("MONEY")) {
-			String ori_val = v1.toString();
 
-			if (type.equalsIgnoreCase("MONEY")) {
+			if (type.equalsIgnoreCase("MONEY") || type.equalsIgnoreCase("LeastMoney")) {
 				ori_val = ori_val.replace(",", "");
 			}
+			if(ori_val.indexOf("%")>=0) {
+				WritableFont wf = new WritableFont(WritableFont.ARIAL, 10, WritableFont.NO_BOLD, false);
+	            //数字显示格式为浮点数百分比
+	            DisplayFormat displayFormat = NumberFormats.PERCENT_FLOAT;         
+	            WritableCellFormat wcfF = new WritableCellFormat(wf,displayFormat);
 
-			double ff = Double.parseDouble(ori_val);
-
-			jxl.write.Number num = new jxl.write.Number(colIndex, rowIndex, ff);
-			this._Sheet.addCell(num);
-		} else if (type.indexOf("DATE") >= 0 || type.indexOf("TIME") >= 0) {
-			java.util.Date t1 = (java.util.Date) v1;
-
-			if (this._Lang == null) {
-				// 增加8小时，避免时区出问题
-				long newTime = t1.getTime() + 1000 * 60 * 60 * 8;
-				t1.setTime(newTime);
-				jxl.write.DateTime dt = new jxl.write.DateTime(colIndex, rowIndex, t1);
-				this._Sheet.addCell(dt);
-			} else {
-				String d = com.gdxsoft.easyweb.utils.UFormat.formatDate("datetime", t1, this._Lang);
-				if (d.indexOf(" 00:00:00") > 0) {
-					d = d.substring(0, d.indexOf(" "));
+				double ff = Double.parseDouble(ori_val.replace("%", ""));
+				ff=ff/100;
+				jxl.write.Number num = new jxl.write.Number(colIndex, rowIndex, ff, wcfF);
+				this._Sheet.addCell(num);
+			}else {
+				double ff = Double.parseDouble(ori_val);
+				jxl.write.Number num = new jxl.write.Number(colIndex, rowIndex, ff);
+				this._Sheet.addCell(num);
+			}
+			
+		} else if ((type.indexOf("DATE") >= 0 || type.indexOf("TIME") >= 0)) {
+			if((ori_val.indexOf("/")>0 || ori_val.indexOf("-")>0 || ori_val.indexOf(":")>0)) {
+				java.util.Date t1 = (java.util.Date) v1;
+	
+				if (this._Lang == null) {
+					// 增加8小时，避免时区出问题
+					long newTime = t1.getTime() + 1000 * 60 * 60 * 8;
+					t1.setTime(newTime);
+					jxl.write.DateTime dt = new jxl.write.DateTime(colIndex, rowIndex, t1);
+					this._Sheet.addCell(dt);
+				} else {
+					String d = com.gdxsoft.easyweb.utils.UFormat.formatDate("datetime", t1, this._Lang);
+					if (d.indexOf(" 00:00:00") > 0) {
+						d = d.substring(0, d.indexOf(" "));
+					}
+					Label lbl = new Label(colIndex, rowIndex, d);
+					this._Sheet.addCell(lbl);
 				}
-				Label lbl = new Label(colIndex, rowIndex, d);
+			}else {
+				Label lbl = new Label(colIndex, rowIndex, ori_val);
 				this._Sheet.addCell(lbl);
 			}
 		} else {
-			Label lbl = new Label(colIndex, rowIndex, v1.toString());
+			Label lbl = new Label(colIndex, rowIndex, ori_val);
 			this._Sheet.addCell(lbl);
 		}
 	}
