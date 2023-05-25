@@ -96,6 +96,20 @@ public class SyncRemote {
 	}
 
 	/**
+	 * 不上传文件的扩展名
+	 * @param exts 扩展名
+	 */
+	private void addExcludeExts(String[] exts) {
+		for (int i = 0; i < exts.length; i++) {
+			String ext = exts[i].trim().toUpperCase();
+			if (!this._Filters.containsKey(ext)) {
+				this._Filters.put(ext, false);
+				LOGGER.info("Add exclude filter {}", ext);
+			}
+		}
+	}
+
+	/**
 	 * 初始化，根据过滤条件和根目录
 	 *
 	 * @param filters 过滤条件（js or js,html）
@@ -114,9 +128,14 @@ public class SyncRemote {
 			}
 			if (exp.length() > 0) {
 				this._Filters.put(exp, true);
+				LOGGER.info("Add include filter {}", exp);
 			}
 		}
-		_Filters.put(".BAK", false);
+
+		// 不上传文件的扩展名
+		String[] excludes = { ".BAK", ".LOG", ".DS_Store" };
+		this.addExcludeExts(excludes);
+
 		File ff = new File(root);
 		this._Root = ff.getAbsolutePath();
 		_Json = new JSONObject();
@@ -173,7 +192,7 @@ public class SyncRemote {
 		File f1 = new File(path);
 		String name = f1.getName().toUpperCase();
 		if (name.indexOf("_") == 0 || name.indexOf("TMP_") == 0 || name.indexOf("TEMP_") == 0
-				|| name.indexOf("CVS") == 0 || name.equalsIgnoreCase(".DS_Store") || name.equalsIgnoreCase(".git")) {
+				|| name.indexOf("CVS") == 0 || name.equalsIgnoreCase(".git")) {
 			return;
 		}
 		File[] ff = f1.listFiles();
@@ -326,16 +345,22 @@ public class SyncRemote {
 	 * @return
 	 */
 	private boolean checkExts(File source) {
-		if (this._Filters.size() == 0 || this._Filters.containsKey(".*")) {
-			return true;
-		}
 		String name = source.getName();
 		int loc = name.lastIndexOf(".");
 		if (loc >= 0) {
 			String ext = name.substring(loc).toUpperCase();
 			if (this._Filters.containsKey(ext)) {
-				return this._Filters.get(ext);
+				boolean included = this._Filters.get(ext);
+				if (included) {
+					return true;
+				} else { // .BAK or .DS_Store ...
+					LOGGER.info("Skip {}", source.getAbsolutePath());
+					return false;
+				}
 			}
+		}
+		if (this._Filters.containsKey(".*")) {
+			return true;
 		}
 		return false;
 	}
@@ -632,7 +657,8 @@ public class SyncRemote {
 		NodeList nl = syncs.getElementsByTagName("remote_sync");
 
 		/*
-		 * <remote_sync name="用户 XML配置文件" id="1" source="/Volumes/work_xml/user.config.xml"
+		 * <remote_sync name="用户 XML配置文件" id="1"
+		 * source="/Volumes/work_xml/user.config.xml"
 		 * target="d:/java/erp2014/user.config.xml" filter="xml" />
 		 */
 		for (int i = 0; i < nl.getLength(); i++) {
