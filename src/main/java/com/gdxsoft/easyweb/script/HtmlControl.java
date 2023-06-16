@@ -343,6 +343,10 @@ public class HtmlControl {
 		if (m1 > 0) {
 			tmp = tmp.substring(0, m1);
 		}
+		if (this._FrameUnidPrefix != null && this._FrameUnidPrefix.trim().length() > 0) {
+			String unid = this.getRequestValue().getString("SYS_FRAME_UNID");
+			tmp = tmp.replace(unid, this._FrameUnidPrefix.trim() + unid);
+		}
 		return tmp;
 
 	}
