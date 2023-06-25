@@ -1327,9 +1327,12 @@ public class RequestValue implements Cloneable {
 			if (key.length() == 0) {
 				continue;
 			}
-			String val = Utils.urlToText(pp[1]);
-			this.addValue(key, val, pageValueTag);
-
+			try {
+				String val = Utils.urlToText(pp[1]);
+				this.addValue(key, val, pageValueTag);
+			} catch (Exception err) {
+				this.addValue(key, pp[1], pageValueTag);
+			}
 			addList.add(key);
 		}
 
