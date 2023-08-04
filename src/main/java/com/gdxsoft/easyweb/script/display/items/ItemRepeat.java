@@ -692,8 +692,7 @@ public class ItemRepeat extends ItemBase {
 		try {
 			String val = super.getValue();
 			DTRow row = this._Table.getRowByKey(this._Value, val);
-
-			return row.getCell(this._Text).toString();
+			return row == null ? "" : row.getCell(this._Text).toString();
 		} catch (Exception e) {
 			return e.getMessage();
 		}
