@@ -387,7 +387,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 			// 设置排序
 			col.setOrder(mapOrder.get(name));
 			total_export_fields++;
-			if (name.equals(seqIdField)) { 
+			if (name.equals(seqIdField)) {
 				// seq字段
 				this.setSeqValueOfTable(tb, i);
 			} else { // 格式化字段
@@ -505,6 +505,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 			String orderExp = uxi.getItem("OrderSearch").getItem(0).getItem("OrderExp");
 			if (orderExp.trim().length() > 0) {
 				s1 = orderExp;
+				orderField = orderExp;
 			}
 		}
 		s1 = SqlUtils.replaceChnOrder(dbType, s1, dt);
