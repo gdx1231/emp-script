@@ -1534,11 +1534,12 @@ public class FrameList extends FrameBase implements IFrame {
 		RequestValue rv = super.getHtmlClass().getItemValues().getRequestValue();
 		DataConnection cnn = super.getHtmlClass().getItemValues().getDataConn();
 		String gunid = super.getHtmlClass().getSysParas().getFrameUnid();
-		 
+
+		String thisXmlName = super.getHtmlClass().getSysParas().getXmlName();
+		thisXmlName = UserConfig.filterXmlName(thisXmlName);
 
 		// 工作量应用表 （_EWA_WF_APP）
-		DTTable tb = EwaWfMain.getAppTable(super.getHtmlClass().getSysParas().getXmlName(),
-				super.getHtmlClass().getSysParas().getItemName(), cnn);
+		DTTable tb = EwaWfMain.getAppTable(thisXmlName, super.getHtmlClass().getSysParas().getItemName(), cnn);
 
 		if (tb == null) {
 			this._WorkFlowBut = null;
@@ -1549,25 +1550,22 @@ public class FrameList extends FrameBase implements IFrame {
 			throw new Exception("未发现流程数据");
 
 		}
+		String xmlNameApp = null, itemNameApp = null, wfXmlName = null, wfItemName = null, wfRefTable = null,
+				checkField = null;
 
-		String xmlNameApp = tb.getCell(0, "APP_XMLNAME").toString();
-		String itemNameApp = tb.getCell(0, "APP_ITEMNAME").toString();
-
-		xmlNameApp = xmlNameApp.replace("/", "|");
-		xmlNameApp = xmlNameApp.replace("\\", "|");
-		while (xmlNameApp.indexOf("||") >= 0) {
-			xmlNameApp = xmlNameApp.replace("||", "|");
+		for (int i = 0; i < tb.getCount(); i++) {
+			xmlNameApp = UserConfig.filterXmlName(tb.getCell(i, "APP_XMLNAME").toString());
+			itemNameApp = tb.getCell(i, "APP_ITEMNAME").toString();
+			wfXmlName = tb.getCell(i, "APP_FRAME_XMLNAME").toString();
+			wfItemName = tb.getCell(i, "APP_FRAME_ITEMNAME").toString();
+			wfRefTable = tb.getCell(i, "APP_WF_TABLE").toString();
+			checkField = tb.getCell(i, "APP_WF_FIELD").toString();
+			if (tb.getCount() == 1 || thisXmlName.equalsIgnoreCase(xmlNameApp)) {
+				break;
+			}
 		}
-		if (!xmlNameApp.startsWith("|")) {
-			xmlNameApp = "|" + xmlNameApp;
-		}
-
 		// EWA.UI.Dialog.OpenReloadClose('1366885157','ewa|ewa_wf.xml',
 		// '_EWA_WF_UNIT.Frame.NewModify', false, paras);
-
-		String wfXmlName = tb.getCell(0, "APP_FRAME_XMLNAME").toString();
-		String wfItemName = tb.getCell(0, "APP_FRAME_ITEMNAME").toString();
-		String wfRefTable = tb.getCell(0, "APP_WF_TABLE").toString();
 
 		if (wfXmlName == null || wfXmlName.trim().length() == 0) {
 			throw new Exception("App未定义的配置参数 APP_FRAME_XMLNAME");
@@ -1575,8 +1573,7 @@ public class FrameList extends FrameBase implements IFrame {
 		if (wfItemName == null || wfItemName.trim().length() == 0) {
 			throw new Exception("App未定义的配置参数 APP_FRAME_ITEMNAME");
 		}
-		String checkField = tb.getCell(0, "APP_WF_FIELD").toString();
-
+		wfXmlName = UserConfig.filterXmlName(wfXmlName);
 		String para = "APP_XMLNAME=" + xmlNameApp + "&APP_ITEMNAME=" + itemNameApp
 				+ "&SYS_STA_RID=[RID]&EWA_ACTION_KEY=[RID]&APP_WF_UNIT_CUR=@" + checkField + "&SYS_STA_TABLE="
 				+ wfRefTable + "&WF_ID=" + tb.getCell(0, "WF_ID").toString().trim();
