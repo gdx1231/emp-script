@@ -1539,31 +1539,18 @@ public class FrameList extends FrameBase implements IFrame {
 		thisXmlName = UserConfig.filterXmlName(thisXmlName);
 
 		// 工作量应用表 （_EWA_WF_APP）
-		DTTable tb = EwaWfMain.getAppTable(thisXmlName, super.getHtmlClass().getSysParas().getItemName(), cnn);
+		JSONObject cfg = EwaWfMain.getAppCfg (thisXmlName, super.getHtmlClass().getSysParas().getItemName(), cnn);
 
-		if (tb == null) {
-			this._WorkFlowBut = null;
-			throw new Exception("加载流程数据执行错误：" + cnn.getErrorMsg());
-		}
-		if (tb.getCount() == 0) {
-			this._WorkFlowBut = null;
-			throw new Exception("未发现流程数据");
-
-		}
 		String xmlNameApp = null, itemNameApp = null, wfXmlName = null, wfItemName = null, wfRefTable = null,
 				checkField = null;
 
-		for (int i = 0; i < tb.getCount(); i++) {
-			xmlNameApp = UserConfig.filterXmlName(tb.getCell(i, "APP_XMLNAME").toString());
-			itemNameApp = tb.getCell(i, "APP_ITEMNAME").toString();
-			wfXmlName = tb.getCell(i, "APP_FRAME_XMLNAME").toString();
-			wfItemName = tb.getCell(i, "APP_FRAME_ITEMNAME").toString();
-			wfRefTable = tb.getCell(i, "APP_WF_TABLE").toString();
-			checkField = tb.getCell(i, "APP_WF_FIELD").toString();
-			if (tb.getCount() == 1 || thisXmlName.equalsIgnoreCase(xmlNameApp)) {
-				break;
-			}
-		}
+		xmlNameApp = UserConfig.filterXmlName(cfg.optString("APP_XMLNAME"));
+		itemNameApp = cfg.optString("APP_ITEMNAME");
+		wfXmlName = cfg.optString("APP_FRAME_XMLNAME");
+		wfItemName = cfg.optString("APP_FRAME_ITEMNAME");
+		wfRefTable = cfg.optString("APP_WF_TABLE");
+		checkField = cfg.optString("APP_WF_FIELD");
+
 		// EWA.UI.Dialog.OpenReloadClose('1366885157','ewa|ewa_wf.xml',
 		// '_EWA_WF_UNIT.Frame.NewModify', false, paras);
 
@@ -1576,7 +1563,7 @@ public class FrameList extends FrameBase implements IFrame {
 		wfXmlName = UserConfig.filterXmlName(wfXmlName);
 		String para = "APP_XMLNAME=" + xmlNameApp + "&APP_ITEMNAME=" + itemNameApp
 				+ "&SYS_STA_RID=[RID]&EWA_ACTION_KEY=[RID]&APP_WF_UNIT_CUR=@" + checkField + "&SYS_STA_TABLE="
-				+ wfRefTable + "&WF_ID=" + tb.getCell(0, "WF_ID").toString().trim();
+				+ wfRefTable + "&WF_ID=" + cfg.optString("WF_ID").toString().trim();
 
 		// //逻辑分值的值
 		// String wfLogic = super.getPageItemValue("Workflow", "WfLogic");
@@ -1590,7 +1577,7 @@ public class FrameList extends FrameBase implements IFrame {
 			para += "&" + q;
 		}
 
-		String appPks = tb.getCell(0, "APP_WF_PKS").toString();
+		String appPks =  cfg.optString("APP_WF_PKS");
 		String[] pks = appPks.split(",");
 		for (int i = 0; i < pks.length; i++) {
 			para += "&" + pks[i] + "=@" + pks[i];

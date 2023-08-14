@@ -17,6 +17,7 @@ import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -92,10 +93,65 @@ public class EwaWfMain {
 		}
 	}
 
+	/**
+	 * 获取_EWA_WF_APP数据
+	 * @param wfId
+	 * @param cnn
+	 * @return
+	 */
+	public static DTTable getAppTable(String wfId, DataConnection cnn) {
+		String sql = "SELECT * FROM _EWA_WF_APP where WF_ID=" + cnn.sqlParameterStringExp(wfId);
+		DTTable tableApp = DTTable.getJdbcTable(sql, cnn);
+		return tableApp;
+	}
+	
 	public static DTTable getAppTable(String xmlName, String itemName, DataConnection cnn) {
 		String sql = "SELECT * FROM _EWA_WF_APP where APP_ITEMNAME=" + cnn.sqlParameterStringExp(itemName);
 		DTTable tableApp = DTTable.getJdbcTable(sql, cnn);
 		return tableApp;
+	}
+
+	/**
+	 * 获取工作流应用的配置信息 WF_ID<br>
+	 * APP_XMLNAME<br>
+	 * APP_ITEMNAME<br>
+	 * APP_ID<br>
+	 * APP_REF_TAG<br>
+	 * APP_WF_NAME<br>
+	 * APP_WF_DS<br>
+	 * APP_WF_FIELD<br>
+	 * APP_WF_TABLE<br>
+	 * APP_WF_PKS<br>
+	 * APP_WF_DES<br>
+	 * APP_WF_CDATE<br>
+	 * APP_WF_MDATE<br>
+	 * APP_FRAME_XMLNAME<br>
+	 * APP_FRAME_ITEMNAME<br>
+	 * 
+	 * @param xmlName
+	 * @param itemName
+	 * @param cnn
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject getAppCfg (String xmlName, String itemName, DataConnection cnn) throws Exception {
+		DTTable tb = getAppTable(xmlName, itemName, cnn);
+		if (tb == null) {
+			throw new Exception("加载流程数据执行错误：" + cnn.getErrorMsg());
+		}
+		if (tb.getCount() == 0) {
+			throw new Exception("未发现流程数据");
+		}
+		String xmlNameApp = null;
+		String thisXmlName = UserConfig.filterXmlName(xmlName);
+
+		for (int i = 0; i < tb.getCount(); i++) {
+			xmlNameApp = UserConfig.filterXmlName(tb.getCell(i, "APP_XMLNAME").toString());
+			if (thisXmlName.equalsIgnoreCase(xmlNameApp)) {
+				return tb.getRow(i).toJson();
+			}
+		}
+		return tb.getRow(0).toJson("UPPER");
 	}
 
 	private HashMap<String, EwaWfUnit> _Units = new HashMap<String, EwaWfUnit>();
@@ -1276,7 +1332,7 @@ public class EwaWfMain {
 		// WF_REF_ID=@REF_ID ";
 		String sql4 = sqls.getSql("WF_UNIT_LOGIC");
 		DTTable tbLOGIC = DTTable.getJdbcTable(sql4, cnn);
-		
+
 		RequestValue rv = cnn.getRequestValue();
 		rv.addValue("dlv_ver", -1);
 		rv.addValue("DLV_JSON_UNIT", tbUnit.toJson(rv));
