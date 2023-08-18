@@ -44,6 +44,7 @@ public class SystemXmlUtils {
 
 	/**
 	 * Get the system inner config
+	 * 
 	 * @param confName
 	 * @return
 	 * @throws Exception
@@ -85,6 +86,10 @@ public class SystemXmlUtils {
 	 */
 	private static synchronized String loadSystemXmlFromResources(String path) {
 		URL url = SystemXmlUtils.class.getResource(path);
+		if (url == null) {
+			LOGGER.error("Can't found the CFG: {}", path);
+			return null;
+		}
 		String xml;
 		try {
 			LOGGER.info("Load resource: {}", url.toString());
@@ -93,7 +98,7 @@ public class SystemXmlUtils {
 			return xml;
 		} catch (IOException e) {
 			LOGGER.error("Load resource: {}, {}", e.getMessage(), url.toString());
-			return e.getMessage();
+			return null;
 		}
 
 	}
