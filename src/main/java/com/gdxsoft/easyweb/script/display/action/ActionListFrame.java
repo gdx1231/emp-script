@@ -496,6 +496,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 		String dbType = conn == null ? "" : conn.getCurrentConfig().getType();
 		// 排序字段
 		String s1 = uxi.getItem("DataItem").getItem(0).getItem("DataField");
+		if (s1 == null || s1.trim().length() == 0) {
+			s1 = name;
+		}
 		String dt = uxi.getItem("DataItem").getItem(0).getItem("DataType");
 
 		String orderField = s1.trim().toUpperCase();
