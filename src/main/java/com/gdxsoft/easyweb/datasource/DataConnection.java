@@ -74,6 +74,7 @@ public class DataConnection {
 
 	// 批处理更新返回的表
 	private List<DTTable> updateBatchTables;
+
 	/**
 	 * 用户和系统的时差(分钟)
 	 * 
@@ -727,7 +728,7 @@ public class DataConnection {
 	 * @return
 	 */
 	private boolean executeQuery(String sql, String oriSql) {
-		if(sql == null || oriSql == null) {
+		if (sql == null || oriSql == null) {
 			return false;
 		}
 		if (this._RequestValue == null)
@@ -1120,16 +1121,16 @@ public class DataConnection {
 	}
 
 	/**
-	 * 批量执行sql语句
+	 * 批量执行sql语句，混合update和select的语句集合
 	 * 
 	 * @param sqls
 	 * @return
 	 */
 	public int executeUpdateBatch(List<String> sqls) {
 		int runInc = 0;
-		
+
 		this.updateBatchTables = new ArrayList<>();
-		
+
 		for (int i = 0; i < sqls.size(); i++) {
 			String sql = sqls.get(i);
 			if (sql == null) {
@@ -1152,7 +1153,7 @@ public class DataConnection {
 				tb.initData(this.getLastResult().getResultSet());
 				try {
 					this.getLastResult().getResultSet().close();
-					
+
 					updateBatchTables.add(tb);
 				} catch (SQLException e) {
 					LOGGER.warn(sql, e.getMessage());
@@ -1672,7 +1673,7 @@ public class DataConnection {
 	 * @throws Exception
 	 */
 	public String rebuildSql(String sql) throws Exception {
-		if(sql == null) {
+		if (sql == null) {
 			return null;
 		}
 		String sql1 = sql;
@@ -2797,6 +2798,7 @@ public class DataConnection {
 
 	/**
 	 * executeUpdateBatch 批处理更新后产生的所有表
+	 * 
 	 * @return the updateBatchTables
 	 */
 	public List<DTTable> getUpdateBatchTables() {

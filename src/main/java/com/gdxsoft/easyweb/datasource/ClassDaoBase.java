@@ -23,38 +23,6 @@ import com.gdxsoft.easyweb.utils.types.UInt64;
 
 public class ClassDaoBase<T> {
 	private static Logger LOGGER = LoggerFactory.getLogger(ClassDaoBase.class);
-	private static HashMap<String, Boolean> MYSQL_RESERVED;
-	static {
-		String[] reseverds = ("ADD,ALL,ALTER,ANALYZE,AND,AS,ASC,ASENSITIVE,BEFORE,BETWEEN,BIGINT,BINARY"
-				+ ",BLOB,BOTH,BY,CALL,CASCADE,CASE,CHANGE,CHAR,CHARACTER,CHECK,COLLATE,COLUMN,CONDITION"
-				+ ",CONNECTION,CONSTRAINT,CONTINUE,CONVERT,CREATE,CROSS,CURRENT_DATE,CURRENT_TIME,"
-				+ "CURRENT_TIMESTAMP,CURRENT_USER,CURSOR,DATABASE,DATABASES,DAY_HOUR,DAY_MICROSECOND"
-				+ ",DAY_MINUTE,DAY_SECOND,DEC,DECIMAL,DECLARE,DEFAULT,DELAYED,DELETE,DESC,DESCRIBE"
-				+ ",DETERMINISTIC,DISTINCT,DISTINCTROW,DIV,DOUBLE,DROP,DUAL,EACH,ELSE,ELSEIF,ENCLOSED"
-				+ ",ESCAPED,EXISTS,EXIT,EXPLAIN,FALSE,FETCH,FLOAT,FLOAT4,FLOAT8,FOR,FORCE,FOREIGN,FROM"
-				+ ",FULLTEXT,GOTO,GRANT,GROUP,HAVING,HIGH_PRIORITY,HOUR_MICROSECOND,HOUR_MINUTE"
-				+ ",HOUR_SECOND,IF,IGNORE,IN,INDEX,INFILE,INNER,INOUT,INSENSITIVE,INSERT,INT,INT1"
-				+ ",INT2,INT3,INT4,INT8,INTEGER,INTERVAL,INTO,IS,ITERATE,JOIN,KEY,KEYS,KILL,LABEL"
-				+ ",LEADING,LEAVE,LEFT,LIKE,LIMIT,LINEAR,LINES,LOAD,LOCALTIME,LOCALTIMESTAMP,LOCK"
-				+ ",LONG,LONGBLOB,LONGTEXT,LOOP,LOW_PRIORITY,MATCH,MEDIUMBLOB,MEDIUMINT,MEDIUMTEXT"
-				+ ",MIDDLEINT,MINUTE_MICROSECOND,MINUTE_SECOND,MOD,MODIFIES,NATURAL,NOT"
-				+ ",NO_WRITE_TO_BINLOG,NULL,NUMERIC,ON,OPTIMIZE,OPTION,OPTIONALLY,OR,ORDER,OUT"
-				+ ",OUTER,OUTFILE,PRECISION,PRIMARY,PROCEDURE,PURGE,RAID0,RANGE,READ,READS,REAL"
-				+ ",REFERENCES,REGEXP,RELEASE,RENAME,REPEAT,REPLACE,REQUIRE,RESTRICT,RETURN,REVOKE"
-				+ ",RIGHT,RLIKE,SCHEMA,SCHEMAS,SECOND_MICROSECOND,SELECT,SENSITIVE,SEPARATOR,SET,SHOW"
-				+ ",SMALLINT,SPATIAL,SPECIFIC,SQL,SQLEXCEPTION,SQLSTATE,SQLWARNING,SQL_BIG_RESULT"
-				+ ",SQL_CALC_FOUND_ROWS,SQL_SMALL_RESULT,SSL,STARTING,STRAIGHT_JOIN,TABLE,TERMINATED"
-				+ ",THEN,TINYBLOB,TINYINT,TINYTEXT,TO,TRAILING,TRIGGER,TRUE,UNDO,UNION,UNIQUE,UNLOCK"
-				+ ",UNSIGNED,UPDATE,USAGE,USE,USING,UTC_DATE,UTC_TIME,UTC_TIMESTAMP,VALUES,VARBINARY"
-				+ ",VARCHAR,VARCHARACTER,VARYING,WHEN,WHERE,WHILE,WITH,WRITE,X509,XOR,YEAR_MONTH,ZEROFILL"
-				+ ",CHARACTER,TIMESTAMP,ACTION,BIT,DATE,ENUM,NO,TEXT,TIME").split(",");
-		MYSQL_RESERVED = new HashMap<String, Boolean>();
-		for (int i = 0; i < reseverds.length; i++) {
-			String reseverd = reseverds[i].trim().toUpperCase();
-			MYSQL_RESERVED.put(reseverd, true);
-		}
-	}
-
 	private String _ErrorMsg;
 	private DataConnection _Conn;
 	private String _ConfigName = "default";
@@ -82,6 +50,44 @@ public class ClassDaoBase<T> {
 			updateFields.put(fieldLst[i], true);
 		}
 
+		return updateFields;
+	}
+
+	/**
+	 * 创建所用更新字段
+	 * 
+	 * @param fieldLst
+	 * @return
+	 */
+	public Map<String, Boolean> createAllUpdateFields(String fieldLsts) {
+		return this.createAllUpdateFields(fieldLsts, false);
+	}
+
+	/**
+	 * 创建所用更新字段
+	 * 
+	 * @param fieldLsts
+	 * @param lowerCase 是否改为小写
+	 * @return
+	 */
+	public Map<String, Boolean> createAllUpdateFields(String fieldLsts, boolean lowerCase) {
+		HashMap<String, Boolean> updateFields = new HashMap<>();
+		if (fieldLsts == null || fieldLsts.length() == 0) {
+			return updateFields;
+		}
+		String[] fields = fieldLsts.split(",");
+
+		for (short i = 0; i < fields.length; i++) {
+			String f = fields[i].trim();
+			if (f.length() == 0) {
+				continue;
+			}
+			if (lowerCase) {
+				updateFields.put(f.toLowerCase(), true);
+			} else {
+				updateFields.put(f, true);
+			}
+		}
 		return updateFields;
 	}
 
@@ -475,7 +481,7 @@ public class ClassDaoBase<T> {
 				sbWhere.append(" AND ");
 			}
 			String key = keys[i];
-			if (isMysql && MYSQL_RESERVED.containsKey(key.toUpperCase())) {
+			if (isMysql && SqlUtils.MYSQL_RESERVED.containsKey(key.toUpperCase())) {
 				sbWhere.append("`" + key + "`");
 			} else {
 				sbWhere.append(key);
@@ -492,7 +498,7 @@ public class ClassDaoBase<T> {
 			if (inc > 0) {
 				sb.append("\n ,");
 			}
-			if (isMysql && MYSQL_RESERVED.containsKey(key.toUpperCase())) {
+			if (isMysql && SqlUtils.MYSQL_RESERVED.containsKey(key.toUpperCase())) {
 				sb.append("`" + key + "`");
 			} else {
 				sb.append(key);
@@ -508,6 +514,70 @@ public class ClassDaoBase<T> {
 	}
 
 	/**
+	 * 创建复制数据的SQL<br>
+	 * 例如：insert into xxx (f1,f2,f3) select f1,f2,f3 from xxx where vvv
+	 * 
+	 * @param fromWhere
+	 * @return
+	 */
+	public String sqlCopy(String fromWhere) {
+		return this.sqlCopy(fromWhere, null);
+	}
+
+	/**
+	 * 创建复制数据的SQL<br>
+	 * 例如：insert into xxx (f1,f2,f3) select f1,f2,f3 from xxx where vvv
+	 * 
+	 * @param fromWhere     数据来源的查询条件
+	 * @param excludeFields 用,分割的需要排除的字段，
+	 * @return
+	 */
+	public String sqlCopy(String fromWhere, String excludeFields) {
+		Map<String, Boolean> exs = this.createAllUpdateFields(excludeFields, true);
+
+		this.ConnectToDatabase();
+		boolean isMysql = SqlUtils.isMySql(this._Conn);
+
+		String tb;
+		// 增加database前缀
+		if (StringUtils.isNotBlank(this.database)) {
+			tb = this.database + "." + this.tableName;
+		} else {
+			tb = this.tableName;
+		}
+		StringBuilder sb = new StringBuilder();
+		StringBuilder sb_values = new StringBuilder();
+		sb.append("INSERT INTO ").append(tb).append(" ( ");
+		sb_values.append("SELECT ");
+		int inc = 0;
+		for (int i = 0; i < this.fields.length; i++) {
+			String key = this.fields[i];
+			if (this.autoKey != null && key.equalsIgnoreCase(this.autoKey)) {
+				continue;// 自增字段
+			}
+			if (exs.containsKey(key.toLowerCase())) {
+				continue;
+			}
+			if (inc > 0) {
+				sb.append(", ");
+				sb_values.append(", ");
+			}
+			if (isMysql && SqlUtils.MYSQL_RESERVED.containsKey(key.toUpperCase())) {
+				sb.append("`" + key + "`");
+				sb_values.append("`" + key + "`");
+			} else {
+				sb.append(key);
+				sb_values.append(key);
+			}
+			inc++;
+		}
+		sb.append(")\n");
+		sb_values.append("\nFROM ").append(tb).append("\nWHERE ").append(fromWhere);
+
+		return sb.append(sb_values).toString();
+	}
+
+	/**
 	 * 创建 新建变化的 SQL
 	 * 
 	 * @param tableName    表名
@@ -519,7 +589,7 @@ public class ClassDaoBase<T> {
 			return null;
 		}
 		this.ConnectToDatabase();
-		boolean isMysql = "mysql".equalsIgnoreCase(this._Conn.getDatabaseType());
+		boolean isMysql = SqlUtils.isMySql(this._Conn);
 
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sb_values = new StringBuilder();
@@ -545,7 +615,7 @@ public class ClassDaoBase<T> {
 				sb.append("\n ,");
 				sb_values.append("\n ,");
 			}
-			if (isMysql && MYSQL_RESERVED.containsKey(key.toUpperCase())) {
+			if (isMysql && SqlUtils.MYSQL_RESERVED.containsKey(key.toUpperCase())) {
 				sb.append("`" + key + "`");
 			} else {
 				sb.append(key);
