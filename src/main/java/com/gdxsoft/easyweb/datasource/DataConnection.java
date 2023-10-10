@@ -1897,7 +1897,7 @@ public class DataConnection {
 		}
 
 		v1 = pv.getStringValue();
-		if (dt.equals("INT")) {
+		if (dt.equals("INT") || dt.equals("INTEGER")) {
 			return this.getParaInteger(pv).toString();
 		} else if (dt.equals("LONG") || dt.equals("BIGINT")) {
 			return this.getParaLong(pv).toString();
