@@ -339,7 +339,7 @@ public class HtmlControl {
 		if (m0 >= 0) {
 			tmp = Html.substring(m0);
 		}
-		int m1 = tmp.lastIndexOf("</body></html>");
+		int m1 = tmp.lastIndexOf("</body>\n</html>");
 		if (m1 > 0) {
 			tmp = tmp.substring(0, m1);
 		}
