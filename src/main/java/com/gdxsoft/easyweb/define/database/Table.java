@@ -86,7 +86,7 @@ public class Table {
 	 * @return
 	 */
 	public String getDatabasePrefix(String targetDatabaseType) {
-		if (this.getReplaceMetaDatabaseName() == null && this.getReplaceMetaDatabaseName().trim().length() == 0) {
+		if (this.getReplaceMetaDatabaseName() == null || this.getReplaceMetaDatabaseName().trim().length() == 0) {
 			return "";
 		}
 		boolean isSqlServer = SqlUtils.isSqlServer(targetDatabaseType);
