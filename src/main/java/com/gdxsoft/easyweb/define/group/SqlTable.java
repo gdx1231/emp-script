@@ -167,8 +167,8 @@ public class SqlTable {
 		if (mapType == null) {
 			throw new Exception("数据类型：" + fieldType + "未定义");
 		}
-		if (mapType.getDatabaseName().equalsIgnoreCase(databaseType)) {
-			// 数据库类型一致的话则保持原始数据类型，不用转换
+		if (mapType.getDatabaseName().equalsIgnoreCase(databaseType) && fieldType.indexOf("_MAX")<0) {
+			// 数据库类型一致的话则保持原始数据类型，不用转换			
 			return mapType;
 		}
 		MapFieldType[] b = mapType.getEwa().getMapTo().get(databaseType);
