@@ -964,7 +964,9 @@ public class EwaWfMain {
 					sb1.append("SELECT A.* FROM ADM_R_DEPT_POST a\n");
 					sb1.append(" inner join adm_post b on a.pos_id=b.pos_id and pos_is_master='Y'\n");
 					sb1.append(" INNER JOIN ADM_R_UDP C ON A.DEP_POS_ID=C.DEP_POS_ID\n");
-					sb1.append(" inner join adm_user d on a.dep_id=d.adm_dep_id and d.adm_id='" + startAdmin + "'");
+					//sb1.append(" inner join adm_user d on a.dep_id=d.adm_dep_id and d.adm_id='" + startAdmin + "'");
+					//一人多岗
+					sb1.append(" inner join adm_user d on d.adm_id='" + startAdmin + "'");
 					sb1.append(" where C.ADM_ID= @g_adm_id ");
 					DTTable tb = DTTable.getJdbcTable(sb1.toString(), cnn);
 					if (tb.getCount() > 0) {
