@@ -1689,8 +1689,12 @@ public class DataConnection {
 				throw new Exception("The param (~" + para + ") not exists");
 			}
 
-			if (!(pv.getPVTag() == PageValueTag.SESSION || pv.getPVTag() == PageValueTag.SYSTEM
-					|| pv.getPVTag() == PageValueTag.DTTABLE || pv.getPVTag() == PageValueTag.OTHER)) {
+			if (!(pv.getPVTag() == PageValueTag.SESSION //
+					|| pv.getPVTag() == PageValueTag.SYSTEM //
+					|| pv.getPVTag() == PageValueTag.DTTABLE //
+					|| pv.getPVTag() == PageValueTag.OTHER //
+					|| pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS//
+			)) {
 				// form or query传递
 				if (!v1.matches("[a-zA-Z0-9_.\\-]*")) {
 					if (v1.indexOf("--") >= 0) {
