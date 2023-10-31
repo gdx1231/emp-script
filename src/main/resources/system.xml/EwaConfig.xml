@@ -3444,6 +3444,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				, DateShortTime_zh,DateShortTime_zh1
 				, DateTime_zh, DateTime_zh1
 				, ShortTime_zh, ShortTime_zh1, Time_zh, Time_zh1
+				, Bin2Base64, Bin2Hex
 				 ">
 				<DescriptionSet>
 					<Set Lang="zhcn"
@@ -3454,6 +3455,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 						, 中文日期短时间(2003年09月01日 09点07分), 中文日期1(2003年9月1日 9点7分)
 						, 中文日期时间(2003年09月01日 09点07分00秒), 中文日期时间1(2003年9月1日 9点7分0秒)
 						, 中文短时间(09点07分), 中文短时间1(9点7分), 中文时间(09点07分00秒), 中文时间1(9点7分0秒)
+						, 二进制显示为Base64, 二进制显示为Hex
 						 " />
 					<Set Lang="enus"
 						Info=", Date, ShortDate, Time,ShortTime, DateTime, DateShortTime
@@ -3463,6 +3465,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 						, 中文日期短时间(2003年09月01日 09点07分), 中文日期1(2003年9月1日 9点7分)
 						, 中文日期时间(2003年09月01日 09点07分00秒), 中文日期时间1(2003年9月1日 9点7分0秒)
 						, 中文短时间(09点07分), 中文短时间1(9点7分), 中文时间(09点07分00秒), 中文时间1(9点7分0秒)
+						, Bin2Base64, Bin2Hex 
 						 " />
 				</DescriptionSet>
 			</XGroupValue>
