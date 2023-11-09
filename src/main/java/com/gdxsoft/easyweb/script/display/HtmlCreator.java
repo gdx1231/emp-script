@@ -1994,8 +1994,11 @@ public class HtmlCreator {
 		String frameType = _SysParas.getFrameType();
 		String returnValue = "";
 		UserXItem action = this._UserConfig.getUserActionItem();
-
-		if (frameType.equalsIgnoreCase("MultiGrid")) {
+		String actionName = _SysParas.getActionName();
+		if (frameType.equalsIgnoreCase("MultiGrid")) { // 多维表格
+			if (!"OnPageLoad".equalsIgnoreCase(actionName) && this.isAjaxCall()) {
+				return this.executeAction(actionName);
+			}
 			if (!action.testName("ActionSet")) {
 				return "";
 			}
@@ -2029,7 +2032,7 @@ public class HtmlCreator {
 				_SysParas.getDataConn().transCommit();// 提交事物
 			}
 		} else {
-			returnValue = this.executeAction(_SysParas.getActionName());
+			returnValue = this.executeAction(actionName);
 		}
 
 		return returnValue;
