@@ -179,7 +179,7 @@ public class ItemBase implements IItem {
 	 */
 	private String handleSpanTitle(String s1, String val) {
 		Object title = this._HtmlClass.getItemValues().getLastValue();
-		if (title == null  ) {
+		if (title == null) {
 			return s1;
 		}
 		// 引用
@@ -419,11 +419,12 @@ public class ItemBase implements IItem {
 
 		String clickType = tagIsLFEdit == 2 ? "onclick" : "ondblclick";
 
-		sb.append("<div class='EWA_LF_EDIT EWA_LF_EDIT_TXT' " + clickType + "=\"");
-		sb.append(js1);
-		sb.append("\">");
-		sb.append(val == null ? "&nbsp;" : val.replace("<", "&lt;").replace("\n", "<br>"));
-		sb.append(" </div><div class='EWA_LF_EDIT EWA_LF_EDIT_CTRL' style='display:none'>" + html + "</div>");
+		sb.a("<div class='EWA_LF_EDIT EWA_LF_EDIT_TXT' " + clickType + "=\"");
+		sb.a(js1);
+		sb.a("\">");
+		sb.a(val == null ? "&nbsp;"
+				: val.replace("@", IItem.REP_AT_STR).replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>"));
+		sb.a(" </div><div class='EWA_LF_EDIT EWA_LF_EDIT_CTRL' style='display:none'>" + html + "</div>");
 		return sb.toString();
 	}
 
