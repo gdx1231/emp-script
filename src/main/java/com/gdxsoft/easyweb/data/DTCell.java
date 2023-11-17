@@ -8,13 +8,18 @@ import java.sql.Clob;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class DTCell implements Serializable {
+import com.gdxsoft.easyweb.utils.Utils;
 
+
+public class DTCell implements Serializable {
+	private static Logger LOGGER = LoggerFactory.getLogger(DTCell.class);
 	/**
 	 * 
 	 */
@@ -197,8 +202,16 @@ public class DTCell implements Serializable {
 			int v = Integer.parseInt((this._Value.toString().split("\\.")[0]).replace(",", ""));
 			return v;
 		} catch (Exception err) {
+			LOGGER.warn("Covert Int fail, {}, {}", this._Value, err.getMessage());
 			return null;
 		}
+	}
+	
+	public Boolean toBoolean() {
+		if (this._Value == null) {
+			return null;
+		}
+		return Utils.cvtBool(this._Value);
 	}
 
 	public Long toLong() {
@@ -209,6 +222,7 @@ public class DTCell implements Serializable {
 			Long v = Long.parseLong((this._Value.toString().split("\\.")[0]).replace(",", ""));
 			return v;
 		} catch (Exception err) {
+			LOGGER.warn("Covert Long fail, {}, {}", this._Value, err.getMessage());
 			return null;
 		}
 	}
@@ -221,6 +235,7 @@ public class DTCell implements Serializable {
 			Double v = Double.parseDouble(this._Value.toString());
 			return v;
 		} catch (Exception err) {
+			LOGGER.warn("Covert Double fail, {}, {}", this._Value, err.getMessage());
 			return null;
 		}
 	}
@@ -238,7 +253,7 @@ public class DTCell implements Serializable {
 			Date d = (Date) this._Value;
 			return d;
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			LOGGER.warn("Covert date fail, {}, {}", this._Value, e.getMessage());
 			return null;
 
 		}
@@ -298,6 +313,7 @@ public class DTCell implements Serializable {
 
 				return c;
 			} catch (Exception e) {
+				LOGGER.warn("Covert date fail, {}, {}", this._Value, e.getMessage());
 				return e.getLocalizedMessage();
 
 			}
