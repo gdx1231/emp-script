@@ -487,6 +487,15 @@ public class FrameParameters {
 	public static final String EWA_SQL_SPLIT_NO = "EWA_SQL_SPLIT_NO";
 
 	/**
+	 * 英文
+	 */
+	public static final String ENUS = "enus";
+	/**
+	 * 中文
+	 */
+	public static final String ZHCN = "zhcn";
+
+	/**
 	 * shortName
 	 */
 	public static String $S = "$S";

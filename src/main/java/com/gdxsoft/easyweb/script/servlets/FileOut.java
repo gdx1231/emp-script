@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.utils.UFile;
+import com.gdxsoft.easyweb.utils.UImages;
 import com.gdxsoft.easyweb.utils.Utils;
 
 public class FileOut {
@@ -1076,29 +1077,7 @@ public class FileOut {
 	 * @return null or dimension
 	 */
 	public static Dimension getImageResize(String resize) {
-		if (StringUtils.isBlank(resize)) {
-			return null;
-		}
-
-		String[] s1 = resize.toLowerCase().split("x");
-		;
-		if (s1.length != 2) {
-			return null;
-		}
-		int w = 0;
-		int h = 0;
-		try {
-			w = Integer.parseInt(s1[0]);
-			h = Integer.parseInt(s1[1]);
-
-			Dimension d = new Dimension();
-			d.setSize(w, h);
-
-			return d;
-		} catch (Exception e) {
-			LOGGER.error("ImageResize: {},{}", resize, e.getMessage());
-			return null;
-		}
+		 return UImages.parseSize(resize);
 	}
 
 	private HttpServletRequest request;

@@ -190,7 +190,7 @@ public class Upload {
 			String p = u.getItem("UpPath");
 			if (!p.trim().equals("")) {
 				// p = iv.replaceParameters(p, false);
-				//替换参数在upload中调用，因为此时的rv数据不完整
+				// 替换参数在upload中调用，因为此时的rv数据不完整
 				_uploadDir = p;
 			}
 		}
@@ -382,6 +382,7 @@ public class Upload {
 
 	/**
 	 * 替换上传路径的参数
+	 * 
 	 * @throws Exception
 	 */
 	public void replaceUploadPathParameters() throws Exception {
@@ -401,15 +402,15 @@ public class Upload {
 		this._uploadRealDir = this._Rv.replaceParameters(_uploadRealDir);
 		UFile.buildPaths(this._uploadRealDir);
 	}
-	
+
 	/**
 	 * 处理文件上传
 	 * 
 	 * @throws Exception
 	 */
 	public String upload() throws Exception {
-		 this.replaceUploadPathParameters();
-		
+		this.replaceUploadPathParameters();
+
 		int m = 0;
 		if (this._UploadItems != null) { // 处理文件上传
 			for (int i = 0; i < this._UploadItems.size(); i++) {
@@ -706,35 +707,9 @@ public class Upload {
 			return;
 		}
 
-		String[] sizes = this._upNewSizes.split("\\,");
-		ArrayList<Dimension> ds = new ArrayList<Dimension>();
-		for (int i = 0; i < sizes.length; i++) {
-			String s = sizes[i];
-			String[] s1 = s.split("x");
-			if (s1.length != 2) {
-				continue;
-			}
-			int w = 0;
-			int h = 0;
-			try {
-				w = Integer.parseInt(s1[0]);
-				h = Integer.parseInt(s1[1]);
-				if (w <= 5 || w > 3000 || h <= 5 || h > 3000) {
-					// 尺寸太大或太小
-					continue;
-				}
-			} catch (Exception e) {
-				System.err.println(e.getMessage());
-				continue;
-			}
-			Dimension d = new Dimension();
-			d.setSize(w, h);
-			ds.add(d);
-		}
-		if (ds.size() == 0)
+		Dimension[] dd = UImages.parseSizes(this._upNewSizes);
+		if (dd.length == 0)
 			return;
-		Dimension[] dd = new Dimension[ds.size()];
-		dd = ds.toArray(dd);
 		String imgPath = fu.getSavePath();
 		try {
 			// sub 记录生成图片

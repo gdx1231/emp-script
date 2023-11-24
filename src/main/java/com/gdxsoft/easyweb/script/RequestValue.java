@@ -248,13 +248,20 @@ public class RequestValue implements Cloneable {
 		// //避免跨站脚本攻击漏洞 2015-2-4
 		// 因为 FrameFrame.createJsFramePage sJs.append("\r\nEWA.LANG='" +
 		// lang.toLowerCase()+ "'; //page language\r\n");
-		if (lang == null || lang.trim().length() == 0 || !lang.equalsIgnoreCase("enus")) {
-			lang = "zhcn";// 默认字符集为简体中文
+		if (FrameParameters.ENUS.equalsIgnoreCase(lang)) {
+			lang = FrameParameters.ZHCN;// 默认字符集为简体中文
 		} else {
-			lang = "enus";
+			lang = FrameParameters.ENUS;
 		}
 
 		return lang;
+	}
+	/**
+	 * 是否英文模式
+	 * @return
+	 */
+	public boolean isEn() {
+		return FrameParameters.ENUS.equalsIgnoreCase(this.getLang());
 	}
 
 	public String queryToJson() {
