@@ -249,9 +249,10 @@ public class RequestValue implements Cloneable {
 		// 因为 FrameFrame.createJsFramePage sJs.append("\r\nEWA.LANG='" +
 		// lang.toLowerCase()+ "'; //page language\r\n");
 		if (FrameParameters.ENUS.equalsIgnoreCase(lang)) {
-			lang = FrameParameters.ZHCN;// 默认字符集为简体中文
-		} else {
 			lang = FrameParameters.ENUS;
+		} else {
+			// 默认字符集为简体中文
+			lang = FrameParameters.ZHCN;
 		}
 
 		return lang;
