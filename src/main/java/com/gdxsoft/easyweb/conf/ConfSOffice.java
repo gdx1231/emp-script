@@ -8,6 +8,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.utils.UPath;
+import java.net.ServerSocket;
 
 /**
  * 文档转换服务的OpenOffice /LibreOffice配置 &lt;sOffice sofficePath="c:/Program
@@ -18,6 +19,18 @@ public class ConfSOffice {
 	private static Logger LOGGER = LoggerFactory.getLogger(ConfSecurities.class);
 	private static ConfSOffice INST = null;
 	private static long PROP_TIME = 0;
+
+	/**
+	 * 获取一个可用的端口
+	 * @return
+	 */
+	public static int getAvailablePort() {
+		try (ServerSocket serverSocket = new ServerSocket(0)) {
+			return serverSocket.getLocalPort();
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to find an available port.", e);
+		}
+	}
 
 	/**
 	 * Return the instance of define
@@ -101,8 +114,8 @@ public class ConfSOffice {
 	// 文档转换服务的OpenOffice /LibreOffice配置
 	private String sofficePath;
 
-	// 启动服务的端口，默认8100，多个端口意味者多个服务
-	private int[] ports = { 8100 };
+	// 启动服务的端口，多个端口意味者多个服务，无定义时，使用随机端口
+	private int[] ports = {   };
 
 	/**
 	 * 文档转换服务的OpenOffice /LibreOffice安装路径
@@ -114,12 +127,19 @@ public class ConfSOffice {
 	}
 
 	/**
-	 * 启动服务的端口，默认8100，多个端口意味者多个服务
+	 * 启动服务的端口，<del>默认8100</del>，多个端口意味者多个服务，无定义时，使用随机端口
 	 * 
 	 * @return
 	 */
 	public int[] getPorts() {
 		return ports;
+	}
+
+	/**
+	 * @param ports the ports to set
+	 */
+	public void setPorts(int[] ports) {
+		this.ports = ports;
 	}
 
 }
