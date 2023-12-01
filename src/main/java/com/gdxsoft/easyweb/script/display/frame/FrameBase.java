@@ -877,15 +877,15 @@ public class FrameBase {
 				doc.addScriptHtml(r.toString());
 			});
 		}
-
-		if (this.isUseTest1Table()) {
+		boolean useTest1 = this.isUseTest1Table();
+		if (useTest1) {
 			doc.addScriptHtml("<div id='EWA_FRAME_MAIN' _s='主框架开始'>", "主框架开始");
 		}
 		this.createH5FrameSet();
 		if (this._Html5FrameSet != null) {
 			doc.addScriptHtml(_Html5FrameSet[0]);
 		}
-		if (this.isUseTest1Table()) {
+		if (useTest1) {
 			this.createTest1Table(doc, skinName); // <table id='Test1'
 		}
 		if (this._HtmlClass.getItemValues().getRequestValue().s(FrameParameters.EWA_IN_DIALOG) != null) {
@@ -984,10 +984,10 @@ public class FrameBase {
 	public boolean isUseTest1Table() {
 		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
 		if (rv.s(FrameParameters.EWA_SKIP_TEST1) != null) {
-			return  !Utils.cvtBool(rv.s(FrameParameters.EWA_SKIP_TEST1));
+			return !Utils.cvtBool(rv.s(FrameParameters.EWA_SKIP_TEST1));
 		}
-		if (!this._HtmlClass.getSysParas().isPc()) {
-			return false;
+		if (this._HtmlClass.getSysParas().isPc()) {
+			return true;
 		}
 		String frameTag = this._HtmlClass.getUserConfig().getUserPageItem().getSingleValue("FrameTag");
 		if (!frameTag.equalsIgnoreCase("Complex")) {
@@ -1015,24 +1015,35 @@ public class FrameBase {
 
 		String userWidth = null;
 		// 用户参数指定宽度
-		if (rv.isNotBlank(FrameParameters.EWA_WIDTH)  ) {
+		if (rv.isNotBlank(FrameParameters.EWA_WIDTH)) {
 			userWidth = rv.s(FrameParameters.EWA_WIDTH).replace("'", "").replace("\"", "").replace(">", "").replace("<",
 					"");
 		}
 		String userHeight = null;
 		// 用户参数指定的高度
-		if (rv.isNotBlank(FrameParameters.EWA_HEIGHT)  ) {
-			userHeight = rv.s(FrameParameters.EWA_HEIGHT).replace("'", "").replace("\"", "").replace(">", "").replace("<",
-					"");
+		if (rv.isNotBlank(FrameParameters.EWA_HEIGHT)) {
+			userHeight = rv.s(FrameParameters.EWA_HEIGHT).replace("'", "").replace("\"", "").replace(">", "")
+					.replace("<", "");
 		}
 		if (sizeW != null && sizeW.trim().length() > 0) {
-			try {
-				int w = Integer.parseInt(userWidth);
-				mainWidth = "width: " + w + "px; ";
-				sb.append("width: " + w + "px; ");
-			} catch (Exception e) {
-				mainWidth = "width: " + sizeW + "; ";
-				sb.append("width: " + sizeW + "; ");
+			if (userWidth != null && userWidth.trim().length() > 0) {
+				try {
+					int w = Integer.parseInt(userWidth);
+					mainWidth = "width: " + w + "px; ";
+					sb.append("width: " + w + "px; ");
+				} catch (Exception e) {
+					mainWidth = "width: " + sizeW + "; ";
+					sb.append("width: " + sizeW + "; ");
+				}
+			} else {
+				try {
+					int w = Integer.parseInt(sizeW);
+					mainWidth = "width: " + w + "px; ";
+					sb.append("width: " + w + "px; ");
+				} catch (Exception e) {
+					mainWidth = "width: " + sizeW + "; ";
+					sb.append("width: " + sizeW + "; ");
+				}
 			}
 			String ft = this._HtmlClass.getSysParas().getFrameType();
 			if (ft.equals("COMBINE")) {
@@ -1042,11 +1053,20 @@ public class FrameBase {
 			sb.append("width:100%; ");
 		}
 		if (sizeH != null && sizeH.trim().length() > 0) {
-			try {
-				int h = Integer.parseInt(userHeight);
-				sb.append("height: " + h + "px; ");
-			} catch (Exception e) {
-				sb.append("height: " + sizeH + "; ");
+			if (userHeight != null && userHeight.trim().length() > 0) {
+				try {
+					int h = Integer.parseInt(userHeight);
+					sb.append("height: " + h + "px; ");
+				} catch (Exception e) {
+					sb.append("height: " + sizeH + "; ");
+				}
+			} else {
+				try {
+					int h = Integer.parseInt(sizeH);
+					sb.append("height: " + h + "px; ");
+				} catch (Exception e) {
+					sb.append("height: " + sizeH + "; ");
+				}
 			}
 		}
 		if (sizeHAlign != null && sizeHAlign.trim().length() > 0) {
@@ -1101,13 +1121,14 @@ public class FrameBase {
 		if (this._HtmlClass.getItemValues().getRequestValue().s(FrameParameters.EWA_IN_DIALOG) != null) {
 			doc.addScriptHtml("</div><!-- end of ewa-in-dialog -->");
 		}
-		if (this.isUseTest1Table()) {
+		boolean useTest1 = this.isUseTest1Table();
+		if (useTest1) {
 			doc.addScriptHtml("</td></tr></table><!--浮动表结束-->");
 		}
 		if (this._Html5FrameSet != null) {
 			doc.addScriptHtml(_Html5FrameSet[1]);
 		}
-		if (this.isUseTest1Table()) {
+		if (useTest1) {
 			doc.addScriptHtml("</div><!-- 主框架结束 -->");
 		}
 		// this._HtmlClass.getDocument().addScriptHtml(
