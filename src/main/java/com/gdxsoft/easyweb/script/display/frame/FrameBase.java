@@ -984,7 +984,7 @@ public class FrameBase {
 	public boolean isUseTest1Table() {
 		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
 		if (rv.s(FrameParameters.EWA_SKIP_TEST1) != null) {
-			return false;
+			return  !Utils.cvtBool(rv.s(FrameParameters.EWA_SKIP_TEST1));
 		}
 		if (!this._HtmlClass.getSysParas().isPc()) {
 			return false;
@@ -1013,19 +1013,21 @@ public class FrameBase {
 		String sizeHAlign = this.getPageItemValue("Size", "HAlign");
 		String mainWidth = null;
 
+		String userWidth = null;
 		// 用户参数指定宽度
-		if (rv.s(FrameParameters.EWA_WIDTH) != null) {
-			sizeW = rv.s(FrameParameters.EWA_WIDTH).replace("'", "").replace("\"", "").replace(">", "").replace("<",
+		if (rv.isNotBlank(FrameParameters.EWA_WIDTH)  ) {
+			userWidth = rv.s(FrameParameters.EWA_WIDTH).replace("'", "").replace("\"", "").replace(">", "").replace("<",
 					"");
 		}
+		String userHeight = null;
 		// 用户参数指定的高度
-		if (rv.s(FrameParameters.EWA_HEIGHT) != null) {
-			sizeH = rv.s(FrameParameters.EWA_HEIGHT).replace("'", "").replace("\"", "").replace(">", "").replace("<",
+		if (rv.isNotBlank(FrameParameters.EWA_HEIGHT)  ) {
+			userHeight = rv.s(FrameParameters.EWA_HEIGHT).replace("'", "").replace("\"", "").replace(">", "").replace("<",
 					"");
 		}
 		if (sizeW != null && sizeW.trim().length() > 0) {
 			try {
-				int w = Integer.parseInt(sizeW);
+				int w = Integer.parseInt(userWidth);
 				mainWidth = "width: " + w + "px; ";
 				sb.append("width: " + w + "px; ");
 			} catch (Exception e) {
@@ -1041,7 +1043,7 @@ public class FrameBase {
 		}
 		if (sizeH != null && sizeH.trim().length() > 0) {
 			try {
-				int h = Integer.parseInt(sizeH);
+				int h = Integer.parseInt(userHeight);
 				sb.append("height: " + h + "px; ");
 			} catch (Exception e) {
 				sb.append("height: " + sizeH + "; ");
