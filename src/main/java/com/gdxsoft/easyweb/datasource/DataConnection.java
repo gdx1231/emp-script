@@ -2221,7 +2221,8 @@ public class DataConnection {
 				continue;
 			}
 			index++;
-			if (!key1.endsWith("_OUT")) { // 非输出参数
+			if (!key1.endsWith("_OUT") && !key1.endsWith("_OUTPUT")) { 
+				// 非输出参数
 				this.addStatementParameter(pst, key, index);
 				continue;
 			}
