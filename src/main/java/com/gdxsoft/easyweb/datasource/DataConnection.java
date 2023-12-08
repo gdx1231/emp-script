@@ -642,7 +642,12 @@ public class DataConnection {
 	}
 
 	public boolean connect() {
+
 		try {
+			if (this._ds == null) {
+				this.initConnection();
+			}
+
 			_ds.connect();
 			return true;
 		} catch (Exception e) {
@@ -2221,7 +2226,7 @@ public class DataConnection {
 				continue;
 			}
 			index++;
-			if (!key1.endsWith("_OUT") && !key1.endsWith("_OUTPUT")) { 
+			if (!key1.endsWith("_OUT") && !key1.endsWith("_OUTPUT")) {
 				// 非输出参数
 				this.addStatementParameter(pst, key, index);
 				continue;
