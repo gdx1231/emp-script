@@ -185,7 +185,8 @@ public class DataHelper {
 			LOGGER.error("username not defined");
 			errors.al("username not defined");
 		}
-		LOGGER.debug("driverClassName={}, username={}, url={}", driverClassName, username, url);
+		
+		LOGGER.info("driverClassName={}, username={}, url={}", driverClassName, username, url);
 		if (errors.length() > 0) {
 			throw new Exception(errors.toString());
 		}
@@ -210,15 +211,16 @@ public class DataHelper {
 
 		cpds.setMinimumIdle(1);
 
+		long maxLifetimeMin = 30000l;// 最小允许值30秒
 		try {
-			// 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0
 			String maxWait = _Cfg.getPool().get("maxWait");
 			long maxWaitMs = Long.parseLong(maxWait) * 1000;
-			cpds.setIdleTimeout(maxWaitMs);
+			if (maxWaitMs < maxLifetimeMin) {
+				maxWaitMs = maxLifetimeMin;
+			}
 			cpds.setMaxLifetime(maxWaitMs);
+
 		} catch (Exception err) {
-			// 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0
-			cpds.setIdleTimeout(60 * 1000);
 		}
 		DATASOURCES.put(_Cfg.getName().toUpperCase().trim(), cpds);
 		return cpds;
