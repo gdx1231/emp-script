@@ -895,14 +895,16 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 */
 	private String createSearchTextSql(SearchParameter lsp, DataConnection conn, String dataField, String dataType) {
 		String[] txtExps = { lsp.getPara1().trim() };
-		Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
-		Matcher m = p.matcher(lsp.getPara1().trim());
-		if (m.find()) {
-			// 用空格分割查询字符串，拼接为 OR
-			txtExps = lsp.getPara1().trim().split(" ");
-		}
 		String opTag = lsp.getTag();
 
+		if (!(opTag.equals("eq") || opTag.equals("uneq"))) {// 非 等于或不等于
+			Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+			Matcher m = p.matcher(lsp.getPara1().trim());
+			if (m.find()) {
+				// 用空格分割查询字符串，拼接为 OR
+				txtExps = lsp.getPara1().trim().split(" ");
+			}
+		}
 		// 例如全文检索的用法 contains(字段, @q)
 		// SQLServer 的 contains(字段, '北京')
 		boolean isFunc = dataField.toLowerCase().indexOf("contains") >= 0 && dataField.toLowerCase().indexOf("@q") >= 0
