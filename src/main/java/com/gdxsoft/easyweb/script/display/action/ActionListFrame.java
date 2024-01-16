@@ -897,8 +897,8 @@ public class ActionListFrame extends ActionBase implements IAction {
 		String[] txtExps = { lsp.getPara1().trim() };
 		String opTag = lsp.getTag();
 
-		if (!(opTag.equals("eq") || opTag.equals("uneq"))) {// 非 等于或不等于
-			Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+		if (!(opTag.equals("eq") || opTag.equals("uneq"))) {// not （等于或不等于）
+			Pattern p = Pattern.compile("[\u4e00-\u9fa5]");// 判断是不是中⽂
 			Matcher m = p.matcher(lsp.getPara1().trim());
 			if (m.find()) {
 				// 用空格分割查询字符串，拼接为 OR
