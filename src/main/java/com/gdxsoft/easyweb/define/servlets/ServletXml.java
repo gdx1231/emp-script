@@ -209,6 +209,7 @@ public class ServletXml extends HttpServlet {
 			// 从配置文件中加载DropList配置信息
 			try {
 				cnt = this.handleEwacDdlRead(rv);
+				this.setOutType(response, "javascript");
 			} catch (Exception e) {
 				cnt = e.getMessage();
 			}
