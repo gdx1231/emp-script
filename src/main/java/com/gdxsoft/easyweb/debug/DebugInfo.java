@@ -1,6 +1,5 @@
 package com.gdxsoft.easyweb.debug;
 
-import java.io.UnsupportedEncodingException;
 
 import com.gdxsoft.easyweb.cache.SqlCachedHsqldbImpl;
 import com.gdxsoft.easyweb.datasource.DataConnection;

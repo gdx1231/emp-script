@@ -33,7 +33,6 @@ import com.gdxsoft.easyweb.define.group.ModuleExport;
 import com.gdxsoft.easyweb.define.group.ModuleImport;
 import com.gdxsoft.easyweb.define.group.ModulePublish;
 import com.gdxsoft.easyweb.script.RequestValue;
-import com.gdxsoft.easyweb.script.servlets.FileOut;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UJSon;
@@ -261,6 +260,7 @@ public class ServletGroup extends HttpServlet {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if (!ConfDefine.isAllowDefine()) {
 			response.setStatus(404);

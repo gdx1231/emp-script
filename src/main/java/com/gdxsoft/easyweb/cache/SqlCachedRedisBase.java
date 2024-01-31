@@ -27,6 +27,7 @@ public abstract class SqlCachedRedisBase implements ISqlCached {
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	private Jedis getSingleConnection() {
 		Jedis conn = POOL.getResource();
 		// 设置密码

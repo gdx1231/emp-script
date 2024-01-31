@@ -18,5 +18,6 @@ public class TestItem {
 		IItem item = new ItemEwaConfigItem();
 		System.out.println(item.getClass().getSimpleName());
 		ItemEwaConfigItem aa = (ItemEwaConfigItem)item;
+		System.out.println(aa);
 	}
 }

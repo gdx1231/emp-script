@@ -1,6 +1,5 @@
 package com.gdxsoft.easyweb.define.group.dao;
 
-import java.util.*;
 import com.gdxsoft.easyweb.datasource.ClassBase;
 /**表ewa_mod_data映射类
  * @author gdx 时间：Wed Apr 26 2023 18:08:19 GMT+0800 (中国标准时间)*/
