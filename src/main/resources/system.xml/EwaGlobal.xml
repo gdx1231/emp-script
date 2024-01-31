@@ -180,7 +180,7 @@
 				<Set Lang="enus" Info="Recycle" Memo="Recycle" />
 			</DescriptionSet>
 		</Info>
-		
+
 	</Infos>
 	<Events>
 		<Event Name="ValidCodeError" BackValue="EWA.C.Utils.ReloadValidCodeImage();">
@@ -191,7 +191,14 @@
 				</DescriptionSet>
 			</Front>
 		</Event>
-
+		<Event Name="IdempotanceError" BackValue="">
+			<Front>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="" Memo="请勿重复提交" />
+					<Set Lang="enus" Info="" Memo="Please do not resubmit" />
+				</DescriptionSet>
+			</Front>
+		</Event>
 		<Event Name="EWA_DELETE" FrontValue="EWA.F.FOS['@SYS_FRAME_UNID'].DoDelete(this)"
 			BackValue="EWA.F.FOS['@SYS_FRAME_UNID'].Reload();">
 			<Front>
@@ -329,8 +336,9 @@
 				<Set Lang="zhcn" Info="时间 HH:MM" Memo="格式：09:18 或 9:18" />
 				<Set Lang="enus" Info="Time HH:MM" Memo="e.g.：09:18 or 9:18" />
 			</DescriptionSet>
-		</Valid>		
-		<Valid Name="HH_MM_d4" Regex="/^$|^(\d{1}|0\d{1}|1\d{1}|2[0-3]):[0-5]\d{1}$|^(0\d{1}|1\d{1}|2[0-3])[0-5]\d{1}$/">
+		</Valid>
+		<Valid Name="HH_MM_d4"
+			Regex="/^$|^(\d{1}|0\d{1}|1\d{1}|2[0-3]):[0-5]\d{1}$|^(0\d{1}|1\d{1}|2[0-3])[0-5]\d{1}$/">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="时间 HH:MM,4位数字需自己处理格式" Memo="格式：09:18 或 9:18 或 0918" />
 				<Set Lang="enus" Info="Time HH:MM" Memo="e.g.：09:18 or 9:18 or 0918" />

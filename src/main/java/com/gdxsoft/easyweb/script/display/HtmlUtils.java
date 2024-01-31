@@ -28,6 +28,17 @@ public class HtmlUtils {
 	private static Logger LOGGER = LoggerFactory.getLogger(HtmlUtils.class);
 
 	/**
+	 * 创建Idempotance的键值
+	 * 
+	 * @param frameUnid
+	 * @param name
+	 * @return
+	 */
+	public static String createIdempotanceKey(String frameUnid, String name) {
+		return FrameParameters.EWA_IDEMPOTENCE + "_" + name.toUpperCase() + "_" + frameUnid;
+	}
+
+	/**
 	 * 如果名称为空的话，根据值表达式，生成属性名称，例如：@USER_NAME = data-user-name<br>
 	 * name = "" and value = "" return null<br>
 	 * name = "" return data-xxx<br>
@@ -81,7 +92,7 @@ public class HtmlUtils {
 			signPath = uxv.getItem(0).getItem("SignPath");
 		}
 		signPath = signPath.trim();
-		 
+
 		// data:image/jpeg;base64,
 		String metaData = imageBase64.substring(0, loc);
 		String ext = metaData.split("\\:")[1].split("\\;")[0].split("\\/")[1];

@@ -938,9 +938,14 @@ public class HtmlCreator {
 		}
 		_DebugFrames.addDebug(this, "HTML", "开始合成HTML");
 
-		if (_SysParas.isPagePost() && !this.checkValidCode()) { // 验证码错误
-			this._PageHtml = "EWA.F.FOS['" + this._SysParas.getFrameUnid() + "'].ValidCodeError();";
-			return;
+		if (_SysParas.isPagePost()) { // 验证码错误
+			if (!this.checkValidCode()) {
+				this._PageHtml = "EWA.F.FOS['" + this._SysParas.getFrameUnid() + "'].ValidCodeError();";
+				return;
+			} else if (!this.checkIdempotence()) {
+				this._PageHtml = "EWA.F.FOS['" + this._SysParas.getFrameUnid() + "'].checkIdempotenceError();";
+				return;
+			}
 		} else {
 			if (createFrameSet()) {
 				return;
@@ -1883,6 +1888,37 @@ public class HtmlCreator {
 			// discarded
 			// this._Document.addJs("JsEventsBack", js, false);
 		}
+	}
+
+	/**
+	 * 检查幂，form传递的值和cooke中的值一致
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean checkIdempotence() throws Exception {
+		UserConfig uc = this._UserConfig;
+		for (int i = 0; i < uc.getUserXItems().count(); i++) {
+			UserXItem uxi = uc.getUserXItems().getItem(i);
+			String tag = uxi.getItem("Tag").getItem(0).getItem(0);
+			if (!(tag.equalsIgnoreCase("idempotence"))) {
+				continue;
+			}
+			String key = HtmlUtils.createIdempotanceKey(this.getHtmlClass().getSysParas().getFrameUnid(),
+					uxi.getName());
+			RequestValue rv = this.getHtmlClass().getSysParas().getRequestValue();
+			String sessionValue = rv.getPageValues().getSessionValue(key);
+			if (rv.getSession() != null) {
+				rv.getSession().removeAttribute(key);
+			}
+			String idempotenceValue = rv.s(uxi.getName());
+			if (idempotenceValue != null && idempotenceValue.equals(sessionValue)) {
+				continue;
+			} else {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

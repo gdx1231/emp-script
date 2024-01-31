@@ -594,7 +594,9 @@ public class FrameFrame extends FrameBase implements IFrame {
 
 		super.addDebug(this, "Item", "Create item " + uxi.getName() + "[" + tag + "]");
 
-		if (tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit") || tag.equalsIgnoreCase("hidden")) {
+		if (tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit") || tag.equalsIgnoreCase("hidden") // 隐含字段
+				|| tag.equalsIgnoreCase("idempotence") // 幂等性，用于Frame
+		) {
 			return; // 在CreateFooter中
 		}
 
@@ -1076,7 +1078,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 		for (int i = 0; i < uc.getUserXItems().count(); i++) {
 			UserXItem uxi = uc.getUserXItems().getItem(i);
 			XItem xItem = HtmlUtils.getXItem(uxi);
-			
+
 			if (!(xItem.getName().equalsIgnoreCase("button") || xItem.getName().equalsIgnoreCase("submit"))) {
 				continue;
 			}
@@ -1110,16 +1112,26 @@ public class FrameFrame extends FrameBase implements IFrame {
 		UserConfig uc = this.getHtmlClass().getUserConfig();
 
 		MStr sbHiddens = new MStr();
+
 		for (int i = 0; i < uc.getUserXItems().count(); i++) {
 			UserXItem uxi = uc.getUserXItems().getItem(i);
 			XItem xItem = HtmlUtils.getXItem(uxi);
-			if (!xItem.getName().equalsIgnoreCase("hidden")) {
+			String tag = xItem.getName();
+			if (!(tag.equalsIgnoreCase("hidden") || tag.equalsIgnoreCase("idempotence"))) {
 				continue;
 			}
 			IItem item = super.getHtmlClass().getItem(uxi);
 			String s1 = item.createItemHtml();
 			sbHiddens.al(s1);
-
+			if (!tag.equalsIgnoreCase("idempotence")) {
+				continue;
+			}
+			RequestValue rv = this.getHtmlClass().getSysParas().getRequestValue();
+			String idempotanceValue = item.getValue();
+			// 幂等性值 放到session中
+			String key = HtmlUtils.createIdempotanceKey(this.getHtmlClass().getSysParas().getFrameUnid(),
+					uxi.getName());
+			rv.getSession().setAttribute(key, idempotanceValue);
 		}
 		return sbHiddens.toString();
 	}

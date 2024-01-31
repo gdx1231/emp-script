@@ -1631,6 +1631,20 @@ var swfVersionStr = "11.1.0";
 <div class="frame" id='@Name'>{__EWA_VAL__}</div>]]></Html>
 				</Template>
 			</XItem>
+			
+			<XItem Name="idempotence" HtmlTag="" BaseType="0"
+				UIGroup="Extend"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
+				Parameters="Name, DescriptionSet">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="幂等性，用于Frame" />
+					<Set Lang="enus" Info="Idempotence in Frame" />
+				</DescriptionSet>
+				<Template>
+					<Html><![CDATA[<input type="hidden" ewa_tag='idempotence' value="{__EWA_VAL__}" !! >]]></Html>
+				</Template>
+			</XItem>
+			
 		</XItems>
 
 		<XItemParameters>
