@@ -27,16 +27,6 @@ import com.gdxsoft.easyweb.utils.Utils;
 public class HtmlUtils {
 	private static Logger LOGGER = LoggerFactory.getLogger(HtmlUtils.class);
 
-	/**
-	 * 创建Idempotance的键值
-	 * 
-	 * @param frameUnid
-	 * @param name
-	 * @return
-	 */
-	public static String createIdempotanceKey(String frameUnid, String name) {
-		return FrameParameters.EWA_IDEMPOTENCE + "_" + name.toUpperCase() + "_" + frameUnid;
-	}
 
 	/**
 	 * 如果名称为空的话，根据值表达式，生成属性名称，例如：@USER_NAME = data-user-name<br>

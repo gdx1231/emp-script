@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConfIdempontance;
 import com.gdxsoft.easyweb.data.DTCell;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.global.EwaEvents;
@@ -17,6 +18,7 @@ import com.gdxsoft.easyweb.script.InitValues;
 import com.gdxsoft.easyweb.script.display.HtmlClass;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.ItemFormat;
+import com.gdxsoft.easyweb.script.idempotance.IOp;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
 import com.gdxsoft.easyweb.script.template.XItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
@@ -43,8 +45,6 @@ public class ItemBase implements IItem {
 	private InitValues _InitValues; // 初始值类
 	private HttpServletResponse _Response;
 	private int _TagIsLfEdit = -1; // tag 的 IsLFEdit 0 不可编辑，1双击，2单击
-
-	private String lastValue;
 
 	/**
 	 * 获取Item的JSON对象，用于APP
@@ -445,10 +445,7 @@ public class ItemBase implements IItem {
 	 * 获取对象值，如果为空，则取初始化值的定义
 	 */
 	public String getValue() throws Exception {
-		if (lastValue != null) {
-			return lastValue;
-		}
-		
+
 		String val;
 		if (_UserXItem.testName("InitValue")) {
 			UserXItemValues uxvs = _UserXItem.getItem("InitValue");
@@ -456,15 +453,25 @@ public class ItemBase implements IItem {
 				String initValue = uxvs.getItem(0).getItem(0);
 				if (initValue != null && initValue.trim().length() > 0) {
 					val = this._InitValues.getInitValue(initValue);
-					lastValue = val;
 					return val;
 				}
 			}
 		}
 		String tag = this._UserXItem.getItem("Tag").getItem(0).getItem(0).trim().toLowerCase();
 		if ("idempotence".equals(tag)) { // 幂等性
-			String idempotenceValue = Utils.getGuid().toLowerCase().replace("-", "");
-			lastValue = idempotenceValue;
+			
+			 // 幂等性，将值放到hidden中，同时放到session中
+			 // HtmlCreateor.checkIdempotence 在提交时判断此值是否存在
+			 // 如果存在则继续，同时删除session中的值
+			 // 不存在，则提示信息
+			
+			IOp op = ConfIdempontance.getInstance().getOp();
+			op.init(_HtmlClass, _UserXItem);
+			
+			String idempotenceValue = op.generateValue();
+			
+			//将值保存到系统中，例如session中
+			op.save();
 			return idempotenceValue;
 		}
 
@@ -476,14 +483,12 @@ public class ItemBase implements IItem {
 		if (tag.indexOf("dhtml") >= 0) {
 			val = this.checkHtmlScript(val);
 			val = Utils.textToInputValue(val);
-			lastValue = val;
 			return val;
 		}
 
 		boolean isHtml = this.isShowAsHtml(); // 是否显示为HTML
 		if (isHtml) {
 			val = this.checkHtmlScript(val);
-			lastValue = val;
 			return val;
 		}
 		// 替换标签
@@ -502,7 +507,6 @@ public class ItemBase implements IItem {
 				val = val.replace("\n", "<br />");
 			}
 		}
-		lastValue = val;
 		return val;
 	}
 

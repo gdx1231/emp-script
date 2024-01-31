@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +21,7 @@ import com.gdxsoft.easyweb.acl.IAcl;
 import com.gdxsoft.easyweb.acl.IAcl2;
 import com.gdxsoft.easyweb.cache.CacheEwaScript;
 import com.gdxsoft.easyweb.cache.CacheLoadResult;
+import com.gdxsoft.easyweb.conf.ConfIdempontance;
 import com.gdxsoft.easyweb.data.Bin2Base64BinaryHandle;
 import com.gdxsoft.easyweb.data.Bin2HexBinaryHandle;
 import com.gdxsoft.easyweb.data.DTTable;
@@ -43,6 +46,7 @@ import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.display.frame.IFrame;
 import com.gdxsoft.easyweb.script.display.items.IItem;
 import com.gdxsoft.easyweb.script.html.HtmlDocument;
+import com.gdxsoft.easyweb.script.idempotance.IOp;
 import com.gdxsoft.easyweb.script.messageQueue.MsgQueueManager;
 import com.gdxsoft.easyweb.script.template.Skin;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
@@ -1891,28 +1895,34 @@ public class HtmlCreator {
 	}
 
 	/**
-	 * 检查幂，form传递的值和cooke中的值一致
+	 * 幂等性，在FrameFrame.handleIdempotance，将值放到hidden中，同时放到session中<br>
+	 * HtmlCreateor.checkIdempotence 在提交时判断此值是否存在，<br>
+	 * 如果存在则继续，同时删除session中的值<br>
+	 * 不存在，则提示信息
 	 * 
 	 * @return
 	 * @throws Exception
 	 */
 	private boolean checkIdempotence() throws Exception {
 		UserConfig uc = this._UserConfig;
+		List<UserXItem> lst = new ArrayList<>();
 		for (int i = 0; i < uc.getUserXItems().count(); i++) {
 			UserXItem uxi = uc.getUserXItems().getItem(i);
 			String tag = uxi.getItem("Tag").getItem(0).getItem(0);
-			if (!(tag.equalsIgnoreCase("idempotence"))) {
-				continue;
+			if (tag.equalsIgnoreCase("idempotence")) {
+				lst.add(uxi);
 			}
-			String key = HtmlUtils.createIdempotanceKey(this.getHtmlClass().getSysParas().getFrameUnid(),
-					uxi.getName());
-			RequestValue rv = this.getHtmlClass().getSysParas().getRequestValue();
-			String sessionValue = rv.getPageValues().getSessionValue(key);
-			if (rv.getSession() != null) {
-				rv.getSession().removeAttribute(key);
-			}
-			String idempotenceValue = rv.s(uxi.getName());
-			if (idempotenceValue != null && idempotenceValue.equals(sessionValue)) {
+
+		}
+		if (lst.size() == 0) {
+			return true;
+		}
+		IOp op = ConfIdempontance.getInstance().getOp();
+		for (int i = 0; i < lst.size(); i++) {
+			UserXItem uxi = lst.get(i);
+			op.init(_HtmlClass, uxi);
+
+			if (op.checkOnlyOnce()) {
 				continue;
 			} else {
 				return false;
@@ -1935,9 +1945,11 @@ public class HtmlCreator {
 
 		PageValue pv = this._RequestValue.getPageValues().getPageValue(FrameParameters.EWA_VALIDCODE_CHECK);
 		// 不检查验证码，用于手机应用或AJAX调用
-		if (pv != null && pv.getValue() != null && pv.getValue().toString().equals("NOT_CHECK")) {
-			if (pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS || pv.getPVTag() == PageValueTag.SYSTEM
-					|| pv.getPVTag() == PageValueTag.SESSION) {
+		if (pv != null && "NOT_CHECK".equals(pv.toString())) {
+			if (pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS // 限定参数来源于htmlControl的paras
+					|| pv.getPVTag() == PageValueTag.SYSTEM // 限定参数来源于SYSTEM
+					|| pv.getPVTag() == PageValueTag.SESSION // 限定参数来源于session
+			) {
 				return true;
 			} else {
 				LOGGER.info("Invalid pageValueTag {} to skip validcode", pv.getPVTag());

@@ -3,11 +3,6 @@ package com.gdxsoft.easyweb.script.display.frame;
 public class FrameParameters {
 
 	/**
-	 * 幂等性，防止客户端重复提交
-	 */
-	public static final String EWA_IDEMPOTENCE = "EWA_IDEMPOTENCE";
-	
-	/**
 	 * 隐藏Frame字段的字符串表达式，用,分割
 	 */
 	public static final String EWA_HIDDEN_FIELDS = "EWA_HIDDEN_FIELDS";

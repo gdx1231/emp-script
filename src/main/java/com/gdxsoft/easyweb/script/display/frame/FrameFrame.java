@@ -1123,18 +1123,12 @@ public class FrameFrame extends FrameBase implements IFrame {
 			IItem item = super.getHtmlClass().getItem(uxi);
 			String s1 = item.createItemHtml();
 			sbHiddens.al(s1);
-			if (!tag.equalsIgnoreCase("idempotence")) {
-				continue;
-			}
-			RequestValue rv = this.getHtmlClass().getSysParas().getRequestValue();
-			String idempotanceValue = item.getValue();
-			// 幂等性值 放到session中
-			String key = HtmlUtils.createIdempotanceKey(this.getHtmlClass().getSysParas().getFrameUnid(),
-					uxi.getName());
-			rv.getSession().setAttribute(key, idempotanceValue);
+			 
 		}
 		return sbHiddens.toString();
 	}
+
+	 
 
 	/**
 	 * 显示为3段还是2段
