@@ -215,7 +215,18 @@ public class HtmlUtils {
 
 				return UJSon.rstTrue().put("VALID", encrypt);
 			} else {
-				return UJSon.rstFalse("不行");
+				JSONObject result = UJSon.rstFalse("不行");
+				int inc = sysVal.has("inc") ? sysVal.optInt("inc") : 0;
+				inc++;
+				if (inc == 3) {
+					JSONObject newConfig = createValidSildePuzzle(htmlClass);
+					result.put("newConfig", newConfig);
+				} else {
+					sysVal.put("inc", inc);
+					op.save(sysVal.toString());
+				}
+
+				return result;
 			}
 		} catch (Exception err) {
 			return UJSon.rstFalse(err.getMessage());
