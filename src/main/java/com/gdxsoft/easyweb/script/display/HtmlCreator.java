@@ -4,8 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,7 +19,6 @@ import com.gdxsoft.easyweb.acl.IAcl;
 import com.gdxsoft.easyweb.acl.IAcl2;
 import com.gdxsoft.easyweb.cache.CacheEwaScript;
 import com.gdxsoft.easyweb.cache.CacheLoadResult;
-import com.gdxsoft.easyweb.conf.ConfIdempontance;
 import com.gdxsoft.easyweb.data.Bin2Base64BinaryHandle;
 import com.gdxsoft.easyweb.data.Bin2HexBinaryHandle;
 import com.gdxsoft.easyweb.data.DTTable;
@@ -36,8 +33,6 @@ import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.ShortName;
 import com.gdxsoft.easyweb.script.ShortNames;
-import com.gdxsoft.easyweb.script.ValidCode;
-import com.gdxsoft.easyweb.script.ValidCode1;
 import com.gdxsoft.easyweb.script.Workflow.WfRst;
 import com.gdxsoft.easyweb.script.Workflow.WfUnits;
 import com.gdxsoft.easyweb.script.display.action.IAction;
@@ -46,7 +41,6 @@ import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.display.frame.IFrame;
 import com.gdxsoft.easyweb.script.display.items.IItem;
 import com.gdxsoft.easyweb.script.html.HtmlDocument;
-import com.gdxsoft.easyweb.script.idempotance.IOp;
 import com.gdxsoft.easyweb.script.messageQueue.MsgQueueManager;
 import com.gdxsoft.easyweb.script.template.Skin;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
@@ -931,6 +925,24 @@ public class HtmlCreator {
 		return sber.toString();
 	}
 
+	public String checkPosts() throws Exception {
+		// 验证码错误
+		if (!HtmlUtils.checkValidCode(this._HtmlClass)) {
+			return "EWA.F.FOS['" + this._SysParas.getFrameUnid() + "'].ValidCodeError();";
+		}
+		// 幂等性
+		if (!HtmlUtils.checkIdempotence(this._HtmlClass)) {
+			return "EWA.F.FOS['" + this._SysParas.getFrameUnid() + "'].checkIdempotenceError();";
+		}
+		// 拼图检查
+		JSONObject result = HtmlUtils.verifyValidSildePuzzle(this._HtmlClass);
+		if (!result.optBoolean("RST")) {
+			return "EWA.F.FOS['" + this._SysParas.getFrameUnid() + "'].checkValidSildePuzzleError(\""
+					+ Utils.textToJscript(result.optString("ERR")) + "\");";
+		}
+		return null;
+	}
+
 	/**
 	 * 生成页面信息
 	 * 
@@ -942,12 +954,10 @@ public class HtmlCreator {
 		}
 		_DebugFrames.addDebug(this, "HTML", "开始合成HTML");
 
-		if (_SysParas.isPagePost()) { // 验证码错误
-			if (!this.checkValidCode()) {
-				this._PageHtml = "EWA.F.FOS['" + this._SysParas.getFrameUnid() + "'].ValidCodeError();";
-				return;
-			} else if (!this.checkIdempotence()) {
-				this._PageHtml = "EWA.F.FOS['" + this._SysParas.getFrameUnid() + "'].checkIdempotenceError();";
+		if (_SysParas.isPagePost()) {
+			String checksResult = this.checkPosts();
+			if (checksResult != null) {
+				this._PageHtml = checksResult;
 				return;
 			}
 		} else {
@@ -1580,60 +1590,8 @@ public class HtmlCreator {
 	 * @throws Exception
 	 */
 	public BufferedImage createValidCode() throws Exception {
-		UserConfig uc = this._UserConfig;
-
-		UserXItem uxi_vc = null;
-		for (int i = 0; i < uc.getUserXItems().count(); i++) {
-			UserXItem uxi = uc.getUserXItems().getItem(i);
-			String tag = uxi.getItem("Tag").getItem(0).getItem(0);
-			if (tag.trim().equalsIgnoreCase("valid")) {
-				uxi_vc = uxi;
-				break;
-			}
-		}
-
-		if (uxi_vc == null) {
-			return null; // 没有配置验证码
-		}
-
-		int len = 6;
-		String vcType = "string";
-		boolean isNumberCode = false;// 默认是数字验证码
-		if (uxi_vc != null) {
-			if (uxi_vc.testName("MaxMinLength")) {
-				try {
-					len = Integer.parseInt(uxi_vc.getSingleValue("MaxMinLength", "MaxLength"));
-				} catch (Exception err) {
-				}
-			}
-			if (uxi_vc.testName("DataItem")) {
-				vcType = uxi_vc.getSingleValue("DataItem", "DataType");
-			}
-
-			isNumberCode = !vcType.equalsIgnoreCase("string");
-		}
-
-		if (len > 10) {
-			len = 10;
-		} else if (len < 4) {
-			len = 4;
-		}
-
-		ValidCode1 vc = new ValidCode1(len, isNumberCode);
-		BufferedImage image = vc.createCode();
-		String code = vc.getRandomNumber();
-
-		HttpServletRequest req = this._RequestValue == null ? null : this._RequestValue.getRequest();
-		if (req != null) {
-			HttpSession session = req.getSession() == null ? req.getSession(true) : req.getSession();
-			// save to session
-			session.setAttribute(ValidCode.SESSION_NAME, code);
-		} else {
-			LOGGER.warn("The request is null, can't save the validcode to session");
-		}
-
-		this.validCode = image;
-		return image;
+		this.validCode = HtmlUtils.createValidCode(_HtmlClass);
+		return this.validCode;
 	}
 
 	/**
@@ -1657,8 +1615,25 @@ public class HtmlCreator {
 		if (ajax.equalsIgnoreCase("DOWNLOAD") || ajax.equalsIgnoreCase("DOWNLOAD-INLINE")) {
 			// 下载保存文件或在线文件（图片、pdf等）
 			this._PageHtml = this.createResponseFrameDownload();
-		} else if (ajax.equalsIgnoreCase("VALIDCODE")) { // 输出验证码
+		} else if (ajax.equalsIgnoreCase("VALIDCODE")) {
+			// 输出验证码
 			this.createValidCode();
+		} else if (ajax.equalsIgnoreCase("ValidSlidePuzzle")) {
+			String mode = this._RequestValue.s("ewa_trigger_valid_mode");
+			if ("create".equalsIgnoreCase(mode) || "refresh".equalsIgnoreCase(mode)) {
+				// 输出拼图验证
+				this._PageHtml = HtmlUtils.createValidSildePuzzle(_HtmlClass).toString();
+			} else if ("check".equalsIgnoreCase(mode)) {
+				// 验证拼图🧩
+				JSONObject result = HtmlUtils.checkValidSildePuzzle(_HtmlClass);
+				if (result.optBoolean("RST")) {
+					this._PageHtml = result.toString();
+				} else {
+					this._PageHtml = result.toString();
+				}
+			} else {
+				this._PageHtml = UJSon.rstFalse("Unkown mode: " + mode).toString();
+			}
 		} else if (ajax.equalsIgnoreCase("XML")) {
 			// 显示为XML数据
 			this._PageHtml = this._Frame.createaXmlData();
@@ -1891,94 +1866,6 @@ public class HtmlCreator {
 			// To avoid the XSS (Cross Site Scripting) attacks, the others event are
 			// discarded
 			// this._Document.addJs("JsEventsBack", js, false);
-		}
-	}
-
-	/**
-	 * 幂等性，在FrameFrame.handleIdempotance，将值放到hidden中，同时放到session中<br>
-	 * HtmlCreateor.checkIdempotence 在提交时判断此值是否存在，<br>
-	 * 如果存在则继续，同时删除session中的值<br>
-	 * 不存在，则提示信息
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	private boolean checkIdempotence() throws Exception {
-		UserConfig uc = this._UserConfig;
-		List<UserXItem> lst = new ArrayList<>();
-		for (int i = 0; i < uc.getUserXItems().count(); i++) {
-			UserXItem uxi = uc.getUserXItems().getItem(i);
-			String tag = uxi.getItem("Tag").getItem(0).getItem(0);
-			if (tag.equalsIgnoreCase("idempotence")) {
-				lst.add(uxi);
-			}
-
-		}
-		if (lst.size() == 0) {
-			return true;
-		}
-		IOp op = ConfIdempontance.getInstance().getOp();
-		for (int i = 0; i < lst.size(); i++) {
-			UserXItem uxi = lst.get(i);
-			op.init(_HtmlClass, uxi);
-
-			if (op.checkOnlyOnce()) {
-				continue;
-			} else {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * 检查验证码
-	 * 
-	 * @return
-	 * @throws Exception
-	 */
-	private boolean checkValidCode() throws Exception {
-		UserXItem uxiValid = this._UserConfig.getValidXItem();
-		if (uxiValid == null) { // 没有验证码定义
-			return true;
-		}
-
-		PageValue pv = this._RequestValue.getPageValues().getPageValue(FrameParameters.EWA_VALIDCODE_CHECK);
-		// 不检查验证码，用于手机应用或AJAX调用
-		if (pv != null && "NOT_CHECK".equals(pv.toString())) {
-			if (pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS // 限定参数来源于htmlControl的paras
-					|| pv.getPVTag() == PageValueTag.SYSTEM // 限定参数来源于SYSTEM
-					|| pv.getPVTag() == PageValueTag.SESSION // 限定参数来源于session
-			) {
-				return true;
-			} else {
-				LOGGER.info("Invalid pageValueTag {} to skip validcode", pv.getPVTag());
-			}
-		}
-
-		HttpServletRequest req = this._RequestValue.getRequest();
-		if (req == null) {
-			return false;
-		}
-		HttpSession session = req.getSession();
-		if (session == null) {
-			return false;
-		}
-
-		if (session.getAttribute(ValidCode.SESSION_NAME) == null) {
-			return false;
-		}
-
-		String validCodeInSession = session.getAttribute(ValidCode.SESSION_NAME).toString();
-
-		String userValue = this._RequestValue.getString(uxiValid.getName());
-		if (validCodeInSession.equalsIgnoreCase(userValue)) {
-			// 去除缓存中的验证码
-			session.removeAttribute(ValidCode.SESSION_NAME);
-			return true;
-		} else {
-			session.removeAttribute(ValidCode.SESSION_NAME);
-			return false;
 		}
 	}
 

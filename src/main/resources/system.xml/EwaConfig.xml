@@ -551,7 +551,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 			<XItem Name="submit" HtmlTag="input$submit" BaseType="1"
 				UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemButton"
-				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet, Style, ParentStyle">
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,DataItem">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="提交" />
 					<Set Lang="enus" Info="Submit" />
@@ -565,7 +565,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 			<XItem Name="button" HtmlTag="input$button" BaseType="1"
 				UIGroup="Standard"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemButton"
-				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, Style, ParentStyle, EventSet,OpenFrame,CallAction">
+				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, Style, ParentStyle, EventSet,OpenFrame,CallAction,DataItem">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="按钮,ewa_click在ListFrame中用于新增等功能" />
 					<Set Lang="enus" Info="Button" />
@@ -1024,7 +1024,6 @@ addEvent(window, 'load', ewa_load_upload_image);
 ]]></Html>
 				</Template>
 			</XItem>
-
 			<XItem Name="signature" HtmlTag="" BaseType="0"
 				UIGroup="Extend"
 				ClassName="com.gdxsoft.easyweb.script.display.items.ItemSignature"
@@ -2219,6 +2218,12 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 							<Set Lang="enus" Info="Frame One Cell" />
 						</DescriptionSet>
 					</Value>
+					<Value Type="group" Name="TriggerValid">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="触发验证" />
+							<Set Lang="enus" Info="Trigger Valid" />
+						</DescriptionSet>
+					</Value>
 				</Values>
 			</XItemParameter>
 			<XItemParameter Name="DispEnc" IsSet="0" IsMulti="1"
@@ -3220,7 +3225,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 
 
 		<XGroupValues>
-
+			<XGroupValue Name="TriggerValid" Default=""
+				Values=",ValidSlidePuzzle">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info=",滑动拼图验证" />
+					<Set Lang="enus" Info=",Slide Puzzle" />
+				</DescriptionSet>
+			</XGroupValue>
 			<XGroupValue Name="CallUrlMethod" Default=""
 				Values="INNER_CALL,WITH_PAGE">
 				<DescriptionSet>

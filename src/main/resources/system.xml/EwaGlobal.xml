@@ -199,6 +199,15 @@
 				</DescriptionSet>
 			</Front>
 		</Event>
+		<Event Name="ValidSildePuzzleError" BackValue="">
+			<Front>
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="" Memo="拼图验证失败" />
+					<Set Lang="enus" Info="" Memo="Puzzle verification failed" />
+				</DescriptionSet>
+			</Front>
+		</Event>
+		
 		<Event Name="EWA_DELETE" FrontValue="EWA.F.FOS['@SYS_FRAME_UNID'].DoDelete(this)"
 			BackValue="EWA.F.FOS['@SYS_FRAME_UNID'].Reload();">
 			<Front>

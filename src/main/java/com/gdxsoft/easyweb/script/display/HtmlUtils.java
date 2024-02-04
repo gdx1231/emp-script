@@ -1,15 +1,22 @@
 package com.gdxsoft.easyweb.script.display;
 
+import java.awt.image.BufferedImage;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.conf.ConfValidOp;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.SearchParameter;
 import com.gdxsoft.easyweb.datasource.SqlPart;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.ValidCode1;
+import com.gdxsoft.easyweb.script.ValidSlidePuzzle;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.script.template.XItem;
@@ -18,15 +25,282 @@ import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
+import com.gdxsoft.easyweb.script.validOp.IOp;
+import com.gdxsoft.easyweb.utils.UAes;
 import com.gdxsoft.easyweb.utils.UConvert;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UFormat;
+import com.gdxsoft.easyweb.utils.UJSon;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 
 public class HtmlUtils {
 	private static Logger LOGGER = LoggerFactory.getLogger(HtmlUtils.class);
 
+	/**
+	 * 幂等性，在FrameFrame.handleIdempotance，将值放到hidden中，同时放到session中<br>
+	 * HtmlCreateor.checkIdempotence 在提交时判断此值是否存在，<br>
+	 * 如果存在则继续，同时删除session中的值<br>
+	 * 不存在，则提示信息
+	 * 
+	 * @param htmlClass
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean checkIdempotence(HtmlClass htmlClass) throws Exception {
+		List<UserXItem> lst = htmlClass.getUserConfig().getIdempotenceXItems();
+		if (lst.size() == 0) {
+			return true;
+		}
+
+		IOp op = ConfValidOp.getInstance().getOp();
+		for (int i = 0; i < lst.size(); i++) {
+			UserXItem uxi = lst.get(i);
+			op.init(htmlClass, uxi);
+
+			if (op.checkOnlyOnce()) {
+				continue;
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 创建拼图验证的json
+	 * 
+	 * @param htmlClass
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject createValidSildePuzzle(HtmlClass htmlClass) {
+		RequestValue rv = htmlClass.getSysParas().getRequestValue();
+		String name = rv.s("EWA_TRIGGER_VALID_NAME");
+
+		List<UserXItem> items = htmlClass.getUserConfig().getSlidePuzzleXItems();
+		UserXItem itemSildePuzzle = null;
+		for (int i = 0; i < items.size(); i++) {
+			UserXItem item = items.get(i);
+			if (item.getName().equals(name)) {
+				itemSildePuzzle = item;
+				break;
+			}
+		}
+		if (itemSildePuzzle == null) {
+			return UJSon.rstFalse(name + ", NOT fund ValidSildePuzzle");
+		}
+
+		int width = 400;
+		if (rv.isNotBlank("ewa_trigger_valid_width")) {
+			try {
+				width = rv.getInt("ewa_trigger_valid_width");
+				if (width > 460) {
+					width = 400;
+				} else {
+					width = width - 24;
+				}
+			} catch (Exception err) {
+
+			}
+		}
+		if (width < 200) {
+			width = 400;
+		}
+
+		IOp op = ConfValidOp.getInstance().getOp();
+		op.init(htmlClass, itemSildePuzzle);
+
+		ValidSlidePuzzle vsp = new ValidSlidePuzzle();
+		vsp.setBigWidth(width);
+
+		try {
+			vsp.randomImg(ValidSlidePuzzle.getDefImgs());
+		} catch (Exception err) {
+			return UJSon.rstFalse(err.getMessage());
+		}
+		JSONObject sysValue = vsp.toJsonSys();
+		op.setGeneratedValue(sysValue.toString());
+		op.save();
+
+		JSONObject json = vsp.toJsonWeb();
+		return json;
+	}
+
+	public static JSONObject verifyValidSildePuzzle(HtmlClass htmlClass) throws Exception {
+		if (htmlClass.getUserConfig().getSlidePuzzleXItems().size() == 0) {
+			return UJSon.rstTrue();
+		}
+		// 和EWA_FrameClass.CreateAjax一致
+		String afterTag = "_TRIGGER_VALID_RESULT";
+
+		long thresholdMills = 1000 * 60; // 60s
+		RequestValue rv = htmlClass.getSysParas().getRequestValue();
+		List<UserXItem> items = htmlClass.getUserConfig().getSlidePuzzleXItems();
+		for (int i = 0; i < items.size(); i++) {
+			UserXItem item = items.get(i);
+
+			String name = item.getName() + afterTag;
+			String encrypt = rv.s(name);
+			try {
+				JSONObject valid = new JSONObject(UAes.getInstance().decrypt(encrypt));
+
+				long t = valid.getLong("t");
+				String name1 = valid.getString("name");
+				if (!item.getName().equals(name1)) {
+					return UJSon.rstFalse("invalid name " + name1);
+				}
+				long diff = System.currentTimeMillis() - t;
+
+				if (diff > thresholdMills) {
+					return UJSon.rstFalse("overtime, " + diff);
+				}
+			} catch (Exception err) {
+				return UJSon.rstFalse(err.getMessage());
+			}
+		}
+
+		return UJSon.rstTrue();
+
+	}
+
+	/**
+	 * 创建拼图验证的结果
+	 * 
+	 * @param htmlClass
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONObject checkValidSildePuzzle(HtmlClass htmlClass) throws Exception {
+		RequestValue rv = htmlClass.getSysParas().getRequestValue();
+		String name = rv.s("EWA_TRIGGER_VALID_NAME");
+		List<UserXItem> items = htmlClass.getUserConfig().getSlidePuzzleXItems();
+		UserXItem itemSildePuzzle = null;
+		for (int i = 0; i < items.size(); i++) {
+			UserXItem item = items.get(i);
+			if (item.getName().equals(name)) {
+				itemSildePuzzle = item;
+				break;
+			}
+		}
+		if (itemSildePuzzle == null) {
+			return UJSon.rstFalse(name + ", NOT fund ValidSildePuzzle");
+		}
+
+		IOp op = ConfValidOp.getInstance().getOp();
+		op.init(htmlClass, itemSildePuzzle);
+
+		String sv = op.getSysValue();
+		JSONObject sysVal = new JSONObject(sv);
+
+		double left = -1;
+		double top = -1;
+		try {
+			left = rv.getDouble("left");
+			// double left1 = rv.getDouble("left1");
+			top = rv.getDouble("top");
+			// double top1 = rv.getDouble("top1");
+
+			int leftSys = sysVal.optInt("posX");
+			int posY = sysVal.optInt("posY");
+
+			if (Math.abs(left - leftSys) <= 5 && Math.abs(top - posY) < 1) {
+				op.removeSysValue();
+
+				long t = System.currentTimeMillis();
+				JSONObject valid = new JSONObject();
+				valid.put("t", t);
+				valid.put("name", name);
+				String encrypt = UAes.getInstance().encrypt(valid.toString());
+
+				return UJSon.rstTrue().put("VALID", encrypt);
+			} else {
+				return UJSon.rstFalse("不行");
+			}
+		} catch (Exception err) {
+			return UJSon.rstFalse(err.getMessage());
+		}
+	}
+
+	/**
+	 * 检查验证码
+	 * 
+	 * @param htmlClass
+	 * @return
+	 * @throws Exception
+	 */
+	public static boolean checkValidCode(HtmlClass htmlClass) throws Exception {
+		UserXItem uxiValid = htmlClass.getUserConfig().getValidXItem();
+		if (uxiValid == null) { // 没有验证码定义
+			return true;
+		}
+		IOp op = ConfValidOp.getInstance().getOp();
+		op.init(htmlClass, uxiValid);
+
+		RequestValue rv = htmlClass.getSysParas().getRequestValue();
+		PageValue pv = rv.getPageValues().getPageValue(FrameParameters.EWA_VALIDCODE_CHECK);
+		// 不检查验证码，用于手机应用或AJAX调用
+		if (pv != null && "NOT_CHECK".equals(pv.toString())) {
+			if (pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS // 限定参数来源于htmlControl的paras
+					|| pv.getPVTag() == PageValueTag.SYSTEM // 限定参数来源于SYSTEM
+					|| pv.getPVTag() == PageValueTag.SESSION // 限定参数来源于session
+			) {
+				op.removeSysValue();
+				return true;
+			} else {
+				LOGGER.info("Invalid pageValueTag {} to skip validcode", pv.getPVTag());
+			}
+		}
+
+		return op.checkOnlyOnce();
+	}
+
+	/**
+	 * 创建本配置的验证码
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public static BufferedImage createValidCode(HtmlClass htmlClass) throws Exception {
+		UserXItem uxi_vc = htmlClass.getUserConfig().getValidXItem();
+		if (uxi_vc == null) {
+			return null; // 没有配置验证码
+		}
+
+		int len = 6;
+		String vcType = "string";
+		boolean isNumberCode = false;// 默认是数字验证码
+		if (uxi_vc != null) {
+			if (uxi_vc.testName("MaxMinLength")) {
+				try {
+					len = Integer.parseInt(uxi_vc.getSingleValue("MaxMinLength", "MaxLength"));
+				} catch (Exception err) {
+				}
+			}
+			if (uxi_vc.testName("DataItem")) {
+				vcType = uxi_vc.getSingleValue("DataItem", "DataType");
+			}
+
+			isNumberCode = !vcType.equalsIgnoreCase("string");
+		}
+
+		if (len > 10) {
+			len = 10;
+		} else if (len < 4) {
+			len = 4;
+		}
+
+		ValidCode1 vc = new ValidCode1(len, isNumberCode);
+		BufferedImage image = vc.createCode();
+
+		IOp op = ConfValidOp.getInstance().getOp();
+		op.init(htmlClass, uxi_vc);
+		// 保存验证码值到系统中
+		op.setGeneratedValue(vc.getRandomNumber());
+		op.save();
+
+		return image;
+	}
 
 	/**
 	 * 如果名称为空的话，根据值表达式，生成属性名称，例如：@USER_NAME = data-user-name<br>

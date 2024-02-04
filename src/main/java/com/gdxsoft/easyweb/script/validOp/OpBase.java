@@ -1,4 +1,4 @@
-package com.gdxsoft.easyweb.script.idempotance;
+package com.gdxsoft.easyweb.script.validOp;
 
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlClass;
@@ -8,26 +8,25 @@ import com.gdxsoft.easyweb.utils.Utils;
 public class OpBase {
 	HtmlClass htmlClass;
 	UserXItem uxi;
-	String idempotenceValue;
+	String generatedValue;
 	String key;
-	
+
 	public void init(HtmlClass htmlClass, UserXItem uxi) {
 		this.htmlClass = htmlClass;
 		this.uxi = uxi;
-		this.idempotenceValue = null;
+		this.generatedValue = null;
 		this.key = null;
 	}
-	
-	
 
 	/**
-	 * 创建Idempotance的键值
+	 * 创建Key
 	 * 
 	 * @return
 	 */
 	public String generateKey() {
 		if (key == null) {
-			key = "EWA_IDEMPOTENCE_" + uxi.getName().toUpperCase() + "_" + htmlClass.getSysParas().getFrameUnid();
+			key = "EWA_IDEMPOTENCE_" + (uxi == null ? "NOUXI" : uxi.getName().toUpperCase()) + "_"
+					+ htmlClass.getSysParas().getFrameUnid();
 		}
 		return key;
 	}
@@ -38,22 +37,23 @@ public class OpBase {
 	 * @return
 	 */
 	public String generateValue() {
-		if (idempotenceValue == null) {
-			idempotenceValue = Utils.getGuid().toLowerCase().replace("-", "");
+		if (generatedValue == null) {
+			generatedValue = Utils.getGuid().toLowerCase().replace("-", "");
 		}
-		return idempotenceValue;
+		return generatedValue;
 	}
 
 	/**
 	 * 获取从前端传递的值
+	 * 
 	 * @return
 	 */
-	public String getIdempontance() {
+	public String getUserValue() {
 		RequestValue rv = htmlClass.getSysParas().getRequestValue();
 		String idempotenceValue = rv.s(uxi.getName());
 		return idempotenceValue;
 	}
-	
+
 	/**
 	 * @return the htmlClass
 	 */
@@ -66,6 +66,14 @@ public class OpBase {
 	 */
 	public UserXItem getUxi() {
 		return uxi;
+	}
+
+	public String getGeneratedValue() {
+		return generatedValue;
+	}
+
+	public void setGeneratedValue(String generatedValue) {
+		this.generatedValue = generatedValue;
 	}
 
 }

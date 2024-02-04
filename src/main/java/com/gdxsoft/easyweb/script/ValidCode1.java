@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ValidCode1 {
 	private static Logger LOGGER = LoggerFactory.getLogger(ValidCode1.class);
-	// 使用到Algerian字体，系统里没有的话需要安装字体，字体只显示大写，去掉了1,0,i,o几个容易混淆的字符
 	public static final String VERIFY_CODES = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 	public static final String VERIFY_NUMBERS = "0123456789";
 

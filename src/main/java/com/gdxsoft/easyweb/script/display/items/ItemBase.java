@@ -10,7 +10,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.conf.ConfIdempontance;
+import com.gdxsoft.easyweb.conf.ConfValidOp;
 import com.gdxsoft.easyweb.data.DTCell;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.global.EwaEvents;
@@ -18,12 +18,12 @@ import com.gdxsoft.easyweb.script.InitValues;
 import com.gdxsoft.easyweb.script.display.HtmlClass;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.ItemFormat;
-import com.gdxsoft.easyweb.script.idempotance.IOp;
 import com.gdxsoft.easyweb.script.template.SkinFrame;
 import com.gdxsoft.easyweb.script.template.XItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
+import com.gdxsoft.easyweb.script.validOp.IOp;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -459,18 +459,18 @@ public class ItemBase implements IItem {
 		}
 		String tag = this._UserXItem.getItem("Tag").getItem(0).getItem(0).trim().toLowerCase();
 		if ("idempotence".equals(tag)) { // 幂等性
-			
-			 // 幂等性，将值放到hidden中，同时放到session中
-			 // HtmlCreateor.checkIdempotence 在提交时判断此值是否存在
-			 // 如果存在则继续，同时删除session中的值
-			 // 不存在，则提示信息
-			
-			IOp op = ConfIdempontance.getInstance().getOp();
+
+			// 幂等性，将值放到hidden中，同时放到session中
+			// HtmlCreateor.checkIdempotence 在提交时判断此值是否存在
+			// 如果存在则继续，同时删除session中的值
+			// 不存在，则提示信息
+
+			IOp op = ConfValidOp.getInstance().getOp();
 			op.init(_HtmlClass, _UserXItem);
-			
+
 			String idempotenceValue = op.generateValue();
-			
-			//将值保存到系统中，例如session中
+
+			// 将值保存到系统中，例如session中
 			op.save();
 			return idempotenceValue;
 		}
@@ -647,11 +647,13 @@ public class ItemBase implements IItem {
 			sb.append(" oninput=\"" + event + "\"");
 			sb.append(" onmousedown=\"" + event + "\"");
 		}
+
 		MStr ss = new MStr(s1);
 
 		// 检查是否带图标
 		String icon = null;
 		String iconLoction = "left";
+		String triggerValid = null; // 触发验证
 		if (this._UserXItem.testName("DataItem") && this._UserXItem.getItem("DataItem").count() > 0) {
 			UserXItemValue dataItem = this._UserXItem.getItem("DataItem").getItem(0);
 			if (dataItem.testName("Icon")) {
@@ -661,6 +663,13 @@ public class ItemBase implements IItem {
 			if (dataItem.testName("IconLoction")) {
 				iconLoction = dataItem.getItem("IconLoction");
 			}
+			if (dataItem.testName("TriggerValid")) {
+				triggerValid = dataItem.getItem("TriggerValid");
+			}
+		}
+		// 触发验证
+		if (triggerValid != null && triggerValid.trim().length() > 0) {
+			sb.append("triggerValid='" + triggerValid + "'");
 		}
 		if (icon != null && icon.trim().length() > 0) {
 			String for_id = this._UserXItem.getItem("Name").getItem(0).getItem("Name");

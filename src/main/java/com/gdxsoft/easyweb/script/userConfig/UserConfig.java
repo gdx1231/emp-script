@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -229,7 +231,7 @@ public class UserConfig implements Serializable, Cloneable {
 		if (iConfig == null) {
 			String msg = "Can't find the IConfig from ->" + xmlName + ", " + itemName;
 			LOGGER.error(msg);
-			
+
 			if (debugFrames != null) {
 				debugFrames.addDebug(uc, "instance", msg);
 			}
@@ -428,6 +430,8 @@ public class UserConfig implements Serializable, Cloneable {
 	private IConfig configType;
 
 	private UserXItem validXItem; // The validCode item
+	private List<UserXItem> idempotenceXItems = new ArrayList<>();
+	private List<UserXItem> slidePuzzleXItems = new ArrayList<>();
 
 	public IConfig getConfigType() {
 		if (this.configType != null && this.configType.getFixedXmlName() == null) {
@@ -557,10 +561,26 @@ public class UserConfig implements Serializable, Cloneable {
 		// find the valid code item
 		for (int i = 0; i < this.getUserXItems().count(); i++) {
 			UserXItem uxi = this.getUserXItems().getItem(i);
-			String tag = uxi.getItem("Tag").getItem(0).getItem(0);
-			if (tag.trim().equalsIgnoreCase("valid")) {
+			String tag = uxi.getItem("Tag").getItem(0).getItem(0).trim();
+			if (tag.equalsIgnoreCase("valid")) {
 				this.validXItem = uxi;
-				break;
+				continue;
+			} 
+			
+			if (tag.equalsIgnoreCase("idempotence")) {
+				this.idempotenceXItems.add(uxi);
+			}
+
+			if (uxi.testName("DataItem") && uxi.getItem("DataItem").count() > 0) {
+				UserXItemValue dataItem = uxi.getItem("DataItem").getItem(0);
+				//
+				if (dataItem.testName("TriggerValid")) {
+					String tv = dataItem.getItem("TriggerValid");
+					// 滑动拼图验证
+					if ("ValidSlidePuzzle".equalsIgnoreCase(tv)) {
+						this.slidePuzzleXItems.add(uxi);
+					}
+				}
 			}
 		}
 	}
@@ -964,6 +984,22 @@ public class UserConfig implements Serializable, Cloneable {
 	 */
 	public UserXItem getValidXItem() {
 		return validXItem;
+	}
+
+	/**
+	 * 幂等性
+	 * @return
+	 */
+	public List<UserXItem> getIdempotenceXItems() {
+		return idempotenceXItems;
+	}
+
+	/**
+	 * 滑动拼图验证
+	 * @return
+	 */
+	public List<UserXItem> getSlidePuzzleXItems() {
+		return slidePuzzleXItems;
 	}
 
 }

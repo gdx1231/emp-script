@@ -1,4 +1,4 @@
-package com.gdxsoft.easyweb.script.idempotance;
+package com.gdxsoft.easyweb.script.validOp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,15 +32,14 @@ public abstract class OpJdbcDempImpl extends OpBase implements IOp {
 		List<String> sqls = new ArrayList<>();
 		sqls.add(SQL_DEL);
 		sqls.add(SQL_NEW);
-		
+
 		DataConnection.updateBatchAndClose(sqls, configName, rv);
 	}
 
 	public String generateKey() {
 		if (key == null) {
 			RequestValue rv = htmlClass.getSysParas().getRequestValue();
-			key = Utils.md5(rv.getSession().getId() + "_" + uxi.getName().toUpperCase() + "_"
-					+ htmlClass.getSysParas().getFrameUnid());
+			key = Utils.md5(rv.getSession().getId() + "_" + super.generateKey());
 		}
 		return key;
 	}
@@ -50,7 +49,7 @@ public abstract class OpJdbcDempImpl extends OpBase implements IOp {
 	 * 
 	 * @return
 	 */
-	public String getValue() {
+	public String getSysValue() {
 		RequestValue rv = new RequestValue();
 		rv.addOrUpdateValue("key", this.generateKey());
 		DTTable tb = DTTable.getJdbcTable(SQL_GET, configName, rv);
@@ -67,15 +66,18 @@ public abstract class OpJdbcDempImpl extends OpBase implements IOp {
 	 */
 	public boolean checkOnlyOnce() {
 		// 从前端传递的值
-		String idempotenceValue = this.getIdempontance();
+		String idempotenceValue = this.getUserValue();
 
-		String jdbcValue = this.getValue();
+		String jdbcValue = this.getSysValue();
 		if (jdbcValue != null) {
-			RequestValue rv1 = new RequestValue();
-			rv1.addOrUpdateValue("key", this.generateKey());
-			DataConnection.updateAndClose(SQL_DEL, configName, rv1);
+			this.removeSysValue();
 		}
-		return idempotenceValue != null && idempotenceValue.length() == 32 && idempotenceValue.equals(jdbcValue);
+		return idempotenceValue != null && idempotenceValue.length() > 0 && idempotenceValue.equals(jdbcValue);
 	}
 
+	public void removeSysValue() {
+		RequestValue rv1 = new RequestValue();
+		rv1.addOrUpdateValue("key", this.generateKey());
+		DataConnection.updateAndClose(SQL_DEL, configName, rv1);
+	}
 }
