@@ -35,6 +35,7 @@ public class ValidSlidePuzzle {
 
 	/**
 	 * 默认的图片系列
+	 * 
 	 * @return
 	 */
 	public static String[] getDefImgs() {
@@ -43,6 +44,7 @@ public class ValidSlidePuzzle {
 
 	/**
 	 * 设置默认的图片系列
+	 * 
 	 * @param defImgs
 	 */
 	public synchronized static void setDefImgs(String[] defImgs) {
@@ -93,7 +95,7 @@ public class ValidSlidePuzzle {
 
 	public void randomImg(String[] imgs) throws IOException {
 		Random rand = new Random();
-		int index = rand.nextInt(0, imgs.length);
+		int index = rand.nextInt(imgs.length);
 		String img = imgs[index];
 		URL url = ValidSlidePuzzle.class.getResource(img);
 
@@ -150,7 +152,10 @@ public class ValidSlidePuzzle {
 		// 2.随机生成离左上角的(X,Y)坐标，上限为 [bigWidth-smallWidth,
 		// bigHeight-smallHeight]。最好离背景图左边远一点，上限不要紧挨着背景图边界
 		Random random = new Random();
-		int randomX = random.nextInt(bigWidth / 2, bigWidth - smallWidth - smallCircle); // X范围：[2*smallWidth,
+		int randomX = random.nextInt(bigWidth - smallWidth - smallCircle); // X范围：[2*smallWidth,
+		if (randomX < bigWidth / 2 ) {
+			randomX += bigWidth / 2 - smallWidth;
+		}
 		int randomY = random.nextInt(bigHeight - smallHeight - 2 * smallCircle) + smallCircle; // Y范围：[smallCircle,
 
 		logger.info("原图大小：{} x {}，背景图大小：{} x {}，随机生成的坐标：(X,Y)=({},{})", originalImage.getWidth(),
