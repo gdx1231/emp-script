@@ -899,11 +899,19 @@ public class FrameFrame extends FrameBase implements IFrame {
 		stringBuilder.append("\" ewa_memo=\"");
 		stringBuilder.append(memo);
 		stringBuilder.append("\" ");
+		// EWA_TD_M
 		String template = tmps[1].replace(">{", stringBuilder.toString() + " >{");
 
 		StringBuilder sb = new StringBuilder();
 		if (isC11) { // 一段,上下排列
-			sb.append(tmps[0]);
+			sb.append(tmps[0]); //<td class="EWA_TD_L">您的邮箱</td>
+			
+			/*String info = tmps[3];
+			if (tmps[4] != null && tmps[4].length() > 0 && !info.equals(tmps[4])) {
+				info += ", " + tmps[4];
+			}
+			sb.append("<td class=\"EWA_TD_L\">").append(info).append("</td>");
+			*/
 			sb.append("</tr>\n<tr class='" + trClass + " ewa-row-item' " + disp + ">\n");
 			sb.append(template);
 		} else if (colSpan == 2) {
@@ -1123,12 +1131,10 @@ public class FrameFrame extends FrameBase implements IFrame {
 			IItem item = super.getHtmlClass().getItem(uxi);
 			String s1 = item.createItemHtml();
 			sbHiddens.al(s1);
-			 
+
 		}
 		return sbHiddens.toString();
 	}
-
-	 
 
 	/**
 	 * 显示为3段还是2段
