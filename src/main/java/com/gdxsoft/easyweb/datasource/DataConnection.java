@@ -1267,6 +1267,11 @@ public class DataConnection {
 					int autov = this.executeUpdateReturnAutoIncrement(sql1);
 					if (autov > -1) {
 						this._RequestValue.addValue(auto_field, autov, PageValueTag.DTTABLE);
+					} else {
+						//删除可能存在的字段，避免外部攻击
+						this._RequestValue.getPageValues().remove(auto_field, PageValueTag.FORM);
+						this._RequestValue.getPageValues().remove(auto_field, PageValueTag.QUERY_STRING);
+						this._RequestValue.getPageValues().remove(auto_field, PageValueTag.COOKIE);
 					}
 				} else {
 					this.executeUpdate(sql1);
