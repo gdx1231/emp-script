@@ -1231,6 +1231,32 @@ public class DataConnection {
 	}
 
 	/**
+	 * 执行带自动返回值的SQL，返回执行后的自动字段的名称<br>
+	 * 如果成功，则在_RequestValue里保存<br>
+	 * 如果失败，则清除_RequestValue里的Form,Query,Cookie的值，避免外部攻击
+	 * 
+	 * @param sql 自增的sql, 例如 -- auto MEMO_ID
+	 * @return 返回值的字段名称，保存在_RequestValue里， null无自动字段
+	 */
+	public String executeAutoFieldReturnName(String sql) {
+		String autoField = DataConnection.getAutoField(sql);
+		if (autoField == null || autoField.length() == 0) {
+			return null;
+		}
+		// 执行自增的插入
+		Object autov = this.executeUpdateReturnAutoIncrementObject(sql);
+		if (autov != null && autov.toString().equals("-1")) {
+			// 删除可能存在的字段，避免外部攻击
+			this._RequestValue.getPageValues().remove(autoField, PageValueTag.FORM);
+			this._RequestValue.getPageValues().remove(autoField, PageValueTag.QUERY_STRING);
+			this._RequestValue.getPageValues().remove(autoField, PageValueTag.COOKIE);
+		} else {
+			this._RequestValue.addValue(autoField, autov, PageValueTag.DTTABLE);
+		}
+		return autoField;
+	}
+
+	/**
 	 * 执行混合SQL语句(查询，更新(包含返回自增)，存储过程)<br>
 	 * 1. 如果是select返回数据的话，回将第一行数据放到 rv中<br>
 	 * 2. 自动创建变量 --auto xxx 会放到rv中<br>
@@ -1261,19 +1287,7 @@ public class DataConnection {
 					this._RequestValue.addValue(key, val, PageValueTag.DTTABLE);
 				}
 			} else {
-				String auto_field = DataConnection.getAutoField(sql1);
-				if (auto_field != null && auto_field.length() > 0) {
-					// 执行自增的插入
-					int autov = this.executeUpdateReturnAutoIncrement(sql1);
-					if (autov > -1) {
-						this._RequestValue.addValue(auto_field, autov, PageValueTag.DTTABLE);
-					} else {
-						//删除可能存在的字段，避免外部攻击
-						this._RequestValue.getPageValues().remove(auto_field, PageValueTag.FORM);
-						this._RequestValue.getPageValues().remove(auto_field, PageValueTag.QUERY_STRING);
-						this._RequestValue.getPageValues().remove(auto_field, PageValueTag.COOKIE);
-					}
-				} else {
+				if (this.executeAutoFieldReturnName(sql1) == null) {
 					this.executeUpdate(sql1);
 				}
 			}

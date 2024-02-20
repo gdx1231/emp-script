@@ -1021,11 +1021,7 @@ public class ActionBase {
 		// 查找自增的sql, 例如 -- auto MEMO_ID
 		String auto_field = DataConnection.getAutoField(sql1);
 		if (auto_field != null && auto_field.length() > 0) {
-			// 执行自增的插入
-			int autov = conn.executeUpdateReturnAutoIncrement(sql1);
-			if (autov > -1) {
-				this.getRequestValue().addValue(auto_field, autov);
-			}
+			conn.executeAutoFieldReturnName(sql1);
 		} else if (DataConnection.isComparativeChanges(sql1)) {
 			// 比较更新前和更新后字段的变化
 			// 记录更新前后变化的 ，方式 -- COMPARATIVE_CHANGES
