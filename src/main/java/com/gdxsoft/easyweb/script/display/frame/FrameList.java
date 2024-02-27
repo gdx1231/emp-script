@@ -56,6 +56,9 @@ public class FrameList extends FrameBase implements IFrame {
 	private boolean _IsLuButtons;
 	private boolean _IsLuSearch;
 	private boolean _ComposeSearchTexts; // 合并文字搜索
+	 //分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
+	private boolean _SearchGroup =true;
+	
 	private String _LuSelect = "";
 	private boolean _IsLuDblClick;
 	private String _LuDblClickIdx;
@@ -203,7 +206,8 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 		if (this._IsLuSearch && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_SEARCH))) {
 			boolean compose = this._ComposeSearchTexts; // 合并搜索
-			String js = fname + ".ShowSearch(" + compose + ");";
+			boolean denySearchGroup = !this._SearchGroup;  //分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
+			String js = fname + ".ShowSearch(" + compose + ", "+ denySearchGroup +");";
 			sJs.al(js);
 		}
 
@@ -492,7 +496,12 @@ public class FrameList extends FrameBase implements IFrame {
 				this._IsLuSearch = true;
 			} else if (v1.equals("2")) {
 				this._IsLuSearch = true;
+				//合并文字搜索
 				this._ComposeSearchTexts = true;
+			} else if(v1.equals("3")) { 
+				//分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
+				this._IsLuSearch = true;
+				this._SearchGroup = false;
 			}
 		}
 		// 单选多选
