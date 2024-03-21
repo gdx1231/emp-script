@@ -736,34 +736,34 @@ public class DataConnection {
 		MStr str = new MStr();
 		boolean lastResult = true;
 		for (int m = 0; m < sqls.length; m++) {
-			String sql = sqls[m];
-			String len = sql.trim().toLowerCase();
+			String sql = sqls[m].trim();
+			String len = sql.toLowerCase();
 			if (!len.startsWith("--")) {
 				if (lastResult) {
-					str.al(sql);
+					str.al(sqls[m]); // 不改变原来SQL的前导空白
 				}
 				continue;
 			}
 
 			// 获取表达式，例如：-- ewa_test @abc is not null
-			String len1 = len.replaceFirst("--", "").trim();
-			int loc0 = len1.indexOf("ewa_test");
+			int loc0 = len.indexOf("ewa_test");
 			if (loc0 == -1) {
 				if (lastResult) {
-					str.al(sql);
+					str.al(sqls[m]); // 不改变原来SQL的前导空白
 				}
 				continue;
 			}
-			String len2 = len1.substring(loc0 + 8).trim(); // 去除ewa_test
+			String len2 = sql.substring(loc0 + 8).trim(); // 去除ewa_test
 			if (len2.length() == 0) {
 				// -- ewa_test
 				lastResult = true;
 			} else {
 				// -- ewa_test @name is null or @name = ''
-				len2 = this.replaceSqlSelectParameters(len2);
+				String exp = this.replaceSqlSelectParameters(len2);
 				// 利用数据库执行判断逻辑
-				lastResult = ULogic.runLogic(len2);
+				lastResult = ULogic.runLogic(exp);
 			}
+			str.al("-- ewa_test<" + lastResult + "> " + len2.replace("@", "<at>"));
 		}
 
 		return str.toString();
@@ -1789,7 +1789,7 @@ public class DataConnection {
 
 		// 查询上级或下级id，ewa_ids_sub或 ewa_ids_up
 		// select * from adm_dept where dep_id in (
-		//   ewa_ids_sub('adm_dept','dep_id','dep_pid',@dep_id)
+		// ewa_ids_sub('adm_dept','dep_id','dep_pid',@dep_id)
 		// )
 		ReverseIds reverseIds = new ReverseIds(this);
 		String sqlReverseIds = reverseIds.replaceReverseIds(sql1);
