@@ -2,6 +2,7 @@ package com.gdxsoft.easyweb.datasource;
 
 import java.util.HashMap;
 
+
 public class SqlUtils {
 	/**
 	 * MYSQL保留词
@@ -48,6 +49,32 @@ public class SqlUtils {
 	 */
 	public final static String[] CHN_TEMPLATES = { "convert([FIELD] using gbk)", "convert([FIELD] using gbk)",
 			"convert_to([FIELD],'gb18030')" };
+
+
+	/**
+	 * 查找自增的sql的返回字段, 例如 -- auto MEMO_ID
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public static String getAutoField(String sql) {
+		// 查找自增的sql, 例如 -- auto MEMO_ID
+		String[] sqls = sql.split("\n");
+		String auto_field = null;
+		// 从后向前找
+		for (int m = sqls.length - 1; m >= 0; m--) {
+			String len = sqls[m].trim().toUpperCase();
+			if (len.startsWith("--")) {
+				len = len.replace("--", "").trim();
+				// 第3个的空格是 32 &nbsp;
+				if (len.indexOf("AUTO ") >= 0 || len.indexOf("AUTO\t") >= 0 || len.indexOf("AUTO ") >= 0) {
+					auto_field = len.replaceFirst("AUTO", "").trim();
+					return auto_field;
+				}
+			}
+		}
+		return null;
+	}
 
 	public static boolean isMySql(String databaseType) {
 		return "mysql".equalsIgnoreCase(databaseType) || "MariaDB".equalsIgnoreCase(databaseType);

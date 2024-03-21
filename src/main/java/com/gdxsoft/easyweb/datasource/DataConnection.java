@@ -32,6 +32,7 @@ import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UFormat;
+import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
@@ -330,22 +331,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public static String getAutoField(String sql) {
-		// 查找自增的sql, 例如 -- auto MEMO_ID
-		String[] sqls = sql.split("\n");
-		String auto_field = null;
-		// 从后向前找
-		for (int m = sqls.length - 1; m >= 0; m--) {
-			String len = sqls[m].trim().toUpperCase();
-			if (len.startsWith("--")) {
-				len = len.replace("--", "").trim();
-				// 第3个的空格是 32 &nbsp;
-				if (len.indexOf("AUTO ") >= 0 || len.indexOf("AUTO\t") >= 0 || len.indexOf("AUTO ") >= 0) {
-					auto_field = len.replaceFirst("AUTO", "").trim();
-					return auto_field;
-				}
-			}
-		}
-		return null;
+		return SqlUtils.getAutoField(sql);
 	}
 
 	/**
@@ -723,6 +709,64 @@ public class DataConnection {
 			return;
 		}
 		this.ewaSqlFunctions.executeEwaFunctions(_RequestValue, this._DebugFrames);
+	}
+
+	/**
+	 * 根据逻辑判断组合SQL, 判断条件是 <b>"-- ewa_test"</b><br>
+	 * SELECT A.*, B.GRP <br>
+	 * &nbsp;&nbsp; FROM TABLE1 A<br>
+	 * INNER JOIN TABLE2 B ON A.ID = B.ID<br>
+	 * WHERE A.STATUS = 'USED'<br>
+	 * -- ewa_test @tag is not null<br>
+	 * &nbsp;&nbsp; and A.tag = @tag<br>
+	 * -- ewa_test @abc is not null<br>
+	 * &nbsp;&nbsp; and A.tag = 'TAG_CAR'<br>
+	 * &nbsp;&nbsp; and B.GRP = 'CAR0'<br>
+	 * -- ewa_test<br>
+	 * order by A.ID, B.GRP desc<br>
+	 * 
+	 * @param orignalSql
+	 * @return
+	 */
+	public String createSqlByEwaTest(String orignalSql) {
+		if (this._RequestValue == null || orignalSql == null || orignalSql.toLowerCase().indexOf("ewa_test") == -1) {
+			return orignalSql;
+		}
+		String[] sqls = orignalSql.split("\n");
+		MStr str = new MStr();
+		boolean lastResult = true;
+		for (int m = 0; m < sqls.length; m++) {
+			String sql = sqls[m];
+			String len = sql.trim().toLowerCase();
+			if (!len.startsWith("--")) {
+				if (lastResult) {
+					str.al(sql);
+				}
+				continue;
+			}
+
+			// 获取表达式，例如：-- ewa_test @abc is not null
+			String len1 = len.replaceFirst("--", "").trim();
+			int loc0 = len1.indexOf("ewa_test");
+			if (loc0 == -1) {
+				if (lastResult) {
+					str.al(sql);
+				}
+				continue;
+			}
+			String len2 = len1.substring(loc0 + 8).trim(); // 去除ewa_test
+			if (len2.length() == 0) {
+				// -- ewa_test
+				lastResult = true;
+			} else {
+				// -- ewa_test @name is null or @name = ''
+				len2 = this.replaceSqlSelectParameters(len2);
+				// 利用数据库执行判断逻辑
+				lastResult = ULogic.runLogic(len2);
+			}
+		}
+
+		return str.toString();
 	}
 
 	/**
@@ -1731,6 +1775,9 @@ public class DataConnection {
 			sql1 = sql1.replace("~" + para, v1);
 		}
 
+		// 根据逻辑判断组合SQL, 判断条件是 "-- ewa_test"
+		sql1 = this.createSqlByEwaTest(sql1);
+
 		// 分割字符串函数 ewa_split(@xxx, ',')
 		if (this._RequestValue != null) {
 			if (_CreateSplitData == null) {
@@ -1740,7 +1787,10 @@ public class DataConnection {
 			sql1 = sql;
 		}
 
-		// 查询上级或下级id
+		// 查询上级或下级id，ewa_ids_sub或 ewa_ids_up
+		// select * from adm_dept where dep_id in (
+		//   ewa_ids_sub('adm_dept','dep_id','dep_pid',@dep_id)
+		// )
 		ReverseIds reverseIds = new ReverseIds(this);
 		String sqlReverseIds = reverseIds.replaceReverseIds(sql1);
 		sql1 = sqlReverseIds;

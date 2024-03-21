@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.data.DTTable;
 
+/**
+ * 查询上级或下级的所有id，ewa_ids_sub或 ewa_ids_up
+ */
 public class ReverseIds {
 	private static Logger LOGGER = LoggerFactory.getLogger(ReverseIds.class);
 	private DataConnection cnn;
@@ -20,6 +23,12 @@ public class ReverseIds {
 		this.cnn = cnn;
 	}
 
+	/**
+	 * 根据ewa_ids_sub/ewa_ids_up，将上级/下级所以的id拼成字符串，例如： 1,2,4,100
+	 * 
+	 * @param sql
+	 * @return
+	 */
 	public String replaceReverseIds(String sql) {
 		// select * from adm_dept where dep_id in (
 		// ewa_ids_sub('adm_dept','dep_id','dep_pid',@dep_id)
