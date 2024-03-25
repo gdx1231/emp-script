@@ -449,7 +449,7 @@ public class ServletXml extends HttpServlet {
 		LOGGER.info("name={}, mode={}, modeName={}", name, mode, modeName);
 
 		if (mode.equals("JS")) {
-			this.setOutType(response, "html");
+			this.setOutType(response, "javascript");
 			xml = this.getCfgXmlJs(name, modeName);
 		} else {
 			this.setOutType(response, "xml");
