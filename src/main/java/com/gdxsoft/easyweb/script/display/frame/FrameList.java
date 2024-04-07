@@ -680,15 +680,17 @@ public class FrameList extends FrameBase implements IFrame {
 
 				}
 				rowContents.append(rowHtml);
-				if (colSizeInc == colSize || colSize == 1) {
+				if (colSizeInc == colSize || colSize == 1 || i==tb.getCount()-1) {
 					if (ewaRowSign) {
 						// 列表每行所有TD字符串进行md5签名，用于刷新数据 refreshPage or replaceRowsData 的比对
 						String rowMd5 = Utils.md5(rowContents.toString());
 						sb.a(" ewa_row_sign='" + rowMd5 + "'");
 					}
-					sb.al(">");
+					sb.al(">");					
 					sb.a(rowContents);
-					sb.al("</tr>");
+					if(colSize==1 || colSizeInc == colSize || i<tb.getCount()-1) {
+						sb.al("</tr>");
+					}
 				}
 				colSizeInc++;
 				if (colSizeInc > colSize) {
