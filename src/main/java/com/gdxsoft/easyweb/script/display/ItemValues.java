@@ -244,7 +244,7 @@ public class ItemValues {
 		f.setLang(lang);
 		f.init(userXItem, timeDiffMinutes);
 		f.setItemValues(this);
-		
+
 		this.formatMap.put(userXItem, f);
 		return f;
 	}
@@ -254,34 +254,32 @@ public class ItemValues {
 
 		ItemFormat f = this.getItemFormat(userXItem);
 
+		// 从缓存中取得数据
 		String val = this.getCacheValue(f.getName(), f.getDataFieldName());
-		if (val != null)
-			return val;
+		if (val == null) {
+			// 来源数据库的数据
+			Object o = this.getTableValue(f.getDataFieldName(), f.getDataType());
+			if (o != null) {
+				String v = f.formatValue(o);
+				this._LastValue = v;
+				return v;
+			}
+			// 来源类的数据
+			val = this.getClassValue(f.getName(), f.getDataFieldName());
+			if (val == null) {
+				// 来源RequestValue的数据
+				val = this.getRvValue(f.getName(), f.getDataFieldName());
+			}
 
-		// 来源数据库的数据
-		Object o = this.getTableValue(f.getDataFieldName(), f.getDataType());
-		if (o != null) {
-			String v = f.formatValue(o);
-			this._LastValue = v;
-			return v;
 		}
-
-		// 来源类的数据
-		val = this.getClassValue(f.getName(), f.getDataFieldName());
-		if (val != null) {
+		if (val == null) {
+			this._LastValue = null;
+			return null;
+		} else {
 			String v = f.formatValue(val);
 			this._LastValue = v;
 			return v;
 		}
-
-		// 来源RequestValue的数据
-		val = this.getRvValue(f.getName(), f.getDataFieldName());
-		if (val != null) {
-			String v = f.formatValue(val);
-			this._LastValue = v;
-			return v;
-		}
-		return null;
 	}
 
 	public Object getTableValue(UserXItem userXItem) throws Exception {
