@@ -32,6 +32,7 @@ public class ItemFormat {
 	private String refShow;
 	private boolean isRef;
 	private boolean refShowMulti;
+	private boolean refShowMultiValues;
 
 	private String lang;
 
@@ -103,6 +104,8 @@ public class ItemFormat {
 
 			// 是否多个ID的匹配，例如：CAMP_OPT_TSG,CAMP_OPT_LQC,CAMP_OPT_ZQC
 			this.refShowMulti = "yes".equals(vs.checkItemExists("RefMulti") ? vs.getItem("RefMulti") : "");
+			// 单id时，是否显示多个值
+			this.refShowMultiValues = "yes1".equals(vs.checkItemExists("RefMulti") ? vs.getItem("RefMulti") : "");
 			this.splitChar = vs.checkItemExists("RefMultiSplit") ? vs.getItem("RefMultiSplit").trim() : ",";
 		} catch (Exception e) {
 			return;
@@ -112,7 +115,7 @@ public class ItemFormat {
 
 	public List<String> getRefMultiValues(String val) {
 		List<String> al = new ArrayList<>();
-		if (!refShowMulti) { // 单个id匹配
+		if (!refShowMulti && !this.refShowMultiValues) { // 单个id匹配
 			al.add(val);
 			return al;
 		}
@@ -130,6 +133,23 @@ public class ItemFormat {
 		if (cellIndex == -1) {
 			// 字段不存在
 			al.add(val);
+			return al;
+		}
+
+		// 单个id匹配，显示这个id下的多个值
+		if (this.refShowMultiValues) {
+			for (int i = 0; i < dt.getCount(); i++) {
+				DTCell refValCell = dt.getCell(i, cellIndex);
+				if (refValCell.isNull()) {
+					continue;
+				}
+				String refVal = refValCell.toString().trim();
+
+				if (refVal.equals(val)) {
+					al.add(refVal);
+				}
+			}
+
 			return al;
 		}
 
@@ -176,7 +196,7 @@ public class ItemFormat {
 		return show;
 	}
 
-	public List<Pair<String,DTRow>> getRefRows(String val) {
+	public List<Pair<String, DTRow>> getRefRows(String val) {
 		String[] refKeys = new String[1];
 		refKeys[0] = refKey;
 		DTTable dt = itemValues.getRefTable(refSql, refKeys);
@@ -184,14 +204,34 @@ public class ItemFormat {
 		if (dt == null) {
 			return null;
 		}
-		List<Pair<String,DTRow>> al = new ArrayList<>();
+		List<Pair<String, DTRow>> al = new ArrayList<>();
 
-		if (!refShowMulti) {
+		if (!refShowMulti && !refShowMultiValues) {
 			DTRow row = dt.getRowByKey(refKey, val);
-			Pair<String,DTRow> m = Pair.of(val, row);
+			Pair<String, DTRow> m = Pair.of(val, row);
 			al.add(m);
 			return al;
 		}
+		
+		// 单个id下的多个值
+		if (this.refShowMultiValues) {
+			int cellIndex = dt.getColumns().getNameIndex( this.refKey );
+			for (int i = 0; i < dt.getCount(); i++) {
+				DTCell refValCell = dt.getCell(i, cellIndex);
+				if (refValCell.isNull()) {
+					continue;
+				}
+				String refVal = refValCell.toString().trim();
+
+				if (refVal.equals(val)) {
+					Pair<String, DTRow> m = Pair.of(val, refValCell.getRow());
+					al.add(m);
+				}
+			}
+
+			return al;
+		}
+
 		// 多个ID的匹配， 例如 CAMP_OPT_TSG,CAMP_OPT_LQC,CAMP_OPT_ZQC
 		// 字符串分割字符，默认英文逗号
 		if (splitChar.length() == 0) {
@@ -201,7 +241,7 @@ public class ItemFormat {
 		for (int i = 0; i < vals.length; i++) {
 			String v = vals[i].trim();
 			DTRow row1 = dt.getRowByKey(refKey, v);
-			Pair<String,DTRow> m = Pair.of(val, row1);
+			Pair<String, DTRow> m = Pair.of(val, row1);
 			al.add(m);
 		}
 		return al;
@@ -243,7 +283,7 @@ public class ItemFormat {
 		for (int i = 0; i < vals.length; i++) {
 			String v = vals[i].trim();
 			DTRow row1 = dt.getRowByKey(refKey, v);
-			if(i>0) {
+			if (i > 0) {
 				sb.append(", ");
 			}
 			if (row1 == null) {

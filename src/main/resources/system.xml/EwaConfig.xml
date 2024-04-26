@@ -3246,10 +3246,10 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info="png,jpeg,webp" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="RefMulti" Default="" Values="no,yes">
+			<XGroupValue Name="RefMulti" Default="" Values="no,yes,yes1">
 				<DescriptionSet>
-					<Set Lang="zhcn" Info="否,是" />
-					<Set Lang="enus" Info="No,Yes" />
+					<Set Lang="zhcn" Info="否,是(多个ID下关联的值),是(单个ID下，关联的多个值)" />
+					<Set Lang="enus" Info="No, Yes (values associated with multiple IDs), Yes (multiple values associated with a single ID)" />
 				</DescriptionSet>
 			</XGroupValue>
 			<XGroupValue Name="Trim" Default="" Values="yes,no">
