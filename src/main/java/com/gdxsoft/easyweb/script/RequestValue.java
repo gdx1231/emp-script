@@ -476,7 +476,7 @@ public class RequestValue implements Cloneable {
 		if (tag.equalsIgnoreCase("QUERY") || tag.equalsIgnoreCase("FROM")) {
 			if (tag.equalsIgnoreCase("QUERY")) {
 				v = this.getPageValues().getQueryValue(name2);
-			} else if (tag.equalsIgnoreCase("SHA256")) {
+			} else if (tag.equalsIgnoreCase("FROM")) {
 				v = this.getPageValues().getFormValue(name2);
 			}
 			return v;
