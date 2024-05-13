@@ -230,6 +230,8 @@ public class RequestValue implements Cloneable {
 
 	private HtmlCreator htmlCreator;
 
+	private Map<String, Boolean> querys = new HashMap<>();
+
 	public RequestValue() {
 		initSysParameters();
 	}
@@ -257,8 +259,10 @@ public class RequestValue implements Cloneable {
 
 		return lang;
 	}
+
 	/**
 	 * 是否英文模式
+	 * 
 	 * @return
 	 */
 	public boolean isEn() {
@@ -825,6 +829,9 @@ public class RequestValue implements Cloneable {
 				}
 			}
 			this._ReqValues.addValue(key, val, PageValueTag.QUERY_STRING);
+			// 区分大小写记录名称
+			this.querys.put(key, true);
+
 			if (parameters.length() > 0) {
 				parameters.append("&");
 			}
@@ -1054,10 +1061,16 @@ public class RequestValue implements Cloneable {
 		}
 	}
 
+	
+	/**
+	 * Form 提交的参数
+	 * @param req
+	 */
 	private void addParameter(HttpServletRequest req) {
 
 		Enumeration<?> ee = req.getParameterNames();
 		MTable mt = new MTable();
+
 		while (ee.hasMoreElements()) {
 			String RKey = ee.nextElement().toString().trim();
 			if (RKey.indexOf(":") > 0 || RKey.indexOf("__EVENT") == 0 || RKey.indexOf("__VIEWSTATE") >= 0) {
@@ -1069,26 +1082,17 @@ public class RequestValue implements Cloneable {
 				continue;
 
 			String RVal = req.getParameter(RKey);
-			if (this._ReqValues.getQueryValue(RKey) != null) {
-				String qv = this._ReqValues.getQueryValue(RKey);
-				if (qv.indexOf("%") >= 0) {
-					try {
-						qv = java.net.URLDecoder.decode(RVal, "utf-8");
-					} catch (Exception e) {
-						qv = RVal;
-					}
-					// qv = Utils.getUtf8(RVal);
-				} else {
-					qv = RVal;
+			
+			if (this.querys.containsKey(RKey)) { // 区分大小写
+				if(vals.length == 1) {
+					// 已经通过addQueryValues处理过了
+					continue;
 				}
-
-				if (vals.length == 2) {// form and query
-					// form 优先级高
-					RVal = qv.equals(vals[0]) ? vals[1] : vals[0];
-					if (RVal.equals("undefined")) {// 属于在页面未找到
-						RVal = qv;
-					}
-				} else {
+				// vals.length == 2
+				// form and query，form 优先级高
+				String qv = this._ReqValues.getQueryValue(RKey);
+				RVal = qv.equals(vals[0]) ? vals[1] : vals[0];
+				if (RVal.equals("undefined")) {// 属于在页面未找到
 					RVal = qv;
 				}
 			}
