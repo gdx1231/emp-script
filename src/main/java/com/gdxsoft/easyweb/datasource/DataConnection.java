@@ -345,7 +345,8 @@ public class DataConnection {
 	}
 
 	/**
-	 * 检查是否为 存储过程，例如 CALL pr_batAdd(@a)
+	 * 检查是否为 select语句或标记为<b>-- EWA_IS_SELECT</b>
+	 *		
 	 * 
 	 * @param sql
 	 * @return
@@ -367,7 +368,8 @@ public class DataConnection {
 			}
 			return true;
 		}
-		return false;
+		// 强制执行为select 模式，解决with xxx as 语句后面的selec
+		return SqlUtils.ewaIsSelect(sql);
 	}
 
 	/**

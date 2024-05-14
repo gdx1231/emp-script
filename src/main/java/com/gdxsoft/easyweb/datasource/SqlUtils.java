@@ -2,7 +2,6 @@ package com.gdxsoft.easyweb.datasource;
 
 import java.util.HashMap;
 
-
 public class SqlUtils {
 	/**
 	 * MYSQL保留词
@@ -50,7 +49,6 @@ public class SqlUtils {
 	public final static String[] CHN_TEMPLATES = { "convert([FIELD] using gbk)", "convert([FIELD] using gbk)",
 			"convert_to([FIELD],'gb18030')" };
 
-
 	/**
 	 * 查找自增的sql的返回字段, 例如 -- auto MEMO_ID
 	 * 
@@ -74,6 +72,34 @@ public class SqlUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * 强制执行为select 模式，解决with xxx as 语句后面的select<br>
+	 * 标记为：<b>-- EWA_IS_SELECT</b>
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public static boolean ewaIsSelect(String sql) {
+		String[] sqls = sql.split("\n");
+
+		for (int m = 0; m <= sqls.length; m++) {
+			String len = sqls[m].trim().toUpperCase();
+			if (len.length() == 0) {
+				continue;
+			}
+
+			if (len.startsWith("--")) {
+				len = len.replace("--", "").trim();
+				if (len.indexOf("EWA_IS_SELECT ") == 0) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		return false;
 	}
 
 	public static boolean isMySql(String databaseType) {
