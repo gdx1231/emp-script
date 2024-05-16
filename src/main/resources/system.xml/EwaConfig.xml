@@ -1575,31 +1575,19 @@ var swfVersionStr = "11.1.0";
 					]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="code2d" HtmlTag="" BaseType="1" UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
-				Parameters="GroupIndex , Name, DescriptionSet, AttributeSet,EventSet, Events, DataItem, IsMustInput, 
-				MaxMinLength,MaxMinValue, InitValue, Valid, Style, ParentStyle,VaildEx">
+			<XItem Name="QRCode" HtmlTag="" BaseType="1" UIGroup="Standard"
+				ClassName="com.gdxsoft.easyweb.script.display.items.ItemQRCode"
+				Parameters="GroupIndex , Name, DescriptionSet, AttributeSet,EventSet, Events, DataItem,  
+				QRCode, Style, ParentStyle,VaildEx">
 				<DescriptionSet>
-					<Set Lang="zhcn" Info="二维码(有图片)" />
-					<Set Lang="enus" Info="code2d" />
+					<Set Lang="zhcn" Info="二维码" />
+					<Set Lang="enus" Info="QRCode" />
 				</DescriptionSet>
 				<Template>
-					<Html><![CDATA[<input type="text" class="EWA_INPUT" value="{__EWA_VAL__}" !!/>]]></Html>
+					<Html><![CDATA[<img class="ewa-qrcode" src="{__EWA_VAL__}" !! >]]></Html>
 				</Template>
 			</XItem>
-			<XItem Name="code2dNoImg" HtmlTag="" BaseType="1"
-				UIGroup="Standard"
-				ClassName="com.gdxsoft.easyweb.script.display.items.ItemBase"
-				Parameters="GroupIndex , Name, DescriptionSet, AttributeSet,EventSet, Events, DataItem, IsMustInput, 
-				MaxMinLength,MaxMinValue, InitValue, Valid, Style, ParentStyle,VaildEx">
-				<DescriptionSet>
-					<Set Lang="zhcn" Info="二维码（无图片）" />
-					<Set Lang="enus" Info="code2d No Image" />
-				</DescriptionSet>
-				<Template>
-					<Html><![CDATA[<input type="text" class="EWA_INPUT" value="{__EWA_VAL__}" !!/>]]></Html>
-				</Template>
-			</XItem>
+			 
 
 			<XItem Name="CombineItem" HtmlTag="" BaseType="0"
 				UIGroup="Extend"
@@ -3191,6 +3179,21 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 						</DescriptionSet>
 					</Value>
 
+				</Values>
+			</XItemParameter>
+			<XItemParameter Name="QRCode" IsSet="0"
+				IsShow="1" UIGroup="Others" IsJsShow="0" IsMulti="1" Html="">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="二维码" />
+					<Set Lang="enus" Info="QRCode" />
+				</DescriptionSet>
+				<Values>
+					<Value Type="string" Name="QRLogoUrl">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="Logo 网址" />
+							<Set Lang="enus" Info="Logo Url" />
+						</DescriptionSet>
+					</Value>
 				</Values>
 			</XItemParameter>
 			<XItemParameter Name="ImageDefault" IsSet="0"
