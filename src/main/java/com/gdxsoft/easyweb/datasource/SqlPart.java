@@ -41,10 +41,10 @@ public class SqlPart {
 	public String rebuildSql(String order, String where, String dataBaseType) {
 		StringBuilder sqlTmp = new StringBuilder();
 		sqlTmp.append("SELECT " + this._Fields + "\nFROM " + this._TableName);
-		sqlTmp.append(" WHERE (" + this._Where + " )");
+		sqlTmp.append(" WHERE (\n" + this._Where + " \n\n)");
 
 		if (where != null && where.trim().length() > 0) {
-			sqlTmp.append(" AND (" + where + ") ");
+			sqlTmp.append(" AND (\n" + where + " \n\n) ");
 		}
 		if (this._GroupBy.length() > 0) {
 			sqlTmp.append("\n GROUP BY " + this._GroupBy);

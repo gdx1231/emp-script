@@ -3,6 +3,22 @@ package com.gdxsoft.easyweb.script.display.frame;
 public class FrameParameters {
 
 	/**
+	 * 跳过图片滑动验证，NOT_CHECK=不检查验证码
+	 * pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS ||<br>
+	 * pv.getPVTag() == PageValueTag.SYSTEM || <br>
+	 * pv.getPVTag() == PageValueTag.SESSION
+	 */
+	public final static String EWA_SLIDE_PUZZLE_CHECK = "EWA_SLIDE_PUZZLE_CHECK";
+	/**
+	 * 不检查验证码，用于手机应用或AJAX调用<br>
+	 * NOT_CHECK=不检查验证码<br>
+	 * pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS ||<br>
+	 * pv.getPVTag() == PageValueTag.SYSTEM || <br>
+	 * pv.getPVTag() == PageValueTag.SESSION
+	 */
+	public static final String EWA_VALIDCODE_CHECK = "EWA_VALIDCODE_CHECK";
+	
+	/**
 	 * 隐藏Frame字段的字符串表达式，用,分割
 	 */
 	public static final String EWA_HIDDEN_FIELDS = "EWA_HIDDEN_FIELDS";
@@ -342,15 +358,7 @@ public class FrameParameters {
 	 */
 	public static final String EWA_AFTER_EVENT = "EWA_AFTER_EVENT";
 
-	/**
-	 * 不检查验证码，用于手机应用或AJAX调用<br>
-	 * NOT_CHECK=不检查验证码<br>
-	 * pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS ||<br>
-	 * pv.getPVTag() == PageValueTag.SYSTEM || <br>
-	 * pv.getPVTag() == PageValueTag.SESSION
-	 */
-	public static final String EWA_VALIDCODE_CHECK = "EWA_VALIDCODE_CHECK";
-
+ 
 	/**
 	 * shortName
 	 */

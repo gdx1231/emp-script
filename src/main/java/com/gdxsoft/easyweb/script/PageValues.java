@@ -233,6 +233,21 @@ public class PageValues {
 
 	}
 
+	public String getSystemValue(String name) {
+		PageValue pv = this.getPageValue(name, PageValueTag.SYSTEM);
+		return pv == null ? null : pv.getStringValue();
+	}
+	
+	public String getDTableValue(String name) {
+		PageValue pv = this.getPageValue(name, PageValueTag.DTTABLE);
+		return pv == null ? null : pv.getStringValue();
+	}
+	
+	public String getHCParasValue(String name) {
+		PageValue pv = this.getPageValue(name, PageValueTag.HTML_CONTROL_PARAS);
+		return pv == null ? null : pv.getStringValue();
+	}
+	
 	public String getFormValue(String name) {
 		PageValue pv = this.getPageValue(name, PageValueTag.FORM);
 		return pv == null ? null : pv.getStringValue();
