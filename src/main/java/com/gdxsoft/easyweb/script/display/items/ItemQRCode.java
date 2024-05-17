@@ -26,6 +26,12 @@ public class ItemQRCode extends ItemBase {
 
 	public String createItemHtml() throws Exception {
 		UserXItem userXItem = super.getUserXItem();
+		String s1 = super.getXItemFrameHtml();
+		String val = super.getValue();
+		if (val == null) {
+			return s1 = s1.replace(SkinFrame.TAG_VAL, "");
+		}
+		
 		String logoUrl = null;
 		if (userXItem.testName("QRCode") && userXItem.getItem("QRCode").count() > 0) {
 
@@ -37,9 +43,7 @@ public class ItemQRCode extends ItemBase {
 
 		}
 
-		String s1 = super.getXItemFrameHtml();
-		String val = super.getValue();
-
+		
 		int width = 300;
 
 		// 拼接参数，用于判断是否已经创建
@@ -53,7 +57,7 @@ public class ItemQRCode extends ItemBase {
 		if (logoUrl != null && logoUrl.length() > 0) {
 			hash_string.append("~~~~logoUrl=");
 			hash_string.append(logoUrl);
-			
+
 			hasLogo = true;
 		}
 
@@ -63,14 +67,14 @@ public class ItemQRCode extends ItemBase {
 		String[] paths = UQRCode.getQRCodeSavedPath(md5, "jpeg");
 		String path = paths[0];
 		File exists = new File(path);
-		
+
 		if (exists.exists()) {
 			try {
 				img = UFile.readFileBytes(exists.getAbsolutePath());
 			} catch (Exception err) {
 				LOGGER.warn(err.getMessage());
 			}
-		} else if(hasLogo){
+		} else if (hasLogo) {
 			byte[] logoBytes = loadLogo(logoUrl);
 
 			if (logoBytes == null || logoBytes.length == 0) {
