@@ -3,12 +3,7 @@
  */
 package com.gdxsoft.easyweb.define.database;
 
-import java.io.IOException;
 import java.util.Date;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 
 /**
  * @author Administrator
@@ -20,8 +15,7 @@ public class DataSql {
 	private MapTypes _SrcMapTypes;
 	private MapTypes _defMapTypes;
 
-	public DataSql() throws ParserConfigurationException, SAXException,
-			IOException {
+	public DataSql() throws Exception {
 		_MapDatabaseTypes = MapDatabaseTypes.instance();
 	}
 

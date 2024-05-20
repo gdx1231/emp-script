@@ -511,7 +511,7 @@ public class Table {
 			LOGGER.error("{}", e.getMessage());
 			return;
 		}
-		 
+
 		// 视图替换数据库名称
 		if (isView && this.replaceMetaDatabaseName != null) {
 			// 替换元数据库的前缀
@@ -574,7 +574,7 @@ public class Table {
 		if (tb.getCount() == 0) {
 			return;
 		}
-		
+
 		try {
 			this._CatalogName = tb.getCell(0, "TABLE_CATALOG").toString();
 		} catch (Exception e) {
@@ -596,7 +596,9 @@ public class Table {
 
 		if (tb.isOk() && tb.getCount() > 0) {
 			thisDatabase = tb.getCell(0, 0).toString();
-			conn.executeUpdateNoParameter("use " + targetDatabase);
+			if (!thisDatabase.equalsIgnoreCase(targetDatabase)) {
+				conn.executeUpdateNoParameter("use " + targetDatabase);
+			}
 		}
 
 		_DatabaseType = conn.getCurrentConfig().getType();
@@ -614,12 +616,18 @@ public class Table {
 			initRemarks(conn);
 			initRemarks();
 			initFieldIdentity(conn);
+
+			// 获取创建表或视图的DDL
+			this.initTableOrViewDDL(conn);
+
 		} catch (SQLException e) {
 			LOGGER.error(e.getMessage());
 		} finally {
 			try {
 				if (thisDatabase.trim().length() > 0) {
-					conn.executeUpdateNoParameter("use " + thisDatabase);
+					if (!thisDatabase.equalsIgnoreCase(targetDatabase)) {
+						conn.executeUpdateNoParameter("use " + thisDatabase);
+					}
 				}
 				conn.close();
 			} catch (Exception ee) {
