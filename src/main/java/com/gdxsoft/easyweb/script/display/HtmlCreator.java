@@ -1875,9 +1875,22 @@ public class HtmlCreator {
 	 * @throws Exception
 	 */
 	private void createPageTitle() throws Exception {
-		String pageDescription = HtmlUtils.getDescription(this._UserConfig.getUserPageItem().getItem("DescriptionSet"),
-				"Info", this._SysParas.getLang());
-		String title = this._ItemValues.replaceParameters(pageDescription, true);
+		String title = null;
+		RequestValue rv = this.getRequestValue();
+		String cnTitle = rv.s(FrameParameters.EWA_TITLE);
+		String enTitle =rv.s(FrameParameters.EWA_TITLE_EN);
+		if(cnTitle !=null || enTitle != null) {
+			title = cnTitle;
+			if (FrameParameters.ENUS.equals(this._SysParas.getLang()) && enTitle != null){
+				title = enTitle;
+			}
+		}
+		
+		if (title == null) {
+			String pageDescription = HtmlUtils.getDescription(
+					this._UserConfig.getUserPageItem().getItem("DescriptionSet"), "Info", this._SysParas.getLang());
+			title = this._ItemValues.replaceParameters(pageDescription, true);
+		}
 		_SysParas.setTitle(title);
 		this._Log.setDescription(title);
 	}

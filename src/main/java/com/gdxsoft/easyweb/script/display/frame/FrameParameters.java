@@ -3,6 +3,15 @@ package com.gdxsoft.easyweb.script.display.frame;
 public class FrameParameters {
 
 	/**
+	 * 通过参数传递的Title，覆盖frame的title
+	 */
+	public final static String EWA_TITLE = "EWA_TITLE";
+	/**
+	 * 通过参数传递的TitleEn (ewa_lang=enus)，覆盖frame的title
+	 */
+	public final static String EWA_TITLE_EN = "EWA_TITLE_EN";
+	
+	/**
 	 * 跳过图片滑动验证，NOT_CHECK=不检查验证码
 	 * pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS ||<br>
 	 * pv.getPVTag() == PageValueTag.SYSTEM || <br>

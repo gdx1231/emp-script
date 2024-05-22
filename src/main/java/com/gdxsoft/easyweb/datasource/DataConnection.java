@@ -346,7 +346,7 @@ public class DataConnection {
 
 	/**
 	 * 检查是否为 select语句或标记为<b>-- EWA_IS_SELECT</b>
-	 *		
+	 * 
 	 * 
 	 * @param sql
 	 * @return
@@ -1622,7 +1622,7 @@ public class DataConnection {
 	}
 
 	/**
-	 * 获取记录数
+	 * 重新组合SQL，获取记录数，创建出SELECT COUNT(*) GDX FROM ...
 	 * 
 	 * @param sql
 	 * @return
@@ -1632,20 +1632,22 @@ public class DataConnection {
 		sp.setSql(sql);
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT COUNT(*) GDX ");
-		sb.append(" FROM ");
+		sb.append("SELECT COUNT(*) GDX FROM \n");
 		if (sp.getGroupBy().length() > 0) {
-			sb.append("( SELECT " + sp.getFields() + " FROM " + sp.getTableName());
-			if (!sp.getWhere().equals("")) {
-				sb.append(" WHERE ");
-				sb.append(sp.getWhere());
-			}
-			sb.append(" GROUP BY " + sp.getGroupBy());
-			if (!sp.getHaving().equals("")) {
-				sb.append(" HAVING " + sp.getHaving());
-			}
-			sb.append(") GDX1231");
+			sb.append("(").append(sql).append(") tmp");
 		} else {
+//			String subSql = null;
+//			int loc0 = sp.getTableName().indexOf("(");
+//			int loc1 = sp.getTableName().lastIndexOf(")");
+//
+//			if (loc1 - loc0 > 10) {
+//				// 提取子查询的sql，用于获取数量
+//				subSql = sp.getTableName().substring(loc0 + 1, loc1).trim();
+//				if (subSql.toLowerCase().indexOf("select") == 0) {
+//					sp = new SqlPart();
+//					sp.setSql(subSql);
+//				}
+//			}
 
 			sb.append(sp.getTableName());
 
@@ -1653,12 +1655,7 @@ public class DataConnection {
 				sb.append(" WHERE ");
 				sb.append(sp.getWhere());
 			}
-			if (!sp.getGroupBy().equals("")) {
-				sb.append(" GROUP BY " + sp.getGroupBy());
-			}
-			if (!sp.getHaving().equals("")) {
-				sb.append(" HAVING " + sp.getHaving());
-			}
+
 		}
 		int m1 = 0;
 		if (executeQuery(sb.toString())) {

@@ -71,7 +71,7 @@ public class HtmlDocument {
 //		sb.al("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
 
 		sb.al(_Head.toString());
-		sb.al("<title>" + this._Title + "</title>");
+		sb.al("<title>" + Utils.textToInputValue(this._Title) + "</title>");
 		sb.al("</head>");
 		return sb.toString();
 	}
