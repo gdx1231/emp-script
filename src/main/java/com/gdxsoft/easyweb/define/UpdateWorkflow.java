@@ -20,12 +20,12 @@ public class UpdateWorkflow {
 
 	public String updateCnns(RequestValue rv) {
 		if (rv.getString("FROMS") == null || rv.getString("TOS") == null) {
-			return "{RST:false, ERR:'FROMS/TOS NOT EXISTS'}";
+			return "{\"RST\":false, \"ERR\":\"FROMS/TOS NOT EXISTS\"}";
 		}
 		String[] froms = rv.getString("FROMS").split(",");
 		String[] tos = rv.getString("TOS").split(",");
 		if (froms.length != tos.length) {
-			return "{RST:false, ERR:'FROMS != TOS'}";
+			return "{\"RST\":false, \"ERR\":\"FROMS != TOS\"}";
 		}
 		DataConnection cnn = this.getCnn(rv);
 
@@ -34,15 +34,12 @@ public class UpdateWorkflow {
 		cnn.executeUpdate(sql);
 
 		for (int i = 0; i < froms.length; i++) {
-			sql = "INSERT INTO _EWA_WF_CNN(WF_UNIT_FROM, WF_UNIT_TO, WF_ID,WF_REF_ID) "
-					+ "VALUES('"
-					+ froms[i].replace("'", "''")
-					+ "', '"
-					+ tos[i].replace("'", "''") + "', @WF_ID,@REF_ID)";
+			sql = "INSERT INTO _EWA_WF_CNN(WF_UNIT_FROM, WF_UNIT_TO, WF_ID,WF_REF_ID) " + "VALUES('"
+					+ froms[i].replace("'", "''") + "', '" + tos[i].replace("'", "''") + "', @WF_ID,@REF_ID)";
 			cnn.executeUpdate(sql);
 		}
 		cnn.close();
-		return "{RST:true}";
+		return "{\"RST\":true}";
 	}
 
 	public String updateUnits(RequestValue rv) {
@@ -77,40 +74,29 @@ public class UpdateWorkflow {
 			for (int i = 0; i < ids.length; i++) {
 				String id = ids[i];
 				if (map.containsKey(id)) {
-					sql = "UPDATE _EWA_WF_UNIT SET WF_UNIT_NAME='"
-							+ names[i].replace("'", "''")
-							+ "', WF_UNIT_X="
-							+ xs[i].replace("'", "")
-							+ ",WF_UNIT_Y="
-							+ ys[i].replace("'", "")
-							+ " WHERE WF_ID=@WF_ID AND WF_REF_ID=@REF_ID AND WF_UNIT_ID='"
-							+ id.replace("'", "''") + "'";
+					sql = "UPDATE _EWA_WF_UNIT SET WF_UNIT_NAME='" + names[i].replace("'", "''") + "', WF_UNIT_X="
+							+ xs[i].replace("'", "") + ",WF_UNIT_Y=" + ys[i].replace("'", "")
+							+ " WHERE WF_ID=@WF_ID AND WF_REF_ID=@REF_ID AND WF_UNIT_ID='" + id.replace("'", "''")
+							+ "'";
 				} else {
 					sql = "INSERT INTO _EWA_WF_UNIT(WF_UNIT_ID, WF_ID, WF_REF_ID, WF_UNIT_NAME, "
-							+ "WF_UNIT_TYPE, WF_UNIT_X, WF_UNIT_Y)"
-							+ " VALUES ('"
-							+ ids[i].replace("'", "''")
-							+ "', @WF_ID, @REF_ID, '"
-							+ names[i].replace("'", "''")
-							+ "', '"
-							+ types[i].replace("'", "''")
-							+ "', "
-							+ xs[i].replace("'", "")
-							+ ", "
+							+ "WF_UNIT_TYPE, WF_UNIT_X, WF_UNIT_Y)" + " VALUES ('" + ids[i].replace("'", "''")
+							+ "', @WF_ID, @REF_ID, '" + names[i].replace("'", "''") + "', '"
+							+ types[i].replace("'", "''") + "', " + xs[i].replace("'", "") + ", "
 							+ ys[i].replace("'", "") + ")";
 				}
 				cnn.executeUpdate(sql);
 				if (cnn.getErrorMsg() != null) {
 					throw new Exception(cnn.getErrorMsg());
 				}
-				cnn.transCommit();
 			}
+			cnn.transCommit();
 		} catch (Exception err) {
 			cnn.transRollback();
 		} finally {
 			cnn.close();
 		}
-		return "{RST:true}";
+		return "{\"RST\":true}";
 	}
 
 	public String getUnitsCnns(RequestValue rv) {
@@ -119,10 +105,8 @@ public class UpdateWorkflow {
 			String sql = "SELECT * FROM _EWA_WF_CNN WHERE WF_ID=@WF_ID and wf_ref_id=@ref_id";
 			DTTable tableCnn = DTTable.getJdbcTable(sql, cnn);
 
-			sql = "SELECT * FROM _EWA_WF_UNIT WHERE WF_ID='"
-					+ rv.getString("WF_ID").replace("'", "''")
-					+ "' and wf_ref_id='"
-					+ rv.getString("ref_id").replace("'", "''") + "'";
+			sql = "SELECT * FROM _EWA_WF_UNIT WHERE WF_ID='" + rv.getString("WF_ID").replace("'", "''")
+					+ "' and wf_ref_id='" + rv.getString("ref_id").replace("'", "''") + "'";
 
 			DTTable tableUnit = DTTable.getJdbcTable(sql, cnn);
 
@@ -134,20 +118,20 @@ public class UpdateWorkflow {
 
 			MStr str = new MStr();
 			str.al("{");
-			str.al("UNITS:");
+			str.al("\"UNITS\":");
 			str.al(tableUnit.toJson(rv));
 
-			str.al(",CNNS:");
+			str.al(",\"CNNS\":");
 			str.al(tableCnn.toJson(rv));
 
-			str.al(",ROLES:");
+			str.al(",\"ROLES\":");
 			str.al(tableAdmin.toJson(rv));
 
 			str.al("}");
 			return str.toString();
 
 		} catch (Exception err) {
-			return "{RST:false, ERR:'???'}";
+			return "{\"RST\": false, \"ERR\":'???'}";
 		} finally {
 			cnn.close();
 

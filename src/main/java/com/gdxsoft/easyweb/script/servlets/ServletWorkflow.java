@@ -10,13 +10,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.gdxsoft.easyweb.define.UpdateWorkflow;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.Workflow.EwaWfMain;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
+import com.gdxsoft.easyweb.utils.UJSon;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
@@ -48,22 +48,16 @@ public class ServletWorkflow extends HttpServlet {
 	 * 
 	 * This method is called when a form has its tag value method equals to get.
 	 * 
-	 * @param request
-	 *            the request send by the client to the server
-	 * @param response
-	 *            the response send by the server to the client
-	 * @throws ServletException
-	 *             if an error occurred
-	 * @throws IOException
-	 *             if an error occurred
+	 * @param request  the request send by the client to the server
+	 * @param response the response send by the server to the client
+	 * @throws ServletException if an error occurred
+	 * @throws IOException      if an error occurred
 	 */
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.show(request, response);
 	}
 
-	private void show(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		request.setCharacterEncoding("UTF-8");
 		RequestValue rv = new RequestValue(request, request.getSession());
 		UpdateWorkflow u = new UpdateWorkflow();
@@ -73,8 +67,10 @@ public class ServletWorkflow extends HttpServlet {
 			wfType = "";
 		}
 		wfType = wfType.trim().toLowerCase();
+
+		String contentType = FileOut.MAP.get("json");
 		JSONObject obj = new JSONObject();
-		
+
 		if (wfType.equals("cnns")) {
 			s = u.updateCnns(rv);
 		} else if (wfType.equals("units")) {
@@ -113,14 +109,7 @@ public class ServletWorkflow extends HttpServlet {
 				obj.put("RST", true);
 				s = obj.toString();
 			} catch (Exception e) {
-				try {
-					obj.put("RST", false);
-					obj.put("ERR", e.getMessage());
-					s = obj.toString();
-				} catch (JSONException e1) {
-					s = "{\"RST\":false,ERR:\"???\"}";
-				}
-
+				s = UJSon.rstFalse(e.getLocalizedMessage()).toString();
 			}
 		} else if (wfType.equals("ins_get")) { // 用户提交
 			EwaWfMain main = new EwaWfMain();
@@ -129,43 +118,33 @@ public class ServletWorkflow extends HttpServlet {
 				String wfId = rv.getString("WF_ID");
 				main.initDlv(wfId, rv);
 				s = main.doGetStatusDlv(rv);
+				contentType = FileOut.MAP.get("js");
+
 			} catch (Exception e) {
-				try {
-					obj.put("RST", false);
-					obj.put("ERR", e.getMessage());
-					s = obj.toString();
-				} catch (JSONException e1) {
-					s = "{\"RST\":false,ERR:\"???\"}";
-				}
+				s = UJSon.rstFalse(e.getLocalizedMessage()).toString();
 
 			}
 		} else {
-			s = "{\"RST\":false,\"ERR\":\"type error\"}";
+			 s = UJSon.rstFalse("Invalid workflow type").toString();
 		}
 		response.setCharacterEncoding("UTF-8");
+		response.setContentType(contentType);
 		GZipOut out = new GZipOut(request, response);
 		out.outContent(s);
-		//response.getWriter().println(s);
 
 	}
 
 	/**
 	 * The doPost method of the servlet. <br>
 	 * 
-	 * This method is called when a form has its tag value method equals to
-	 * post.
+	 * This method is called when a form has its tag value method equals to post.
 	 * 
-	 * @param request
-	 *            the request send by the client to the server
-	 * @param response
-	 *            the response send by the server to the client
-	 * @throws ServletException
-	 *             if an error occurred
-	 * @throws IOException
-	 *             if an error occurred
+	 * @param request  the request send by the client to the server
+	 * @param response the response send by the server to the client
+	 * @throws ServletException if an error occurred
+	 * @throws IOException      if an error occurred
 	 */
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		this.show(request, response);
 	}
 
@@ -182,8 +161,7 @@ public class ServletWorkflow extends HttpServlet {
 	/**
 	 * Initialization of the servlet. <br>
 	 * 
-	 * @throws ServletException
-	 *             if an error occurs
+	 * @throws ServletException if an error occurs
 	 */
 	public void init() throws ServletException {
 		// Put your code here
