@@ -75,7 +75,7 @@ public class SqlSyntaxCheck {
 		}
 		_Cnn.transRollback();
 		_Cnn.transClose();
-		return "{RST:true}";
+		return "{\"RST\":true}";
 	}
 
 	private String mssql() {
@@ -105,10 +105,10 @@ public class SqlSyntaxCheck {
 				json.put("RST", false);
 				cnt = json.toString();
 			} catch (JSONException e) {
-				cnt = "{RST:false}";
+				cnt = "{\"RST\":false}";
 			}
 		} else {
-			cnt = "{RST:true}";
+			cnt = "{\"RST\":true}";
 		}
 		_Cnn.close();
 		return cnt;

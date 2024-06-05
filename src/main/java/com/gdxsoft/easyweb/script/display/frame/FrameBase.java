@@ -1016,57 +1016,56 @@ public class FrameBase {
 		String userWidth = null;
 		// 用户参数指定宽度
 		if (rv.isNotBlank(FrameParameters.EWA_WIDTH)) {
-			userWidth = rv.s(FrameParameters.EWA_WIDTH).replace("'", "").replace("\"", "").replace(">", "").replace("<",
-					"");
+			userWidth = rv.s(FrameParameters.EWA_WIDTH).replace("'", "").replace("\"", "").replace(">", "")
+					.replace("<", "").replace(";", "").replace("\n", " ").trim();
 		}
 		String userHeight = null;
 		// 用户参数指定的高度
 		if (rv.isNotBlank(FrameParameters.EWA_HEIGHT)) {
 			userHeight = rv.s(FrameParameters.EWA_HEIGHT).replace("'", "").replace("\"", "").replace(">", "")
-					.replace("<", "");
+					.replace("<", "").replace(";", "").replace("\n", " ").trim();
 		}
-		if (sizeW != null && sizeW.trim().length() > 0) {
-			if (userWidth != null && userWidth.trim().length() > 0) {
-				try {
-					int w = Integer.parseInt(userWidth);
-					mainWidth = "width: " + w + "px; ";
-					sb.append("width: " + w + "px; ");
-				} catch (Exception e) {
-					mainWidth = "width: " + sizeW + "; ";
-					sb.append("width: " + sizeW + "; ");
-				}
-			} else {
-				try {
-					int w = Integer.parseInt(sizeW);
-					mainWidth = "width: " + w + "px; ";
-					sb.append("width: " + w + "px; ");
-				} catch (Exception e) {
-					mainWidth = "width: " + sizeW + "; ";
-					sb.append("width: " + sizeW + "; ");
-				}
+		if (userWidth != null && userWidth.length() > 0) {
+			try {
+				int w = Integer.parseInt(userWidth);
+				mainWidth = "width: " + w + "px; ";
+				sb.append("width: " + w + "px; ");
+			} catch (Exception e) {
+				mainWidth = userWidth;
+				sb.append("width: " + mainWidth + "; ");
 			}
-			String ft = this._HtmlClass.getSysParas().getFrameType();
-			if (ft.equals("COMBINE")) {
-				doc.addCss(".ewa_cb_box{" + mainWidth + "}");
+		} else if (sizeW != null && sizeW.length() > 0) {
+			try {
+				int w = Integer.parseInt(sizeW);
+				mainWidth = "width: " + w + "px; ";
+				sb.append("width: " + w + "px; ");
+			} catch (Exception e) {
+				mainWidth = "width: " + sizeW + "; ";
+				sb.append("width: " + sizeW + "; ");
 			}
 		} else {
 			sb.append("width:100%; ");
 		}
-		if (sizeH != null && sizeH.trim().length() > 0) {
-			if (userHeight != null && userHeight.trim().length() > 0) {
-				try {
-					int h = Integer.parseInt(userHeight);
-					sb.append("height: " + h + "px; ");
-				} catch (Exception e) {
-					sb.append("height: " + sizeH + "; ");
-				}
-			} else {
-				try {
-					int h = Integer.parseInt(sizeH);
-					sb.append("height: " + h + "px; ");
-				} catch (Exception e) {
-					sb.append("height: " + sizeH + "; ");
-				}
+
+		if (mainWidth != null) {
+			String ft = this._HtmlClass.getSysParas().getFrameType();
+			if (ft.equals("COMBINE")) {
+				doc.addCss(".ewa_cb_box{" + mainWidth + "}");
+			}
+		}
+		if (userHeight != null && userHeight.trim().length() > 0) {
+			try {
+				int h = Integer.parseInt(userHeight);
+				sb.append("height: " + h + "px; ");
+			} catch (Exception e) {
+				sb.append("height: " + userHeight + "; ");
+			}
+		} else if (sizeH != null && sizeH.trim().length() > 0) {
+			try {
+				int h = Integer.parseInt(sizeH);
+				sb.append("height: " + h + "px; ");
+			} catch (Exception e) {
+				sb.append("height: " + sizeH + "; ");
 			}
 		}
 		if (sizeHAlign != null && sizeHAlign.trim().length() > 0) {
@@ -1087,20 +1086,23 @@ public class FrameBase {
 
 	private void createTest1Table(HtmlDocument doc, String skinName) {
 		String style = this.createFrameStyle(doc);
-
+		String fuid = this._HtmlClass.getItemValues().getSysParas().getFrameUnid();
 		StringBuilder sb = new StringBuilder();
 		sb.append("<table id='");
 		sb.append(skinName);
 		sb.append("' border='0' cellspacing='0' cellpadding='0' style=\"");
 		sb.append(style);
 		sb.append("\"");
+		sb.append(" class='ewa-frame-");
+		sb.append(fuid);
+		sb.append("'");
 		sb.append(">");
 
 		String sizeVAlign = this.getPageItemValue("Size", "VAlign");
 		if (sizeVAlign == null || sizeVAlign.trim().length() == 0) {
 			sizeVAlign = "top";
 		}
-		sb.append("\n<tr>\n<td height='100%' vAlign='" + sizeVAlign + "'>");
+		sb.append("\n<tr>\n<td height='100%' class='ewa-frame-box-" + fuid + "' vAlign='" + sizeVAlign + "'>");
 
 		doc.addScriptHtml(sb.toString());
 	}
