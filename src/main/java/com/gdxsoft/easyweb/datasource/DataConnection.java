@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -352,24 +351,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public static boolean checkIsSelect(String sql) {
-		if (checkStartWord(sql, "SELECT")) {
-			int intoIndex = sql.toLowerCase().indexOf("into");
-			if (intoIndex == -1) {
-				return true;
-			}
-			int fromIndex = sql.toLowerCase().indexOf("from");
-			if (intoIndex < fromIndex && fromIndex > 0) {
-				// select * into aa from bb SQLSEREVER
-				return false;
-			}
-			if (fromIndex == -1) {
-				// select 1 a,2 b into #temp
-				return false;
-			}
-			return true;
-		}
-		// 强制执行为select 模式，解决with xxx as 语句后面的selec
-		return SqlUtils.ewaIsSelect(sql);
+		return SqlUtils.checkIsSelect(sql);
 	}
 
 	/**
@@ -380,35 +362,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public static boolean checkStartWord(String sql, String word) {
-		if (word == null || word.trim().length() == 0) {
-			return false;
-		}
-		if (sql == null || sql.trim().length() == 0) {
-			return false;
-		}
-		// 删除sql 的多行备注 /* */
-		sql = removeSqlMuitiComment(sql);
-
-		String[] sqls = sql.split("\n");
-		word = word.toUpperCase().trim();
-		String chk0 = word + " ";
-		String chk1 = word + "\t";
-		String chk2 = word + " "; // 空格是 32 &nbsp;
-		for (int m = 0; m < sqls.length; m++) {
-			String line = sqls[m].trim().toUpperCase();
-			if (line.length() == 0 || line.startsWith("--")) {
-				// 空行和 -- 注释
-				continue;
-			}
-
-			if (line.indexOf(chk0) == 0 || line.indexOf(chk1) == 0 || line.indexOf(chk2) == 0 || line.equals(word)) {
-				// 非注释和空行的第一次出现进行判断
-				return true;
-			} else {
-				return false;
-			}
-		}
-		return false;
+		return SqlUtils.checkStartWord(sql, word);
 	}
 
 	/**
@@ -418,11 +372,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public static String removeSqlMuitiComment(String sql) {
-		// 删除sql 的多行备注 /* */
-		Pattern pat = Pattern.compile("(\\/\\*[^\\/]*\\*\\/)", Pattern.CASE_INSENSITIVE);
-		Matcher mat = pat.matcher(sql);
-		String s1 = mat.replaceAll("");
-		return s1;
+		return SqlUtils.removeSqlMuitiComment(sql);
 	}
 
 	/**
@@ -433,19 +383,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public static boolean isComparativeChanges(String sql) {
-		// 记录更新前后变化的 ，方式 -- COMPARATIVE_CHANGES
-		String[] sqls = sql.split("\n");
-		for (int m = sqls.length - 1; m >= 0; m--) {
-			String len = sqls[m].trim().toUpperCase();
-			if (len.startsWith("--")) {
-				len = len.replace("--", "").trim();
-				if (len.equalsIgnoreCase("COMPARATIVE_CHANGES")) {
-					// Comparative changes
-					return true;
-				}
-			}
-		}
-		return false;
+		return SqlUtils.isComparativeChanges(sql);
 	}
 
 	/**
@@ -663,9 +601,7 @@ public class DataConnection {
 	}
 
 	public boolean executeQueryNoParameter(String sql) {
-		if (this._DataBaseName != null && this._DatabaseType.equalsIgnoreCase("mssql")) {
-			sql = "USE " + this._DataBaseName + ";\r\n" + sql;
-		}
+
 		StringBuilder debuginfo = new StringBuilder();
 		debuginfo.append("[executeQuery(sql)] Start excute query. \n\n");
 		debuginfo.append(sql);
@@ -673,6 +609,8 @@ public class DataConnection {
 
 		this.closeStatment(this._queryStatement);
 		try {
+			this.useDatabase();
+
 			sql = this.rebuildSql(sql);
 
 			_ds.connect();
@@ -822,9 +760,8 @@ public class DataConnection {
 				this.setConfigName(null);
 			}
 
-			if (this._DataBaseName != null && this._DatabaseType.equalsIgnoreCase("mssql")) {
-				sql1 = "USE " + this._DataBaseName + ";\r\n" + sql1;
-			}
+			this.useDatabase();
+
 			ResultSet rs;
 
 			this.closeStatment(this._queryStatement);
@@ -1376,9 +1313,7 @@ public class DataConnection {
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Start update. (" + sql1 + ")");
 
 			// sqlserver 更换数据库
-			if (this._DataBaseName != null && this._DatabaseType.equalsIgnoreCase("mssql")) {
-				sql1 = "USE " + this._DataBaseName + ";\r\n" + sql1;
-			}
+			this.useDatabase();
 
 			_pst = this._ds.getPreparedStatementAutoIncrement(sql1);
 			this.writeDebug(this, "SQL", "[创建自增] PST");
@@ -1463,19 +1398,24 @@ public class DataConnection {
 		if (parameters.size() == 0) {
 			return this.executeUpdateNoParameter(sql1);
 		}
+		sql1 = replaceSqlParameters(sql1);
+
+		// 除去注释，没有可执行的sql
+		if (!SqlUtils.checkHaveSql(sql1)) {
+			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Not execute. (" + sql1 + ")");
+			return true;
+		}
+
+		this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Start update. (" + sql1 + ")");
+		// sqlserver, mysql 更换数据库
+
 		try {
-			sql1 = replaceSqlParameters(sql1);
-			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Start update. (" + sql1 + ")");
-
-			// sqlserver 更换数据库
-			if (this._DataBaseName != null && this._DatabaseType.equalsIgnoreCase("mssql")) {
-				sql1 = "USE " + this._DataBaseName + ";\r\n" + sql1;
-			}
-
+			this.useDatabase();
 			_pst = this._ds.getPreparedStatement(sql1);
 			// add parameter
 			this.addSqlParameter(parameters, _pst);
 			_pst.executeUpdate();
+
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
 			if (!this._IsTrans) {
 				if (!this._ds.getConnection().getAutoCommit()) {
@@ -1497,6 +1437,38 @@ public class DataConnection {
 			setError(err, sql1);
 			return false;
 		}
+	}
+
+	/**
+	 * sqlserver, mysql 更换数据库
+	 * 
+	 * @param sql
+	 * @return
+	 * @throws Exception
+	 * @throws SQLException
+	 */
+	public boolean useDatabase() throws Exception {
+		if (this._DataBaseName == null || this._DataBaseName.trim().length() == 0) {
+			return false;
+		}
+		String sql = null;
+		if (SqlUtils.isMySql(this)) {
+			sql = "USE `" + this._DataBaseName + "`";
+		} else if (SqlUtils.isSqlServer(this)) {
+			sql = "USE [" + this._DataBaseName + "]";
+		}
+
+		if (sql != null) {
+			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Start update. (" + sql + ")");
+			this._ds.getStatement().executeUpdate(sql);
+			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
+
+			return true;
+		} else {
+			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Not sqlserve or mysql [" + this._DataBaseName + "].");
+			return false;
+		}
+
 	}
 
 	/**
@@ -1551,9 +1523,7 @@ public class DataConnection {
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Start update. (" + sql1 + ")");
 
 			// sqlserver 更换数据库
-			if (this._DataBaseName != null && this._DatabaseType.equalsIgnoreCase("mssql")) {
-				sql1 = "USE " + this._DataBaseName + ";\r\n" + sql1;
-			}
+			this.useDatabase();
 
 			_pst = this._ds.getPreparedStatement(sql1);
 			// add parameter
@@ -1593,14 +1563,15 @@ public class DataConnection {
 	}
 
 	public boolean executeUpdateNoParameter(String sql) {
-		// sqlserver 更换数据库
-		if (this._DataBaseName != null && this._DatabaseType.equalsIgnoreCase("mssql")) {
-			sql = "USE " + this._DataBaseName + ";\r\n" + sql;
+		// 除去注释，没有可执行的sql
+		if (!SqlUtils.checkHaveSql(sql)) {
+			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Not execute. (" + sql + ")");
+			return true;
 		}
-
-		this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql)] update. (" + sql + ")");
+		// sqlserver, mysql 更换数据库 USE xxxx
 		try {
-
+			this.useDatabase();
+			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql)] update. (" + sql + ")");
 			this._ds.getStatement().executeUpdate(sql);
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql,rv)] End update.");
 			if (!this._IsTrans) {

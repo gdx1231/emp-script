@@ -1,6 +1,8 @@
 package com.gdxsoft.easyweb.datasource;
 
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SqlUtils {
 	/**
@@ -75,6 +77,128 @@ public class SqlUtils {
 	}
 
 	/**
+	 * 判断 特定字符出现在非注释的SQL的0位置，多行的SQL只进行第一次判断
+	 * 
+	 * @param sql
+	 * @param word 关键单词，例如SELECT
+	 * @return
+	 */
+	public static boolean checkStartWord(String sql, String word) {
+		if (word == null || word.trim().length() == 0) {
+			return false;
+		}
+		if (sql == null || sql.trim().length() == 0) {
+			return false;
+		}
+		// 删除sql 的多行备注 /* */
+		sql = removeSqlMuitiComment(sql);
+
+		String[] sqls = sql.split("\n");
+		word = word.toUpperCase().trim();
+		String chk0 = word + " ";
+		String chk1 = word + "\t";
+		String chk2 = word + " "; // 空格是 32 &nbsp;
+		for (int m = 0; m < sqls.length; m++) {
+			String line = sqls[m].trim().toUpperCase();
+			if (line.length() == 0 || line.startsWith("--")) {
+				// 空行和 -- 注释
+				continue;
+			}
+
+			if (line.indexOf(chk0) == 0 || line.indexOf(chk1) == 0 || line.indexOf(chk2) == 0 || line.equals(word)) {
+				// 非注释和空行的第一次出现进行判断
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 检查是否为 select语句或标记为<b>-- EWA_IS_SELECT</b>
+	 * 
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public static boolean checkIsSelect(String sql) {
+		if (checkStartWord(sql, "SELECT")) {
+			int intoIndex = sql.toLowerCase().indexOf("into");
+			if (intoIndex == -1) {
+				return true;
+			}
+			int fromIndex = sql.toLowerCase().indexOf("from");
+			if (intoIndex < fromIndex && fromIndex > 0) {
+				// select * into aa from bb SQLSEREVER
+				return false;
+			}
+			if (fromIndex == -1) {
+				// select 1 a,2 b into #temp
+				return false;
+			}
+			return true;
+		}
+		// 强制执行为select 模式，解决with xxx as 语句后面的selec
+		return SqlUtils.ewaIsSelect(sql);
+	}
+
+	/**
+	 * 是否比较更新前和更新后字段的变化, 方式：<br>
+	 * SQL 添加 -- COMPARATIVE_CHANGES
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public static boolean isComparativeChanges(String sql) {
+		// 记录更新前后变化的 ，方式 -- COMPARATIVE_CHANGES
+		String[] sqls = sql.split("\n");
+		for (int m = sqls.length - 1; m >= 0; m--) {
+			String len = sqls[m].trim().toUpperCase();
+			if (len.startsWith("--")) {
+				len = len.replace("--", "").trim();
+				if (len.equalsIgnoreCase("COMPARATIVE_CHANGES")) {
+					// Comparative changes
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 删除sql 的多行备注
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public static String removeSqlMuitiComment(String sql) {
+		Pattern pat = Pattern.compile("(\\/\\*[^\\/]*\\*\\/)", Pattern.CASE_INSENSITIVE);
+		Matcher mat = pat.matcher(sql);
+		String s1 = mat.replaceAll("");
+		return s1;
+	}
+
+	/**
+	 * 去除SQL注释后/* 和 --，是否有可执行的sql
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public static boolean checkHaveSql(String sql) {
+		String sql1 = SqlUtils.removeSqlMuitiComment(sql);
+		String[] sqls = sql1.split("\n");
+
+		for (int m = 0; m < sqls.length; m++) {
+			String len = sqls[m].trim();
+			if (len.length() > 1 && !len.startsWith("--")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * 强制执行为select 模式，解决with xxx as 语句后面的select<br>
 	 * 标记为：<b>-- EWA_IS_SELECT</b>
 	 * 
@@ -84,7 +208,7 @@ public class SqlUtils {
 	public static boolean ewaIsSelect(String sql) {
 		String[] sqls = sql.split("\n");
 
-		for (int m = 0; m <= sqls.length; m++) {
+		for (int m = 0; m < sqls.length; m++) {
 			String len = sqls[m].trim().toUpperCase();
 			if (len.length() == 0) {
 				continue;

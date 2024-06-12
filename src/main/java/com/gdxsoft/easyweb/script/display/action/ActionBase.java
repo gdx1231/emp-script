@@ -589,32 +589,6 @@ public class ActionBase {
 	}
 
 	/**
-	 * 执行sql语句
-	 * 
-	 * @param sql
-	 * @param sqlType
-	 * @param name
-	 * @return false = 检查执行提交时返回的错误判断
-	 */
-	public boolean executeSql(String sql, String sqlType, String name) {
-		boolean isSelect = DataConnection.checkIsSelect(sql);
-		if (sqlType.equals("procedure")) {
-			this.executeSqlProcdure(sql);
-			// 检查执行提交时返回的错误判断
-			return StringUtils.isBlank(this.getChkErrorMsg());
-		} else if (isSelect) { // 不再判断 sqlType = query or update
-			// 查询
-			DTTable dt = this.executeSqlQuery(sql);
-			dt.setName(name);
-			// 检查执行提交时返回的错误判断
-			return StringUtils.isBlank(this.getChkErrorMsg());
-		} else {// 更新
-			this.executeSqlUpdate(sql);
-			return true;
-		}
-	}
-
-	/**
 	 * 执行SQL语句
 	 * 
 	 * @param name SqlSet名称
@@ -968,13 +942,45 @@ public class ActionBase {
 	}
 
 	/**
-	 * 去除SQL表达式的备注 /××/
+	 * 执行sql语句
 	 * 
 	 * @param sql
-	 * @return
+	 * @param sqlType
+	 * @param name
+	 * @return false = 检查执行提交时返回的错误判断
 	 */
-	public String getSql(String sql) {
-		return DataConnection.removeSqlMuitiComment(sql);
+	public boolean executeSql(String sql, String sqlType, String name) {
+		DataConnection cnn = this.getItemValues().getSysParas().getDataConn();
+		// 删除sql备注 /**/
+		String sqlRemoveMultiRemark = getSql(sql);
+		String sqlRepalcedEwaTest = cnn.createSqlByEwaTest(sqlRemoveMultiRemark);
+
+		if (sqlType.equals("procedure") || DataConnection.checkIsProcdure(sqlRepalcedEwaTest)) {
+			this.executeSqlProcdure(sql);
+			// 检查执行提交时返回的错误判断
+			return StringUtils.isBlank(this.getChkErrorMsg());
+		}
+		// 不再判断 sqlType = query or update
+		if (DataConnection.checkIsSelect(sqlRepalcedEwaTest)) {
+			// 查询
+			DTTable dt = this.executeSqlQuery(sql);
+			dt.setName(name);
+			// 检查执行提交时返回的错误判断
+		} else if (DataConnection.getAutoField(sqlRepalcedEwaTest) != null) {
+			cnn.executeAutoFieldReturnName(sqlRemoveMultiRemark);
+		} else if (DataConnection.isComparativeChanges(sqlRepalcedEwaTest)) {
+			// 比较更新前和更新后字段的变化
+			// 记录更新前后变化的 ，方式 -- COMPARATIVE_CHANGES
+			UpdateChanges ucs = cnn.executeUpdateAndReturnChanges(sqlRemoveMultiRemark);
+			// 记录到变化列表
+			_LstChanges.add(ucs);
+		} else {
+			// 更新
+			cnn.executeUpdate(sqlRemoveMultiRemark);
+		}
+		this.executeExtOpt(sql);
+		return true;
+
 	}
 
 	/**
@@ -1004,23 +1010,30 @@ public class ActionBase {
 	}
 
 	/**
-	 * 执行更新
+	 * 执行更新，不用了2024-06-12 郭磊
 	 * 
 	 * @param sql
 	 */
+	@Deprecated
 	public void executeSqlUpdate(String sql) {
-		if (DataConnection.checkIsProcdure(sql)) {
+		String sql1 = getSql(sql); // 删除sql备注 /**/
+		DataConnection conn = this.getItemValues().getDataConn();
+
+		// 提前替换
+		String sql2 = conn.createSqlByEwaTest(sql1);
+		if (DataConnection.checkIsProcdure(sql2)) {
 			// 存储过程
 			this.executeSqlProcdure(sql);
 			return;
 		}
 
-		String sql1 = getSql(sql); // 删除sql备注 /**/
-		DataConnection conn = this.getItemValues().getDataConn();
-
-		// 查找自增的sql, 例如 -- auto MEMO_ID
-		String auto_field = DataConnection.getAutoField(sql1);
-		if (auto_field != null && auto_field.length() > 0) {
+		String autoField = null;
+		try {
+			// 查找自增的sql, 例如 -- auto MEMO_ID
+			autoField = DataConnection.getAutoField(sql2);
+		} catch (Exception e) {
+		}
+		if (autoField != null && autoField.length() > 0) {
 			conn.executeAutoFieldReturnName(sql1);
 		} else if (DataConnection.isComparativeChanges(sql1)) {
 			// 比较更新前和更新后字段的变化
@@ -1236,6 +1249,16 @@ public class ActionBase {
 				this.getRequestValue().getPageValues().addValue(col.getName(), v, PageValueTag.DTTABLE);
 			}
 		}
+	}
+
+	/**
+	 * 去除SQL表达式的备注 /××/
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public String getSql(String sql) {
+		return DataConnection.removeSqlMuitiComment(sql);
 	}
 
 	public UserConfig getUserConfig() {
