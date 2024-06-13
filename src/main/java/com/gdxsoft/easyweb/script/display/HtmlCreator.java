@@ -1842,6 +1842,7 @@ public class HtmlCreator {
 			return;
 		}
 		if (js.indexOf(".NewNodeAfter") > 0 && _SysParas.getFrameType().equalsIgnoreCase("Tree")) {
+			// EWA.F.FOS["437949404"].NewNodeAfter
 			UserXItemValue uv = this._UserConfig.getUserPageItem().getItem("Tree").getItem(0);
 
 			String key = uv.getItem("Key");
@@ -1860,7 +1861,9 @@ public class HtmlCreator {
 					+ (sadv3 == null ? "" : sadv3);
 			String s1 = "(\"" + skey + "\",\"" + adv + "\",\"" + (smg == null ? "" : smg) + "\")";
 
-			String s2 = js.replace(".NewNodeAfter", ".NewNodeAfter" + s1);
+			// String s2 = js.replace(".NewNodeAfter", ".NewNodeAfter" + s1);
+			// To avoid the XSS (Cross Site Scripting) attacks
+			String s2 = "EWA.F.FOS['" + this.getSysParas().getFrameUnid() + "'].NewNodeAfter" + s1;
 			this._Document.addJs("JsEventsBack", s2, false);
 		} else {
 			// To avoid the XSS (Cross Site Scripting) attacks, the others event are
@@ -1878,14 +1881,14 @@ public class HtmlCreator {
 		String title = null;
 		RequestValue rv = this.getRequestValue();
 		String cnTitle = rv.s(FrameParameters.EWA_TITLE);
-		String enTitle =rv.s(FrameParameters.EWA_TITLE_EN);
-		if(cnTitle !=null || enTitle != null) {
+		String enTitle = rv.s(FrameParameters.EWA_TITLE_EN);
+		if (cnTitle != null || enTitle != null) {
 			title = cnTitle;
-			if (FrameParameters.ENUS.equals(this._SysParas.getLang()) && enTitle != null){
+			if (FrameParameters.ENUS.equals(this._SysParas.getLang()) && enTitle != null) {
 				title = enTitle;
 			}
 		}
-		
+
 		if (title == null) {
 			String pageDescription = HtmlUtils.getDescription(
 					this._UserConfig.getUserPageItem().getItem("DescriptionSet"), "Info", this._SysParas.getLang());

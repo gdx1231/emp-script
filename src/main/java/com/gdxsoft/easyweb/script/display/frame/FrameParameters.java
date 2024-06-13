@@ -364,6 +364,7 @@ public class FrameParameters {
 
 	/**
 	 * 页面提交的要执行的事件
+	 * 避免xxs攻击，仅支持EWA.F.FOS["xxxx"].NewNodeAfter，其它无效
 	 */
 	public static final String EWA_AFTER_EVENT = "EWA_AFTER_EVENT";
 
