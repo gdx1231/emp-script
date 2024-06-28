@@ -138,6 +138,18 @@ public class ReverseIds {
 		return result;
 	}
 
+	private static boolean checkIsNumber(DataConnection cnn, String tableName, String idName) {
+		String sqlCheckType = "select " + idName + " from " + tableName + " where 1=2";
+		DTTable tbChk = DTTable.getJdbcTable(sqlCheckType, cnn);
+		String className = tbChk.getColumns().getColumn(0).getClassName();
+
+		if ("java.lang.Integer".equals(className) || "java.lang.Long".equalsIgnoreCase(className)
+				|| "java.lang.Short".equals(className) || "java.lang.Byte".equals(className)) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * 递归获取所有下级编号，限制100次查询
 	 * 
@@ -149,17 +161,20 @@ public class ReverseIds {
 	 * @return 所有下级编号，例如 'a','0','am','d''f'
 	 */
 	public static String reverseSubIds(DataConnection cnn, String tableName, String idName, String pIdName,
-			String currentIdValue) {
+			Object currentIdValue) {
 		Map<String, Integer> map = new HashMap<>();
+
+		boolean isNumber = checkIsNumber(cnn, tableName, idName);
 
 		String sql0 = "select " + idName + " from " + tableName + " where " + pIdName + " in";
 
 		StringBuilder sbIds = new StringBuilder();
-		if (currentIdValue.startsWith("@")) {
+		if (currentIdValue.toString().startsWith("@")) {
 			sbIds.append(currentIdValue);
 		} else {
-			sbIds.append(cnn.sqlParameterStringExp(currentIdValue));
+			sbIds.append(isNumber ? currentIdValue : cnn.sqlParameterStringExp(currentIdValue.toString()));
 		}
+
 		for (int i = 0; i < 100; i++) {
 			String sql = sql0 + "(" + sbIds.toString() + ")";
 			LOGGER.debug(sql);
@@ -168,6 +183,7 @@ public class ReverseIds {
 			if (tb.getCount() == 0) {
 				break;
 			}
+
 			sbIds = new StringBuilder();
 			for (int m = 0; m < tb.getCount(); m++) {
 				String rid = tb.getCell(m, 0).toString();
@@ -181,19 +197,29 @@ public class ReverseIds {
 				if (sbIds.length() > 0) {
 					sbIds.append(",");
 				}
-				sbIds.append(cnn.sqlParameterStringExp(rid));
+				if (isNumber) {
+					sbIds.append(rid);
+				} else {
+					sbIds.append(cnn.sqlParameterStringExp(rid));
+				}
 			}
 			if (sbIds.length() == 0) {
 				break;
 			}
 		}
+
 		// 输出的ids表达式
 		StringBuilder sbIdsOut = new StringBuilder();
+		final boolean isNumber1 = isNumber;
 		map.forEach((k, v) -> {
 			if (sbIdsOut.length() > 0) {
 				sbIdsOut.append(",");
 			}
-			sbIdsOut.append(cnn.sqlParameterStringExp(k));
+			if (isNumber1) {
+				sbIdsOut.append(k);
+			} else {
+				sbIdsOut.append(cnn.sqlParameterStringExp(k));
+			}
 		});
 		// 'a','0','am','d''f'
 		return sbIdsOut.toString();
@@ -210,13 +236,14 @@ public class ReverseIds {
 	 * @return 所有上级编号，例如 'a','0','am','d''f'
 	 */
 	public static String reverseUpIds(DataConnection cnn, String tableName, String idName, String pIdName,
-			String currentIdValue) {
+			Object currentIdValue) {
 		Map<String, Integer> map = new HashMap<>();
+		boolean isNumber = checkIsNumber(cnn, tableName, idName);
 
 		String sql0 = "select " + pIdName + " from " + tableName + " where " + idName + " =";
-		String rid = currentIdValue;
+		String rid = currentIdValue.toString();
 		for (int i = 0; i < 100; i++) {
-			String sql = sql0 + (rid.startsWith("@") ? rid : cnn.sqlParameterStringExp(rid));
+			String sql = sql0 + (rid.startsWith("@") ? rid : isNumber ? rid : cnn.sqlParameterStringExp(rid));
 			LOGGER.debug(sql);
 			DTTable tb = DTTable.getJdbcTable(sql, cnn);
 			if (tb.getCount() == 0) {
@@ -231,11 +258,18 @@ public class ReverseIds {
 		}
 		// 输出的ids表达式
 		StringBuilder sbIdsOut = new StringBuilder();
+
+		final boolean isNumber1 = isNumber;
+
 		map.forEach((k, v) -> {
 			if (sbIdsOut.length() > 0) {
 				sbIdsOut.append(",");
 			}
-			sbIdsOut.append(cnn.sqlParameterStringExp(k));
+			if (isNumber1) {
+				sbIdsOut.append(k);
+			} else {
+				sbIdsOut.append(cnn.sqlParameterStringExp(k));
+			}
 		});
 		// 'a','0','am','d''f'
 		return sbIdsOut.toString();
