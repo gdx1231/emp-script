@@ -339,9 +339,14 @@ public class HtmlControl {
 		if (m0 >= 0) {
 			tmp = Html.substring(m0);
 		}
-		int m1 = tmp.lastIndexOf("</body>\n</html>");
+		int m1 = tmp.lastIndexOf("<!--INC_END-->");
 		if (m1 > 0) {
-			tmp = tmp.substring(0, m1);
+			tmp = tmp.substring(0, m1 + 14); // 14=<!--INC_END-->的长度
+		} else {
+			m1 = tmp.lastIndexOf("</body>");
+			if (m1 > 0) {
+				tmp = tmp.substring(0, m1);
+			}
 		}
 		if (this._FrameUnidPrefix != null && this._FrameUnidPrefix.trim().length() > 0) {
 			String unid = this.getRequestValue().getString("SYS_FRAME_UNID");
