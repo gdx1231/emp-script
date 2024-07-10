@@ -2330,10 +2330,11 @@ public class DataConnection {
 	 * 关闭所有连接,包括ResultSet，Cst，Pst
 	 */
 	public void close() {
-		this.writeDebug(this, "SQL", "删除分割临时数据.");
 		// 放到close处理，以便复用时不用重复创建
 		if (this._CreateSplitData != null) {
+			this.writeDebug(this, "SQL", "删除分割临时数据 START.");
 			this._CreateSplitData.clearEwaSplitTempData();
+			this.writeDebug(this, "SQL", "删除分割临时数据 END.");
 			this._CreateSplitData = null;
 		}
 		// 清除所有返回的 resultSet，当长期执行查询的时，会造成内存占用过高

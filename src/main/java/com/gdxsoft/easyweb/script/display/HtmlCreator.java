@@ -2251,6 +2251,8 @@ public class HtmlCreator {
 			return;
 		}
 
+		_DebugFrames.addDebug(this, "LOG", "写日志 START");
+
 		String msg = this._Log.getMsg();
 
 		// 替换信息中的参数
@@ -2260,8 +2262,11 @@ public class HtmlCreator {
 		logInterface.setLog(this._Log);
 		try {
 			logInterface.write();
+
+			_DebugFrames.addDebug(this, "LOG", "写日志 END");
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage(), e);
+			_DebugFrames.addDebug(this, "LOG", "ERR：" + e.getLocalizedMessage());
 		}
 	}
 

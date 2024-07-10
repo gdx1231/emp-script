@@ -277,40 +277,7 @@ public class BatchInsert {
 	 * @return
 	 */
 	private String batchSqlServer(String insertHeader, List<String> values) {
-		// 批量插入数据的数量
-		int bulkMax = this.maxInsertCount;
-		if (bulkMax <= 0) {
-			bulkMax = 100;
-		}
-		MStr sbError = new MStr();
-		MStr batSql = new MStr();
-
-		// sqlserver 插入方法 insert aa (a,b) values (1,2) insert aa (a,b) values (1,2)
-		for (int i = 0; i < values.size(); i++) {
-			if (i % bulkMax == 0) {
-				if (i > 0) {
-					String err = this.execInsert(batSql.toString());
-					if (err != null) {
-						sbError.append(err);
-						if (this.transcation) {
-							return sbError.toString();
-						}
-					}
-				}
-				batSql = new MStr();
-
-			}
-			String sqlValues = values.get(i);
-			batSql.al(insertHeader);
-			batSql.al(sqlValues);
-		}
-		if (batSql.length() > 0) {
-			String err = this.execInsert(batSql.toString());
-			if (err != null) {
-				sbError.append(err);
-			}
-		}
-		return sbError.toString();
+		return this.batchMysql(insertHeader, values);
 	}
 
 	private int getBulkMax() {
