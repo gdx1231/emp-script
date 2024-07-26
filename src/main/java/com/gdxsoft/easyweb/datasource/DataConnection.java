@@ -1582,9 +1582,10 @@ public class DataConnection {
 		try {
 			this.useDatabase();
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql)] update. (" + sql + ")");
-			this._ds.getStatement().executeUpdate(sql);
+			Statement st = this._ds.getStatement();
+			st.executeUpdate(sql);
 			//print语句的输出可通过SQLWarnings获得
-			SQLWarning warning = _pst.getWarnings();
+			SQLWarning warning = st.getWarnings();
 			while (warning != null) {
 				String msg = warning.getLocalizedMessage();
 				LOGGER.debug(msg);
@@ -2579,7 +2580,7 @@ public class DataConnection {
 			ResultSet rs = cst.executeQuery();
 
 			//print语句的输出可通过SQLWarnings获得
-			SQLWarning warning = _pst.getWarnings();
+			SQLWarning warning = cst.getWarnings();
 			while (warning != null) {
 				String msg = warning.getLocalizedMessage();
 				LOGGER.debug(msg);
@@ -2631,7 +2632,7 @@ public class DataConnection {
 			cst.execute();
 			
 			//print语句的输出可通过SQLWarnings获得
-			SQLWarning warning = _pst.getWarnings();
+			SQLWarning warning = cst.getWarnings();
 			while (warning != null) {
 				String msg = warning.getLocalizedMessage();
 				LOGGER.debug(msg);
