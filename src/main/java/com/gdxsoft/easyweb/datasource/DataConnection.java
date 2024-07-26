@@ -46,7 +46,6 @@ public class DataConnection {
 	private static Logger LOGGER = LoggerFactory.getLogger(DataConnection.class);
 
 	private DataHelper _ds;
-	private CallableStatement _cst;
 	private PreparedStatement _pst;
 
 	private Statement _queryStatement;
@@ -1598,6 +1597,7 @@ public class DataConnection {
 					this._ds.getConnection().commit();
 				}
 			}
+			closeStatment(st);
 			return true;
 		} catch (Exception err) {
 			// if (_IsTrans) {// 如果事务处理开始
@@ -2359,7 +2359,6 @@ public class DataConnection {
 		// 清除所有返回的 resultSet，当长期执行查询的时，会造成内存占用过高
 		// 郭磊 2019-02-14
 		this.clearResultSets();
-		this.closeStatment(this._cst);
 		this.closeStatment(this._pst);
 		this.closeStatment(this._queryStatement);
 		if (_DebugFrames != null) {

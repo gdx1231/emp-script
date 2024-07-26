@@ -56,9 +56,9 @@ public class FrameList extends FrameBase implements IFrame {
 	private boolean _IsLuButtons;
 	private boolean _IsLuSearch;
 	private boolean _ComposeSearchTexts; // 合并文字搜索
-	 //分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
-	private boolean _SearchGroup =true;
-	
+	// 分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
+	private boolean _SearchGroup = true;
+
 	private String _LuSelect = "";
 	private boolean _IsLuDblClick;
 	private String _LuDblClickIdx;
@@ -122,20 +122,29 @@ public class FrameList extends FrameBase implements IFrame {
 		if (this._ListFrameRecordCount >= 0) {
 			return this._ListFrameRecordCount;
 		}
+		// 在 ActionListFrame.executeSqlWithPageSplit创建
 		DTTable tb = this.getSplitPageTable();
 		if (tb == null) {
 			this._ListFrameRecordCount = -1;
 			return this._ListFrameRecordCount;
 		}
-
-//		if (tb.getAttsTable().containsKey("RECORDS")) {
-//			this._ListFrameRecordCount = Integer.parseInt(tb.getAttsTable().get("RECORDS").toString());
-//			return this._ListFrameRecordCount;
-//		}
-		DataConnection conn = super.getHtmlClass().getItemValues().getSysParas().getDataConn();
-		_ListFrameRecordCount = conn.getRecordCount(tb.getAttsTable().get("sql").toString());
+		int pagesize = -1231;
+		try {
+			// 每页面的记录数
+			pagesize = Integer.parseInt(tb.getAttsTable().get(ActionListFrame.PAGE_SIZE).toString());
+		} catch (Exception err) {
+			LOGGER.warn(err.getLocalizedMessage());
+		}
+		if (tb.getCount() == 0 || tb.getCount() < pagesize) {
+			// 返回的数量 < 分页记录数
+			_ListFrameRecordCount = tb.getCount();
+		} else {
+			DataConnection conn = super.getHtmlClass().getItemValues().getSysParas().getDataConn();
+			String sql = tb.getAttsTable().get(ActionListFrame.SPLIT_SQL).toString();
+			_ListFrameRecordCount = conn.getRecordCount(sql);
+			conn.close();
+		}
 		tb.getAttsTable().put("RECORDS", _ListFrameRecordCount);
-		conn.close();
 
 		return _ListFrameRecordCount;
 	}
@@ -206,8 +215,8 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 		if (this._IsLuSearch && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_SEARCH))) {
 			boolean compose = this._ComposeSearchTexts; // 合并搜索
-			boolean denySearchGroup = !this._SearchGroup;  //分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
-			String js = fname + ".ShowSearch(" + compose + ", "+ denySearchGroup +");";
+			boolean denySearchGroup = !this._SearchGroup; // 分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
+			String js = fname + ".ShowSearch(" + compose + ", " + denySearchGroup + ");";
 			sJs.al(js);
 		}
 
@@ -496,10 +505,10 @@ public class FrameList extends FrameBase implements IFrame {
 				this._IsLuSearch = true;
 			} else if (v1.equals("2")) {
 				this._IsLuSearch = true;
-				//合并文字搜索
+				// 合并文字搜索
 				this._ComposeSearchTexts = true;
-			} else if(v1.equals("3")) { 
-				//分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
+			} else if (v1.equals("3")) {
+				// 分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
 				this._IsLuSearch = true;
 				this._SearchGroup = false;
 			}
@@ -680,15 +689,15 @@ public class FrameList extends FrameBase implements IFrame {
 
 				}
 				rowContents.append(rowHtml);
-				if (colSizeInc == colSize || colSize == 1 || i==tb.getCount()-1) {
+				if (colSizeInc == colSize || colSize == 1 || i == tb.getCount() - 1) {
 					if (ewaRowSign) {
 						// 列表每行所有TD字符串进行md5签名，用于刷新数据 refreshPage or replaceRowsData 的比对
 						String rowMd5 = Utils.md5(rowContents.toString());
 						sb.a(" ewa_row_sign='" + rowMd5 + "'");
 					}
-					sb.al(">");					
+					sb.al(">");
 					sb.a(rowContents);
-					if(colSize==1 || colSizeInc == colSize || i<tb.getCount()-1) {
+					if (colSize == 1 || colSizeInc == colSize || i < tb.getCount() - 1) {
 						sb.al("</tr>");
 					}
 				}
@@ -1550,7 +1559,7 @@ public class FrameList extends FrameBase implements IFrame {
 		thisXmlName = UserConfig.filterXmlName(thisXmlName);
 
 		// 工作量应用表 （_EWA_WF_APP）
-		JSONObject cfg = EwaWfMain.getAppCfg (thisXmlName, super.getHtmlClass().getSysParas().getItemName(), cnn);
+		JSONObject cfg = EwaWfMain.getAppCfg(thisXmlName, super.getHtmlClass().getSysParas().getItemName(), cnn);
 
 		String xmlNameApp = null, itemNameApp = null, wfXmlName = null, wfItemName = null, wfRefTable = null,
 				checkField = null;
@@ -1588,7 +1597,7 @@ public class FrameList extends FrameBase implements IFrame {
 			para += "&" + q;
 		}
 
-		String appPks =  cfg.optString("APP_WF_PKS");
+		String appPks = cfg.optString("APP_WF_PKS");
 		String[] pks = appPks.split(",");
 		for (int i = 0; i < pks.length; i++) {
 			para += "&" + pks[i] + "=@" + pks[i];

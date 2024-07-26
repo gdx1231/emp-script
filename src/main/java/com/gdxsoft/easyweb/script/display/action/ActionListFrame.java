@@ -45,7 +45,9 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 public class ActionListFrame extends ActionBase implements IAction {
 	private static Logger LOG = LoggerFactory.getLogger(ActionListFrame.class);
 	public static final String EXECUTE_SPLIT_SQL = "EXECUTE_SPLIT_SQL";
-
+	public static final String SPLIT_SQL = "SPLIT_SQL";
+	public static final String PAGE_SIZE = "PAGE_SIZE";
+	
 	public void executeCallClass(String name) throws Exception {
 
 		UserXItemValues sqlset = super.getUserConfig().getUserActionItem().getItem("ClassSet");
@@ -244,9 +246,10 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @return
 	 */
 	private DTTable executeSqlWithPageSplit(String sql1, DataConnection conn, RequestValue rv, boolean useSplit) {
+		PageSplit ps = null;
 		if (useSplit) { // 分页
 			int iPageSize = this.getUserSettingPageSize();
-			PageSplit ps = new PageSplit(0, rv, iPageSize);
+			ps = new PageSplit(0, rv, iPageSize);
 			String keyField = this.getPageItemValue("PageSize", "KeyField");
 			conn.executeQueryPage(sql1, keyField, ps.getPageCurrent(), ps.getPageSize());
 		} else {
@@ -261,7 +264,11 @@ public class ActionListFrame extends ActionBase implements IAction {
 		}
 		if (tb.isOk()) {
 			tb.getAttsTable().add(EXECUTE_SPLIT_SQL, "1");
-			tb.getAttsTable().add("sql", sql1);
+			tb.getAttsTable().add(SPLIT_SQL, sql1);
+			tb.getAttsTable().add("sql", sql1); //兼容可能的老方法
+			if(ps != null) {
+				tb.getAttsTable().add(PAGE_SIZE, ps.getPageSize());
+			}
 			super.getItemValues().setListFrameTable(tb);
 		}
 
