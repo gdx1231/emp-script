@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -1416,6 +1417,15 @@ public class DataConnection {
 			this.addSqlParameter(parameters, _pst);
 			_pst.executeUpdate();
 
+			//print语句的输出可通过SQLWarnings获得
+			SQLWarning warning = _pst.getWarnings();
+			while (warning != null) {
+				String msg = warning.getLocalizedMessage();
+				LOGGER.debug(msg);
+				this.writeDebug(this, "SQL-INFO", msg);
+				warning = warning.getNextWarning();
+			}
+
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
 			if (!this._IsTrans) {
 				if (!this._ds.getConnection().getAutoCommit()) {
@@ -1573,6 +1583,14 @@ public class DataConnection {
 			this.useDatabase();
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql)] update. (" + sql + ")");
 			this._ds.getStatement().executeUpdate(sql);
+			//print语句的输出可通过SQLWarnings获得
+			SQLWarning warning = _pst.getWarnings();
+			while (warning != null) {
+				String msg = warning.getLocalizedMessage();
+				LOGGER.debug(msg);
+				this.writeDebug(this, "SQL-INFO", msg);
+				warning = warning.getNextWarning();
+			}
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql,rv)] End update.");
 			if (!this._IsTrans) {
 				if (!this._ds.getConnection().getAutoCommit()) {
@@ -2560,6 +2578,15 @@ public class DataConnection {
 
 			ResultSet rs = cst.executeQuery();
 
+			//print语句的输出可通过SQLWarnings获得
+			SQLWarning warning = _pst.getWarnings();
+			while (warning != null) {
+				String msg = warning.getLocalizedMessage();
+				LOGGER.debug(msg);
+				this.writeDebug(this, "SQL-INFO", msg);
+				warning = warning.getNextWarning();
+			}
+			
 			if (!this._ds.getConnection().getAutoCommit()) {
 				this._ds.getConnection().commit();
 			}
@@ -2602,6 +2629,16 @@ public class DataConnection {
 		try {
 			CallableStatement cst = this._ds.getCallableStatement(sql);
 			cst.execute();
+			
+			//print语句的输出可通过SQLWarnings获得
+			SQLWarning warning = _pst.getWarnings();
+			while (warning != null) {
+				String msg = warning.getLocalizedMessage();
+				LOGGER.debug(msg);
+				this.writeDebug(this, "SQL-INFO", msg);
+				warning = warning.getNextWarning();
+			}
+			
 			if (!this._ds.getConnection().getAutoCommit()) {
 				this._ds.getConnection().commit();
 			}
