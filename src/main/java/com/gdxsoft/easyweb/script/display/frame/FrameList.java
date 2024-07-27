@@ -129,13 +129,16 @@ public class FrameList extends FrameBase implements IFrame {
 			return this._ListFrameRecordCount;
 		}
 		int pagesize = -1231;
+		int pageCurrent = -1;
 		try {
 			// 每页面的记录数
-			pagesize = Integer.parseInt(tb.getAttsTable().get(ActionListFrame.PAGE_SIZE).toString());
+			PageSplit ps = (PageSplit) tb.getAttsTable().get(ActionListFrame.PAGE_SIZE);
+			pagesize = ps.getPageSize();
+			pageCurrent = ps.getPageCurrent();
 		} catch (Exception err) {
 			LOGGER.warn(err.getLocalizedMessage());
 		}
-		if (tb.getCount() == 0 || tb.getCount() < pagesize) {
+		if (tb.getCount() == 0 || (pageCurrent <= 1 && tb.getCount() < pagesize)) {
 			// 返回的数量 < 分页记录数
 			_ListFrameRecordCount = tb.getCount();
 		} else {

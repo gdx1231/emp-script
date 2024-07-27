@@ -267,7 +267,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 			tb.getAttsTable().add(SPLIT_SQL, sql1);
 			tb.getAttsTable().add("sql", sql1); //兼容可能的老方法
 			if(ps != null) {
-				tb.getAttsTable().add(PAGE_SIZE, ps.getPageSize());
+				tb.getAttsTable().add(PAGE_SIZE, ps);
 			}
 			super.getItemValues().setListFrameTable(tb);
 		}
