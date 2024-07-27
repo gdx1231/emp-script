@@ -135,7 +135,7 @@ public class DTTable implements Serializable {
 				try {
 					ins.add(cachedKey, tb.toSerialize());
 				} catch (Exception err) {
-					System.err.println(err.getMessage());
+					LOGGER.error("tb.toSerialize, {}", err.getMessage());
 				}
 			}
 			return tb;
@@ -246,7 +246,7 @@ public class DTTable implements Serializable {
 			tb.setOk(false);
 			tb.setErrorInfo(err.getMessage());
 
-			LOGGER.error(err.getMessage());
+			LOGGER.error("SQL: {}\nError: {}", sql, conn.getErrorMsg());
 		} finally {
 			conn.close();
 		}
@@ -288,7 +288,7 @@ public class DTTable implements Serializable {
 			// 不返回sql
 			tb.setErrorInfo(conn.getErrorMsgOnly());
 
-			LOGGER.error(conn.getErrorMsg());
+			LOGGER.error("SQL: {}\nError: {}", sql, conn.getErrorMsg());
 		}
 
 		return tb;
