@@ -1416,13 +1416,18 @@ public class DataConnection {
 			this.addSqlParameter(parameters, _pst);
 			_pst.executeUpdate();
 
-			//print语句的输出可通过SQLWarnings获得
+			// print语句的输出可通过SQLWarnings获得
 			SQLWarning warning = _pst.getWarnings();
+			int incWarings = 0;
 			while (warning != null) {
 				String msg = warning.getLocalizedMessage();
-				LOGGER.debug(msg);
+				if (incWarings == 0) {
+					LOGGER.warn("SQL: {}", sql);
+				}
+				LOGGER.warn("Warning: {}", msg);
 				this.writeDebug(this, "SQL-INFO", msg);
 				warning = warning.getNextWarning();
+				incWarings++;
 			}
 
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
@@ -1583,13 +1588,18 @@ public class DataConnection {
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql)] update. (" + sql + ")");
 			Statement st = this._ds.getStatement();
 			st.executeUpdate(sql);
-			//print语句的输出可通过SQLWarnings获得
+			// print语句的输出可通过SQLWarnings获得
 			SQLWarning warning = st.getWarnings();
+			int incWarings = 0;
 			while (warning != null) {
 				String msg = warning.getLocalizedMessage();
-				LOGGER.debug(msg);
+				if (incWarings == 0) {
+					LOGGER.warn("SQL: {}", sql);
+				}
+				LOGGER.warn("Warning: {}", msg);
 				this.writeDebug(this, "SQL-INFO", msg);
 				warning = warning.getNextWarning();
+				incWarings++;
 			}
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql,rv)] End update.");
 			if (!this._IsTrans) {
@@ -2578,15 +2588,20 @@ public class DataConnection {
 
 			ResultSet rs = cst.executeQuery();
 
-			//print语句的输出可通过SQLWarnings获得
+			// print语句的输出可通过SQLWarnings获得
 			SQLWarning warning = cst.getWarnings();
+			int incWarings = 0;
 			while (warning != null) {
 				String msg = warning.getLocalizedMessage();
-				LOGGER.debug(msg);
+				if (incWarings == 0) {
+					LOGGER.warn("SQL: {}", sql);
+				}
+				LOGGER.warn("Warning: {}", msg);
 				this.writeDebug(this, "SQL-INFO", msg);
 				warning = warning.getNextWarning();
+				incWarings++;
 			}
-			
+
 			if (!this._ds.getConnection().getAutoCommit()) {
 				this._ds.getConnection().commit();
 			}
@@ -2629,16 +2644,21 @@ public class DataConnection {
 		try {
 			CallableStatement cst = this._ds.getCallableStatement(sql);
 			cst.execute();
-			
-			//print语句的输出可通过SQLWarnings获得
+
+			// print语句的输出可通过SQLWarnings获得
 			SQLWarning warning = cst.getWarnings();
+			int incWarings = 0;
 			while (warning != null) {
 				String msg = warning.getLocalizedMessage();
-				LOGGER.debug(msg);
+				if (incWarings == 0) {
+					LOGGER.warn("SQL: {}", sql);
+				}
+				LOGGER.warn("Warning: {}", msg);
 				this.writeDebug(this, "SQL-INFO", msg);
 				warning = warning.getNextWarning();
+				incWarings++;
 			}
-			
+
 			if (!this._ds.getConnection().getAutoCommit()) {
 				this._ds.getConnection().commit();
 			}
