@@ -357,12 +357,15 @@ public class EwaWfMain {
 		String appField = rowApp.getCell("APP_WF_FIELD").toString();
 		String appPks = rowApp.getCell("APP_WF_PKS").toString();
 		if (appTable == null || appTable.trim().length() == 0) {
+			LOGGER.error("APP_TABLE未定义");
 			throw new Exception("APP_TABLE未定义");
 		}
 		if (appField == null || appField.trim().length() == 0) {
+			LOGGER.error("appField未定义");
 			throw new Exception("appField未定义");
 		}
 		if (appPks == null || appPks.trim().length() == 0) {
+			LOGGER.error("APP_PKS未定义");
 			throw new Exception("APP_PKS未定义");
 		}
 		String[] pks = appPks.split(",");
@@ -370,11 +373,15 @@ public class EwaWfMain {
 		// SYS_STA_RID
 		String[] vals = taskPks.split(",");
 		if (pks.length != vals.length) {
-			throw new Exception("APP_PKS定义和参数值不一致" + appPks + "|" + rv.getString(WF_REF_ID));
+			String err = "APP_PKS定义和参数值不一致" + appPks + "|" + rv.getString(WF_REF_ID);
+			LOGGER.error(err);
+			throw new Exception(err);
 		}
 
 		if (this._Wf.getWfPara0() == null || this._Wf.getWfPara0().trim().length() == 0) {
-			throw new Exception("生成索引数据脚本未定义");
+			String err ="生成索引数据脚本未定义, this._Wf.getWfPara0=null";
+			LOGGER.error(err);
+			throw new Exception(err);
 		}
 
 		// 更新业务表的字段状态
@@ -433,6 +440,8 @@ public class EwaWfMain {
 		if (tbIdxCheck.getCount() == 0) {
 			// 写日志索引
 			String writeLogSql = this._Wf.getWfPara0();
+			//INSERT INTO SYS_STATUS_IDX (SUP_ID, ADM_ID, ADM_NAME, SYS_STA_TABLE, RID, RID1, RMSG)
+			
 			String sqlIdxNew = sqls.getSql("WF_LOG_IDX_NEW").replace("[LOG_SQL]", writeLogSql);
 			this.executeAct(cnn, sqlIdxNew);
 		}
