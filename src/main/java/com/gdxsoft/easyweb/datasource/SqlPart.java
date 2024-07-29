@@ -18,6 +18,8 @@ public class SqlPart {
 	private String _GroupBy = "";
 	private String _Having = "";
 	private String _TableName = "";
+	private String withBlock = "";
+	private boolean hasWithBlock;
 
 	/**
 	 * 根据 order 或 where重建 SQL
@@ -40,6 +42,10 @@ public class SqlPart {
 	 */
 	public String rebuildSql(String order, String where, String dataBaseType) {
 		StringBuilder sqlTmp = new StringBuilder();
+		if (this.hasWithBlock) {
+			sqlTmp.append(this.withBlock);
+			sqlTmp.append("\n");
+		}
 		sqlTmp.append("SELECT " + this._Fields + "\nFROM " + this._TableName);
 		sqlTmp.append(" WHERE (\n" + this._Where + " \n\n)");
 
@@ -152,7 +158,19 @@ public class SqlPart {
 	}
 
 	private void createPart() {
-		String[] s1 = getSqlSplit(_Sql, "from", 2);
+		// 获取 SQL 的with部分和sql部分，用于分页查询
+		// 如果存在[withSql, selectSql]，否则null
+		String[] withSql = SqlUtils.getSqlWithBlock(_Sql);
+		String sql;
+		if (withSql != null) {
+			this.hasWithBlock = true;
+			this.withBlock = withSql[0];
+
+			sql = withSql[1];
+		} else {
+			sql = _Sql;
+		}
+		String[] s1 = getSqlSplit(sql, "from", 2);
 		String select = s1[0].toUpperCase();
 		int m1 = select.indexOf("SELECT");
 		this._Fields = s1[0].substring(m1 + 6).trim();
@@ -221,6 +239,20 @@ public class SqlPart {
 
 	public String getHaving() {
 		return _Having;
+	}
+
+	/**
+	 * @return the withBlock
+	 */
+	public String getWithBlock() {
+		return withBlock;
+	}
+
+	/**
+	 * @return the hasWithBlock
+	 */
+	public boolean isHasWithBlock() {
+		return hasWithBlock;
 	}
 
 }

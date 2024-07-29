@@ -47,7 +47,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 	public static final String EXECUTE_SPLIT_SQL = "EXECUTE_SPLIT_SQL";
 	public static final String SPLIT_SQL = "SPLIT_SQL";
 	public static final String PAGE_SIZE = "PAGE_SIZE";
-	
+
 	public void executeCallClass(String name) throws Exception {
 
 		UserXItemValues sqlset = super.getUserConfig().getUserActionItem().getItem("ClassSet");
@@ -158,9 +158,10 @@ public class ActionListFrame extends ActionBase implements IAction {
 			}
 
 			String sqlType = sqlItem.getItem("SqlType");
+			String sqlup = sql.toUpperCase();
 			if (sqlType.equals("query") && !executedSplitSql && DataConnection.checkIsSelect(sql)
-					&& sql.toUpperCase().indexOf(FrameParameters.EWA_ERR_OUT) == -1
-					&& sql.toUpperCase().indexOf(FrameParameters.EWA_SQL_SPLIT_NO) == -1) {
+					&& sqlup.indexOf(FrameParameters.EWA_ERR_OUT) == -1
+					&& sqlup.indexOf(FrameParameters.EWA_SQL_SPLIT_NO) == -1) {
 				// 执行分页查询
 				executedSplitSql = true; // 分页只执行1次
 				this.executeSplitSql(sql, conn, rv, name);
@@ -265,8 +266,8 @@ public class ActionListFrame extends ActionBase implements IAction {
 		if (tb.isOk()) {
 			tb.getAttsTable().add(EXECUTE_SPLIT_SQL, "1");
 			tb.getAttsTable().add(SPLIT_SQL, sql1);
-			tb.getAttsTable().add("sql", sql1); //兼容可能的老方法
-			if(ps != null) {
+			tb.getAttsTable().add("sql", sql1); // 兼容可能的老方法
+			if (ps != null) {
 				tb.getAttsTable().add(PAGE_SIZE, ps);
 			}
 			super.getItemValues().setListFrameTable(tb);

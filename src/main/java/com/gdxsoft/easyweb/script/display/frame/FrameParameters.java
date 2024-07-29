@@ -10,10 +10,10 @@ public class FrameParameters {
 	 * 通过参数传递的TitleEn (ewa_lang=enus)，覆盖frame的title
 	 */
 	public final static String EWA_TITLE_EN = "EWA_TITLE_EN";
-	
+
 	/**
-	 * 跳过图片滑动验证，NOT_CHECK=不检查验证码
-	 * pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS ||<br>
+	 * 跳过图片滑动验证，NOT_CHECK=不检查验证码 pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS
+	 * ||<br>
 	 * pv.getPVTag() == PageValueTag.SYSTEM || <br>
 	 * pv.getPVTag() == PageValueTag.SESSION
 	 */
@@ -26,7 +26,7 @@ public class FrameParameters {
 	 * pv.getPVTag() == PageValueTag.SESSION
 	 */
 	public static final String EWA_VALIDCODE_CHECK = "EWA_VALIDCODE_CHECK";
-	
+
 	/**
 	 * 隐藏Frame字段的字符串表达式，用,分割
 	 */
@@ -363,12 +363,10 @@ public class FrameParameters {
 	public static final String EWA_ACTION_RELOAD = "EWA_ACTION_RELOAD";
 
 	/**
-	 * 页面提交的要执行的事件
-	 * 避免xxs攻击，仅支持EWA.F.FOS["xxxx"].NewNodeAfter，其它无效
+	 * 页面提交的要执行的事件 避免xxs攻击，仅支持EWA.F.FOS["xxxx"].NewNodeAfter，其它无效
 	 */
 	public static final String EWA_AFTER_EVENT = "EWA_AFTER_EVENT";
 
- 
 	/**
 	 * shortName
 	 */
@@ -503,7 +501,10 @@ public class FrameParameters {
 	 * ListFrame分页查询时跳过的select语句
 	 */
 	public static final String EWA_SQL_SPLIT_NO = "EWA_SQL_SPLIT_NO";
-
+	/**
+	 * 强制制定为SELECT查询
+	 */
+	public static final String EWA_IS_SELECT = "EWA_IS_SELECT";
 	/**
 	 * 英文
 	 */

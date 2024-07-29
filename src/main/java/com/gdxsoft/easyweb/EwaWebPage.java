@@ -143,9 +143,7 @@ public class EwaWebPage {
 				// DebugRecords.add(record);
 			}
 			if (_IsPageDebug) {
-				if (isXml || _HtmlCreator.getAjaxCallType() != null) {
-					// System.out.println(hc.getDebugFrames().listDebugText());
-				} else {// 页面显示跟踪信息
+				if (!isXml || ajaxType.length() == 0 || "LF_RELOAD".equalsIgnoreCase(ajaxType)) {
 					this._PageDeubgInfo = debugStr;
 				}
 			}

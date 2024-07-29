@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
+
 public class SqlUtils {
 	/**
 	 * MYSQL保留词
@@ -77,6 +79,56 @@ public class SqlUtils {
 	}
 
 	/**
+	 * 获取 SQL 的with部分和sql部分，用于分页查询
+	 * 
+	 * @param sql
+	 * @return 如果存在[withSql, selectSql]，否则null
+	 */
+	public static String[] getSqlWithBlock(String sql) {
+		String[] sqls = sql.split("\n");
+		// 检查with
+		StringBuilder sqlWith = new StringBuilder();
+		StringBuilder sqlSelect = new StringBuilder();
+		boolean findWith = false;
+		boolean findSelect = false;
+		int leftBracket = 0; // 左括号数量
+		/*
+		 * with t1 as ( SELECT * from GRP_SER_SP WHERE GSSM_ID > 0 ) -- 必须在新行上 select *
+		 * from t1
+		 */
+		for (int i = 0; i < sqls.length; i++) {
+			String line = sqls[i];
+			findWith = findWith || checkStartWord(line, "WITH");
+			if (!findSelect && (leftBracket == 0 || !findWith)) {
+				findSelect = checkStartWord(line, "SELECT");
+			}
+			boolean isLeftBracket = line.indexOf("(") >= 0;
+			if (isLeftBracket) {
+				leftBracket++;
+			}
+			boolean isRightBracket = line.indexOf(")") >= 0;
+			if (isRightBracket) {
+				leftBracket--;
+			}
+			// 当左括号为0时候检查
+			if (findSelect && !findWith) {
+				// 没有with语句
+				break;
+			}
+			if (findSelect) {
+				sqlSelect.append(line).append("\n");
+			} else {
+				sqlWith.append(line).append("\n");
+			}
+		}
+		if (!findWith) {
+			return null;
+		}
+
+		return new String[] { sqlWith.toString(), sqlSelect.toString() };
+	}
+
+	/**
 	 * 判断 特定字符出现在非注释的SQL的0位置，多行的SQL只进行第一次判断
 	 * 
 	 * @param sql
@@ -140,7 +192,16 @@ public class SqlUtils {
 			return true;
 		}
 		// 强制执行为select 模式，解决with xxx as 语句后面的selec
-		return SqlUtils.ewaIsSelect(sql);
+		if( SqlUtils.ewaIsSelect(sql)) {
+			return true;
+		}
+		
+		String[] result = SqlUtils.getSqlWithBlock(sql);
+		if(result == null) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
@@ -203,27 +264,10 @@ public class SqlUtils {
 	 * 标记为：<b>-- EWA_IS_SELECT</b>
 	 * 
 	 * @param sql
-	 * @return
+	 * @return true/false
 	 */
 	public static boolean ewaIsSelect(String sql) {
-		String[] sqls = sql.split("\n");
-
-		for (int m = 0; m < sqls.length; m++) {
-			String len = sqls[m].trim().toUpperCase();
-			if (len.length() == 0) {
-				continue;
-			}
-
-			if (len.startsWith("--")) {
-				len = len.replace("--", "").trim();
-				if (len.indexOf("EWA_IS_SELECT ") == 0) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		return false;
+		return SqlUtils.checkStartWord(sql, FrameParameters.EWA_IS_SELECT);
 	}
 
 	public static boolean isMySql(String databaseType) {

@@ -111,7 +111,7 @@ public class ServletMain extends HttpServlet {
 			LOGGER.error("ConfSecurities instance, {}", e.getMessage());
 		}
 
-		//数据库连接池初始化
+		// 数据库连接池初始化
 		try {
 			ConnectionConfigs.instance();
 			LOGGER.info("ConnectionConfigs inst");
@@ -173,7 +173,8 @@ public class ServletMain extends HttpServlet {
 	public void init() throws ServletException {
 		// servlet init一个生命周期执行1次
 		super.init();
-		LOGGER.info("{}, {}", super.getServletConfig().getServletContext().getContextPath(), super.getServletConfig().getServletName());
+		LOGGER.info("{}, {}", super.getServletConfig().getServletContext().getContextPath(),
+				super.getServletConfig().getServletName());
 
 		// 从web.xml中获取 init-param参数
 		Enumeration<String> names = this.getInitParameterNames();
@@ -361,15 +362,15 @@ public class ServletMain extends HttpServlet {
 
 		cnt.a(cnt1);
 		if (p.isPageDebug()) {// 是否Debug状态
-			if ((ct != null && ct.equals("text/xml")) || p.getHtmlCreator().getAjaxCallType() != null) {
-				// 不输出
-			} else { // 输出Debug内容
+			String ajax = p.getHtmlCreator().getAjaxCallType();
+			if (ajax == null || ajax.length() == 0 || "LF_RELOAD".equalsIgnoreCase(ajax)) { 
+				// 输出Debug内容
 				String debug = p.getPageDeubgInfo();
 				if (rv.s(FrameParameters.EWA_PARENT_FRAME) != null) {
 					StringBuilder sb = new StringBuilder();
-					sb.append("<div><style>#__EWA_DEBUG{position: absolute;left:0;bottom:0}");
+					sb.append("<div><style>.EWA_DEBUG{position: absolute;left:0;bottom:0}");
 					sb.append(
-							"#__EWA_DEBUG_INFO{background-color:#fff;width:100vw;height: calc(100vh - 50px);overflow: auto;}</style>");
+							".EWA_DEBUG_INFO{background-color:#fff;width:100vw;height: calc(100vh - 50px);overflow: auto;}</style>");
 					sb.append(debug).append("</div>");
 					cnt.a(sb.toString());
 				} else {

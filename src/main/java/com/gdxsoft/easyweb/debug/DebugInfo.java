@@ -1,11 +1,11 @@
 package com.gdxsoft.easyweb.debug;
 
-
 import com.gdxsoft.easyweb.cache.SqlCachedHsqldbImpl;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
+import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class DebugInfo {
@@ -31,9 +31,8 @@ public class DebugInfo {
 			return;
 		}
 
-		
 		String name = "__D_HTML_XXXXXXXXXXXXX123123123XXXXXXXXXXXXXXXXX";
-		StringBuilder sbCnt=new StringBuilder();
+		StringBuilder sbCnt = new StringBuilder();
 		sbCnt.append(this._RequestValue.listValuesHtml());
 		sbCnt.append(this.getDebugInfo(true));
 		this._RequestValue.addValue(name, sbCnt.toString());
@@ -43,7 +42,8 @@ public class DebugInfo {
 		this._RequestValue.addValue(name1, xmlname);
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("INSERT INTO FRAME_DEBUG(D_XMLNAME, D_ITEMNAME, D_DATE, D_HTML, D_IP, D_CGI, D_USER_AGENT, D_REFERER)");
+		sb.append(
+				"INSERT INTO FRAME_DEBUG(D_XMLNAME, D_ITEMNAME, D_DATE, D_HTML, D_IP, D_CGI, D_USER_AGENT, D_REFERER)");
 		sb.append("VALUES(@");
 		sb.append(name1);
 		sb.append(", @ITEMNAME, @SYS_DATE, @");
@@ -79,12 +79,12 @@ public class DebugInfo {
 	}
 
 	public String getDebugPage() {
-		 
+		String id = "DEBUG_" + Utils.randomStr(10);
 		MStr sb = new MStr();
-		sb.al("<div id='__EWA_DEBUG'><div style='font-size:9px;color:#dcdcdc' ");
-		sb.al("onclick=\"var o1=$X('__EWA_DEBUG_INFO');");
+		sb.al("<div id='__EWA_DEBUG' class='EWA_DEBUG'><div style='font-size:9px;color:#dcdcdc' ");
+		sb.al("onclick=\"var o1=document.getElementById('" + id + "');");
 		sb.al("if(o1.style.display==''){o1.style.display='none'}else{o1.style.display=''};");
-		sb.al("\">DEBUG INFO</div><div id='__EWA_DEBUG_INFO' style='display:none'>");
+		sb.al("\">DEBUG INFO</div><div id='" + id + "' class='EWA_DEBUG_INFO' style='display:none'>");
 		sb.al(this.getRequestInfo(true));
 		sb.al(this.getDebugInfo(true));
 		sb.al("</div></div>");

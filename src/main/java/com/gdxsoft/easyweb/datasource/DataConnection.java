@@ -344,8 +344,9 @@ public class DataConnection {
 	}
 
 	/**
-	 * 检查是否为 select语句或标记为<b>-- EWA_IS_SELECT</b>
-	 * 
+	 * 检查是否为 select语句<br>
+	 * 或标记为<b>-- EWA_IS_SELECT</b><br>
+	 * 或with block语句
 	 * 
 	 * @param sql
 	 * @return
@@ -911,7 +912,9 @@ public class DataConnection {
 				if (sp.getOrderBy().length() > 0) {
 					sqlTmp.append("\r\n ORDER BY " + sp.getOrderBy());
 				}
-				sb.insert(0, "SELECT TOP " + pageSize + " ");
+				String sql0=(sp.isHasWithBlock()?sp.getWithBlock():"")
+						+"SELECT TOP " + pageSize + " ";
+				sb.insert(0, sql0);
 				sb.append(sp.getFields());
 				sb.append("\r\n FROM ");
 				sb.append(sp.getTableName());
@@ -926,6 +929,9 @@ public class DataConnection {
 				} else if (pkFieldName != null && pkFieldName.trim().length() > 0) {
 					overOrderBy = pkFieldName;
 				}
+				if(sp.isHasWithBlock()) {
+					sb.al( sp.getWithBlock());
+				}
 				sb.append("SELECT * FROM (");
 				sb.append("SELECT ");
 				sb.append("ROW_NUMBER() OVER(ORDER BY " + overOrderBy + ") EMP__X___G____D_RN,");
@@ -938,37 +944,6 @@ public class DataConnection {
 				sb.append(" AND " + currentPage * pageSize);
 				sb.append("\r\n ORDER BY EMP__X___G____D_RN");
 			}
-			/// 20190816
-			/*
-			 * if (sp.getOrderBy().length() > 0) { sqlTmp.append("\r\n ORDER BY " +
-			 * sp.getOrderBy()); } sb.insert(0, "SELECT TOP " + currentPage * pageSize +
-			 * " "); sb.append(sp.getFields()); sb.append("\r\n FROM ");
-			 * sb.append(sp.getTableName()); if (currentPage == 1) { sb.append("\r\n WHERE "
-			 * + sp.getWhere()); sb.append(sqlTmp.toString()); } else { String pk =
-			 * "GGDDXX." + pkFieldName; String pk1 = pkFieldName; if
-			 * (pkFieldName.indexOf(",") > 0) { String[] pks = pkFieldName.split(",");
-			 * String tmp = ""; String tmp1 = ""; for (int i = 0; i < pks.length; i++) { if
-			 * (i > 0) { tmp += " + '~`" + i + "!' + "; tmp1 += " + '~`" + i + "!' + "; }
-			 * String[] filedName = pks[i].trim().split("\\."); String name = "GGDDXX.[" +
-			 * filedName[filedName.length - 1] + "]"; tmp += "ISNULL(CONVERT(VARCHAR(222),"
-			 * + name + "),'--null--')"; tmp1 += "ISNULL(CONVERT(VARCHAR(222), " +
-			 * pks[i].trim() + "),'--null--')"; } pk = tmp; pk1 = tmp1; } else { String[]
-			 * filedName = pkFieldName.trim().split("\\."); pk = "GGDDXX." +
-			 * filedName[filedName.length - 1];
-			 * 
-			 * }
-			 * 
-			 * StringBuilder where = new StringBuilder(); where.append("SELECT TOP " +
-			 * (currentPage - 1) * pageSize + " "); where.append(pk1 + " FROM ");
-			 * where.append(sp.getTableName()); where.append("\r\n WHERE " + sp.getWhere());
-			 * where.append(sqlTmp.toString());
-			 * 
-			 * sb.append(" WHERE " + sp.getWhere()); sb.append(sqlTmp.toString());
-			 * 
-			 * sb.insert(0, "SELECT * FROM(\r\n"); sb.append(") GGDDXX\r\n WHERE NOT " + pk
-			 * + " IN (\r\n\t"); sb.append(where.toString()); sb.append(")"); }
-			 */
-
 		} else if (this._DatabaseType.equals("HSQLDB") || this._DatabaseType.equals("MYSQL")) {
 			sb.append(sql);
 			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);
@@ -1632,23 +1607,13 @@ public class DataConnection {
 		sp.setSql(sql);
 
 		StringBuilder sb = new StringBuilder();
+		if(sp.isHasWithBlock()) {
+			sb.append( sp.getWithBlock() ).append("\n");
+		}
 		sb.append("SELECT COUNT(*) GDX FROM \n");
 		if (sp.getGroupBy().length() > 0) {
 			sb.append("(").append(sql).append(") tmp");
 		} else {
-//			String subSql = null;
-//			int loc0 = sp.getTableName().indexOf("(");
-//			int loc1 = sp.getTableName().lastIndexOf(")");
-//
-//			if (loc1 - loc0 > 10) {
-//				// 提取子查询的sql，用于获取数量
-//				subSql = sp.getTableName().substring(loc0 + 1, loc1).trim();
-//				if (subSql.toLowerCase().indexOf("select") == 0) {
-//					sp = new SqlPart();
-//					sp.setSql(subSql);
-//				}
-//			}
-
 			sb.append(sp.getTableName());
 
 			if (!sp.getWhere().equals("")) {
