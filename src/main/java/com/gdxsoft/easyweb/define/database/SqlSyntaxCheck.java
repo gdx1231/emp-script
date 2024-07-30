@@ -84,15 +84,15 @@ public class SqlSyntaxCheck {
 		sql1.al("");
 		sql1.al("");
 		sql1.al("");
-		sql1.al("SET NOEXEC ON");
+		sql1.al("SET NOEXEC ON;");
 		sql1.al("");
 		sql1.al("-- START --");
 		sql1.al("");
-		sql1.al(sql);
+		sql1.al(sql).al(";");
 		sql1.al("-- END --");
 		sql1.al("");
 		sql1.al("");
-		sql1.al("SET NOEXEC OFF");
+		sql1.al("SET NOEXEC OFF;");
 		String cnt = "{}";
 		_Cnn.executeUpdate(sql1.toString());
 		if (_Cnn.getErrorMsg() != null) {

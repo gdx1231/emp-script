@@ -97,18 +97,29 @@ public class SqlUtils {
 		 * from t1
 		 */
 		for (int i = 0; i < sqls.length; i++) {
-			String line = sqls[i];
+			String line = sqls[i] + "\n";
 			findWith = findWith || checkStartWord(line, "WITH");
 			if (!findSelect && (leftBracket == 0 || !findWith)) {
 				findSelect = checkStartWord(line, "SELECT");
 			}
-			boolean isLeftBracket = line.indexOf("(") >= 0;
-			if (isLeftBracket) {
+			int leftStartLoc = line.indexOf("(");
+			while (leftStartLoc >= 0) {
 				leftBracket++;
+				leftStartLoc = line.indexOf("(", leftStartLoc + 1);
+				if (leftBracket > 1000) {
+					break;
+				}
 			}
-			boolean isRightBracket = line.indexOf(")") >= 0;
-			if (isRightBracket) {
+			int rightStartLoc = line.indexOf(")");
+			while (rightStartLoc >= 0) {
 				leftBracket--;
+				rightStartLoc = line.indexOf(")", rightStartLoc + 1);
+				if (rightStartLoc > 1000) {
+					break;
+				}
+			}
+			if (leftBracket < 0) {
+				System.out.println(leftBracket);
 			}
 			// 当左括号为0时候检查
 			if (findSelect && !findWith) {
@@ -116,9 +127,9 @@ public class SqlUtils {
 				break;
 			}
 			if (findSelect) {
-				sqlSelect.append(line).append("\n");
+				sqlSelect.append(line);
 			} else {
-				sqlWith.append(line).append("\n");
+				sqlWith.append(line);
 			}
 		}
 		if (!findWith) {
@@ -192,12 +203,12 @@ public class SqlUtils {
 			return true;
 		}
 		// 强制执行为select 模式，解决with xxx as 语句后面的selec
-		if( SqlUtils.ewaIsSelect(sql)) {
+		if (SqlUtils.ewaIsSelect(sql)) {
 			return true;
 		}
-		
+
 		String[] result = SqlUtils.getSqlWithBlock(sql);
-		if(result == null) {
+		if (result == null) {
 			return false;
 		} else {
 			return true;
