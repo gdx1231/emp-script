@@ -180,7 +180,17 @@ public class ItemBase implements IItem {
 	 * @return
 	 */
 	private String handleSpanTitle(String s1, String val) {
-		Object title = this._HtmlClass.getItemValues().getLastValue();
+		Object title = null;
+		try {
+			if ("4".equalsIgnoreCase(this.getIsHtmlValue())) {
+				title = val == null ? "" : val;
+			}
+		} catch (Exception e) {
+			return s1;
+		}
+		if (title == null) {
+			title = this._HtmlClass.getItemValues().getLastValue();
+		}
 		if (title == null) {
 			return s1;
 		}
@@ -491,10 +501,17 @@ public class ItemBase implements IItem {
 			val = this.checkHtmlScript(val);
 			return val;
 		}
-		// 替换标签
+		String isHtmlValue = this.getIsHtmlValue(); // 1 html,2 回车为p,3 不替换回车，0，br
+
+		// 20240827 郭磊
+		if (isHtmlValue.equals("4")) { // 去除 html 标签
+			val = Utils.filterHtml(val);
+			return val;
+		}
+
+		// 替换标签< 和 >
 		val = Utils.textToInputValue(val);
 		if (tag.equals("span") || tag.equals("user")) {
-			String isHtmlValue = this.getIsHtmlValue(); // 1 html,2 回车为p,3 不替换回车，0，br
 			if (isHtmlValue.equals("2")) { // 替换回车为P标签
 				StringBuilder sb = new StringBuilder();
 				sb.append("<p>");

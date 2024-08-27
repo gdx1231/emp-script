@@ -3621,10 +3621,10 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info="No,Yes" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="IsHtml" Default="0" Values="0,1,2,3">
+			<XGroupValue Name="IsHtml" Default="0" Values="0,1,2,3,4">
 				<DescriptionSet>
-					<Set Lang="zhcn" Info="否（回车替换为BR标签）,是,否（回车替换为P标签）,否（不替换回车）" />
-					<Set Lang="enus" Info="No(BR),Yes,No(P),No(Nothing)" />
+					<Set Lang="zhcn" Info="否（回车替换为BR标签）,是,否（回车替换为P标签）,否（不替换回车）,否（去除 html 标签）" />
+					<Set Lang="enus" Info="No(BR),Yes,No(P),No(Nothing),No(html2text）" />
 				</DescriptionSet>
 			</XGroupValue>
 			<XGroupValue Name="IsOrder" Default="0" Values="0,1">
