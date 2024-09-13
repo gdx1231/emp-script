@@ -161,6 +161,7 @@ public class MsWord implements IWord {
 			if (!map.containsKey(ext)) {
 				map.put(ext, 1);
 			}
+			u = u.replace("$", "%24"); //$resized/1000x1000
 			byte[] buf = net.downloadData(u);
 			if (buf == null) {
 				buf = net.getLastErr().getBytes("utf-8");

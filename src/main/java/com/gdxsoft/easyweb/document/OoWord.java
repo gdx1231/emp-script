@@ -18,21 +18,17 @@ import com.gdxsoft.easyweb.utils.UNet;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
 
-public class OoWord implements IWord{
+public class OoWord implements IWord {
 	/**
 	 * 生成文件
 	 * 
-	 * @param tmplate
-	 *            模板
-	 * @param exportName
-	 *            输出文件名
-	 * @param rv
-	 *            参数表
+	 * @param tmplate    模板
+	 * @param exportName 输出文件名
+	 * @param rv         参数表
 	 * @return
 	 * @throws Exception
 	 */
-	public String doWork(String tmplate, String exportName, RequestValue rv)
-			throws Exception {
+	public String doWork(String tmplate, String exportName, RequestValue rv) throws Exception {
 		this.templateName = tmplate;
 		File f1 = new File(exportName);
 		String name = f1.getName();
@@ -40,8 +36,8 @@ public class OoWord implements IWord{
 		this.rv = rv;
 		String root = unzipTemplate();
 		rootPath = root;
-		File froot=new File(root);
-		String rootParent=froot.getParent();
+		File froot = new File(root);
+		String rootParent = froot.getParent();
 		this.exportName = rootParent + "/" + name;
 
 		String xml = rv.getString("xml");
@@ -52,7 +48,7 @@ public class OoWord implements IWord{
 
 		UFile.createNewTextFile(docmentName, s1);
 
-		if(DocUtils.compress(this.exportName, root)){
+		if (DocUtils.compress(this.exportName, root)) {
 			DocUtils.clearTempPath(root);
 		}
 		return "";
@@ -60,11 +56,10 @@ public class OoWord implements IWord{
 
 	public String downloadUrl() {
 		File f1 = new File(this.exportName);
-		String c1=UPath.getPATH_IMG_CACHE();
-		File fc=new File(c1);
-		return f1.getAbsolutePath().replace(fc.getAbsolutePath(),
-				UPath.getPATH_IMG_CACHE_URL());
-	 
+		String c1 = UPath.getPATH_IMG_CACHE();
+		File fc = new File(c1);
+		return f1.getAbsolutePath().replace(fc.getAbsolutePath(), UPath.getPATH_IMG_CACHE_URL());
+
 	}
 
 	private String createMedia(String pics, String xml) throws Exception {
@@ -93,13 +88,13 @@ public class OoWord implements IWord{
 			}
 
 			ext = ext.toLowerCase();
-			if (!(ext.equals(".jpg") || ext.equals(".png")
-					|| ext.equals(".bmp") || ext.equals(".jpeg"))) {
+			if (!(ext.equals(".jpg") || ext.equals(".png") || ext.equals(".bmp") || ext.equals(".jpeg"))) {
 				ext = ".jpg";
 			}
+			u = u.replace("$", "%24"); //$resized/1000x1000
 			byte[] buf = net.downloadData(u);
-			if(buf==null){
-				buf=net.getLastErr().getBytes("utf-8");
+			if (buf == null) {
+				buf = net.getLastErr().getBytes("utf-8");
 			}
 			String fixed = "00000" + i;
 			fixed = fixed.substring(fixed.length() - 5);
