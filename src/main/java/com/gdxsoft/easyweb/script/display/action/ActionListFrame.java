@@ -855,8 +855,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @param dataField
 	 * @param dataType
 	 * @return
+	 * @throws Exception 
 	 */
-	private String createSearchSql(SearchParameter lsp, DataConnection conn, String dataField, String dataType) {
+	private String createSearchSql(SearchParameter lsp, DataConnection conn, String dataField, String dataType) throws Exception {
 		String exp = null;
 		if (lsp.isDouble()) { // 双字段
 			exp = createSearchDoubleSql(lsp, conn, dataField, dataType);
@@ -1087,8 +1088,9 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @param dataField
 	 * @param dataType
 	 * @return
+	 * @throws Exception 
 	 */
-	private String createSearchDoubleSql(SearchParameter lsp, DataConnection conn, String dataField, String dataType) {
+	private String createSearchDoubleSql(SearchParameter lsp, DataConnection conn, String dataField, String dataType) throws Exception {
 		StringBuilder sb = new StringBuilder();
 
 		if (dataType.indexOf("DATE") >= 0 || dataType.indexOf("TIME") >= 0) {// 日期形式
@@ -1149,6 +1151,8 @@ public class ActionListFrame extends ActionBase implements IAction {
 				}
 				sb.append(dataField + " <= " + lsp.getPara2());
 			}
+		} else {
+			throw new Exception("Not support data type " + dataField +"(" + dataType+")");
 		}
 
 		return sb.toString();
