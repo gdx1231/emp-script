@@ -768,7 +768,23 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 返回JSON对象 含有图片的最多返回50条记录，其它最多1000条数据
+	 * 检查是否为密码字段，password, _pwd, _pass
+	 * @param passwordColumn 字段名称
+	 * @return
+	 */
+	public boolean checkPasswordColumn(String passwordColumn) {
+		if (passwordColumn == null) {
+			return false;
+		}
+		String name = passwordColumn.trim().toUpperCase();
+		if (name.indexOf("PASSWORD") >= 0 || name.endsWith("_PWD") || name.endsWith("_PASS")) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 返回JSON对象 含有图片的最多返回50条记录，其它最多50000条数据
 	 * 
 	 * @return the JSON array
 	 * @throws JSONException the exception
@@ -776,14 +792,21 @@ public class DTTable implements Serializable {
 	public JSONArray toJSONArray() throws JSONException {
 		JSONArray json = new JSONArray();
 		String contentpath = "";
+		Map<String, Boolean> map = new HashMap<String, Boolean>();
 		for (int m = 0; m < getCount(); m++) {
 			DTRow r = getRow(m);
 			JSONObject obj = new JSONObject();
 			for (int i = 0; i < getColumns().getCount(); i++) {
 				String name = getColumns().getColumn(i).getName();
+				if (!map.containsKey(name)) {
+					map.put(name, this.checkPasswordColumn(name));
+				}
+
+				boolean isPwd = map.get(name);
 
 				DTCell cell = r.getCell(i);
-				Object v = getCellValueByJson(cell, contentpath);
+				//隐含密码
+				Object v = isPwd ? "******" : getCellValueByJson(cell, contentpath);
 
 				obj.put(name, v);
 
@@ -793,7 +816,7 @@ public class DTTable implements Serializable {
 			if (this._IshaveImage && m > 50) { // 含有图片的最多返回50条记录
 				break;
 			}
-			if (m > 50000) { // 最多1000条数据
+			if (m > 50000) { // 最多50000条数据
 				break;
 			}
 		}
@@ -933,6 +956,7 @@ public class DTTable implements Serializable {
 				}
 			}
 		}
+		Map<String, Boolean> map = new HashMap<String, Boolean>();
 		for (int m = 0; m < getCount(); m++) {
 			DTRow r = getRow(m);
 			if (m > 0) {
@@ -941,8 +965,13 @@ public class DTTable implements Serializable {
 			sb.append("{");
 			for (int i = 0; i < getColumns().getCount(); i++) {
 				String name = getColumns().getColumn(i).getName();
+				if (!map.containsKey(name)) {
+					map.put(name, this.checkPasswordColumn(name));
+				}
+				boolean isPwd = map.get(name);
 				DTCell cell = r.getCell(i);
-				Object v = this.getCellValueByJson(cell, contentpath);
+				//隐含密码
+				Object v = isPwd ? "******" : this.getCellValueByJson(cell, contentpath);
 				if (i > 0) {
 					sb.append(", ");
 				}
