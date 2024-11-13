@@ -139,7 +139,11 @@ public class SqlTable {
 			ArrayList<Field> pks = table.getPk().getPkFields();
 			sb.append(",\n\t");
 			if (!isMySql) {
-				sb.append(" constraint " + fix.getFixCharBefore() + table.getPk().getPkName() + fix.getFixCharAfter());
+				String pkName=table.getPk().getPkName() ;
+				if("primary".equalsIgnoreCase(pkName)) {
+					pkName = "PK_" + table.getName();
+				}
+				sb.append(" constraint " + fix.getFixCharBefore() + pkName + fix.getFixCharAfter());
 			}
 			sb.append(" primary key(");
 			for (int i = 0; i < pks.size(); i++) {
