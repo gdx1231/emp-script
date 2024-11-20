@@ -769,6 +769,7 @@ public class DTTable implements Serializable {
 
 	/**
 	 * 检查是否为密码字段，password, _pwd, _pass
+	 * 
 	 * @param passwordColumn 字段名称
 	 * @return
 	 */
@@ -805,7 +806,7 @@ public class DTTable implements Serializable {
 				boolean isPwd = map.get(name);
 
 				DTCell cell = r.getCell(i);
-				//隐含密码
+				// 隐含密码
 				Object v = isPwd ? "******" : getCellValueByJson(cell, contentpath);
 
 				obj.put(name, v);
@@ -823,6 +824,66 @@ public class DTTable implements Serializable {
 		return json;
 	}
 
+	/**
+	 * 根据fieldName转换成key:DTRow的 map，无重复数据
+	 * 
+	 * @param fieldName
+	 * @return key:DTRow的 map
+	 */
+	public Map<String, DTRow> toMapRow(String fieldName) {
+		int colIndex = this.getColumns().getNameIndex(fieldName);
+		return toMapRow(colIndex);
+	}
+
+	/**
+	 * 根据fieldName转换成key:DTRow的 map，无重复数据
+	 * @param colIndex
+	 * @return key:DTRow的 map
+	 */
+	public Map<String, DTRow> toMapRow(int colIndex) {
+		if (colIndex == -1 || colIndex > this.getColumns().getCount()) {
+			return null; // "FIELD NOT FOUNDED"
+		}
+		Map<String, DTRow> map = new HashMap<String, DTRow>();
+		for (int i = 0; i < this.getCount(); i++) {
+			String id = this.getCell(i, colIndex).toString();
+			if (map.containsKey(id)) {
+				continue;
+			}
+			map.put(id, this.getRow(i));
+		}
+		return map;
+	}
+
+	/**
+	 * 根据fieldName转换成key: List DTRow的 map，无重复数据
+	 * 
+	 * @param fieldName
+	 * @return key: List DTRow的 map
+	 */
+	public Map<String, List<DTRow>> toMapRows(String fieldName) {
+		int colIndex = this.getColumns().getNameIndex(fieldName);
+		return toMapRows(colIndex);
+	}
+	/**
+	 * 根据fieldName转换成key:List DTRow的 map，无重复数据
+	 * @param colIndex
+	 * @return key: List DTRow的 map
+	 */
+	public Map<String, List<DTRow>> toMapRows(int colIndex) {
+		if (colIndex == -1 || colIndex > this.getColumns().getCount()) {
+			return null; // "FIELD NOT FOUNDED"
+		}
+		Map<String, List<DTRow>> map = new HashMap<String, List<DTRow>>();
+		for (int i = 0; i < this.getCount(); i++) {
+			String id = this.getCell(i, colIndex).toString();
+			if (!map.containsKey(id)) {
+				map.put(id, new ArrayList<DTRow>());
+			}
+			map.get(id).add(this.getRow(i));
+		}
+		return map;
+	}
 	/**
 	 * 根据fieldName转换成Map，无重复数据
 	 * 
@@ -970,7 +1031,7 @@ public class DTTable implements Serializable {
 				}
 				boolean isPwd = map.get(name);
 				DTCell cell = r.getCell(i);
-				//隐含密码
+				// 隐含密码
 				Object v = isPwd ? "******" : this.getCellValueByJson(cell, contentpath);
 				if (i > 0) {
 					sb.append(", ");
