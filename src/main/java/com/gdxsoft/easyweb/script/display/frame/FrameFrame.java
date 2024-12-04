@@ -702,15 +702,16 @@ public class FrameFrame extends FrameBase implements IFrame {
 			MStr s1 = new MStr();
 
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.append("\r\n<tr SHOW_MSG='1' class='ewa-tr-summary ");
+			stringBuilder.append("\n<tr SHOW_MSG='1' class='ewa-tr-summary ");
 			stringBuilder.append(trClass);
 			stringBuilder.append("' id='");
 			stringBuilder.append(trId);
 			stringBuilder.append("'");
 			stringBuilder.append(disp);
-			stringBuilder.append(">\r\n<td class='EWA_TD' colspan='");
+			stringBuilder.append(">\n<td class='EWA_TD' colspan='");
 			stringBuilder.append(colSpan);
-			stringBuilder.append("'> &bull; ");
+			//stringBuilder.append("'> &bull; "); //remove • 2024-12-04
+			stringBuilder.append("'><span>");
 
 			s1.append(stringBuilder.toString());
 			s1.append(des);
@@ -719,10 +720,10 @@ public class FrameFrame extends FrameBase implements IFrame {
 				s1.append(memo);
 				s1.a(")");
 			}
-			s1.append("</td>\r\n");
+			s1.append("</span></td>\n");
 
 			StringBuilder stringBuilder2 = new StringBuilder();
-			stringBuilder2.append("</tr>\r\n<tr SHOW_MSG=1  class='");
+			stringBuilder2.append("</tr>\n<tr SHOW_MSG=1  class='");
 			stringBuilder2.append(trClass);
 			stringBuilder2.append("' ");
 			stringBuilder2.append(disp);
@@ -745,9 +746,9 @@ public class FrameFrame extends FrameBase implements IFrame {
 			sbTmp.append(trId);
 			sbTmp.append("' ");
 			sbTmp.append(disp);
-			sbTmp.append(">\r\n");
+			sbTmp.append(">\n");
 			sbTmp.append(this.createRowCols(tmps, colSpan, isC11, trClass, disp));
-			sbTmp.append("</tr>\r\n");
+			sbTmp.append("</tr>\n");
 
 			parentHtml = sbTmp.toString(); // 皮肤定义的页面样式;
 
@@ -977,7 +978,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 				stmp.append(ids);
 				stmp.append("'>");
 				stmp.append(this._GroupInfos[i]);
-				stmp.append("</td></tr>\r\n");
+				stmp.append("</td></tr>\n");
 				sb.append(stmp);
 			} else {
 				// 分组模式
@@ -1014,7 +1015,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 			}
 			if (this._GroupShow.equals("") || this._GroupShow.equals("LST")) {
 				sb.append("<tr><td colspan='" + colSize + "' class='EWA_GROUP'" + " ewa_group_ids='" + idsSb
-						+ "'>错误GroupIndex定义</td></tr>\r\n");
+						+ "'>错误GroupIndex定义</td></tr>\n");
 			} else {
 				sb1.append("<div ewa_group_ids='" + idsSb + "'>错误GroupIndex定义</div>");
 			}
@@ -1022,10 +1023,10 @@ public class FrameFrame extends FrameBase implements IFrame {
 		}
 		if (this._GroupShow.equals("TOP")) {
 			sb.insert(0, "<tr><td colspan='" + colSize + "' class='EWA_GROUP_TOP EWA_GROUP_ITEM"
-					+ this._GroupInfos.length + "'>" + sb1.toString() + "</td></tr>\r\n");
+					+ this._GroupInfos.length + "'>" + sb1.toString() + "</td></tr>\n");
 		} else if (this._GroupShow.equals("BOTTOM")) {
 			sb.append("<tr><td colspan='" + colSize + "' class='EWA_GROUP_BOTTOM EWA_GROUP_ITEM"
-					+ this._GroupInfos.length + "'>" + sb1.toString() + "</td></tr>\r\n");
+					+ this._GroupInfos.length + "'>" + sb1.toString() + "</td></tr>\n");
 		} else if (this._GroupShow.equals("GUIDE")) {
 		}
 		if (this._GroupShow.equals("LST")) { // 列表显示，没有隐含项目
@@ -1052,7 +1053,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 		String buttons = this.getButtonsHtml();
 		if (buttons.length() > 0) {
 			MStr sbButtons = new MStr(); //
-			sbButtons.append("\r\n<tr class='ewa-frame-buttons'>\r\n" + super.createSkinFCItemButton() + "</tr>\r\n");// 皮肤定义的button样式
+			sbButtons.append("\n<tr class='ewa-frame-buttons'>\n" + super.createSkinFCItemButton() + "</tr>\n");// 皮肤定义的button样式
 			int index = sbButtons.indexOf(SkinFrame.TAG_ITEM);
 			sbButtons.insert(index, buttons);
 

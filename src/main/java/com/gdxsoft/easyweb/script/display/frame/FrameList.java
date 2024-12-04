@@ -1140,12 +1140,18 @@ public class FrameList extends FrameBase implements IFrame {
 		String mark = "";
 		if (userOrder != null && userOrder.trim().length() > 0) {
 			String[] orderNames = userOrder.split(" ");
+			String asc = "";
+			if (orderNames.length > 1) {
+				asc = orderNames[1].trim();
+			}
+			
 			if (uxi.getName().equalsIgnoreCase(orderNames[0].trim())) {
-				if (orderNames.length == 1) {
+				if (orderNames.length == 1 || asc.equalsIgnoreCase("asc")) {
 					exp += " desc";
-					mark = " ^";
-				} else {
 					mark = " v";
+				} else {
+					mark = " ^";
+					exp +=" asc";
 				}
 			}
 			if (isGroup && orderNames[0].trim().equalsIgnoreCase(uxi.getName())) {

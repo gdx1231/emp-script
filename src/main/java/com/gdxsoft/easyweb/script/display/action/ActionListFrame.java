@@ -521,9 +521,18 @@ public class ActionListFrame extends ActionBase implements IAction {
 		}
 		s1 = SqlUtils.replaceChnOrder(dbType, s1, dt);
 
-		if (userOrder.indexOf(" ") > 0) {
-			s1 += " DESC";
+		String[] orderNames = userOrder.split(" ");
+		String asc = "";
+		if (orderNames.length > 1) {
+			asc = orderNames[1].trim();
 		}
+		
+		if (orderNames.length == 1 || asc.equalsIgnoreCase("asc")) {
+			s1 += " desc"; //默认倒序 2024-12-04 郭磊
+		} else {
+			s1 +=" asc";
+		}
+		
 		userOrder = s1;
 		if (keyField == null || keyField.trim().length() == 0) {
 			return userOrder;
