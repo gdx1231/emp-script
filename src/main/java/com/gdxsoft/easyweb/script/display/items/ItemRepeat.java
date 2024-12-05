@@ -18,6 +18,7 @@ import com.gdxsoft.easyweb.script.template.XItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValues;
+import com.gdxsoft.easyweb.utils.UPinYin;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -439,6 +440,21 @@ public class ItemRepeat extends ItemBase {
 			}
 			try {
 				JSONObject rowJson = row.toJson();
+				for (int m = 0; m < row.getTable().getColumns().getCount(); m++) {
+					String sv = row.getCell(m).toString();
+					String name = row.getTable().getColumns().getColumn(m).getName();
+					String py = "";
+					if (sv != null) {
+						sv = sv.trim();
+						try {
+							py = sv.length() == 0 ? "" : UPinYin.convertToPinyinFirstAlpha(sv.substring(0, 1), true);
+						} catch (Exception e) {
+							py = e.getMessage();
+						}
+					}
+					//添加拼音头字母
+					rowJson.put("ewa_py_" + name, py.toUpperCase());
+				}
 				rep1 += " json=\"" + Utils.textToInputValue(rowJson.toString()) + "\" ";
 			} catch (JSONException err) {
 				rep1 += " json=\"" + Utils.textToInputValue(err.toString()) + "\" ";
