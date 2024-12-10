@@ -390,6 +390,18 @@ public class ItemRepeat extends ItemBase {
 			}
 		}
 		String last_groupValue = null;
+
+		// 是否创建拼音
+		boolean createPy = false;
+		if (listXItem.testName("ListFilterType") && listXItem.testName("ListFilterField")) {
+			String listFilterType = listXItem.getItem("ListFilterType").trim();
+			String listFilterField = listXItem.getItem("ListFilterField").trim();
+			if ("json".equalsIgnoreCase(listFilterType)
+					&& listFilterField.startsWith("ewa_py_")) {
+				createPy = true;
+			}
+		}
+
 		for (int i = 0; i < this._Table.getCount(); i++) {
 			String id = userXItem.getName() + "_" + i;
 			DTRow row = this._Table.getRow(i);
@@ -440,20 +452,23 @@ public class ItemRepeat extends ItemBase {
 			}
 			try {
 				JSONObject rowJson = row.toJson();
-				for (int m = 0; m < row.getTable().getColumns().getCount(); m++) {
-					String sv = row.getCell(m).toString();
-					String name = row.getTable().getColumns().getColumn(m).getName();
-					String py = "";
-					if (sv != null) {
-						sv = sv.trim();
-						try {
-							py = sv.length() == 0 ? "" : UPinYin.convertToPinyinFirstAlpha(sv.substring(0, 1), true);
-						} catch (Exception e) {
-							py = e.getMessage();
+				if (createPy) { // 创建拼音
+					for (int m = 0; m < row.getTable().getColumns().getCount(); m++) {
+						String sv = row.getCell(m).toString();
+						String name = row.getTable().getColumns().getColumn(m).getName();
+						String py = "";
+						if (sv != null) {
+							sv = sv.trim();
+							try {
+								py = sv.length() == 0 ? ""
+										: UPinYin.convertToPinyinFirstAlpha(sv.substring(0, 1), true);
+							} catch (Exception e) {
+								py = e.getMessage();
+							}
 						}
+						// 添加拼音头字母
+						rowJson.put("ewa_py_" + name, py.toUpperCase());
 					}
-					//添加拼音头字母
-					rowJson.put("ewa_py_" + name, py.toUpperCase());
 				}
 				rep1 += " json=\"" + Utils.textToInputValue(rowJson.toString()) + "\" ";
 			} catch (JSONException err) {
