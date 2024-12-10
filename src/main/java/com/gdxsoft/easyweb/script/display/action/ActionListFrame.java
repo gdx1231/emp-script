@@ -357,13 +357,16 @@ public class ActionListFrame extends ActionBase implements IAction {
 		String seqIdField = ""; // 自动排序字段
 		for (int i = 0; i < uc.getUserXItems().count(); i++) {
 			UserXItem uxi = uc.getUserXItems().getItem(i);
-
+			String name = uxi.getName().toUpperCase().trim();
 			// 检查是否为隐含字段，在逻辑控制页面生成
-			if (super.getHtmlClass().getSysParas().isHiddenColumn(uxi.getName())) {
+			// 这个好像无效了，暂时保留一段时间
+			if (super.getHtmlClass().getSysParas().isHiddenColumn(name)) {
 				continue;
 			}
-
-			String name = uxi.getName().toUpperCase().trim();
+			// 检查是否为隐含字段，在逻辑控制页面生成
+			if (super.getHtmlClass().getFrame().isHiddenField(name)) {
+				continue;
+			}
 
 			if (seqIdField.length() == 0 && uxi.testName("InitValue")) {
 				UserXItemValues uxvs = uxi.getItem("InitValue");

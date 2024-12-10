@@ -7,12 +7,16 @@ import com.gdxsoft.easyweb.script.display.HtmlClass;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public interface IFrame {
-	 
-
-	 
 	
 	FrameBase getFrameBase();
 	 
+	/**
+	 * 检查是否为隐含字段，在Page的LogicShow中定义
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public boolean isHiddenField(String name);
 
 	/**
 	 * 需要隐藏的字段集合
