@@ -394,8 +394,8 @@ public class ItemRepeat extends ItemBase {
 		// 是否创建拼音
 		boolean createPy = false;
 		if (listXItem.testName("ListFilterType") && listXItem.testName("ListFilterField")) {
-			String listFilterType = listXItem.getItem("ListFilterType").trim();
-			String listFilterField = listXItem.getItem("ListFilterField").trim();
+			String listFilterType = listXItem.getItem("ListFilterType").trim().toLowerCase();
+			String listFilterField = listXItem.getItem("ListFilterField").trim().toLowerCase();
 			if ("json".equalsIgnoreCase(listFilterType)
 					&& listFilterField.startsWith("ewa_py_")) {
 				createPy = true;
