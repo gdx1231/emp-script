@@ -925,6 +925,11 @@ public class HtmlCreator {
 		return sber.toString();
 	}
 
+	/**
+	 * Check valid code, Idempotence, SlidePuzzle
+	 * @return
+	 * @throws Exception
+	 */
 	public String checkPosts() throws Exception {
 		// 验证码错误
 		if (!HtmlUtils.checkValidCode(this._HtmlClass)) {
