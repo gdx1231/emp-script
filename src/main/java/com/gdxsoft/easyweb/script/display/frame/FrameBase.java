@@ -2,6 +2,7 @@ package com.gdxsoft.easyweb.script.display.frame;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -14,6 +15,7 @@ import org.w3c.dom.Element;
 
 import com.gdxsoft.easyweb.conf.ConfAddedResource;
 import com.gdxsoft.easyweb.conf.ConfAddedResources;
+import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.global.EwaInfo;
@@ -44,6 +46,11 @@ import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class FrameBase {
 	private static Logger LOGGER = LoggerFactory.getLogger(FrameBase.class);
+	
+	/**
+	 * 固定查询的表，用于ListFrame
+	 */
+	private Map<String, DTTable> searchFixTables = new HashMap<String, DTTable>();
 	private HashMap<String, String> _ItemParentHtmls = new HashMap<String, String>();
 	private HtmlClass _HtmlClass;
 
@@ -1332,5 +1339,13 @@ public class FrameBase {
 	 */
 	public void setHiddenFields(MTable hiddenFields) {
 		this._HiddenFields = hiddenFields;
+	}
+
+	/**
+	 * 固定查询的表，用于ListFrame
+	 * @return 固定查询的表
+	 */
+	public Map<String, DTTable> getSearchFixTables() {
+		return searchFixTables;
 	}
 }

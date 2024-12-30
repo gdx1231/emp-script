@@ -1262,6 +1262,8 @@ public class FrameList extends FrameBase implements IFrame {
 					CachedValueManager.addValue(cacheKey, s1.toString());
 				}
 				s.a(s1.toString());
+				tb.setName(searchSql);
+				super.getSearchFixTables().put(uxi.getName(), tb);
 			} else { // 从缓存中获取
 				s.a(c.getValue().toString());
 			}

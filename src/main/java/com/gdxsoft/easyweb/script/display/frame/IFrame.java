@@ -1,22 +1,31 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.script.display.HtmlClass;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public interface IFrame {
-	
+
 	FrameBase getFrameBase();
-	 
+
+	/**
+	 * 固定查询的表，用于ListFrame
+	 * 
+	 * @return 固定查询的表
+	 */
+	public abstract Map<String, DTTable> getSearchFixTables();
+
 	/**
 	 * 检查是否为隐含字段，在Page的LogicShow中定义
 	 * 
 	 * @param name
 	 * @return
 	 */
-	public boolean isHiddenField(String name);
+	public abstract boolean isHiddenField(String name);
 
 	/**
 	 * 需要隐藏的字段集合
