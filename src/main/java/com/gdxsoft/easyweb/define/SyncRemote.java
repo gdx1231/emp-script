@@ -691,8 +691,9 @@ public class SyncRemote {
 
 			AES.createKey(code.getBytes("utf-8"));
 
+			LOGGER.info("Create AES KEY:" + code);
 		} catch (Exception e) {
-			System.err.println(e.getMessage());
+			LOGGER.error(e.getMessage());
 		}
 
 	}

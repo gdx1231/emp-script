@@ -21,6 +21,7 @@ import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
+import com.gdxsoft.easyweb.utils.UJSon;
 
 /**
  * 
@@ -136,7 +137,7 @@ public class HandleRemoteSync {
 			contentJson = new JSONObject(contentDecode);
 		} catch (Exception err) {
 			LOGGER.error(err.getLocalizedMessage());
-			return "{RST:false,ERR:'decode error'}";
+			return  UJSon.rstFalse(err.getLocalizedMessage()).toString();
 		}
 		String id = contentJson.optString("remote_id");
 		String name = contentJson.getString("name");
@@ -172,7 +173,8 @@ public class HandleRemoteSync {
 			contentJson = new JSONObject(contentDecode);
 		} catch (Exception err) {
 			LOGGER.error(err.getLocalizedMessage());
-			return "{RST:false,ERR:'decode error'}";
+			
+			return UJSon.rstFalse(err.getLocalizedMessage()).toString();
 		}
 
 		String id = contentJson.optString("remote_id");
@@ -278,7 +280,7 @@ public class HandleRemoteSync {
 			contentJson = new JSONObject(contentDecode);
 		} catch (Exception err) {
 			LOGGER.error(err.getLocalizedMessage());
-			return "{RST:false,ERR:'decode error'}";
+			return UJSon.rstFalse(err.getLocalizedMessage()).toString();
 		}
 		String id = contentJson.optString("remote_id");
 		String name = contentJson.getString("name");
