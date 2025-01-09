@@ -79,6 +79,44 @@ public class SqlUtils {
 	}
 
 	/**
+	 * 生产的列表数据转换为JSONObject<br>
+	 * 例如 -- ewa_kv json_name, key_field_name,
+	 * value_field_name，用于转换为RequestValue的json对象
+	 * 
+	 * @param sql
+	 * @return 数组，0：json_name，1：key_field_name，2：value_field_name
+	 */
+	public static String[] getKVParameters(String sql) {
+		String checkName = "EWA_KV";
+
+		String[] sqls = sql.split("\n");
+		String[] jsonResult = null;
+		String findLen = null;
+		// 从后向前找
+		for (int m = sqls.length - 1; m >= 0; m--) {
+			String len = sqls[m].trim().toUpperCase();
+			if (len.startsWith("--")) {
+				len = len.replace("--", "").trim();
+				boolean isJson = checkStartWord(len, checkName);
+				if (isJson) {
+					findLen = len;
+					break;
+				}
+			}
+		}
+		if (findLen == null) {
+			return null;
+		}
+		findLen = findLen.replace(checkName, "").trim();
+		jsonResult = findLen.split(",");
+		for (int i = 0; i < jsonResult.length; i++) {
+			jsonResult[i] = jsonResult[i].trim();
+		}
+
+		return jsonResult;
+	}
+
+	/**
 	 * 获取 SQL 的with部分和sql部分，用于分页查询
 	 * 
 	 * @param sql

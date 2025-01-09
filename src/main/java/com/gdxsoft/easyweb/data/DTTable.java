@@ -34,6 +34,7 @@ import org.w3c.dom.NodeList;
 import com.gdxsoft.easyweb.cache.SqlCached;
 import com.gdxsoft.easyweb.cache.SqlCachedValue;
 import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.datasource.DataResult;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UObjectValue;
@@ -70,6 +71,8 @@ public class DTTable implements Serializable {
 	private boolean _IshaveImage;
 
 	private int _TimeDiffMinutes; // 用户和系统的时差
+	private String originalSql; // 原始sql
+	private String execedSql; // 执行的sql
 
 	/**
 	 * 用户和系统的时差(分钟)
@@ -238,19 +241,15 @@ public class DTTable implements Serializable {
 		if (rv != null) {
 			conn.setRequestValue(rv);
 		}
-		DTTable tb;
 		try {
-			tb = getJdbcTable(sql, conn);
+			return getJdbcTable(sql, conn);
 		} catch (Exception err) {
-			tb = new DTTable();
-			tb.setOk(false);
-			tb.setErrorInfo(err.getMessage());
-
 			LOGGER.error("SQL: {}\nError: {}", sql, conn.getErrorMsg());
+			return null;
 		} finally {
 			conn.close();
 		}
-		return tb;
+
 	}
 
 	/**
@@ -273,25 +272,8 @@ public class DTTable implements Serializable {
 	 * @return
 	 */
 	public static DTTable getJdbcTable(String sql, DataConnection conn) {
-		boolean rst = conn.executeQuery(sql);
-		DTTable tb = new DTTable();
-		if (rst) {
-			tb.initData(conn.getLastResult().getResultSet());
-			try {
-				conn.getLastResult().getResultSet().close();
-			} catch (Exception eee) {
-				LOGGER.warn("Close result. {}", eee.getMessage());
-			}
-			conn.getResultSetList().removeAt(conn.getResultSetList().size() - 1);
-		} else {
-			tb.setOk(false);
-			// 不返回sql
-			tb.setErrorInfo(conn.getErrorMsgOnly());
-
-			LOGGER.error("SQL: {}\nError: {}", sql, conn.getErrorMsg());
-		}
-
-		return tb;
+		conn.executeQuery(sql);
+		return returnTable(conn);
 	}
 
 	/**
@@ -326,9 +308,14 @@ public class DTTable implements Serializable {
 		if (rv != null) {
 			conn.setRequestValue(rv);
 		}
-		DTTable tb = getJdbcTable(sql, pkFiled, pageSize, curPage, conn);
-		conn.close();
-		return tb;
+		try {
+			return getJdbcTable(sql, pkFiled, pageSize, curPage, conn);
+		} catch (Exception err) {
+			LOGGER.error("SQL: {}\nError: {}", sql, conn.getErrorMsg());
+			return null;
+		} finally {
+			conn.close();
+		}
 	}
 
 	/**
@@ -342,14 +329,30 @@ public class DTTable implements Serializable {
 	 * @return
 	 */
 	public static DTTable getJdbcTable(String sql, String pkFiled, int pageSize, int curPage, DataConnection conn) {
-		boolean rst = conn.executeQueryPage(sql, pkFiled, curPage, pageSize);
-		if (rst) {
-			DTTable tb = new DTTable();
-			tb.initData(conn.getLastResult().getResultSet());
-			return tb;
+		conn.executeQueryPage(sql, pkFiled, curPage, pageSize);
+		return returnTable(conn);
+	}
+
+	/**
+	 * 从conn获取表数据
+	 * 
+	 * @param conn
+	 * @return
+	 */
+	private static DTTable returnTable(DataConnection conn) {
+		DTTable tb = new DTTable();
+		if (conn.getLastResult().getResultSet() != null) {
+			DataResult result = conn.getLastResult();
+			ResultSet rs = result.getResultSet();
+			tb.initData(rs);
+			tb.setExecedSql(result.getSqlExecute());
+			tb.setOriginalSql(result.getSqlOrigin());
 		} else {
-			return null;
+			tb.setOk(false);
+			tb.setErrorInfo(conn.getErrorMsgOnly());
+			LOGGER.error("Return table, Error: {}", conn.getErrorMsg());
 		}
+		return tb;
 	}
 
 	/**
@@ -785,6 +788,50 @@ public class DTTable implements Serializable {
 	}
 
 	/**
+	 * 返回KV的JSON对象
+	 * 
+	 * @param nameIndex  Name对应的字段序号
+	 * @param valueIndex Value对应的字段序号
+	 * @return KV的JSON对象
+	 */
+	public JSONObject toKVJSONObject(int nameIndex, int valueIndex) {
+
+		if (nameIndex == -1 || valueIndex == -1) {
+			return null;
+		}
+
+		JSONObject json = new JSONObject();
+
+		for (int i = 0; i < this.getCount(); i++) {
+			DTRow r = this.getRow(i);
+			String name = r.getCell(nameIndex).toString();
+			Object value;
+			if (this.checkPasswordColumn(r.getCell(valueIndex).getColumn().getName())) {
+				value = "******";
+			} else {
+				value = getCellValueByJson(r.getCell(valueIndex), "");
+			}
+			json.put(name, value);
+		}
+
+		return json;
+	}
+
+	/**
+	 * 返回KV的JSON对象
+	 * 
+	 * @param jsonNameField  Name对应的字段
+	 * @param jsonValueField Value对应的字段
+	 * @return KV的JSON对象
+	 */
+	public JSONObject toKVJSONObject(String jsonNameField, String jsonValueField) {
+		int nameIndex = this.getColumns().getNameIndex(jsonNameField);
+		int valueIndex = this.getColumns().getNameIndex(jsonValueField);
+
+		return toKVJSONObject(nameIndex, valueIndex);
+	}
+
+	/**
 	 * 返回JSON对象 含有图片的最多返回50条记录，其它最多50000条数据
 	 * 
 	 * @return the JSON array
@@ -837,6 +884,7 @@ public class DTTable implements Serializable {
 
 	/**
 	 * 根据fieldName转换成key:DTRow的 map，无重复数据
+	 * 
 	 * @param colIndex
 	 * @return key:DTRow的 map
 	 */
@@ -865,8 +913,10 @@ public class DTTable implements Serializable {
 		int colIndex = this.getColumns().getNameIndex(fieldName);
 		return toMapRows(colIndex);
 	}
+
 	/**
 	 * 根据fieldName转换成key:List DTRow的 map，无重复数据
+	 * 
 	 * @param colIndex
 	 * @return key: List DTRow的 map
 	 */
@@ -884,6 +934,7 @@ public class DTTable implements Serializable {
 		}
 		return map;
 	}
+
 	/**
 	 * 根据fieldName转换成Map，无重复数据
 	 * 
@@ -1208,6 +1259,7 @@ public class DTTable implements Serializable {
 	 * @param limit 限制返回数量，&lt;=0为不限制
 	 */
 	public void initData(ResultSet rs, String[] keys, int limit) {
+
 		this.initColumns(rs);
 		if (keys != null && keys.length > 0) {
 			this._Columns.setKeys(keys);
@@ -2104,5 +2156,41 @@ public class DTTable implements Serializable {
 
 	public void setErrorInfo(String errorInfo) {
 		this._ErrorInfo = errorInfo;
+	}
+
+	/**
+	 * 原始SQL语句
+	 * 
+	 * @return the originalSql
+	 */
+	public String getOriginalSql() {
+		return originalSql;
+	}
+
+	/**
+	 * 原始SQL语句
+	 * 
+	 * @param originalSql the originalSql to set
+	 */
+	public void setOriginalSql(String originalSql) {
+		this.originalSql = originalSql;
+	}
+
+	/**
+	 * 执行的SQL语句
+	 * 
+	 * @return the execedSql
+	 */
+	public String getExecedSql() {
+		return execedSql;
+	}
+
+	/**
+	 * 执行的SQL语句
+	 * 
+	 * @param execedSql the execedSql to set
+	 */
+	public void setExecedSql(String execedSql) {
+		this.execedSql = execedSql;
 	}
 }

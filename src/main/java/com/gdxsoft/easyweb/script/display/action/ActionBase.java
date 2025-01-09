@@ -23,6 +23,7 @@ import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.data.HorTable;
 import com.gdxsoft.easyweb.data.XmlData;
 import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.datasource.UpdateChanges;
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.PageValue;
@@ -1055,16 +1056,14 @@ public class ActionBase {
 	public DTTable executeSqlQuery(String sql) {
 		String sql1 = getSql(sql);
 		DataConnection conn = this.getItemValues().getDataConn();
-		conn.executeQuery(sql1);
 
-		DTTable tb = new DTTable(); // 映射到自定义数据表
-		tb.initData(this.getItemValues().getDataConn().getLastResult().getResultSet());
+		DTTable tb = DTTable.getJdbcTable(sql1, conn); // 映射到自定义数据表
 		try {
 			this.getItemValues().getDataConn().getLastResult().getResultSet().close();
 		} catch (SQLException e) {
 			LOGGER.warn("close the result. {} {}", e.getMessage(), sql);
 		}
-		if (!tb.isOk()) {
+		if (tb == null || !tb.isOk()) {
 			conn.setErrorMsg("tb error, " + sql);
 			return null;
 		}
@@ -1078,7 +1077,20 @@ public class ActionBase {
 		}
 
 		if (!this.checkActionErrorOutInTable(tb)) {
-			if (tb.getCount() == 1) {
+			String[] map2JsonParams = SqlUtils.getKVParameters(sql1);
+			if (map2JsonParams != null) {
+				// table数据例如为 张三,1;李四,2
+				// -- ewa_kv user_, user_name, user_id
+				// 在rv中最后变成 user.张三 = 1, user.李四 = 2
+
+				String jsonName  = map2JsonParams[0]; // user_
+				String jsonFieldName = map2JsonParams[1];
+				String valueFieldName = map2JsonParams[2];
+
+				JSONObject jsonObject = tb.toKVJSONObject(jsonFieldName, valueFieldName);
+				this.getItemValues().getRequestValue().addOrUpdateValue(jsonName, jsonObject);
+
+			} else if (tb.getCount() == 1) {
 				this.addDTTableToRequestValue(tb);
 			}
 		}
