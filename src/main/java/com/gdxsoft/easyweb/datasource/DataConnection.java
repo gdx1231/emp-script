@@ -912,8 +912,7 @@ public class DataConnection {
 				if (sp.getOrderBy().length() > 0) {
 					sqlTmp.append("\r\n ORDER BY " + sp.getOrderBy());
 				}
-				String sql0=(sp.isHasWithBlock()?sp.getWithBlock():"")
-						+"SELECT TOP " + pageSize + " ";
+				String sql0 = (sp.isHasWithBlock() ? sp.getWithBlock() : "") + "SELECT TOP " + pageSize + " ";
 				sb.insert(0, sql0);
 				sb.append(sp.getFields());
 				sb.append("\r\n FROM ");
@@ -929,8 +928,8 @@ public class DataConnection {
 				} else if (pkFieldName != null && pkFieldName.trim().length() > 0) {
 					overOrderBy = pkFieldName;
 				}
-				if(sp.isHasWithBlock()) {
-					sb.al( sp.getWithBlock());
+				if (sp.isHasWithBlock()) {
+					sb.al(sp.getWithBlock());
 				}
 				sb.append("SELECT * FROM (");
 				sb.append("SELECT ");
@@ -1607,8 +1606,8 @@ public class DataConnection {
 		sp.setSql(sql);
 
 		StringBuilder sb = new StringBuilder();
-		if(sp.isHasWithBlock()) {
-			sb.append( sp.getWithBlock() ).append("\n");
+		if (sp.isHasWithBlock()) {
+			sb.append(sp.getWithBlock()).append("\n");
 		}
 		sb.append("SELECT COUNT(*) GDX FROM \n");
 		if (sp.getGroupBy().length() > 0) {
@@ -2757,14 +2756,19 @@ public class DataConnection {
 		String lang = this._RequestValue != null ? this._RequestValue.getLang() : "zhcn";
 		// 是否为英式日期格式
 		boolean isUKFormat = false;
-		if ("enus".equalsIgnoreCase(lang)) {
+		if (!"enus".equalsIgnoreCase(lang)) {
+			return Utils.getTimestamp(s1, lang, isUKFormat);
+		}
+		if (ConfExtraGlobals.getInstance() != null) {
 			ConfExtraGlobal extra = ConfExtraGlobals.getInstance().getConfExtraGlobalByLang(lang);
-			if (extra.getDate() != null && extra.getDate().equalsIgnoreCase(UFormat.DATE_FROMAT_ENUS)) {
-				// 通过在ewa_conf.xml中定义 global lang=enus date=dd/MM/yyyy
-				isUKFormat = true;
-			} else if (this._RequestValue != null) {
-				// 通过参数SYS_EWA_ENUS_YMD定义
-				isUKFormat = UFormat.DATE_FROMAT_ENUS.equalsIgnoreCase(this._RequestValue.s("SYS_EWA_ENUS_YMD"));
+			if (extra != null) {
+				if (extra.getDate() != null && extra.getDate().equalsIgnoreCase(UFormat.DATE_FROMAT_ENUS)) {
+					// 通过在ewa_conf.xml中定义 global lang=enus date=dd/MM/yyyy
+					isUKFormat = true;
+				} else if (this._RequestValue != null) {
+					// 通过参数SYS_EWA_ENUS_YMD定义
+					isUKFormat = UFormat.DATE_FROMAT_ENUS.equalsIgnoreCase(this._RequestValue.s("SYS_EWA_ENUS_YMD"));
+				}
 			}
 		}
 
