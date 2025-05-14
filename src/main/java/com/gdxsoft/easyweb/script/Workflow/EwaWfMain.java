@@ -476,6 +476,20 @@ public class EwaWfMain {
 		String startAdmin = null;
 		if (table.getCount() > 0) {
 			startAdmin = table.getCell(0, "adm_id").toString();
+			
+			// 获取最后一次启动流程的员工ID
+			String roleType=table.getCell(0, "ROLE_TYPE").toString();
+			String staTag=table.getCell(0, "SYS_STA_TAG").toString();
+			if(roleType.equalsIgnoreCase("WF_ADM_START")) {
+				for(int i=table.getCount()-1;i>0;i--) {
+					if(staTag.equals(table.getCell(i, "SYS_STA_TAG").toString())
+							&& roleType.equals(table.getCell(i, "ROLE_TYPE").toString())
+							) {
+						startAdmin = table.getCell(i, "adm_id").toString();
+						break;
+					}
+				}
+			}
 		}
 		// 检查是否可流转
 		boolean isCanRun = false;
