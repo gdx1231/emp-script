@@ -52,7 +52,7 @@ public class FrameTree extends FrameBase implements IFrame {
 			sJs.append("o.AddCols =\"" + Utils.textToJscript(this._TreeViewMain.getAddCols()) + "\";\n");
 		}
 
-		sJs.append("o._Id ='" + gunid + "';\n})();\n");
+		sJs.append("o.Id = o._Id ='" + gunid + "';\n})();\n");
 
 		// 初始化显示的值
 		String k = rv.getString( FrameParameters.EWA_TREE_INIT_KEY);
