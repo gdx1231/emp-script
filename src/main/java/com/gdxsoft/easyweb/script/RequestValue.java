@@ -1636,10 +1636,19 @@ public class RequestValue implements Cloneable {
 	}
 
 	public String listValuesHtml() {
+		StringBuilder sb = new StringBuilder();
+		String u0 = this.s("EWA.CPF_ALL");
+		if(u0!= null ) {
+			// 打开链接
+			String link="<div><a target=_blank href=\""+u0+"\">"+u0+"</a></div>";
+			sb.append(link);
+		}
 		String s1 = listValues(true);
 		s1 = s1.replace(" = ", " = <span style='color:red'>");
 		s1 = s1.replace("\r\n", "</span><br>");
-		return s1;
+		
+		sb.append(s1);
+		return sb.toString();
 	}
 
 	/**
