@@ -2117,34 +2117,50 @@ public class DTTable implements Serializable {
 	 * @return
 	 */
 	public String joinIds(String fieldName, boolean addQuotationMarks) {
+		return this.joinIds(fieldName, ", ", "'", true);
+	}
+
+	/**
+	 * 将表字段拼接为用“quot”分割的字符串表达式
+	 * 
+	 * @param fieldName 字段
+	 * @param split     分割符
+	 * @param quot      前后添加地符号，例如：'
+	 * @param distinct  是否去除重复值
+	 * @return
+	 */
+	public String joinIds(String fieldName, String split, String quot, boolean distinct) {
 		int colIndex = this.getColumns().getNameIndex(fieldName);
 		if (colIndex == -1) {
-			return "FIELD NOT FOUNDED";
+			return "FIELD_NOT_FOUNDED";
 		}
 		StringBuilder sbIds = new StringBuilder();
 		HashMap<String, Boolean> map = new HashMap<String, Boolean>();
 		int inc = 0;
 		for (int i = 0; i < this.getCount(); i++) {
-
 			String id = this.getCell(i, colIndex).toString();
 			if (id == null) {
 				continue;
 			}
-			if (map.containsKey(id)) {
-				continue;
+			if (distinct) {
+				if (map.containsKey(id)) { // 去除重复
+					continue;
+				}
+				map.put(id, true);
 			}
 			if (inc > 0) {
-				sbIds.append(", ");
+				sbIds.append(split);
 			}
 			inc++;
 
-			if (addQuotationMarks) {
-				sbIds.append("'");
+			if (quot != null && quot.length() > 0) {
+				sbIds.append(quot);
+				sbIds.append(id.replace(quot, quot + quot));
+				sbIds.append(quot);
+			} else {
+				sbIds.append(id);
 			}
-			sbIds.append(id.replace("'", "''"));
-			if (addQuotationMarks) {
-				sbIds.append("'");
-			}
+
 		}
 
 		return sbIds.toString();
