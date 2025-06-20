@@ -61,59 +61,96 @@ public class SqlUtils {
 	 */
 	public static String getAutoField(String sql) {
 		// 查找自增的sql, 例如 -- auto MEMO_ID
-		String[] sqls = sql.split("\n");
-		String auto_field = null;
-		// 从后向前找
-		for (int m = sqls.length - 1; m >= 0; m--) {
-			String len = sqls[m].trim().toUpperCase();
-			if (len.startsWith("--")) {
-				len = len.replace("--", "").trim();
-				// 第3个的空格是 32 &nbsp;
-				if (len.indexOf("AUTO ") >= 0 || len.indexOf("AUTO\t") >= 0 || len.indexOf("AUTO ") >= 0) {
-					auto_field = len.replaceFirst("AUTO", "").trim();
-					return auto_field;
-				}
-			}
-		}
-		return null;
+		final String checkName = "AUTO";
+		String[] paras = getMemoParameters(sql, checkName);
+		return paras == null ? null : paras[0];
+//		String[] sqls = sql.split("\n");
+//		String auto_field = null;
+//		// 从后向前找
+//		for (int m = sqls.length - 1; m >= 0; m--) {
+//			String len = sqls[m].trim().toUpperCase();
+//			if (len.startsWith("--")) {
+//				len = len.replace("--", "").trim();
+//				// 第3个的空格是 32 &nbsp;
+//				if (len.indexOf("AUTO ") >= 0 || len.indexOf("AUTO\t") >= 0 || len.indexOf("AUTO ") >= 0) {
+//					auto_field = len.replaceFirst("AUTO", "").trim();
+//					return auto_field;
+//				}
+//			}
+//		}
+//		return null;
 	}
 
 	/**
-	 * 生产的列表数据转换为JSONObject<br>
-	 * 例如 -- ewa_kv json_name, key_field_name,
-	 * value_field_name，用于转换为RequestValue的json对象
+	 * 将表的列数据转换为拼接为字符串<br>
+	 * 例如 -- ewa_join join_name, key_field_name
+	 * 
+	 * @param sql
+	 * @return 数组，0：join_name，1：key_field_name
+	 */
+	public static String[] getJoinValueParameters(String sql) {
+		final String checkName = "EWA_JOIN";
+		return getMemoParameters(sql, checkName);
+	}
+
+	/**
+	 * 将表的列数据转换为JSONObject<br>
+	 * 例如： -- ewa_kv json_name, key_field_name, value_field_name<br>
+	 * 用于转换为RequestValue的json对象
 	 * 
 	 * @param sql
 	 * @return 数组，0：json_name，1：key_field_name，2：value_field_name
 	 */
 	public static String[] getKVParameters(String sql) {
-		String checkName = "EWA_KV";
+		final String checkName = "EWA_KV";
+		return getMemoParameters(sql, checkName);
+	}
 
-		String[] sqls = sql.split("\n");
-		String[] jsonResult = null;
-		String findLen = null;
-		// 从后向前找
-		for (int m = sqls.length - 1; m >= 0; m--) {
-			String len = sqls[m].trim().toUpperCase();
-			if (len.startsWith("--")) {
-				len = len.replace("--", "").trim();
-				boolean isJson = checkStartWord(len, checkName);
-				if (isJson) {
-					findLen = len;
-					break;
-				}
-			}
-		}
+	/**
+	 * 获取SQL语句中地备注（--）包含关键字的参数<br>
+	 * -- ewa_kv json_name, key_field_name, value_field_name<br>
+	 * -- ewa_join join_name, key_field_name<br>
+	 * 
+	 * @param sql
+	 * @param checkName 关键字
+	 * @return 包含的参数
+	 */
+	public static String[] getMemoParameters(String sql, String checkName) {
+		String findLen = getMemoKeyWordLine(sql, checkName);
 		if (findLen == null) {
 			return null;
 		}
-		findLen = findLen.replace(checkName, "").trim();
-		jsonResult = findLen.split(",");
+		findLen = findLen.substring(checkName.length()).trim();
+		String[] jsonResult = findLen.split(",");
 		for (int i = 0; i < jsonResult.length; i++) {
 			jsonResult[i] = jsonResult[i].trim();
 		}
 
 		return jsonResult;
+	}
+
+	/**
+	 * 获取SQL语句中地备注（--）信息包含关键字的行<br>
+	 * 
+	 * @param sql
+	 * @param checkName 关键字
+	 * @return 含有关键字的行，去除了--
+	 */
+	public static String getMemoKeyWordLine(String sql, String checkName) {
+		String[] sqls = sql.split("\n");
+		// 从后向前找
+		for (int m = sqls.length - 1; m >= 0; m--) {
+			String line = sqls[m].trim();
+			if (!line.startsWith("--")) {
+				continue;
+			}
+			line = line.replace("--", "").trim();
+			boolean isHave = checkStartWord(line, checkName);
+			if (isHave) {
+				return line;
+			}
+		}
+		return null;
 	}
 
 	/**

@@ -1083,14 +1083,29 @@ public class ActionBase {
 				// -- ewa_kv user_, user_name, user_id
 				// 在rv中最后变成 user.张三 = 1, user.李四 = 2
 
-				String jsonName  = map2JsonParams[0]; // user_
+				String jsonName = map2JsonParams[0]; // user_
 				String jsonFieldName = map2JsonParams[1];
 				String valueFieldName = map2JsonParams[2];
 
 				JSONObject jsonObject = tb.toKVJSONObject(jsonFieldName, valueFieldName);
 				this.getItemValues().getRequestValue().addOrUpdateValue(jsonName, jsonObject);
 
-			} else if (tb.getCount() == 1) {
+			}
+
+			String[] joinParams = SqlUtils.getJoinValueParameters(sql1);
+			if (joinParams != null) {
+				// table数据例如为 select id, name from users where age=10
+				// -- ewa_join ids, id
+				// 在rv中最后变成 100,120,130
+				String joinName = joinParams[0]; // ids
+				String joinFieldName = joinParams[1]; // id
+
+				// 拼接为以,分割地字符串
+				String ids = tb.joinIds(joinFieldName, ",", null, true);
+
+				this.getItemValues().getRequestValue().addOrUpdateValue(joinName, ids);
+			}
+			if (tb.getCount() == 1 && map2JsonParams == null && joinParams == null) {
 				this.addDTTableToRequestValue(tb);
 			}
 		}
