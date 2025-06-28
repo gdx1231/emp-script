@@ -2117,7 +2117,8 @@ public class DTTable implements Serializable {
 	 * @return
 	 */
 	public String joinIds(String fieldName, boolean addQuotationMarks) {
-		return this.joinIds(fieldName, ", ", "'", true);
+		String quot = addQuotationMarks ? "'" : "";
+		return this.joinIds(fieldName, ", ", quot, true);
 	}
 
 	/**
