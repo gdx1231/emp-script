@@ -838,8 +838,11 @@ public class FrameBase {
 				true);
 
 		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
+		 
 		String lang = this._HtmlClass.getItemValues().getSysParas().getLang();
-		if (rv.s(FrameParameters.EWA_MTYPE) != null) {
+		if (rv.s(FrameParameters.EWA_MTYPE) != null && this._HtmlClass.getFrame() instanceof FrameFrame) {
+			// 在Title前增加“修改、新增、复制”前缀
+			// EWA_MTYPE_tag = M or N or C
 			String EWA_MTYPE_tag = "EWA_MTYPE_" + rv.s(FrameParameters.EWA_MTYPE).toUpperCase();
 			if (EwaGlobals.instance().getEwaInfos().testName(EWA_MTYPE_tag)) {
 				try {
