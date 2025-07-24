@@ -46,7 +46,7 @@ import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class FrameBase {
 	private static Logger LOGGER = LoggerFactory.getLogger(FrameBase.class);
-	
+
 	/**
 	 * 固定查询的表，用于ListFrame
 	 */
@@ -838,7 +838,7 @@ public class FrameBase {
 				true);
 
 		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
-		 
+
 		String lang = this._HtmlClass.getItemValues().getSysParas().getLang();
 		if (rv.s(FrameParameters.EWA_MTYPE) != null && this._HtmlClass.getFrame() instanceof FrameFrame) {
 			// 在Title前增加“修改、新增、复制”前缀
@@ -1175,6 +1175,16 @@ public class FrameBase {
 		s2 = s2.replace(SkinFrame.TAG_NAME, uxi.getName()); // 替换 id
 		s2 = s2.replace(SkinFrame.TAG_MSG, memo); // 替换备注
 
+		RequestValue rv = this._HtmlClass.getItemValues().getRequestValue();
+		if (rv.s(FrameParameters.EWA_CELL_ADD_DES) != null) {
+			// 在每个td上添加属性 ewa_cell_des, ewa_cell_memo
+			// 前端css：.ewa-col-name::before {content: attr(ewa_cell_des);}
+			String atts = " " + FrameParameters.EWA_CELL_ADD_DES_NAME + "=\"" + Utils.textToInputValue(des) + "\"";
+			if (memo.length() > 0) {
+				atts += " " + FrameParameters.EWA_CELL_ADD_DES_NAME_MEMO + "=\"" + Utils.textToInputValue(memo) + "\"";
+			}
+			s2 = s2.replace("EWA_TD_M\"", "EWA_TD_M\" " + atts);
+		}
 		// 将ParentHtml内容放入，下次使用
 		_ItemParentHtmls.put(name, s2);
 		return s2;
@@ -1346,6 +1356,7 @@ public class FrameBase {
 
 	/**
 	 * 固定查询的表，用于ListFrame
+	 * 
 	 * @return 固定查询的表
 	 */
 	public Map<String, DTTable> getSearchFixTables() {
