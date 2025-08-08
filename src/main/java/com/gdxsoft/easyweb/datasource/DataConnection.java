@@ -1876,7 +1876,7 @@ public class DataConnection {
 	 * @param sql sql表达式
 	 * @return 替换后的sql
 	 */
-	private String replaceSqlSelectParameters(String sql) {
+	public String replaceSqlSelectParameters(String sql) {
 		String sql1 = sql;
 		MListStr al = Utils.getParameters(sql, "@");
 
