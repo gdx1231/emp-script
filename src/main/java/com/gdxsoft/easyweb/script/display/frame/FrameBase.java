@@ -768,9 +768,11 @@ public class FrameBase {
 					int is0 = Integer.parseInt(s0);
 					stOne = tag + is0 + "px";
 					stSplit = tag1 + is0 + "px";
+					stTwo = tag1 + s0+ "px";
 				} catch (Exception err) {
 					stOne = tag + s0;
 					stSplit = tag1 + s0;
+					stTwo = tag1 + s0;
 				}
 
 				if (sizes.length > 1) {
