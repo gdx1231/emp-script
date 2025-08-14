@@ -832,6 +832,120 @@ public class DTTable implements Serializable {
 	}
 
 	/**
+	 * 将表数据按指定字段分组，并将每个分组转换为一个JSONArray，最终返回一个以分组字段值为键的JSONObject。
+	 * 
+	 * @param groupFieldName 用于分组的字段名称
+	 * @return 一个JSONObject，其键为分组字段的值，值为该分组内所有行的JSONArray
+	 * @throws JSONException 如果在创建JSON对象时发生错误
+	 */
+	public JSONObject toJSONObjectGroup(String groupFieldName) {
+		JSONObject result = new JSONObject();
+		int groupColIndex = this.getColumns().getNameIndex(groupFieldName);
+		String realGroupName = this.getColumns().getColumn(groupColIndex).getName();
+		// 如果指定的字段不存在，返回一个空的JSONObject
+		if (groupColIndex == -1) {
+			LOGGER.warn("Group field '{}' not found in the table.", groupFieldName);
+			return result;
+		}
+
+		// 使用Map来临时存储分组，键是分组字段的值，值是对应的JSONArray
+		Map<String, JSONArray> groupMap = new HashMap<>();
+
+		// 遍历表中的每一行
+		for (int i = 0; i < this.getCount(); i++) {
+			DTRow row = this.getRow(i);
+			// 获取该行用于分组的字段值
+			String groupKey = row.getCell(groupColIndex).toString();
+			// 如果该值为空，可以跳过或使用一个默认值（如"NULL"）
+			if (groupKey == null || groupKey.trim().isEmpty()) {
+				groupKey = "NULL";
+			}
+
+			// 检查该分组是否已存在
+			JSONArray groupArray = groupMap.get(groupKey);
+			if (groupArray == null) {
+				// 如果不存在，创建一个新的JSONArray并放入Map
+				groupArray = new JSONArray();
+				groupMap.put(groupKey, groupArray);
+			}
+			// 将当前行转换为JSONObject并添加到对应的JSONArray中
+			JSONObject rowJson = row.toJson();
+			rowJson.remove(realGroupName); // 移除分组字段，因为它已经是分组的键
+			groupArray.put(rowJson);
+		}
+
+		// 将Map中的所有分组结果放入最终的JSONObject中
+		for (Map.Entry<String, JSONArray> entry : groupMap.entrySet()) {
+			result.put(entry.getKey(), entry.getValue());
+		}
+
+		return result;
+	}
+
+	/**
+	 * 将表数据转换为CSV格式字符串
+	 * 
+	 * @return CSV格式的字符串
+	 */
+	public String toCSV() {
+		MStr sb = new MStr(); // 使用类中已有的MStr工具类进行字符串拼接
+
+		// 1. 写入标题行
+		for (int i = 0; i < this.getColumns().getCount(); i++) {
+			if (i > 0) {
+				sb.append(",");
+			}
+			String colName = this.getColumns().getColumn(i).getName();
+			sb.append(escapeCSVField(colName)); // 对列名进行安全处理
+		}
+		sb.append("\r\n"); // 标题行结束
+
+		// 2. 写入数据行
+		Map<String, Boolean> map = new HashMap<String, Boolean>();
+		for (int rowIndex = 0; rowIndex < this.getCount(); rowIndex++) {
+			DTRow row = this.getRow(rowIndex);
+			for (int colIndex = 0; colIndex < this.getColumns().getCount(); colIndex++) {
+				String name = getColumns().getColumn(colIndex).getName();
+				if (!map.containsKey(name)) {
+					map.put(name, this.checkPasswordColumn(name));
+				}
+				boolean isPwd = this.checkPasswordColumn(name);
+				if (colIndex > 0) {
+					sb.append(",");
+				}
+				DTCell cell = row.getCell(colIndex);
+				Object value = cell.getValue();
+				String valueStr = isPwd ? "******" : (value == null ? "" : value.toString()); // 处理null值
+				sb.append(escapeCSVField(valueStr)); // 对值进行安全处理
+			}
+			sb.append("\r\n"); // 数据行结束
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * 对CSV字段进行转义处理，确保符合CSV规范。 如果字段包含逗号、换行符或双引号，则用双引号包围，并将内部的双引号替换为两个双引号。
+	 * 
+	 * @param field 字段原始值
+	 * @return 转义后的字段
+	 */
+	private String escapeCSVField(String field) {
+		if (field == null || field.isEmpty()) {
+			return "\"\""; // 空值或null输出为 ""
+		}
+
+		// 如果字段包含需要转义的字符，则进行处理
+		if (field.contains(",") || field.contains("\n") || field.contains("\r") || field.contains("\"")) {
+			// 将字段内的双引号 " 替换为 ""
+			return "\"" + field.replace("\"", "\"\"") + "\"";
+		}
+
+		// 如果不包含特殊字符，直接返回
+		return field;
+	}
+
+	/**
 	 * 返回JSON对象 含有图片的最多返回50条记录，其它最多50000条数据
 	 * 
 	 * @return the JSON array
@@ -1152,6 +1266,10 @@ public class DTTable implements Serializable {
 			DTRow r = this.getRow(i);
 			for (int m = 0; m < this.getColumns().getCount(); m++) {
 				Object o = r.getCell(m).getValue();
+				String colName = this.getColumns().getColumn(m).getName();
+				if (this.checkPasswordColumn(colName)) {
+					o = "******"; // 隐含密码
+				}
 				String val = this.createFieldData(o, this.getColumns().getColumn(m));
 				s.a(val);
 			}
