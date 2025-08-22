@@ -12,14 +12,14 @@
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionListFrame">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="表格" />
-				<Set Lang="enus" Info="List Show" />
+				<Set Lang="enus" Info="List" />
 			</DescriptionSet>
 		</Frame>
 		<Frame Name="Grid" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameGrid"
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionListFrame">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="网格显示" />
-				<Set Lang="enus" Info="Grid Show" />
+				<Set Lang="enus" Info="Grid" />
 			</DescriptionSet>
 		</Frame>
 		<Frame Name="Tree" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameTree"
@@ -55,7 +55,7 @@
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionFrame">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="逻辑" />
-				<Set Lang="enus" Info="Logic" />
+				<Set Lang="enus" Info="Report" />
 			</DescriptionSet>
 		</Frame>
 		<Frame Name="Combine" FrameClassName="com.gdxsoft.easyweb.script.display.frame.FrameCombine"
@@ -69,14 +69,14 @@
 			ActionClassName="com.gdxsoft.easyweb.script.display.action.ActionComplex">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="复合页面" />
-				<Set Lang="enus" Info="Complex" />
+				<Set Lang="enus" Info="Composite Page" />
 			</DescriptionSet>
 		</Frame>
 	</Frames>
 	<Items>
 		<DescriptionSet>
 			<Set Lang="zhcn" Info="页面元素" />
-			<Set Lang="enus" Info="Page Items" />
+			<Set Lang="enus" Info="Page Elements" />
 		</DescriptionSet>
 		<XItems>
 			<UIGroups>
@@ -185,7 +185,7 @@
 			Style, ParentStyle, MaxMinLength, Valid">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="可查看密码" />
-					<Set Lang="enus" Info="Password with view" />
+					<Set Lang="enus" Info="Show password" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -415,7 +415,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 					Style, ParentStyle, EventSet, Switch, DataItem, IsMustInput, OrderSearch">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="开关" />
-					<Set Lang="enus" Info="Switch button" />
+					<Set Lang="enus" Info="Switch" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<div class='ewa-switch' !!>
@@ -483,7 +483,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 			Style, ParentStyle, AnchorParas,OrderSearch,DataRef">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="链接，显示值内容" />
-					<Set Lang="enus" Info="Anchor, View Value" />
+					<Set Lang="enus" Info="Anchor, display value" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<a class="ewa-anchor" href="@aHref" target="@aTarget" !!>{__EWA_VAL__}</a>]]></Html>
@@ -495,7 +495,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 			Style, ParentStyle, LinkButtonParas,OrderSearch, IsHtml,DataRef,XStyle">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="链接按钮,触发对应按钮click事件" />
-					<Set Lang="enus" Info="LinkModify" />
+					<Set Lang="enus" Info="Link Button" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<a class="ewa-anchor" href="javascript:void(0)" onclick="$(this).parentsUntil('tbody').find('input[id=@lkbButtonId]').trigger('click')" !!>{__EWA_VAL__}</a>]]></Html>
@@ -507,7 +507,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 			Style, ParentStyle,Frame, DopListShow">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="动态列表" />
-					<Set Lang="enus" Info="Drop List" />
+					<Set Lang="enus" Info="Dropdown List" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -566,7 +566,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 				 Style, ParentStyle, Upload">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="HTML文本" />
-					<Set Lang="enus" Info="DHtml" />
+					<Set Lang="enus" Info="WYSIWYG HTML Editor" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<div class='EWA_DHTML' EWA_DHTML="1" !!>
@@ -582,7 +582,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 				 Style, ParentStyle">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="HTML文本,不含图片上传" />
-					<Set Lang="enus" Info="DHtml No Upload" />
+					<Set Lang="enus" Info="WYSIWYG HTML Editor (no image upload)" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<div class='EWA_DHTML' EWA_DHTML="1" !!>
@@ -597,7 +597,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 				 Style, ParentStyle">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="HTML5,含图片上传" />
-					<Set Lang="enus" Info="DHtml No Upload" />
+					<Set Lang="enus" Info="HTML5 Editor with image upload" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<textarea class='EWA_TEXTAREA EWA_DHTML' EWA_DHTML="1" !!>{__EWA_VAL__}</textarea><script type="text/javascript">
@@ -629,8 +629,8 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle,IsMustInput,Upload">
 				<DescriptionSet>
-					<Set Lang="zhcn" Info="Html5 上传文件" />
-					<Set Lang="enus" Info="Html5 Upload" />
+					<Set Lang="zhcn" Info="HTML5 上传文件" />
+					<Set Lang="enus" Info="HTML5 Upload" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -682,8 +682,8 @@ name="aaa" ref="h5u_@sys_frame_unid$@NAME"><span>{__EWA_DES__}</span></div></div
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet, EventSet,DataItem,
 			Style, ParentStyle,IsMustInput,Upload">
 				<DescriptionSet>
-					<Set Lang="zhcn" Info="Html5 拍照" />
-					<Set Lang="enus" Info="Html5 TakePhoto" />
+					<Set Lang="zhcn" Info="HTML5 拍照" />
+					<Set Lang="enus" Info="HTML5 Take Photo" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -963,7 +963,7 @@ addEvent(window, 'load', ewa_load_upload_image);
 				MaxMinLength">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="验证码" Js="错误的验证码" />
-					<Set Lang="enus" Info="Valid Code" Js="Error Code" />
+					<Set Lang="enus" Info="Verification Code" Js="Incorrect verification code" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -992,7 +992,7 @@ addEvent(window, 'load', ewa_load_upload_image);
 					DataItem, EventSet, Style, ParentStyle,IsMustInput,signature">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="手写签名" />
-					<Set Lang="enus" Info="Handwritten signature" />
+					<Set Lang="enus" Info="Handwritten Signature" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -1120,7 +1120,7 @@ addEvent(window, 'load', ewa_load_upload_image);
 				MaxMinLength">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="短信验证码" Js="错误的验证码" />
-					<Set Lang="enus" Info="Sms valid Code" Js="Error Code" />
+					<Set Lang="enus" Info="SMS Verification Code" Js="Incorrect verification code" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -1161,7 +1161,7 @@ addEvent(window, 'load', ewa_load_upload_image);
 				Parameters="Name,DataItem,DescriptionSet,Format">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="数据类型，无UI" />
-					<Set Lang="enus" Info="Defined the data type, none UI" />
+					<Set Lang="enus" Info="Defines the data type, no UI" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[]]>
@@ -1174,7 +1174,7 @@ addEvent(window, 'load', ewa_load_upload_image);
 				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,IsMustInput">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="带地图的地址栏" />
-					<Set Lang="enus" Info="Addr with map" />
+					<Set Lang="enus" Info="Address with map" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -1208,7 +1208,7 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 				Parameters="GroupIndex,Name, DescriptionSet, AttributeSet,ImageDefault, EventSet, Style, ParentStyle, DataItem">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="列表显示背景图片" />
-					<Set Lang="enus" Info="Background Image for list" />
+					<Set Lang="enus" Info="Background image for list" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<a style="{__BACKGROUND_IMAGE__}"
@@ -1223,7 +1223,7 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 				Parameters="Group,Name, DescriptionSet, Style, ParentStyle, PopFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="弹出对话框选择" />
-					<Set Lang="enus" Info="Pop Select" />
+					<Set Lang="enus" Info="Dialog Select" />
 
 				</DescriptionSet>
 				<Template>
@@ -1245,7 +1245,7 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 				Parameters="GroupIndex,Name, DescriptionSet, Style, ParentStyle, DefineFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="定义的配置项目" />
-					<Set Lang="enus" Info="Ewa Define" />
+					<Set Lang="enus" Info="EWA Define" />
 
 				</DescriptionSet>
 				<Template>
@@ -1257,7 +1257,7 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 				Parameters="Name, DescriptionSet, MGAddField">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="多维表格汇总" />
-					<Set Lang="enus" Info="Multi Grid" />
+					<Set Lang="enus" Info="Multi-grid" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<DIV !!>{__EWA_VAL__}</DIV>]]></Html>
@@ -1292,7 +1292,7 @@ setTimeout(function(){$GMap( function(){ @name$MAPClass.init() })},999);</script
 				Parameters="GroupIndex,Name, DescriptionSet,Style, ParentStyle, DataItem">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="文库显示" />
-					<Set Lang="enus" Info="Flash Doc" />
+					<Set Lang="enus" Info="Flash Document" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -1378,7 +1378,7 @@ var swfVersionStr = "11.1.0";
 				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,DataItem">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="SQL编辑器" />
-					<Set Lang="enus" Info="SQL Editor" />
+					<Set Lang="enus" Info="SQL editor" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -1427,7 +1427,7 @@ var swfVersionStr = "11.1.0";
 				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,DataItem">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="JS编辑器" />
-					<Set Lang="enus" Info="JS Editor" />
+					<Set Lang="enus" Info="JavaScript editor" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -1478,7 +1478,7 @@ var swfVersionStr = "11.1.0";
 				 DescriptionSet, AttributeSet, EventSet, Style, ParentStyle,DataItem">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="XML编辑器" />
-					<Set Lang="enus" Info="XML Editor" />
+					<Set Lang="enus" Info="XML editor" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[
@@ -1529,7 +1529,7 @@ var swfVersionStr = "11.1.0";
 				QRCode, Style, ParentStyle,VaildEx">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="二维码" />
-					<Set Lang="enus" Info="QRCode" />
+					<Set Lang="enus" Info="QR Code" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<img class="ewa-qrcode" src="{__EWA_VAL__}" !! >]]></Html>
@@ -1542,7 +1542,7 @@ var swfVersionStr = "11.1.0";
 				Parameters="Name, DescriptionSet, CombineFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="组合配置项目" />
-					<Set Lang="enus" Info="Combine Item" />
+					<Set Lang="enus" Info="Composite Item" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<div class='ewa_cb_box'><div class='ewa_cb_subject' id='DES_@Name'><a 
@@ -1555,7 +1555,7 @@ var swfVersionStr = "11.1.0";
 				Parameters="Name, DescriptionSet, CombineFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="组合配置项目" />
-					<Set Lang="enus" Info="Combine Item" />
+					<Set Lang="enus" Info="Composite Item" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<div class="caption-info" id='@Name-caption'>
@@ -1570,7 +1570,7 @@ var swfVersionStr = "11.1.0";
 				Parameters="Name, DescriptionSet">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="幂等性，用于Frame" />
-					<Set Lang="enus" Info="Idempotence in Frame" />
+					<Set Lang="enus" Info="Idempotency in Frame" />
 				</DescriptionSet>
 				<Template>
 					<Html><![CDATA[<input type="hidden" ewa_tag='idempotence' value="{__EWA_VAL__}" !! >]]></Html>
@@ -1584,7 +1584,7 @@ var swfVersionStr = "11.1.0";
 				<UIGroup Name="Main">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info="主信息" />
-						<Set Lang="enus" Info="Main infomation" />
+						<Set Lang="enus" Info="Main information" />
 					</DescriptionSet>
 				</UIGroup>
 				<UIGroup Name="Data">
@@ -1596,20 +1596,20 @@ var swfVersionStr = "11.1.0";
 				<UIGroup Name="UI">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info="用户界面" />
-						<Set Lang="enus" Info="User interface" />
+						<Set Lang="enus" Info="User Interface" />
 					</DescriptionSet>
 				</UIGroup>
 				<UIGroup Name="Valid">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info="验证" />
-						<Set Lang="enus" Info="Valid" />
+						<Set Lang="enus" Info="Validation" />
 					</DescriptionSet>
 				</UIGroup>
 
 				<UIGroup Name="Others">
 					<DescriptionSet>
 						<Set Lang="zhcn" Info="其它" />
-						<Set Lang="enus" Info="Others" />
+						<Set Lang="enus" Info="Other" />
 					</DescriptionSet>
 				</UIGroup>
 			</UIGroups>
@@ -1636,18 +1636,13 @@ action_confirm 执行前确认信息&#x0D;&#x0A;
 action_tip 执行后提示&#x0D;&#x0A;
 action_js 执行后调用脚本&#x0D;&#x0A;" />
 							<Set Lang="enus"
-								Info="ListFrame Editabled, Default call OnListFrameUpdateCell&#x0D;&#x0A;
-In AttributeSet 设置的参数：&#x0D;&#x0A;
-action_name 执行的动作的名称&#x0D;&#x0A;
-action_confirm 执行前确认信息&#x0D;&#x0A;
-action_tip 执行后提示&#x0D;&#x0A;
-action_js 执行后调用脚本&#x0D;&#x0A;" />
+								Info="Editable in ListFrame; by default calls OnListFrameUpdateCell&#x0D;&#x0A;Parameters in AttributeSet:&#x0D;&#x0A;action_name Name of the action&#x0D;&#x0A;action_confirm Confirmation message before execution&#x0D;&#x0A;action_tip Tip after execution&#x0D;&#x0A;action_js JavaScript to run after execution&#x0D;&#x0A;" />
 						</DescriptionSet>
 					</Value>
 					<Value Name='SpanShowAs' Type='group'>
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="当设置文本，设置显示标签" />
-							<Set Lang="enus" Info="Span tag as" />
+							<Set Lang="enus" Info="Span tag" />
 						</DescriptionSet>
 					</Value>
 				</Values>
@@ -1686,13 +1681,13 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 			<XItemParameter Name="InitValue" IsSet="0" IsShow="1" UIGroup="Data" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="初始化值" />
-					<Set Lang="enus" Info="Init Value" />
+					<Set Lang="enus" Info="Initial Value" />
 				</DescriptionSet>
 				<Values>
 					<Value Name="InitValue" Type="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="初始化值" />
-							<Set Lang="enus" Info="Init value" />
+							<Set Lang="enus" Info="Initial value" />
 						</DescriptionSet>
 					</Value>
 				</Values>
@@ -1727,7 +1722,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 			<XItemParameter Name="XStyle" IsSet="0" IsShow="1" UIGroup="UI" IsJsShow="1" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="标准样式" />
-					<Set Lang="enus" Info="St Style" />
+					<Set Lang="enus" Info="Standard Style" />
 				</DescriptionSet>
 				<Values>
 					<Value Name="XStyleAlign" Type="group">
@@ -1817,25 +1812,25 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 				Html='@AttName="@AttValue"'>
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="属性值" />
-					<Set Lang="enus" Info="Atts" />
+					<Set Lang="enus" Info="Attributes" />
 				</DescriptionSet>
 				<Values>
 					<Value Type="string" Name="AttName" IsUnique="1">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="属性名称" />
-							<Set Lang="enus" Info="Att Name" />
+							<Set Lang="enus" Info="Attribute Name" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="string" Name="AttValue">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="属性值" />
-							<Set Lang="enus" Info="Att Value" />
+							<Set Lang="enus" Info="Attribute Value" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="string" Name="AttLogic">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="逻辑表达式，当为true时期作用" />
-							<Set Lang="enus" Info="Att Logic (true)" />
+							<Set Lang="enus" Info="Attribute Logic (true)" />
 						</DescriptionSet>
 					</Value>
 				</Values>
@@ -1876,13 +1871,13 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 			<XItemParameter Name="IsHtml" IsShow="1" IsSet="0" UIGroup="UI" IsJsShow="0" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="是否显示为HTML" />
-					<Set Lang="enus" Info="Is Html" />
+					<Set Lang="enus" Info="Is HTML" />
 				</DescriptionSet>
 				<Values>
 					<Value Type="group" Name="IsHtml">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="是否显示为HTML" />
-							<Set Lang="enus" Info="Is Html" />
+							<Set Lang="enus" Info="Is HTML" />
 						</DescriptionSet>
 					</Value>
 				</Values>
@@ -1892,7 +1887,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 				Frames="ListFrame">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="是否排序" />
-					<Set Lang="enus" Info="Order and Search" />
+					<Set Lang="enus" Info="Ordering and Search" />
 				</DescriptionSet>
 				<Values>
 					<Value Type="group" Name="IsOrder">
@@ -1904,7 +1899,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					<Value Type="string" Name="OrderExp">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="排序表达式" />
-							<Set Lang="enus" Info="Order exp" />
+							<Set Lang="enus" Info="Order expression" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="group" Name="SearchType">
@@ -1928,7 +1923,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					<Value Type="string" Name="SearchExp">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="检索表达式" />
-							<Set Lang="enus" Info="Order exp" />
+							<Set Lang="enus" Info="Order expression" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="group" Name="IsSearchQuick">
@@ -2121,7 +2116,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					<Value Type="group" Name="IconLoction">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="图标位置" />
-							<Set Lang="enus" Info="Icon Loction" />
+							<Set Lang="enus" Info="Icon Location" />
 						</DescriptionSet>
 					</Value>
 					<!-- <Value Type="ref" Name="MeargeTo" Ref="EasyWebTemplate/XItems/XItem">
@@ -2130,13 +2125,13 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					<Value Type="group" Name="FrameOneCell">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="Frame单独一行" />
-							<Set Lang="enus" Info="Frame One Cell" />
+							<Set Lang="enus" Info="Single-cell Frame" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="group" Name="TriggerValid">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="触发验证" />
-							<Set Lang="enus" Info="Trigger Valid" />
+							<Set Lang="enus" Info="Trigger Validation" />
 						</DescriptionSet>
 					</Value>
 				</Values>
@@ -2156,7 +2151,7 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 					<Value Type="string" Name="EncShowUrl">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="全部显示验证地址" />
-							<Set Lang="enus" Info="Show all url" />
+							<Set Lang="enus" Info="Show full URL" />
 						</DescriptionSet>
 					</Value>
 				</Values>
@@ -2196,7 +2191,7 @@ EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql
 					<Value Type="group" Name="RefMulti">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="是否多个ID的匹配" />
-							<Set Lang="enus" Info="Multiple IDS match" />
+							<Set Lang="enus" Info="Multiple IDs match" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="string" Name="RefMultiSplit">
@@ -2259,7 +2254,7 @@ EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql
 					<Value Type="string" Name="ParentField">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="父节点字段" />
-							<Set Lang="enus" Info="Parent key Field" />
+							<Set Lang="enus" Info="Parent Key Field" />
 						</DescriptionSet>
 					</Value>
 
@@ -2317,7 +2312,7 @@ EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql
 				IsJsShow="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="用户自定义" />
-					<Set Lang="enus" Info="User defined" />
+					<Set Lang="enus" Info="User-defined" />
 				</DescriptionSet>
 				<Values>
 					<Value Type="group" Name="Lang">
@@ -2351,7 +2346,7 @@ EWA.UI.Dialog.OpenWindow('./?XMLNAME=|ewa|ewa.xml&amp;ITEMNAME=select_create_sql
 					<Value Type="ref" Ref="EwaGlobal.xml|Globals/Infos/Info" Name="AfterTip">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="调用后的提示信息" />
-							<Set Lang="enus" Info="Title After" />
+							<Set Lang="enus" Info="Tooltip After" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="ref" Name="Action" Ref="EasyWebTemplate/Action/ActionSet">
@@ -2374,13 +2369,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400)"
 				Html=" onclick=&quot;EWA.UI.Dialog.@CallMethod('@SYS_FRAME_UNID','@CallXmlName','@CallItemName', false,'@CallParas', null, '@AttatchParas')&quot;">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="相关配置名称" />
-					<Set Lang="enus" Info="Relate Cfg" />
+					<Set Lang="enus" Info="Related Config" />
 				</DescriptionSet>
 				<Values>
 					<Value Type="group" Name="CallMethod">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="调用模式" />
-							<Set Lang="enus" Info="Call method" />
+							<Set Lang="enus" Info="Call Method" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="string" Name="CallXmlName">
@@ -2399,13 +2394,13 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400)"
 					<Value Type="string" Name="CallParas">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="参数集合" />
-							<Set Lang="enus" Info="Paramters" />
+							<Set Lang="enus" Info="Parameters" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="group" Name="AttatchParas">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="附加来源参数" />
-							<Set Lang="enus" Info="Attatch Paras" />
+							<Set Lang="enus" Info="Attach Params" />
 						</DescriptionSet>
 					</Value>
 				</Values>
@@ -2523,7 +2518,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Value Type="group" Name="CallUrlMethod">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="URL调用模式" />
-							<Set Lang="enus" Info="Url call method" />
+							<Set Lang="enus" Info="URL Call Method" />
 						</DescriptionSet>
 					</Value>
 				</Values>
@@ -2788,7 +2783,7 @@ EWA_UP_LOCAL User local file name
 				Html="onblur=&quot;EWA.F.FOS['@SYS_FRAME_UNID'].DoValidEx(this,'@VXMode','@VXJs','@VXAction','@VXOk','@VXFail')&quot;">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="高级验证" />
-					<Set Lang="enus" Info="Valid Extend" />
+					<Set Lang="enus" Info="Advanced Validation" />
 				</DescriptionSet>
 				<Values>
 					<Value Type="group" Name="VXMode">
@@ -2800,7 +2795,7 @@ EWA_UP_LOCAL User local file name
 					<Value Type="string" Name="VXJs">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="脚本调用" />
-							<Set Lang="enus" Info="Javascript Call" />
+							<Set Lang="enus" Info="JavaScript Call" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="ref" Name="VXAction" Ref="EasyWebTemplate/Action/ActionSet">
@@ -2812,13 +2807,13 @@ EWA_UP_LOCAL User local file name
 					<Value Type="ref" Name="VXOk" Ref="EasyWebTemplate/PageInfos/PageInfo">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="验证成功信息" />
-							<Set Lang="enus" Info="Infomation of valided ok" />
+							<Set Lang="enus" Info="Information when validated successfully" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="ref" Name="VXFail" Ref="EasyWebTemplate/PageInfos/PageInfo">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="验证失败信息" />
-							<Set Lang="enus" Info="Infomation of vailded failure" />
+							<Set Lang="enus" Info="Information when validation fails" />
 						</DescriptionSet>
 					</Value>
 				</Values>
@@ -3739,25 +3734,25 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 				Html='@AttName="@AttValue"'>
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="行属性值" />
-					<Set Lang="enus" Info="Row Atts" />
+					<Set Lang="enus" Info="Row Attributes" />
 				</DescriptionSet>
 				<Values>
 					<Value Type="string" Name="RowAttName" IsUnique="1">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="属性名称" />
-							<Set Lang="enus" Info="Att Name" />
+							<Set Lang="enus" Info="Attribute Name" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="string" Name="RowAttValue">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="属性值" />
-							<Set Lang="enus" Info="Att Value" />
+							<Set Lang="enus" Info="Attribute Value" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="string" Name="RowAttLogic">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="逻辑表达式，当为true时期作用" />
-							<Set Lang="enus" Info="Att Logic (true)" />
+							<Set Lang="enus" Info="Attribute Logic (true)" />
 						</DescriptionSet>
 					</Value>
 				</Values>
