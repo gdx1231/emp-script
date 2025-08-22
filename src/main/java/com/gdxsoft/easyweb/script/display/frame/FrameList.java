@@ -55,6 +55,7 @@ public class FrameList extends FrameBase implements IFrame {
 	private MStr _SearchExp = new MStr();
 	private boolean _IsLuButtons;
 	private boolean _IsLuSearch;
+	private boolean luStickyHeaders; // 是否启用表头固定（sticky headers）
 	private boolean _ComposeSearchTexts; // 合并文字搜索
 	// 分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
 	private boolean _SearchGroup = true;
@@ -210,20 +211,18 @@ public class FrameList extends FrameBase implements IFrame {
 		// sJs.al(funName + ";");
 
 		String fname = "EWA.F.FOS['" + gunid + "']";
-		if (this._IsLuButtons && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_BUTTONS))) {
+		if (this._IsLuButtons) {
 			String js = fname + ".ReShow();";
 			sJs.al(js);
-			// MStr bt = this.getHtmlClass().getDocument().getBodyTop();
-			// bt.replace("<body", "<body style='overflow:hidden'");
 		}
-		if (this._IsLuSearch && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_SEARCH))) {
+		if (this._IsLuSearch) {
 			boolean compose = this._ComposeSearchTexts; // 合并搜索
 			boolean denySearchGroup = !this._SearchGroup; // 分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
 			String js = fname + ".ShowSearch(" + compose + ", " + denySearchGroup + ");";
 			sJs.al(js);
 		}
 
-		if (this._LuSelect.length() > 0 && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_SELECT))) {
+		if (this._LuSelect.length() > 0) {
 			if (this._LuSelect.equals("S")) { // 单选
 				String js = fname + ".SelectSingle();";
 				sJs.al(js);
@@ -232,7 +231,7 @@ public class FrameList extends FrameBase implements IFrame {
 				sJs.al(js);
 			}
 		}
-		if (this._IsLuDblClick && !"NO".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_DBL_CLICK))) {
+		if (this._IsLuDblClick) {
 			String js = fname + ".DblClick(" + this._LuDblClickIdx + ");";
 			sJs.al(js);
 		}
@@ -287,6 +286,12 @@ public class FrameList extends FrameBase implements IFrame {
 				ss.a(s);
 			}
 			sJs.al(fname + ".SubBottoms( \"" + ss.toString() + "\");");
+		}
+
+		// 固定表头
+		if (this.luStickyHeaders) {
+			String js = fname + ".stickyHeaders();";
+			sJs.al(js);
 		}
 		// box json
 		String boxJson = super.getPageItemValue("BoxJson", "BoxJson");
@@ -493,6 +498,16 @@ public class FrameList extends FrameBase implements IFrame {
 
 		RequestValue rv = super.getHtmlClass().getItemValues().getRequestValue();
 		UserXItemValue x = uv.getItem(0);
+
+		// 固定头部
+		if ("yes".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_STICKY_HEADERS))) {
+			this.luStickyHeaders = true;
+		} else if (x.checkItemExists("luStickyHeaders")) {
+			String v1 = x.getItem("luStickyHeaders");
+			if (v1.equals("yes")) {
+				this.luStickyHeaders = true;
+			}
+		}
 
 		// 重绘按钮
 		if (x.checkItemExists("luButtons") && !("no".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_BUTTONS)))) {
@@ -1144,14 +1159,14 @@ public class FrameList extends FrameBase implements IFrame {
 			if (orderNames.length > 1) {
 				asc = orderNames[1].trim();
 			}
-			
+
 			if (uxi.getName().equalsIgnoreCase(orderNames[0].trim())) {
 				if (orderNames.length == 1 || asc.equalsIgnoreCase("asc")) {
 					exp += " desc";
 					mark = " v";
 				} else {
 					mark = " ^";
-					exp +=" asc";
+					exp += " asc";
 				}
 			}
 			if (isGroup && orderNames[0].trim().equalsIgnoreCase(uxi.getName())) {

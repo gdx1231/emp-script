@@ -226,6 +226,11 @@ public class FrameParameters {
 	 */
 	public static final String EWA_IS_SPLIT_PAGE = "EWA_IS_SPLIT_PAGE";
 
+	//luStickyHeaders
+	/**
+	 * 列表是否固定表头，限定值为yes/no，参数大小写无关<br>
+	 */
+	public static final String EWA_LU_STICKY_HEADERS = "EWA_LU_STICKY_HEADERS";
 	/**
 	 * 列表不进行重绘按钮，限定值为NO，参数大小写无关<br>
 	 */
