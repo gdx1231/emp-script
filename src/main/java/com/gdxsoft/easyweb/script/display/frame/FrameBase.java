@@ -344,16 +344,19 @@ public class FrameBase {
 			// 生成最初对象 NAME, VAL, TAG
 			JSONObject obj = item.createItemJson();
 			obj.remove("VAL");
+			obj.remove("TAG");
 
 			// 添加其它属性
 			if (uxi.testName("DataItem")) {
 				UserXItemValues us = uxi.getItem("DataItem");
 				if (us.count() > 0) {
 					UserXItemValue u = us.getItem(0);
-					String dataField = u.getItem("DataField");
+					// String dataField = u.getItem("DataField");
 					String dataType = u.getItem("DataType");
-					obj.put("DF", dataField);
-					obj.put("DT", dataType);
+					// obj.put("DF", dataField);
+					if (StringUtils.isNotBlank(dataType)) {
+						obj.put("DT", dataType);
+					}
 				}
 			}
 
@@ -1249,6 +1252,10 @@ public class FrameBase {
 	 * @throws Exception
 	 */
 	public String createJsonContent() throws Exception {
+		return null;
+	}
+
+	public String createJsonContent(boolean skipUnDefined) throws Exception {
 		return null;
 	}
 

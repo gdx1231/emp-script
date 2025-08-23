@@ -1446,6 +1446,16 @@ public class FrameList extends FrameBase implements IFrame {
 	 * @throws Exception
 	 */
 	public String createJsonContent() throws Exception {
+		return this.createJsonContent(false);
+	}
+
+	/**
+	 * 生成页面的JSON数据
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public String createJsonContent(boolean skipUnDefined) throws Exception {
 		MList tbs = super.getHtmlClass().getAction().getDTTables();
 
 		if (tbs == null || tbs.size() == 0) {
@@ -1459,7 +1469,7 @@ public class FrameList extends FrameBase implements IFrame {
 		for (int i = 0; i < tb.getCount(); i++) {
 			DTRow row = tb.getRow(i); // 将数据移动到当前行
 			String keyExp = this.createItemKeys();
-			JSONObject rowJson = this.createJsonRow(row);
+			JSONObject rowJson = this.createJsonRow(row, skipUnDefined);
 			rowJson.put(FrameParameters.EWA_KEY, keyExp);
 			arr.put(rowJson);
 		}
@@ -1472,7 +1482,7 @@ public class FrameList extends FrameBase implements IFrame {
 	 * @return
 	 * @throws Exception
 	 */
-	private JSONObject createJsonRow(DTRow row) throws Exception {
+	private JSONObject createJsonRow(DTRow row, boolean skipUnDefined) throws Exception {
 		JSONObject obj = new JSONObject();
 		SysParameters sysParas = super.getHtmlClass().getSysParas();
 		HashMap<String, Boolean> map = null;
@@ -1505,7 +1515,7 @@ public class FrameList extends FrameBase implements IFrame {
 			String s2 = this.createJsonCell(uxi);
 			if (s2 != null && s2.indexOf("~!@`") > 0) {
 				String[] ss = s2.split("~!@`");
-				obj.put(uxi.getName(), ss[0]);
+				obj.put(uxi.getName(), "null".equals(ss[0]) ? null : ss[0]);
 				if (ss.length > 1) {
 					obj.put(uxi.getName() + "_HTML", "null".equals(ss[1]) ? null : ss[1]);
 				} else {
@@ -1521,7 +1531,8 @@ public class FrameList extends FrameBase implements IFrame {
 				obj.put(uxi.getName(), "null".equals(s2) ? null : s2);
 			}
 		}
-		if (isUnScaned) {
+
+		if (isUnScaned) {// 扫描一次为定义的字段
 			for (int i = 0; i < row.getTable().getColumns().getCount(); i++) {
 				String name = row.getTable().getColumns().getColumn(i).getName();
 				if (!map.containsKey(name.toUpperCase())) {
@@ -1529,11 +1540,14 @@ public class FrameList extends FrameBase implements IFrame {
 				}
 			}
 		}
-		// 将不在页面框架上的数据显示出来
-		for (int i = 0; i < this._JsonUsedFields.size(); i++) {
-			String name = this._JsonUsedFields.get(i);
-			if (!row.getCell(name).isNull()) {
-				obj.put(name, row.getCell(name).getValue());
+		// 非略过为定义字段
+		if (!skipUnDefined) {
+			// 将不在页面框架上的数据显示出来
+			for (int i = 0; i < this._JsonUsedFields.size(); i++) {
+				String name = this._JsonUsedFields.get(i);
+				if (!row.getCell(name).isNull()) {
+					obj.put(name, row.getCell(name).getValue());
+				}
 			}
 		}
 		return obj;

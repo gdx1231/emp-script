@@ -11,8 +11,10 @@ import com.gdxsoft.easyweb.debug.DebugRecord;
 import com.gdxsoft.easyweb.debug.DebugRecords;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.AjaxParameters;
 import com.gdxsoft.easyweb.script.display.HtmlCreator;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
+import com.gdxsoft.easyweb.script.servlets.FileOut;
 import com.gdxsoft.easyweb.statusControl.StatusControl;
 import com.gdxsoft.easyweb.utils.UPath;
 
@@ -107,18 +109,18 @@ public class EwaWebPage {
 				ajaxType = "";
 			}
 
-			if (ajaxType.equalsIgnoreCase("XML") || ajaxType.equalsIgnoreCase("XMLDATA")) {
-				this._PageContentType = "text/xml";
+			if (ajaxType.equalsIgnoreCase(AjaxParameters.XML) || ajaxType.equalsIgnoreCase(AjaxParameters.XMLDATA)) {
+				this._PageContentType = FileOut.MAP.get("xml");
 				isXml = true;
-			} else if (ajaxType.equalsIgnoreCase("JSON")) {
+			} else if (ajaxType.equalsIgnoreCase(AjaxParameters.JSON)) {
 				// application/json
 				if (this._Rv.getString(FrameParameters.EWA_JSON_NAME) == null) {
-					this._PageContentType = "text/json";
+					this._PageContentType = FileOut.MAP.get("json");
 				} else {
-					this._PageContentType = "text/javascript";
+					this._PageContentType = FileOut.MAP.get("js");
 				}
-			} else if (ajaxType.equalsIgnoreCase("JSON_EXT") || ajaxType.equalsIgnoreCase("JSON_EXT1")) {
-				this._PageContentType = "text/json";
+			} else if (ajaxType.startsWith("JSON") ) {
+				this._PageContentType = FileOut.MAP.get("json");
 			}
 
 			this._PageContent = _HtmlCreator.getPageHtml();
@@ -143,7 +145,7 @@ public class EwaWebPage {
 				// DebugRecords.add(record);
 			}
 			if (_IsPageDebug) {
-				if (!isXml || ajaxType.length() == 0 || "LF_RELOAD".equalsIgnoreCase(ajaxType)) {
+				if (!isXml || ajaxType.length() == 0 || AjaxParameters.LF_RELOAD.equalsIgnoreCase(ajaxType)) {
 					this._PageDeubgInfo = debugStr;
 				}
 			}

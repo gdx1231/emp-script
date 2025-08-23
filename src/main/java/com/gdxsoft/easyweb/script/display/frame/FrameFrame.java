@@ -108,13 +108,18 @@ public class FrameFrame extends FrameBase implements IFrame {
 		super.addDebug(this, "HTML", "createJsBottom");
 	}
 
+	public String createJsonContent() throws Exception {
+		return createJsonContent(false);
+	}
+
 	/**
 	 * 生成页面的JSON数据
 	 * 
+	 * @param skipUnDefined 是否跳过未定义的字段
 	 * @return 页面的JSON数据
 	 * @throws Exception
 	 */
-	public String createJsonContent() throws Exception {
+	public String createJsonContent(boolean skipUnDefined) throws Exception {
 		MStr sb = new MStr();
 		RequestValue rv = super.getHtmlClass().getItemValues().getRequestValue();
 		String jsonName = super.getHtmlClass().getItemValues().getRequestValue()
@@ -710,7 +715,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 			stringBuilder.append(disp);
 			stringBuilder.append(">\n<td class='EWA_TD' colspan='");
 			stringBuilder.append(colSpan);
-			//stringBuilder.append("'> &bull; "); //remove • 2024-12-04
+			// stringBuilder.append("'> &bull; "); //remove • 2024-12-04
 			stringBuilder.append("'><span>");
 
 			s1.append(stringBuilder.toString());
@@ -905,14 +910,15 @@ public class FrameFrame extends FrameBase implements IFrame {
 
 		StringBuilder sb = new StringBuilder();
 		if (isC11) { // 一段,上下排列
-			sb.append(tmps[0]); //<td class="EWA_TD_L">您的邮箱</td>
-			
-			/*String info = tmps[3];
-			if (tmps[4] != null && tmps[4].length() > 0 && !info.equals(tmps[4])) {
-				info += ", " + tmps[4];
-			}
-			sb.append("<td class=\"EWA_TD_L\">").append(info).append("</td>");
-			*/
+			sb.append(tmps[0]); // <td class="EWA_TD_L">您的邮箱</td>
+
+			/*
+			 * String info = tmps[3];
+			 * if (tmps[4] != null && tmps[4].length() > 0 && !info.equals(tmps[4])) {
+			 * info += ", " + tmps[4];
+			 * }
+			 * sb.append("<td class=\"EWA_TD_L\">").append(info).append("</td>");
+			 */
 			sb.append("</tr>\n<tr class='" + trClass + " ewa-row-item' " + disp + ">\n");
 			sb.append(template);
 		} else if (colSpan == 2) {

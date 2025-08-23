@@ -1375,7 +1375,7 @@ public class HtmlCreator {
 		sb.a("{\"CFG\":");
 		sb.al(this._Frame.createJsonFrameAIPrompt());
 		sb.a(",\"DATA\":");
-		String dataJson = this._Frame.createJsonContent();
+		String dataJson = this._Frame.createJsonContent(true);
 		if (dataJson == null) {
 			sb.al(this.createPageJson());
 		} else {

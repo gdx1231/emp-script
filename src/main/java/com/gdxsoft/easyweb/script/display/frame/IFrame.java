@@ -25,7 +25,7 @@ public interface IFrame {
 	 * 
 	 * @return 固定查询的表
 	 */
-	public abstract Map<String, DTTable> getSearchFixTables();
+	Map<String, DTTable> getSearchFixTables();
 
 	/**
 	 * 检查是否为隐含字段，在Page的LogicShow中定义
@@ -33,29 +33,29 @@ public interface IFrame {
 	 * @param name
 	 * @return
 	 */
-	public abstract boolean isHiddenField(String name);
+	boolean isHiddenField(String name);
 
 	/**
 	 * 需要隐藏的字段集合
 	 * 
 	 * @return the _HiddenFields
 	 */
-	public abstract MTable getHiddenFields();
+	MTable getHiddenFields();
 
 	/**
 	 * 需要隐藏的字段集合
 	 * 
 	 * @param hiddenFields the 需要隐藏的字段集合 to set
 	 */
-	public abstract void setHiddenFields(MTable hiddenFields);
+	void setHiddenFields(MTable hiddenFields);
 
-	public abstract String createJsonJs();
+	String createJsonJs();
 
-	public abstract String createaXmlData() throws Exception;
+	String createaXmlData() throws Exception;
 
-	public abstract HtmlClass getHtmlClass();
+	HtmlClass getHtmlClass();
 
-	public abstract void setHtmlClass(HtmlClass htmlClass);
+	void setHtmlClass(HtmlClass htmlClass);
 
 	/**
 	 * 获取ListFrame分页<br>
@@ -63,7 +63,16 @@ public interface IFrame {
 	 * 
 	 * @return the page split
 	 */
-	public abstract PageSplit getPageSplit();
+	PageSplit getPageSplit();
+
+	/**
+	 * 创建JSON数据
+	 * 
+	 * @param skipUnDefined 是否跳过未定义的字段
+	 * @return the JSON String
+	 * @throws Exception
+	 */
+	String createJsonContent(boolean skipUnDefined) throws Exception;
 
 	/**
 	 * 生成页面的JSON数据<br>
@@ -72,7 +81,7 @@ public interface IFrame {
 	 * @return the JSON String
 	 * @throws Exception
 	 */
-	public String createJsonContent() throws Exception;
+	String createJsonContent() throws Exception;
 
 	/**
 	 * 获取工作流的json表达式<br>
@@ -80,7 +89,7 @@ public interface IFrame {
 	 * 
 	 * @return the WorkFlowBut
 	 */
-	public abstract String getWorkFlowButJson();
+	String getWorkFlowButJson();
 
 	/**
 	 * 配置文件的对象的 JSON表达式(在FrameBase中生成)<br>
@@ -89,60 +98,60 @@ public interface IFrame {
 	 * @return the JSON expression
 	 * @throws Exception
 	 */
-	public abstract String createJsonFrame() throws Exception;
+	String createJsonFrame() throws Exception;
 
 	/**
 	 * item描述XML字符串
 	 * 
 	 * @throws Exception
 	 */
-	public abstract void createJsFrameXml() throws Exception;
+	void createJsFrameXml() throws Exception;
 
 	/**
 	 * 生成菜单的Js表达式
 	 * 
 	 * @throws Exception
 	 */
-	public abstract void createJsFrameMenu() throws Exception;
+	void createJsFrameMenu() throws Exception;
 
 	/**
 	 * 页面Js初始化
 	 * 
 	 * @throws Exception
 	 */
-	public abstract void createJsFramePage() throws Exception;
+	void createJsFramePage() throws Exception;
 
 	/**
 	 * 仅生成内容HTML
 	 * 
 	 * @throws Exception
 	 */
-	public abstract void createContent() throws Exception;
+	void createContent() throws Exception;
 
 	/**
 	 * 生成CSS内容
 	 * 
 	 * @throws Exception
 	 */
-	public abstract void createCss() throws Exception;
+	void createCss() throws Exception;
 
 	/**
 	 * 生成头部Js
 	 */
-	public abstract void createJsTop();
+	void createJsTop();
 
 	/**
 	 * 生成底部Js
 	 * 
 	 */
-	public abstract void createJsBottom();
+	void createJsBottom();
 
 	/**
 	 * 生成主底部
 	 * 
 	 * @throws Exception
 	 */
-	public abstract void createSkinBottom() throws Exception;
+	void createSkinBottom() throws Exception;
 
 	/**
 	 * 生成主头部
@@ -156,7 +165,7 @@ public interface IFrame {
 	 * 
 	 * @throws Exception
 	 */
-	public abstract void createHtml() throws Exception;
+	void createHtml() throws Exception;
 
 	/**
 	 * 生成Frame页头
@@ -164,14 +173,14 @@ public interface IFrame {
 	 * @return Frame页头
 	 * @throws Exception
 	 */
-	public abstract String createFrameHeader() throws Exception;
+	String createFrameHeader() throws Exception;
 
 	/**
 	 * 生成Frame内容
 	 * 
 	 * @throws Exception
 	 */
-	public abstract void createFrameContent() throws Exception;
+	void createFrameContent() throws Exception;
 
 	/**
 	 * 生成页面的所有元素
@@ -179,25 +188,25 @@ public interface IFrame {
 	 * @return 所有元素
 	 * @throws Exception
 	 */
-	public abstract String createItemHtmls() throws Exception;
+	String createItemHtmls() throws Exception;
 
 	/**
 	 * 生成Frame页脚
 	 * 
 	 * @throws Exception
 	 */
-	public abstract void createFrameFooter() throws Exception;
+	void createFrameFooter() throws Exception;
 
 	/**
 	 * @return the _ItemParentHtmls
 	 */
-	public abstract HashMap<String, String> getItemParentHtmls();
+	HashMap<String, String> getItemParentHtmls();
 
 	/**
 	 * @param itemParentHtmls the _ItemParentHtmls to set
 	 */
-	public abstract void setItemParentHtmls(HashMap<String, String> itemParentHtmls);
+	void setItemParentHtmls(HashMap<String, String> itemParentHtmls);
 
-	public abstract String createSelectReload() throws Exception;
+	String createSelectReload() throws Exception;
 
 }
