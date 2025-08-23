@@ -49,7 +49,7 @@ public class ItemBase implements IItem {
 	/**
 	 * 获取Item的JSON对象，用于APP
 	 * 
-	 * @return
+	 * @return JSONObject NAME, VAL, TAG
 	 * @throws Exception
 	 */
 	public JSONObject createItemJson() throws Exception {

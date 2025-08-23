@@ -323,6 +323,56 @@ public class FrameBase {
 	}
 
 	/**
+	 * 创建用于AI提示词的JSON格式的页面框架
+	 * 
+	 * @return JSON格式的页面框架
+	 * @throws Exception
+	 */
+	public String createJsonFrameAIPrompt() throws Exception {
+		UserConfig uc = this._HtmlClass.getUserConfig();
+		String lang = this._HtmlClass.getSysParas().getLang();
+		JSONArray arr = new JSONArray();
+
+		for (int i = 0; i < uc.getUserXItems().count(); i++) {
+			UserXItem uxi = uc.getUserXItems().getItem(i);
+			String tag = uxi.getSingleValue("tag");
+
+			if ("button".equals(tag) || "submit".equals(tag)) {
+				continue;
+			}
+			IItem item = getHtmlClass().getItem(uxi);
+			// 生成最初对象 NAME, VAL, TAG
+			JSONObject obj = item.createItemJson();
+			obj.remove("VAL");
+
+			// 添加其它属性
+			if (uxi.testName("DataItem")) {
+				UserXItemValues us = uxi.getItem("DataItem");
+				if (us.count() > 0) {
+					UserXItemValue u = us.getItem(0);
+					String dataField = u.getItem("DataField");
+					String dataType = u.getItem("DataType");
+					obj.put("DF", dataField);
+					obj.put("DT", dataType);
+				}
+			}
+
+			if (uxi.testName("DescriptionSet")) {
+				String des = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Info", lang);// 描述
+				obj.put("DES", des);
+
+				String memo = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Memo", lang);// 描述
+				if (!StringUtils.isBlank(memo)) {
+					obj.put("MEMO", memo);
+				}
+			}
+
+			arr.put(obj);
+		}
+		return arr.toString();
+	}
+
+	/**
 	 * 配置文件的对象的 JSON表达式(在FrameBase中生成)
 	 * 
 	 * @return JSON
@@ -768,7 +818,7 @@ public class FrameBase {
 					int is0 = Integer.parseInt(s0);
 					stOne = tag + is0 + "px";
 					stSplit = tag1 + is0 + "px";
-					stTwo = tag1 + s0+ "px";
+					stTwo = tag1 + s0 + "px";
 				} catch (Exception err) {
 					stOne = tag + s0;
 					stSplit = tag1 + s0;

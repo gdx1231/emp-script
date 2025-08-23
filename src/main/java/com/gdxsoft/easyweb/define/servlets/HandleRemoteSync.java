@@ -20,6 +20,7 @@ import com.gdxsoft.easyweb.define.SyncRemotes;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.servlets.FileOut;
 import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.utils.UJSon;
 
@@ -317,7 +318,7 @@ public class HandleRemoteSync {
 
 	private void out(String cnt) throws ServletException, IOException {
 		_Response.setCharacterEncoding("utf-8");
-		_Response.setContentType("text/json");
+		_Response.setContentType(FileOut.MAP.get("json"));
 
 		PrintWriter out = _Response.getWriter();
 		try {

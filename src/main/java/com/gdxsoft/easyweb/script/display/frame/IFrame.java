@@ -13,6 +13,14 @@ public interface IFrame {
 	FrameBase getFrameBase();
 
 	/**
+	 * 创建用于AI提示词的JSON格式的页面框架(2025-08-23)
+	 * 
+	 * @return JSON格式的页面框架
+	 * @throws Exception
+	 */
+	String createJsonFrameAIPrompt() throws Exception;
+
+	/**
 	 * 固定查询的表，用于ListFrame
 	 * 
 	 * @return 固定查询的表

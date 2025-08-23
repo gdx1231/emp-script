@@ -177,11 +177,11 @@ public class FrameList extends FrameBase implements IFrame {
 		MStr sJs = new MStr();
 		String lang = super.getHtmlClass().getSysParas().getLang();
 		sJs.al("EWA.LANG='" + lang.toLowerCase() + "';");
-//		String ewaPath = rv.s("rv_ewa_style_path");
-//		if (StringUtils.isBlank(ewaPath)) {
-//			ewaPath = "/EmpScriptV2"; // default static url prefix
-//		}
-//		sJs.al("EWA.RV_STATIC_PATH = \"" + ewaPath + "\";");
+		// String ewaPath = rv.s("rv_ewa_style_path");
+		// if (StringUtils.isBlank(ewaPath)) {
+		// ewaPath = "/EmpScriptV2"; // default static url prefix
+		// }
+		// sJs.al("EWA.RV_STATIC_PATH = \"" + ewaPath + "\";");
 		// String funName = "EWA_F" + gunid + "()";
 		sJs.al("(function() {");
 		// sJs.al("function "+funName+" {");
@@ -1507,9 +1507,9 @@ public class FrameList extends FrameBase implements IFrame {
 				String[] ss = s2.split("~!@`");
 				obj.put(uxi.getName(), ss[0]);
 				if (ss.length > 1) {
-					obj.put(uxi.getName() + "_HTML", ss[1]);
+					obj.put(uxi.getName() + "_HTML", "null".equals(ss[1]) ? null : ss[1]);
 				} else {
-					obj.put(uxi.getName() + "_HTML", ss[0]);
+					obj.put(uxi.getName() + "_HTML", "null".equals(ss[0]) ? null : ss[0]);
 				}
 			} else {
 				if (s2 != null) {
@@ -1518,7 +1518,7 @@ public class FrameList extends FrameBase implements IFrame {
 						s2 = ItemImage.getImage(rv.getContextPath(), buf);
 					}
 				}
-				obj.put(uxi.getName(), s2);
+				obj.put(uxi.getName(), "null".equals(s2) ? null : s2);
 			}
 		}
 		if (isUnScaned) {
@@ -1532,7 +1532,9 @@ public class FrameList extends FrameBase implements IFrame {
 		// 将不在页面框架上的数据显示出来
 		for (int i = 0; i < this._JsonUsedFields.size(); i++) {
 			String name = this._JsonUsedFields.get(i);
-			obj.put(name, row.getCell(name));
+			if (!row.getCell(name).isNull()) {
+				obj.put(name, row.getCell(name).getValue());
+			}
 		}
 		return obj;
 

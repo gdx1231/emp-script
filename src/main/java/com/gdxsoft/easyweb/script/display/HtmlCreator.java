@@ -829,27 +829,28 @@ public class HtmlCreator {
 
 		String ajax = _SysParas.getAjaxCallType();
 
-		if (ajax.equalsIgnoreCase("XML") || ajax.equalsIgnoreCase("XMLDATA")) {
+		if (ajax.equalsIgnoreCase(AjaxParameters.XML) || ajax.equalsIgnoreCase(AjaxParameters.XMLDATA)) {
 			this._PageHtml = "<root><error>" + msg + "</error></root>";
-		} else if (ajax.equalsIgnoreCase("HAVE_DATA")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.HAVE_DATA)) {
 			this._PageHtml = msg;
-		} else if (ajax.equalsIgnoreCase("DOWN_DATA")) { // DOWN_DATA 则表示下载数据
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.DOWN_DATA)) { // DOWN_DATA 则表示下载数据
 			this._PageHtml = msg;
-		} else if (ajax.equalsIgnoreCase("TOP_CNT_BOTTOM")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.TOP_CNT_BOTTOM)) {
 			this._PageHtml = msg;
-		} else if (ajax.equalsIgnoreCase("JSON")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON)) {
 			this._PageHtml = "[" + msgJson + "]";
-		} else if (ajax.equalsIgnoreCase("JSON_EXT") || ajax.equalsIgnoreCase("JSON_EXT1")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT) || ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT1)
+				|| ajax.equalsIgnoreCase(AjaxParameters.JSON_AI_PROMPT)) {
 			this._PageHtml = msgJson.toString();
-		} else if (ajax.equalsIgnoreCase("JSON_ALL")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_ALL)) {
 			this._PageHtml = "[[" + msgJson + "]]";
-		} else if (ajax.equalsIgnoreCase("SELECT_RELOAD")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.SELECT_RELOAD)) {
 			this._PageHtml = msgJson.toString();
-		} else if (ajax.equalsIgnoreCase("LF_RELOAD")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.LF_RELOAD)) {
 			this._PageHtml = msg;
-		} else if (ajax.equalsIgnoreCase("INSTALL")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.INSTALL)) {
 			this._PageHtml = msg;
-		} else if (ajax.equalsIgnoreCase("WORKFLOW")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.WORKFLOW)) {
 			this._PageHtml = msg;
 		} else {
 			this._PageHtml = msg;
@@ -927,6 +928,7 @@ public class HtmlCreator {
 
 	/**
 	 * Check valid code, Idempotence, SlidePuzzle
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
@@ -1358,6 +1360,32 @@ public class HtmlCreator {
 	}
 
 	/**
+	 * 创建用于AI Prompt的JSON数据
+	 * 
+	 * @param dt 数据表对象
+	 * @return JSON数据
+	 * @throws Exception
+	 */
+	public String createPageJsonAIPrompt() throws Exception {
+		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
+		if ("no".equals(allowJsonExport)) {
+			return UJSon.rstFalse("NOT allow json export").toString();
+		}
+		MStr sb = new MStr();
+		sb.a("{\"CFG\":");
+		sb.al(this._Frame.createJsonFrameAIPrompt());
+		sb.a(",\"DATA\":");
+		String dataJson = this._Frame.createJsonContent();
+		if (dataJson == null) {
+			sb.al(this.createPageJson());
+		} else {
+			sb.al(dataJson);
+		}
+		sb.a("}");
+		return sb.toString();
+	}
+
+	/**
 	 * 获取JSON数据和页面表达
 	 * 
 	 * @return
@@ -1366,7 +1394,7 @@ public class HtmlCreator {
 	public String createPageJsonExt() throws Exception {
 		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
 		if ("no".equals(allowJsonExport)) {
-			return "{'AllowJsonExport':'no'}";
+			return UJSon.rstFalse("NOT allow json export").toString();
 		}
 		MStr sb = new MStr();
 		sb.a("{\"CFG\":");
@@ -1404,7 +1432,7 @@ public class HtmlCreator {
 	public String createPageJsonExt1() throws Exception {
 		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
 		if ("no".equals(allowJsonExport)) {
-			return "{'AllowJsonExport':'no'}";
+			return UJSon.rstFalse("NOT allow json export").toString();
 		}
 		MStr sb = new MStr();
 		sb.a("{\"CFG\":");
@@ -1617,13 +1645,13 @@ public class HtmlCreator {
 			this._SysParas.setAjaxCallType("");
 		String ajax = _SysParas.getAjaxCallType();
 
-		if (ajax.equalsIgnoreCase("DOWNLOAD") || ajax.equalsIgnoreCase("DOWNLOAD-INLINE")) {
+		if (ajax.equalsIgnoreCase(AjaxParameters.DOWNLOAD) || ajax.equalsIgnoreCase(AjaxParameters.DOWNLOAD_INLINE)) {
 			// 下载保存文件或在线文件（图片、pdf等）
 			this._PageHtml = this.createResponseFrameDownload();
-		} else if (ajax.equalsIgnoreCase("VALIDCODE")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.VALIDCODE)) {
 			// 输出验证码
 			this.createValidCode();
-		} else if (ajax.equalsIgnoreCase("ValidSlidePuzzle")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.VALID_SLIDE_PUZZLE)) {
 			String mode = this._RequestValue.s("ewa_trigger_valid_mode");
 			if ("create".equalsIgnoreCase(mode) || "refresh".equalsIgnoreCase(mode)) {
 				// 输出拼图验证
@@ -1639,10 +1667,10 @@ public class HtmlCreator {
 			} else {
 				this._PageHtml = UJSon.rstFalse("Unkown mode: " + mode).toString();
 			}
-		} else if (ajax.equalsIgnoreCase("XML")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.XML)) {
 			// 显示为XML数据
 			this._PageHtml = this._Frame.createaXmlData();
-		} else if (ajax.equalsIgnoreCase("HAVE_DATA")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.HAVE_DATA)) {
 			// 显示为是否有数据
 			MList tbs = this._ItemValues.getDTTables();
 			if (tbs.size() > 0) {
@@ -1655,24 +1683,26 @@ public class HtmlCreator {
 			} else {
 				this._PageHtml = "0";
 			}
-		} else if (ajax.equalsIgnoreCase("DOWN_DATA")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.DOWN_DATA)) {
 			// DOWN_DATA 则表示下载数据
 			String key = "DOWN_DATA_" + this._RequestValue.getString("EWA.ID");
 			String name = this._RequestValue.getString(key);
 			this._PageHtml = name == null ? "DENY" : name.replace("../../", this._RequestValue.getContextPath() + "/");
-		} else if (ajax.equalsIgnoreCase("TOP_CNT_BOTTOM")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.TOP_CNT_BOTTOM)) {
 			this._PageHtml = this.createPageOnlyCnt();
-		} else if (ajax.equalsIgnoreCase("JSON")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON)) {
 			this._PageHtml = this.createPageJson();
-		} else if (ajax.equalsIgnoreCase("JSON_EXT")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT)) {
 			this._PageHtml = this.createPageJsonExt();
-		} else if (ajax.equalsIgnoreCase("JSON_EXT1")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT1)) {
 			this._PageHtml = this.createPageJsonExt1();
-		} else if (ajax.equalsIgnoreCase("JSON_ALL")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_AI_PROMPT)) {
+			this._PageHtml = this.createPageJsonAIPrompt();
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_ALL)) {
 			this._PageHtml = this.createPageJsonAll();
-		} else if (ajax.equalsIgnoreCase("XMLDATA")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.XMLDATA)) {
 			this._PageHtml = this.createPageXml();
-		} else if (ajax.equalsIgnoreCase("SELECT_RELOAD")) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.SELECT_RELOAD)) {
 			this._PageHtml = this.createSelectReload();
 		} else if (isNoCnt) {
 			_DebugFrames.addDebug(this, "HTML", "开始合成脚本");
@@ -1685,14 +1715,14 @@ public class HtmlCreator {
 				js = this._ItemValues.replaceParameters(js, true);
 				this._PageHtml = js;
 			}
-		} else if (ajax.equalsIgnoreCase("LF_RELOAD")) { // listframe reload
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.LF_RELOAD)) { // listframe reload
 			MStr sb = new MStr();
 			this._Frame.createFrameContent();
 			String content = this._Document.getScriptHtml().toString();
 			content = this._ItemValues.replaceParameters(content, true);
 			sb.append(content.replace(IItem.REP_AT_STR, "@"));
 			this._PageHtml = sb.toString();
-		} else if (ajax.equalsIgnoreCase("INSTALL")) { // listframe reload
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.INSTALL)) { // listframe reload
 			// MStr sb = new MStr();
 			this._Frame.createHtml();
 
@@ -1712,7 +1742,7 @@ public class HtmlCreator {
 			}
 			htmlInstall = htmlInstall.replace(IItem.REP_AT_STR, "@");
 			this._PageHtml = htmlInstall;
-		} else if (ajax.equalsIgnoreCase("WORKFLOW")) { // listframe reload
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.WORKFLOW)) { // listframe reload
 			MStr sb = new MStr();
 			String tmp = "EWA.F.FOS['" + this._SysParas.getFrameUnid() + "']";
 			if (this._Workflow == null) {
@@ -1783,7 +1813,7 @@ public class HtmlCreator {
 				|| _SysParas.getBehavior().trim().length() == 0) {
 			return;
 		}
-		if (_SysParas.getAjaxCallType().equalsIgnoreCase("install")) {
+		if (_SysParas.getAjaxCallType().equalsIgnoreCase(AjaxParameters.INSTALL)) {
 			return;
 		}
 
