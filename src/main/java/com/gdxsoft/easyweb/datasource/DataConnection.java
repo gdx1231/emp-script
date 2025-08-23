@@ -2187,7 +2187,7 @@ public class DataConnection {
 			}
 			return;
 		}
-		if (dt.equals("BOOL") || dt.equals("BOOLEAN") || dt.equals("JAVA.LANG.BOOLEAN")) {
+		if (dt.equals("BOOL") || dt.equals("BOOLEN") /*拼写错误*/ || dt.equals("BOOLEAN") || dt.equals("JAVA.LANG.BOOLEAN")) {
 			boolean v = Utils.cvtBool(v1);
 			cst.setBoolean(index, v);
 			this.writeDebug(this, "添加参数(Bool)" + index, parameterName + "=v");
