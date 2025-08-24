@@ -107,22 +107,22 @@ public class EwaWebPage {
 			String ajaxType = _HtmlCreator.getAjaxCallType();
 			if (ajaxType == null) {
 				ajaxType = "";
-			}
-
-			if (ajaxType.equalsIgnoreCase(AjaxParameters.XML) || ajaxType.equalsIgnoreCase(AjaxParameters.XMLDATA)) {
-				this._PageContentType = FileOut.MAP.get("xml");
-				isXml = true;
-			} else if (ajaxType.equalsIgnoreCase(AjaxParameters.JSON)) {
-				// application/json
-				if (this._Rv.getString(FrameParameters.EWA_JSON_NAME) == null) {
+			} else {
+				if (ajaxType.equalsIgnoreCase(AjaxParameters.XML)
+						|| ajaxType.equalsIgnoreCase(AjaxParameters.XMLDATA)) {
+					this._PageContentType = FileOut.MAP.get("xml");
+					isXml = true;
+				} else if (ajaxType.equalsIgnoreCase(AjaxParameters.JSON)) {
+					// application/json
+					if (this._Rv.getString(FrameParameters.EWA_JSON_NAME) == null) {
+						this._PageContentType = FileOut.MAP.get("json");
+					} else {
+						this._PageContentType = FileOut.MAP.get("js");
+					}
+				} else if (ajaxType.toUpperCase().startsWith("JSON")) {
 					this._PageContentType = FileOut.MAP.get("json");
-				} else {
-					this._PageContentType = FileOut.MAP.get("js");
 				}
-			} else if (ajaxType.startsWith("JSON") ) {
-				this._PageContentType = FileOut.MAP.get("json");
 			}
-
 			this._PageContent = _HtmlCreator.getPageHtml();
 //			int loc0=_PageContent.toString().indexOf("EWA_ITEMS_XML_");
 //			int loc1=_PageContent.toString().indexOf("\";",loc0);

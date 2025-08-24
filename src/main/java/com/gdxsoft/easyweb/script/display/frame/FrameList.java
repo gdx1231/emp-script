@@ -24,6 +24,7 @@ import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.Workflow.EwaWfMain;
 import com.gdxsoft.easyweb.script.Workflow.WfUnit;
 import com.gdxsoft.easyweb.script.Workflow.WfUnits;
+import com.gdxsoft.easyweb.script.display.AjaxParameters;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.ItemValues;
 import com.gdxsoft.easyweb.script.display.SysParameters;
@@ -1452,7 +1453,8 @@ public class FrameList extends FrameBase implements IFrame {
 	/**
 	 * 生成页面的JSON数据
 	 * 
-	 * @return
+	 * @param skipUnDefined 是否略过未定义的字段
+	 * @return JSON字符串
 	 * @throws Exception
 	 */
 	public String createJsonContent(boolean skipUnDefined) throws Exception {
@@ -1461,6 +1463,11 @@ public class FrameList extends FrameBase implements IFrame {
 		if (tbs == null || tbs.size() == 0) {
 			return "[]";
 		}
+		SysParameters sysParas = super.getHtmlClass().getSysParas();
+		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
+		// 检查是否为AI Prompt
+		boolean isApiPrompt = AjaxParameters.JSON_AI_PROMPT.equalsIgnoreCase(sysParas.getAjaxCallType());
+
 		DTTable tb = (DTTable) tbs.get(tbs.size() - 1);
 		super.getHtmlClass().getItemValues().setListFrameTable(tb);
 
@@ -1468,9 +1475,14 @@ public class FrameList extends FrameBase implements IFrame {
 
 		for (int i = 0; i < tb.getCount(); i++) {
 			DTRow row = tb.getRow(i); // 将数据移动到当前行
-			String keyExp = this.createItemKeys();
-			JSONObject rowJson = this.createJsonRow(row, skipUnDefined);
-			rowJson.put(FrameParameters.EWA_KEY, keyExp);
+			
+			JSONObject rowJson = this.createJsonRow(row, skipUnDefined, sysParas, rv, isApiPrompt);
+			
+			if (!isApiPrompt) { 
+				// ai prompt 不需要 EWA_KEY
+				String keyExp = this.createItemKeys();
+				rowJson.put(FrameParameters.EWA_KEY, keyExp);
+			}
 			arr.put(rowJson);
 		}
 		return arr.toString();
@@ -1479,15 +1491,19 @@ public class FrameList extends FrameBase implements IFrame {
 	/**
 	 * 生成页面的每一行JSON数据
 	 * 
-	 * @return
+	 * @param row 数据行
+	 * @param skipUnDefined 是否略过未定义的字段
+	 * @param sysParas 系统参数
+	 * @param rv 请求值
+	 * @param isApiPrompt 是否为AI Prompt
+	 * 
+	 * @return JSONObject 每一行的JSON数据
 	 * @throws Exception
 	 */
-	private JSONObject createJsonRow(DTRow row, boolean skipUnDefined) throws Exception {
+	private JSONObject createJsonRow(DTRow row, boolean skipUnDefined, SysParameters sysParas, RequestValue rv,
+			boolean isApiPrompt) throws Exception {
 		JSONObject obj = new JSONObject();
-		SysParameters sysParas = super.getHtmlClass().getSysParas();
 		HashMap<String, Boolean> map = null;
-
-		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
 
 		boolean isUnScaned = _JsonUsedFields == null;
 		if (isUnScaned) {
@@ -1499,10 +1515,7 @@ public class FrameList extends FrameBase implements IFrame {
 			if (sysParas.isHiddenColumn(uxi.getName())) {
 				continue;
 			}
-			// if (uxi.getName().equals("ENQ_JNY_CONTENT")) {
-			// int k = 0;
-			// k++;
-			// }
+
 			if (isUnScaned) {
 				map.put(uxi.getName().toUpperCase().trim(), true);
 			}
@@ -1513,13 +1526,27 @@ public class FrameList extends FrameBase implements IFrame {
 			// }
 
 			String s2 = this.createJsonCell(uxi);
-			if (s2 != null && s2.indexOf("~!@`") > 0) {
+			if (s2 != null && s2.indexOf("~!@`") >= 0) {
 				String[] ss = s2.split("~!@`");
-				obj.put(uxi.getName(), "null".equals(ss[0]) ? null : ss[0]);
-				if (ss.length > 1) {
-					obj.put(uxi.getName() + "_HTML", "null".equals(ss[1]) ? null : ss[1]);
+				if (ss.length == 0) { // s2 == "~!@`"
+					continue;
+				}
+				ss[0] = "null".equals(ss[0]) ? null : ss[0];
+				if (isApiPrompt) { // ai prompt 不需要_HTML数据
+					if (ss.length > 1) {
+						ss[1] = "null".equals(ss[1]) ? null : ss[1];
+						obj.put(uxi.getName(), ss[1]);
+					} else {
+						obj.put(uxi.getName(), ss[0]);
+					}
 				} else {
-					obj.put(uxi.getName() + "_HTML", "null".equals(ss[0]) ? null : ss[0]);
+					obj.put(uxi.getName(), ss[0]);
+					if (ss.length > 1) {
+						ss[1] = "null".equals(ss[1]) ? null : ss[1];
+						obj.put(uxi.getName() + "_HTML", ss[1]);
+					} else {
+						obj.put(uxi.getName() + "_HTML", ss[0]);
+					}
 				}
 			} else {
 				if (s2 != null) {

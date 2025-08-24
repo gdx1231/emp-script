@@ -4,7 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -1367,15 +1368,43 @@ public class HtmlCreator {
 	 * @throws Exception
 	 */
 	public String createPageJsonAIPrompt() throws Exception {
+		long t0 = System.currentTimeMillis();
 		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
 		if ("no".equals(allowJsonExport)) {
 			return UJSon.rstFalse("NOT allow json export").toString();
 		}
-		MStr sb = new MStr();
-		sb.a("{\"CFG\":");
-		sb.al(this._Frame.createJsonFrameAIPrompt());
-		sb.a(",\"DATA\":");
+		String cfgs = this._Frame.createJsonFrameAIPrompt();
+		JSONArray jsonCfg = new JSONArray(cfgs);
 		String dataJson = this._Frame.createJsonContent(true);
+		Map<String, Integer> map = new HashMap<>();
+		for (int i = 0; i < jsonCfg.length(); i++) {
+			JSONObject cfg = jsonCfg.getJSONObject(i);
+			String name = cfg.getString("NAME");
+			String des = cfg.getString("DES");
+			if (name.equals(des)) {
+				continue;
+			}
+			if ("全选".equals(name)) {
+				name = "编号";
+			} else if ("select all".equalsIgnoreCase(name)) {
+				name = "No";
+			}
+			if (map.containsKey(des)) {
+				// 避免替换的json.key 重名
+				int inc = map.get(des);
+				inc++;
+				map.put(des, inc);
+				des = des + inc;
+			} else {
+				map.put(des, 0);
+			}
+			dataJson = dataJson.replaceAll("\"" + name + "\":", "\"" + des + "\":");
+		}
+		dataJson = dataJson.replace("<br />", "\\n");
+		long t1 = System.currentTimeMillis() - t0;
+		MStr sb = new MStr();
+
+		sb.a("{\"RST\":true,\"_time\":" + t1 + ",\"DATA\":");
 		if (dataJson == null) {
 			sb.al(this.createPageJson());
 		} else {
