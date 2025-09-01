@@ -219,6 +219,7 @@ public class RequestValue implements Cloneable {
 	private HttpServletRequest _Request;
 	private HttpSession _Session;
 	private String _ContextPath;
+	private Map<String, String> httpHeaders;
 	/**
 	 * 用于Cache文件用的标记
 	 */
@@ -939,21 +940,22 @@ public class RequestValue implements Cloneable {
 		this._ReqValues.addValue(EWAdotHOST_CONTEXT, ctx, PageValueTag.SYSTEM);
 		// 兼容过去的老方法
 		this._ReqValues.addValue("EWA.HOST.CONTEXT", ctx, PageValueTag.SYSTEM);
+		
 		Enumeration<?> enums = _Request.getHeaderNames();
 		int inc1 = 0;
-		Map<String, String> headers = new HashMap<String, String>();
+		httpHeaders = new HashMap<String, String>();
 		while (enums.hasMoreElements()) {
 			String name = enums.nextElement().toString();
 			String val = _Request.getHeader(name).toString();
 
-			headers.put(name, val);
+			httpHeaders.put(name, val);
 			if (inc1 > 100) {
 				break;
 			}
 			inc1++;
 		}
 
-		this.initParametersByHeaders(headers);
+		this.initParametersByHeaders(httpHeaders);
 
 		if (this.s(SYS_REMOTEIP) == null) {
 			// 从header未取得 X-Real-IP和X-Forwarded-For
@@ -1061,9 +1063,9 @@ public class RequestValue implements Cloneable {
 		}
 	}
 
-	
 	/**
 	 * Form 提交的参数
+	 * 
 	 * @param req
 	 */
 	private void addParameter(HttpServletRequest req) {
@@ -1082,9 +1084,9 @@ public class RequestValue implements Cloneable {
 				continue;
 
 			String RVal = req.getParameter(RKey);
-			
+
 			if (this.querys.containsKey(RKey)) { // 区分大小写
-				if(vals.length == 1) {
+				if (vals.length == 1) {
 					// 已经通过addQueryValues处理过了
 					continue;
 				}
@@ -1638,15 +1640,15 @@ public class RequestValue implements Cloneable {
 	public String listValuesHtml() {
 		StringBuilder sb = new StringBuilder();
 		String u0 = this.s("EWA.CPF_ALL");
-		if(u0!= null ) {
+		if (u0 != null) {
 			// 打开链接
-			String link="<div><a target=_blank href=\""+u0+"\">"+u0+"</a></div>";
+			String link = "<div><a target=_blank href=\"" + u0 + "\">" + u0 + "</a></div>";
 			sb.append(link);
 		}
 		String s1 = listValues(true);
 		s1 = s1.replace(" = ", " = <span style='color:red'>");
 		s1 = s1.replace("\r\n", "</span><br>");
-		
+
 		sb.append(s1);
 		return sb.toString();
 	}
@@ -1771,5 +1773,12 @@ public class RequestValue implements Cloneable {
 	 */
 	public void setHtmlCreator(HtmlCreator htmlCreator) {
 		this.htmlCreator = htmlCreator;
+	}
+
+	/**
+	 * request HTTP头信息
+	 */
+	public Map<String, String> getHttpHeaders() {
+		return httpHeaders;
 	}
 }
