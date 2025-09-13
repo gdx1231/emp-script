@@ -479,7 +479,6 @@ public class ItemValues {
 			return s1;
 		MListStr a = Utils.getParameters(s1, "@");
 		MStr sb = new MStr(s1);
-
 		for (int i = 0; i < a.size(); i++) {
 			String name = a.get(i);
 			String val = null;
@@ -488,8 +487,14 @@ public class ItemValues {
 			} catch (Exception e) {
 				val = e.getLocalizedMessage();
 			}
-
+//			//EWA.FRAME.DATA
+//			if(FrameParameters.EWAdotFRAMEdotDATA.equalsIgnoreCase(name)) {
+//				// 输出json_all，不进行替换
+//			} else {
+//				val = Utils.textToJscript(val);
+//			}
 			val = Utils.textToJscript(val);
+			
 			String find = "@" + name;
 			sb.replace(find, val);
 		}

@@ -1,7 +1,10 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
 public class FrameParameters {
-
+	/**
+	 * 在frame页面创建json_all
+	 */
+	public final static String EWAdotFRAMEdotDATA = "EWA.FRAME.DATA";
 	/**
 	 * 在Frame的TD 附加标题，描述的开关参数名称，非空
 	 *  在每个td上添加属性 ewa_cell_des, ewa_cell_memo

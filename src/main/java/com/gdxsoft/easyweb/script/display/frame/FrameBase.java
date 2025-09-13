@@ -41,6 +41,7 @@ import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UUrl;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
+import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
@@ -703,6 +704,7 @@ public class FrameBase {
 		// 用户自定义头部Js
 		String pageAddJsTop = this.getPageItemValue("AddScript", "Top");
 		if (pageAddJsTop != null && pageAddJsTop.trim().length() > 0) {
+			this.appendFrameDataToRv(pageAddJsTop);
 			pageAddJsTop = this._HtmlClass.getItemValues().replaceJsParameters(pageAddJsTop);
 			pageAddJsTop = pageAddJsTop.replace("@", IItem.REP_AT_STR);
 			doc.addJs("JS_TOP", pageAddJsTop, true);
@@ -763,14 +765,44 @@ public class FrameBase {
 	}
 
 	/**
+	 * 附加所有sql数据到Rv中 EWA.FRAME.DATA
+	 * 
+	 * @param content
+	 */
+	private void appendFrameDataToRv(String content) {
+		String key = FrameParameters.EWAdotFRAMEdotDATA; //EWA.FRAME.DATA
+		if (content == null || content.trim().length() == 0) {
+			return;
+		}
+
+		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
+		if (rv.isNotNull(key)) {
+			return;
+		}
+		MListStr paras = Utils.getParameters(content, "@");
+		for (int i = 0; i < paras.size(); i++) {
+			String p = paras.get(i);
+			// 将所有数据输出到js里
+			if (p.equalsIgnoreCase(key)) {
+				String jsonData = this.getHtmlClass().getHtmlCreator().createPageJsonAll();
+				rv.addOrUpdateValue(key, jsonData);
+				return;
+			}
+		}
+	}
+
+	/**
 	 * 配置页面定义的底部附加 Js
 	 */
 	public void createJsBottom() {
 		HtmlDocument doc = this._HtmlClass.getDocument();
-
+		// 增加附加的资源
+		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
 		String pageAddJsBottom = this.getPageItemValue("AddScript", "Bottom");
 
-		if (pageAddJsBottom != null) {
+		if (pageAddJsBottom != null && pageAddJsBottom.trim().length() > 0) {
+			this.appendFrameDataToRv(pageAddJsBottom);
+
 			// pageAddJsBottom =
 			// this._HtmlClass.getItemValues().replaceParameters(pageAddJsBottom, false);
 			pageAddJsBottom = this._HtmlClass.getItemValues().replaceJsParameters(pageAddJsBottom);
@@ -779,8 +811,6 @@ public class FrameBase {
 			doc.addJs("JS_BOTTOM", pageAddJsBottom, false);
 		}
 
-		// 增加附加的资源
-		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
 		String ewa_added_resources = rv.s(FrameParameters.EWA_ADDED_RESOURCES);
 		List<ConfAddedResource> al = StringUtils.isBlank(ewa_added_resources)
 				? ConfAddedResources.getInstance().getDefaultResList(true)
