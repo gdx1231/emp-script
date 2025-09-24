@@ -514,7 +514,7 @@ value="{__EWA_LST_VAL__}" id="{__EWA_LST_IDS__}" !!/><label title="{__EWA_LST_TI
 <input class="EWA_INPUT ewa-ipt-droplist" ewa_class='droplist' type="text"
  onkeyup="if(EWA.B.IE){EWA.F.I.DropList(this);}"
  oninput="EWA.F.I.DropList(this);" onfocus="this.select()"
- placeholder="输入字符选择"
+ placeholder="输入字符选择，输入%显示全部"
  /><input type="hidden" value="{__EWA_VAL__}" !!/>
 ]]></Html>
 				</Template>
