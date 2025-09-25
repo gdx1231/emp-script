@@ -54,6 +54,18 @@ public class SqlUtils {
 			"convert_to([FIELD],'gb18030')" };
 
 	/**
+	 * 获取SQL语句中表名，例如 -- ewa_table_name 表名
+	 * 
+	 * @param sql
+	 * @return 表名
+	 */
+	public static String getTableNameBySqlComment(String sql) {
+		final String checkName = "EWA_TABLE_NAME";
+		String[] paras = getMemoParameters(sql, checkName);
+		return paras == null ? null : paras[0];
+	}
+
+	/**
 	 * 查找自增的sql的返回字段, 例如 -- auto MEMO_ID
 	 * 
 	 * @param sql
@@ -64,21 +76,22 @@ public class SqlUtils {
 		final String checkName = "AUTO";
 		String[] paras = getMemoParameters(sql, checkName);
 		return paras == null ? null : paras[0];
-//		String[] sqls = sql.split("\n");
-//		String auto_field = null;
-//		// 从后向前找
-//		for (int m = sqls.length - 1; m >= 0; m--) {
-//			String len = sqls[m].trim().toUpperCase();
-//			if (len.startsWith("--")) {
-//				len = len.replace("--", "").trim();
-//				// 第3个的空格是 32 &nbsp;
-//				if (len.indexOf("AUTO ") >= 0 || len.indexOf("AUTO\t") >= 0 || len.indexOf("AUTO ") >= 0) {
-//					auto_field = len.replaceFirst("AUTO", "").trim();
-//					return auto_field;
-//				}
-//			}
-//		}
-//		return null;
+		// String[] sqls = sql.split("\n");
+		// String auto_field = null;
+		// // 从后向前找
+		// for (int m = sqls.length - 1; m >= 0; m--) {
+		// String len = sqls[m].trim().toUpperCase();
+		// if (len.startsWith("--")) {
+		// len = len.replace("--", "").trim();
+		// // 第3个的空格是 32 &nbsp;
+		// if (len.indexOf("AUTO ") >= 0 || len.indexOf("AUTO\t") >= 0 ||
+		// len.indexOf("AUTO ") >= 0) {
+		// auto_field = len.replaceFirst("AUTO", "").trim();
+		// return auto_field;
+		// }
+		// }
+		// }
+		// return null;
 	}
 
 	/**

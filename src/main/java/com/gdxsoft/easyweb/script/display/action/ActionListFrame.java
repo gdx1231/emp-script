@@ -29,6 +29,7 @@ import com.gdxsoft.easyweb.datasource.SearchParameterInit;
 import com.gdxsoft.easyweb.datasource.SqlPart;
 import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.AjaxParameters;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.ItemFormat;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
@@ -207,7 +208,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 		if (ajax == null) {
 			ajax = "";
 		} else {
-			ajax = ajax.trim();
+			ajax = ajax.trim().toUpperCase();
 		}
 		if (ajax.equalsIgnoreCase("DOWN_DATA")) {// 下载数据
 			String dataName = this.createDownloadData(sql1);
@@ -215,7 +216,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 				String key = "DOWN_DATA_" + rv.getString("EWA.ID");
 				rv.addValue(key, dataName);
 			}
-		} else if (ajax.equalsIgnoreCase("JSON") || ajax.equalsIgnoreCase("JSON_ALL")) {
+		} else if (ajax.indexOf("JSON")==0) {
 			boolean useSplit = rv.getString(FrameParameters.EWA_PAGESIZE) != null;
 			DTTable tb = this.executeSqlWithPageSplit(sql1, conn, rv, useSplit);
 			tb.setName(name);
@@ -248,21 +249,16 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 */
 	private DTTable executeSqlWithPageSplit(String sql1, DataConnection conn, RequestValue rv, boolean useSplit) {
 		PageSplit ps = null;
+		DTTable tb = null;
 		if (useSplit) { // 分页
 			int iPageSize = this.getUserSettingPageSize();
 			ps = new PageSplit(0, rv, iPageSize);
 			String keyField = this.getPageItemValue("PageSize", "KeyField");
-			conn.executeQueryPage(sql1, keyField, ps.getPageCurrent(), ps.getPageSize());
+			tb = DTTable.getJdbcTable(sql1, keyField, ps.getPageCurrent(), ps.getPageSize(), conn);
 		} else {
-			conn.executeQuery(sql1); // all
+			tb = DTTable.getJdbcTable(sql1, conn); // all
 		}
-		DTTable tb = new DTTable(); // 映射到自定义数据表
-		tb.initData(conn.getLastResult().getResultSet());
-		try {
-			conn.getLastResult().getResultSet().close();
-		} catch (SQLException e) {
-			LOG.warn("Close the resultSet. {}, {}", e.getMessage(), sql1);
-		}
+		 
 		if (tb.isOk()) {
 			tb.getAttsTable().add(EXECUTE_SPLIT_SQL, "1");
 			tb.getAttsTable().add(SPLIT_SQL, sql1);

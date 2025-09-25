@@ -35,6 +35,7 @@ import com.gdxsoft.easyweb.cache.SqlCached;
 import com.gdxsoft.easyweb.cache.SqlCachedValue;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.DataResult;
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UObjectValue;
@@ -73,7 +74,7 @@ public class DTTable implements Serializable {
 	private int _TimeDiffMinutes; // 用户和系统的时差
 	private String originalSql; // 原始sql
 	private String execedSql; // 执行的sql
-
+	private String tableName; //重ewa_table_name中提取
 	/**
 	 * 用户和系统的时差(分钟)
 	 * 
@@ -272,8 +273,12 @@ public class DTTable implements Serializable {
 	 * @return
 	 */
 	public static DTTable getJdbcTable(String sql, DataConnection conn) {
+
+		String tableName = SqlUtils.getTableNameBySqlComment(sql);
 		conn.executeQuery(sql);
-		return returnTable(conn);
+		DTTable tb =  returnTable(conn);
+		tb.setTableName(tableName);
+		return tb;
 	}
 
 	/**
@@ -329,8 +334,12 @@ public class DTTable implements Serializable {
 	 * @return
 	 */
 	public static DTTable getJdbcTable(String sql, String pkFiled, int pageSize, int curPage, DataConnection conn) {
+		String tableName = SqlUtils.getTableNameBySqlComment(sql);
 		conn.executeQueryPage(sql, pkFiled, curPage, pageSize);
-		return returnTable(conn);
+		DTTable tb = returnTable(conn);
+		tb.setTableName(tableName);
+		return tb;
+		
 	}
 
 	/**
@@ -2327,5 +2336,21 @@ public class DTTable implements Serializable {
 	 */
 	public void setExecedSql(String execedSql) {
 		this.execedSql = execedSql;
+	}
+
+	/**
+	 * 从 ewa_table_name提取
+	 * @return
+	 */
+	public String getTableName() {
+		return tableName;
+	}
+
+	/**
+	 * 从 ewa_table_name提取
+	 * @param tableName
+	 */
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
 	}
 }

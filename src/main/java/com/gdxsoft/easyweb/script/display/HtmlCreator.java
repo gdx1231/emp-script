@@ -840,8 +840,10 @@ public class HtmlCreator {
 			this._PageHtml = msg;
 		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON)) {
 			this._PageHtml = "[" + msgJson + "]";
-		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT) || ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT1)
-				|| ajax.equalsIgnoreCase(AjaxParameters.JSON_AI_PROMPT)) {
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT)
+				|| ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT1)
+				|| ajax.equalsIgnoreCase(AjaxParameters.JSON_AI_PROMPT)
+				|| ajax.equalsIgnoreCase(AjaxParameters.JSON_OBJECTS)) {
 			this._PageHtml = msgJson.toString();
 		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_ALL)) {
 			this._PageHtml = "[[" + msgJson + "]]";
@@ -1729,6 +1731,8 @@ public class HtmlCreator {
 			this._PageHtml = this.createPageJsonAIPrompt();
 		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_ALL)) {
 			this._PageHtml = this.createPageJsonAll();
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_OBJECTS)) {
+			this._PageHtml = this.createPageJsonObjects();
 		} else if (ajax.equalsIgnoreCase(AjaxParameters.XMLDATA)) {
 			this._PageHtml = this.createPageXml();
 		} else if (ajax.equalsIgnoreCase(AjaxParameters.SELECT_RELOAD)) {
@@ -1807,6 +1811,77 @@ public class HtmlCreator {
 			sb.append(content.replace(IItem.REP_AT_STR, "@"));
 			this._PageHtml = this._ItemValues.replaceParameters(sb.toString(), true);
 		}
+	}
+
+	/**
+	 * 获取所有的表数据，格式为{TABLENAME:[{},{}], TABLENAME2:[{},{}]}
+	 * 
+	 * @return
+	 */
+	private String createPageJsonObjects() {
+		String allowJsonExport = this.getPageItemValue("AllowJsonExport", "AllowJsonExport");
+		MStr sb = new MStr();
+		String jsonName = this.getJsonName();
+		if (jsonName != null) {
+			sb.append(Utils.textToJscript(jsonName) + " = ");
+		}
+
+		if ("no".equals(allowJsonExport)) {
+			JSONObject rst = UJSon.rstFalse("NOT allow json export");
+			return rst.toString();
+		}
+
+		int len = this._ItemValues.getDTTables().size();
+		JSONObject rst = UJSon.rstTrue();
+			rst.put("count", len);
+			JSONObject tables = new JSONObject();
+			rst.put("tables", tables);
+		if (len == 0) {
+			return rst.toString();
+		}
+		// 输出json时候忽略null值，即不输出 addr: null
+		boolean skipNullField = this.getRequestValue().s(FrameParameters.EWA_JSON_SKIP_NULL) != null;
+
+		// 处理二进制的方式
+		String convertBinMethod = this.getRequestValue().s(FrameParameters.EWA_JSON_BIN_METHOD);
+		IBinaryHandle binHandle = null;
+		if ("hex".equalsIgnoreCase(convertBinMethod)) {
+			binHandle = new Bin2HexBinaryHandle();
+		} else if ("base64".equalsIgnoreCase(convertBinMethod)) {
+			binHandle = new Bin2Base64BinaryHandle();
+		}
+		for (int i = 0; i < len; i++) {
+			DTTable dt = (DTTable) this._ItemValues.getDTTables().get(i);
+			if (binHandle != null) {
+				dt.setJsonBinaryHandle(binHandle);
+			}
+			dt.setTimeDiffMinutes(this._HtmlClass.getSysParas().getTimeDiffMinutes());
+			String tableName = dt.getTableName();
+			// 如果没有表名，自动生成一个
+			if (tableName == null || tableName.trim().length() == 0) {
+				tableName = "TABLE" + i;
+			}
+			int v = 1;
+			// 避免表名重复
+			while (tables.has(tableName)) {
+				// 避免表名重复
+				tableName = tableName + ("_" + v);
+				v++;
+				if (v > 100) {
+					// 避免死循环
+					break;
+				}
+			}
+			if (skipNullField) {
+				// 输出json时候忽略null值，即不输出 addr: null
+				tables.put(tableName, dt.toJSONArray());
+			} else {
+				String s1 = dt.toJson(this._RequestValue);
+				JSONArray arr = new JSONArray(s1);
+				tables.put(tableName, arr);
+			}
+		}
+		return rst.toString();
 	}
 
 	/**

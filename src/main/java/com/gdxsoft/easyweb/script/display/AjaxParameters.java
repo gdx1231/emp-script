@@ -64,4 +64,7 @@ public class AjaxParameters {
 
     /** 在线下载文件（如图片、PDF等） */
     public static final String DOWNLOAD_INLINE = "DOWNLOAD-INLINE";
+
+    /** 返回JSON格式数据对象 ewa_table_name */
+    public static final String JSON_OBJECTS = "JSON_OBJECTS";
 }
