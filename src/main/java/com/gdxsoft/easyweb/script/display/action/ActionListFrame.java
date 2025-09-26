@@ -2,7 +2,6 @@ package com.gdxsoft.easyweb.script.display.action;
 
 import java.io.File;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +28,6 @@ import com.gdxsoft.easyweb.datasource.SearchParameterInit;
 import com.gdxsoft.easyweb.datasource.SqlPart;
 import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
-import com.gdxsoft.easyweb.script.display.AjaxParameters;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.ItemFormat;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
@@ -254,7 +252,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 			int iPageSize = this.getUserSettingPageSize();
 			ps = new PageSplit(0, rv, iPageSize);
 			String keyField = this.getPageItemValue("PageSize", "KeyField");
-			tb = DTTable.getJdbcTable(sql1, keyField, ps.getPageCurrent(), ps.getPageSize(), conn);
+			tb = DTTable.getJdbcTable(sql1, keyField, ps.getPageSize(),ps.getPageCurrent(), conn);
 		} else {
 			tb = DTTable.getJdbcTable(sql1, conn); // all
 		}

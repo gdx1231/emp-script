@@ -41,6 +41,7 @@ import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UUrl;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
+import com.gdxsoft.easyweb.utils.msnet.MList;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
@@ -770,7 +771,7 @@ public class FrameBase {
 	 * @param content
 	 */
 	private void appendFrameDataToRv(String content) {
-		String key = FrameParameters.EWAdotFRAMEdotDATA; //EWA.FRAME.DATA
+		String key = FrameParameters.EWAdotFRAMEdotDATA; // EWA.FRAME.DATA
 		if (content == null || content.trim().length() == 0) {
 			return;
 		}
@@ -780,14 +781,58 @@ public class FrameBase {
 			return;
 		}
 		MListStr paras = Utils.getParameters(content, "@");
+		MList tables = this.getHtmlClass().getItemValues().getDTTables();
 		for (int i = 0; i < paras.size(); i++) {
 			String p = paras.get(i);
 			// 将所有数据输出到js里
 			if (p.equalsIgnoreCase(key)) {
 				String jsonData = this.getHtmlClass().getHtmlCreator().createPageJsonAll();
 				rv.addOrUpdateValue(key, jsonData);
-				return;
+				continue;
 			}
+			if (!p.toUpperCase().startsWith(key + ".")) {
+				continue;
+			}
+
+			String name = p.substring(key.length() + 1);
+			int tableIndex = -1;
+			if (name.startsWith("R")) {//倒数
+				// EWA.FRAME.DATA.R0 从后面数
+				String name1 = name.substring(1);
+				try {
+					tableIndex = Integer.parseInt(name1);
+					if (tableIndex >= 0 && tables.size() > tableIndex) {
+						DTTable tb = (DTTable) tables.get(tables.size() - 1 - tableIndex);
+						rv.addOrUpdateValue(p, tb.toJson(rv));
+					} else {
+						LOGGER.warn("Invalid tableIndex: " + tableIndex + ", key=" + p);
+					}
+					continue;
+				} catch (Exception err) {
+
+				}
+			}
+			try {
+				// EWA.FRAME.DATA.3
+				tableIndex = Integer.parseInt(name);
+				if (tableIndex >= 0 && tables.size() > tableIndex) {
+					DTTable tb = (DTTable) tables.get(tableIndex);
+					rv.addOrUpdateValue(p, tb.toJson(rv));
+				} else {
+					LOGGER.warn("Invalid tableIndex: " + tableIndex + ", key=" + p);
+				}
+				continue;
+			} catch (Exception err) {
+
+			}
+			// 按照tableName 匹配
+			for (int ia = 0; ia < tables.size(); ia++) {
+				DTTable tb = (DTTable) tables.get(ia);
+				if (name.equalsIgnoreCase(tb.getTableName())) {
+					rv.addOrUpdateValue(p, tb.toJson(rv));
+				}
+			}
+
 		}
 	}
 
