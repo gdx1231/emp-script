@@ -275,6 +275,17 @@ public class HtmlCreator {
 			this._RequestValue = new RequestValue();
 		}
 
+		// 设置Sys_frame_unid前缀
+		String prefix = this._RequestValue.s(FrameParameters.EWA_FRAME_UNID_PREFIX);
+		if (StringUtils.isNotBlank(prefix)) {
+			// 只保留中文、英文、数字,_ 去掉其他
+			String prefix1 = prefix.replaceAll("[^\\u4e00-\\u9fa5a-zA-Z0-9_]", "");
+			if (prefix1.length() == 0) {
+				prefix1 = Utils.md5(prefix);
+			}
+			this._SysParas.setFrameUnidPrefix(prefix1);
+		}
+
 		// 初始化参数，大部分内容
 		this._SysParas.initParas(xmlName, itemName, _RequestValue);
 
@@ -1833,9 +1844,9 @@ public class HtmlCreator {
 
 		int len = this._ItemValues.getDTTables().size();
 		JSONObject rst = UJSon.rstTrue();
-			rst.put("count", len);
-			JSONObject tables = new JSONObject();
-			rst.put("tables", tables);
+		rst.put("count", len);
+		JSONObject tables = new JSONObject();
+		rst.put("tables", tables);
 		if (len == 0) {
 			return rst.toString();
 		}

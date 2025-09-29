@@ -7,7 +7,7 @@ public class FrameParameters {
 	public final static String EWAdotFRAMEdotDATA = "EWA.FRAME.DATA";
 	/**
 	 * 在Frame的TD 附加标题，描述的开关参数名称，非空
-	 *  在每个td上添加属性 ewa_cell_des, ewa_cell_memo
+	 * 在每个td上添加属性 ewa_cell_des, ewa_cell_memo
 	 */
 	public final static String EWA_CELL_ADD_DES = "EWA_CELL_ADD_DES";
 	/**
@@ -20,8 +20,7 @@ public class FrameParameters {
 	 * 前端css：.ewa-col-name::before {content: attr(ewa_cell_memo);}
 	 */
 	public final static String EWA_CELL_ADD_DES_NAME_MEMO = "ewa_cell_memo";
-	
-	
+
 	/**
 	 * 通过参数传递的Title，覆盖frame的title
 	 */
@@ -229,7 +228,7 @@ public class FrameParameters {
 	 */
 	public static final String EWA_IS_SPLIT_PAGE = "EWA_IS_SPLIT_PAGE";
 
-	//luStickyHeaders
+	// luStickyHeaders
 	/**
 	 * 列表是否固定表头，限定值为yes/no，参数大小写无关<br>
 	 */
@@ -538,6 +537,11 @@ public class FrameParameters {
 	 * 中文
 	 */
 	public static final String ZHCN = "zhcn";
+
+	/**
+	 * SysFrameUnid前缀，只保留英文，数字，_，中文
+	 */
+	public static final String EWA_FRAME_UNID_PREFIX = "EWA_FRAME_UNID_PREFIX";
 
 	/**
 	 * shortName
