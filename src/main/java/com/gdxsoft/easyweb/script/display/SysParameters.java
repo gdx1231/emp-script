@@ -2,18 +2,13 @@ package com.gdxsoft.easyweb.script.display;
 
 import java.util.HashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
-import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MTable;
 
 public class SysParameters {
-	private static Logger LOGGER = LoggerFactory.getLogger(SysParameters.class);
 	private String _XmlName;
 	private String _ItemName;
 
@@ -185,24 +180,8 @@ public class SysParameters {
 		}
 		// Frame的唯一编号的前缀
 		String prefix = this._FrameUnidPrefix;
-		if (prefix == null) {
-			// 通过参数传递的前缀
-			prefix = rv.s(FrameParameters.FRAME_UNID_PREFIX);
-			if (prefix != null && prefix.trim().length() > 0) {
-				// 只保留中文、英文、数字,_ 去掉其他
-				String prefix1 = prefix.replaceAll("[^\\u4e00-\\u9fa5a-zA-Z0-9_]", "");
-				if (prefix1.length() == 0) {
-					prefix1 = Utils.md5(prefix);
-					LOGGER.warn("FRAME_UNID_PREFIX 参数未来取消，请用 EWA_FRAME_UNID_PREFIX. {}",
-							rv.s(RequestValue.SYS_REMOTE_URL_ALL));
-				}
-				prefix = prefix1;
-			}
-		}
 		if (prefix != null && prefix.trim().length() > 0) {
-
 			frameUnid = prefix + frameUnid;
-
 		}
 		rv.addValue("SYS_FRAME_UNID", frameUnid);
 

@@ -52,9 +52,14 @@ public class FrameParameters {
 	public static final String EWA_HIDDEN_FIELDS = "EWA_HIDDEN_FIELDS";
 
 	/**
-	 * 更改FrameUnid的前缀
+	 * 更改FrameUnid的前缀，请用EWA_FRAME_UNID_PREFIX
 	 */
+	@Deprecated
 	public static final String FRAME_UNID_PREFIX = "FRAME_UNID_PREFIX";
+	/**
+	 *  更改 SysFrameUnid前缀，只保留英文，数字，_，中文
+	 */
+	public static final String EWA_FRAME_UNID_PREFIX = "EWA_FRAME_UNID_PREFIX";
 	/**
 	 * ewaconfigitem或Jsp程序调用内部调用，创建为 /EWA_STYLE/cgi-bin/?xmlname=xx&amp;itemname=yy
 	 */
@@ -538,10 +543,7 @@ public class FrameParameters {
 	 */
 	public static final String ZHCN = "zhcn";
 
-	/**
-	 * SysFrameUnid前缀，只保留英文，数字，_，中文
-	 */
-	public static final String EWA_FRAME_UNID_PREFIX = "EWA_FRAME_UNID_PREFIX";
+
 
 	/**
 	 * shortName

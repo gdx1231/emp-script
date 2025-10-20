@@ -277,10 +277,18 @@ public class HtmlCreator {
 
 		// 设置Sys_frame_unid前缀
 		String prefix = this._RequestValue.s(FrameParameters.EWA_FRAME_UNID_PREFIX);
+		if (prefix == null) {
+			// 通过参数传递的前缀
+			prefix = _RequestValue.s("FRAME_UNID_PREFIX");
+			if (prefix != null && prefix.trim().length() > 0) {
+				LOGGER.warn("FRAME_UNID_PREFIX 参数未来取消，请用 EWA_FRAME_UNID_PREFIX. {}",
+						_RequestValue.s(RequestValue.SYS_REMOTE_URL_ALL));
+			}
+		}
 		if (StringUtils.isNotBlank(prefix)) {
 			// 只保留中文、英文、数字,_ 去掉其他
 			String prefix1 = prefix.replaceAll("[^\\u4e00-\\u9fa5a-zA-Z0-9_]", "");
-			if (prefix1.length() == 0) {
+			if (prefix1.length() == 0 || prefix1.length() > 50) {
 				prefix1 = Utils.md5(prefix);
 			}
 			this._SysParas.setFrameUnidPrefix(prefix1);
@@ -851,8 +859,7 @@ public class HtmlCreator {
 			this._PageHtml = msg;
 		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON)) {
 			this._PageHtml = "[" + msgJson + "]";
-		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT)
-				|| ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT1)
+		} else if (ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT) || ajax.equalsIgnoreCase(AjaxParameters.JSON_EXT1)
 				|| ajax.equalsIgnoreCase(AjaxParameters.JSON_AI_PROMPT)
 				|| ajax.equalsIgnoreCase(AjaxParameters.JSON_OBJECTS)) {
 			this._PageHtml = msgJson.toString();
