@@ -19,13 +19,15 @@
 				<Set Lang="enus" Info="First: select table" />
 			</DescriptionSet>
 		</Step>
-		<Step Eval="this.ModifyFields();" AfterEval="this.SelectFields('field');" Using="Frame,ListFrame">
+		<Step Eval="this.ModifyFields();"
+			AfterEval="this.SelectFields('field');" Using="Frame,ListFrame">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="第四步：选择字段" />
 				<Set Lang="enus" Info="First: select table" />
 			</DescriptionSet>
 		</Step>
-		<Step Eval="this.ModifyMenus();" AfterEval="this.SelectFields('menu');" Using="Tree">
+		<Step Eval="this.ModifyMenus();" AfterEval="this.SelectFields('menu');"
+			Using="Tree">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="第四步：选择菜单" />
 				<Set Lang="enus" Info="First: Select menus" />
@@ -59,23 +61,28 @@
 				</DescriptionSet>
 				<Add>
 					<GridField>
-						<Set FieldXName="X字段列表" FieldYName="Y字段列表" FieldDataName="DATA字段列表" FieldTarget="DATA" FieldAction="DATA" />
+						<Set FieldXName="X字段列表" FieldYName="Y字段列表"
+							FieldDataName="DATA字段列表" FieldTarget="DATA"
+							FieldAction="DATA" />
 					</GridField>
 				</Add>
 			</Button>
-			<Action Name="X" SqlType="query" ActionName="X" Test="" Sql="'SELECT XX FROM XXX WHERE 1=1'">
+			<Action Name="X" SqlType="query" ActionName="X" Test=""
+				Sql="'SELECT XX FROM XXX WHERE 1=1'">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="X轴数据" />
 					<Set Lang="enus" Info="AxisX Data" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="Y" ActionName="Y" SqlType="query" Test="" Sql="'SELECT YY FROM YYY WHERE 1=1'">
+			<Action Name="Y" ActionName="Y" SqlType="query" Test=""
+				Sql="'SELECT YY FROM YYY WHERE 1=1'">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="X轴数据" />
 					<Set Lang="enus" Info="AxisX Data" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="DATA" ActionName="DATA" SqlType="query" Test="" Sql="'SELECT DD FROM DDD WHERE 1=1'">
+			<Action Name="DATA" ActionName="DATA" SqlType="query" Test=""
+				Sql="'SELECT DD FROM DDD WHERE 1=1'">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="数据" />
 					<Set Lang="enus" Info="Data of cell" />
@@ -116,21 +123,24 @@
 					<Set Lang="enus" Info="Cancel" />
 				</DescriptionSet>
 			</Button>
-			<Action Name="OnPageLoad" SqlType="query" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"
+			<Action Name="OnPageLoad" SqlType="query"
+				Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"
 				Sql="this.Fields.GetSqlSelect()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="OnNew" ActionName="OnPagePost" SqlType="update" Test="'@EWA_MTYPE'='N' or '@EWA_MTYPE'='C'"
+			<Action Name="OnNew" ActionName="OnPagePost" SqlType="update"
+				Test="'@EWA_MTYPE'='N' or '@EWA_MTYPE'='C'"
 				Sql="this.Fields.GetSqlNew()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="添加新记录" />
 					<Set Lang="enus" Info="The SQL of data new" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="OnModify" ActionName="OnPagePost" SqlType="update" Test="'@EWA_MTYPE'='M'"
+			<Action Name="OnModify" ActionName="OnPagePost" SqlType="update"
+				Test="'@EWA_MTYPE'='M'"
 				Sql="this.Fields.GetSqlUpdate()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="更新SQL" />
@@ -161,33 +171,35 @@
 					<Set Lang="enus" Info="The SQL of data update" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="CheckError" SqlType="query" Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="检查错误" />
 					<Set Lang="enus" Info="Check Error" />
 				</DescriptionSet>
 			</Action>
 			<Adds>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@SYS_FRAME_UNID .EWA_TD_M{width:400px;}]]></Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
-	let ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@SYS_FRAME_UNID .EWA_TD_M{width:400px;}]]></Add>
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
+	const ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
 	//提交后台数据时执行的检查或附加数据处理
 	ewa.DoPostBefore = function(){
-		/*
+		
 		//附加数据处理
 		// ewa.PostAddData = {add1:'a',add2:2};
 
+        /*
         // 附加检查合法性
-    	if(getObj('#aaa').val()==''){
+    	if(getObj('#aaa').val() == ''){
     		return false; //检查不通过
-    	}else{
-    		return true; //检查通过
-    	}
+    	} 
 	    */
 	    return true;
 	};
 	function getObj(exp){
-		return $('#f_@sys_frame_unid').find(exp);
+		return exp? $('#f_@sys_frame_unid').find(exp): $('#f_@sys_frame_unid');
 	}
 	function init(){
 	}
@@ -247,22 +259,26 @@
 					<Set Lang="enus" Info="Cancel" />
 				</DescriptionSet>
 			</Button>
-			<Action Name="OnPagePost" SqlType="update" Sql="this.Fields.GetSqlNew()">
+			<Action Name="OnPagePost" SqlType="update"
+				Sql="this.Fields.GetSqlNew()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="添加新记录" />
 					<Set Lang="enus" Info="The SQL of data new" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="CheckError" SqlType="query" Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="检查错误" />
 					<Set Lang="enus" Info="Check Error" />
 				</DescriptionSet>
 			</Action>
 			<Adds>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@sys_frame_unid .EWA_TD_M{width:400px;}]]></Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
-	let ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@sys_frame_unid .EWA_TD_M{width:400px;}]]></Add>
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
+	const ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
 	//提交后台数据时执行的检查或附加数据处理
 	ewa.DoPostBefore = function(){
 		/*
@@ -348,28 +364,33 @@
 					<Set Lang="enus" Info="Cancel" />
 				</DescriptionSet>
 			</Button>
-			<Action Name="OnPageLoad" SqlType="query" Sql="this.Fields.GetSqlSelect()">
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlSelect()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="OnPagePost" SqlType="update" Sql="this.Fields.GetSqlUpdate()">
+			<Action Name="OnPagePost" SqlType="update"
+				Sql="this.Fields.GetSqlUpdate()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="更新SQL" />
 					<Set Lang="enus" Info="The SQL of data update" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="CheckError" SqlType="query" Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="检查错误" />
 					<Set Lang="enus" Info="Check Error" />
 				</DescriptionSet>
 			</Action>
 			<Adds>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@sys_frame_unid .EWA_TD_M{width:400px;}]]></Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
-	let ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@sys_frame_unid .EWA_TD_M{width:400px;}]]></Add>
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
+	const ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
 	//提交后台数据时执行的检查或附加数据处理
 	ewa.DoPostBefore = function(){
 		/*
@@ -447,23 +468,27 @@
 					<Set Lang="enus" Info="Cancel" />
 				</DescriptionSet>
 			</Button>
-			<Action Name="OnPageLoad" SqlType="query" Sql="this.Fields.GetSqlSelect()">
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlSelect()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
 				</DescriptionSet>
 			</Action>
 
-			<Action Name="CheckError" SqlType="query" Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="检查错误" />
 					<Set Lang="enus" Info="Check Error" />
 				</DescriptionSet>
 			</Action>
 			<Adds>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@sys_frame_unid .EWA_TD_M{width:400px;}]]></Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
-	let ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddCss/Set/AddCss"><![CDATA[#f_@sys_frame_unid .EWA_TD_M{width:400px;}]]></Add>
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){				
+	const ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
 	function getObj(exp){
 		if(exp){
 			return $('#f_@sys_frame_unid').find(exp);
@@ -531,7 +556,8 @@
 					<Set Lang="enus" Info="Login" />
 				</DescriptionSet>
 			</Button>
-			<Action Name="OnPagePost" SqlType="update" Sql="this.Fields.GetSqlLogin()">
+			<Action Name="OnPagePost" SqlType="update"
+				Sql="this.Fields.GetSqlLogin()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="读取用户信息" />
 					<Set Lang="enus" Info="Load user info" />
@@ -554,7 +580,8 @@
 				<Set Lang="enus" Info="View data"><![CDATA[
 View data]]></Set>
 			</DescriptionSet>
-			<Action Name="OnPageLoad" SqlType="query" Sql="this.Fields.GetSqlSelectLF()">
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlSelectLF()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
@@ -596,15 +623,17 @@ View data]]></Set>
 					<Set Lang="enus" Info="Extends 0" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="CheckError" SqlType="query" Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
+			<Action Name="CheckError" SqlType="query"
+				Sql="'-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2'">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="检查错误" />
 					<Set Lang="enus" Info="Check Error" />
 				</DescriptionSet>
 			</Action>
 			<Adds>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){
-	let ewa = EWA.F.FOS['@SYS_FRAME_UNID'];
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[(function(){
+	const ewa = EWA.F.FOS['@SYS_FRAME_UNID'];
 	ewa.ReloadAfter = function(httpReferer){
 		if(httpReferer) {
 			let uref = new EWA_UrlClass(httpReferer);
@@ -676,7 +705,8 @@ View data]]></Set>
 					<Set Lang="enus" Info="New" />
 				</DescriptionSet>
 				<Para XmlPath="EventSet/Set" Name="EventName" Val="'ewa_click'" />
-				<Para XmlPath="EventSet/Set" Name="EventValue" Val="'EWA.F.FOS[&quot;@'+'sys_frame_unid&quot;].ext_AddNew()'" />
+				<Para XmlPath="EventSet/Set" Name="EventValue"
+					Val="'EWA.F.FOS[&quot;@'+'sys_frame_unid&quot;].ext_NewOrModifyOrCopy(&quot;N&quot;)'" />
 				<Para XmlPath="EventSet/Set" Name="EventType" Val="'Javascript'" />
 			</Button>
 			<Button Name="butModify" Tag="button">
@@ -684,50 +714,73 @@ View data]]></Set>
 					<Set Lang="zhcn" Info="修改" />
 					<Set Lang="enus" Info="Modify" />
 				</DescriptionSet>
-				<Para XmlPath="OpenFrame/Set" Name="CallMethod" Val="'OpenReloadClose'" />
-				<Para XmlPath="OpenFrame/Set" Name="CallXmlName" Val="'@xmlname'" />
-				<Para XmlPath="OpenFrame/Set" Name="CallItemName" Val="define.Fields.TableName+'.F.NM'" />
-				<Para XmlPath="OpenFrame/Set" Name="CallParas" Val="'EWA_MTYPE=M' + define.Fields.GetPkParas()" />
+				<!-- <Para XmlPath="OpenFrame/Set" Name="CallMethod"
+					Val="'OpenReloadClose'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallXmlName"
+					Val="'@xmlname'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallItemName"
+					Val="define.Fields.TableName+'.F.NM'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallParas"
+					Val="'EWA_MTYPE=M' + define.Fields.GetPkParas()" /> 
+				-->
+				<Para XmlPath="EventSet/Set" Name="EventName" Val="'onclick'" />
+				<Para XmlPath="EventSet/Set" Name="EventValue"
+					Val="'EWA.F.FOS[&quot;@'+'sys_frame_unid&quot;].ext_NewOrModifyOrCopy(&quot;M&quot;,&quot;'+ define.Fields.GetPkParas() + '&quot;)'" />
+				<Para XmlPath="EventSet/Set" Name="EventType" Val="'Javascript'" />
 			</Button>
 			<Button Name="butCopy" Tag="button">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="复制到..." />
 					<Set Lang="enus" Info="Copy to ..." />
 				</DescriptionSet>
-				<Para XmlPath="OpenFrame/Set" Name="CallMethod" Val="'OpenReloadClose'" />
-				<Para XmlPath="OpenFrame/Set" Name="CallXmlName" Val="'@xmlname'" />
-				<Para XmlPath="OpenFrame/Set" Name="CallItemName" Val="define.Fields.TableName+'.F.NM'" />
-				<Para XmlPath="OpenFrame/Set" Name="CallParas" Val="'EWA_MTYPE=C' + define.Fields.GetPkParas()" />
+				<!-- <Para XmlPath="OpenFrame/Set" Name="CallMethod"
+					Val="'OpenReloadClose'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallXmlName"
+					Val="'@xmlname'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallItemName"
+					Val="define.Fields.TableName+'.F.NM'" />
+				<Para XmlPath="OpenFrame/Set" Name="CallParas"
+					Val="'EWA_MTYPE=C' + define.Fields.GetPkParas()" /> -->
+				<Para XmlPath="EventSet/Set" Name="EventName" Val="'onclick'" />
+				<Para XmlPath="EventSet/Set" Name="EventValue"
+					Val="'EWA.F.FOS[&quot;@'+'sys_frame_unid&quot;].ext_NewOrModifyOrCopy(&quot;C&quot;,&quot;'+ define.Fields.GetPkParas() + '&quot;)'" />
+				<Para XmlPath="EventSet/Set" Name="EventType" Val="'Javascript'" />	
 			</Button>
 			<Button Name="butDelete" Tag="button">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="删除" />
 					<Set Lang="enus" Info="Delete" />
 				</DescriptionSet>
-				<Para XmlPath="CallAction/Set" Name="ConfirmInfo" Val="'DeleteBefore'" />
-				<Para XmlPath="CallAction/Set" Name="Action" Val="'OnFrameDelete'" />
+				<Para XmlPath="CallAction/Set" Name="ConfirmInfo"
+					Val="'DeleteBefore'" />
+				<Para XmlPath="CallAction/Set" Name="Action"
+					Val="'OnFrameDelete'" />
 			</Button>
 			<Button Name="butRestore" Tag="button">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="恢复数据" />
 					<Set Lang="enus" Info="Restore" />
 				</DescriptionSet>
-				<Para XmlPath="CallAction/Set" Name="Action" Val="'OnFrameRestore'" />
+				<Para XmlPath="CallAction/Set" Name="Action"
+					Val="'OnFrameRestore'" />
 			</Button>
 			<!-- actions -->
-			<Action Name="OnPageLoad" SqlType="query" Sql="this.Fields.GetSqlSelectLF()">
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlSelectLF()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="OnFrameDelete" SqlType="update" Sql="this.Fields.GetSqlDeleteA()">
+			<Action Name="OnFrameDelete" SqlType="update"
+				Sql="this.Fields.GetSqlDeleteA()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="删除记录" />
 					<Set Lang="enus" Info="SQL of delete" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="OnFrameRestore" SqlType="update" Sql="this.Fields.GetSqlRestore()">
+			<Action Name="OnFrameRestore" SqlType="update"
+				Sql="this.Fields.GetSqlRestore()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="删除记录" />
 					<Set Lang="enus" Info="SQL of delete" />
@@ -789,13 +842,16 @@ View data]]></Set>
 					<Att Name="Name" Value="Normal"></Att>
 					<Att Name="ParaExp" Value="'@EWA_RECYCLE' != '1'"></Att>
 				</Add> -->
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top"><![CDATA[]]>
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top"><![CDATA[]]>
 				</Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom"><![CDATA[]]>
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom"><![CDATA[]]>
 				</Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[//{$EasyWebTemplate/Page/Name/Set#Name}
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddScript/Set/Bottom"><![CDATA[//{$EasyWebTemplate/Page/Name/Set#Name}
 (function(){
-	let ewa = EWA.F.FOS['@SYS_FRAME_UNID'];
+	const ewa = EWA.F.FOS['@SYS_FRAME_UNID'];
 	ewa.ReloadAfter = function(httpReferer){
 		if(httpReferer) { // 来源Frame的url，多出现在新增或修改后调用
 			let uref = new EWA_UrlClass(httpReferer);
@@ -814,11 +870,16 @@ View data]]></Set>
 		// ewa.MergeExp('toId', exp); //合并多个单元格
 	};
 
-	ewa.ext_AddNew = function(){
-		let u1 = new EWA_UrlClass(ewa.Url);
+	ewa.ext_NewOrModifyOrCopy = function(mtype, pkParas){
+		const u1 = new EWA_UrlClass(ewa.Url);
 		u1.RemoveEwa();
-		u1.AddParameter("EWA_MTYPE","N");
+		u1.AddParameter("EWA_MTYPE",mtype);
+		// 指定是否在固定高度窗口打开，窗口内容会自适应滚动
+		// u1.AddParameter("EWA_IN_DIALOG", "1");
 		let paras = u1.GetParas();
+		if(pkParas){
+            paras += '&' + pkParas;
+        }
 		EWA.UI.Dialog.OpenReloadClose('@SYS_FRAME_UNID','@xmlName', '{@define.Fields.TableName}.F.NM', false, paras);
 	};
 
@@ -869,13 +930,15 @@ View data]]></Set>
 				<Set Lang="zhcn" Info="添加到相关表中"><![CDATA[添加数据到关系表中]]></Set>
 				<Set Lang="enus" Info="Update data"><![CDATA[Add data to relationship table]]></Set>
 			</DescriptionSet>
-			<Action Name="OnPageLoad" SqlType="query" Sql="this.Fields.GetSqlRelationSelect()">
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlRelationSelect()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="OnAddDataToRelation" SqlType="update" Sql="this.Fields.GetSqlRelationUpdate()">
+			<Action Name="OnAddDataToRelation" SqlType="update"
+				Sql="this.Fields.GetSqlRelationUpdate()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="更新数据到关系表中" />
 					<Set Lang="enus" Info="The SQL of data update" />
@@ -911,10 +974,12 @@ View data]]></Set>
 				</PageInfo>
 			</PageInfos>
 			<Adds>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top"><![CDATA[
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top"><![CDATA[
 <DIV STYLE="width:700px;height:240px;overflow:auto">
 				]]></Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom"><![CDATA[
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom"><![CDATA[
 </DIV>
 <hr>
 <DIV STYLE="width:700px;text-align:right">
@@ -922,7 +987,8 @@ View data]]></Set>
 	<input type=button value='取消' res='EWA.F.FOS["@SYS_FRAME_UNID"].Resources.Cancel.GetInfo()'/>
 </DIV>
 				]]></Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Top"><![CDATA[
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddScript/Set/Top"><![CDATA[
 function AddToRelation(){
 	let s1 = EWA.F.FOS["@SYS_FRAME_UNID"].SelectChecked();
 	if(s1==''){
@@ -955,7 +1021,8 @@ function AddToRelation(){
 </ol>]]></Set>
 				<Set Lang="enus" Info="New data"><![CDATA[new data]]></Set>
 			</DescriptionSet>
-			<Menu Name="itemNew" Cmd="EWA.CurUI.NewNode();" Icon="@SYS_CONTEXTPATH/EWA_STYLE/images/defined/new.gif">
+			<Menu Name="itemNew" Cmd="EWA.CurUI.NewNode();"
+				Icon="@SYS_CONTEXTPATH/EWA_STYLE/images/defined/new.gif">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="新建" />
 					<Set Lang="enus" Info="New" />
@@ -973,31 +1040,36 @@ function AddToRelation(){
 					<Set Lang="enus" Info="&lt;hr>" />
 				</DescriptionSet>
 			</Menu>
-			<Menu Name="itemDelete" Cmd="EWA.CurUI.Delete();" Icon="@SYS_CONTEXTPATH/EWA_STYLE/images/defined/del.gif">
+			<Menu Name="itemDelete" Cmd="EWA.CurUI.Delete();"
+				Icon="@SYS_CONTEXTPATH/EWA_STYLE/images/defined/del.gif">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="删除" />
 					<Set Lang="enus" Info="Delete" />
 				</DescriptionSet>
 			</Menu>
-			<Action Name="OnPageLoad" SqlType="query" Sql="this.Fields.GetSqlTreeLoad()">
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlTreeLoad()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="OnTreeNodeDelete" SqlType="update" Sql="this.Fields.GetSqlTreeNodeDelete()">
+			<Action Name="OnTreeNodeDelete" SqlType="update"
+				Sql="this.Fields.GetSqlTreeNodeDelete()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="删除节点" />
 					<Set Lang="enus" Info="Delete node" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="OnTreeNodeRename" SqlType="update" Sql="this.Fields.GetSqlTreeNodeRename()">
+			<Action Name="OnTreeNodeRename" SqlType="update"
+				Sql="this.Fields.GetSqlTreeNodeRename()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="修改节点名称" />
 					<Set Lang="enus" Info="Rename node" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="OnTreeNodeNew" SqlType="update" Sql="this.Fields.GetSqlTreeNodeNew()">
+			<Action Name="OnTreeNodeNew" SqlType="update"
+				Sql="this.Fields.GetSqlTreeNodeNew()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="新建节点" />
 					<Set Lang="enus" Info="New node" />
@@ -1013,13 +1085,15 @@ function AddToRelation(){
 </ol>]]></Set>
 				<Set Lang="enus" Info="New data"><![CDATA[new data]]></Set>
 			</DescriptionSet>
-			<Action Name="OnPageLoad" SqlType="query" Sql="this.Fields.GetSqlTreeLoad()">
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlTreeLoad()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
 				</DescriptionSet>
 			</Action>
-			<Action Name="OnChangeNode" SqlType="update" Sql="this.Fields.GetSqlTreeChangeNode()">
+			<Action Name="OnChangeNode" SqlType="update"
+				Sql="this.Fields.GetSqlTreeChangeNode()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
@@ -1055,12 +1129,14 @@ function AddToRelation(){
 				</PageInfo>
 			</PageInfos>
 			<Adds>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top">
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top">
 					<![CDATA[
 <DIV STYLE="width:700px;height:240px;overflow:auto">
 				]]>
 				</Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom">
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom">
 					<![CDATA[
 </DIV>
 <hr>
@@ -1070,7 +1146,8 @@ function AddToRelation(){
 </DIV>
 				]]>
 				</Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Top">
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddScript/Set/Top">
 					<![CDATA[
 let linkedId=null;
 
@@ -1097,7 +1174,8 @@ function ok(){
 </ol>]]></Set>
 				<Set Lang="enus" Info="Pop dialog 4 select"><![CDATA[Pop]]></Set>
 			</DescriptionSet>
-			<Action Name="OnPageLoad" SqlType="query" Sql="this.Fields.GetSqlTreeLoad()">
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="this.Fields.GetSqlTreeLoad()">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
@@ -1133,12 +1211,14 @@ function ok(){
 				</PageInfo>
 			</PageInfos>
 			<Adds>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top">
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddHtml/Set/Top">
 					<![CDATA[
 <div style='width:700px;height:330px;overflow:auto'>
 				]]>
 				</Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom">
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddHtml/Set/Bottom">
 					<![CDATA[
 </div>
 <hr>
@@ -1148,7 +1228,8 @@ function ok(){
 	<input type=button value='取消' res='EWA.F.FOS["@SYS_FRAME_UNID"].Resources.Cancel.GetInfo()'/>
 </div>]]>
 				</Add>
-				<Add SetMethod="CDATA" XmlPath="EasyWebTemplate/Page/AddScript/Set/Top">
+				<Add SetMethod="CDATA"
+					XmlPath="EasyWebTemplate/Page/AddScript/Set/Top">
 					<![CDATA[
 let sid,sname;
 function link(id,pid,name){
@@ -1196,7 +1277,8 @@ function ok(){
 </ol>]]></Set>
 				<Set Lang="enus" Info="New data"><![CDATA[new data]]></Set>
 			</DescriptionSet>
-			<Action Name="OnPageLoad" SqlType="query" Sql="'SELECT * FROM '+this.Fields.TableName+' WHERE 1=1'">
+			<Action Name="OnPageLoad" SqlType="query"
+				Sql="'SELECT * FROM '+this.Fields.TableName+' WHERE 1=1'">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面调用时执行的SQL" />
 					<Set Lang="enus" Info="The SQL of page load" />
