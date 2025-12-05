@@ -1,6 +1,7 @@
 package com.gdxsoft.easyweb.script;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -90,6 +91,27 @@ public class PageValues {
 
 	}
 
+	/**
+	 * 从所有对象中删除keys
+	 * @param keys
+	 */
+	public void removes(List<String> keys) {
+		for (String key : keys) {
+			this.remove(key);
+		}
+		
+	}
+	/**
+	 * 从指定来源对象中删除keys
+	 * @param keys 	
+	 * @param pvTag
+	 */
+	public void removes(List<String> keys, PageValueTag pvTag) {
+		for (String key : keys) {
+			this.remove(key, pvTag);
+		}
+		
+	}
 	/**
 	 * 从指定来源对象中删除key
 	 * 
