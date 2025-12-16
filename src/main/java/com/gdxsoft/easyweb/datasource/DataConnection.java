@@ -1390,20 +1390,24 @@ public class DataConnection {
 			this.addSqlParameter(parameters, _pst);
 			_pst.executeUpdate();
 
-			// print语句的输出可通过SQLWarnings获得
-			SQLWarning warning = _pst.getWarnings();
-			int incWarings = 0;
-			while (warning != null) {
-				String msg = warning.getLocalizedMessage();
-				if (incWarings == 0) {
-					LOGGER.warn("SQL: {}", sql);
+			if (sql.toLowerCase().indexOf("update") != -1 || sql.toLowerCase().indexOf("insert") != -1
+					|| sql.toLowerCase().indexOf("delete") != -1) {
+				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + _pst.getUpdateCount());
+			} else {
+				// print语句的输出可通过SQLWarnings获得
+				SQLWarning warning = _pst.getWarnings();
+				int incWarings = 0;
+				while (warning != null) {
+					String msg = warning.getLocalizedMessage();
+					if (incWarings == 0) {
+						LOGGER.warn("SQL: {}", sql);
+					}
+					LOGGER.warn("Warning: {}", msg);
+					this.writeDebug(this, "SQL-INFO", msg);
+					warning = warning.getNextWarning();
+					incWarings++;
 				}
-				LOGGER.warn("Warning: {}", msg);
-				this.writeDebug(this, "SQL-INFO", msg);
-				warning = warning.getNextWarning();
-				incWarings++;
 			}
-
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
 			if (!this._IsTrans) {
 				if (!this._ds.getConnection().getAutoCommit()) {
@@ -1562,19 +1566,26 @@ public class DataConnection {
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql)] update. (" + sql + ")");
 			Statement st = this._ds.getStatement();
 			st.executeUpdate(sql);
-			// print语句的输出可通过SQLWarnings获得
-			SQLWarning warning = st.getWarnings();
-			int incWarings = 0;
-			while (warning != null) {
-				String msg = warning.getLocalizedMessage();
-				if (incWarings == 0) {
-					LOGGER.warn("SQL: {}", sql);
+
+			if (sql.toLowerCase().indexOf("update") != -1 || sql.toLowerCase().indexOf("insert") != -1
+					|| sql.toLowerCase().indexOf("delete") != -1) {
+				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + _pst.getUpdateCount());
+			} else {
+				// print语句的输出可通过SQLWarnings获得
+				SQLWarning warning = st.getWarnings();
+				int incWarings = 0;
+				while (warning != null) {
+					String msg = warning.getLocalizedMessage();
+					if (incWarings == 0) {
+						LOGGER.warn("SQL: {}", sql);
+					}
+					LOGGER.warn("Warning: {}", msg);
+					this.writeDebug(this, "SQL-INFO", msg);
+					warning = warning.getNextWarning();
+					incWarings++;
 				}
-				LOGGER.warn("Warning: {}", msg);
-				this.writeDebug(this, "SQL-INFO", msg);
-				warning = warning.getNextWarning();
-				incWarings++;
 			}
+
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql,rv)] End update.");
 			if (!this._IsTrans) {
 				if (!this._ds.getConnection().getAutoCommit()) {
@@ -2187,7 +2198,8 @@ public class DataConnection {
 			}
 			return;
 		}
-		if (dt.equals("BOOL") || dt.equals("BOOLEN") /*拼写错误*/ || dt.equals("BOOLEAN") || dt.equals("JAVA.LANG.BOOLEAN")) {
+		if (dt.equals("BOOL") || dt.equals("BOOLEN") /* 拼写错误 */ || dt.equals("BOOLEAN")
+				|| dt.equals("JAVA.LANG.BOOLEAN")) {
 			boolean v = Utils.cvtBool(v1);
 			cst.setBoolean(index, v);
 			this.writeDebug(this, "添加参数(Bool)" + index, parameterName + "=v");
