@@ -1569,7 +1569,7 @@ public class DataConnection {
 
 			if (sql.toLowerCase().indexOf("update") != -1 || sql.toLowerCase().indexOf("insert") != -1
 					|| sql.toLowerCase().indexOf("delete") != -1) {
-				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + _pst.getUpdateCount());
+				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + st.getUpdateCount());
 			} else {
 				// print语句的输出可通过SQLWarnings获得
 				SQLWarning warning = st.getWarnings();
