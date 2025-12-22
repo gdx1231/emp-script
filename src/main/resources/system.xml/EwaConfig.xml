@@ -3585,7 +3585,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-
+<!-- 取消页面缓存功能，意义不大
 			<XItemParameter Name="Cached" IsShow="0" IsSet="0" IsMulti="1">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="页面缓存" />
@@ -3606,7 +3606,7 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					</Value>
 				</Values>
 			</XItemParameter>
-
+-->
 			<XItemParameter Name="Acl" IsShow="0" IsSet="0" IsMulti="0">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="权限验证类" />

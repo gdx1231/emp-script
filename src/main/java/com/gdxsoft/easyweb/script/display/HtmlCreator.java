@@ -318,8 +318,8 @@ public class HtmlCreator {
 		// 设置配置类型，tree，listframe...
 		this._SysParas.setFrameType(frameType);
 
-		// 缓存时间
-		this.initCached();
+		// 缓存时间 取消页面缓存功能，意义不大 2025-12-21
+		// this.initCached();
 
 		// 事件调用名称
 		String actionName = _SysParas.getActionName();
@@ -484,6 +484,8 @@ public class HtmlCreator {
 	/**
 	 * 初始化页面缓存参数
 	 */
+	@SuppressWarnings("unused")
+	@Deprecated
 	private void initCached() {
 		// 缓存时间
 		String cachedType = this.getPageItemValue("Cached", "CachedType");
@@ -994,58 +996,51 @@ public class HtmlCreator {
 			}
 		}
 
-		CacheEwaScript cache = loadCached();
 		try {
-			if (cache == null || cache.getResult() != CacheLoadResult.OK) {
-				// 调用活动，执行数据库操作
-				_DebugFrames.addDebug(this, "HTML", "开始执行ACTION");
-				String returnValue = this.executeAction(); // "",URL,SCRIPT
-				this._ActionReturnValue = returnValue;
-				_DebugFrames.addDebug(this, "HTML", "结束执行ACTION");
+			// 调用活动，执行数据库操作
+			_DebugFrames.addDebug(this, "HTML", "开始执行ACTION");
+			String returnValue = this.executeAction(); // "",URL,SCRIPT
+			this._ActionReturnValue = returnValue;
+			_DebugFrames.addDebug(this, "HTML", "结束执行ACTION");
 
-				if (returnValue != null && returnValue.equals("[NOT RUN]")) {
-					if (_SysParas.isAjaxCall()) {
-						this._PageHtml = "DENY";
-					} else {
-						this._PageHtml = "<h1>" + this._Acl2.getNotRunTitle() + "</h1>";
-					}
-					return;
-				}
-
-				// 生成提交后行为
-				this.createPostBehavior();
-				if (returnValue.equals("")) {// 不是执行脚本或页面跳转
-					if (_SysParas.isAjaxCall()) {
-						this.createPageAjax();
-					} else {
-						createPageHtm1();
-					}
-				} else if (returnValue.equals("URL")) {// 最后执行跳转页面
-					String s = this._ItemValues.replaceParameters(this._Document.showJs(false), true);
-					if (_SysParas.isAjaxCall()) {
-						this._PageHtml = s;
-					} else {
-						this._PageHtml = Utils.getJavascript(s);
-					}
-				} else if (returnValue.equals("SCRIPT")) {// 最后执行脚本调用
-					String s = this._ItemValues.replaceParameters(this._Document.showJs(false), true);
-					if (_SysParas.isAjaxCall()) {
-						this._PageHtml = s;
-					} else {
-						this._PageHtml = Utils.getJavascript(s);
-					}
+			if (returnValue != null && returnValue.equals("[NOT RUN]")) {
+				if (_SysParas.isAjaxCall()) {
+					this._PageHtml = "DENY";
 				} else {
-					this._ErrOut = true;
-					this.errOutMessage = returnValue;
-
-					// 抛出错误
-					this._PageHtml = this.createEwaErrOut(returnValue);
-					this.getDocument().setTitle(returnValue);
+					this._PageHtml = "<h1>" + this._Acl2.getNotRunTitle() + "</h1>";
 				}
-				writeCache(cache, this.getPageHtml());
+				return;
+			}
+
+			// 生成提交后行为
+			this.createPostBehavior();
+			if (returnValue.equals("")) {// 不是执行脚本或页面跳转
+				if (_SysParas.isAjaxCall()) {
+					this.createPageAjax();
+				} else {
+					createPageHtm1();
+				}
+			} else if (returnValue.equals("URL")) {// 最后执行跳转页面
+				String s = this._ItemValues.replaceParameters(this._Document.showJs(false), true);
+				if (_SysParas.isAjaxCall()) {
+					this._PageHtml = s;
+				} else {
+					this._PageHtml = Utils.getJavascript(s);
+				}
+			} else if (returnValue.equals("SCRIPT")) {// 最后执行脚本调用
+				String s = this._ItemValues.replaceParameters(this._Document.showJs(false), true);
+				if (_SysParas.isAjaxCall()) {
+					this._PageHtml = s;
+				} else {
+					this._PageHtml = Utils.getJavascript(s);
+				}
 			} else {
-				_DebugFrames.addDebug(this, "HTML", "从缓存中加载");
-				this._PageHtml = cache.getCachedContent();
+				this._ErrOut = true;
+				this.errOutMessage = returnValue;
+
+				// 抛出错误
+				this._PageHtml = this.createEwaErrOut(returnValue);
+				this.getDocument().setTitle(returnValue);
 			}
 
 		} catch (Exception e) {
@@ -1087,6 +1082,8 @@ public class HtmlCreator {
 	 * 
 	 * @return 内容
 	 */
+	@SuppressWarnings("unused")
+	@Deprecated
 	private CacheEwaScript loadCached() {
 		CacheEwaScript cache = null;
 		if (!this._SysParas.isCached() || this._SysParas.getCachedSeconds() <= 0) {
@@ -1113,6 +1110,8 @@ public class HtmlCreator {
 	 * @param cnt
 	 * @return
 	 */
+	@SuppressWarnings("unused")
+	@Deprecated
 	private boolean writeCache(CacheEwaScript cache, String cnt) {
 		if (cache == null || !this._SysParas.isCached() && this._SysParas.getCachedSeconds() <= 0) {
 			return false;

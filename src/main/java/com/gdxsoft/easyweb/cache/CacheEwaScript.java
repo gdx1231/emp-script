@@ -8,6 +8,14 @@ import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
+
+/**
+ * EWA脚本缓存文件, 用于缓存EWA脚本生成的内容
+ * 
+ * @author gdx
+ *
+ */
+@Deprecated
 public class CacheEwaScript {
 
 	private RequestValue _Rv;
