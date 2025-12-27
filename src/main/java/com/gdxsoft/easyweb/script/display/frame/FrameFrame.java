@@ -573,6 +573,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 		return tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit") || tag.toUpperCase().startsWith("DHTML")
 				|| tag.equalsIgnoreCase("h5upload") || tag.equalsIgnoreCase("textarea") || tag.equals("markDown")
 				|| tag.equalsIgnoreCase("xmleditor") || tag.equalsIgnoreCase("jseditor")
+				|| tag.equalsIgnoreCase("csseditor")
 				|| tag.equalsIgnoreCase("sqleditor") || tag.equalsIgnoreCase("user")
 				|| tag.equalsIgnoreCase("ewaconfigitem") || tag.equalsIgnoreCase("signature");
 	}
