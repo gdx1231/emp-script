@@ -52,7 +52,17 @@ public class HtmlUtils {
 		if (lst.size() == 0) {
 			return true;
 		}
-
+		RequestValue rv = htmlClass.getSysParas().getRequestValue();
+		PageValue pv = rv.getPageValues().getPageValue(FrameParameters.EWA_VALIDCODE_CHECK);
+		// 不检查验证码，用于手机应用或AJAX调用
+		if (pv != null && "NOT_CHECK".equals(pv.toString())) {
+			if (pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS // 限定参数来源于htmlControl的paras
+					|| pv.getPVTag() == PageValueTag.SYSTEM // 限定参数来源于SYSTEM
+					|| pv.getPVTag() == PageValueTag.SESSION // 限定参数来源于session
+			) {
+				return true;
+			}
+		}
 		IOp op = ConfValidOp.getInstance().getOp();
 		for (int i = 0; i < lst.size(); i++) {
 			UserXItem uxi = lst.get(i);
