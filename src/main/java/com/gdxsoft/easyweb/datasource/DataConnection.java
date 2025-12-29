@@ -653,6 +653,61 @@ public class DataConnection {
 	}
 
 	/**
+	 * 根据逻辑判断组合SQL, 判断条件是 <b>"-- ewa_block_test"</b><br>
+	 * 
+	 * @param orignalSql
+	 * @return
+	 */
+	public String createSqlByEwaBlockTest(String orignalSql) {
+		if (this._RequestValue == null || orignalSql == null
+				|| orignalSql.toLowerCase().indexOf("ewa_block_test") == -1) {
+			return orignalSql;
+		}
+		String[] sqls = orignalSql.split("\n");
+		MStr str = new MStr();
+		str.setNewLine("\n");
+		boolean lastResult = true;
+		boolean inTestBlock = false;
+		for (int m = 0; m < sqls.length; m++) {
+			String sql = sqls[m].trim();
+			String len = sql.toLowerCase();
+			if (!len.startsWith("--")) {
+				if (!inTestBlock || lastResult) {
+					str.al(sqls[m]); // 不改变原来SQL的前导空白
+				}
+				continue;
+			}
+
+			// 获取表达式，例如：-- ewa_test_block @abc is not null
+			int loc0 = len.indexOf("ewa_block_test");
+			if (loc0 == -1) {
+				if (!inTestBlock || lastResult) {
+					str.al(sqls[m]); // 不改变原来SQL的前导空白
+				}
+				continue;
+			}
+			String len2 = sql.substring(loc0 + 14).trim(); // 去除ewa_block_test
+			String exp = null;
+			if (len2.length() == 0) {
+				// -- ewa_block_test
+				inTestBlock = false;
+				lastResult = true;
+			} else {
+				// -- ewa_block_test @name is null or @name = ''
+				exp = this.replaceSqlSelectParameters(len2);
+				// 利用HSQLDB数据库执行判断逻辑
+				lastResult = ULogic.runLogic(exp);
+			}
+			// pre 不支持html标签渲染
+			//str.a(lastResult ? "<b style='color:green'>" : "<i style='color:red'>");
+			str.al("-- ewa_block_test<" + lastResult + "> "
+					+ len2.replace("@", "&#64;") + (exp == null ? "" : " (" + exp + ")"));
+			str.a(lastResult ? "</b>" : "</i>");
+		}
+		return str.toString();
+	}
+
+	/**
 	 * 根据逻辑判断组合SQL, 判断条件是 <b>"-- ewa_test"</b><br>
 	 * SELECT A.*, B.GRP <br>
 	 * &nbsp;&nbsp; FROM TABLE1 A<br>
@@ -675,6 +730,7 @@ public class DataConnection {
 		}
 		String[] sqls = orignalSql.split("\n");
 		MStr str = new MStr();
+		str.setNewLine("\n");
 		boolean lastResult = true;
 		for (int m = 0; m < sqls.length; m++) {
 			String sql = sqls[m].trim();
@@ -695,18 +751,47 @@ public class DataConnection {
 				continue;
 			}
 			String len2 = sql.substring(loc0 + 8).trim(); // 去除ewa_test
+			String exp = null;
 			if (len2.length() == 0) {
 				// -- ewa_test
 				lastResult = true;
 			} else {
 				// -- ewa_test @name is null or @name = ''
-				String exp = this.replaceSqlSelectParameters(len2);
+				exp = this.replaceSqlSelectParameters(len2);
 				// 利用数据库执行判断逻辑
 				lastResult = ULogic.runLogic(exp);
 			}
-			str.al("-- ewa_test<" + lastResult + "> " + len2.replace("@", "<at>"));
+			//str.a(lastResult ? "<b style='color:green'>" : "<i style='color:red'>");
+			str.al("-- ewa_test<" + lastResult + "> " + len2.replace("@", "&#64;")
+					+ (exp == null ? "" : " (" + exp + ")"));
+			//str.a(lastResult ? "</b>" : "</i>");
 		}
 
+		return str.toString();
+	}
+
+	/**
+	 * 替换SQL注释行中的@符号，防止被当作参数处理
+	 * 
+	 * @param orignalSql
+	 * @return
+	 */
+	public String replaceSqlCommentAtSymbol(String orignalSql) {
+		if (orignalSql == null || orignalSql.indexOf("--") == -1) {
+			return orignalSql;
+		}
+		String[] sqls = orignalSql.split("\n");
+		MStr str = new MStr();
+		str.setNewLine("\n");
+		for (int m = 0; m < sqls.length; m++) {
+			String sql = sqls[m].trim();
+			if (!sql.startsWith("--") && !sql.contains("@")) {
+				str.al(sqls[m]); // 不改变原来SQL的前导空白
+				continue;
+			}
+			String replaced = sqls[m].replace("@", "&#64;");
+			str.al(replaced);
+		}
 		return str.toString();
 	}
 
@@ -1748,10 +1833,12 @@ public class DataConnection {
 
 			sql1 = sql1.replace("~" + para, v1);
 		}
-
+		// 根据逻辑判断组合SQL, 判断条件是 "-- ewa_block_test"
+		sql1 = this.createSqlByEwaBlockTest(sql1);
 		// 根据逻辑判断组合SQL, 判断条件是 "-- ewa_test"
 		sql1 = this.createSqlByEwaTest(sql1);
-
+		// 替换SQL注释中的@参数
+		sql1 = this.replaceSqlCommentAtSymbol(sql1);
 		// 分割字符串函数 ewa_split(@xxx, ',')
 		if (this._RequestValue != null) {
 			if (_CreateSplitData == null) {
