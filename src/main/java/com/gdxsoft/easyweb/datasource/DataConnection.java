@@ -702,7 +702,7 @@ public class DataConnection {
 			//str.a(lastResult ? "<b style='color:green'>" : "<i style='color:red'>");
 			str.al("-- ewa_block_test<" + lastResult + "> "
 					+ len2.replace("@", "&#64;") + (exp == null ? "" : " (" + exp + ")"));
-			str.a(lastResult ? "</b>" : "</i>");
+			// str.a(lastResult ? "</b>" : "</i>");
 		}
 		return str.toString();
 	}
@@ -785,7 +785,7 @@ public class DataConnection {
 		str.setNewLine("\n");
 		for (int m = 0; m < sqls.length; m++) {
 			String sql = sqls[m].trim();
-			if (!sql.startsWith("--") && !sql.contains("@")) {
+			if (!sql.startsWith("--") || !sql.contains("@")) {
 				str.al(sqls[m]); // 不改变原来SQL的前导空白
 				continue;
 			}
