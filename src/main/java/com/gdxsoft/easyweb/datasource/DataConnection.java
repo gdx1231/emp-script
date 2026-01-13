@@ -697,6 +697,7 @@ public class DataConnection {
 				exp = this.replaceSqlSelectParameters(len2);
 				// 利用HSQLDB数据库执行判断逻辑
 				lastResult = ULogic.runLogic(exp);
+				inTestBlock = true;
 			}
 			// pre 不支持html标签渲染
 			//str.a(lastResult ? "<b style='color:green'>" : "<i style='color:red'>");
