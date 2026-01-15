@@ -969,8 +969,9 @@ public class RequestValue implements Cloneable {
 		this._ReqValues.addValue(EWAdotHOST, req.getServerName(), PageValueTag.SYSTEM);
 
 		// 网站的BASE地址
+		String cp = req.getContextPath();
 		this._ReqValues.addValue(EWAdotHOST_BASE, uu.getRoot() //
-				+ req.getContextPath().substring(1) // 去除"/aaa"的"/“符号
+				+ (cp.length() > 0 ? cp.substring(1) : "") // 去除"/aaa"的"/“符号
 				+ "/", PageValueTag.SYSTEM);
 
 		this._ReqValues.addValue(EWAdotHOST_PORT, req.getServerPort(), PageValueTag.SYSTEM);
