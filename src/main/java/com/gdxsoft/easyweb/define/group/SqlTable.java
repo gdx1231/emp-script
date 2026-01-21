@@ -6,7 +6,7 @@ package com.gdxsoft.easyweb.define.group;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,13 +91,13 @@ public class SqlTable {
 				LOGGER.info("The view DDL maybe error, you should fixed this");
 				if (isSourceSqlServer && isMysql) {
 					// 来源是SQLServer，目标数据库是 MYSQL
-					viewDdl = StringUtils.replaceIgnoreCase(viewDdl, "isnull(", "ifnull(");
-					viewDdl = StringUtils.replaceIgnoreCase(viewDdl, "getdate()", "now()");
+					viewDdl = Strings.CI.replace(viewDdl, "isnull(", "ifnull(");
+					viewDdl = Strings.CI.replace(viewDdl, "getdate()", "now()");
 					viewDdl = viewDdl.replace("[", "`").replace("]", "`");
 				} else if (isSourceMysql && isSqlServer) {
 					// 来源是MYSQL，目标数据库是SQLServer
-					viewDdl = StringUtils.replaceIgnoreCase(viewDdl, "ifnull(", "ISNULL(");
-					viewDdl = StringUtils.replaceIgnoreCase(viewDdl, "now()", "GETDATE()");
+					viewDdl = Strings.CI.replace(viewDdl, "ifnull(", "ISNULL(");
+					viewDdl = Strings.CI.replace(viewDdl, "now()", "GETDATE()");
 					viewDdl = viewDdl.replace("`", "");
 				}
 				this.setCreate(table.getSqlTable());
@@ -139,8 +139,8 @@ public class SqlTable {
 			ArrayList<Field> pks = table.getPk().getPkFields();
 			sb.append(",\n\t");
 			if (!isMySql) {
-				String pkName=table.getPk().getPkName() ;
-				if("primary".equalsIgnoreCase(pkName)) {
+				String pkName = table.getPk().getPkName();
+				if ("primary".equalsIgnoreCase(pkName)) {
 					pkName = "PK_" + table.getName();
 				}
 				sb.append(" constraint " + fix.getFixCharBefore() + pkName + fix.getFixCharAfter());
@@ -171,8 +171,8 @@ public class SqlTable {
 		if (mapType == null) {
 			throw new Exception("数据类型：" + fieldType + "未定义");
 		}
-		if (mapType.getDatabaseName().equalsIgnoreCase(databaseType) && fieldType.indexOf("_MAX")<0) {
-			// 数据库类型一致的话则保持原始数据类型，不用转换			
+		if (mapType.getDatabaseName().equalsIgnoreCase(databaseType) && fieldType.indexOf("_MAX") < 0) {
+			// 数据库类型一致的话则保持原始数据类型，不用转换
 			return mapType;
 		}
 		MapFieldType[] b = mapType.getEwa().getMapTo().get(databaseType);

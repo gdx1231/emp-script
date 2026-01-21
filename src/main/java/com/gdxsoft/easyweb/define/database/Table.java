@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -517,24 +517,27 @@ public class Table {
 			// 替换元数据库的前缀
 			// ddl = ddl.replace(replaceMetaDatabaseName, REPLACE_META_DATABASE_NAME);
 			if (isSqlServer) {
-				ddl = StringUtils.replaceIgnoreCase(ddl, replaceMetaDatabaseName + "..",
+				ddl = Strings.CI.replace(ddl, replaceMetaDatabaseName + "..",
 						REPLACE_META_DATABASE_NAME + ".");
-				ddl = StringUtils.replaceIgnoreCase(ddl, replaceMetaDatabaseName + ".dbo.",
-						REPLACE_META_DATABASE_NAME + ".");
+				ddl = Strings.CI
+						.replace(ddl, replaceMetaDatabaseName + ".dbo.",
+								REPLACE_META_DATABASE_NAME + ".");
 			} else {
-				ddl = StringUtils.replaceIgnoreCase(ddl, replaceMetaDatabaseName, REPLACE_META_DATABASE_NAME);
+				ddl = Strings.CI.replace(ddl, replaceMetaDatabaseName, REPLACE_META_DATABASE_NAME);
 			}
 		}
 		if (isView && this.replaceWorkDatabaseName != null) {
 			// 替换工作数据库前缀
 			// ddl = ddl.replace(replaceWorkDatabaseName, REPLACE_WORK_DATABASE_NAME);
 			if (isSqlServer) {
-				ddl = StringUtils.replaceIgnoreCase(ddl, replaceWorkDatabaseName + "..",
-						REPLACE_WORK_DATABASE_NAME + ".");
-				ddl = StringUtils.replaceIgnoreCase(ddl, replaceWorkDatabaseName + ".dbo.",
-						REPLACE_WORK_DATABASE_NAME + ".");
+				ddl = Strings.CI
+						.replace(ddl, replaceWorkDatabaseName + "..",
+								REPLACE_WORK_DATABASE_NAME + ".");
+				ddl = Strings.CI
+						.replace(ddl, replaceWorkDatabaseName + ".dbo.",
+								REPLACE_WORK_DATABASE_NAME + ".");
 			} else {
-				ddl = StringUtils.replaceIgnoreCase(ddl, replaceWorkDatabaseName, REPLACE_WORK_DATABASE_NAME);
+				ddl = Strings.CI.replace(ddl, replaceWorkDatabaseName, REPLACE_WORK_DATABASE_NAME);
 			}
 		}
 		if (isView && isSqlServer) {
@@ -546,15 +549,15 @@ public class Table {
 
 		if (this._SchemaName.equalsIgnoreCase(this.replaceMetaDatabaseName)) {
 			if (isView) {
-				ddl = StringUtils.replaceIgnoreCase(ddl, " VIEW ", " VIEW " + REPLACE_META_DATABASE_NAME + ".", 1);
+				ddl = Strings.CI.replace(ddl, " VIEW ", " VIEW " + REPLACE_META_DATABASE_NAME + ".", 1);
 			} else {
-				ddl = StringUtils.replaceIgnoreCase(ddl, " TABLE ", " TABLE " + REPLACE_META_DATABASE_NAME + ".", 1);
+				ddl = Strings.CI.replace(ddl, " TABLE ", " TABLE " + REPLACE_META_DATABASE_NAME + ".", 1);
 			}
 		} else if (this._SchemaName.equalsIgnoreCase(this.replaceWorkDatabaseName)) {
 			if (isView) {
-				ddl = StringUtils.replaceIgnoreCase(ddl, " VIEW ", " VIEW " + REPLACE_WORK_DATABASE_NAME + ".", 1);
+				ddl = Strings.CI.replace(ddl, " VIEW ", " VIEW " + REPLACE_WORK_DATABASE_NAME + ".", 1);
 			} else {
-				ddl = StringUtils.replaceIgnoreCase(ddl, " TABLE ", " TABLE " + REPLACE_WORK_DATABASE_NAME + ".", 1);
+				ddl = Strings.CI.replace(ddl, " TABLE ", " TABLE " + REPLACE_WORK_DATABASE_NAME + ".", 1);
 			}
 		}
 

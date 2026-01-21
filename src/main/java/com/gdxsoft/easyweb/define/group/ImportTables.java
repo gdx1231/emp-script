@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -193,11 +194,13 @@ public class ImportTables {
 	}
 
 	private String replaceMysql8Collate(String sourceSql) {
-//		CREATE TABLE `adm_racl_tag` (
-//			  `RACL_TAG` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'RACL_TAG',
-//			  `RACL_NAME` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'RACL_NAME',
-//			  PRIMARY KEY (`RACL_TAG`)
-//		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+		// CREATE TABLE `adm_racl_tag` (
+		// `RACL_TAG` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
+		// COMMENT 'RACL_TAG',
+		// `RACL_NAME` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci
+		// DEFAULT NULL COMMENT 'RACL_NAME',
+		// PRIMARY KEY (`RACL_TAG`)
+		// ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 		String s = sourceSql;
 		String su = s.toUpperCase();
 		int loc0 = su.indexOf("COLLATE ");
@@ -360,8 +363,8 @@ public class ImportTables {
 				}
 			} else if (SqlUtils.isSqlServer(sourceDatabase) && isMySqlTarget) {
 				// 源数据库是sqlserver，目标数据库是mysql
-				ddl = StringUtils.replaceIgnoreCase(ddl, "isnull(", "ifnull(");
-				ddl = StringUtils.replaceIgnoreCase(ddl, "getdate()", "now()");
+				ddl = Strings.CI.replace(ddl, "isnull(", "ifnull(");
+				ddl = Strings.CI.replace(ddl, "getdate()", "now()");
 			}
 
 			LOGGER.info("Create the view {}", t.getTable().getName());
@@ -652,12 +655,12 @@ public class ImportTables {
 			} else {
 				String value = this._Conn.sqlParameterStringExp(v1);
 				sb1.a(value);
-//				String value =v1.replace("'", "''");
-//				if (isMysql) {
-//					// 替换转义符
-//					value = value.replace("\\", "\\\\");
-//				}
-// 				sb1.a(prefix + value + prefix);
+				// String value =v1.replace("'", "''");
+				// if (isMysql) {
+				// // 替换转义符
+				// value = value.replace("\\", "\\\\");
+				// }
+				// sb1.a(prefix + value + prefix);
 			}
 		}
 		sb1.append(")");
