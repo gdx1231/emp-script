@@ -700,9 +700,9 @@ public class DataConnection {
 				inTestBlock = true;
 			}
 			// pre 不支持html标签渲染
-			//str.a(lastResult ? "<b style='color:green'>" : "<i style='color:red'>");
-			str.al("-- ewa_block_test<" + lastResult + "> "
-					+ len2.replace("@", "&#64;") + (exp == null ? "" : " (" + exp + ")"));
+			// str.a(lastResult ? "<b style='color:green'>" : "<i style='color:red'>");
+			str.al("-- ewa_block_test<" + lastResult + "> " + len2.replace("@", "&#64;")
+					+ (exp == null ? "" : " (" + exp + ")"));
 			// str.a(lastResult ? "</b>" : "</i>");
 		}
 		return str.toString();
@@ -762,10 +762,10 @@ public class DataConnection {
 				// 利用数据库执行判断逻辑
 				lastResult = ULogic.runLogic(exp);
 			}
-			//str.a(lastResult ? "<b style='color:green'>" : "<i style='color:red'>");
+			// str.a(lastResult ? "<b style='color:green'>" : "<i style='color:red'>");
 			str.al("-- ewa_test<" + lastResult + "> " + len2.replace("@", "&#64;")
 					+ (exp == null ? "" : " (" + exp + ")"));
-			//str.a(lastResult ? "</b>" : "</i>");
+			// str.a(lastResult ? "</b>" : "</i>");
 		}
 
 		return str.toString();
@@ -2825,12 +2825,9 @@ public class DataConnection {
 		}
 		String s2 = s1.replace("'", "");
 		// 先获取字符串的转换的 yyyy-mm-dd表达式
-		s2 = Utils.getDateTimeString(new Date(this.getTimestamp(s2).getTime()));
-		if (this._DatabaseType.equals("ORACLE") || this._DatabaseType.equals("HSQLDB")) {
-			return "to_date('" + s2 + "','YYYY-MM-DD')";
-		} else {
-			return "'" + s2 + "'";
-		}
+		Timestamp timestamp = this.getTimestamp(s2);
+
+		return getDateTimePara(timestamp);
 	}
 
 	public String getDateTimePara(java.sql.Timestamp dt) {
@@ -2856,10 +2853,7 @@ public class DataConnection {
 		String lang = this._RequestValue != null ? this._RequestValue.getLang() : "zhcn";
 		// 是否为英式日期格式
 		boolean isUKFormat = false;
-		if (!"enus".equalsIgnoreCase(lang)) {
-			return Utils.getTimestamp(s1, lang, isUKFormat);
-		}
-		if (ConfExtraGlobals.getInstance() != null) {
+		if (ConfExtraGlobals.getInstance() != null && "enus".equalsIgnoreCase(lang)) {
 			ConfExtraGlobal extra = ConfExtraGlobals.getInstance().getConfExtraGlobalByLang(lang);
 			if (extra != null) {
 				if (extra.getDate() != null && extra.getDate().equalsIgnoreCase(UFormat.DATE_FROMAT_ENUS)) {
@@ -2871,8 +2865,12 @@ public class DataConnection {
 				}
 			}
 		}
-
-		return Utils.getTimestamp(s1, lang, isUKFormat);
+		try {
+			return Utils.getTimestamp(s1, lang, isUKFormat);
+		} catch (Exception e) {
+			LOGGER.error("转换时间错误: {} , lang={}, isUKFormat={}", s1, lang, isUKFormat);
+			return null;
+		}
 	}
 
 	public String getSchemaName() {
