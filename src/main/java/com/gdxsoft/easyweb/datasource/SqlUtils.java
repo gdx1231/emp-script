@@ -41,6 +41,7 @@ public class SqlUtils {
 			MYSQL_RESERVED.put(reseverd, true);
 		}
 	}
+
 	/**
 	 * 需要用中文排序的数据库类型
 	 */
@@ -52,6 +53,42 @@ public class SqlUtils {
 	 */
 	public final static String[] CHN_TEMPLATES = { "convert([FIELD] using gbk)", "convert([FIELD] using gbk)",
 			"convert_to([FIELD],'gb18030')" };
+
+	/**
+	 * 将SQL语句中的@符号替换为各数据库的CHAR(64)表达式
+	 * 
+	 * @param value
+	 * @param databaseType
+	 * @return
+	 */
+	public static String replaceSqlAtWithChar64(String value, String databaseType) {
+		if (value == null || databaseType == null || value.indexOf("@") < 0) {
+			return value;
+		}
+
+		if (isOracle(databaseType) || isPostgreSql(databaseType)) {
+			return "(" + value.replace("@", "' || chr(64) || '") + ")";
+		} else if (isSqlServer(databaseType)) {
+			return "(" + value.replace("@", "' + char(64) + '") + ")";
+		} else if (isHsqlDb(databaseType)) {
+			return "(" + value.replace("@", "' || char(64) || '") + ")";
+		} else if (isMySql(databaseType) || isSqlite(databaseType)) {
+			String[] parts = value.split("@", -1); // 按@拆分，保留空值
+			StringBuilder concatSb = new StringBuilder("CONCAT(");
+			for (int i = 0; i < parts.length; i++) {
+				concatSb.append("'").append(parts[i]).append("'");
+				// 除了最后一段，后面拼接,CHAR(64)
+				if (i < parts.length - 1) {
+					concatSb.append(",").append("CHAR(64)").append(",");
+				}
+			}
+			concatSb.append(")");
+			return concatSb.toString();
+		} else {
+			return value;
+		}
+
+	}
 
 	/**
 	 * 获取SQL语句中表名，例如 -- ewa_table_name 表名
@@ -369,6 +406,11 @@ public class SqlUtils {
 		return SqlUtils.checkStartWord(sql, FrameParameters.EWA_IS_SELECT);
 	}
 
+	/**
+	 * MySQL or MariaDB
+	 * @param databaseType
+	 * @return
+	 */
 	public static boolean isMySql(String databaseType) {
 		return "mysql".equalsIgnoreCase(databaseType) || "MariaDB".equalsIgnoreCase(databaseType);
 	}
@@ -377,35 +419,72 @@ public class SqlUtils {
 		return isMySql(cnn.getDatabaseType());
 	}
 
+	/**
+	 * SQL Server or Sybase
+	 * 
+	 * @param databaseType
+	 * @return
+	 */
 	public static boolean isSqlServer(String databaseType) {
-		return "mssql".equalsIgnoreCase(databaseType) || "sqlServer".equalsIgnoreCase(databaseType);
+		return "mssql".equalsIgnoreCase(databaseType) || "sqlServer".equalsIgnoreCase(databaseType)
+				|| "sybase".equalsIgnoreCase(databaseType);
 	}
 
 	public static boolean isSqlServer(DataConnection cnn) {
 		return isSqlServer(cnn.getDatabaseType());
 	}
 
+	/**
+	 * PostgreSQL or KingbaseES/ Kingbase (人大金仓)
+	 * @param databaseType
+	 * @return
+	 */
 	public static boolean isPostgreSql(String databaseType) {
-		return "PostgreSql".equalsIgnoreCase(databaseType);
+		//KingbaseES 人大金仓
+		return "PostgreSql".equalsIgnoreCase(databaseType) || "KingbaseES".equalsIgnoreCase(databaseType) || "Kingbase".equalsIgnoreCase(databaseType);
 	}
 
 	public static boolean isPostgreSql(DataConnection cnn) {
 		return isPostgreSql(cnn.getDatabaseType());
 	}
 
+	/**
+	 * Oracle or DM达梦
+	 * @param databaseType
+	 * @return
+	 */
 	public static boolean isOracle(String databaseType) {
-		return "Oracle".equalsIgnoreCase(databaseType);
+		//达梦 DM（国产主流数据库，仿 Oracle，小调整）
+		return "Oracle".equalsIgnoreCase(databaseType) || "DM".equalsIgnoreCase(databaseType);
 	}
 
 	public static boolean isOracle(DataConnection cnn) {
 		return isOracle(cnn.getDatabaseType());
 	}
 
+	/**
+	 * HSQLDB or H2
+	 * @param databaseType
+	 * @return
+	 */
 	public static boolean isHsqlDb(String databaseType) {
 		return "HSQLDB".equalsIgnoreCase(databaseType) || "H2".equalsIgnoreCase(databaseType);
 	}
 
 	public static boolean isHsqlDb(DataConnection cnn) {
+		return isHsqlDb(cnn.getDatabaseType());
+	}
+
+	/**
+	 * SQLite
+	 * @param databaseType
+	 * @return
+	 */
+	public static boolean isSqlite(String databaseType) {
+		return "sqlite".equalsIgnoreCase(databaseType);
+	}
+
+	public static boolean isSqlite(DataConnection cnn) {
 		return isHsqlDb(cnn.getDatabaseType());
 	}
 

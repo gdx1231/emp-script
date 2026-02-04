@@ -694,7 +694,7 @@ public class DataConnection {
 				lastResult = true;
 			} else {
 				// -- ewa_block_test @name is null or @name = ''
-				exp = this.replaceSqlSelectParameters(len2);
+				exp = this.replaceSqlSelectParameters(len2, "HSQLDB");
 				// 利用HSQLDB数据库执行判断逻辑
 				lastResult = ULogic.runLogic(exp);
 				inTestBlock = true;
@@ -758,7 +758,7 @@ public class DataConnection {
 				lastResult = true;
 			} else {
 				// -- ewa_test @name is null or @name = ''
-				exp = this.replaceSqlSelectParameters(len2);
+				exp = this.replaceSqlSelectParameters(len2, "HSQLDB");
 				// 利用数据库执行判断逻辑
 				lastResult = ULogic.runLogic(exp);
 			}
@@ -1967,7 +1967,6 @@ public class DataConnection {
 
 		return sql1;
 	}
-
 	/**
 	 * 替换select 查询中的参数名为具体值，原因是sqlserver在查询中出现参数表达式，会进行全表扫描<br>
 	 * 郭磊 2016-11-02
@@ -1976,6 +1975,16 @@ public class DataConnection {
 	 * @return 替换后的sql
 	 */
 	public String replaceSqlSelectParameters(String sql) {
+		return this.replaceSqlSelectParameters(sql, this.getDatabaseType());
+	}
+	/**
+	 * 替换select 查询中的参数名为具体值，原因是sqlserver在查询中出现参数表达式，会进行全表扫描<br>
+	 * 郭磊 2016-11-02
+	 * 
+	 * @param sql sql表达式
+	 * @return 替换后的sql
+	 */
+	public String replaceSqlSelectParameters(String sql, String databaseType) {
 		String sql1 = sql;
 		MListStr al = Utils.getParameters(sql, "@");
 
@@ -1987,7 +1996,7 @@ public class DataConnection {
 				continue;
 			}
 			try {
-				paramValue = this.getReplaceParameterValueExp(paramName);
+				paramValue = this.getReplaceParameterValueExp(paramName, databaseType);
 			} catch (Exception err) {
 				LOGGER.error("replaceSqlSelectParameters[" + paramName + "]: {}", err.getMessage());
 			}
@@ -2008,10 +2017,21 @@ public class DataConnection {
 	/**
 	 * 获取参数值表达式，用于select替换
 	 * 
-	 * @param paramName
+	 * @param paramName 参数名称
 	 * @return
 	 */
-	private String getReplaceParameterValueExp(String paramName) {
+	public String getReplaceParameterValueExp(String paramName) {
+		return this.getReplaceParameterValueExp(paramName, this.getDatabaseType());
+	}
+
+	/**
+	 * 获取参数值表达式，用于select替换
+	 * 
+	 * @param paramName    参数名称
+	 * @param databaseType 数据库类型
+	 * @return
+	 */
+	public String getReplaceParameterValueExp(String paramName, String databaseType) {
 		PageValue pv = this._RequestValue.getPageValues().getValue(paramName);
 
 		String v1 = null;
@@ -2030,6 +2050,13 @@ public class DataConnection {
 			}
 		}
 
+		if (pv.getValue() instanceof java.util.Date) {
+			Date dt1 = (Date) pv.getValue();
+			Timestamp ts1 = new Timestamp(dt1.getTime());
+			String dateStr = this.getDateTimePara(ts1);
+			return dateStr;
+		}
+
 		String dt = pv == null ? "String" : pv.getDataType();
 		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
 		if (dt.equals("BINARY") || dt.equals("B[")) {
@@ -2044,12 +2071,23 @@ public class DataConnection {
 		} else if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("FLOAT")) {
 			return this.getParaBigDecimal(pv).toPlainString();
 		} else if (dt.equals("DATE")) {
-			return null;
-		} else {
-			String v1Exp = this.sqlParameterStringExp(v1);
+			return this.getDateTimePara(v1);
+		}
+		
+		// 字符串类型，处理@符号
+		String v1Exp = this.sqlParameterStringExp(v1, databaseType);
+		if (v1Exp.indexOf("@") < 0) {
+			return v1Exp;
+		}
+		// 处理@符号，替换为 char(64)
+		String v2 = SqlUtils.replaceSqlAtWithChar64(v1Exp, databaseType);
+		if (v2.equals(v1Exp)) {
+			// 没有支持的数据库类型，不替换
 			StringBuilder sb = new StringBuilder();
 			sb.append(v1Exp.replace("@", "{@}"));
 			return sb.toString();
+		} else {
+			return v2;
 		}
 
 	}
@@ -2755,7 +2793,6 @@ public class DataConnection {
 			outValues.put(key, outValues1.get(key));
 		}
 	}
-
 	/**
 	 * SQL字符串参数值表达式，替换'号和\转译符号（mysql）
 	 * 
@@ -2763,6 +2800,15 @@ public class DataConnection {
 	 * @return
 	 */
 	public String sqlParameterStringExp(String parameter) {
+		return sqlParameterStringExp(parameter, this.getDatabaseType());
+	}
+	/**
+	 * SQL字符串参数值表达式，替换'号和\转译符号（mysql）
+	 * 
+	 * @param parameter 字符串参数值
+	 * @return
+	 */
+	public String sqlParameterStringExp(String parameter, String databaseType) {
 		if (parameter == null) {
 			return "NULL";
 		}
@@ -2770,9 +2816,9 @@ public class DataConnection {
 			return "''";
 		}
 		parameter = parameter.replace("'", "''");
-		if (this.getDatabaseType() != null) {
-			boolean isMysql = SqlUtils.isMySql(this);// this.getDatabaseType().equalsIgnoreCase("MYSQL");
-			boolean isSqlServer = SqlUtils.isSqlServer(this);// this.getDatabaseType().equalsIgnoreCase("MSSQL");
+		if (databaseType != null) {
+			boolean isMysql = SqlUtils.isMySql(databaseType);// this.getDatabaseType().equalsIgnoreCase("MYSQL");
+			boolean isSqlServer = SqlUtils.isSqlServer(databaseType);// this.getDatabaseType().equalsIgnoreCase("MSSQL");
 			if (isMysql) {
 				// MySql字符转义符 反斜线(‘\’)开始，
 				parameter = parameter.replace("\\", "\\\\");
@@ -2830,15 +2876,23 @@ public class DataConnection {
 		return getDateTimePara(timestamp);
 	}
 
+	/**
+	 * 获取ListFrame查询的日期表达式，ISO 8601 格式（YYYY-MM-DD HH:MI:SS），<br>
+	 * oracle 使用to_date('YYYY-MM-DD HH24:MI:SS')
+	 * 
+	 * @param dt
+	 * @return
+	 */
 	public String getDateTimePara(java.sql.Timestamp dt) {
 		if (dt == null) {
 			return null;
 		}
-		// 先获取字符串的转换的 yyyy-mm-dd表达式
+		// 先获取字符串的转换的 yyyy-MM-dd HH:mm:ss 表达式（2011-04-02 11:29:31）
 		String s2 = Utils.getDateTimeString(new Date(dt.getTime()));
-		if (this._DatabaseType.equals("ORACLE") || this._DatabaseType.equals("HSQLDB")) {
-			return "to_date('" + s2 + "','YYYY-MM-DD')";
+		if ("ORACLE".equalsIgnoreCase(this._DatabaseType)) {
+			return "to_date('" + s2 + "','YYYY-MM-DD HH24:MI:SS')";
 		} else {
+			// ISO 8601 格式（YYYY-MM-DD HH:MI:SS）
 			return "'" + s2 + "'";
 		}
 	}
