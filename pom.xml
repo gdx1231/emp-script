@@ -338,7 +338,7 @@
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>mssql-jdbc</artifactId>
 			<version>12.4.3.jre8</version>
-			<scope>compile</scope>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
