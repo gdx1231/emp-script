@@ -31,17 +31,59 @@ import com.zaxxer.hikari.HikariDataSource;
  * </p>
  */
 public class DataHelper {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DataHelper.class);
+
 	// 记录使用的数据库连接池
-	private static Map<String, DataSource> DATASOURCES = new ConcurrentHashMap<String, DataSource>();
+	private static final Map<String, DataSource> DATASOURCES = new ConcurrentHashMap<>();
+	// Per-datasource locks to avoid concurrent creation and potential deadlocks
+	// 使用一个静态的锁工厂来创建每个数据源专用的锁，避免锁的频繁创建和销毁
+	private static final ConcurrentHashMap<String, Object> DS_LOCK_FACTORIES = new ConcurrentHashMap<>();
+
+	/**
+	 * Close all datasources created and clear the DATASOURCES map to avoid
+	 * classloader leaks on webapp reload.
+	 */
+	public static void closeAllDataSources() {
+		if (DATASOURCES == null || DATASOURCES.isEmpty()) {
+			return;
+		}
+		for (Map.Entry<String, DataSource> e : new ArrayList<>(DATASOURCES.entrySet())) {
+			String name = e.getKey();
+			DataSource ds = e.getValue();
+			try {
+				if (ds instanceof HikariDataSource) {
+					LOGGER.info("Closing HikariDataSource {}", name);
+					((HikariDataSource) ds).close();
+				} else if (ds instanceof DruidDataSource) {
+					LOGGER.info("Closing DruidDataSource {}", name);
+					((DruidDataSource) ds).close();
+				} else {
+					// attempt reflective close
+					try {
+						java.lang.reflect.Method m = ds.getClass().getMethod("close");
+						m.setAccessible(true);
+						m.invoke(ds);
+						LOGGER.info("Invoked close() on DataSource {} of type {}", name, ds.getClass().getName());
+					} catch (NoSuchMethodException nsme) {
+						LOGGER.debug("DataSource {} has no close() method: {}", name, ds.getClass().getName());
+					}
+				}
+			} catch (Throwable t) {
+				LOGGER.error("Error closing DataSource {}: {}", name, t.getMessage(), t);
+			}
+		}
+		DATASOURCES.clear();
+		DS_LOCK_FACTORIES.clear(); // 清理锁工厂
+	}
 
 	private Connection _conn;
 	private boolean _connected;
 	private ConnectionConfig _Cfg;
 	private String _ErrorMsg;
-	private ArrayList<Statement> _ListStatement = new ArrayList<Statement>();
-	private ArrayList<PreparedStatement> _ListPrepared = new ArrayList<PreparedStatement>();
-	private ArrayList<CallableStatement> _ListCallable = new ArrayList<CallableStatement>();
+	private ArrayList<Statement> _ListStatement = new ArrayList<>();
+	private ArrayList<PreparedStatement> _ListPrepared = new ArrayList<>();
+	private ArrayList<CallableStatement> _ListCallable = new ArrayList<>();
 
 	public DataHelper(ConnectionConfig cfg) {
 		_Cfg = cfg;
@@ -53,7 +95,7 @@ public class DataHelper {
 
 	/**
 	 * 外部设置 数据库连接
-	 * 
+	 *
 	 * @param connection
 	 */
 	public void setConnection(Connection connection) {
@@ -62,8 +104,36 @@ public class DataHelper {
 	}
 
 	/**
-	 * 连接到数据库
-	 * 
+	 * 创建 JNDI 数据源连接
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean createJiniDataSource() throws Exception {
+		try {
+			InitialContext ctx = new InitialContext();
+			Context env = (Context) ctx.lookup("java:comp/env");
+			DataSource pool;
+			if (env != null) {
+				pool = (DataSource) env.lookup(_Cfg.getConnectionString());
+			} else {
+				String connString = "java:comp/env/" + _Cfg.getConnectionString();
+				pool = (DataSource) ctx.lookup(connString);
+			}
+			_conn = pool.getConnection();
+			_connected = true;
+		} catch (Exception ee) {
+			_connected = false;
+			this._ErrorMsg = ee.getMessage();
+			LOGGER.error(_ErrorMsg, ee); // 添加异常堆栈信息
+			throw ee;
+		}
+		return _connected;
+	}
+
+	/**
+	 * 连接到数据库 优化：在获取锁前先检查缓存，减少不必要的同步开销。
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -75,47 +145,69 @@ public class DataHelper {
 			throw new Exception("ConnectionConfig 没有设置");
 		}
 
-		DataSource pool;
+		// 如果配置了外部JNDI数据源
 		if (_Cfg.getPool() == null) {
-			try {
-				InitialContext ctx = new InitialContext();
-				Context env = (Context) ctx.lookup("java:comp/env");
-				if (env != null) {
-					pool = (DataSource) env.lookup(_Cfg.getConnectionString());
-				} else {
-					String connString = "java:comp/env/" + _Cfg.getConnectionString();
-					pool = (DataSource) ctx.lookup(connString);
-				}
-				_conn = pool.getConnection();
-				_connected = true;
-			} catch (Exception ee) {
-				_connected = false;
-				this._ErrorMsg = ee.getMessage();
-				LOGGER.error(_ErrorMsg);
-				throw ee;
-			}
-		} else {
-			String key = _Cfg.getName().toUpperCase().trim();
-			DataSource cpds;
-			if (DATASOURCES == null || !DATASOURCES.containsKey(key)) {
-				try {
-					cpds = this.createMyDatasource();
-				} catch (Exception e) {
-					_connected = false;
-					this._ErrorMsg = e.getMessage();
-					throw e;
-				}
-			} else {
-				cpds = DATASOURCES.get(key);
-			}
+			return createJiniDataSource();
+		}
 
+		// --- 自定义连接池逻辑 ---
+		String key = _Cfg.getName().toUpperCase().trim();
+
+		// 1. 优化点：首先尝试从缓存获取数据源，避免进入锁逻辑
+		DataSource cachedDataSource = DATASOURCES.get(key);
+		if (cachedDataSource != null) {
 			try {
-				this._conn = cpds.getConnection();
+				// 尝试从现有池中获取连接，这通常是非常快的操作
+				this._conn = cachedDataSource.getConnection();
 				_connected = true;
+				return _connected;
 			} catch (SQLException e) {
+				// 如果连接失败，可能是池有问题，但这种情况较少见，仍需处理
 				_connected = false;
 				this._ErrorMsg = e.getMessage();
-				LOGGER.error(_ErrorMsg);
+				LOGGER.error("Failed to get connection from existing pool for key: " + key, e);
+				throw e;
+			}
+		}
+
+		// 2. 缓存未命中，开始创建数据源的流程
+		// 获取一个专门用于创建此数据源的锁对象
+		Object lockObj = DS_LOCK_FACTORIES.computeIfAbsent(key, k -> new Object());
+
+		// 使用 synchronized 块，其性能在现代JVM中对于简单场景已足够好，且代码更简洁
+		synchronized (lockObj) {
+			// 3. 双重检查：在获取锁后再次检查缓存，防止重复创建
+			DataSource dataSourceInCache = DATASOURCES.get(key);
+			if (dataSourceInCache != null) {
+				// 在锁内发现另一个线程已经创建了数据源，直接复用
+				try {
+					this._conn = dataSourceInCache.getConnection();
+					_connected = true;
+				} catch (SQLException e) {
+					_connected = false;
+					this._ErrorMsg = e.getMessage();
+					LOGGER.error("Failed to get connection from concurrently created pool for key: " + key, e);
+					throw e;
+				}
+				return _connected;
+			}
+
+			// 4. 当前线程负责创建数据源
+			try {
+				DataSource newlyCreatedDs = this.createMyDatasource();
+				// createMyDatasource() 内部已经将新创建的数据源放入了 DATASOURCES 缓存
+				// 为保证一致性，再次从缓存获取并尝试连接
+				DataSource finalDs = DATASOURCES.get(key);
+				if (finalDs == null || finalDs != newlyCreatedDs) {
+					// 理论上不应该发生，但如果发生了，说明内部逻辑有问题
+					throw new IllegalStateException("Data source creation failed internally for key: " + key);
+				}
+				this._conn = finalDs.getConnection();
+				_connected = true;
+			} catch (Exception e) {
+				_connected = false;
+				this._ErrorMsg = e.getMessage();
+				LOGGER.error("Failed to create or get connection from new pool for key: " + key, e);
 				throw e;
 			}
 		}
@@ -125,7 +217,7 @@ public class DataHelper {
 
 	/**
 	 * 创建自定义的数据库连接池
-	 * 
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -134,172 +226,155 @@ public class DataHelper {
 		if ("druid".equalsIgnoreCase(poolType)) {
 			return this.createMyDatasourcesDruids();
 		} else {
+			// 默认使用 HikariCP
 			return this.createMyDatasourcesHikariCP();
 		}
 	}
 
 	/**
 	 * 使用 HikariCP（默认）
-	 * 
+	 *
 	 * @return
 	 * @throws Exception
 	 */
 	private DataSource createMyDatasourcesHikariCP() throws Exception {
-
-		// connectionTimeout
-		// 此属性控制客户端（即您）等待来自池的连接的最大毫秒数。如果超过此时间而没有可用的连接，则会抛出SQLException。可接受的最低连接超时为250
-		// ms。 默认值：30000（30秒）
-
-		// idleTimeout
-		// 此属性控制允许连接在池中保持空闲状态的最长时间。 仅当minimumIdle定义为小于时，此设置才适用maximumPoolSize。池达到连接后，
-		// 空闲连接将不会退出minimumIdle。连接是否以空闲状态退役，最大变化为+30秒，平均变化为+15秒。在此超时之前，连接永远不会因为闲置而退役。值为0表示永远不会从池中删除空闲连接。最小允许值为10000ms（10秒）。
-		// 默认值：600000（10分钟）
-
-		// maxLifetime
-		// 此属性控制池中连接的最大生存期。使用中的连接永远不会停止使用，只有在关闭连接后才将其删除。在逐个连接的基础上，应用较小的负衰减以避免池中的质量消灭。
-		// 我们强烈建议设置此值，它应该比任何数据库或基础结构施加的连接时间限制短几秒钟。
-		// 值0表示没有最大寿命（无限寿命），当然要遵守该idleTimeout设置。最小允许值为30000ms（30秒）。 默认值：1800000（30分钟）
-
-		// minimumIdle
-		// 此属性控制HikariCP尝试在池中维护的最小空闲连接数。如果空闲连接下降到该值以下，并且池中的总连接数少于maximumPoolSize，则HikariCP将尽最大努力快速而有效地添加其他连接。但是，为了获得最佳性能和对峰值需求的响应能力，我们建议不要设置此值，而应让HikariCP充当固定大小的连接池。
-		// 默认值：与maximumPoolSize相同
-
-		// maximumPoolSize
-		// 此属性控制允许池达到的最大大小，包括空闲和使用中的连接。基本上，此值将确定到数据库后端的最大实际连接数。合理的值最好由您的执行环境确定。当池达到此大小并且没有空闲连接可用时，对getConnection（）的调用将connectionTimeout在超时之前最多阻塞毫秒。请阅读有关池大小的信息。
-		// 默认值：10
-
-		LOGGER.info("Using HikariCP");
+		LOGGER.info("Using HikariCP for config: {}", _Cfg.getName());
 		String driverClassName = _Cfg.getPool().get("driverClassName");
 		MStr errors = new MStr();
 		if (StringUtils.isBlank(driverClassName)) {
-			LOGGER.error("driverClassName not defined");
+			LOGGER.error("driverClassName not defined in config: {}", _Cfg.getName());
 			errors.al("driverClassName not defined");
 		}
 		String url = _Cfg.getPool().get("url");
 		if (StringUtils.isBlank(url)) {
-			LOGGER.error("url not defined");
+			LOGGER.error("url not defined in config: {}", _Cfg.getName());
 			errors.al("url not defined");
 		}
 		String username = _Cfg.getPool().get("username");
 		if (StringUtils.isBlank(username)) {
-			LOGGER.error("username not defined");
+			LOGGER.error("username not defined in config: {}", _Cfg.getName());
 			errors.al("username not defined");
 		}
-		
-		LOGGER.info("driverClassName={}, username={}, url={}", driverClassName, username, url);
+
 		if (errors.length() > 0) {
 			throw new Exception(errors.toString());
 		}
 
 		String password = _Cfg.getPool().get("password");
-		String maxActive = _Cfg.getPool().get("maxActive");
-		// String maxIdle = _Cfg.getPool().get("maxIdle");
+		String maxActiveStr = _Cfg.getPool().get("maxActive");
+		String maxWaitStr = _Cfg.getPool().get("maxWait");
 
 		HikariDataSource cpds = new HikariDataSource();
-
 		cpds.setDriverClassName(driverClassName);
 		cpds.setJdbcUrl(url);
 		cpds.setUsername(username);
 		cpds.setPassword(password);
+
 		try {
-			// 允许池达到的最大值
-			int maxActive1 = Integer.parseInt(maxActive);
-			cpds.setMaximumPoolSize(maxActive1);
-		} catch (Exception err) {
+			int maxActive = Integer.parseInt(maxActiveStr);
+			cpds.setMaximumPoolSize(Math.max(1, maxActive)); // 确保至少为1
+		} catch (NumberFormatException e) {
+			LOGGER.warn("Invalid maxActive value '{}', using default 40", maxActiveStr);
 			cpds.setMaximumPoolSize(40);
 		}
 
 		cpds.setMinimumIdle(1);
 
-		long maxLifetimeMin = 30000l;// 最小允许值30秒
+		// 设置连接最大生存时间，避免长连接问题
+		long maxLifetimeMs = 1800000L; // 30分钟，默认值
 		try {
-			String maxWait = _Cfg.getPool().get("maxWait");
-			long maxWaitMs = Long.parseLong(maxWait) * 1000;
-			if (maxWaitMs < maxLifetimeMin) {
-				maxWaitMs = maxLifetimeMin;
+			long maxWaitSec = Long.parseLong(maxWaitStr);
+			if (maxWaitSec > 0) {
+				maxLifetimeMs = Math.max(30000L, maxWaitSec * 1000L); // 转换为毫秒，并确保最小值
 			}
-			cpds.setMaxLifetime(maxWaitMs);
-
-		} catch (Exception err) {
+		} catch (NumberFormatException e) {
+			LOGGER.warn("Invalid maxWait value '{}', using default 30 minutes for maxLifetime", maxWaitStr);
 		}
-		DATASOURCES.put(_Cfg.getName().toUpperCase().trim(), cpds);
+		cpds.setMaxLifetime(maxLifetimeMs);
+
+		String key = _Cfg.getName().toUpperCase().trim();
+		DATASOURCES.put(key, cpds);
+		LOGGER.info("HikariCP DataSource '{}' created successfully.", key);
 		return cpds;
 	}
 
 	/**
 	 * 使用 Druid
-	 * 
+	 *
 	 * @return
 	 * @throws Exception
 	 */
 	private DataSource createMyDatasourcesDruids() throws Exception {
-		LOGGER.info("Using Druid");
-
+		LOGGER.info("Using Druid for config: {}", _Cfg.getName());
 		String driverClassName = _Cfg.getPool().get("driverClassName");
 		MStr errors = new MStr();
 		if (StringUtils.isBlank(driverClassName)) {
-			LOGGER.error("driverClassName not defined");
+			LOGGER.error("driverClassName not defined in config: {}", _Cfg.getName());
 			errors.al("driverClassName not defined");
 		}
 		String url = _Cfg.getPool().get("url");
 		if (StringUtils.isBlank(url)) {
-			LOGGER.error("url not defined");
+			LOGGER.error("url not defined in config: {}", _Cfg.getName());
 			errors.al("url not defined");
 		}
 		String username = _Cfg.getPool().get("username");
 		if (StringUtils.isBlank(username)) {
-			LOGGER.error("username not defined");
+			LOGGER.error("username not defined in config: {}", _Cfg.getName());
 			errors.al("username not defined");
 		}
 		String password = _Cfg.getPool().get("password");
 		if (StringUtils.isBlank(password)) {
-			LOGGER.error("password not defined");
+			LOGGER.error("password not defined in config: {}", _Cfg.getName());
 			errors.al("password not defined");
 		}
-		LOGGER.debug("driverClassName={}, username={}, password=xxx, url={}", driverClassName, username, url);
+
 		if (errors.length() > 0) {
 			throw new Exception(errors.toString());
 		}
 
-		String maxActive = _Cfg.getPool().get("maxActive");
-		// String maxIdle = _Cfg.getPool().get("maxIdle");
+		String maxActiveStr = _Cfg.getPool().get("maxActive");
+		String maxWaitStr = _Cfg.getPool().get("maxWait");
 
 		DruidDataSource cpds = new DruidDataSource();
-
 		cpds.setDriverClassName(driverClassName);
 		cpds.setUrl(url);
 		cpds.setUsername(username);
 		cpds.setPassword(password);
-		cpds.setMaxActive(Integer.parseInt(maxActive));
+
+		try {
+			int maxActive = Integer.parseInt(maxActiveStr);
+			cpds.setMaxActive(Math.max(1, maxActive));
+		} catch (NumberFormatException e) {
+			LOGGER.warn("Invalid maxActive value '{}', using default 8", maxActiveStr);
+			cpds.setMaxActive(8);
+		}
 
 		cpds.setInitialSize(1);
 		cpds.setMinIdle(1);
-		cpds.setFilters("stat");
-
 		cpds.setTestOnBorrow(false);
 		cpds.setTestOnReturn(false);
 		cpds.setTestWhileIdle(false);
-
-		// 查询超时 60 s
 		cpds.setValidationQueryTimeout(60);
-		// cpds.setConnectionProperties("druid.stat.mergeSql=true");
-		// cpds.setValidationQuery("select 1");
+
 		try {
-			// 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0
-			String maxWait = _Cfg.getPool().get("maxWait");
-			cpds.setMaxWait(Integer.parseInt(maxWait));
-		} catch (Exception err) {
-			cpds.setMaxWait(60);
+			int maxWaitMs = Integer.parseInt(maxWaitStr);
+			cpds.setMaxWait(Math.max(1000, maxWaitMs)); // 确保最小值
+		} catch (NumberFormatException e) {
+			LOGGER.warn("Invalid maxWait value '{}', using default 60000ms", maxWaitStr);
+			cpds.setMaxWait(60000);
 		}
-		DATASOURCES.put(_Cfg.getName().toUpperCase().trim(), cpds);
+
+		String key = _Cfg.getName().toUpperCase().trim();
+		DATASOURCES.put(key, cpds);
+		LOGGER.info("Druid DataSource '{}' created successfully.", key);
 		return cpds;
 	}
 
 	/**
-	 * 获取Statement
+	 * 获取 Statement 对象
 	 * 
 	 * @return
-	 * @throws SQLException
+	 * @throws Exception
 	 */
 	public Statement getStatement() throws Exception {
 		this.connect();
@@ -309,7 +384,7 @@ public class DataHelper {
 	}
 
 	/**
-	 * 获取PreparedStatement
+	 * 获取 PreparedStatement 对象
 	 * 
 	 * @param sql
 	 * @return
@@ -322,6 +397,13 @@ public class DataHelper {
 		return pst;
 	}
 
+	/**
+	 * 获取 PreparedStatement 对象，并且设置为自动返回自增主键
+	 * 
+	 * @param sql
+	 * @return
+	 * @throws Exception
+	 */
 	public PreparedStatement getPreparedStatementAutoIncrement(String sql) throws Exception {
 		this.connect();
 		PreparedStatement pst = this._conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -330,7 +412,7 @@ public class DataHelper {
 	}
 
 	/**
-	 * 获取CallableStatement
+	 * 获取 CallableStatement 对象
 	 * 
 	 * @param sql
 	 * @return
@@ -344,7 +426,7 @@ public class DataHelper {
 	}
 
 	/**
-	 * 关闭给数据库的连接
+	 * 关闭数据库连接
 	 */
 	public void close() {
 		if (!_connected) {
@@ -375,24 +457,21 @@ public class DataHelper {
 			}
 		}
 		try {
-			// rset.close();
-			if (_connected) {
-				if (_conn != null) {
-					_conn.close();
-				}
-				_connected = false;
+			if (_conn != null) {
+				_conn.close();
 			}
+			_connected = false;
 		} catch (SQLException ee) {
 			this._ErrorMsg += "\r\n" + ee.getMessage();
 		}
-
 	}
 
 	/**
-	 * @return the _ErrorMsg
+	 * 获取错误信息
+	 * 
+	 * @return
 	 */
 	public String getErrorMsg() {
 		return _ErrorMsg;
 	}
-
 }
