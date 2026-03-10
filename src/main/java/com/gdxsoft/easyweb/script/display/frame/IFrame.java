@@ -12,6 +12,8 @@ public interface IFrame {
 
 	FrameBase getFrameBase();
 
+	 
+
 	/**
 	 * 创建用于AI提示词的JSON格式的页面框架(2025-08-23)
 	 * 

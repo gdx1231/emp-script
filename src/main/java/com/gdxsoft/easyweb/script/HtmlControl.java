@@ -35,6 +35,26 @@ public class HtmlControl {
 
 	private boolean skipAcl;
 
+	private String ajaxCallUrl;
+
+	/**
+	 * 设置 Ajax 调用的 URL，供页面上的 Ajax 调用使用
+	 * 
+	 * @return
+	 */
+	public String getAjaxCallUrl() {
+		return ajaxCallUrl;
+	}
+
+	/**
+	 * 设置 Ajax 调用的 URL，供页面上的 Ajax 调用使用
+	 * 
+	 * @param ajaxCallUrl Ajax 调用的 URL
+	 */
+	public void setAjaxCallUrl(String ajaxCallUrl) {
+		this.ajaxCallUrl = ajaxCallUrl;
+	}
+
 	/**
 	 * 获取执行过程
 	 * 
@@ -154,6 +174,13 @@ public class HtmlControl {
 	 */
 	public void init(String xmlName, String itemName, String paras, RequestValue rv, HttpServletResponse response) {
 		HtmlCreator hc = new HtmlCreator();
+		// FrameUnid 前缀修正名称，避免同一个对象多次调用
+		if (this._FrameUnidPrefix != null && this._FrameUnidPrefix.trim().length() > 0) {
+			hc.getSysParas().setFrameUnidPrefix(_FrameUnidPrefix);
+		}
+		if (this.ajaxCallUrl != null && this.ajaxCallUrl.trim().length() > 0) {
+			hc.getSysParas().setAjaxCallUrl(this.ajaxCallUrl);
+		}
 		try {
 			hc.init(xmlName, itemName, paras, rv, response);
 			this.initHtmlCreator(hc);
@@ -180,6 +207,9 @@ public class HtmlControl {
 		// FrameUnid 前缀修正名称，避免同一个对象多次调用
 		if (this._FrameUnidPrefix != null && this._FrameUnidPrefix.trim().length() > 0) {
 			hc.getSysParas().setFrameUnidPrefix(_FrameUnidPrefix);
+		}
+		if (this.ajaxCallUrl != null && this.ajaxCallUrl.trim().length() > 0) {
+			hc.getSysParas().setAjaxCallUrl(this.ajaxCallUrl);
 		}
 		try {
 			hc.init(xmlName, itemName, paras, request, session, response);

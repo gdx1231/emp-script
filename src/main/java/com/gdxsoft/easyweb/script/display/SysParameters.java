@@ -56,6 +56,25 @@ public class SysParameters {
 	private boolean _IsMiniProgram = false;
 	private boolean _IsVue = false;
 
+	// Ajax调用的URL，2026-03-01新增
+		private String ajaxCallUrl;
+	
+	/**
+	 * 设置 Ajax 调用的 URL，供页面上的 Ajax 调用使用
+	 * @return
+	 */
+	public String getAjaxCallUrl() {
+		return ajaxCallUrl;
+	}
+
+	/**
+	 * 设置 Ajax 调用的 URL，供页面上的 Ajax 调用使用
+	 * @param ajaxCallUrl Ajax 调用的 URL
+	 */
+	public void setAjaxCallUrl(String ajaxCallUrl) {
+		this.ajaxCallUrl = ajaxCallUrl;
+	}
+	
 	/**
 	 * 和系统当前时区差值(分钟)
 	 * 

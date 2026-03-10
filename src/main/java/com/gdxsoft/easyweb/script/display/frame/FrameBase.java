@@ -724,14 +724,28 @@ public class FrameBase {
 		UUrl uu = new UUrl(rv.getRequest());
 
 		String callMethod = rv.s(FrameParameters.EWA_CALL_METHOD);
+
+		//通过外部设置的ajaxCallUrl参数调用，优先级高于INNER_CALL
+		String ajaxCallUrl = this.getHtmlClass().getSysParas().getAjaxCallUrl();
+
 		// INNER_CALL 调用模式，表示为ewaconfigitem或 JSp程序调用
-		if (FrameParameters.INNER_CALL.equalsIgnoreCase(callMethod)) {
+		if (ajaxCallUrl != null && ajaxCallUrl.trim().length() > 0) {
+			// Ajax调用，使用ajaxCallUrl
+			UUrl uu1 = new UUrl(ajaxCallUrl);
+			uu.setPath(uu1.getPath());
+			uu.getParams().forEach((k, v) -> {
+				if(!uu1.getParams().containsKey(k.toUpperCase())) {
+					uu1.add(k, v);
+				}  
+			});
+			uu = uu1;
+		} else if (FrameParameters.INNER_CALL.equalsIgnoreCase(callMethod)) {
 			uu.setPath(rv.getContextPath());
 			uu.setName("/EWA_STYLE/cgi-bin/");
 
 			uu.add(FrameParameters.XMLNAME, rv.s(FrameParameters.XMLNAME));
 			uu.add(FrameParameters.ITEMNAME, rv.s(FrameParameters.ITEMNAME));
-		}
+		}  
 		// 来自HtmlControl的参数放到 PageValueTag.HTML_CONTROL_PARAS 中
 		// 覆盖queryString
 		this.attachHtmlControlParas(uu, rv);
@@ -796,7 +810,7 @@ public class FrameBase {
 
 			String name = p.substring(key.length() + 1);
 			int tableIndex = -1;
-			if (name.startsWith("R")) {//倒数
+			if (name.startsWith("R")) {// 倒数
 				// EWA.FRAME.DATA.R0 从后面数
 				String name1 = name.substring(1);
 				try {
@@ -1496,4 +1510,5 @@ public class FrameBase {
 	public Map<String, DTTable> getSearchFixTables() {
 		return searchFixTables;
 	}
+
 }
