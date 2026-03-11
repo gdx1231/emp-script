@@ -144,6 +144,7 @@ public class MsWord implements IWord {
 			net.setCookie(ck);
 		}
 		HashMap<String, Integer> map = new HashMap<String, Integer>();
+		List<String> downloadPics = new ArrayList<String>();
 		for (int i = 0; i < ps.length; i++) {
 			String u = ps[i];
 			int loc = u.lastIndexOf("/");
@@ -171,8 +172,9 @@ public class MsWord implements IWord {
 			String name1 = "ewa_v2_doc" + fixed + ext;
 			String path = this.rootPath + "/word/media/" + name1;
 			UFile.createBinaryFile(path, buf, true);
+			downloadPics.add("media/" + name1);
 		}
-		modifyRels();
+		modifyRels(downloadPics);
 		modifyTypes(map);
 
 	}
@@ -282,21 +284,38 @@ public class MsWord implements IWord {
 		UXml.saveDocument(doc, name);
 	}
 
-	private void modifyRels() throws ParserConfigurationException, SAXException, IOException {
+	/**
+	 * 修改docx关系文件，添加图片关系
+	 * @param downloadPics
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	private void modifyRels(List<String> downloadPics) throws ParserConfigurationException, SAXException, IOException {
 		// <Relationship Id="rId9"
 		// Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
 		// Target="media/image2.png"/>
 		String name = this.rootPath + "/word/_rels/document.xml.rels";
 		Document doc = UXml.retDocument(name);
 		NodeList nl = doc.getElementsByTagName("Relationship");
-		File media = new File(this.rootPath + "/word/media");
-		File[] fs = media.listFiles();
-		for (int i = 0; i < fs.length; i++) {
+		
+		// 直接读取media目录下的文件，可能会有问题，因为在 mac 下获取文件的排序有可能和 windows 不一样，导致图片的关系不对，所以改为直接使用下载的图片列表
+//		File media = new File(this.rootPath + "/word/media");
+//		File[] fs = media.listFiles();
+//		for (int i = 0; i < fs.length; i++) {
+//			Node n = doc.createElement("Relationship");
+//			Element ele = (Element) n;
+//			ele.setAttribute("Id", "pic" + i);
+//			ele.setAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image");
+//			ele.setAttribute("Target", "media/" + fs[i].getName());
+//			nl.item(0).getParentNode().appendChild(ele);
+//		}
+		for (int i = 0; i < downloadPics.size(); i++) {
 			Node n = doc.createElement("Relationship");
 			Element ele = (Element) n;
 			ele.setAttribute("Id", "pic" + i);
 			ele.setAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image");
-			ele.setAttribute("Target", "media/" + fs[i].getName());
+			ele.setAttribute("Target", downloadPics.get(i));
 			nl.item(0).getParentNode().appendChild(ele);
 		}
 		UXml.saveDocument(doc, name);
