@@ -29,15 +29,31 @@ import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
 import com.gdxsoft.easyweb.uploader.Upload;
 import com.gdxsoft.easyweb.utils.UPath;
-import com.gdxsoft.easyweb.utils.UUrl;
 
+/**
+ * ServletRestful
+ * <p>
+ * 提供基于配置的 RESTful API 入口，统一处理 GET/POST/PUT/PATCH/DELETE 等方法。
+ * 具体的行为由 ConfRestful 配置文件定义，并通过 HtmlControl 执行相应的操作。
+ * </p>
+ * 主要职责：
+ * - 解析请求（包括 multipart 上传）
+ * - 根据请求路径和方法查找 ConfRestful
+ * - 根据 ConfRestful 执行对应逻辑（上传/下载/图片/数据操作）
+ * - 封装统一的 JSON 响应格式（RestfulResult）并设置 HTTP 状态码
+ */
 public class ServletRestful extends HttpServlet {
 	private static Logger LOGGER = LoggerFactory.getLogger(ServletRestful.class);
 	/**
-	 * 
+	 * 序列号
 	 */
 	private static final long serialVersionUID = 4725107647089996010L;
 
+	/**
+	 * 重写 service 方法，统一捕获异常并返回 500 错误
+	 * 1. 调用 ewaRestfulHandler 处理请求
+	 * 2. 使用 outContent 输出结果（支持 GZip）
+	 */
 	@Override
 	public void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
@@ -51,21 +67,35 @@ public class ServletRestful extends HttpServlet {
 		}
 	}
 
+	/**
+	 * 输出内容到 response，封装 GZip 支持
+	 */
 	public void outContent(HttpServletRequest request, HttpServletResponse response, String cnt)
 			throws ServletException, IOException {
 		GZipOut out = new GZipOut(request, response);
 		out.outContent(cnt);
 	}
 
+	/**
+	 * 核心处理函数：根据请求路径和方法处理 RESTful 请求
+	 * 返回值说明：
+	 * - 返回 null：表示已经直接通过 response 输出（例如二进制文件），无需再写入字符串
+	 * - 返回 JSON 字符串：由调用者通过 outContent 输出
+	 */
 	public String ewaRestfulHandler(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		RestfulResult<Object> result = new RestfulResult<>();
+		
+		String uri = request.getRequestURI();
+		String ctx = request.getContextPath();
+		String path = uri.substring(ctx.length());
 
-		UUrl u = new UUrl(request);
-		String path = u.getName();
+		LOGGER.info("Restful request: {}, {}", request.getMethod(), path);
+//		UUrl u = new UUrl(request);
+//		String path = u.getName();
 
-		// 创建帮助文档
+		// 特殊接口：生成帮助文档（JSON）
 		if (path.endsWith("/ewa-help-documents")) {
 			response.setContentType("application/json");
 			return this.ewaHelpDocuments(request, response);
@@ -79,41 +109,46 @@ public class ServletRestful extends HttpServlet {
 		boolean isUpload = false;
 		boolean isOutImage = false;
 		boolean isDownload = false;
+		// 根据请求方法和 Content-Type 选择参数解析方式
 		if ("GET".equalsIgnoreCase(httpMethod)) {
 			rv = new RequestValue(request);
 		} else if ("POST".equalsIgnoreCase(httpMethod) && contentType != null
 				&& contentType.toLowerCase().indexOf("multipart/form-data;") >= 0) {
-			// 上传文件
+			// multipart/form-data 上传
 			rv = new RequestValue(request);
 			isUpload = true;
 
 		} else {
-			// true 表示body提交的json参数
+			// 其他情况：将请求体解析为 JSON 参数
 			rv = new RequestValue(request, true);
 		}
 
+		// 根据路径和方法查找配置对象 ConfRestful
 		ConfRestful conf = ConfRestfuls.getInstance().getConfRestful(path, httpMethod, rv, result);
 
 		if (conf == null) {
+			// 未找到配置时，返回 JSON 错误信息并设置相应 HTTP 状态码
 			response.setContentType("application/json");
 			response.setStatus(result.getHttpStatusCode());
 			return result.toString();
 		}
 
+		// 判断是否为下载/内联下载（图片/文件）
 		if ("DOWNLOAD-INLINE".equalsIgnoreCase(rv.s(FrameParameters.EWA_AJAX)) || (conf.getParameters() != null
 				&& conf.getParameters().toUpperCase().indexOf("EWA_AJAX=DOWNLOAD-INLINE") >= 0)) {
-			// output the file bytes e.g. image, pdf
+			// 以字节输出，例如图片、PDF
 			isOutImage = true;
 		} else if ("DOWNLOAD".equalsIgnoreCase(rv.s(FrameParameters.EWA_AJAX)) || (conf.getParameters() != null
 				&& conf.getParameters().toUpperCase().indexOf("EWA_AJAX=DOWNLOAD") >= 0)) {
-			// download the file
+			// 直接下载
 			isDownload = true;
 		}
 
+		// 根据前面判断调用相应的处理器
 		if (isOutImage) {
 			this.handleImage(conf, rv, response, result);
 			if (result.isSuccess()) {
-				return null;
+				return null; // 已直接写入 response（文件字节），返回 null 表示无需再次输出 JSON
 			} else {
 				return result.toString();
 			}
@@ -127,10 +162,10 @@ public class ServletRestful extends HttpServlet {
 			this.handleConf(conf, rv, response, result);
 		}
 		
-		// 记录执行结束时间
+		// 记录执行结束时间（用于性能统计）
 		result.setEnd(System.currentTimeMillis());
 
-		// CORS policy
+		// CORS 策略：从 ConfRestfuls 中获取，若为 '*' 且存在 Origin header，则允许该 Origin
 		String cors = ConfRestfuls.getInstance().getCors();
 		if (StringUtils.isNotBlank(cors)) {
 			if (cors.equals("*") && StringUtils.isNotBlank(request.getHeader("origin"))) {
@@ -144,6 +179,9 @@ public class ServletRestful extends HttpServlet {
 
 	}
 
+	/**
+	 * 检查访问控制列表（ACL）。如果未通过则设置 result 为 401 并返回 false
+	 */
 	public boolean checkAcl(HtmlControl ht, RestfulResult<Object> result) {
 		if (ht.getHtmlCreator().checkAcl()) {
 			return true;
@@ -165,6 +203,9 @@ public class ServletRestful extends HttpServlet {
 		return false;
 	}
 
+	/**
+	 * 检查 HtmlControl 执行过程中是否发生错误（系统错误、异常或 SQL 错误），并设置合适的 HTTP 状态码
+	 */
 	public boolean checkHtRunError(HtmlControl ht, RestfulResult<Object> result) {
 		// 系统执行出现 err_out
 		if (ht.getHtmlCreator().isErrOut()) {
@@ -192,18 +233,22 @@ public class ServletRestful extends HttpServlet {
 		return true;
 	}
 
+	/**
+	 * 处理文件下载请求（Content-Disposition: attachment）
+	 * 通过 HtmlControl 获取文件路径并将文件写入 response
+	 */
 	public void handleDownload(ConfRestful conf, RequestValue rv, HttpServletResponse response,
 			RestfulResult<Object> result) {
 
 		HtmlControl ht = new HtmlControl();
 
 		String parameters = conf.getParameters();
-		// force ewa_restful is yes
+		// 强制设置为 RESTful 模式
 		rv.addOrUpdateValue("ewa_restful", "1");
 
 		ht.init(conf.getXmlName(), conf.getItemName(), parameters, rv, response);
 
-		// request header authorization
+		// 请求头授权校验
 		if (!this.checkAcl(ht, result)) {
 			return;
 		}
@@ -227,7 +272,7 @@ public class ServletRestful extends HttpServlet {
 			return;
 		}
 
-		// The download saved name's filed name
+		// 下载保存名称的字段名
 		String downloadNameField = rv.s("EWA_DOWNLOAD_NAME");
 		String downloadFile = null;
 		if (StringUtils.isNotBlank(downloadNameField)) {
@@ -249,18 +294,21 @@ public class ServletRestful extends HttpServlet {
 
 	}
 
+	/**
+	 * 处理图片及内联展示（Content-Disposition inline），支持 resize 参数
+	 */
 	public void handleImage(ConfRestful conf, RequestValue rv, HttpServletResponse response,
 			RestfulResult<Object> result) {
 
 		HtmlControl ht = new HtmlControl();
 
 		String parameters = conf.getParameters();
-		// force ewa_restful is yes
+		// 强制设置为 RESTful 模式
 		rv.addOrUpdateValue("ewa_restful", "1");
 
 		ht.init(conf.getXmlName(), conf.getItemName(), parameters, rv, response);
 
-		// request header authorization
+		// 请求头授权校验
 		if (!this.checkAcl(ht, result)) {
 			return;
 		}
@@ -308,32 +356,20 @@ public class ServletRestful extends HttpServlet {
 	}
 
 	/**
-	 * 创建帮助文档
-	 * 
-	 * @param request
-	 * @param response
-	 * @return
+	 * 生成帮助文档（目前为空实现，保留接口）
 	 */
 	private String ewaHelpDocuments(HttpServletRequest request, HttpServletResponse response) {
 		/*
-		 * RequestValue rv = new RequestValue(request); Map<String, Map<String, ConfRestful>> map =
-		 * ConfRestfuls.getConfs(); JSONObject paths = new JSONObject(); map.forEach((key, v) -> { JSONObject path = new
-		 * JSONObject(); v.forEach((method, conf) -> { String parameters = this.createEwaParameters(conf); parameters =
-		 * parameters.replace("EWA_AJAX=", "aa=").replace("EWA_ACTION=", "a="); parameters +=
-		 * "&ewa_ajax=json_ext&EWA_ACTION=xlsdfosd2389490234908239048239";
-		 * 
-		 * HtmlControl ht = new HtmlControl(); ht.setSkipAcl(true);
-		 * 
-		 * ht.init(conf.getXmlName(), conf.getItemName(), parameters, rv, response); ht.getHtmlCreator().setAcl(null);
-		 * String rst = ht.getHtml();
-		 * 
-		 * JSONObject obj = new JSONObject(rst); path.put("path", conf.getRestfulPath()); path.put(method, obj); });
-		 * paths.put(path.getString("path"), path); }); return paths.toString();
+		 * 该方法原本准备遍历 ConfRestfuls 中的配置并生成文档，这里保留接口，具体实现注释掉。
 		 */
 		return "";
 	}
 
-	private String createEwaParameters(ConfRestful conf) {
+	/**
+	 * 生成默认的 EWA 参数集合，用于在调用 HtmlControl 前补充必要参数
+	 * 根据不同 HTTP 方法，追加不同的 EWA 参数（例如 EWA_AJAX、EWA_ACTION、EWA_MTYPE）
+	 */
+	private String createEwaParameters(ConfRestful conf, RequestValue rv) {
 		String parameters = conf.getParameters();
 		if (StringUtils.isBlank(parameters)) {
 			parameters = "EWA_RESTFUL=1";
@@ -342,43 +378,43 @@ public class ServletRestful extends HttpServlet {
 		}
 
 		if ("GET".equals(conf.getMethod())) {
-			if (parameters.indexOf("EWA_AJAX=") == -1) {
+			if (parameters.indexOf("EWA_AJAX=") == -1  && rv.isBlank("EWA_AJAX")) {
 				parameters += "&EWA_AJAX=JSON_EXT";
 			}
 		} else if ("POST".equals(conf.getMethod())) {
-			if (parameters.indexOf("EWA_ACTION=") == -1) {
+			if (parameters.indexOf("EWA_ACTION=") == -1 && rv.isBlank("EWA_ACTION")) {
 				parameters += "&EWA_ACTION=OnPagePost";
 			}
-			if (parameters.indexOf("EWA_AJAX=") == -1) {
+			if (parameters.indexOf("EWA_AJAX=") == -1 && rv.isBlank("EWA_AJAX")) {
 				parameters += "&EWA_AJAX=JSON";
 			}
-			if (parameters.indexOf("EWA_MTYPE=") == -1) {
+			if (parameters.indexOf("EWA_MTYPE=") == -1 && rv.isBlank("EWA_MTYPE")) {
 				parameters += "&EWA_MTYPE=N"; // 新增
 			}
 		} else if ("PUT".equals(conf.getMethod())) {
-			if (parameters.indexOf("EWA_ACTION=") == -1) {
+			if (parameters.indexOf("EWA_ACTION=") == -1 && rv.isBlank("EWA_ACTION")) {
 				parameters += "&EWA_ACTION=OnPagePost";
 			}
-			if (parameters.indexOf("EWA_AJAX=") == -1) {
+			if (parameters.indexOf("EWA_AJAX=") == -1  && rv.isBlank("EWA_AJAX")) {
 				parameters += "&EWA_AJAX=JSON";
 			}
-			if (parameters.indexOf("EWA_MTYPE=") == -1) {
+			if (parameters.indexOf("EWA_MTYPE=") == -1 && rv.isBlank("EWA_MTYPE")) {
 				parameters += "&EWA_MTYPE=M"; // 修改
 			}
 		} else if ("PATCH".equals(conf.getMethod())) {
-			if (parameters.indexOf("EWA_AJAX=") == -1) {
+			if (parameters.indexOf("EWA_AJAX=") == -1  && rv.isBlank("EWA_AJAX")) {
 				parameters += "&EWA_AJAX=JSON";
 			}
 			// 默认恢复数据
-			if (parameters.indexOf("EWA_ACTION=") == -1) {
+			if (parameters.indexOf("EWA_ACTION=") == -1 && rv.isBlank("EWA_ACTION")) {
 				parameters += "&EWA_ACTION=OnFrameRestore";
 			}
 		} else if ("DELETE".equals(conf.getMethod())) {
 			// 删除默认调用 OnFrameDelete
-			if (parameters.indexOf("EWA_ACTION=") == -1) {
+			if (parameters.indexOf("EWA_ACTION=") == -1 && rv.isBlank("EWA_ACTION")) {
 				parameters += "&EWA_ACTION=OnFrameDelete";
 			}
-			if (parameters.indexOf("EWA_AJAX=") == -1) {
+			if (parameters.indexOf("EWA_AJAX=") == -1  && rv.isBlank("EWA_AJAX")) {
 				parameters += "&EWA_AJAX=JSON";
 			}
 		}
@@ -386,6 +422,9 @@ public class ServletRestful extends HttpServlet {
 		return parameters;
 	}
 
+	/**
+	 * 初始化上传所需的参数并进行 ACL 校验
+	 */
 	public void initUploadParameters(ConfRestful conf, RequestValue rv, RestfulResult<Object> result) throws Exception {
 		rv.addOrUpdateValue(FrameParameters.XMLNAME, conf.getXmlName());
 		rv.addOrUpdateValue(FrameParameters.ITEMNAME, conf.getItemName());
@@ -403,11 +442,11 @@ public class ServletRestful extends HttpServlet {
 
 		HtmlControl ht = new HtmlControl();
 
-		String params = this.createEwaParameters(conf);
+		String params = this.createEwaParameters(conf, rv);
 
 		ht.init(conf.getXmlName(), conf.getItemName(), params, rv, null);
 
-		// request header authorization
+		// 请求头授权校验
 		if (!ht.getHtmlCreator().checkAcl()) {
 			result.setHttpStatusCode(HttpServletResponse.SC_UNAUTHORIZED); // 401
 			result.setSuccess(false);
@@ -427,6 +466,9 @@ public class ServletRestful extends HttpServlet {
 
 	}
 
+	/**
+	 * 处理上传逻辑：解析 multipart 请求并调用 Upload 组件完成文件保存
+	 */
 	public void handleUpload(ConfRestful conf, RequestValue rv, HttpServletRequest request,
 			RestfulResult<Object> result) {
 		try {
@@ -473,6 +515,7 @@ public class ServletRestful extends HttpServlet {
 				if (item.isFormField()) {
 					rv.addValue(item.getFieldName(), item.getString());
 				} else {
+					// 文件字段，Upload 组件稍后处理
 				}
 			}
 		} catch (Exception err) {
@@ -501,16 +544,20 @@ public class ServletRestful extends HttpServlet {
 		}
 	}
 
+	/**
+	 * 处理基于 ConfRestful 的常规数据操作（包括 GET/POST/PUT/PATCH/DELETE）
+	 * 根据 HtmlControl 执行后把结果封装进 RestfulResult 并设置 HTTP 状态码
+	 */
 	private void handleConf(ConfRestful conf, RequestValue rv, HttpServletResponse response,
 			RestfulResult<Object> result) {
 
 		HtmlControl ht = new HtmlControl();
 
-		String parameters = this.createEwaParameters(conf);
+		String parameters = this.createEwaParameters(conf, rv);
 
 		ht.init(conf.getXmlName(), conf.getItemName(), parameters, rv, response);
 
-		// request header authorization
+		// 请求头授权校验
 		if (!this.checkAcl(ht, result)) {
 			return;
 		}
@@ -518,6 +565,7 @@ public class ServletRestful extends HttpServlet {
 			return;
 		}
 
+		// 列表查询（路径以 s 结尾表示集合资源）
 		if ("GET".equals(conf.getMethod()) && conf.getPath().endsWith("s")) {
 			if (ht.getLastTable() == null) {
 				result.setSuccess(false);
@@ -541,10 +589,10 @@ public class ServletRestful extends HttpServlet {
 			result.setHttpStatusCode(HttpServletResponse.SC_OK);
 			result.setData(data.optJSONArray("DATA"));
 			
-			
 			return;
 		}
 
+		// 创建资源（POST）返回 201
 		if ("POST".equals(conf.getMethod())) {
 			result.setSuccess(true);
 			result.setHttpStatusCode(201); // created
@@ -560,14 +608,17 @@ public class ServletRestful extends HttpServlet {
 			return;
 		}
 
-		if (ht.getLastTable().getCount() == 1) {
+		if (ht.getLastTable().getCount() >= 1) {
 			result.setSuccess(true);
 			result.setHttpStatusCode(HttpServletResponse.SC_OK);
-			result.setData(ht.getLastTable().getRow(0).toJson());
-		} else if (ht.getLastTable().getCount() > 1) {
-			result.setSuccess(true);
-			result.setHttpStatusCode(HttpServletResponse.SC_OK);
-			result.setData(ht.getLastTable().toJSONArray());
+			String rst = ht.getHtml().trim();
+			if (rst.startsWith("{") && rst.endsWith("}")) {
+				result.setData(new JSONObject(rst));
+			} else if (rst.startsWith("[") && rst.endsWith("]")) {
+				result.setData(new JSONArray(rst));
+			} else {
+				result.setData(rst);
+			}
 		} else {// no data
 			if ("GET".equals(conf.getMethod())) {
 				result.setSuccess(false);
