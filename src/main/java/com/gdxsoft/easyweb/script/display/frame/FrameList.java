@@ -419,11 +419,12 @@ public class FrameList extends FrameBase implements IFrame {
 		// 重绘为左引导
 		String left = super.getHtmlClass().getSysParas().getRequestValue().getString(FrameParameters.EWA_LEFT);
 
+		boolean isNotUsingFrameBox = this.isNotUsingFrameBox();
 		try {
 			if (box == null && left == null) {
-				doc.addScriptHtml("<div>");
+				doc.addScriptHtml(isNotUsingFrameBox ? "" : "<div>");
 				this.createContent();
-				doc.addScriptHtml("</div>");
+				doc.addScriptHtml(isNotUsingFrameBox ? "" : "</div>");
 
 			} else { // box redraw
 				this.createJsonFrame(); // 生成查询排序表达式
@@ -574,6 +575,16 @@ public class FrameList extends FrameBase implements IFrame {
 		return false;
 	}
 
+	/**
+	 * 仅输出item的html，不输出table/tr/td
+	 * 
+	 * @return true=不输出table/tr/td，false=输出table/tr/td
+	 */
+	public boolean isNotUsingFrameBox() {
+		RequestValue rv = super.getHtmlClass().getSysParas().getRequestValue();
+		return rv.isNotBlank(FrameParameters.EWA_FRAME_BOX_NO);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -582,6 +593,9 @@ public class FrameList extends FrameBase implements IFrame {
 	public void createFrameContent() throws Exception {
 		UserConfig uc = this.getHtmlClass().getUserConfig();
 		UserXItem item = uc.getUserPageItem();
+		// 是否不使用FrameBox，如果是的话，item的html必须包含table/tr/td等标签，并且必须包含 EWA_KEY="key1,key2"
+		// 的主键表达式
+		boolean isNotUsingFrameBox = this.isNotUsingFrameBox();
 
 		// 初始化列表重绘，搜索...参数
 		this.initListUIParams(item);
@@ -599,18 +613,23 @@ public class FrameList extends FrameBase implements IFrame {
 		// 滑动脚本
 		String fos = "EWA.F.FOS[\"" + super.getHtmlClass().getSysParas().getFrameUnid() + "\"]";
 
-		// 皮肤定义的头部
-		doc.addScriptHtml("<div>");
-		String top = super.createSkinFCTop();
-
-		if (!isApp) {
-			// 鼠标滑出脚本
-			top = top.replace("<table",
-					"<table onmouseout='if(window.EWA && EWA.F && EWA.F.FOS && " + fos + "){" + fos + ".MOut(event)}'");
+		if (!isNotUsingFrameBox) {
+			// 皮肤定义的头部
+			doc.addScriptHtml("<div>");
 		}
-		doc.addScriptHtml(top);
-		doc.addFrameHtml(top);
+		// 如果不使用FrameBox，就不输出皮肤定义的头部和尾部了
+		if (!isNotUsingFrameBox) {
+			String top = super.createSkinFCTop();
 
+			if (!isApp) {
+				// 鼠标滑出脚本
+				top = top.replace("<table",
+						"<table onmouseout='if(window.EWA && EWA.F && EWA.F.FOS && " + fos + "){" + fos
+								+ ".MOut(event)}'");
+			}
+			doc.addScriptHtml(top);
+			doc.addFrameHtml(top);
+		}
 		// Frame定义的页头
 		String frameHeader = this.createFrameHeader();
 		doc.addScriptHtml(frameHeader, "frame head");
@@ -672,6 +691,12 @@ public class FrameList extends FrameBase implements IFrame {
 			MStr rowContents = new MStr();
 			for (int i = 0; i < tb.getCount(); i++) {
 				tb.getRow(i); // 将数据移动到当前行
+				String rowHtml = isUseTemplate ? this.createItemHtmlsByFrameHtml(frameTemplate, "FrameList")
+						: this.createItemHtmls();
+				if (isNotUsingFrameBox) {
+					sb.a(rowHtml);
+					continue;
+				}
 				String keyExp = "EWA_KEY=\"" + this.createItemKeys() + "\" ";
 				// 行属性表达式，2022-08-01 （RowAttributeSet ）
 
@@ -679,8 +704,6 @@ public class FrameList extends FrameBase implements IFrame {
 				String rowAttrs = rowAttrExp[0]; // 属性表达式
 				String rowClassName = rowAttrExp[1]; // 类表达式 class
 
-				String rowHtml = isUseTemplate ? this.createItemHtmlsByFrameHtml(frameTemplate, "FrameList")
-						: this.createItemHtmls();
 				String groupHtml = this.createFrameGroup(flGroup);
 				sb.append(groupHtml);
 
@@ -725,7 +748,7 @@ public class FrameList extends FrameBase implements IFrame {
 					colSizeInc = 1;
 				}
 			}
-			if (colSize > 1) {
+			if (colSize > 1 && !isNotUsingFrameBox) {
 				for (int i = colSizeInc; i <= colSize; i++) {
 					sb.appendLine("<td></td>");
 				}
@@ -736,18 +759,21 @@ public class FrameList extends FrameBase implements IFrame {
 			doc.addScriptHtml(sb.toString(), "Frame content");
 			doc.addFrameHtml(sb.toString());
 		}
-		// 皮肤定义定义的尾部
-		String bottom = super.createSkinFCBottom();
-		doc.addScriptHtml(bottom);
-		doc.addFrameHtml(bottom);
 
 		// Frame定义的页脚
-		try {
-			this.createFrameFooter();
-		} catch (Exception err) {
+		if (!isNotUsingFrameBox) {
+			// 皮肤定义定义的尾部
+			String bottom = super.createSkinFCBottom();
+			doc.addScriptHtml(bottom);
+			doc.addFrameHtml(bottom);
+			try {
+				this.createFrameFooter();
+			} catch (Exception err) {
 
+			}
+			doc.addScriptHtml("</div>");
 		}
-		doc.addScriptHtml("</div>");
+
 	}
 
 	public int getListFrameRecordCount() {
@@ -887,7 +913,7 @@ public class FrameList extends FrameBase implements IFrame {
 	 */
 	public void createFrameFooter() throws Exception {
 
-		if (!this.isSplitPage()) {
+		if (!this.isSplitPage() || this.isNotUsingFrameBox()) {
 			return;
 		}
 
@@ -1001,7 +1027,7 @@ public class FrameList extends FrameBase implements IFrame {
 	 */
 	public String createFrameHeader() throws Exception {
 		// 判断参数EWA_HIDDEN_CAPTION或Size.HiddenCaption
-		if (super.isHiddenCaption()) {// 不显示列头
+		if (super.isHiddenCaption() || this.isNotUsingFrameBox()) {// 不显示列头
 			return "";
 		}
 
@@ -1357,6 +1383,12 @@ public class FrameList extends FrameBase implements IFrame {
 
 			Utils.replaceStringBuilder(tmp, "@" + paraName, paraValue);
 		}
+
+		// 如果不使用框架容器，直接返回内容
+		if (this.isNotUsingFrameBox()) {
+			return tmp.toString();
+		}
+
 		StringBuilder tmp1 = new StringBuilder();
 		if (frameTag.equals("FrameList")) {
 			tmp1.append("<td class='EWA_TD_M ewa-template-lf'>");
@@ -1475,10 +1507,10 @@ public class FrameList extends FrameBase implements IFrame {
 
 		for (int i = 0; i < tb.getCount(); i++) {
 			DTRow row = tb.getRow(i); // 将数据移动到当前行
-			
+
 			JSONObject rowJson = this.createJsonRow(row, skipUnDefined, sysParas, rv, isApiPrompt);
-			
-			if (!isApiPrompt) { 
+
+			if (!isApiPrompt) {
 				// ai prompt 不需要 EWA_KEY
 				String keyExp = this.createItemKeys();
 				rowJson.put(FrameParameters.EWA_KEY, keyExp);
@@ -1491,11 +1523,11 @@ public class FrameList extends FrameBase implements IFrame {
 	/**
 	 * 生成页面的每一行JSON数据
 	 * 
-	 * @param row 数据行
+	 * @param row           数据行
 	 * @param skipUnDefined 是否略过未定义的字段
-	 * @param sysParas 系统参数
-	 * @param rv 请求值
-	 * @param isApiPrompt 是否为AI Prompt
+	 * @param sysParas      系统参数
+	 * @param rv            请求值
+	 * @param isApiPrompt   是否为AI Prompt
 	 * 
 	 * @return JSONObject 每一行的JSON数据
 	 * @throws Exception
@@ -1759,10 +1791,6 @@ public class FrameList extends FrameBase implements IFrame {
 
 		String parentHtml = super.createItemParentHtml(uxi); // 皮肤定义的页面样式
 
-		boolean haveStyle = false;
-		if (uxi.getParentStyle().trim().length() > 0) {
-			haveStyle = true;
-		}
 		// 元素父窗体样式
 		String style = "style=\"" + uxi.getParentStyle();
 
@@ -1782,6 +1810,16 @@ public class FrameList extends FrameBase implements IFrame {
 
 		String itemHtml = item.createItemHtml();
 		itemHtml = super.removeAttrsByLogic(uxi, itemHtml);
+
+		// 不使用框架容器，直接返回内容
+		if (this.isNotUsingFrameBox()) {
+			return itemHtml;
+		}
+
+		boolean haveStyle = false;
+		if (uxi.getParentStyle().trim().length() > 0) {
+			haveStyle = true;
+		}
 
 		String tag = uxi.getSingleValue("Tag");
 		if (this._IsLuButtons && (tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit")

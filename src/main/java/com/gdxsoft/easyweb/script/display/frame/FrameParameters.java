@@ -57,7 +57,7 @@ public class FrameParameters {
 	@Deprecated
 	public static final String FRAME_UNID_PREFIX = "FRAME_UNID_PREFIX";
 	/**
-	 *  更改 SysFrameUnid前缀，只保留英文，数字，_，中文
+	 * 更改 SysFrameUnid前缀，只保留英文，数字，_，中文
 	 */
 	public static final String EWA_FRAME_UNID_PREFIX = "EWA_FRAME_UNID_PREFIX";
 	/**
@@ -290,6 +290,10 @@ public class FrameParameters {
 	 * 不使用FrameHtml模板，非空，参数大小写无关
 	 */
 	public static final String EWA_LF_TEMP_NO = "EWA_LF_TEMP_NO";
+	/**
+	 * ListFrame输出时不生成table/tr/td，仅输出item的html，非空，参数大小写无关
+	 */
+	public static final String EWA_FRAME_BOX_NO = "EWA_FRAME_BOX_NO";
 	/**
 	 * 用户参数指定宽度，参数大小写无关
 	 */
@@ -542,8 +546,6 @@ public class FrameParameters {
 	 * 中文
 	 */
 	public static final String ZHCN = "zhcn";
-
-
 
 	/**
 	 * shortName
