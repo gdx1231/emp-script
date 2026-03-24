@@ -1,0 +1,45 @@
+# EWA API 配置文件模板
+# 复制此文件为 ewa-api.conf 并修改配置
+#
+# 用法:
+#   cp ewa-api.conf.example ewa-api.conf
+#   编辑 ewa-api.conf
+#   source ewa-api.conf
+#
+
+# ==================== API 配置 ====================
+
+# API 基础地址（必填）
+export EWA_API_URL="https://your-server/ewa/servletApi"
+
+# 登录凭据（必填）
+export EWA_API_LOGIN_ID="admin"
+export EWA_API_PASSWORD="your_password"
+
+# Token 缓存文件（可选）
+export EWA_TOKEN_FILE="/tmp/.ewa_api_token"
+
+# 认证模式: token, hmac, simple（可选，默认 token）
+export EWA_AUTH_MODE="token"
+
+# ==================== 数据库配置 ====================
+
+# 默认数据库连接名称
+export EWA_DEFAULT_DB="work"
+
+# ==================== 输出配置 ====================
+
+# 默认输出格式: json, xml, csv
+export EWA_DEFAULT_OUTPUT="json"
+
+# ==================== 示例用法 ====================
+
+# 登录:
+#   source ewa-api.conf
+#   ./ewa-api.sh login
+#
+# 获取表列表:
+#   ./ewa-api.sh getTables $EWA_DEFAULT_DB "" $EWA_DEFAULT_OUTPUT
+#
+# 获取表数据:
+#   ./ewa-api.sh getTableData $EWA_DEFAULT_DB ADM_USER "" $EWA_DEFAULT_OUTPUT
