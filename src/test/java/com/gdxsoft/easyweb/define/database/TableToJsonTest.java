@@ -18,8 +18,11 @@ public class TableToJsonTest {
      */
     @Test
     public void testToJson() {
-        // 创建测试表 (tableName, schemaName, connectionConfigName)
-        Table table = new Table("CRM_COM", "dbo", "globaltravel");
+        // 创建测试表（使用无参构造函数）
+        Table table = new Table();
+        table.setName("CRM_COM");
+        table.setSchemaName("dbo");
+        table.setConnectionConfigName("globaltravel");
         
         // 添加测试字段
         Field field1 = new Field();
@@ -60,8 +63,11 @@ public class TableToJsonTest {
      */
     @Test
     public void testToJson_fromXml() {
-        // 创建测试表 (tableName, schemaName, connectionConfigName)
-        Table table = new Table("TEST_TABLE", "dbo", "globaltravel");
+        // 创建测试表（使用无参构造函数）
+        Table table = new Table();
+        table.setName("TEST_TABLE");
+        table.setSchemaName("dbo");
+        table.setConnectionConfigName("globaltravel");
         
         Field field = new Field();
         field.setName("TEST_FIELD");
