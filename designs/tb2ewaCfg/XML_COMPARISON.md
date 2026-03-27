@@ -243,22 +243,26 @@
 | XItem 属性 | 15+ | 15+ | 100% |
 | Action 节点 | 10 | 10 | 100% |
 | 顶级节点 | 5 | 5 | 100% |
+| List 数据源 | ✅ | ✅ | 90% |
+| Frame 关联 | ✅ | ✅ | 90% |
+| AddScript | ✅ | ✅ | 80% |
+| AddCss | ✅ | ✅ | 80% |
 
-**总体完成度**: 约 **85-90%**
+**总体完成度**: 约 **90-95%**
 
 ---
 
 ## 下一步工作
 
 ### 优先级 1 - 数据源完善
-- [ ] List 节点添加 SQL 数据源（下拉框）
-- [ ] Frame 节点添加关联 XML 配置
+- [ ] List 节点优化（根据字段类型生成不同 SQL）
+- [ ] Frame 节点优化（根据业务类型配置不同 XML）
 - [ ] OrderSearch 添加 SearchSql
 
 ### 优先级 2 - 高级功能
-- [ ] AddScript 添加 JavaScript 代码
-- [ ] AddCss 添加 CSS 样式
-- [ ] VaildEx 添加验证规则
+- [ ] AddScript 添加业务特定 JavaScript
+- [ ] VaildEx 添加验证规则（Email, Mobile 等）
+- [ ] IsMustInput 根据字段属性自动设置
 
 ### 优先级 3 - 特殊字段
 - [ ] 日期字段添加 Format
