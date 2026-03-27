@@ -38,7 +38,8 @@
 		<path des="导入导出目录" name="group_path" value="/Volumes/b2b/ewa_groups/" />
 
 		<!-- 文件转换 OpenOffice -->
-		<path name="cvt_office_home" value="D:\Program Files\LibreOffice\" value1="C:\Program Files (x86)\OpenOffice 4\" />
+		<path name="cvt_office_home" value="D:\Program Files\LibreOffice\"
+			value1="C:\Program Files (x86)\OpenOffice 4\" />
 
 		<!-- <path name="cvt_office_home" valuec="/Applications/OpenOffice.app/Contents/" /> -->
 		<!-- ImageMagick目录可执行文件路径 -->
@@ -56,16 +57,21 @@
 
 	<!-- 数据库连接池 -->
 	<databases>
-		<!-- <database name="b2b" type="MYSQL" connectionString="jdbc/b2b" schemaName="b2b"> <pool username="test" password="" driverClassName="com.mysql.cj.jdbc.Driver"
-			poolType="HikariCP" url="jdbc:mysql://localhost/b2b?serverTimezone=GMT%2B8&amp;autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=utf-8">
+		<!-- <database name="b2b" type="MYSQL" connectionString="jdbc/b2b" schemaName="b2b"> <pool
+		username="test" password="" driverClassName="com.mysql.cj.jdbc.Driver"
+			poolType="HikariCP"
+		url="jdbc:mysql://localhost/b2b?serverTimezone=GMT%2B8&amp;autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=utf-8">
 			</pool> </database> -->
-		<!-- <database name="ms" type="MSSQL" connectionString="jdbc/ms" schemaName="dbo"> <pool username="sa" password="" maxActive="40"
-			maxIdle="120" maxWait="5000" poolType="druid" driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver" url="jdbc:sqlserver://localhost:1433;DatabaseName=OneWorld;applicationName=console">
+		<!-- <database name="ms" type="MSSQL" connectionString="jdbc/ms" schemaName="dbo"> <pool
+		username="sa" password="" maxActive="40"
+			maxIdle="120" maxWait="5000" poolType="druid"
+		driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+		url="jdbc:sqlserver://localhost:1433;DatabaseName=OneWorld;applicationName=console">
 			</pool> </database> -->
-		
+
 		<!-- HSQLDB 数据库连接 -->
-		<database name="demo" type="HSQLDB" connectionString="jdbc/____ewa_cached_hsqldb__" schemaName="demo">
-			<pool username="SA" password="" driverClassName="org.hsqldb.jdbc.JDBCDriver" 
+		<database name="demo" type="HSQLDB" connectionString="jdbc/demo" schemaName="demo">
+			<pool username="SA" password="" driverClassName="org.hsqldb.jdbc.JDBCDriver"
 				url="jdbc:hsqldb:mem:demo" poolType="HikariCP">
 			</pool>
 		</database>

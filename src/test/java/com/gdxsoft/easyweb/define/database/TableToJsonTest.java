@@ -3,15 +3,21 @@ package com.gdxsoft.easyweb.define.database;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.gdxsoft.easyweb.define.database.Field;
-import com.gdxsoft.easyweb.define.database.Table;
+import com.gdxsoft.easyweb.testutils.SqlImporter;
 
 /**
  * Table toJson() 方法测试
  */
 public class TableToJsonTest {
+    
+    @BeforeAll
+    public static void setUp() {
+        // 导入 SQL 文件初始化数据库
+        SqlImporter.initTestDatabase();
+    }
 
     /**
      * 测试 toJson() 方法返回完整的表元数据
