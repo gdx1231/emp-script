@@ -189,6 +189,28 @@ public class BusinessXmlCreator {
         frameTagSet.setAttribute("FrameTag", frameType);
         frameTag.appendChild(frameTagSet);
         
+        // ListFrame 模式添加 Tag 配置
+        if (frameType.equalsIgnoreCase("ListFrame")) {
+            org.w3c.dom.Element tag = doc.createElement("Tag");
+            page.appendChild(tag);
+            org.w3c.dom.Element tagSet = doc.createElement("Set");
+            tagSet.setAttribute("Tag", "span");
+            tag.appendChild(tagSet);
+            
+            // 添加 4 个按钮：新增、修改、复制、删除
+            org.w3c.dom.Element buttons = doc.createElement("Buttons");
+            page.appendChild(buttons);
+            
+            // 新增按钮
+            buttons.appendChild(createButton(doc, "butNew", "新增", "New", "new"));
+            // 修改按钮
+            buttons.appendChild(createButton(doc, "butModify", "修改", "Modify", "modify"));
+            // 复制按钮
+            buttons.appendChild(createButton(doc, "butCopy", "复制", "Copy", "copy"));
+            // 删除按钮
+            buttons.appendChild(createButton(doc, "butDelete", "删除", "Delete", "delete"));
+        }
+        
         // SkinName 节点
         org.w3c.dom.Element skinName = doc.createElement("SkinName");
         page.appendChild(skinName);
@@ -318,6 +340,38 @@ public class BusinessXmlCreator {
     }
     
     /**
+     * 创建按钮
+     */
+    private org.w3c.dom.Element createButton(Document doc, String name, String infoZhcn, String infoEnus, String action) {
+        org.w3c.dom.Element button = doc.createElement("Button");
+        button.setAttribute("Name", name);
+        
+        org.w3c.dom.Element buttonSet = doc.createElement("Set");
+        buttonSet.setAttribute("Action", action);
+        buttonSet.setAttribute("ConfirmInfo", "");
+        buttonSet.setAttribute("Icon", "");
+        buttonSet.setAttribute("IsShow", "1");
+        buttonSet.setAttribute("Style", "");
+        button.appendChild(buttonSet);
+        
+        org.w3c.dom.Element descSet = doc.createElement("DescriptionSet");
+        org.w3c.dom.Element descZhcn = doc.createElement("Set");
+        descZhcn.setAttribute("Info", infoZhcn);
+        descZhcn.setAttribute("Lang", "zhcn");
+        descZhcn.setAttribute("Memo", "");
+        descSet.appendChild(descZhcn);
+        
+        org.w3c.dom.Element descEnus = doc.createElement("Set");
+        descEnus.setAttribute("Info", infoEnus);
+        descEnus.setAttribute("Lang", "enus");
+        descEnus.setAttribute("Memo", "");
+        descSet.appendChild(descEnus);
+        
+        button.appendChild(descSet);
+        return button;
+    }
+    
+    /**
      * 获取 Frame 名称
      */
     private String getFrameName(String frameType) {
@@ -390,7 +444,7 @@ public class BusinessXmlCreator {
         descSetZhcn.setAttribute("Memo", "");
         descSet.appendChild(descSetZhcn);
         org.w3c.dom.Element descSetEnus = doc.createElement("Set");
-        descSetEnus.setAttribute("Info", field.getDescription() != null ? field.getDescription() : field.getName());
+        descSetEnus.setAttribute("Info", "");
         descSetEnus.setAttribute("Lang", "enus");
         descSetEnus.setAttribute("Memo", "");
         descSet.appendChild(descSetEnus);
