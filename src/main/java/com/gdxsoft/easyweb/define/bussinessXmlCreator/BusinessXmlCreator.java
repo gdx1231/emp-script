@@ -1299,6 +1299,11 @@ public class BusinessXmlCreator {
                       .replace("&gt;", ">")
                       .replace("&amp;", "&");
         
+        // 去除前后的单引号 '
+        if (result.startsWith("'") && result.endsWith("'")) {
+            result = result.substring(1, result.length() - 1);
+        }
+        
         return result;
     }
     
