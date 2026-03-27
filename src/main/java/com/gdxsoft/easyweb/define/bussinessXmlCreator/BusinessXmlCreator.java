@@ -147,15 +147,11 @@ public class BusinessXmlCreator {
         for (int i = 0; i < this.table.getFields().getFieldList().size(); i++) {
             String fieldName = this.table.getFields().getFieldList().get(i);
             com.gdxsoft.easyweb.define.database.Field field = this.table.getFields().get(fieldName);
-            
+
             org.w3c.dom.Element xitem = createXItem(doc, field, frameType, operationType, i);
             xitems.appendChild(xitem);
         }
-        
-        // 添加确定按钮
-        org.w3c.dom.Element butOk = createSubmitButton(doc);
-        xitems.appendChild(butOk);
-        
+
         // 根据配置添加 Buttons（作为 XItem）
         if (tmpConfig != null && !tmpConfig.getButtonConfigs().isEmpty()) {
             createButtonsFromConfig(doc, xitems, tmpConfig);
@@ -1261,11 +1257,11 @@ public class BusinessXmlCreator {
         String xmlPath = paraConfig.getXmlPath();
         String name = paraConfig.getName();
         String val = paraConfig.getVal();
-        
+
         // 解析 XmlPath，例如 "EventSet/Set"
         String[] parts = xmlPath.split("/");
         org.w3c.dom.Element current = parent;
-        
+
         for (int i = 0; i < parts.length; i++) {
             String part = parts[i];
             // 查找或创建节点
@@ -1276,11 +1272,34 @@ public class BusinessXmlCreator {
             }
             current = child;
         }
-        
-        // 设置属性
+
+        // 设置属性 - 处理 JavaScript 表达式
+        // EwaDefine.xml 中的 &quot; 和 '+' 是用于在 XML 属性中存储引号的技巧
+        // 例如：'EWA.F.FOS[&quot;@'+'sys_frame_unid&quot;]' 应该转换为 EWA.F.FOS["@sys_frame_unid"]
         if (name != null && !name.isEmpty()) {
-            current.setAttribute(name, unescapeXml(val));
+            current.setAttribute(name, processJsExpression(val));
         }
+    }
+    
+    /**
+     * 处理 JavaScript 表达式
+     * 将 XML 中的转义形式转换为实际的 JavaScript 表达式
+     * 例如：'EWA.F.FOS[&quot;@'+'sys_frame_unid&quot;]' → EWA.F.FOS["@sys_frame_unid"]
+     */
+    private String processJsExpression(String val) {
+        if (val == null) return "";
+        
+        // 移除字符串连接的 '+' 符号，合并被分割的字符串
+        // 例如：'EWA.F.FOS[&quot;@'+'sys_frame_unid&quot;]' → 'EWA.F.FOS[&quot;@sys_frame_unid&quot;]'
+        String result = val.replace("'+'", "");
+        
+        // 转义 XML 实体
+        result = result.replace("&quot;", "\"")
+                      .replace("&lt;", "<")
+                      .replace("&gt;", ">")
+                      .replace("&amp;", "&");
+        
+        return result;
     }
     
     /**
