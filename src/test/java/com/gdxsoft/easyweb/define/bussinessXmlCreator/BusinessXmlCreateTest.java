@@ -79,13 +79,20 @@ public class BusinessXmlCreateTest {
     }
     
     /**
-     * 保存 XML 到 temp 目录
+     * 保存 XML 到 temp/ewa_script_test/日期/ 目录
      */
     private static String saveXmlToTemp(String filename, String xmlContent) throws Exception {
-        java.nio.file.Path tempDir = java.nio.file.Files.createTempDirectory("ewa_test_");
-        java.nio.file.Path xmlFile = tempDir.resolve(filename);
+        // 创建目录结构：temp/ewa_script_test/日期/
+        java.nio.file.Path tempDir = java.nio.file.Paths.get("temp/ewa_script_test");
+        String dateStr = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+        java.nio.file.Path dateDir = tempDir.resolve(dateStr);
+        java.nio.file.Files.createDirectories(dateDir);
+        
+        // 保存文件
+        java.nio.file.Path xmlFile = dateDir.resolve(filename);
         java.nio.file.Files.write(xmlFile, xmlContent.getBytes("UTF-8"));
-        return xmlFile.toString();
+        
+        return xmlFile.toAbsolutePath().toString();
     }
 
     /**
