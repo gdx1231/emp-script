@@ -1248,6 +1248,8 @@ public class BusinessXmlCreator {
             
             // 解析 XmlPath，例如 "EasyWebTemplate/Page/AddScript/Set/Bottom"
             String[] parts = xmlPath.split("/");
+            
+            // 从根节点开始构建
             org.w3c.dom.Element current = doc.getDocumentElement();
             
             for (int i = 0; i < parts.length; i++) {
