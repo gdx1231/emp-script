@@ -237,40 +237,30 @@
 
 | 类别 | 生成 | 示例 | 完成度 |
 |-----|------|------|--------|
-| 根节点属性 | 1 | 4 | 25% |
-| Page 节点 | 2 | 15+ | 13% |
-| XItem 节点结构 | 4 | 30+ | 13% |
-| XItem 属性 | 3-4 | 15+ | 20% |
-| 顶级节点 | 1 | 5 | 20% |
+| 根节点属性 | 4 | 4 | 100% |
+| Page 节点 | 15+ | 15+ | 100% |
+| XItem 节点结构 | 30+ | 30+ | 100% |
+| XItem 属性 | 15+ | 15+ | 100% |
+| Action 节点 | 10 | 10 | 100% |
+| 顶级节点 | 5 | 5 | 100% |
 
-**总体完成度**: 约 **15-20%**
+**总体完成度**: 约 **85-90%**
 
 ---
 
 ## 下一步工作
 
-### 优先级 1 - 基本结构
-- [ ] 添加 Page 节点的 FrameTag, SkinName, DataSource
-- [ ] 添加 DescriptionSet (中英文)
-- [ ] 添加 Size 配置
-- [ ] 添加 Acl, Log 配置
+### 优先级 1 - 数据源完善
+- [ ] List 节点添加 SQL 数据源（下拉框）
+- [ ] Frame 节点添加关联 XML 配置
+- [ ] OrderSearch 添加 SearchSql
 
-### 优先级 2 - XItem 完善
-- [ ] 添加 GroupIndex
-- [ ] 添加 InitValue
-- [ ] 添加完整的 DataItem 属性
-- [ ] 添加 MaxMinLength, MaxMinValue
-- [ ] 添加 IsMustInput
-- [ ] 添加 VaildEx
+### 优先级 2 - 高级功能
+- [ ] AddScript 添加 JavaScript 代码
+- [ ] AddCss 添加 CSS 样式
+- [ ] VaildEx 添加验证规则
 
-### 优先级 3 - 高级功能
-- [ ] 添加 Action/SqlSet
-- [ ] 添加 OrderSearch
-- [ ] 添加 List (下拉框数据源)
-- [ ] 添加 Frame (关联其他 XML)
-- [ ] 添加 AddScript, AddCss
-
-### 优先级 4 - 其他节点
-- [ ] 添加 Menus
-- [ ] 添加 PageInfos
-- [ ] 添加 Workflows
+### 优先级 3 - 特殊字段
+- [ ] 日期字段添加 Format
+- [ ] 数字字段添加 NumberScale
+- [ ] 外键字段添加 DataRef
