@@ -443,13 +443,13 @@ public class BusinessXmlCreator {
         orderSearchSet.setAttribute("GroupTestLength", "");
         orderSearchSet.setAttribute("IsGroup", "");
         orderSearchSet.setAttribute("IsGroupDefault", "");
-        orderSearchSet.setAttribute("IsOrder", "1");
+        orderSearchSet.setAttribute("IsOrder", getOrderValue(field));
         orderSearchSet.setAttribute("IsSearchQuick", "1");
         orderSearchSet.setAttribute("OrderExp", "");
         orderSearchSet.setAttribute("SearchExp", "");
         orderSearchSet.setAttribute("SearchMulti", "2");
         orderSearchSet.setAttribute("SearchSql", getSearchSql(field));
-        orderSearchSet.setAttribute("SearchType", "fix");
+        orderSearchSet.setAttribute("SearchType", getSearchType(field));
         orderSearch.appendChild(orderSearchSet);
         xitem.appendChild(orderSearch);
         
@@ -715,6 +715,54 @@ public class BusinessXmlCreator {
             return fieldName;
         }
         return "DUAL";
+    }
+    
+    /**
+     * 获取 OrderSearch 的 IsOrder 值
+     * 规则：
+     * - 数字/日期/时间：IsOrder=1
+     * - 字符串：长度<=50 时 IsOrder=1，否则 IsOrder=0
+     */
+    private String getOrderValue(com.gdxsoft.easyweb.define.database.Field field) {
+        String dbType = field.getDatabaseType();
+        if (dbType == null) return "0";
+        
+        String type = dbType.toUpperCase();
+        // 数字类型
+        if (type.contains("INT") || type.contains("DECIMAL") || type.contains("NUM") || 
+            type.contains("DOUBLE") || type.contains("FLOAT") || type.contains("MONEY")) {
+            return "1";
+        }
+        // 日期/时间类型
+        if (type.contains("DATE") || type.contains("TIME") || type.contains("TIMESTAMP")) {
+            return "1";
+        }
+        // 字符串类型
+        if (type.contains("CHAR") || type.contains("TEXT")) {
+            if (field.getMaxlength() <= 50) {
+                return "1";
+            }
+            return "0";
+        }
+        return "0";
+    }
+    
+    /**
+     * 获取 OrderSearch 的 SearchType 值
+     * 规则：
+     * - 字符串类型：SearchType=txt
+     * - 其他类型：SearchType=fix
+     */
+    private String getSearchType(com.gdxsoft.easyweb.define.database.Field field) {
+        String dbType = field.getDatabaseType();
+        if (dbType == null) return "fix";
+        
+        String type = dbType.toUpperCase();
+        // 字符串类型
+        if (type.contains("CHAR") || type.contains("TEXT")) {
+            return "txt";
+        }
+        return "fix";
     }
     
     /**
