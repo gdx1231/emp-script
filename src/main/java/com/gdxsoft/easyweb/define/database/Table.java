@@ -942,6 +942,11 @@ public class Table {
 	 * @param dataMeta
 	 */
 	private void initPk(DatabaseMetaData dataMeta) {
+		// 如果已经有_Pk 且不为空，说明已经初始化过了，直接返回
+		if (this._Pk != null && !this._Pk.getPkFields().isEmpty()) {
+			return;
+		}
+		
 		this._Pk = new TablePk();
 		this._Pk.setTableName(this._Name);
 		ResultSet rs = null;
@@ -1055,11 +1060,18 @@ public class Table {
 	}
 
 	public Fields getFields() {
+		// 如果已经有 Fields 且主键已初始化，直接返回
+		if (this._Fields != null && this._Fields.isPkInitialized()) {
+			return _Fields;
+		}
+		
+		// 如果 Fields 为空，初始化
 		if (this._Fields == null) {
 			this.init();
 		}
-		// 初始化 Fields 的表名和主键信息
-		if (this._Fields != null && this._Name != null) {
+		
+		// 初始化 Fields 的表名和主键信息（只初始化一次）
+		if (this._Fields != null && this._Name != null && !this._Fields.isPkInitialized()) {
 			this._Fields.setTableName(this._Name);
 			// 设置主键信息
 			if (this._Pk != null && !this._Pk.getPkFields().isEmpty()) {
@@ -1067,6 +1079,7 @@ public class Table {
 					this._Fields.addPkField(pkField);
 				}
 			}
+			this._Fields.setPkInitialized(true);
 		}
 		return _Fields;
 	}
@@ -1097,6 +1110,11 @@ public class Table {
 	 * @return the _Pk
 	 */
 	public TablePk getPk() {
+		// 如果已经有_Pk 且不为空，直接返回
+		if (this._Pk != null && !this._Pk.getPkFields().isEmpty()) {
+			return _Pk;
+		}
+		// 否则尝试从数据库初始化
 		if (this._Fields == null) {
 			this.init();
 		}

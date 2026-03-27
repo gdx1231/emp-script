@@ -33,7 +33,8 @@ public class DatabaseTableToXmlTest {
             assertNotNull(crmComTable, "CRM_COM 表应该存在");
             System.out.println("表名：" + crmComTable.getName());
             System.out.println("字段数：" + crmComTable.getFields().getFieldList().size());
-            System.out.println("主键字段：" + (crmComTable.getPk() != null ? crmComTable.getPk().getPkFields().size() : 0));
+            System.out.println("主键字段 (Table.Pk)：" + (crmComTable.getPk() != null ? crmComTable.getPk().getPkFields().size() : 0));
+            System.out.println("主键字段 (Fields.PkFields)：" + crmComTable.getFields().getPkFields().size());
         } catch (Exception e) {
             e.printStackTrace();
             fail("初始化失败：" + e.getMessage());
@@ -49,18 +50,42 @@ public class DatabaseTableToXmlTest {
         table.setName("CRM_COM");
         table.setSchemaName("dbo");
         
-        // 添加字段（模拟从数据库读取的字段）
-        addField(table, "CRM_COM_ID", "INT", 0, true, true, false, "公司 ID");
-        addField(table, "CRM_COM_NAME", "NVARCHAR", 200, false, false, false, "公司名称");
-        addField(table, "CRM_COM_SNAME", "NVARCHAR", 150, false, false, true, "公司简称");
-        addField(table, "CRM_COM_CODE", "VARCHAR", 40, false, false, true, "公司代码");
-        addField(table, "CRM_COM_ADDR", "VARCHAR", 500, false, false, true, "公司地址");
-        addField(table, "CRM_COM_EMAIL", "VARCHAR", 100, false, false, true, "邮箱");
-        addField(table, "CRM_COM_TELE", "VARCHAR", 100, false, false, true, "电话");
-        addField(table, "CRM_COM_MOBILE", "VARCHAR", 50, false, false, true, "手机");
-        addField(table, "CRM_COM_CDATE", "DATETIME", 0, false, false, true, "创建时间");
-        addField(table, "CRM_COM_MDATE", "DATETIME", 0, false, false, true, "修改时间");
-        addField(table, "CRM_COM_STATE", "VARCHAR", 10, false, false, true, "状态");
+        // 先添加所有字段（不设置主键）
+        addField(table, "CRM_COM_ID", "INT", 0, false, true, false, "公司 ID", null);
+        addField(table, "CRM_COM_NAME", "NVARCHAR", 200, false, false, false, "公司名称", null);
+        addField(table, "CRM_COM_SNAME", "NVARCHAR", 150, false, false, true, "公司简称", null);
+        addField(table, "CRM_COM_CODE", "VARCHAR", 40, false, false, true, "公司代码", null);
+        addField(table, "CRM_COM_ADDR", "VARCHAR", 500, false, false, true, "公司地址", null);
+        addField(table, "CRM_COM_EMAIL", "VARCHAR", 100, false, false, true, "邮箱", null);
+        addField(table, "CRM_COM_TELE", "VARCHAR", 100, false, false, true, "电话", null);
+        addField(table, "CRM_COM_MOBILE", "VARCHAR", 50, false, false, true, "手机", null);
+        addField(table, "CRM_COM_CDATE", "DATETIME", 0, false, false, true, "创建时间", null);
+        addField(table, "CRM_COM_MDATE", "DATETIME", 0, false, false, true, "修改时间", null);
+        addField(table, "CRM_COM_STATE", "VARCHAR", 10, false, false, true, "状态", null);
+        
+        // 所有字段添加完成后，再设置主键
+        TablePk pk = new TablePk();
+        pk.setTableName("CRM_COM");
+        // 获取 CRM_COM_ID 字段并设置为主键
+        Field pkField = table.getFields().get("CRM_COM_ID");
+        pkField.setPk(true);
+        pk.getPkFields().add(pkField);
+        table.setPk(pk);
+        
+        // 重置 Fields 的主键初始化标志，以便重新初始化
+        // 注意：这里不能调用 table.getFields()，因为这会触发初始化
+        // 而是直接访问 _Fields 字段
+        try {
+            java.lang.reflect.Field fieldsField = Table.class.getDeclaredField("_Fields");
+            fieldsField.setAccessible(true);
+            com.gdxsoft.easyweb.define.database.Fields fields = 
+                (com.gdxsoft.easyweb.define.database.Fields) fieldsField.get(table);
+            if (fields != null) {
+                fields.setPkInitialized(false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         
         return table;
     }
@@ -69,7 +94,7 @@ public class DatabaseTableToXmlTest {
      * 添加字段辅助方法
      */
     private static void addField(Table table, String name, String type, int length, 
-                                  boolean isPk, boolean isIdentity, boolean nullable, String comment) {
+                                  boolean isPk, boolean isIdentity, boolean nullable, String comment, TablePk pk) {
         Field field = new Field();
         field.setName(name);
         field.setDatabaseType(type);
@@ -81,14 +106,6 @@ public class DatabaseTableToXmlTest {
         
         table.getFields().put(field.getName(), field);
         table.getFields().getFieldList().add(field.getName());
-        
-        // 如果是主键字段，添加到 Table 的 Pk 对象
-        if (isPk) {
-            if (table.getPk() == null) {
-                table.setPk(new TablePk());
-            }
-            table.getPk().getPkFields().add(field);
-        }
     }
 
     /**

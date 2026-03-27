@@ -22,12 +22,29 @@ public class Fields extends HashMap<String, Field> {
 	private String _TableName;
 	private String _Pk;
 	private ArrayList<Field> _PkFields = new ArrayList<Field>();
+	private boolean _PkInitialized = false;  // 主键是否已初始化
 
 	public Fields(){
 	}
 
 	public ArrayList<String> getFieldList() {
 		return _FieldList;
+	}
+	
+	/**
+	 * 检查主键是否已初始化
+	 * @return true 表示已初始化，false 表示未初始化
+	 */
+	public boolean isPkInitialized() {
+		return _PkInitialized;
+	}
+	
+	/**
+	 * 设置主键初始化状态
+	 * @param initialized true 表示已初始化，false 表示未初始化
+	 */
+	public void setPkInitialized(boolean initialized) {
+		_PkInitialized = initialized;
 	}
 	
 	/**
