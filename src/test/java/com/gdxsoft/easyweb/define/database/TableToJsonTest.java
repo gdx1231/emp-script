@@ -20,9 +20,9 @@ public class TableToJsonTest {
     public void testToJson() {
         // 创建测试表（使用无参构造函数）
         Table table = new Table();
+        table.initBlankFrame();  // 初始化字段列表
         table.setName("CRM_COM");
         table.setSchemaName("dbo");
-        table.setConnectionConfigName("globaltravel");
         
         // 添加测试字段
         Field field1 = new Field();
@@ -65,9 +65,9 @@ public class TableToJsonTest {
     public void testToJson_fromXml() {
         // 创建测试表（使用无参构造函数）
         Table table = new Table();
+        table.initBlankFrame();  // 初始化字段列表
         table.setName("TEST_TABLE");
         table.setSchemaName("dbo");
-        table.setConnectionConfigName("globaltravel");
         
         Field field = new Field();
         field.setName("TEST_FIELD");
