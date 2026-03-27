@@ -186,9 +186,28 @@ public class EwaDefineConfig {
             AddConfig addConfig = new AddConfig();
             addConfig.setSetMethod(addElem.getAttribute("SetMethod"));
             addConfig.setXmlPath(addElem.getAttribute("XmlPath"));
-            addConfig.setContent(addElem.getTextContent());
+            
+            // 获取 CDATA 内容
+            String content = getCDataContent(addElem);
+            addConfig.setContent(content);
+            
             tmpConfig.addAddConfig(addConfig);
         }
+    }
+    
+    /**
+     * 获取元素的 CDATA 内容
+     */
+    private String getCDataContent(Element elem) {
+        org.w3c.dom.NodeList children = elem.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            org.w3c.dom.Node child = children.item(i);
+            if (child.getNodeType() == org.w3c.dom.Node.CDATA_SECTION_NODE) {
+                return child.getNodeValue();
+            }
+        }
+        // 如果没有 CDATA，返回普通文本
+        return elem.getTextContent();
     }
     
     /**
