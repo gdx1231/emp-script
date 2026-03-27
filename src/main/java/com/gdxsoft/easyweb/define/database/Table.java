@@ -1058,6 +1058,16 @@ public class Table {
 		if (this._Fields == null) {
 			this.init();
 		}
+		// 初始化 Fields 的表名和主键信息
+		if (this._Fields != null && this._Name != null) {
+			this._Fields.setTableName(this._Name);
+			// 设置主键信息
+			if (this._Pk != null && !this._Pk.getPkFields().isEmpty()) {
+				for (Field pkField : this._Pk.getPkFields()) {
+					this._Fields.addPkField(pkField);
+				}
+			}
+		}
 		return _Fields;
 	}
 
