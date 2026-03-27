@@ -368,10 +368,19 @@ public class BusinessXmlCreator {
         // PageSize 节点
         org.w3c.dom.Element pageSize = doc.createElement("PageSize");
         page.appendChild(pageSize);
+        org.w3c.dom.Element pageSizeSet = doc.createElement("Set");
+        pageSizeSet.setAttribute("PageSize", "10");
+        pageSizeSet.setAttribute("Recycle", "1");
+        pageSize.appendChild(pageSizeSet);
         
         // ListUI 节点
         org.w3c.dom.Element listUI = doc.createElement("ListUI");
         page.appendChild(listUI);
+        org.w3c.dom.Element listUISet = doc.createElement("Set");
+        listUISet.setAttribute("luButtons", "1");
+        listUISet.setAttribute("luSearch", "1");
+        listUISet.setAttribute("luSelect", "s");
+        listUI.appendChild(listUISet);
         
         // MenuShow 节点
         org.w3c.dom.Element menuShow = doc.createElement("MenuShow");
