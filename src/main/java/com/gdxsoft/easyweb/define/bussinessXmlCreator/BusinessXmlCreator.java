@@ -126,6 +126,9 @@ public class BusinessXmlCreator {
         // 创建 Page 的基本配置节点
         createPageBasicConfig(doc, page, frameType, operationType, itemName);
         
+        // 创建 Action 节点
+        createPageAction(doc, page, frameType, operationType);
+        
         // 创建 XItems 节点
         org.w3c.dom.Element xitems = doc.createElement("XItems");
         page.appendChild(xitems);
@@ -142,6 +145,18 @@ public class BusinessXmlCreator {
         // 添加确定按钮
         org.w3c.dom.Element butOk = createSubmitButton(doc);
         xitems.appendChild(butOk);
+        
+        // 创建 Menus 节点
+        createMenus(doc, root);
+        
+        // 创建 Charts 节点
+        createCharts(doc, root);
+        
+        // 创建 PageInfos 节点
+        createPageInfos(doc, root);
+        
+        // 创建 Workflows 节点
+        createWorkflows(doc, root);
         
         this.xmlDoc = doc;
         return doc;
@@ -666,6 +681,143 @@ public class BusinessXmlCreator {
         }
         
         return xitem;
+    }
+    
+    /**
+     * 创建 Page 的 Action 配置
+     */
+    private void createPageAction(Document doc, org.w3c.dom.Element page, 
+            String frameType, String operationType) {
+        
+        // Action 节点
+        org.w3c.dom.Element action = doc.createElement("Action");
+        page.appendChild(action);
+        
+        // ActionSet 节点
+        org.w3c.dom.Element actionSet = doc.createElement("ActionSet");
+        action.appendChild(actionSet);
+        
+        // OnPageLoad Action
+        org.w3c.dom.Element onLoadAction = doc.createElement("Set");
+        onLoadAction.setAttribute("LogMsg", "");
+        onLoadAction.setAttribute("Transcation", "");
+        onLoadAction.setAttribute("Type", "OnPageLoad");
+        actionSet.appendChild(onLoadAction);
+        
+        org.w3c.dom.Element onLoadCall = doc.createElement("CallSet");
+        org.w3c.dom.Element onLoadCallSet = doc.createElement("Set");
+        onLoadCallSet.setAttribute("CallIsChk", "");
+        onLoadCallSet.setAttribute("CallName", "OnPageLoad SQL");
+        onLoadCallSet.setAttribute("CallType", "SqlSet");
+        onLoadCallSet.setAttribute("Test", "");
+        onLoadCall.appendChild(onLoadCallSet);
+        onLoadAction.appendChild(onLoadCall);
+        
+        // OnPagePost Action (仅修改/新增模式)
+        if (operationType.equals("M") || operationType.equals("N") || operationType.equals("NM")) {
+            org.w3c.dom.Element onPostAction = doc.createElement("Set");
+            onPostAction.setAttribute("LogMsg", "");
+            onPostAction.setAttribute("Transcation", "");
+            onPostAction.setAttribute("Type", "OnPagePost");
+            actionSet.appendChild(onPostAction);
+            
+            org.w3c.dom.Element onPostCall = doc.createElement("CallSet");
+            org.w3c.dom.Element onPostCallSet = doc.createElement("Set");
+            onPostCallSet.setAttribute("CallIsChk", "");
+            onPostCallSet.setAttribute("CallName", "OnPagePost SQL");
+            onPostCallSet.setAttribute("CallType", "SqlSet");
+            onPostCallSet.setAttribute("Test", "");
+            onPostCall.appendChild(onPostCallSet);
+            onPostAction.appendChild(onPostCall);
+        }
+        
+        // SqlSet 节点
+        org.w3c.dom.Element sqlSet = doc.createElement("SqlSet");
+        action.appendChild(sqlSet);
+        
+        // OnPageLoad SQL
+        org.w3c.dom.Element onLoadSql = doc.createElement("Set");
+        onLoadSql.setAttribute("Name", "OnPageLoad SQL");
+        onLoadSql.setAttribute("SqlType", "query");
+        org.w3c.dom.Element onLoadSqlContent = doc.createElement("Sql");
+        onLoadSqlContent.setTextContent("SELECT * FROM " + this.table.getName() + " WHERE 1=2");
+        onLoadSql.appendChild(onLoadSqlContent);
+        org.w3c.dom.Element onLoadCssSet = doc.createElement("CSSet");
+        onLoadSql.appendChild(onLoadCssSet);
+        sqlSet.appendChild(onLoadSql);
+        
+        // OnPagePost SQL (仅修改/新增模式)
+        if (operationType.equals("M") || operationType.equals("N") || operationType.equals("NM")) {
+            org.w3c.dom.Element onPostSql = doc.createElement("Set");
+            onPostSql.setAttribute("Name", "OnPagePost SQL");
+            onPostSql.setAttribute("SqlType", "update");
+            org.w3c.dom.Element onPostSqlContent = doc.createElement("Sql");
+            onPostSqlContent.setTextContent("-- UPDATE " + this.table.getName() + " SET ... WHERE ...");
+            onPostSql.appendChild(onPostSqlContent);
+            org.w3c.dom.Element onPostCssSet = doc.createElement("CSSet");
+            onPostSql.appendChild(onPostCssSet);
+            sqlSet.appendChild(onPostSql);
+        }
+        
+        // JSONSet 节点
+        org.w3c.dom.Element jsonSet = doc.createElement("JSONSet");
+        action.appendChild(jsonSet);
+        
+        // ClassSet 节点
+        org.w3c.dom.Element classSet = doc.createElement("ClassSet");
+        action.appendChild(classSet);
+        
+        // XmlSet 节点
+        org.w3c.dom.Element xmlSet = doc.createElement("XmlSet");
+        action.appendChild(xmlSet);
+        
+        // XmlSetData 节点
+        org.w3c.dom.Element xmlSetData = doc.createElement("XmlSetData");
+        action.appendChild(xmlSetData);
+        
+        // ScriptSet 节点
+        org.w3c.dom.Element scriptSet = doc.createElement("ScriptSet");
+        action.appendChild(scriptSet);
+        
+        // UrlSet 节点
+        org.w3c.dom.Element urlSet = doc.createElement("UrlSet");
+        action.appendChild(urlSet);
+        
+        // CSSet 节点
+        org.w3c.dom.Element csSet = doc.createElement("CSSet");
+        action.appendChild(csSet);
+    }
+    
+    /**
+     * 创建 Menus 节点
+     */
+    private void createMenus(Document doc, org.w3c.dom.Element root) {
+        org.w3c.dom.Element menus = doc.createElement("Menus");
+        root.appendChild(menus);
+    }
+    
+    /**
+     * 创建 Charts 节点
+     */
+    private void createCharts(Document doc, org.w3c.dom.Element root) {
+        org.w3c.dom.Element charts = doc.createElement("Charts");
+        root.appendChild(charts);
+    }
+    
+    /**
+     * 创建 PageInfos 节点
+     */
+    private void createPageInfos(Document doc, org.w3c.dom.Element root) {
+        org.w3c.dom.Element pageInfos = doc.createElement("PageInfos");
+        root.appendChild(pageInfos);
+    }
+    
+    /**
+     * 创建 Workflows 节点
+     */
+    private void createWorkflows(Document doc, org.w3c.dom.Element root) {
+        org.w3c.dom.Element workflows = doc.createElement("Workflows");
+        root.appendChild(workflows);
     }
     
     /**
