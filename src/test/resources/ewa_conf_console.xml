@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ewa_confs>
+	<define allow="true" apiKey="CLWNxbjLGGovqfhpLM84c3XrHzurydMz2gQmMhA8mdEe9rjaY4"
+		apiSecert="R0jBLAS15yz68Qu99w8BzGujKf5prh4pWR0kDXOQyxpbj1CoCzVRLxPj7XavH8xCzTinPH0B997tj988wfaqV4MxOFZhK601D2LPUfOoDLh7S0IOLM3PM5LvWSFeeDVt"
+		apiServer="http://127.0.0.1:19997/ewa-module-portal/"></define>
+	<scriptPaths>
+		<!-- System inner configuration ewa.xml, m.xml -->
+		<scriptPath name="ewa" path="resources:/define.xml" />
+		<scriptPath name="b2b" path="jdbc:ewa" />
+		<scriptPath name="visa_ewa" path="jdbc:visa_ewa" />
+	</scriptPaths>
+	<!-- 初始化加载的全局变量 -->
+	<requestValuesGlobal>
+		<!-- EWA_STYLE所在目录 -->
+		<rv name="rv_ewa_style_path" value="/EmpScriptV2/" />
+		<rv name="rv_remote_ewa_style_path" value="/EmpScriptV2/" />
+	</requestValuesGlobal>
+
+	<!-- twitter snowflake -->
+	<snowflake workId="1" datacenterId="1"></snowflake>
+
+	<!-- 系统文件目录 -->
+	<paths>
+		<!-- 缓存配置 -->
+		<path name="cached_path" value="d:/3e51fd918b5ce26bd9ea77246332a6e7/ewa/cached" />
+
+		<!-- 用户配置文件目录 -->
+		<!-- <path name="script_path" value="/Volumes/b2b/user.config.xml" /> -->
+		<path name="script_path" value="jdbc:ewa" />
+
+		<!-- 图片缩略图保存根路径 -->
+		<path name="img_tmp_path" value="@/Users/admin/java/b2b/b2b_imgs/" />
+
+		<!-- 图片缩略图保存根路径URL, ！！！需要在Tomcat或Apache或Nginx中配置虚拟路径！！！。 -->
+		<path name="img_tmp_path_url" value="/b2b_imgs/" />
+
+		<!-- 导入导出目录 -->
+		<path des="导入导出目录" name="group_path" value="/Volumes/b2b/ewa_groups/" />
+
+		<!-- 文件转换 OpenOffice -->
+		<path name="cvt_office_home" value="D:\Program Files\LibreOffice\" value1="C:\Program Files (x86)\OpenOffice 4\" />
+
+		<!-- <path name="cvt_office_home" valuec="/Applications/OpenOffice.app/Contents/" /> -->
+		<!-- ImageMagick目录可执行文件路径 -->
+		<path name="cvt_ImageMagick_Home" value="/usr/local/Cellar/imagemagick/7.0.8-12/bin/" />
+	</paths>
+
+
+	<!-- 显示debug的ip地址，用","分割不同的ip, unincludes 排除的目录，不在DEFINE中列出 -->
+	<debug ips="127.0.0.1" unincludes="pf*,.temp*,ewaaaaaaaa" />
+
+	<!-- 发送邮件服务器 -->
+	<smtp ip="127.0.0.1" port="25" user="" pwd="">
+
+	</smtp>
+
+	<!-- 数据库连接池 -->
+	<databases>
+		<!-- <database name="b2b" type="MYSQL" connectionString="jdbc/b2b" schemaName="b2b"> <pool username="test" password="" driverClassName="com.mysql.cj.jdbc.Driver"
+			poolType="HikariCP" url="jdbc:mysql://localhost/b2b?serverTimezone=GMT%2B8&amp;autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=utf-8">
+			</pool> </database> -->
+		<!-- <database name="ms" type="MSSQL" connectionString="jdbc/ms" schemaName="dbo"> <pool username="sa" password="" maxActive="40"
+			maxIdle="120" maxWait="5000" poolType="druid" driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver" url="jdbc:sqlserver://localhost:1433;DatabaseName=OneWorld;applicationName=console">
+			</pool> </database> -->
+		
+		<!-- HSQLDB 数据库连接 -->
+		<database name="demo" type="HSQLDB" connectionString="jdbc/____ewa_cached_hsqldb__" schemaName="demo">
+			<pool username="SA" password="" driverClassName="org.hsqldb.jdbc.JDBCDriver" 
+				url="jdbc:hsqldb:mem:demo" poolType="HikariCP">
+			</pool>
+		</database>
+	</databases>
+
+</ewa_confs>
