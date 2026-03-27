@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<EasyWebTemplate Name="CRM_COM.LF.M">
+  <Page>
+    <Name>
+      <Set Name="CRM_COM.LF.M"/>
+    </Name>
+    <XItems>
+      <XItem Name="CRM_COM_ID">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_ID"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_ID" DataType="INT" DesZHCN="公司 ID"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="公司 ID" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+      <XItem Name="CRM_COM_NAME">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_NAME"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_NAME" DataType="NVARCHAR" DesZHCN="公司名称"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="公司名称" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+      <XItem Name="CRM_COM_SNAME">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_SNAME"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_SNAME" DataType="NVARCHAR" DesZHCN="公司简称"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="公司简称" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+      <XItem Name="CRM_COM_CODE">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_CODE"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_CODE" DataType="VARCHAR" DesZHCN="公司代码"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="公司代码" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+      <XItem Name="CRM_COM_ADDR">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_ADDR"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_ADDR" DataType="VARCHAR" DesZHCN="公司地址"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="公司地址" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+      <XItem Name="CRM_COM_EMAIL">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_EMAIL"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_EMAIL" DataType="VARCHAR" DesZHCN="邮箱"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="邮箱" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+      <XItem Name="CRM_COM_TELE">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_TELE"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_TELE" DataType="VARCHAR" DesZHCN="电话"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="电话" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+      <XItem Name="CRM_COM_MOBILE">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_MOBILE"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_MOBILE" DataType="VARCHAR" DesZHCN="手机"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="手机" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+      <XItem Name="CRM_COM_CDATE">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_CDATE"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_CDATE" DataType="DATETIME" DesZHCN="创建时间"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="创建时间" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+      <XItem Name="CRM_COM_MDATE">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_MDATE"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_MDATE" DataType="DATETIME" DesZHCN="修改时间"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="修改时间" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+      <XItem Name="CRM_COM_STATE">
+        <Tag>
+          <Set IsLFEdit="0"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_STATE"/>
+        </Name>
+        <DataItem>
+          <Set DataField="CRM_COM_STATE" DataType="VARCHAR" DesZHCN="状态"/>
+        </DataItem>
+        <DescriptionSet>
+          <Set Info="状态" Lang="zhcn"/>
+        </DescriptionSet>
+      </XItem>
+    </XItems>
+  </Page>
+</EasyWebTemplate>
