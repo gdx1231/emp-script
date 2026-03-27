@@ -77,12 +77,22 @@ public class BusinessXmlCreateTest {
         table.getFields().put(field.getName(), field);
         table.getFields().getFieldList().add(field.getName());
     }
+    
+    /**
+     * 保存 XML 到 temp 目录
+     */
+    private static String saveXmlToTemp(String filename, String xmlContent) throws Exception {
+        java.nio.file.Path tempDir = java.nio.file.Files.createTempDirectory("ewa_test_");
+        java.nio.file.Path xmlFile = tempDir.resolve(filename);
+        java.nio.file.Files.write(xmlFile, xmlContent.getBytes("UTF-8"));
+        return xmlFile.toString();
+    }
 
     /**
      * 测试创建 CRM_COM.LF.M（列表框修改模式）
      */
     @Test
-    public void testCreateCrmCom_LF_M() {
+    public void testCreateCrmCom_LF_M() throws Exception {
         // 1. 创建参数
         BusinessXmlCreateParams params = new BusinessXmlCreateParams(
             "demo",           // db
@@ -115,7 +125,11 @@ public class BusinessXmlCreateTest {
         assertNotNull(xmlPreview, "XML 预览不应为空");
         assertTrue(xmlPreview.length() > 0, "XML 不应为空字符串");
         
-        // 6. 输出 XML 预览
+        // 6. 保存 XML 到 temp 目录
+        String tempFile = saveXmlToTemp("CRM_COM.LF.M.xml", xmlPreview);
+        System.out.println("XML 已保存到：" + tempFile);
+        
+        // 7. 输出 XML 预览
         System.out.println("=== CRM_COM.LF.M XML 预览 ===");
         System.out.println(xmlPreview);
     }
@@ -124,7 +138,7 @@ public class BusinessXmlCreateTest {
      * 测试使用 SELECT 语句创建 CRM_COM.LF.M
      */
     @Test
-    public void testCreateCrmCom_LF_M_WithSql() {
+    public void testCreateCrmCom_LF_M_WithSql() throws Exception {
         // 1. 创建参数（使用表名）
         BusinessXmlCreateParams params = new BusinessXmlCreateParams(
             "demo",
@@ -154,7 +168,11 @@ public class BusinessXmlCreateTest {
         assertNotNull(xmlPreview, "XML 预览不应为空");
         assertTrue(xmlPreview.length() > 0, "XML 不应为空字符串");
         
-        // 6. 输出 XML 预览
+        // 6. 保存 XML 到 temp 目录
+        String tempFile = saveXmlToTemp("CRM_COM.LF.M.Sql.xml", xmlPreview);
+        System.out.println("XML 已保存到：" + tempFile);
+        
+        // 7. 输出 XML 预览
         System.out.println("=== CRM_COM.LF.M (SELECT) XML 预览 ===");
         System.out.println(xmlPreview);
     }
@@ -163,7 +181,7 @@ public class BusinessXmlCreateTest {
      * 测试使用表 JSON 创建 CRM_COM.LF.M
      */
     @Test
-    public void testCreateCrmCom_LF_M_WithJson() {
+    public void testCreateCrmCom_LF_M_WithJson() throws Exception {
         // 1. 获取表 JSON
         JSONObject tableJson = crmComTable.toJson();
         assertNotNull(tableJson, "表 JSON 不应为空");
@@ -197,7 +215,11 @@ public class BusinessXmlCreateTest {
         assertNotNull(xmlPreview, "XML 预览不应为空");
         assertTrue(xmlPreview.length() > 0, "XML 不应为空字符串");
         
-        // 7. 输出 XML 预览
+        // 7. 保存 XML 到 temp 目录
+        String tempFile = saveXmlToTemp("CRM_COM.LF.M.Json.xml", xmlPreview);
+        System.out.println("XML 已保存到：" + tempFile);
+        
+        // 8. 输出 XML 预览
         System.out.println("=== CRM_COM.LF.M (JSON) XML 预览 ===");
         System.out.println(xmlPreview);
     }

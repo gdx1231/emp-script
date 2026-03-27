@@ -103,12 +103,104 @@ public class BusinessXmlCreator {
     }
 
     /**
-     * 创建 XML 文档（简化版本）
+     * 创建 XML 文档
      */
     private Document create(String frameType, String operationType) throws Exception {
         Document doc = UXml.createBlankDocument();
-        // TODO: 实现完整的 XML 创建逻辑
+        
+        // 创建根节点 EasyWebTemplate
+        org.w3c.dom.Element root = doc.createElement("EasyWebTemplate");
+        doc.appendChild(root);
+        
+        // 设置 Name 属性（后续由 save() 方法设置）
+        root.setAttribute("Name", this.table.getName() + "." + getFrameTypeShort(frameType) + "." + operationType);
+        
+        // 创建 Page 节点
+        org.w3c.dom.Element page = doc.createElement("Page");
+        root.appendChild(page);
+        
+        // 创建 Name 节点
+        org.w3c.dom.Element nameNode = doc.createElement("Name");
+        page.appendChild(nameNode);
+        org.w3c.dom.Element nameSet = doc.createElement("Set");
+        nameSet.setAttribute("Name", this.table.getName() + "." + getFrameTypeShort(frameType) + "." + operationType);
+        nameNode.appendChild(nameSet);
+        
+        // 创建 XItems 节点
+        org.w3c.dom.Element xitems = doc.createElement("XItems");
+        page.appendChild(xitems);
+        
+        // 根据表字段创建 XItem
+        for (int i = 0; i < this.table.getFields().getFieldList().size(); i++) {
+            String fieldName = this.table.getFields().getFieldList().get(i);
+            com.gdxsoft.easyweb.define.database.Field field = this.table.getFields().get(fieldName);
+            
+            org.w3c.dom.Element xitem = createXItem(doc, field, frameType, operationType);
+            xitems.appendChild(xitem);
+        }
+        
+        this.xmlDoc = doc;
         return doc;
+    }
+    
+    /**
+     * 创建 XItem 节点
+     */
+    private org.w3c.dom.Element createXItem(Document doc, 
+            com.gdxsoft.easyweb.define.database.Field field, 
+            String frameType, String operationType) {
+        
+        org.w3c.dom.Element xitem = doc.createElement("XItem");
+        xitem.setAttribute("Name", field.getName());
+        
+        // 创建 Tag 节点
+        org.w3c.dom.Element tag = doc.createElement("Tag");
+        org.w3c.dom.Element tagSet = doc.createElement("Set");
+        tagSet.setAttribute("IsLFEdit", "0");
+        tag.appendChild(tagSet);
+        xitem.appendChild(tag);
+        
+        // 创建 Name 节点
+        org.w3c.dom.Element name = doc.createElement("Name");
+        org.w3c.dom.Element nameSet = doc.createElement("Set");
+        nameSet.setAttribute("Name", field.getName());
+        name.appendChild(nameSet);
+        xitem.appendChild(name);
+        
+        // 创建 DataItem 节点
+        org.w3c.dom.Element dataItem = doc.createElement("DataItem");
+        org.w3c.dom.Element dataItemSet = doc.createElement("Set");
+        dataItemSet.setAttribute("DataField", field.getName());
+        dataItemSet.setAttribute("DataType", field.getDatabaseType());
+        if (field.getDescription() != null) {
+            dataItemSet.setAttribute("DesZHCN", field.getDescription());
+        }
+        dataItem.appendChild(dataItemSet);
+        xitem.appendChild(dataItem);
+        
+        // 创建 DescriptionSet 节点
+        org.w3c.dom.Element descSet = doc.createElement("DescriptionSet");
+        org.w3c.dom.Element descSetItem = doc.createElement("Set");
+        descSetItem.setAttribute("Lang", "zhcn");
+        if (field.getDescription() != null) {
+            descSetItem.setAttribute("Info", field.getDescription());
+        }
+        descSet.appendChild(descSetItem);
+        xitem.appendChild(descSet);
+        
+        return xitem;
+    }
+    
+    /**
+     * 获取 Frame 类型简写
+     */
+    private String getFrameTypeShort(String frameType) {
+        switch (frameType.toUpperCase()) {
+            case "FRAME": return "F";
+            case "LISTFRAME": return "LF";
+            case "TREE": return "T";
+            default: return frameType;
+        }
     }
 
     /**
