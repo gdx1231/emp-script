@@ -448,7 +448,7 @@ public class BusinessXmlCreator {
         orderSearchSet.setAttribute("OrderExp", "");
         orderSearchSet.setAttribute("SearchExp", "");
         orderSearchSet.setAttribute("SearchMulti", "2");
-        orderSearchSet.setAttribute("SearchSql", "");
+        orderSearchSet.setAttribute("SearchSql", getSearchSql(field));
         orderSearchSet.setAttribute("SearchType", "fix");
         orderSearch.appendChild(orderSearchSet);
         xitem.appendChild(orderSearch);
@@ -486,12 +486,12 @@ public class BusinessXmlCreator {
         dataItemSet.setAttribute("DataField", field.getName());
         dataItemSet.setAttribute("DataType", getDataType(field.getDatabaseType()));
         dataItemSet.setAttribute("DisableOnModify", "");
-        dataItemSet.setAttribute("Format", "");
+        dataItemSet.setAttribute("Format", getFormat(field.getDatabaseType()));
         dataItemSet.setAttribute("FrameOneCell", "");
         dataItemSet.setAttribute("Icon", "");
         dataItemSet.setAttribute("IconLoction", "");
         dataItemSet.setAttribute("IsEncrypt", "");
-        dataItemSet.setAttribute("NumberScale", "");
+        dataItemSet.setAttribute("NumberScale", getNumberScale(field.getDatabaseType()));
         dataItemSet.setAttribute("SumBottom", "");
         dataItemSet.setAttribute("TransTarget", "");
         dataItemSet.setAttribute("Translation", "");
@@ -577,7 +577,7 @@ public class BusinessXmlCreator {
         org.w3c.dom.Element vaildExSet = doc.createElement("Set");
         vaildExSet.setAttribute("VXAction", "");
         vaildExSet.setAttribute("VXFail", "");
-        vaildExSet.setAttribute("VXJs", "");
+        vaildExSet.setAttribute("VXJs", getValidJs(field));
         vaildExSet.setAttribute("VXMode", "");
         vaildExSet.setAttribute("VXOk", "");
         vaildEx.appendChild(vaildExSet);
@@ -651,6 +651,70 @@ public class BusinessXmlCreator {
         if (type.contains("EMAIL")) return "Email";
         if (type.contains("MOBILE") || type.contains("PHONE")) return "Mobile";
         return "";
+    }
+    
+    /**
+     * 获取验证 JavaScript
+     */
+    private String getValidJs(com.gdxsoft.easyweb.define.database.Field field) {
+        String validType = getValidType(field.getDatabaseType());
+        if (validType.equals("Email")) {
+            return "if (v && !/^[\\w-]+(\\.[\\w-]+)*@[\\w-]+(\\.[\\w-]+)+$/.test(v)) { return '邮箱格式不正确'; }";
+        }
+        if (validType.equals("Mobile")) {
+            return "if (v && !/^1[3-9]\\d{9}$/.test(v)) { return '手机号格式不正确'; }";
+        }
+        return "";
+    }
+    
+    /**
+     * 获取日期格式
+     */
+    private String getFormat(String dbType) {
+        if (dbType == null) return "";
+        String type = dbType.toUpperCase();
+        if (type.contains("DATE") && !type.contains("TIME")) return "yyyy-MM-dd";
+        if (type.contains("TIME") && !type.contains("DATE")) return "HH:mm:ss";
+        if (type.contains("DATETIME") || type.contains("TIMESTAMP")) return "yyyy-MM-dd HH:mm:ss";
+        return "";
+    }
+    
+    /**
+     * 获取数字精度
+     */
+    private String getNumberScale(String dbType) {
+        if (dbType == null) return "";
+        String type = dbType.toUpperCase();
+        if (type.contains("DECIMAL") || type.contains("NUMERIC") || type.contains("MONEY")) return "2";
+        return "";
+    }
+    
+    /**
+     * 获取搜索 SQL
+     */
+    private String getSearchSql(com.gdxsoft.easyweb.define.database.Field field) {
+        String name = field.getName();
+        String desc = field.getDescription() != null ? field.getDescription() : name;
+        // 为常用字段添加搜索 SQL
+        if (name.endsWith("_ID") || name.contains("CODE") || name.contains("NAME")) {
+            return "SELECT " + name + ", " + name + "_NAME FROM " + getTableNameFromField(name) + " WHERE " + name + "=@value";
+        }
+        return "";
+    }
+    
+    /**
+     * 从字段名获取表名
+     */
+    private String getTableNameFromField(String fieldName) {
+        if (fieldName.startsWith("CRM_")) {
+            // CRM_COM_ID -> CRM_COM
+            int idx = fieldName.indexOf("_", 4);
+            if (idx > 0) {
+                return fieldName.substring(0, idx);
+            }
+            return fieldName;
+        }
+        return "DUAL";
     }
     
     /**
