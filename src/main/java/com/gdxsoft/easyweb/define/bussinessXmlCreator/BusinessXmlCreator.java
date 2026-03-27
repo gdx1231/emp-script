@@ -962,20 +962,57 @@ public class BusinessXmlCreator {
         org.w3c.dom.Element set = doc.createElement("Set");
         set.setAttribute("Name", config.getName() + " SQL");
         set.setAttribute("SqlType", config.getSqlType());
-        
+
         // Sql 节点
         org.w3c.dom.Element sql = doc.createElement("Sql");
         String sqlContent = config.getSql();
-        if (sqlContent != null && sqlContent.startsWith("'") && sqlContent.endsWith("'")) {
-            sqlContent = sqlContent.substring(1, sqlContent.length() - 1);
-        }
-        sql.setTextContent(sqlContent);
-        set.appendChild(sql);
         
+        // 解析 Sql 内容，如果是方法调用则生成实际 SQL
+        if (sqlContent != null) {
+            if (sqlContent.startsWith("'") && sqlContent.endsWith("'")) {
+                sqlContent = sqlContent.substring(1, sqlContent.length() - 1);
+            }
+            
+            // 处理 this.Fields.GetSqlXxx() 方法调用
+            sqlContent = parseFieldsMethod(sqlContent);
+        }
+        
+        sql.setTextContent(sqlContent != null ? sqlContent : "");
+        set.appendChild(sql);
+
         // CSSet 节点
         set.appendChild(doc.createElement("CSSet"));
-        
+
         return set;
+    }
+    
+    /**
+     * 解析 Fields 方法调用
+     */
+    private String parseFieldsMethod(String sqlContent) {
+        if (sqlContent == null) return null;
+        
+        // 获取状态字段
+        String statusField = getStatusField();
+        
+        // 替换方法调用为实际 SQL
+        if (sqlContent.contains("this.Fields.GetSqlSelectLF()")) {
+            return this.table.getFields().GetSqlSelectLF(statusField, true);
+        } else if (sqlContent.contains("this.Fields.GetSqlSelect()")) {
+            return this.table.getFields().GetSqlSelect();
+        } else if (sqlContent.contains("this.Fields.GetSqlDeleteA()")) {
+            return this.table.getFields().GetSqlDeleteA(statusField);
+        } else if (sqlContent.contains("this.Fields.GetSqlRestore()")) {
+            return this.table.getFields().GetSqlRestore(statusField);
+        } else if (sqlContent.contains("this.Fields.GetSqlDelete()")) {
+            return this.table.getFields().GetSqlDelete();
+        } else if (sqlContent.contains("this.Fields.GetSqlUpdate()")) {
+            return this.table.getFields().GetSqlUpdate(statusField);
+        } else if (sqlContent.contains("this.Fields.GetSqlNew()")) {
+            return this.table.getFields().GetSqlNew(statusField);
+        }
+        
+        return sqlContent;
     }
     
     /**
@@ -1001,16 +1038,85 @@ public class BusinessXmlCreator {
         // SqlSet 节点
         org.w3c.dom.Element sqlSet = doc.createElement("SqlSet");
         action.appendChild(sqlSet);
-        
-        // OnPageLoad SQL
+
+        // OnPageLoad SQL - 使用 Fields.GetSqlSelectLF() 生成的 SQL
         org.w3c.dom.Element onLoadSql = doc.createElement("Set");
         onLoadSql.setAttribute("Name", "OnPageLoad SQL");
         onLoadSql.setAttribute("SqlType", "query");
         org.w3c.dom.Element onLoadSqlContent = doc.createElement("Sql");
-        onLoadSqlContent.setTextContent("SELECT * FROM " + this.table.getName() + " WHERE 1=2");
+        
+        // 获取状态字段名（ListFrame 模式）
+        String statusField = getStatusField();
+        
+        // 根据 Frame 类型生成不同的 SQL
+        if (frameType.equalsIgnoreCase("ListFrame")) {
+            // ListFrame 使用 GetSqlSelectLF
+            onLoadSqlContent.setTextContent(this.table.getFields().GetSqlSelectLF(statusField, true));
+        } else {
+            // Frame 使用 GetSqlSelect
+            onLoadSqlContent.setTextContent(this.table.getFields().GetSqlSelect());
+        }
+        
         onLoadSql.appendChild(onLoadSqlContent);
         onLoadSql.appendChild(doc.createElement("CSSet"));
         sqlSet.appendChild(onLoadSql);
+        
+        // OnPagePost SQL (仅修改/新增模式)
+        if (operationType.equals("M") || operationType.equals("N") || operationType.equals("NM")) {
+            org.w3c.dom.Element onPostSql = doc.createElement("Set");
+            onPostSql.setAttribute("Name", "OnPagePost SQL");
+            onPostSql.setAttribute("SqlType", "update");
+            org.w3c.dom.Element onPostSqlContent = doc.createElement("Sql");
+            
+            // 根据操作类型生成不同的 SQL
+            if (operationType.equals("N")) {
+                onPostSqlContent.setTextContent(this.table.getFields().GetSqlNew(statusField));
+            } else if (operationType.equals("M")) {
+                onPostSqlContent.setTextContent(this.table.getFields().GetSqlUpdate(statusField));
+            } else { // NM
+                onPostSqlContent.setTextContent("-- New or Update\n" + this.table.getFields().GetSqlNew(statusField));
+            }
+            
+            onPostSql.appendChild(onPostSqlContent);
+            onPostSql.appendChild(doc.createElement("CSSet"));
+            sqlSet.appendChild(onPostSql);
+        }
+        
+        // OnFrameDelete SQL (ListFrame.M 模式)
+        if (frameType.equalsIgnoreCase("ListFrame") && 
+            (operationType.equals("M") || operationType.equals("NM"))) {
+            org.w3c.dom.Element onDeleteSql = doc.createElement("Set");
+            onDeleteSql.setAttribute("Name", "OnFrameDelete SQL");
+            onDeleteSql.setAttribute("SqlType", "update");
+            org.w3c.dom.Element onDeleteSqlContent = doc.createElement("Sql");
+            onDeleteSqlContent.setTextContent(this.table.getFields().GetSqlDeleteA(statusField));
+            onDeleteSql.appendChild(onDeleteSqlContent);
+            onDeleteSql.appendChild(doc.createElement("CSSet"));
+            sqlSet.appendChild(onDeleteSql);
+            
+            org.w3c.dom.Element onRestoreSql = doc.createElement("Set");
+            onRestoreSql.setAttribute("Name", "OnFrameRestore SQL");
+            onRestoreSql.setAttribute("SqlType", "update");
+            org.w3c.dom.Element onRestoreSqlContent = doc.createElement("Sql");
+            onRestoreSqlContent.setTextContent(this.table.getFields().GetSqlRestore(statusField));
+            onRestoreSql.appendChild(onRestoreSqlContent);
+            onRestoreSql.appendChild(doc.createElement("CSSet"));
+            sqlSet.appendChild(onRestoreSql);
+        }
+    }
+    
+    /**
+     * 获取状态字段名
+     * @return 状态字段名，如果没有则返回 null
+     */
+    private String getStatusField() {
+        // 查找状态字段（通常命名为 xxx_STATE 或 STATUS）
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.endsWith("_STATE") || fieldName.equals("STATUS") || fieldName.endsWith("_STATUS")) {
+                return fieldName;
+            }
+        }
+        return null;
     }
     
     /**
