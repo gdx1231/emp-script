@@ -1200,14 +1200,15 @@ public class BusinessXmlCreator {
             String xmlPath = addConfig.getXmlPath();
             String content = addConfig.getContent();
             String setMethod = addConfig.getSetMethod();
-            
+
             // 解析 XmlPath，例如 "EasyWebTemplate/Page/AddScript/Set/Bottom"
             String[] parts = xmlPath.split("/");
-            
-            // 从根节点开始构建
+
+            // 从根节点开始（跳过 EasyWebTemplate，因为已经是根了）
             org.w3c.dom.Element current = doc.getDocumentElement();
             
-            for (int i = 0; i < parts.length; i++) {
+            // 从第 2 个部分开始查找（跳过 EasyWebTemplate）
+            for (int i = 1; i < parts.length; i++) {
                 String part = parts[i];
                 org.w3c.dom.Element child = findChildElement(current, part);
                 if (child == null) {
@@ -1216,7 +1217,7 @@ public class BusinessXmlCreator {
                 }
                 current = child;
             }
-            
+
             // 设置内容
             if ("CDATA".equals(setMethod)) {
                 org.w3c.dom.CDATASection cdata = doc.createCDATASection(content);
