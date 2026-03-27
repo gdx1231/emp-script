@@ -199,23 +199,23 @@ public class BusinessXmlCreator {
     /**
      * 创建 Page 的基本配置
      */
-    private void createPageBasicConfig(Document doc, org.w3c.dom.Element page, 
+    private void createPageBasicConfig(Document doc, org.w3c.dom.Element page,
             String frameType, String operationType, String itemName) {
-        
+
         // Name 节点
         org.w3c.dom.Element nameNode = doc.createElement("Name");
         page.appendChild(nameNode);
         org.w3c.dom.Element nameSet = doc.createElement("Set");
         nameSet.setAttribute("Name", itemName);
         nameNode.appendChild(nameSet);
-        
+
         // FrameTag 节点
         org.w3c.dom.Element frameTag = doc.createElement("FrameTag");
         page.appendChild(frameTag);
         org.w3c.dom.Element frameTagSet = doc.createElement("Set");
         frameTagSet.setAttribute("FrameTag", frameType);
         frameTag.appendChild(frameTagSet);
-        
+
         // ListFrame 模式添加 Tag 配置
         if (frameType.equalsIgnoreCase("ListFrame")) {
             org.w3c.dom.Element tag = doc.createElement("Tag");
@@ -224,7 +224,7 @@ public class BusinessXmlCreator {
             tagSet.setAttribute("Tag", "span");
             tag.appendChild(tagSet);
         }
-        
+
         // SkinName 节点
         org.w3c.dom.Element skinName = doc.createElement("SkinName");
         page.appendChild(skinName);
@@ -232,18 +232,18 @@ public class BusinessXmlCreator {
         skinNameSet.setAttribute("IsXhtml", "0");
         skinNameSet.setAttribute("SkinName", "Test1");
         skinName.appendChild(skinNameSet);
-        
+
         // DataSource 节点
         org.w3c.dom.Element dataSource = doc.createElement("DataSource");
         page.appendChild(dataSource);
         org.w3c.dom.Element dataSourceSet = doc.createElement("Set");
         dataSourceSet.setAttribute("DataSource", "globaltravel");
         dataSource.appendChild(dataSourceSet);
-        
+
         // AllowJsonExport 节点
         org.w3c.dom.Element allowJsonExport = doc.createElement("AllowJsonExport");
         page.appendChild(allowJsonExport);
-        
+
         // ConfigMemo 节点
         org.w3c.dom.Element configMemo = doc.createElement("ConfigMemo");
         page.appendChild(configMemo);
@@ -251,7 +251,7 @@ public class BusinessXmlCreator {
         org.w3c.dom.Element configMemoInner = doc.createElement("ConfigMemo");
         configMemoSet.appendChild(configMemoInner);
         configMemo.appendChild(configMemoSet);
-        
+
         // Cached 节点
         org.w3c.dom.Element cached = doc.createElement("Cached");
         page.appendChild(cached);
@@ -259,21 +259,21 @@ public class BusinessXmlCreator {
         cachedSet.setAttribute("CachedSeconds", "");
         cachedSet.setAttribute("CachedType", "");
         cached.appendChild(cachedSet);
-        
+
         // Acl 节点
         org.w3c.dom.Element acl = doc.createElement("Acl");
         page.appendChild(acl);
         org.w3c.dom.Element aclSet = doc.createElement("Set");
         aclSet.setAttribute("Acl", "com.gdxsoft.web.acl.BusinessImpl");
         acl.appendChild(aclSet);
-        
+
         // Log 节点
         org.w3c.dom.Element log = doc.createElement("Log");
         page.appendChild(log);
         org.w3c.dom.Element logSet = doc.createElement("Set");
         logSet.setAttribute("Log", "com.gdxsoft.web.log.EwaScriptLog");
         log.appendChild(logSet);
-        
+
         // DescriptionSet 节点
         org.w3c.dom.Element descSet = doc.createElement("DescriptionSet");
         page.appendChild(descSet);
@@ -287,16 +287,32 @@ public class BusinessXmlCreator {
         descSetEnus.setAttribute("Lang", "enus");
         descSetEnus.setAttribute("Memo", "");
         descSet.appendChild(descSetEnus);
-        
+
+        // PageAttributeSet 节点
+        org.w3c.dom.Element pageAttributeSet = doc.createElement("PageAttributeSet");
+        page.appendChild(pageAttributeSet);
+
+        // RowAttributeSet 节点
+        org.w3c.dom.Element rowAttributeSet = doc.createElement("RowAttributeSet");
+        page.appendChild(rowAttributeSet);
+
+        // GroupSet 节点
+        org.w3c.dom.Element groupSet = doc.createElement("GroupSet");
+        page.appendChild(groupSet);
+
         // Size 节点
         org.w3c.dom.Element size = doc.createElement("Size");
         page.appendChild(size);
         org.w3c.dom.Element sizeSet = doc.createElement("Set");
+        sizeSet.setAttribute("FrameCols", "");
         sizeSet.setAttribute("HAlign", "center");
+        sizeSet.setAttribute("Height", "");
+        sizeSet.setAttribute("HiddenCaption", "");
+        sizeSet.setAttribute("TextareaAuto", "");
         sizeSet.setAttribute("VAlign", "top");
         sizeSet.setAttribute("Width", "100%");
         size.appendChild(sizeSet);
-        
+
         // AddHtml 节点
         org.w3c.dom.Element addHtml = doc.createElement("AddHtml");
         page.appendChild(addHtml);
@@ -306,6 +322,92 @@ public class BusinessXmlCreator {
         org.w3c.dom.Element addHtmlBottom = doc.createElement("Bottom");
         addHtmlSet.appendChild(addHtmlBottom);
         addHtml.appendChild(addHtmlSet);
+        
+        // AddScript 节点（空，实际内容从 EwaDefine.xml 读取）
+        org.w3c.dom.Element addScript = doc.createElement("AddScript");
+        page.appendChild(addScript);
+        org.w3c.dom.Element addScriptSet = doc.createElement("Set");
+        org.w3c.dom.Element addScriptTop = doc.createElement("Top");
+        addScriptSet.appendChild(addScriptTop);
+        org.w3c.dom.Element addScriptBottom = doc.createElement("Bottom");
+        addScriptSet.appendChild(addScriptBottom);
+        addScript.appendChild(addScriptSet);
+        
+        // AddCss 节点
+        org.w3c.dom.Element addCss = doc.createElement("AddCss");
+        page.appendChild(addCss);
+        org.w3c.dom.Element addCssSet = doc.createElement("Set");
+        org.w3c.dom.Element addCssContent = doc.createElement("AddCss");
+        addCssSet.appendChild(addCssContent);
+        addCss.appendChild(addCssSet);
+        
+        // ChartsShow 节点
+        org.w3c.dom.Element chartsShow = doc.createElement("ChartsShow");
+        page.appendChild(chartsShow);
+        
+        // RedrawJson 节点
+        org.w3c.dom.Element redrawJson = doc.createElement("RedrawJson");
+        page.appendChild(redrawJson);
+        
+        // BoxJson 节点
+        org.w3c.dom.Element boxJson = doc.createElement("BoxJson");
+        page.appendChild(boxJson);
+        
+        // LeftJson 节点
+        org.w3c.dom.Element leftJson = doc.createElement("LeftJson");
+        page.appendChild(leftJson);
+        
+        // FrameHtml 节点
+        org.w3c.dom.Element frameHtml = doc.createElement("FrameHtml");
+        page.appendChild(frameHtml);
+        org.w3c.dom.Element frameHtmlSet = doc.createElement("Set");
+        org.w3c.dom.Element frameHtmlInner = doc.createElement("FrameHtml");
+        frameHtmlSet.appendChild(frameHtmlInner);
+        frameHtml.appendChild(frameHtmlSet);
+        
+        // PageSize 节点
+        org.w3c.dom.Element pageSize = doc.createElement("PageSize");
+        page.appendChild(pageSize);
+        
+        // ListUI 节点
+        org.w3c.dom.Element listUI = doc.createElement("ListUI");
+        page.appendChild(listUI);
+        
+        // MenuShow 节点
+        org.w3c.dom.Element menuShow = doc.createElement("MenuShow");
+        page.appendChild(menuShow);
+        
+        // Menu 节点
+        org.w3c.dom.Element menu = doc.createElement("Menu");
+        page.appendChild(menu);
+        
+        // Tree 节点
+        org.w3c.dom.Element tree = doc.createElement("Tree");
+        page.appendChild(tree);
+        
+        // HtmlFrame 节点
+        org.w3c.dom.Element htmlFrame = doc.createElement("HtmlFrame");
+        page.appendChild(htmlFrame);
+        
+        // TreeIconSet 节点
+        org.w3c.dom.Element treeIconSet = doc.createElement("TreeIconSet");
+        page.appendChild(treeIconSet);
+        
+        // MGAxisX 节点
+        org.w3c.dom.Element mgAxisX = doc.createElement("MGAxisX");
+        page.appendChild(mgAxisX);
+        
+        // MGAxisY 节点
+        org.w3c.dom.Element mgAxisY = doc.createElement("MGAxisY");
+        page.appendChild(mgAxisY);
+        
+        // MGCell 节点
+        org.w3c.dom.Element mgCell = doc.createElement("MGCell");
+        page.appendChild(mgCell);
+        
+        // LogicShow 节点
+        org.w3c.dom.Element logicShow = doc.createElement("LogicShow");
+        page.appendChild(logicShow);
     }
     
     /**
@@ -1089,6 +1191,40 @@ public class BusinessXmlCreator {
             onRestoreSql.appendChild(doc.createElement("CSSet"));
             sqlSet.appendChild(onRestoreSql);
         }
+        
+        // SAct0-2 SQL (标准查询 Action)
+        for (int i = 0; i <= 2; i++) {
+            org.w3c.dom.Element sActSql = doc.createElement("Set");
+            sActSql.setAttribute("Name", "SAct" + i + " SQL");
+            sActSql.setAttribute("SqlType", "query");
+            org.w3c.dom.Element sActSqlContent = doc.createElement("Sql");
+            sActSqlContent.setTextContent("-- enter your sql");
+            sActSql.appendChild(sActSqlContent);
+            sActSql.appendChild(doc.createElement("CSSet"));
+            sqlSet.appendChild(sActSql);
+        }
+        
+        // UAct0-2 SQL (标准更新 Action)
+        for (int i = 0; i <= 2; i++) {
+            org.w3c.dom.Element uActSql = doc.createElement("Set");
+            uActSql.setAttribute("Name", "UAct" + i + " SQL");
+            uActSql.setAttribute("SqlType", "update");
+            org.w3c.dom.Element uActSqlContent = doc.createElement("Sql");
+            uActSqlContent.setTextContent("-- enter your sql");
+            uActSql.appendChild(uActSqlContent);
+            uActSql.appendChild(doc.createElement("CSSet"));
+            sqlSet.appendChild(uActSql);
+        }
+        
+        // CheckError SQL
+        org.w3c.dom.Element checkErrorSql = doc.createElement("Set");
+        checkErrorSql.setAttribute("Name", "CheckError SQL");
+        checkErrorSql.setAttribute("SqlType", "query");
+        org.w3c.dom.Element checkErrorSqlContent = doc.createElement("Sql");
+        checkErrorSqlContent.setTextContent("-- select 不能执行/javascript_func() as EWA_ERR_OUT FROM xxx where 1=2");
+        checkErrorSql.appendChild(checkErrorSqlContent);
+        checkErrorSql.appendChild(doc.createElement("CSSet"));
+        sqlSet.appendChild(checkErrorSql);
     }
     
     /**
@@ -1201,7 +1337,7 @@ public class BusinessXmlCreator {
     private org.w3c.dom.Element createButtonAsXItem(Document doc, EwaDefineConfig.ButtonConfig config) {
         org.w3c.dom.Element xitem = doc.createElement("XItem");
         xitem.setAttribute("Name", config.getName());
-        
+
         // Tag 节点
         org.w3c.dom.Element tag = doc.createElement("Tag");
         org.w3c.dom.Element tagSet = doc.createElement("Set");
@@ -1212,24 +1348,192 @@ public class BusinessXmlCreator {
         tagSet.setAttribute("SpanShowAs", "");
         tag.appendChild(tagSet);
         xitem.appendChild(tag);
-        
+
         // Name 节点
         org.w3c.dom.Element name = doc.createElement("Name");
         org.w3c.dom.Element nameSet = doc.createElement("Set");
         nameSet.setAttribute("Name", config.getName());
         name.appendChild(nameSet);
         xitem.appendChild(name);
-        
+
+        // GroupIndex 节点
+        org.w3c.dom.Element groupIndex = doc.createElement("GroupIndex");
+        xitem.appendChild(groupIndex);
+
+        // InitValue 节点
+        org.w3c.dom.Element initValue = doc.createElement("InitValue");
+        xitem.appendChild(initValue);
+
         // DescriptionSet 节点
         if (config.getDescriptionSet() != null) {
             xitem.appendChild(createDescriptionSet(doc, config.getDescriptionSet()));
         }
-        
+
+        // XStyle 节点
+        org.w3c.dom.Element xstyle = doc.createElement("XStyle");
+        xitem.appendChild(xstyle);
+
+        // Style 节点
+        org.w3c.dom.Element style = doc.createElement("Style");
+        org.w3c.dom.Element styleSet = doc.createElement("Set");
+        styleSet.setAttribute("Style", "");
+        style.appendChild(styleSet);
+        xitem.appendChild(style);
+
+        // ParentStyle 节点
+        org.w3c.dom.Element parentStyle = doc.createElement("ParentStyle");
+        org.w3c.dom.Element parentStyleSet = doc.createElement("Set");
+        parentStyleSet.setAttribute("ParentStyle", "");
+        parentStyle.appendChild(parentStyleSet);
+        xitem.appendChild(parentStyle);
+
+        // AttributeSet 节点
+        org.w3c.dom.Element attributeSet = doc.createElement("AttributeSet");
+        org.w3c.dom.Element attributeSetItem = doc.createElement("Set");
+        attributeSetItem.setAttribute("AttLogic", "");
+        attributeSetItem.setAttribute("AttName", "");
+        attributeSetItem.setAttribute("AttValue", "");
+        attributeSet.appendChild(attributeSetItem);
+        xitem.appendChild(attributeSet);
+
+        // EventSet 节点
+        org.w3c.dom.Element eventSet = doc.createElement("EventSet");
+        xitem.appendChild(eventSet);
+
+        // IsHtml 节点
+        org.w3c.dom.Element isHtml = doc.createElement("IsHtml");
+        xitem.appendChild(isHtml);
+
+        // OrderSearch 节点
+        org.w3c.dom.Element orderSearch = doc.createElement("OrderSearch");
+        xitem.appendChild(orderSearch);
+
+        // MaxMinLength 节点
+        org.w3c.dom.Element maxMinLength = doc.createElement("MaxMinLength");
+        xitem.appendChild(maxMinLength);
+
+        // MaxMinValue 节点
+        org.w3c.dom.Element maxMinValue = doc.createElement("MaxMinValue");
+        xitem.appendChild(maxMinValue);
+
+        // IsMustInput 节点
+        org.w3c.dom.Element isMustInput = doc.createElement("IsMustInput");
+        xitem.appendChild(isMustInput);
+
+        // Switch 节点
+        org.w3c.dom.Element switchElem = doc.createElement("Switch");
+        xitem.appendChild(switchElem);
+
+        // DataItem 节点
+        org.w3c.dom.Element dataItem = doc.createElement("DataItem");
+        xitem.appendChild(dataItem);
+
+        // DispEnc 节点
+        org.w3c.dom.Element dispEnc = doc.createElement("DispEnc");
+        xitem.appendChild(dispEnc);
+
+        // DataRef 节点
+        org.w3c.dom.Element dataRef = doc.createElement("DataRef");
+        xitem.appendChild(dataRef);
+
+        // List 节点
+        org.w3c.dom.Element list = doc.createElement("List");
+        xitem.appendChild(list);
+
+        // UserSet 节点
+        org.w3c.dom.Element userSet = doc.createElement("UserSet");
+        xitem.appendChild(userSet);
+
         // 处理 Para 配置 (EventSet, CallAction 等)
         for (EwaDefineConfig.ParaConfig paraConfig : config.getParaConfigs()) {
             applyParaConfig(doc, xitem, paraConfig);
         }
-        
+
+        // CallAction 节点（butDelete 和 butRestore）
+        if (config.getName().equals("butDelete") || config.getName().equals("butRestore")) {
+            org.w3c.dom.Element callAction = doc.createElement("CallAction");
+            org.w3c.dom.Element callActionSet = doc.createElement("Set");
+            
+            // butDelete 需要 ConfirmInfo
+            if (config.getName().equals("butDelete")) {
+                callActionSet.setAttribute("Action", "OnFrameDelete");
+                callActionSet.setAttribute("ConfirmInfo", "DeleteBefore");
+            } else {
+                callActionSet.setAttribute("Action", "OnFrameRestore");
+            }
+            
+            callAction.appendChild(callActionSet);
+            xitem.appendChild(callAction);
+        }
+
+        // OpenFrame 节点
+        org.w3c.dom.Element openFrame = doc.createElement("OpenFrame");
+        xitem.appendChild(openFrame);
+
+        // Frame 节点
+        org.w3c.dom.Element frame = doc.createElement("Frame");
+        xitem.appendChild(frame);
+
+        // UserControl 节点
+        org.w3c.dom.Element userControl = doc.createElement("UserControl");
+        xitem.appendChild(userControl);
+
+        // DefineFrame 节点
+        org.w3c.dom.Element defineFrame = doc.createElement("DefineFrame");
+        xitem.appendChild(defineFrame);
+
+        // PopFrame 节点
+        org.w3c.dom.Element popFrame = doc.createElement("PopFrame");
+        xitem.appendChild(popFrame);
+
+        // signature 节点
+        org.w3c.dom.Element signature = doc.createElement("signature");
+        xitem.appendChild(signature);
+
+        // Upload 节点
+        org.w3c.dom.Element upload = doc.createElement("Upload");
+        xitem.appendChild(upload);
+
+        // VaildEx 节点
+        org.w3c.dom.Element vaildEx = doc.createElement("VaildEx");
+        xitem.appendChild(vaildEx);
+
+        // MGAddField 节点
+        org.w3c.dom.Element mgAddField = doc.createElement("MGAddField");
+        xitem.appendChild(mgAddField);
+
+        // AnchorParas 节点
+        org.w3c.dom.Element anchorParas = doc.createElement("AnchorParas");
+        xitem.appendChild(anchorParas);
+
+        // LinkButtonParas 节点
+        org.w3c.dom.Element linkButtonParas = doc.createElement("LinkButtonParas");
+        xitem.appendChild(linkButtonParas);
+
+        // DopListShow 节点
+        org.w3c.dom.Element dopListShow = doc.createElement("DopListShow");
+        xitem.appendChild(dopListShow);
+
+        // ReportCfg 节点
+        org.w3c.dom.Element reportCfg = doc.createElement("ReportCfg");
+        xitem.appendChild(reportCfg);
+
+        // CombineFrame 节点
+        org.w3c.dom.Element combineFrame = doc.createElement("CombineFrame");
+        xitem.appendChild(combineFrame);
+
+        // AddrMapRels 节点
+        org.w3c.dom.Element addrMapRels = doc.createElement("AddrMapRels");
+        xitem.appendChild(addrMapRels);
+
+        // QRCode 节点
+        org.w3c.dom.Element qrCode = doc.createElement("QRCode");
+        xitem.appendChild(qrCode);
+
+        // ImageDefault 节点
+        org.w3c.dom.Element imageDefault = doc.createElement("ImageDefault");
+        xitem.appendChild(imageDefault);
+
         return xitem;
     }
     
