@@ -47,30 +47,22 @@ public class BusinessXmlCreateParams {
 
     // 验证参数
     public boolean validate() {
-        // tableName、selectSql、tableJson 必须三选一
-        int count = 0;
-        if (tableName != null && !tableName.trim().isEmpty())
-            count++;
-        if (selectSql != null && !selectSql.trim().isEmpty())
-            count++;
-        if (tableJson != null)
-            count++;
-
-        if (count != 1) {
-            return false;
-        }
-
-        // 如果提供了 selectSql，检查是否为 SELECT 语句
-        if (selectSql != null && !SqlUtils.checkIsSelect(selectSql)) {
-            return false;
-        }
-
-        // 如果提供了 tableJson，检查是否为有效的 JSON 对象
+        // 检查 tableJson 是否有效
         if (tableJson != null && !tableJson.has("TableName")) {
             return false;
         }
 
-        return true;
+        // 检查 selectSql 是否为 SELECT 语句
+        if (selectSql != null && !SqlUtils.checkIsSelect(selectSql)) {
+            return false;
+        }
+
+        // 至少有一个输入源
+        boolean hasInput = (tableName != null && !tableName.trim().isEmpty()) ||
+                           (selectSql != null && !selectSql.trim().isEmpty()) ||
+                           (tableJson != null);
+        
+        return hasInput;
     }
 
     // 生成输出路径

@@ -72,24 +72,24 @@ public class BusinessXmlCreateParamsTest {
     }
 
     /**
-     * 测试 Frame 类型简写
+     * 测试 Frame 类型简写（通过 outputPath 验证）
      */
     @Test
     public void testGetFrameTypeShort() {
         BusinessXmlCreateParams params1 = new BusinessXmlCreateParams(
             "globaltravel", "CRM_COM", "Frame", "NM"
         );
-        assertEquals("F", params1.getFrameTypeShort());
+        assertEquals("/bussiness/CRM_COM.F.NM.xml", params1.getOutputPath());
 
         BusinessXmlCreateParams params2 = new BusinessXmlCreateParams(
             "globaltravel", "CRM_COM", "ListFrame", "M"
         );
-        assertEquals("LF", params2.getFrameTypeShort());
+        assertEquals("/bussiness/CRM_COM.LF.M.xml", params2.getOutputPath());
 
         BusinessXmlCreateParams params3 = new BusinessXmlCreateParams(
             "globaltravel", "CRM_COM", "Tree", "V"
         );
-        assertEquals("T", params3.getFrameTypeShort());
+        assertEquals("/bussiness/CRM_COM.T.V.xml", params3.getOutputPath());
     }
 
     /**

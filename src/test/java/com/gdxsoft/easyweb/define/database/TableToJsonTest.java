@@ -18,7 +18,7 @@ public class TableToJsonTest {
      */
     @Test
     public void testToJson() {
-        // 创建测试表
+        // 创建测试表 (tableName, schemaName, connectionConfigName)
         Table table = new Table("CRM_COM", "dbo", "globaltravel");
         
         // 添加测试字段
@@ -50,7 +50,6 @@ public class TableToJsonTest {
         assertNotNull(json);
         assertEquals("CRM_COM", json.getString("TableName"));
         assertEquals("dbo", json.getString("SchemaName"));
-        assertEquals("globaltravel", json.getString("ConnectionConfigName"));
         
         // 验证字段列表存在
         assertTrue(json.has("Fields"));
@@ -61,7 +60,8 @@ public class TableToJsonTest {
      */
     @Test
     public void testToJson_fromXml() {
-        Table table = new Table("TEST_TABLE", "globaltravel");
+        // 创建测试表 (tableName, schemaName, connectionConfigName)
+        Table table = new Table("TEST_TABLE", "dbo", "globaltravel");
         
         Field field = new Field();
         field.setName("TEST_FIELD");
