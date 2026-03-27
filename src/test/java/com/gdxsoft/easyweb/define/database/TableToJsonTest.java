@@ -1,9 +1,9 @@
 package com.gdxsoft.easyweb.define.database;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.gdxsoft.easyweb.define.database.Field;
 import com.gdxsoft.easyweb.define.database.Table;
