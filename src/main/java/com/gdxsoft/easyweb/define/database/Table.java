@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.commons.lang3.Strings;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -252,148 +255,57 @@ public class Table {
 
 	/**
 	 * 将表元数据转换为 JSON 对象
+	 * 使用 toXml() + XML.toJSONObject() 方式
 	 * @return JSON 对象
 	 */
 	public JSONObject toJson() {
-		JSONObject json = new JSONObject();
+		// 使用 toXml() 生成 XML，然后转换为 JSON
+		String xml = this.toXml();
+		JSONObject json = XML.toJSONObject(xml);
 		
-		// 表属性
-		json.put("TableName", this._Name);
-		if (this._SchemaName != null) {
-			json.put("SchemaName", this._SchemaName);
-		}
-		if (this._CatalogName != null) {
-			json.put("CatalogName", this._CatalogName);
-		}
-		if (this._TableType != null) {
-			json.put("TableType", this._TableType);
-		}
-		if (this._DatabaseType != null) {
-			json.put("DatabaseType", this._DatabaseType);
-		}
-		if (this._ConnectionConfigName != null) {
-			json.put("ConnectionConfigName", this._ConnectionConfigName);
-		}
-		if (this._SqlTable != null) {
-			json.put("DDL", this._SqlTable);
+		// 获取 Table 节点
+		if (json.has("root") && json.getJSONObject("root").has("Table")) {
+			JSONObject tableJson = json.getJSONObject("root").getJSONObject("Table");
+			
+			// 添加表属性
+			JSONObject result = new JSONObject();
+			result.put("TableName", this._Name);
+			if (this._SchemaName != null) {
+				result.put("SchemaName", this._SchemaName);
+			}
+			if (this._CatalogName != null) {
+				result.put("CatalogName", this._CatalogName);
+			}
+			if (this._TableType != null) {
+				result.put("TableType", this._TableType);
+			}
+			if (this._DatabaseType != null) {
+				result.put("DatabaseType", this._DatabaseType);
+			}
+			if (this._ConnectionConfigName != null) {
+				result.put("ConnectionConfigName", this._ConnectionConfigName);
+			}
+			if (this._SqlTable != null) {
+				result.put("DDL", this._SqlTable);
+			}
+			
+			// 从 XML JSON 中复制 Fields, Pk, Fks, Indexes
+			if (tableJson.has("Fields")) {
+				result.put("Fields", tableJson.get("Fields"));
+			}
+			if (tableJson.has("Pk")) {
+				result.put("Pk", tableJson.get("Pk"));
+			}
+			if (tableJson.has("Fks")) {
+				result.put("Fks", tableJson.get("Fks"));
+			}
+			if (tableJson.has("Indexes")) {
+				result.put("Indexes", tableJson.get("Indexes"));
+			}
+			
+			return result;
 		}
 		
-		// 字段列表
-		JSONArray fieldsJson = new JSONArray();
-		for (int i = 0; i < this._Fields.size(); i++) {
-			Field f = this._Fields.get(this._Fields.getFieldList().get(i));
-			JSONObject fieldJson = fieldToJson(f);
-			fieldsJson.put(fieldJson);
-		}
-		json.put("Fields", fieldsJson);
-		
-		// 主键
-		JSONObject pkJson = new JSONObject();
-		JSONArray pkFieldsJson = new JSONArray();
-		for (int i = 0; i < this._Pk.getPkFields().size(); i++) {
-			Field pkField = this._Pk.getPkFields().get(i);
-			pkFieldsJson.put(pkField.getName());
-		}
-		pkJson.put("Fields", pkFieldsJson);
-		json.put("Pk", pkJson);
-		
-		// 外键
-		JSONArray fksJson = new JSONArray();
-		for (int i = 0; i < this._Fks.size(); i++) {
-			TableFk fk = this._Fks.get(i);
-			JSONObject fkJson = fkToJson(fk);
-			fksJson.put(fkJson);
-		}
-		json.put("Fks", fksJson);
-		
-		// 索引
-		JSONArray indexesJson = new JSONArray();
-		for (int i = 0; i < this._Indexes.size(); i++) {
-			TableIndex idx = this._Indexes.get(i);
-			JSONObject indexJson = indexToJson(idx);
-			indexesJson.put(indexJson);
-		}
-		json.put("Indexes", indexesJson);
-		
-		return json;
-	}
-	
-	/**
-	 * 将字段转换为 JSON 对象
-	 * @param field 字段
-	 * @return JSON 对象
-	 */
-	private JSONObject fieldToJson(Field field) {
-		JSONObject json = new JSONObject();
-		json.put("Name", field.getName());
-		json.put("Type", field.getType());
-		json.put("Length", field.getLength());
-		json.put("IsPrimaryKey", field.isPrimaryKey());
-		json.put("IsForeignKey", field.isForeignKey());
-		json.put("IsIdentity", field.isIdentity());
-		json.put("Nullable", field.isNullable());
-		if (field.getComment() != null) {
-			json.put("Comment", field.getComment());
-		}
-		if (field.getDefaultValue() != null) {
-			json.put("DefaultValue", field.getDefaultValue());
-		}
-		if (field.getFkTableName() != null) {
-			json.put("FkTableName", field.getFkTableName());
-		}
-		if (field.getFkColumnName() != null) {
-			json.put("FkColumnName", field.getFkColumnName());
-		}
-		return json;
-	}
-	
-	/**
-	 * 将外键转换为 JSON 对象
-	 * @param fk 外键
-	 * @return JSON 对象
-	 */
-	private JSONObject fkToJson(TableFk fk) {
-		JSONObject json = new JSONObject();
-		if (fk.getConstraintName() != null) {
-			json.put("ConstraintName", fk.getConstraintName());
-		}
-		if (fk.getPkTableName() != null) {
-			json.put("PkTableName", fk.getPkTableName());
-		}
-		if (fk.getFkTableName() != null) {
-			json.put("FkTableName", fk.getFkTableName());
-		}
-		// 外键字段列表
-		JSONArray columnsJson = new JSONArray();
-		for (int i = 0; i < fk.getColumns().size(); i++) {
-			columnsJson.put(fk.getColumns().get(i));
-		}
-		json.put("Columns", columnsJson);
-		return json;
-	}
-	
-	/**
-	 * 将索引转换为 JSON 对象
-	 * @param index 索引
-	 * @return JSON 对象
-	 */
-	private JSONObject indexToJson(TableIndex index) {
-		JSONObject json = new JSONObject();
-		if (index.getIndexName() != null) {
-			json.put("IndexName", index.getIndexName());
-		}
-		json.put("IsUnique", index.isUnique());
-		json.put("IsClustered", index.isClustered());
-		// 索引字段列表
-		JSONArray fieldsJson = new JSONArray();
-		for (int i = 0; i < index.getIndexFields().size(); i++) {
-			IndexField field = index.getIndexFields().get(i);
-			JSONObject fieldJson = new JSONObject();
-			fieldJson.put("Name", field.getName());
-			fieldJson.put("IsDescending", field.isDescending());
-			fieldsJson.put(fieldJson);
-		}
-		json.put("Fields", fieldsJson);
 		return json;
 	}
 
