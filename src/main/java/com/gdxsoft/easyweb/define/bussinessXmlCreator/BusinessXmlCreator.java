@@ -820,9 +820,18 @@ public class BusinessXmlCreator {
     private String getFormat(String dbType) {
         if (dbType == null) return "";
         String type = dbType.toUpperCase();
-        if (type.contains("DATE") && !type.contains("TIME")) return "yyyy-MM-dd";
-        if (type.contains("TIME") && !type.contains("DATE")) return "HH:mm:ss";
-        if (type.contains("DATETIME") || type.contains("TIMESTAMP")) return "yyyy-MM-dd HH:mm:ss";
+        // 日期时间类型（包含 DATE 和 TIME）
+        if (type.contains("DATETIME") || type.contains("TIMESTAMP") || (type.contains("DATE") && type.contains("TIME"))) {
+            return "DateShortTime";
+        }
+        // 纯日期类型
+        if (type.contains("DATE") && !type.contains("TIME")) {
+            return "yyyy-MM-dd";
+        }
+        // 纯时间类型
+        if (type.contains("TIME") && !type.contains("DATE")) {
+            return "HH:mm:ss";
+        }
         return "";
     }
     
