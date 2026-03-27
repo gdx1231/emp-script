@@ -448,10 +448,59 @@ public class UserConfig implements Serializable, Cloneable {
 		this._XmlName = xmlFileName.trim();
 		this._ItemName = itemName.trim();
 	}
+	
+	/**
+	 * 静态方法创建 UserConfig 实例，用于验证生成的 XML
+	 * @param xmlName XML 名称
+	 * @param itemName 配置项名称
+	 * @param itemNodeXml XML 字符串
+	 * @return UserConfig 实例
+	 * @throws Exception 验证失败时抛出异常
+	 */
+	public static UserConfig createForValidation(String xmlName, String itemName, String itemNodeXml) throws Exception {
+		UserConfig uc = new UserConfig(xmlName, itemName);
+		
+		// 直接设置 XML 字符串和节点
+		uc._ItemNodeXml = itemNodeXml;
+		uc._ItemNode = UXml.asDocument(itemNodeXml).getFirstChild();
+		
+		// 初始化配置类型
+		uc.configType = getConfig(xmlName, itemName);
+		
+		// 初始化所有组件
+		uc.initXItems();
+		uc.initPage();
+		uc.initAction();
+		uc.initMenus();
+		uc.initPageInfos();
+		uc.initCharts();
+		uc.initWorkflows();
+		
+		return uc;
+	}
+	
+	/**
+	 * 设置 ItemNode（用于验证生成的 XML）
+	 * @param itemNode XML 节点
+	 */
+	public void setItemNode(Node itemNode) {
+		this._ItemNode = itemNode;
+	}
+	
+	/**
+	 * 设置 ItemNodeXml（用于验证生成的 XML）
+	 * @param itemNodeXml XML 字符串
+	 */
+	public void setItemNodeXml(String itemNodeXml) {
+		this._ItemNodeXml = itemNodeXml;
+		if (this._ItemNode == null) {
+			this._ItemNode = UXml.asDocument(itemNodeXml).getFirstChild();
+		}
+	}
 
 	/**
 	 * 获取配置文件状态
-	 * 
+	 *
 	 * @return
 	 */
 	public ConfigStatus getConfigStatus() {

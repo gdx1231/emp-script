@@ -5,6 +5,5 @@
       "Bash(./call-ewa-api.sh *)",
       "Bash(bash *)"
     ]
-  },
-  "$version": 3
+  }
 }

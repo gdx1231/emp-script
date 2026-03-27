@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<funcs>
+	<func name="ListFrameReloadAfter" limits="ListFrame" des="用于ListFrame 加载后处理样式等"><![CDATA[
+/**
+* ListFrame 重新刷新数据后的处理
+* @param httpReferer 跳转发起的页面，例如Frame，通常是通过EWA_PostBehavior回调
+**/
+EWA.F.FOS["@sys_frame_unid"].ReloadAfter = function(httpReferer) {
+	/*
+	if(httpReferer) {
+		let uref = new EWA_UrlClass(httpReferer);
+		let mtype   = uref.GetParameter("EWA_MTYPE");
+		let refXml  = uref.GetParameter("XMLNAME");
+		let refItem = uref.GetParameter("ITEMNAME");
+	}
+	*/
+	// this.Merge('fromId','toId'); //合并单元格
+	// let exp="@@aa <h1>@@bb</h1> <div>@@cc</div>";
+	// this.MergeExp('toId', exp); //合并多个单元格
+}	
+// 初始化执行一次
+// EWA.F.FOS["@sys_frame_unid"].ReloadAfter();
+		]]>
+	</func>
+	<func name="ListFrameMergeCell" limits="ListFrame" des="用于ListFrame 合并单元格"><![CDATA[
+//简单合并，将两个单元格合并在一起
+EWA.F.FOS["@sys_frame_unid"].Merge('fromId','toId');  
+
+//多个单元格合并的表达式，@@NAME的NAME是列的 ID
+let exp="@@NAME <h1>@@NAME_EN</h1> <div>@@DESCRIPTION</div>";
+EWA.F.FOS["@sys_frame_unid"].MergeExp('toId', exp);  
+		]]>
+	</func>
+	<func name="ListFrameBindButton" limits="ListFrame" des="用于ListFrame 绑定显示内容到按钮"><![CDATA[
+//绑定显示内容到按钮
+EWA.F.FOS["@sys_frame_unid"].BindButton('来源ID','butModify');  
+		]]>
+	</func>
+	<func name="ListFrameAddPreRowBasic" limits="ListFrame"
+		des="添加点击当前行，触发的在之后行显示的内容方法(最简单)">
+	<![CDATA[
+/**
+ * 添加点击当前行，触发的在之后行显示的内容方法
+ *
+ * @param frameUnid
+ *            本配置的unid
+ * @param tr
+ *            事件当前行
+ * @param key
+ *            当前行的key
+ * @param newTr
+ *            下一行(要放置东西的行)，只有一个单元格，其id是随机数，调用采用 newTr.cells[0]
+ * @param evt
+ *            event事件
+ */
+EWA.F.FOS["@sys_frame_unid"].AddPreRow(function(frameUnid, tr, key, newTr, evt) {
+		let cntTd = newTr.cells[0]; //新行的td
+		// $(newTr).addClass('add-pre-row');
+		// $(cntTd).addClass('add-pre-row-td');
+		
+		let u1 = new EWA_UrlClass(this.Url);
+    	// u1.AddParameter("ITEMNAME", itemName);
+    	// u1.AddParameter("key", key);
+
+		// 通过ajax加载内容
+		let ajaxUrl = u1.GetUrl();
+		$Install(ajaxUrl, cntTd, function() {
+			console.log('install ok');
+		});
+		
+		/*
+		 // 用Iframe加载，需要指定高度
+		 let iframeUrl = "......";
+		 let html = '<iframe src="' + iframeUrl + '" width="100%" height="465" frameborder="0" scroll="no"></iframe>';
+		 cntTd.innerHTML = html;
+		 */
+	
+	}
+);
+	]]>
+	</func>
+	<func name="ListFrameAddPreRowComplete" limits="ListFrame"
+		des="添加点击当前行，触发的在之后行显示的内容方法"><![CDATA[
+/**
+ * 添加点击当前行，触发的在之后行显示的内容方法
+ *
+ * @param frameUnid
+ *            本配置的unid
+ * @param tr
+ *            事件当前行
+ * @param key
+ *            当前行的key
+ * @param newTr
+ *            下一行(要放置东西的行)，只有一个单元格，其id是随机数，调用采用 newTr.cells[0]
+ * @param evt
+ *            event事件
+ */
+EWA.F.FOS["@sys_frame_unid"].AddPreRow(function(frameUnid, tr, key, newTr, evt) {
+	let cntTd = newTr.cells[0]; //新行的td
+	// $(newTr).addClass('add-pre-row');
+	// $(cntTd).addClass('add-pre-row-td');
+	
+	let u1 = new EWA_UrlClass(this.Url);
+	// u1.AddParameter("ITEMNAME", itemName);
+	// u1.AddParameter("key", key);
+	
+	// 通过ajax加载内容
+	let ajaxUrl = u1.GetUrl();
+	$Install(ajaxUrl, cntTd, function() {
+		console.log('install ok');
+	});
+	
+	/*
+	 // 用Iframe加载，需要指定高度
+	 let iframeUrl = "......";
+	 let html = '<iframe src="' + iframeUrl + '" width="100%" height="465" frameborder="0" scroll="no"></iframe>';
+	 cntTd.innerHTML = html;
+	 */
+);
+/**
+ * （不需要可删除）
+ * 检查是否可以执行 AddPreRow 的方法，返回true执行，false不执行
+ * 
+ * @param tr
+ *            事件当前行
+ * @param key
+ *            当前行的key
+ * @param evt
+ *            event事件
+ * @returns true/false
+ */
+EWA.F.FOS["@sys_frame_unid"].AddPreRowCheck = function(tr, key, evt) {
+	// TODO 你的逻辑判断
+	return true;
+};
+/**
+ * （不需要可删除）
+ * 关闭显示前触发事件 
+ * 
+ * @param frameUnid
+ *			  本配置的unid
+ * @param tr
+ *            事件当前行
+ * @param key
+ *            当前行的key
+ * @param newTr
+ *            下一行(要放置东西的行)，只有一个单元格，其id是随机数，调用采用 newTr.cells[0]
+ * @param evt
+ *            event事件
+ */
+EWA.F.FOS["@sys_frame_unid"].AddPreRowCloseBeforeEvent = function(frameUnid, cr, key, nr, evt) {
+	// TODO 你要做的事情
+	console.log('AddPreRowCloseBeforeEvent');
+};
+
+/**
+ * （不需要可删除）
+ * 关闭显示触发事件 
+ * 
+ * @param frameUnid
+ *			  本配置的unid
+ * @param tr
+ *            事件当前行
+ * @param key
+ *            当前行的key
+ * @param newTr
+ *            下一行(要放置东西的行)，只有一个单元格，其id是随机数，调用采用 newTr.cells[0]
+ * @param evt
+ *            event事件
+ */
+EWA.F.FOS["@sys_frame_unid"].AddPreRowCloseEvent = function(frameUnid, tr, key, newTr, evt) {
+	// TODO 你要做的事情
+	console.log('AddPreRowCloseEvent');
+};
+	]]></func>
+	<func name="FramePostBeforeCheck" limits="Frame" des="用于Frame Post 提交前检查执行"><![CDATA[
+/**
+* Frame 提交前进行检查，返回true，则可以提交数据
+* 同时可以手动增加提交的参数
+**/
+EWA.F.FOS["@sys_frame_unid"].DoPostBefore = function() {
+	/* 附加数据处理
+	let add_data = {};
+	add_data["para1"] = "123";
+	add_data["para2"] = $("#id").val();
+	add_data["para3"] = $("#id").html();
+	...
+	this.PostAddData = add_data;
+    */
+    
+    /* 附加检查合法性
+	if($('#aaa').val() == '') {
+		return false; //检查不通过，阻止提交
+	} else {
+		return true; //检查通过，可以提交
+	}
+    */
+    return true;
+}		
+		]]>
+	</func>
+	<func name="EWA.OW" limits="Frame" des="窗口获取当前Dialog对象和父窗体对象"><![CDATA[
+/**
+*  窗口获取当前Dialog对象和父窗体对象
+**/
+function() demo {
+	 EWA.OW.Load();
+	 // 父窗体对象
+	 // let parentWindow = EWA.OW.PWin;
+	 // 父窗体ListFrame刷新列表 
+	 // parentWindow.EWA.F.FOS["@EWA_PARENT_FRAME"].Reload();
+	 
+	 // 当前 Dialog
+	 // let dialog = EWA.OW.Dia;
+	 // 关闭窗口  
+	 // dialog.CloseWindow(); 
+	 
+}		
+		]]>
+	</func>
+	<func name="LoadJson" nameRequire="true" des="用于调用JSON"><![CDATA[
+/**
+* 调用本配置文件的JSON
+**/
+function loadJson{NAME} () {
+	let url = EWA.F.FOS["@SYS_FRAME_UNID"].Url;
+    let u1 = new EWA_UrlClass();
+    u1.SetUrl(url);
+    
+    // 指定调用的Action名称
+    u1.AddParameter("ewa_action","{NAME}");
+    // json or json_all or json_ext or json_ext1
+    u1.AddParameter("ewa_ajax","json"); 
+    // 返回json字段大小写参数 lower or upper
+    // u1.AddParameter("ewa_ajax_field_case","lower"); 
+    
+    let u=u1.GetUrl();
+    $J(u, function(rst){
+    	for(let n in rst){
+    		let d = rst[n]; //数据行
+    		// let id=d.ID; 
+    		// let name=d.NAME;
+    	}
+    });
+}		
+		]]>
+	</func>
+	<func name="loadActionJson" hide='true'><![CDATA[
+/**
+* 调用本配置文件的 Action
+**/
+function loadActionJson_{NAME} () {
+	//调用Frame Action的方法
+	/* 
+	let paras = [];
+	paras[0] = {
+		Name : 'pname',
+		Value : 'pval'
+	};
+	EWA.F.FOS['@SYS_FRAME_UNID'].DoAction(this, '{NAME}', '执行前消息', '执行后消息', paras);
+	*/
+	
+	// 安全创建 Url 类
+    let u1 = new EWA_UrlClass(EWA.F.FOS["@SYS_FRAME_UNID"].Url);
+    
+    // 指定调用的Action名称
+    u1.AddParameter("ewa_action","{NAME}");
+    // json / json_all / json_ext / json_ext1 / xml
+    u1.AddParameter("ewa_ajax","json"); 
+    // 返回json字段大小写参数 lower or upper
+    // u1.AddParameter("EWA_JSON_FIELD_CASE","lower"); 
+    
+    let u = u1.GetUrl();
+    $J(u, function(rst) {
+    	for(let n in rst){
+    		let d = rst[n]; //数据行
+    		// let id=d.ID; 
+    		// let name=d.NAME;
+    	}
+    });
+}		
+		]]>
+	</func>
+		<func name="translate" nameRequire="true" des="翻译对象"><![CDATA[
+// 离开焦点自动翻译
+// addEvent($X('{NAME}'), 'blur', translate_{NAME}  );
+// 手动翻译
+// $('.ewa-row-{NAME} .EWA_TD_R').html('<a href="javascript:translate_{NAME}(true)">翻译</a>');
+// $('.ewa-row-{NAME} .EWA_TD_L').append(' <a href="javascript:translate_{NAME}(true)">翻译</a>');
+
+function translate_{NAME} (isforce) {
+	let toObj = $X('{NAME}_EN'); //英文对象
+	if(isforce === true || toObj.value == ''){ //如果没有值的话就翻译
+		let trans = new EWA_TransClass();
+		// trans._Trans = 'youdao'; //默认用bing
+		let fromStr = $X('{NAME}').value; //中文对象字符串
+		trans.TransToEn(fromStr,toObj); //中文到英文
+		//trans.TransToCn(fromStr,toObj); //英文到中文
+	}
+}]]>
+	</func>
+</funcs>
