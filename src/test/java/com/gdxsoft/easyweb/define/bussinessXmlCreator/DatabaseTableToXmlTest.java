@@ -161,9 +161,21 @@ public class DatabaseTableToXmlTest {
         // 数字类型 (CRM_COM_ID) 应该 IsOrder=1, SearchType=""
         assertTrue(xmlPreview.contains("CRM_COM_ID"), "应该包含 CRM_COM_ID 字段");
         
-        // 9. 打印 XML 预览
+        // 9. 打印 XML 预览（输出包含 DateItem 的部分）
         System.out.println("=== XML 预览 ===");
-        System.out.println(xmlPreview.substring(0, Math.min(2000, xmlPreview.length())));
+        int dataItemIndex = xmlPreview.indexOf("<DataItem");
+        if (dataItemIndex > 0) {
+            // 输出所有 DataItem
+            String remaining = xmlPreview.substring(dataItemIndex);
+            int endIdx = remaining.indexOf("</XItems>");
+            if (endIdx > 0) {
+                System.out.println(remaining.substring(0, endIdx));
+            } else {
+                System.out.println(remaining.substring(0, Math.min(3000, remaining.length())));
+            }
+        } else {
+            System.out.println(xmlPreview.substring(0, Math.min(2000, xmlPreview.length())));
+        }
         
         // 10. 保存完整 XML（使用临时文件）
         System.out.println("=== XML 已生成 ===");
