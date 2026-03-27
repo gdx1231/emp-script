@@ -14,15 +14,17 @@ import com.gdxsoft.easyweb.utils.UXml;
  */
 public class BusinessXmlCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessXmlCreator.class);
-    
+
     private EwaConfig config;
     private Table table;
     private Document xmlDoc;
+    private EwaDefineConfig defineConfig;
 
     // 构造方法
     public BusinessXmlCreator(EwaConfig config, Table table) {
         this.config = config;
         this.table = table;
+        this.defineConfig = new EwaDefineConfig();
     }
 
     /**
@@ -108,6 +110,14 @@ public class BusinessXmlCreator {
     private Document create(String frameType, String operationType) throws Exception {
         Document doc = UXml.createBlankDocument();
         
+        // 获取 Tmp 配置
+        String tmpName = getTmpNameByOperation(operationType);
+        EwaDefineConfig.TmpConfig tmpConfig = defineConfig.getTmpConfig(frameType, tmpName);
+        
+        if (tmpConfig == null) {
+            LOGGER.warn("未找到配置：{}.{}，使用默认配置", frameType, tmpName);
+        }
+        
         // 创建根节点 EasyWebTemplate
         org.w3c.dom.Element root = doc.createElement("EasyWebTemplate");
         doc.appendChild(root);
@@ -127,7 +137,7 @@ public class BusinessXmlCreator {
         createPageBasicConfig(doc, page, frameType, operationType, itemName);
         
         // 创建 Action 节点
-        createPageAction(doc, page, frameType, operationType);
+        createPageAction(doc, page, frameType, operationType, tmpConfig);
         
         // 创建 XItems 节点
         org.w3c.dom.Element xitems = doc.createElement("XItems");
@@ -153,15 +163,19 @@ public class BusinessXmlCreator {
         createCharts(doc, root);
         
         // 创建 PageInfos 节点
-        createPageInfos(doc, root);
+        createPageInfos(doc, root, tmpConfig);
         
         // 创建 Workflows 节点
         createWorkflows(doc, root);
         
-        // ListFrame.M 模式添加 Buttons
-        if (frameType.equalsIgnoreCase("ListFrame") && 
-            (operationType.equals("M") || operationType.equals("NM"))) {
-            createListFrameButtons(doc, page);
+        // 根据配置添加 Buttons
+        if (tmpConfig != null && !tmpConfig.getButtonConfigs().isEmpty()) {
+            createButtonsFromConfig(doc, page, tmpConfig);
+        }
+        
+        // 根据配置添加 AddScript 和 AddCss
+        if (tmpConfig != null && !tmpConfig.getAddConfigs().isEmpty()) {
+            addFromConfig(doc, tmpConfig);
         }
         
         this.xmlDoc = doc;
@@ -169,110 +183,19 @@ public class BusinessXmlCreator {
     }
     
     /**
+     * 根据操作类型获取 Tmp 名称
+     */
+    private String getTmpNameByOperation(String operationType) {
+        if (operationType.equals("N")) return "N";
+        if (operationType.equals("M")) return "M";
+        if (operationType.equals("V")) return "V";
+        if (operationType.equals("NM")) return "NM";
+        return "NM"; // 默认
+    }
+    
+    /**
      * 创建 ListFrame 的 Buttons
      */
-    private void createListFrameButtons(Document doc, org.w3c.dom.Element page) {
-        org.w3c.dom.Element buttons = doc.createElement("Buttons");
-        page.appendChild(buttons);
-        
-        // butNew 按钮
-        buttons.appendChild(createListFrameButton(doc, "butNew", "新增", "New", 
-            "ewa_click", "EWA.F.FOS[\"@SYS_FRAME_UNID\"].ext_NewOrModifyOrCopy(\"N\")"));
-        
-        // butModify 按钮
-        buttons.appendChild(createListFrameButton(doc, "butModify", "修改", "Modify",
-            "onclick", "EWA.F.FOS[\"@SYS_FRAME_UNID\"].ext_NewOrModifyOrCopy(\"M\")"));
-        
-        // butCopy 按钮
-        buttons.appendChild(createListFrameButton(doc, "butCopy", "复制到...", "Copy to ...",
-            "onclick", "EWA.F.FOS[\"@SYS_FRAME_UNID\"].ext_NewOrModifyOrCopy(\"C\")"));
-        
-        // butDelete 按钮
-        buttons.appendChild(createListFrameButtonDelete(doc));
-        
-        // butRestore 按钮
-        buttons.appendChild(createListFrameButton(doc, "butRestore", "恢复数据", "Restore",
-            "", "OnFrameRestore"));
-    }
-    
-    /**
-     * 创建 ListFrame 按钮
-     */
-    private org.w3c.dom.Element createListFrameButton(Document doc, String name, 
-            String infoZhcn, String infoEnus, String eventType, String eventValue) {
-        org.w3c.dom.Element button = doc.createElement("Button");
-        button.setAttribute("Name", name);
-        button.setAttribute("Tag", "button");
-        
-        org.w3c.dom.Element buttonSet = doc.createElement("Set");
-        button.appendChild(buttonSet);
-        
-        // DescriptionSet
-        org.w3c.dom.Element descSet = doc.createElement("DescriptionSet");
-        org.w3c.dom.Element descZhcn = doc.createElement("Set");
-        descZhcn.setAttribute("Lang", "zhcn");
-        descZhcn.setAttribute("Info", infoZhcn);
-        descZhcn.setAttribute("Memo", "");
-        descSet.appendChild(descZhcn);
-        
-        org.w3c.dom.Element descEnus = doc.createElement("Set");
-        descEnus.setAttribute("Lang", "enus");
-        descEnus.setAttribute("Info", infoEnus);
-        descEnus.setAttribute("Memo", "");
-        descSet.appendChild(descEnus);
-        button.appendChild(descSet);
-        
-        // EventSet (如果有事件)
-        if (eventType != null && !eventType.isEmpty()) {
-            org.w3c.dom.Element eventSet = doc.createElement("EventSet");
-            org.w3c.dom.Element eventSetItem = doc.createElement("Set");
-            eventSetItem.setAttribute("EventName", eventType);
-            eventSetItem.setAttribute("EventValue", eventValue);
-            eventSetItem.setAttribute("EventType", "Javascript");
-            eventSet.appendChild(eventSetItem);
-            button.appendChild(eventSet);
-        }
-        
-        return button;
-    }
-    
-    /**
-     * 创建 ListFrame 删除按钮
-     */
-    private org.w3c.dom.Element createListFrameButtonDelete(Document doc) {
-        org.w3c.dom.Element button = doc.createElement("Button");
-        button.setAttribute("Name", "butDelete");
-        button.setAttribute("Tag", "button");
-        
-        org.w3c.dom.Element buttonSet = doc.createElement("Set");
-        button.appendChild(buttonSet);
-        
-        // DescriptionSet
-        org.w3c.dom.Element descSet = doc.createElement("DescriptionSet");
-        org.w3c.dom.Element descZhcn = doc.createElement("Set");
-        descZhcn.setAttribute("Lang", "zhcn");
-        descZhcn.setAttribute("Info", "删除");
-        descZhcn.setAttribute("Memo", "");
-        descSet.appendChild(descZhcn);
-        
-        org.w3c.dom.Element descEnus = doc.createElement("Set");
-        descEnus.setAttribute("Lang", "enus");
-        descEnus.setAttribute("Info", "Delete");
-        descEnus.setAttribute("Memo", "");
-        descSet.appendChild(descEnus);
-        button.appendChild(descSet);
-        
-        // CallAction
-        org.w3c.dom.Element callAction = doc.createElement("CallAction");
-        org.w3c.dom.Element callActionSet = doc.createElement("Set");
-        callActionSet.setAttribute("ConfirmInfo", "DeleteBefore");
-        callActionSet.setAttribute("Action", "OnFrameDelete");
-        callAction.appendChild(callActionSet);
-        button.appendChild(callAction);
-        
-        return button;
-    }
-    
     /**
      * 获取当前日期时间
      */
@@ -1018,195 +941,124 @@ public class BusinessXmlCreator {
      * 创建 Page 的 Action 配置
      */
     private void createPageAction(Document doc, org.w3c.dom.Element page, 
-            String frameType, String operationType) {
+            String frameType, String operationType, EwaDefineConfig.TmpConfig tmpConfig) {
         
         // Action 节点
         org.w3c.dom.Element action = doc.createElement("Action");
         page.appendChild(action);
         
+        // 如果配置中有 Actions，使用配置
+        if (tmpConfig != null && !tmpConfig.getActionConfigs().isEmpty()) {
+            // ActionSet 节点
+            org.w3c.dom.Element actionSet = doc.createElement("ActionSet");
+            action.appendChild(actionSet);
+            
+            for (EwaDefineConfig.ActionConfig actConfig : tmpConfig.getActionConfigs()) {
+                actionSet.appendChild(createActionSetItem(doc, actConfig));
+            }
+            
+            // SqlSet 节点
+            org.w3c.dom.Element sqlSet = doc.createElement("SqlSet");
+            action.appendChild(sqlSet);
+            
+            for (EwaDefineConfig.ActionConfig actConfig : tmpConfig.getActionConfigs()) {
+                if (actConfig.getSqlType() != null) {
+                    sqlSet.appendChild(createSqlSetItem(doc, actConfig));
+                }
+            }
+        } else {
+            // 默认配置
+            createDefaultPageAction(doc, action, frameType, operationType);
+        }
+        
+        // 添加其他空节点
+        action.appendChild(doc.createElement("JSONSet"));
+        action.appendChild(doc.createElement("ClassSet"));
+        action.appendChild(doc.createElement("XmlSet"));
+        action.appendChild(doc.createElement("XmlSetData"));
+        action.appendChild(doc.createElement("ScriptSet"));
+        action.appendChild(doc.createElement("UrlSet"));
+        action.appendChild(doc.createElement("CSSet"));
+    }
+    
+    /**
+     * 创建 ActionSet 项
+     */
+    private org.w3c.dom.Element createActionSetItem(Document doc, EwaDefineConfig.ActionConfig config) {
+        org.w3c.dom.Element set = doc.createElement("Set");
+        set.setAttribute("LogMsg", "");
+        set.setAttribute("Transcation", "");
+        set.setAttribute("Type", config.getName());
+        
+        // CallSet 节点
+        org.w3c.dom.Element callSet = doc.createElement("CallSet");
+        org.w3c.dom.Element callSetItem = doc.createElement("Set");
+        callSetItem.setAttribute("CallIsChk", "");
+        callSetItem.setAttribute("CallName", config.getName() + " SQL");
+        callSetItem.setAttribute("CallType", "SqlSet");
+        callSetItem.setAttribute("Test", config.getTest());
+        callSet.appendChild(callSetItem);
+        set.appendChild(callSet);
+        
+        return set;
+    }
+    
+    /**
+     * 创建 SqlSet 项
+     */
+    private org.w3c.dom.Element createSqlSetItem(Document doc, EwaDefineConfig.ActionConfig config) {
+        org.w3c.dom.Element set = doc.createElement("Set");
+        set.setAttribute("Name", config.getName() + " SQL");
+        set.setAttribute("SqlType", config.getSqlType());
+        
+        // Sql 节点
+        org.w3c.dom.Element sql = doc.createElement("Sql");
+        String sqlContent = config.getSql();
+        if (sqlContent != null && sqlContent.startsWith("'") && sqlContent.endsWith("'")) {
+            sqlContent = sqlContent.substring(1, sqlContent.length() - 1);
+        }
+        sql.setTextContent(sqlContent);
+        set.appendChild(sql);
+        
+        // CSSet 节点
+        set.appendChild(doc.createElement("CSSet"));
+        
+        return set;
+    }
+    
+    /**
+     * 创建默认 Page Action
+     */
+    private void createDefaultPageAction(Document doc, org.w3c.dom.Element action, 
+            String frameType, String operationType) {
         // ActionSet 节点
         org.w3c.dom.Element actionSet = doc.createElement("ActionSet");
         action.appendChild(actionSet);
         
-        // ListFrame.M 模式
-        if (frameType.equalsIgnoreCase("ListFrame") && 
-            (operationType.equals("M") || operationType.equals("NM"))) {
-            
-            // OnPageLoad Action
-            org.w3c.dom.Element onLoadAction = doc.createElement("Set");
-            onLoadAction.setAttribute("LogMsg", "");
-            onLoadAction.setAttribute("Transcation", "");
-            onLoadAction.setAttribute("Type", "OnPageLoad");
-            actionSet.appendChild(onLoadAction);
-            
-            org.w3c.dom.Element onLoadCall = doc.createElement("CallSet");
-            org.w3c.dom.Element onLoadCallSet = doc.createElement("Set");
-            onLoadCallSet.setAttribute("CallIsChk", "");
-            onLoadCallSet.setAttribute("CallName", "OnPageLoad SQL");
-            onLoadCallSet.setAttribute("CallType", "SqlSet");
-            onLoadCallSet.setAttribute("Test", "");
-            onLoadCall.appendChild(onLoadCallSet);
-            onLoadAction.appendChild(onLoadCall);
-            
-            // OnFrameDelete Action
-            org.w3c.dom.Element onDeleteAction = doc.createElement("Set");
-            onDeleteAction.setAttribute("LogMsg", "");
-            onDeleteAction.setAttribute("Transcation", "1");
-            onDeleteAction.setAttribute("Type", "OnFrameDelete");
-            actionSet.appendChild(onDeleteAction);
-            
-            org.w3c.dom.Element onDeleteCall = doc.createElement("CallSet");
-            org.w3c.dom.Element onDeleteCallSet = doc.createElement("Set");
-            onDeleteCallSet.setAttribute("CallIsChk", "");
-            onDeleteCallSet.setAttribute("CallName", "OnFrameDelete SQL");
-            onDeleteCallSet.setAttribute("CallType", "SqlSet");
-            onDeleteCallSet.setAttribute("Test", "");
-            onDeleteCall.appendChild(onDeleteCallSet);
-            onDeleteAction.appendChild(onDeleteCall);
-            
-            // OnFrameRestore Action
-            org.w3c.dom.Element onRestoreAction = doc.createElement("Set");
-            onRestoreAction.setAttribute("LogMsg", "");
-            onRestoreAction.setAttribute("Transcation", "1");
-            onRestoreAction.setAttribute("Type", "OnFrameRestore");
-            actionSet.appendChild(onRestoreAction);
-            
-            org.w3c.dom.Element onRestoreCall = doc.createElement("CallSet");
-            org.w3c.dom.Element onRestoreCallSet = doc.createElement("Set");
-            onRestoreCallSet.setAttribute("CallIsChk", "");
-            onRestoreCallSet.setAttribute("CallName", "OnFrameRestore SQL");
-            onRestoreCallSet.setAttribute("CallType", "SqlSet");
-            onRestoreCallSet.setAttribute("Test", "");
-            onRestoreCall.appendChild(onRestoreCallSet);
-            onRestoreAction.appendChild(onRestoreCall);
-        } else {
-            // Frame 模式
-            // OnPageLoad Action
-            org.w3c.dom.Element onLoadAction = doc.createElement("Set");
-            onLoadAction.setAttribute("LogMsg", "");
-            onLoadAction.setAttribute("Transcation", "");
-            onLoadAction.setAttribute("Type", "OnPageLoad");
-            actionSet.appendChild(onLoadAction);
-            
-            org.w3c.dom.Element onLoadCall = doc.createElement("CallSet");
-            org.w3c.dom.Element onLoadCallSet = doc.createElement("Set");
-            onLoadCallSet.setAttribute("CallIsChk", "");
-            onLoadCallSet.setAttribute("CallName", "OnPageLoad SQL");
-            onLoadCallSet.setAttribute("CallType", "SqlSet");
-            onLoadCallSet.setAttribute("Test", "");
-            onLoadCall.appendChild(onLoadCallSet);
-            onLoadAction.appendChild(onLoadCall);
-            
-            // OnPagePost Action (仅修改/新增模式)
-            if (operationType.equals("M") || operationType.equals("N") || operationType.equals("NM")) {
-                org.w3c.dom.Element onPostAction = doc.createElement("Set");
-                onPostAction.setAttribute("LogMsg", "");
-                onPostAction.setAttribute("Transcation", "");
-                onPostAction.setAttribute("Type", "OnPagePost");
-                actionSet.appendChild(onPostAction);
-                
-                org.w3c.dom.Element onPostCall = doc.createElement("CallSet");
-                org.w3c.dom.Element onPostCallSet = doc.createElement("Set");
-                onPostCallSet.setAttribute("CallIsChk", "");
-                onPostCallSet.setAttribute("CallName", "OnPagePost SQL");
-                onPostCallSet.setAttribute("CallType", "SqlSet");
-                onPostCallSet.setAttribute("Test", "");
-                onPostCall.appendChild(onPostCallSet);
-                onPostAction.appendChild(onPostCall);
-            }
-        }
+        // OnPageLoad Action
+        org.w3c.dom.Element onLoadAction = doc.createElement("Set");
+        onLoadAction.setAttribute("Type", "OnPageLoad");
+        org.w3c.dom.Element onLoadCall = doc.createElement("CallSet");
+        org.w3c.dom.Element onLoadCallSet = doc.createElement("Set");
+        onLoadCallSet.setAttribute("CallName", "OnPageLoad SQL");
+        onLoadCallSet.setAttribute("CallType", "SqlSet");
+        onLoadCall.appendChild(onLoadCallSet);
+        onLoadAction.appendChild(onLoadCall);
+        actionSet.appendChild(onLoadAction);
         
         // SqlSet 节点
         org.w3c.dom.Element sqlSet = doc.createElement("SqlSet");
         action.appendChild(sqlSet);
         
         // OnPageLoad SQL
-        if (frameType.equalsIgnoreCase("ListFrame")) {
-            org.w3c.dom.Element onLoadSql = doc.createElement("Set");
-            onLoadSql.setAttribute("Name", "OnPageLoad SQL");
-            onLoadSql.setAttribute("SqlType", "query");
-            org.w3c.dom.Element onLoadSqlContent = doc.createElement("Sql");
-            onLoadSqlContent.setTextContent("SELECT * FROM " + this.table.getName() + " WHERE 1=2");
-            onLoadSql.appendChild(onLoadSqlContent);
-            org.w3c.dom.Element onLoadCssSet = doc.createElement("CSSet");
-            onLoadSql.appendChild(onLoadCssSet);
-            sqlSet.appendChild(onLoadSql);
-        } else {
-            org.w3c.dom.Element onLoadSql = doc.createElement("Set");
-            onLoadSql.setAttribute("Name", "OnPageLoad SQL");
-            onLoadSql.setAttribute("SqlType", "query");
-            org.w3c.dom.Element onLoadSqlContent = doc.createElement("Sql");
-            onLoadSqlContent.setTextContent("SELECT * FROM " + this.table.getName() + " WHERE 1=2");
-            onLoadSql.appendChild(onLoadSqlContent);
-            org.w3c.dom.Element onLoadCssSet = doc.createElement("CSSet");
-            onLoadSql.appendChild(onLoadCssSet);
-            sqlSet.appendChild(onLoadSql);
-        }
-        
-        // OnPagePost SQL (仅修改/新增模式)
-        if (operationType.equals("M") || operationType.equals("N") || operationType.equals("NM")) {
-            org.w3c.dom.Element onPostSql = doc.createElement("Set");
-            onPostSql.setAttribute("Name", "OnPagePost SQL");
-            onPostSql.setAttribute("SqlType", "update");
-            org.w3c.dom.Element onPostSqlContent = doc.createElement("Sql");
-            onPostSqlContent.setTextContent("-- UPDATE " + this.table.getName() + " SET ... WHERE ...");
-            onPostSql.appendChild(onPostSqlContent);
-            org.w3c.dom.Element onPostCssSet = doc.createElement("CSSet");
-            onPostSql.appendChild(onPostCssSet);
-            sqlSet.appendChild(onPostSql);
-        }
-        
-        // OnFrameDelete SQL (ListFrame.M 模式)
-        if (frameType.equalsIgnoreCase("ListFrame") && 
-            (operationType.equals("M") || operationType.equals("NM"))) {
-            org.w3c.dom.Element onDeleteSql = doc.createElement("Set");
-            onDeleteSql.setAttribute("Name", "OnFrameDelete SQL");
-            onDeleteSql.setAttribute("SqlType", "update");
-            org.w3c.dom.Element onDeleteSqlContent = doc.createElement("Sql");
-            onDeleteSqlContent.setTextContent("-- DELETE FROM " + this.table.getName() + " WHERE ...");
-            onDeleteSql.appendChild(onDeleteSqlContent);
-            org.w3c.dom.Element onDeleteCssSet = doc.createElement("CSSet");
-            onDeleteSql.appendChild(onDeleteCssSet);
-            sqlSet.appendChild(onDeleteSql);
-            
-            org.w3c.dom.Element onRestoreSql = doc.createElement("Set");
-            onRestoreSql.setAttribute("Name", "OnFrameRestore SQL");
-            onRestoreSql.setAttribute("SqlType", "update");
-            org.w3c.dom.Element onRestoreSqlContent = doc.createElement("Sql");
-            onRestoreSqlContent.setTextContent("-- UPDATE " + this.table.getName() + " SET ... WHERE ...");
-            onRestoreSql.appendChild(onRestoreSqlContent);
-            org.w3c.dom.Element onRestoreCssSet = doc.createElement("CSSet");
-            onRestoreSql.appendChild(onRestoreCssSet);
-            sqlSet.appendChild(onRestoreSql);
-        }
-        
-        // JSONSet 节点
-        org.w3c.dom.Element jsonSet = doc.createElement("JSONSet");
-        action.appendChild(jsonSet);
-        
-        // ClassSet 节点
-        org.w3c.dom.Element classSet = doc.createElement("ClassSet");
-        action.appendChild(classSet);
-        
-        // XmlSet 节点
-        org.w3c.dom.Element xmlSet = doc.createElement("XmlSet");
-        action.appendChild(xmlSet);
-        
-        // XmlSetData 节点
-        org.w3c.dom.Element xmlSetData = doc.createElement("XmlSetData");
-        action.appendChild(xmlSetData);
-        
-        // ScriptSet 节点
-        org.w3c.dom.Element scriptSet = doc.createElement("ScriptSet");
-        action.appendChild(scriptSet);
-        
-        // UrlSet 节点
-        org.w3c.dom.Element urlSet = doc.createElement("UrlSet");
-        action.appendChild(urlSet);
-        
-        // CSSet 节点
-        org.w3c.dom.Element csSet = doc.createElement("CSSet");
-        action.appendChild(csSet);
+        org.w3c.dom.Element onLoadSql = doc.createElement("Set");
+        onLoadSql.setAttribute("Name", "OnPageLoad SQL");
+        onLoadSql.setAttribute("SqlType", "query");
+        org.w3c.dom.Element onLoadSqlContent = doc.createElement("Sql");
+        onLoadSqlContent.setTextContent("SELECT * FROM " + this.table.getName() + " WHERE 1=2");
+        onLoadSql.appendChild(onLoadSqlContent);
+        onLoadSql.appendChild(doc.createElement("CSSet"));
+        sqlSet.appendChild(onLoadSql);
     }
     
     /**
@@ -1228,9 +1080,209 @@ public class BusinessXmlCreator {
     /**
      * 创建 PageInfos 节点
      */
-    private void createPageInfos(Document doc, org.w3c.dom.Element root) {
+    private void createPageInfos(Document doc, org.w3c.dom.Element root, EwaDefineConfig.TmpConfig tmpConfig) {
         org.w3c.dom.Element pageInfos = doc.createElement("PageInfos");
         root.appendChild(pageInfos);
+        
+        // 如果配置中有 PageInfo，使用配置
+        if (tmpConfig != null && !tmpConfig.getPageInfoConfigs().isEmpty()) {
+            for (EwaDefineConfig.PageInfoConfig pageInfoConfig : tmpConfig.getPageInfoConfigs()) {
+                pageInfos.appendChild(createPageInfoFromConfig(doc, pageInfoConfig));
+            }
+        } else {
+            // 默认添加 3 个 PageInfo
+            pageInfos.appendChild(createDefaultPageInfo(doc, "msg0", "消息 0", "Msg0"));
+            pageInfos.appendChild(createDefaultPageInfo(doc, "msg1", "消息 1", "Msg1"));
+            pageInfos.appendChild(createDefaultPageInfo(doc, "msg2", "消息 2", "Msg2"));
+        }
+    }
+    
+    /**
+     * 创建 PageInfo
+     */
+    private org.w3c.dom.Element createPageInfoFromConfig(Document doc, EwaDefineConfig.PageInfoConfig config) {
+        org.w3c.dom.Element pageInfo = doc.createElement("PageInfo");
+        pageInfo.setAttribute("Name", config.getName());
+        
+        // Name 节点
+        org.w3c.dom.Element name = doc.createElement("Name");
+        org.w3c.dom.Element nameSet = doc.createElement("Set");
+        nameSet.setAttribute("Name", config.getName());
+        name.appendChild(nameSet);
+        pageInfo.appendChild(name);
+        
+        // DescriptionSet 节点
+        if (config.getDescriptionSet() != null) {
+            pageInfo.appendChild(createDescriptionSet(doc, config.getDescriptionSet()));
+        }
+        
+        return pageInfo;
+    }
+    
+    /**
+     * 创建默认 PageInfo
+     */
+    private org.w3c.dom.Element createDefaultPageInfo(Document doc, String name, String infoZhcn, String infoEnus) {
+        org.w3c.dom.Element pageInfo = doc.createElement("PageInfo");
+        pageInfo.setAttribute("Name", name);
+
+        // Name 节点
+        org.w3c.dom.Element nameElem = doc.createElement("Name");
+        org.w3c.dom.Element nameSet = doc.createElement("Set");
+        nameSet.setAttribute("Name", name);
+        nameElem.appendChild(nameSet);
+        pageInfo.appendChild(nameElem);
+
+        // DescriptionSet 节点
+        java.util.Map<String, String> descMap = new java.util.HashMap<>();
+        descMap.put("zhcn", infoZhcn);
+        descMap.put("enus", infoEnus);
+        pageInfo.appendChild(createDescriptionSet(doc, descMap));
+
+        return pageInfo;
+    }
+    
+    /**
+     * 根据配置创建 Buttons
+     */
+    private void createButtonsFromConfig(Document doc, org.w3c.dom.Element page, EwaDefineConfig.TmpConfig tmpConfig) {
+        org.w3c.dom.Element buttons = doc.createElement("Buttons");
+        page.appendChild(buttons);
+        
+        for (EwaDefineConfig.ButtonConfig btnConfig : tmpConfig.getButtonConfigs()) {
+            buttons.appendChild(createButtonFromConfig(doc, btnConfig));
+        }
+    }
+    
+    /**
+     * 根据配置创建 Button
+     */
+    private org.w3c.dom.Element createButtonFromConfig(Document doc, EwaDefineConfig.ButtonConfig config) {
+        org.w3c.dom.Element button = doc.createElement("Button");
+        button.setAttribute("Name", config.getName());
+        if (config.getTag() != null && !config.getTag().isEmpty()) {
+            button.setAttribute("Tag", config.getTag());
+        }
+        
+        // Set 节点
+        org.w3c.dom.Element buttonSet = doc.createElement("Set");
+        button.appendChild(buttonSet);
+        
+        // DescriptionSet 节点
+        if (config.getDescriptionSet() != null) {
+            button.appendChild(createDescriptionSet(doc, config.getDescriptionSet()));
+        }
+        
+        // 处理 Para 配置 (EventSet, CallAction 等)
+        for (EwaDefineConfig.ParaConfig paraConfig : config.getParaConfigs()) {
+            applyParaConfig(doc, button, paraConfig);
+        }
+        
+        return button;
+    }
+    
+    /**
+     * 应用 Para 配置到节点
+     */
+    private void applyParaConfig(Document doc, org.w3c.dom.Element parent, EwaDefineConfig.ParaConfig paraConfig) {
+        String xmlPath = paraConfig.getXmlPath();
+        String name = paraConfig.getName();
+        String val = paraConfig.getVal();
+        
+        // 解析 XmlPath，例如 "EventSet/Set"
+        String[] parts = xmlPath.split("/");
+        org.w3c.dom.Element current = parent;
+        
+        for (int i = 0; i < parts.length; i++) {
+            String part = parts[i];
+            // 查找或创建节点
+            org.w3c.dom.Element child = findChildElement(current, part);
+            if (child == null) {
+                child = doc.createElement(part);
+                current.appendChild(child);
+            }
+            current = child;
+        }
+        
+        // 设置属性
+        if (name != null && !name.isEmpty()) {
+            current.setAttribute(name, unescapeXml(val));
+        }
+    }
+    
+    /**
+     * 查找子元素
+     */
+    private org.w3c.dom.Element findChildElement(org.w3c.dom.Element parent, String tagName) {
+        org.w3c.dom.NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            if (children.item(i).getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                org.w3c.dom.Element elem = (org.w3c.dom.Element) children.item(i);
+                if (elem.getTagName().equals(tagName)) {
+                    return elem;
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * 转义 XML 属性值
+     */
+    private String unescapeXml(String val) {
+        if (val == null) return "";
+        return val.replace("&quot;", "\"")
+                  .replace("&lt;", "<")
+                  .replace("&gt;", ">")
+                  .replace("&amp;", "&");
+    }
+    
+    /**
+     * 根据配置添加 AddScript 和 AddCss
+     */
+    private void addFromConfig(Document doc, EwaDefineConfig.TmpConfig tmpConfig) {
+        for (EwaDefineConfig.AddConfig addConfig : tmpConfig.getAddConfigs()) {
+            String xmlPath = addConfig.getXmlPath();
+            String content = addConfig.getContent();
+            String setMethod = addConfig.getSetMethod();
+            
+            // 解析 XmlPath，例如 "EasyWebTemplate/Page/AddScript/Set/Bottom"
+            String[] parts = xmlPath.split("/");
+            org.w3c.dom.Element current = doc.getDocumentElement();
+            
+            for (int i = 0; i < parts.length; i++) {
+                String part = parts[i];
+                org.w3c.dom.Element child = findChildElement(current, part);
+                if (child == null) {
+                    child = doc.createElement(part);
+                    current.appendChild(child);
+                }
+                current = child;
+            }
+            
+            // 设置内容
+            if ("CDATA".equals(setMethod)) {
+                org.w3c.dom.CDATASection cdata = doc.createCDATASection(content);
+                current.appendChild(cdata);
+            } else {
+                current.setTextContent(content);
+            }
+        }
+    }
+    
+    /**
+     * 创建 DescriptionSet
+     */
+    private org.w3c.dom.Element createDescriptionSet(Document doc, java.util.Map<String, String> descMap) {
+        org.w3c.dom.Element descSet = doc.createElement("DescriptionSet");
+        for (java.util.Map.Entry<String, String> entry : descMap.entrySet()) {
+            org.w3c.dom.Element set = doc.createElement("Set");
+            set.setAttribute("Lang", entry.getKey());
+            set.setAttribute("Info", entry.getValue());
+            set.setAttribute("Memo", "");
+            descSet.appendChild(set);
+        }
+        return descSet;
     }
     
     /**
