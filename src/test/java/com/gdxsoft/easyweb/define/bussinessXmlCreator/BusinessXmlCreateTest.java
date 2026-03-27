@@ -76,6 +76,14 @@ public class BusinessXmlCreateTest {
         
         table.getFields().put(field.getName(), field);
         table.getFields().getFieldList().add(field.getName());
+        
+        // 如果是主键字段，添加到 Table 的 Pk 对象
+        if (isPk) {
+            if (table.getPk() == null) {
+                table.setPk(new com.gdxsoft.easyweb.define.database.TablePk());
+            }
+            table.getPk().getPkFields().add(field);
+        }
     }
     
     /**

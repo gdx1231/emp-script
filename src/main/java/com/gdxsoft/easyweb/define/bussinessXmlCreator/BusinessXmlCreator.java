@@ -1,5 +1,7 @@
 package com.gdxsoft.easyweb.define.bussinessXmlCreator;
 
+import java.util.ArrayList;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -369,8 +371,14 @@ public class BusinessXmlCreator {
         org.w3c.dom.Element pageSize = doc.createElement("PageSize");
         page.appendChild(pageSize);
         org.w3c.dom.Element pageSizeSet = doc.createElement("Set");
+        pageSizeSet.setAttribute("IsSplitPage", "1");
         pageSizeSet.setAttribute("PageSize", "10");
         pageSizeSet.setAttribute("Recycle", "1");
+        // 设置 KeyField 为表的主键
+        String keyField = getPrimaryKeyField();
+        if (keyField != null && !keyField.isEmpty()) {
+            pageSizeSet.setAttribute("KeyField", keyField);
+        }
         pageSize.appendChild(pageSizeSet);
         
         // ListUI 节点
@@ -1245,6 +1253,26 @@ public class BusinessXmlCreator {
         for (String fieldName : this.table.getFields().getFieldList()) {
             if (fieldName.endsWith("_STATE") || fieldName.equals("STATUS") || fieldName.endsWith("_STATUS")) {
                 return fieldName;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * 获取主键字段名
+     * @return 主键字段名，如果没有则返回 null
+     */
+    private String getPrimaryKeyField() {
+        // 从 Table 对象获取主键
+        if (this.table.getPk() != null) {
+            ArrayList<com.gdxsoft.easyweb.define.database.Field> pkFields = this.table.getPk().getPkFields();
+            if (pkFields != null && !pkFields.isEmpty()) {
+                // 如果是复合主键，用逗号分隔
+                ArrayList<String> fieldNames = new ArrayList<String>();
+                for (com.gdxsoft.easyweb.define.database.Field pkField : pkFields) {
+                    fieldNames.add(pkField.getName());
+                }
+                return String.join(",", fieldNames);
             }
         }
         return null;
