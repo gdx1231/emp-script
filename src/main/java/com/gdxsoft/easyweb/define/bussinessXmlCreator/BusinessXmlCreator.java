@@ -309,55 +309,10 @@ public class BusinessXmlCreator {
         page.appendChild(addHtml);
         org.w3c.dom.Element addHtmlSet = doc.createElement("Set");
         org.w3c.dom.Element addHtmlTop = doc.createElement("Top");
-        addHtmlTop.setTextContent(" ");
         addHtmlSet.appendChild(addHtmlTop);
         org.w3c.dom.Element addHtmlBottom = doc.createElement("Bottom");
         addHtmlSet.appendChild(addHtmlBottom);
         addHtml.appendChild(addHtmlSet);
-        
-        // AddScript 节点
-        org.w3c.dom.Element addScript = doc.createElement("AddScript");
-        page.appendChild(addScript);
-        org.w3c.dom.Element addScriptSet = doc.createElement("Set");
-        org.w3c.dom.Element addScriptTop = doc.createElement("Top");
-        addScriptSet.appendChild(addScriptTop);
-        org.w3c.dom.Element addScriptBottom = doc.createElement("Bottom");
-        addScriptBottom.setTextContent(getDefaultScript(itemName));
-        addScriptSet.appendChild(addScriptBottom);
-        addScript.appendChild(addScriptSet);
-        
-        // AddCss 节点
-        org.w3c.dom.Element addCss = doc.createElement("AddCss");
-        page.appendChild(addCss);
-        org.w3c.dom.Element addCssSet = doc.createElement("Set");
-        org.w3c.dom.Element addCssContent = doc.createElement("AddCss");
-        addCssContent.setTextContent(getDefaultCss());
-        addCssSet.appendChild(addCssContent);
-        addCss.appendChild(addCssSet);
-    }
-    
-    /**
-     * 获取默认 JavaScript 代码
-     */
-    private String getDefaultScript(String itemName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("function init").append(itemName.replace(".", "_")).append("() {\n");
-        sb.append("    // 初始化代码\n");
-        sb.append("    console.log('").append(itemName).append(" initialized');\n");
-        sb.append("}\n");
-        sb.append("\n");
-        sb.append("// 页面加载完成后执行\n");
-        sb.append("if (typeof EWA !== 'undefined' && EWA.F) {\n");
-        sb.append("    EWA.F.FOS[\"@SYS_FRAME_UNID\"].LoadedAfter = init").append(itemName.replace(".", "_")).append(";\n");
-        sb.append("}");
-        return sb.toString();
-    }
-    
-    /**
-     * 获取默认 CSS 样式
-     */
-    private String getDefaultCss() {
-        return ".EWA_TD_L { width: 150px; }\n.EWA_TD_M { width: 300px; }";
     }
     
     /**
