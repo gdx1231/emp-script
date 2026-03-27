@@ -156,6 +156,16 @@ public class BusinessXmlCreator {
         org.w3c.dom.Element butOk = createSubmitButton(doc);
         xitems.appendChild(butOk);
         
+        // 根据配置添加 Buttons（作为 XItem）
+        if (tmpConfig != null && !tmpConfig.getButtonConfigs().isEmpty()) {
+            createButtonsFromConfig(doc, xitems, tmpConfig);
+        }
+        
+        // 根据配置添加 AddScript 和 AddCss
+        if (tmpConfig != null && !tmpConfig.getAddConfigs().isEmpty()) {
+            addFromConfig(doc, tmpConfig);
+        }
+        
         // 创建 Menus 节点
         createMenus(doc, root);
         
@@ -167,17 +177,7 @@ public class BusinessXmlCreator {
         
         // 创建 Workflows 节点
         createWorkflows(doc, root);
-        
-        // 根据配置添加 Buttons
-        if (tmpConfig != null && !tmpConfig.getButtonConfigs().isEmpty()) {
-            createButtonsFromConfig(doc, page, tmpConfig);
-        }
-        
-        // 根据配置添加 AddScript 和 AddCss
-        if (tmpConfig != null && !tmpConfig.getAddConfigs().isEmpty()) {
-            addFromConfig(doc, tmpConfig);
-        }
-        
+
         this.xmlDoc = doc;
         return doc;
     }
@@ -193,9 +193,6 @@ public class BusinessXmlCreator {
         return "NM"; // 默认
     }
     
-    /**
-     * 创建 ListFrame 的 Buttons
-     */
     /**
      * 获取当前日期时间
      */
@@ -1098,42 +1095,50 @@ public class BusinessXmlCreator {
     }
     
     /**
-     * 根据配置创建 Buttons
+     * 根据配置创建 Buttons（作为 XItem 添加到 XItems）
      */
-    private void createButtonsFromConfig(Document doc, org.w3c.dom.Element page, EwaDefineConfig.TmpConfig tmpConfig) {
-        org.w3c.dom.Element buttons = doc.createElement("Buttons");
-        page.appendChild(buttons);
-        
+    private void createButtonsFromConfig(Document doc, org.w3c.dom.Element xitems, EwaDefineConfig.TmpConfig tmpConfig) {
         for (EwaDefineConfig.ButtonConfig btnConfig : tmpConfig.getButtonConfigs()) {
-            buttons.appendChild(createButtonFromConfig(doc, btnConfig));
+            xitems.appendChild(createButtonAsXItem(doc, btnConfig));
         }
     }
     
     /**
-     * 根据配置创建 Button
+     * 将 Button 作为 XItem 创建
      */
-    private org.w3c.dom.Element createButtonFromConfig(Document doc, EwaDefineConfig.ButtonConfig config) {
-        org.w3c.dom.Element button = doc.createElement("Button");
-        button.setAttribute("Name", config.getName());
-        if (config.getTag() != null && !config.getTag().isEmpty()) {
-            button.setAttribute("Tag", config.getTag());
-        }
+    private org.w3c.dom.Element createButtonAsXItem(Document doc, EwaDefineConfig.ButtonConfig config) {
+        org.w3c.dom.Element xitem = doc.createElement("XItem");
+        xitem.setAttribute("Name", config.getName());
         
-        // Set 节点
-        org.w3c.dom.Element buttonSet = doc.createElement("Set");
-        button.appendChild(buttonSet);
+        // Tag 节点
+        org.w3c.dom.Element tag = doc.createElement("Tag");
+        org.w3c.dom.Element tagSet = doc.createElement("Set");
+        if (config.getTag() != null && !config.getTag().isEmpty()) {
+            tagSet.setAttribute("Tag", config.getTag());
+        }
+        tagSet.setAttribute("IsLFEdit", "0");
+        tagSet.setAttribute("SpanShowAs", "");
+        tag.appendChild(tagSet);
+        xitem.appendChild(tag);
+        
+        // Name 节点
+        org.w3c.dom.Element name = doc.createElement("Name");
+        org.w3c.dom.Element nameSet = doc.createElement("Set");
+        nameSet.setAttribute("Name", config.getName());
+        name.appendChild(nameSet);
+        xitem.appendChild(name);
         
         // DescriptionSet 节点
         if (config.getDescriptionSet() != null) {
-            button.appendChild(createDescriptionSet(doc, config.getDescriptionSet()));
+            xitem.appendChild(createDescriptionSet(doc, config.getDescriptionSet()));
         }
         
         // 处理 Para 配置 (EventSet, CallAction 等)
         for (EwaDefineConfig.ParaConfig paraConfig : config.getParaConfigs()) {
-            applyParaConfig(doc, button, paraConfig);
+            applyParaConfig(doc, xitem, paraConfig);
         }
         
-        return button;
+        return xitem;
     }
     
     /**
