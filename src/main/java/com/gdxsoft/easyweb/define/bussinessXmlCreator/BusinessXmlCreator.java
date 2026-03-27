@@ -158,8 +158,119 @@ public class BusinessXmlCreator {
         // 创建 Workflows 节点
         createWorkflows(doc, root);
         
+        // ListFrame.M 模式添加 Buttons
+        if (frameType.equalsIgnoreCase("ListFrame") && 
+            (operationType.equals("M") || operationType.equals("NM"))) {
+            createListFrameButtons(doc, page);
+        }
+        
         this.xmlDoc = doc;
         return doc;
+    }
+    
+    /**
+     * 创建 ListFrame 的 Buttons
+     */
+    private void createListFrameButtons(Document doc, org.w3c.dom.Element page) {
+        org.w3c.dom.Element buttons = doc.createElement("Buttons");
+        page.appendChild(buttons);
+        
+        // butNew 按钮
+        buttons.appendChild(createListFrameButton(doc, "butNew", "新增", "New", 
+            "ewa_click", "EWA.F.FOS[\"@SYS_FRAME_UNID\"].ext_NewOrModifyOrCopy(\"N\")"));
+        
+        // butModify 按钮
+        buttons.appendChild(createListFrameButton(doc, "butModify", "修改", "Modify",
+            "onclick", "EWA.F.FOS[\"@SYS_FRAME_UNID\"].ext_NewOrModifyOrCopy(\"M\")"));
+        
+        // butCopy 按钮
+        buttons.appendChild(createListFrameButton(doc, "butCopy", "复制到...", "Copy to ...",
+            "onclick", "EWA.F.FOS[\"@SYS_FRAME_UNID\"].ext_NewOrModifyOrCopy(\"C\")"));
+        
+        // butDelete 按钮
+        buttons.appendChild(createListFrameButtonDelete(doc));
+        
+        // butRestore 按钮
+        buttons.appendChild(createListFrameButton(doc, "butRestore", "恢复数据", "Restore",
+            "", "OnFrameRestore"));
+    }
+    
+    /**
+     * 创建 ListFrame 按钮
+     */
+    private org.w3c.dom.Element createListFrameButton(Document doc, String name, 
+            String infoZhcn, String infoEnus, String eventType, String eventValue) {
+        org.w3c.dom.Element button = doc.createElement("Button");
+        button.setAttribute("Name", name);
+        button.setAttribute("Tag", "button");
+        
+        org.w3c.dom.Element buttonSet = doc.createElement("Set");
+        button.appendChild(buttonSet);
+        
+        // DescriptionSet
+        org.w3c.dom.Element descSet = doc.createElement("DescriptionSet");
+        org.w3c.dom.Element descZhcn = doc.createElement("Set");
+        descZhcn.setAttribute("Lang", "zhcn");
+        descZhcn.setAttribute("Info", infoZhcn);
+        descZhcn.setAttribute("Memo", "");
+        descSet.appendChild(descZhcn);
+        
+        org.w3c.dom.Element descEnus = doc.createElement("Set");
+        descEnus.setAttribute("Lang", "enus");
+        descEnus.setAttribute("Info", infoEnus);
+        descEnus.setAttribute("Memo", "");
+        descSet.appendChild(descEnus);
+        button.appendChild(descSet);
+        
+        // EventSet (如果有事件)
+        if (eventType != null && !eventType.isEmpty()) {
+            org.w3c.dom.Element eventSet = doc.createElement("EventSet");
+            org.w3c.dom.Element eventSetItem = doc.createElement("Set");
+            eventSetItem.setAttribute("EventName", eventType);
+            eventSetItem.setAttribute("EventValue", eventValue);
+            eventSetItem.setAttribute("EventType", "Javascript");
+            eventSet.appendChild(eventSetItem);
+            button.appendChild(eventSet);
+        }
+        
+        return button;
+    }
+    
+    /**
+     * 创建 ListFrame 删除按钮
+     */
+    private org.w3c.dom.Element createListFrameButtonDelete(Document doc) {
+        org.w3c.dom.Element button = doc.createElement("Button");
+        button.setAttribute("Name", "butDelete");
+        button.setAttribute("Tag", "button");
+        
+        org.w3c.dom.Element buttonSet = doc.createElement("Set");
+        button.appendChild(buttonSet);
+        
+        // DescriptionSet
+        org.w3c.dom.Element descSet = doc.createElement("DescriptionSet");
+        org.w3c.dom.Element descZhcn = doc.createElement("Set");
+        descZhcn.setAttribute("Lang", "zhcn");
+        descZhcn.setAttribute("Info", "删除");
+        descZhcn.setAttribute("Memo", "");
+        descSet.appendChild(descZhcn);
+        
+        org.w3c.dom.Element descEnus = doc.createElement("Set");
+        descEnus.setAttribute("Lang", "enus");
+        descEnus.setAttribute("Info", "Delete");
+        descEnus.setAttribute("Memo", "");
+        descSet.appendChild(descEnus);
+        button.appendChild(descSet);
+        
+        // CallAction
+        org.w3c.dom.Element callAction = doc.createElement("CallAction");
+        org.w3c.dom.Element callActionSet = doc.createElement("Set");
+        callActionSet.setAttribute("ConfirmInfo", "DeleteBefore");
+        callActionSet.setAttribute("Action", "OnFrameDelete");
+        callAction.appendChild(callActionSet);
+        button.appendChild(callAction);
+        
+        return button;
     }
     
     /**
@@ -196,19 +307,6 @@ public class BusinessXmlCreator {
             org.w3c.dom.Element tagSet = doc.createElement("Set");
             tagSet.setAttribute("Tag", "span");
             tag.appendChild(tagSet);
-            
-            // 添加 4 个按钮：新增、修改、复制、删除
-            org.w3c.dom.Element buttons = doc.createElement("Buttons");
-            page.appendChild(buttons);
-            
-            // 新增按钮
-            buttons.appendChild(createButton(doc, "butNew", "新增", "New", "new"));
-            // 修改按钮
-            buttons.appendChild(createButton(doc, "butModify", "修改", "Modify", "modify"));
-            // 复制按钮
-            buttons.appendChild(createButton(doc, "butCopy", "复制", "Copy", "copy"));
-            // 删除按钮
-            buttons.appendChild(createButton(doc, "butDelete", "删除", "Delete", "delete"));
         }
         
         // SkinName 节点
@@ -337,38 +435,6 @@ public class BusinessXmlCreator {
      */
     private String getDefaultCss() {
         return ".EWA_TD_L { width: 150px; }\n.EWA_TD_M { width: 300px; }";
-    }
-    
-    /**
-     * 创建按钮
-     */
-    private org.w3c.dom.Element createButton(Document doc, String name, String infoZhcn, String infoEnus, String action) {
-        org.w3c.dom.Element button = doc.createElement("Button");
-        button.setAttribute("Name", name);
-        
-        org.w3c.dom.Element buttonSet = doc.createElement("Set");
-        buttonSet.setAttribute("Action", action);
-        buttonSet.setAttribute("ConfirmInfo", "");
-        buttonSet.setAttribute("Icon", "");
-        buttonSet.setAttribute("IsShow", "1");
-        buttonSet.setAttribute("Style", "");
-        button.appendChild(buttonSet);
-        
-        org.w3c.dom.Element descSet = doc.createElement("DescriptionSet");
-        org.w3c.dom.Element descZhcn = doc.createElement("Set");
-        descZhcn.setAttribute("Info", infoZhcn);
-        descZhcn.setAttribute("Lang", "zhcn");
-        descZhcn.setAttribute("Memo", "");
-        descSet.appendChild(descZhcn);
-        
-        org.w3c.dom.Element descEnus = doc.createElement("Set");
-        descEnus.setAttribute("Info", infoEnus);
-        descEnus.setAttribute("Lang", "enus");
-        descEnus.setAttribute("Memo", "");
-        descSet.appendChild(descEnus);
-        
-        button.appendChild(descSet);
-        return button;
     }
     
     /**
@@ -962,38 +1028,92 @@ public class BusinessXmlCreator {
         org.w3c.dom.Element actionSet = doc.createElement("ActionSet");
         action.appendChild(actionSet);
         
-        // OnPageLoad Action
-        org.w3c.dom.Element onLoadAction = doc.createElement("Set");
-        onLoadAction.setAttribute("LogMsg", "");
-        onLoadAction.setAttribute("Transcation", "");
-        onLoadAction.setAttribute("Type", "OnPageLoad");
-        actionSet.appendChild(onLoadAction);
-        
-        org.w3c.dom.Element onLoadCall = doc.createElement("CallSet");
-        org.w3c.dom.Element onLoadCallSet = doc.createElement("Set");
-        onLoadCallSet.setAttribute("CallIsChk", "");
-        onLoadCallSet.setAttribute("CallName", "OnPageLoad SQL");
-        onLoadCallSet.setAttribute("CallType", "SqlSet");
-        onLoadCallSet.setAttribute("Test", "");
-        onLoadCall.appendChild(onLoadCallSet);
-        onLoadAction.appendChild(onLoadCall);
-        
-        // OnPagePost Action (仅修改/新增模式)
-        if (operationType.equals("M") || operationType.equals("N") || operationType.equals("NM")) {
-            org.w3c.dom.Element onPostAction = doc.createElement("Set");
-            onPostAction.setAttribute("LogMsg", "");
-            onPostAction.setAttribute("Transcation", "");
-            onPostAction.setAttribute("Type", "OnPagePost");
-            actionSet.appendChild(onPostAction);
+        // ListFrame.M 模式
+        if (frameType.equalsIgnoreCase("ListFrame") && 
+            (operationType.equals("M") || operationType.equals("NM"))) {
             
-            org.w3c.dom.Element onPostCall = doc.createElement("CallSet");
-            org.w3c.dom.Element onPostCallSet = doc.createElement("Set");
-            onPostCallSet.setAttribute("CallIsChk", "");
-            onPostCallSet.setAttribute("CallName", "OnPagePost SQL");
-            onPostCallSet.setAttribute("CallType", "SqlSet");
-            onPostCallSet.setAttribute("Test", "");
-            onPostCall.appendChild(onPostCallSet);
-            onPostAction.appendChild(onPostCall);
+            // OnPageLoad Action
+            org.w3c.dom.Element onLoadAction = doc.createElement("Set");
+            onLoadAction.setAttribute("LogMsg", "");
+            onLoadAction.setAttribute("Transcation", "");
+            onLoadAction.setAttribute("Type", "OnPageLoad");
+            actionSet.appendChild(onLoadAction);
+            
+            org.w3c.dom.Element onLoadCall = doc.createElement("CallSet");
+            org.w3c.dom.Element onLoadCallSet = doc.createElement("Set");
+            onLoadCallSet.setAttribute("CallIsChk", "");
+            onLoadCallSet.setAttribute("CallName", "OnPageLoad SQL");
+            onLoadCallSet.setAttribute("CallType", "SqlSet");
+            onLoadCallSet.setAttribute("Test", "");
+            onLoadCall.appendChild(onLoadCallSet);
+            onLoadAction.appendChild(onLoadCall);
+            
+            // OnFrameDelete Action
+            org.w3c.dom.Element onDeleteAction = doc.createElement("Set");
+            onDeleteAction.setAttribute("LogMsg", "");
+            onDeleteAction.setAttribute("Transcation", "1");
+            onDeleteAction.setAttribute("Type", "OnFrameDelete");
+            actionSet.appendChild(onDeleteAction);
+            
+            org.w3c.dom.Element onDeleteCall = doc.createElement("CallSet");
+            org.w3c.dom.Element onDeleteCallSet = doc.createElement("Set");
+            onDeleteCallSet.setAttribute("CallIsChk", "");
+            onDeleteCallSet.setAttribute("CallName", "OnFrameDelete SQL");
+            onDeleteCallSet.setAttribute("CallType", "SqlSet");
+            onDeleteCallSet.setAttribute("Test", "");
+            onDeleteCall.appendChild(onDeleteCallSet);
+            onDeleteAction.appendChild(onDeleteCall);
+            
+            // OnFrameRestore Action
+            org.w3c.dom.Element onRestoreAction = doc.createElement("Set");
+            onRestoreAction.setAttribute("LogMsg", "");
+            onRestoreAction.setAttribute("Transcation", "1");
+            onRestoreAction.setAttribute("Type", "OnFrameRestore");
+            actionSet.appendChild(onRestoreAction);
+            
+            org.w3c.dom.Element onRestoreCall = doc.createElement("CallSet");
+            org.w3c.dom.Element onRestoreCallSet = doc.createElement("Set");
+            onRestoreCallSet.setAttribute("CallIsChk", "");
+            onRestoreCallSet.setAttribute("CallName", "OnFrameRestore SQL");
+            onRestoreCallSet.setAttribute("CallType", "SqlSet");
+            onRestoreCallSet.setAttribute("Test", "");
+            onRestoreCall.appendChild(onRestoreCallSet);
+            onRestoreAction.appendChild(onRestoreCall);
+        } else {
+            // Frame 模式
+            // OnPageLoad Action
+            org.w3c.dom.Element onLoadAction = doc.createElement("Set");
+            onLoadAction.setAttribute("LogMsg", "");
+            onLoadAction.setAttribute("Transcation", "");
+            onLoadAction.setAttribute("Type", "OnPageLoad");
+            actionSet.appendChild(onLoadAction);
+            
+            org.w3c.dom.Element onLoadCall = doc.createElement("CallSet");
+            org.w3c.dom.Element onLoadCallSet = doc.createElement("Set");
+            onLoadCallSet.setAttribute("CallIsChk", "");
+            onLoadCallSet.setAttribute("CallName", "OnPageLoad SQL");
+            onLoadCallSet.setAttribute("CallType", "SqlSet");
+            onLoadCallSet.setAttribute("Test", "");
+            onLoadCall.appendChild(onLoadCallSet);
+            onLoadAction.appendChild(onLoadCall);
+            
+            // OnPagePost Action (仅修改/新增模式)
+            if (operationType.equals("M") || operationType.equals("N") || operationType.equals("NM")) {
+                org.w3c.dom.Element onPostAction = doc.createElement("Set");
+                onPostAction.setAttribute("LogMsg", "");
+                onPostAction.setAttribute("Transcation", "");
+                onPostAction.setAttribute("Type", "OnPagePost");
+                actionSet.appendChild(onPostAction);
+                
+                org.w3c.dom.Element onPostCall = doc.createElement("CallSet");
+                org.w3c.dom.Element onPostCallSet = doc.createElement("Set");
+                onPostCallSet.setAttribute("CallIsChk", "");
+                onPostCallSet.setAttribute("CallName", "OnPagePost SQL");
+                onPostCallSet.setAttribute("CallType", "SqlSet");
+                onPostCallSet.setAttribute("Test", "");
+                onPostCall.appendChild(onPostCallSet);
+                onPostAction.appendChild(onPostCall);
+            }
         }
         
         // SqlSet 节点
@@ -1001,15 +1121,27 @@ public class BusinessXmlCreator {
         action.appendChild(sqlSet);
         
         // OnPageLoad SQL
-        org.w3c.dom.Element onLoadSql = doc.createElement("Set");
-        onLoadSql.setAttribute("Name", "OnPageLoad SQL");
-        onLoadSql.setAttribute("SqlType", "query");
-        org.w3c.dom.Element onLoadSqlContent = doc.createElement("Sql");
-        onLoadSqlContent.setTextContent("SELECT * FROM " + this.table.getName() + " WHERE 1=2");
-        onLoadSql.appendChild(onLoadSqlContent);
-        org.w3c.dom.Element onLoadCssSet = doc.createElement("CSSet");
-        onLoadSql.appendChild(onLoadCssSet);
-        sqlSet.appendChild(onLoadSql);
+        if (frameType.equalsIgnoreCase("ListFrame")) {
+            org.w3c.dom.Element onLoadSql = doc.createElement("Set");
+            onLoadSql.setAttribute("Name", "OnPageLoad SQL");
+            onLoadSql.setAttribute("SqlType", "query");
+            org.w3c.dom.Element onLoadSqlContent = doc.createElement("Sql");
+            onLoadSqlContent.setTextContent("SELECT * FROM " + this.table.getName() + " WHERE 1=2");
+            onLoadSql.appendChild(onLoadSqlContent);
+            org.w3c.dom.Element onLoadCssSet = doc.createElement("CSSet");
+            onLoadSql.appendChild(onLoadCssSet);
+            sqlSet.appendChild(onLoadSql);
+        } else {
+            org.w3c.dom.Element onLoadSql = doc.createElement("Set");
+            onLoadSql.setAttribute("Name", "OnPageLoad SQL");
+            onLoadSql.setAttribute("SqlType", "query");
+            org.w3c.dom.Element onLoadSqlContent = doc.createElement("Sql");
+            onLoadSqlContent.setTextContent("SELECT * FROM " + this.table.getName() + " WHERE 1=2");
+            onLoadSql.appendChild(onLoadSqlContent);
+            org.w3c.dom.Element onLoadCssSet = doc.createElement("CSSet");
+            onLoadSql.appendChild(onLoadCssSet);
+            sqlSet.appendChild(onLoadSql);
+        }
         
         // OnPagePost SQL (仅修改/新增模式)
         if (operationType.equals("M") || operationType.equals("N") || operationType.equals("NM")) {
@@ -1022,6 +1154,30 @@ public class BusinessXmlCreator {
             org.w3c.dom.Element onPostCssSet = doc.createElement("CSSet");
             onPostSql.appendChild(onPostCssSet);
             sqlSet.appendChild(onPostSql);
+        }
+        
+        // OnFrameDelete SQL (ListFrame.M 模式)
+        if (frameType.equalsIgnoreCase("ListFrame") && 
+            (operationType.equals("M") || operationType.equals("NM"))) {
+            org.w3c.dom.Element onDeleteSql = doc.createElement("Set");
+            onDeleteSql.setAttribute("Name", "OnFrameDelete SQL");
+            onDeleteSql.setAttribute("SqlType", "update");
+            org.w3c.dom.Element onDeleteSqlContent = doc.createElement("Sql");
+            onDeleteSqlContent.setTextContent("-- DELETE FROM " + this.table.getName() + " WHERE ...");
+            onDeleteSql.appendChild(onDeleteSqlContent);
+            org.w3c.dom.Element onDeleteCssSet = doc.createElement("CSSet");
+            onDeleteSql.appendChild(onDeleteCssSet);
+            sqlSet.appendChild(onDeleteSql);
+            
+            org.w3c.dom.Element onRestoreSql = doc.createElement("Set");
+            onRestoreSql.setAttribute("Name", "OnFrameRestore SQL");
+            onRestoreSql.setAttribute("SqlType", "update");
+            org.w3c.dom.Element onRestoreSqlContent = doc.createElement("Sql");
+            onRestoreSqlContent.setTextContent("-- UPDATE " + this.table.getName() + " SET ... WHERE ...");
+            onRestoreSql.appendChild(onRestoreSqlContent);
+            org.w3c.dom.Element onRestoreCssSet = doc.createElement("CSSet");
+            onRestoreSql.appendChild(onRestoreCssSet);
+            sqlSet.appendChild(onRestoreSql);
         }
         
         // JSONSet 节点
