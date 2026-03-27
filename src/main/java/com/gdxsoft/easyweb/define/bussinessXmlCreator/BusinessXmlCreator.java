@@ -340,19 +340,26 @@ public class BusinessXmlCreator {
     /**
      * 创建 XItem 节点
      */
-    private org.w3c.dom.Element createXItem(Document doc, 
-            com.gdxsoft.easyweb.define.database.Field field, 
+    private org.w3c.dom.Element createXItem(Document doc,
+            com.gdxsoft.easyweb.define.database.Field field,
             String frameType, String operationType, int index) {
-        
+
         org.w3c.dom.Element xitem = doc.createElement("XItem");
         xitem.setAttribute("Name", field.getName());
-        
+
         // Tag 节点
         org.w3c.dom.Element tag = doc.createElement("Tag");
         org.w3c.dom.Element tagSet = doc.createElement("Set");
         tagSet.setAttribute("IsLFEdit", "0");
         tagSet.setAttribute("SpanShowAs", "");
-        tagSet.setAttribute("Tag", getTagType(field.getDatabaseType()));
+        
+        // ListFrame 模式默认 tag=span（按钮除外）
+        if (frameType.equalsIgnoreCase("ListFrame")) {
+            tagSet.setAttribute("Tag", "span");
+        } else {
+            tagSet.setAttribute("Tag", getTagType(field.getDatabaseType()));
+        }
+        
         tag.appendChild(tagSet);
         xitem.appendChild(tag);
         
