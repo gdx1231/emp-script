@@ -279,6 +279,7 @@ public class BusinessXmlCreator {
         org.w3c.dom.Element addScriptTop = doc.createElement("Top");
         addScriptSet.appendChild(addScriptTop);
         org.w3c.dom.Element addScriptBottom = doc.createElement("Bottom");
+        addScriptBottom.setTextContent(getDefaultScript(itemName));
         addScriptSet.appendChild(addScriptBottom);
         addScript.appendChild(addScriptSet);
         
@@ -287,8 +288,33 @@ public class BusinessXmlCreator {
         page.appendChild(addCss);
         org.w3c.dom.Element addCssSet = doc.createElement("Set");
         org.w3c.dom.Element addCssContent = doc.createElement("AddCss");
+        addCssContent.setTextContent(getDefaultCss());
         addCssSet.appendChild(addCssContent);
         addCss.appendChild(addCssSet);
+    }
+    
+    /**
+     * 获取默认 JavaScript 代码
+     */
+    private String getDefaultScript(String itemName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("function init").append(itemName.replace(".", "_")).append("() {\n");
+        sb.append("    // 初始化代码\n");
+        sb.append("    console.log('").append(itemName).append(" initialized');\n");
+        sb.append("}\n");
+        sb.append("\n");
+        sb.append("// 页面加载完成后执行\n");
+        sb.append("if (typeof EWA !== 'undefined' && EWA.F) {\n");
+        sb.append("    EWA.F.FOS[\"@SYS_FRAME_UNID\"].LoadedAfter = init").append(itemName.replace(".", "_")).append(";\n");
+        sb.append("}");
+        return sb.toString();
+    }
+    
+    /**
+     * 获取默认 CSS 样式
+     */
+    private String getDefaultCss() {
+        return ".EWA_TD_L { width: 150px; }\n.EWA_TD_M { width: 300px; }";
     }
     
     /**
@@ -484,6 +510,23 @@ public class BusinessXmlCreator {
         
         // List 节点
         org.w3c.dom.Element list = doc.createElement("List");
+        if (needList(field.getDatabaseType())) {
+            org.w3c.dom.Element listSet = doc.createElement("Set");
+            listSet.setAttribute("DisplayField", getFieldDisplayName(field));
+            listSet.setAttribute("DisplayList", "");
+            listSet.setAttribute("GroupField", "");
+            listSet.setAttribute("ListAddBlank", "1");
+            listSet.setAttribute("ListFilterField", "");
+            listSet.setAttribute("ListFilterType", "");
+            listSet.setAttribute("ListShowType", "");
+            listSet.setAttribute("ParentField", "");
+            listSet.setAttribute("Sql", getListSql(field));
+            listSet.setAttribute("TitleField", "");
+            listSet.setAttribute("TitleList", "");
+            listSet.setAttribute("ValueField", getFieldValueName(field));
+            listSet.setAttribute("ValueList", "");
+            list.appendChild(listSet);
+        }
         xitem.appendChild(list);
         
         // UserSet 节点
@@ -500,6 +543,13 @@ public class BusinessXmlCreator {
         
         // Frame 节点
         org.w3c.dom.Element frame = doc.createElement("Frame");
+        if (needFrame(field.getDatabaseType())) {
+            org.w3c.dom.Element frameSet = doc.createElement("Set");
+            frameSet.setAttribute("CallItemName", getFieldDisplayName(field) + ".ListFrame.View");
+            frameSet.setAttribute("CallPara", "a");
+            frameSet.setAttribute("CallXmlName", "business/common/droplist.xml");
+            frame.appendChild(frameSet);
+        }
         xitem.appendChild(frame);
         
         // UserControl 节点
@@ -600,6 +650,55 @@ public class BusinessXmlCreator {
         String type = dbType.toUpperCase();
         if (type.contains("EMAIL")) return "Email";
         if (type.contains("MOBILE") || type.contains("PHONE")) return "Mobile";
+        return "";
+    }
+    
+    /**
+     * 判断是否需要 List 数据源
+     */
+    private boolean needList(String dbType) {
+        if (dbType == null) return false;
+        String type = dbType.toUpperCase();
+        // ID 结尾的字段通常需要关联
+        if (dbType.endsWith("_ID")) return true;
+        return false;
+    }
+    
+    /**
+     * 判断是否需要 Frame 关联
+     */
+    private boolean needFrame(String dbType) {
+        return needList(dbType);
+    }
+    
+    /**
+     * 获取 List 显示字段名
+     */
+    private String getFieldDisplayName(com.gdxsoft.easyweb.define.database.Field field) {
+        String name = field.getName();
+        if (name.endsWith("_ID")) {
+            // 将 CRM_COM_ID 转换为 CRM_COM_NAME
+            return name.substring(0, name.length() - 3) + "_NAME";
+        }
+        return name + "_NAME";
+    }
+    
+    /**
+     * 获取 List 值字段名
+     */
+    private String getFieldValueName(com.gdxsoft.easyweb.define.database.Field field) {
+        return field.getName();
+    }
+    
+    /**
+     * 获取 List SQL
+     */
+    private String getListSql(com.gdxsoft.easyweb.define.database.Field field) {
+        String name = field.getName();
+        if (name.endsWith("_ID")) {
+            String tableName = name.substring(0, name.length() - 3);
+            return "SELECT " + tableName + "_ID, " + tableName + "_NAME FROM " + tableName;
+        }
         return "";
     }
     

@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<EasyWebTemplate Author="System" CreateDate="2026-03-27 16:45:35" Name="CRM_COM.LF.M" UpdateDate="2026-03-27 16:45:35">
+  <Page>
+    <Name>
+      <Set Name="CRM_COM.LF.M"/>
+    </Name>
+    <FrameTag>
+      <Set FrameTag="ListFrame"/>
+    </FrameTag>
+    <SkinName>
+      <Set IsXhtml="0" SkinName="Test1"/>
+    </SkinName>
+    <DataSource>
+      <Set DataSource="globaltravel"/>
+    </DataSource>
+    <AllowJsonExport/>
+    <ConfigMemo>
+      <Set>
+        <ConfigMemo/>
+      </Set>
+    </ConfigMemo>
+    <Cached>
+      <Set CachedSeconds="" CachedType=""/>
+    </Cached>
+    <Acl>
+      <Set Acl="com.gdxsoft.web.acl.BusinessImpl"/>
+    </Acl>
+    <Log>
+      <Set Log="com.gdxsoft.web.log.EwaScriptLog"/>
+    </Log>
+    <DescriptionSet>
+      <Set Info="CRM_COM 列表 修改" Lang="zhcn" Memo=""/>
+      <Set Info="CRM_COM 列表 修改" Lang="enus" Memo=""/>
+    </DescriptionSet>
+    <Size>
+      <Set HAlign="center" VAlign="top" Width="100%"/>
+    </Size>
+    <AddHtml>
+      <Set>
+        <Top> </Top>
+        <Bottom/>
+      </Set>
+    </AddHtml>
+    <AddScript>
+      <Set>
+        <Top/>
+        <Bottom>function initCRM_COM_LF_M() {
+    // 初始化代码
+    console.log('CRM_COM.LF.M initialized');
+}
+
+// 页面加载完成后执行
+if (typeof EWA !== 'undefined' &amp;&amp; EWA.F) {
+    EWA.F.FOS["@SYS_FRAME_UNID"].LoadedAfter = initCRM_COM_LF_M;
+}</Bottom>
+      </Set>
+    </AddScript>
+    <AddCss>
+      <Set>
+        <AddCss>.EWA_TD_L { width: 150px; }
+.EWA_TD_M { width: 300px; }</AddCss>
+      </Set>
+    </AddCss>
+    <Action>
+      <ActionSet>
+        <Set LogMsg="" Transcation="" Type="OnPageLoad">
+          <CallSet>
+            <Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+        <Set LogMsg="" Transcation="" Type="OnPagePost">
+          <CallSet>
+            <Set CallIsChk="" CallName="OnPagePost SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+      </ActionSet>
+      <SqlSet>
+        <Set Name="OnPageLoad SQL" SqlType="query">
+          <Sql>SELECT * FROM CRM_COM WHERE 1=2</Sql>
+          <CSSet/>
+        </Set>
+        <Set Name="OnPagePost SQL" SqlType="update">
+          <Sql>-- UPDATE CRM_COM SET ... WHERE ...</Sql>
+          <CSSet/>
+        </Set>
+      </SqlSet>
+      <JSONSet/>
+      <ClassSet/>
+      <XmlSet/>
+      <XmlSetData/>
+      <ScriptSet/>
+      <UrlSet/>
+      <CSSet/>
+    </Action>
+    <XItems>
+      <XItem Name="CRM_COM_ID">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_ID"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="公司 ID" Lang="zhcn" Memo=""/>
+          <Set Info="公司 ID" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="0" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="0"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_ID" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="CRM_COM_NAME">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_NAME"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="公司名称" Lang="zhcn" Memo=""/>
+          <Set Info="公司名称" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="200" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_NAME" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="CRM_COM_SNAME">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_SNAME"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="公司简称" Lang="zhcn" Memo=""/>
+          <Set Info="公司简称" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="150" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_SNAME" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="CRM_COM_CODE">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_CODE"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="公司代码" Lang="zhcn" Memo=""/>
+          <Set Info="公司代码" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="40" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_CODE" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="CRM_COM_ADDR">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_ADDR"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="公司地址" Lang="zhcn" Memo=""/>
+          <Set Info="公司地址" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="500" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_ADDR" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="CRM_COM_EMAIL">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_EMAIL"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="邮箱" Lang="zhcn" Memo=""/>
+          <Set Info="邮箱" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="100" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_EMAIL" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="CRM_COM_TELE">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_TELE"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="电话" Lang="zhcn" Memo=""/>
+          <Set Info="电话" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="100" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_TELE" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="CRM_COM_MOBILE">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_MOBILE"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="手机" Lang="zhcn" Memo=""/>
+          <Set Info="手机" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="50" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_MOBILE" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="CRM_COM_CDATE">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="datetime"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_CDATE"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="创建时间" Lang="zhcn" Memo=""/>
+          <Set Info="创建时间" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="0" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_CDATE" DataType="Date" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="CRM_COM_MDATE">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="datetime"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_MDATE"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="修改时间" Lang="zhcn" Memo=""/>
+          <Set Info="修改时间" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="0" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_MDATE" DataType="Date" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="CRM_COM_STATE">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="CRM_COM_STATE"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex="0"/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="状态" Lang="zhcn" Memo=""/>
+          <Set Info="状态" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml/>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="10" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="CRM_COM_STATE" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="butOk">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="submit"/>
+        </Tag>
+        <Name>
+          <Set Name="butOk"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue/>
+        <DescriptionSet>
+          <Set Info="确定" Lang="zhcn" Memo=""/>
+          <Set Info="Ok" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle="width:40px; text-align: center"/>
+        </ParentStyle>
+        <AttributeSet/>
+        <EventSet/>
+        <IsHtml/>
+        <OrderSearch/>
+        <MaxMinLength/>
+        <MaxMinValue/>
+        <IsMustInput/>
+        <Switch/>
+        <DataItem/>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx/>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <ImageDefault/>
+      </XItem>
+    </XItems>
+  </Page>
+  <Menus/>
+  <Charts/>
+  <PageInfos/>
+  <Workflows/>
+</EasyWebTemplate>
