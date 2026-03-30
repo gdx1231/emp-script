@@ -1695,6 +1695,11 @@ public class BusinessXmlCreator {
             String content = addConfig.getContent();
             String setMethod = addConfig.getSetMethod();
 
+            // 替换占位符 {@define.Fields.TableName} 为实际表名
+            if (content != null) {
+                content = content.replace("{@define.Fields.TableName}", this.table.getName());
+            }
+
             // 解析 XmlPath，例如 "EasyWebTemplate/Page/AddScript/Set/Bottom"
             String[] parts = xmlPath.split("/");
 
