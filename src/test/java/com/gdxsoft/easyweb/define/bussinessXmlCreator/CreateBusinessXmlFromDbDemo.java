@@ -109,26 +109,42 @@ public class CreateBusinessXmlFromDbDemo {
      * 从 SqlImporter 创建 HSQL demo 数据
      */
     private void createDemoDatabase() throws Exception {
-        // 使用已有的 SqlImporter 功能
-        // 注意：这里需要根据你项目的实际 SqlImporter 实现来调整
-        // 下面是示例代码
-        
         System.out.println("    检查 demo 数据库...");
         
-        // 如果 demo 数据库已存在，直接使用
-        // 如果不存在，使用 SqlImporter 导入
-        // SqlImporter importer = new SqlImporter();
-        // importer.importFromResource("/sql/demo_data.sql", "demo");
+        // 注意：demo 数据源需要在 ewa_conf.xml 中配置
+        // 如果 demo 数据源不存在，使用 HSQL 内存数据库创建测试数据
         
-        System.out.println("    使用已有的 demo 数据库");
+        // 检查表是否存在
+        boolean tableExists = false;
+        try {
+            String checkSql = "SELECT COUNT(*) AS CNT FROM CRM_COM";
+            com.gdxsoft.easyweb.data.DTTable checkDt = com.gdxsoft.easyweb.data.DTTable.getJdbcTable(checkSql, "demo");
+            if (checkDt.getCount() >= 0) {
+                tableExists = true;
+                System.out.println("    CRM_COM 表已存在，包含 " + checkDt.getCount() + " 条记录");
+            }
+        } catch (Exception e) {
+            // 表不存在或 demo 数据源不存在
+            System.out.println("    demo 数据源未配置或 CRM_COM 表不存在");
+            System.out.println("    提示：请在 ewa_conf.xml 中配置 demo 数据源");
+            System.out.println("    或者使用已有的数据源替换 'demo' 字符串");
+        }
+        
+        if (!tableExists) {
+            // 如果 demo 数据源不存在，使用模拟数据
+            System.out.println("    使用模拟数据创建表结构...");
+            // 这里不实际创建表，因为数据源不存在
+            // 实际使用时，请确保 demo 数据源已配置
+        }
     }
     
     /**
      * 从数据库读取表结构
+     * 使用 INFORMATION_SCHEMA 查询获取字段信息
+     * 如果数据库不存在，使用模拟数据
      */
     private Table readTableStructure() throws Exception {
-        // 使用 Table 类从数据库读取表结构
-        // 注意：根据实际 API 调整，这里使用模拟方式
+        System.out.println("    从 INFORMATION_SCHEMA 读取表结构...");
         
         Table table = new Table();
         table.initBlankFrame();
@@ -139,18 +155,137 @@ public class CreateBusinessXmlFromDbDemo {
         pk.setTableName("CRM_COM");
         table.setPk(pk);
         
-        // 添加 CRM_COM 表的字段（根据实际数据库表结构调整）
-        addField(table, "CRM_COM_ID", "INT", 0, true, true, false, "公司 ID", pk);
-        addField(table, "CRM_COM_NAME", "VARCHAR", 200, false, false, false, "公司名称", pk);
-        addField(table, "CRM_COM_SNAME", "VARCHAR", 150, false, false, true, "公司简称", pk);
-        addField(table, "CRM_COM_CODE", "VARCHAR", 40, false, false, true, "公司代码", pk);
-        addField(table, "CRM_COM_ADDR", "VARCHAR", 500, false, false, true, "公司地址", pk);
-        addField(table, "CRM_COM_EMAIL", "VARCHAR", 100, false, false, true, "邮箱", pk);
-        addField(table, "CRM_COM_TELE", "VARCHAR", 100, false, false, true, "电话", pk);
-        addField(table, "CRM_COM_MOBILE", "VARCHAR", 50, false, false, true, "手机", pk);
-        addField(table, "CRM_COM_CDATE", "TIMESTAMP", 0, false, false, true, "创建时间", pk);
-        addField(table, "CRM_COM_MDATE", "TIMESTAMP", 0, false, false, true, "修改时间", pk);
-        addField(table, "CRM_COM_STATE", "VARCHAR", 10, false, false, true, "状态", pk);
+        // 尝试从数据库读取
+        boolean fromDatabase = false;
+        try {
+            // 1. 读取字段信息
+            String sql = "SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, " +
+                         "NUMERIC_PRECISION, NUMERIC_SCALE, IS_NULLABLE, COLUMN_DEFAULT " +
+                         "FROM INFORMATION_SCHEMA.COLUMNS " +
+                         "WHERE TABLE_NAME='CRM_COM' AND TABLE_SCHEMA='PUBLIC' " +
+                         "ORDER BY ORDINAL_POSITION";
+            
+            com.gdxsoft.easyweb.data.DTTable dt = com.gdxsoft.easyweb.data.DTTable.getJdbcTable(sql, "demo");
+            
+            if (dt.getCount() > 0) {
+                fromDatabase = true;
+                System.out.println("    找到 " + dt.getCount() + " 个字段");
+                
+                // 2. 读取主键信息
+                String pkSql = "SELECT CC.COLUMN_NAME " +
+                               "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC " +
+                               "JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CC " +
+                               "ON TC.CONSTRAINT_NAME = CC.CONSTRAINT_NAME " +
+                               "WHERE TC.TABLE_NAME='CRM_COM' AND TC.CONSTRAINT_TYPE='PRIMARY KEY'";
+                
+                java.util.Set<String> pkColumns = new java.util.HashSet<>();
+                try {
+                    com.gdxsoft.easyweb.data.DTTable pkDt = com.gdxsoft.easyweb.data.DTTable.getJdbcTable(pkSql, "demo");
+                    for (int i = 0; i < pkDt.getCount(); i++) {
+                        String pkColumnName = pkDt.getRows().getRow(i).getCell("COLUMN_NAME").toString();
+                        pkColumns.add(pkColumnName);
+                        System.out.println("    主键字段：" + pkColumnName);
+                    }
+                } catch (Exception e) {
+                    System.out.println("    未找到主键信息");
+                }
+                
+                // 3. 读取自增列信息
+                String identitySql = "SELECT COLUMN_NAME " +
+                                     "FROM INFORMATION_SCHEMA.COLUMNS " +
+                                     "WHERE TABLE_NAME='CRM_COM' AND TABLE_SCHEMA='PUBLIC' " +
+                                     "AND COLUMN_DEFAULT LIKE '%auto_increment%'";
+                
+                java.util.Set<String> identityColumns = new java.util.HashSet<>();
+                try {
+                    com.gdxsoft.easyweb.data.DTTable identityDt = com.gdxsoft.easyweb.data.DTTable.getJdbcTable(identitySql, "demo");
+                    for (int i = 0; i < identityDt.getCount(); i++) {
+                        String identityColumnName = identityDt.getRows().getRow(i).getCell("COLUMN_NAME").toString();
+                        identityColumns.add(identityColumnName);
+                        System.out.println("    自增字段：" + identityColumnName);
+                    }
+                } catch (Exception e) {
+                    // 没有自增列，忽略
+                }
+                
+                // 4. 创建字段对象
+                for (int i = 0; i < dt.getCount(); i++) {
+                    com.gdxsoft.easyweb.data.DTRow row = dt.getRows().getRow(i);
+                    
+                    String columnName = row.getCell("COLUMN_NAME").toString();
+                    String dataType = row.getCell("DATA_TYPE").toString();
+                    
+                    // 获取长度
+                    String charMaxLenStr = row.getCell("CHARACTER_MAXIMUM_LENGTH").toString();
+                    String numericPrecisionStr = row.getCell("NUMERIC_PRECISION").toString();
+                    int length = 0;
+                    if (charMaxLenStr != null && !charMaxLenStr.isEmpty() && !"null".equals(charMaxLenStr)) {
+                        try {
+                            length = Integer.parseInt(charMaxLenStr);
+                        } catch (NumberFormatException e) {
+                            length = 0;
+                        }
+                    } else if (numericPrecisionStr != null && !numericPrecisionStr.isEmpty() && !"null".equals(numericPrecisionStr)) {
+                        try {
+                            length = Integer.parseInt(numericPrecisionStr);
+                        } catch (NumberFormatException e) {
+                            length = 0;
+                        }
+                    }
+                    
+                    // 判断是否允许空
+                    String isNullable = row.getCell("IS_NULLABLE").toString();
+                    boolean nullable = "YES".equals(isNullable);
+                    
+                    // 判断是否是主键
+                    boolean isPk = pkColumns.contains(columnName);
+                    
+                    // 判断是否是自增列
+                    boolean isIdentity = identityColumns.contains(columnName) || 
+                                         (columnName.endsWith("_ID") && dataType.equals("INT"));
+                    
+                    // 创建字段
+                    com.gdxsoft.easyweb.define.database.Field field = 
+                        new com.gdxsoft.easyweb.define.database.Field();
+                    field.setName(columnName);
+                    field.setDatabaseType(dataType);
+                    field.setMaxlength(length);
+                    field.setNull(nullable);
+                    field.setPk(isPk);
+                    field.setIdentity(isIdentity);
+                    field.setDescription(columnName);
+                    
+                    table.getFields().put(field.getName(), field);
+                    table.getFields().getFieldList().add(field.getName());
+                    
+                    // 如果是主键字段，添加到 Pk 对象
+                    if (isPk) {
+                        pk.getPkFields().add(field);
+                    }
+                    
+                    System.out.println("    字段：" + columnName + " (" + dataType + ", " + length + ")");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("    从数据库读取失败：" + e.getMessage());
+            System.out.println("    使用模拟数据...");
+        }
+        
+        // 如果从数据库读取失败，使用模拟数据
+        if (!fromDatabase) {
+            System.out.println("    使用模拟数据创建表结构...");
+            addField(table, "CRM_COM_ID", "INT", 0, true, true, false, "公司 ID", pk);
+            addField(table, "CRM_COM_NAME", "VARCHAR", 200, false, false, false, "公司名称", pk);
+            addField(table, "CRM_COM_SNAME", "VARCHAR", 150, false, false, true, "公司简称", pk);
+            addField(table, "CRM_COM_CODE", "VARCHAR", 40, false, false, true, "公司代码", pk);
+            addField(table, "CRM_COM_ADDR", "VARCHAR", 500, false, false, true, "公司地址", pk);
+            addField(table, "CRM_COM_EMAIL", "VARCHAR", 100, false, false, true, "邮箱", pk);
+            addField(table, "CRM_COM_TELE", "VARCHAR", 100, false, false, true, "电话", pk);
+            addField(table, "CRM_COM_MOBILE", "VARCHAR", 50, false, false, true, "手机", pk);
+            addField(table, "CRM_COM_CDATE", "TIMESTAMP", 0, false, false, true, "创建时间", pk);
+            addField(table, "CRM_COM_MDATE", "TIMESTAMP", 0, false, false, true, "修改时间", pk);
+            addField(table, "CRM_COM_STATE", "VARCHAR", 10, false, false, true, "状态", pk);
+        }
         
         return table;
     }
