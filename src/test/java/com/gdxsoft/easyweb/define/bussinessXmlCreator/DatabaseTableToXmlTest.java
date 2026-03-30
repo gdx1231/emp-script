@@ -329,4 +329,80 @@ public class DatabaseTableToXmlTest {
         System.out.println("=== ListFrame.V XML 已生成 ===");
         System.out.println("预览模式，未保存文件");
     }
+    
+    /**
+     * 测试创建 CRM_COM.xml（包含 LF.M 和 LF.V 两个例子）
+     */
+    @Test
+    public void testCreateCrmComXml_With_LF_M_And_LF_V() throws Exception {
+        // 1. 创建参数 - LF.M
+        BusinessXmlCreateParams paramsM = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "ListFrame",      // frameType
+            "M"               // operationType (Modify)
+        );
+        
+        // 2. 创建参数 - LF.V
+        BusinessXmlCreateParams paramsV = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "ListFrame",      // frameType
+            "V"               // operationType (View)
+        );
+        
+        // 3. 验证参数
+        assertTrue(paramsM.validate(), "LF.M 参数应该有效");
+        assertTrue(paramsV.validate(), "LF.V 参数应该有效");
+        
+        // 4. 创建 BusinessXmlCreator
+        BusinessXmlCreator creator = new BusinessXmlCreator(config, crmComTable);
+        
+        // 5. 生成 LF.M XML
+        String xmlLFM = creator.createShowXml(
+            paramsM.getDb(),
+            paramsM.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            paramsM.getFrameType(),
+            paramsM.getOperationType()
+        );
+        
+        // 6. 生成 LF.V XML
+        String xmlLFV = creator.createShowXml(
+            paramsV.getDb(),
+            paramsV.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            paramsV.getFrameType(),
+            paramsV.getOperationType()
+        );
+        
+        // 7. 验证 XML
+        assertNotNull(xmlLFM, "LF.M XML 不应该为空");
+        assertNotNull(xmlLFV, "LF.V XML 不应该为空");
+        
+        // 8. 验证 LF.M 内容
+        assertTrue(xmlLFM.contains("CRM_COM.LF.M"), "LF.M XML 应该包含正确的名称");
+        assertTrue(xmlLFM.contains("ListFrame"), "LF.M XML 应该包含 ListFrame");
+        assertTrue(xmlLFM.contains("butNew"), "LF.M XML 应该包含 butNew 按钮");
+        assertTrue(xmlLFM.contains("butModify"), "LF.M XML 应该包含 butModify 按钮");
+        assertTrue(xmlLFM.contains("butDelete"), "LF.M XML 应该包含 butDelete 按钮");
+        
+        // 9. 验证 LF.V 内容
+        assertTrue(xmlLFV.contains("CRM_COM.LF.V"), "LF.V XML 应该包含正确的名称");
+        assertTrue(xmlLFV.contains("ListFrame"), "LF.V XML 应该包含 ListFrame");
+        
+        // 10. 保存 XML 文件到 temp 目录
+        String outputPath = "temp/ewa_script_test/CRM_COM.xml";
+        java.nio.file.Files.createDirectories(java.nio.file.Paths.get("temp/ewa_script_test"));
+        java.nio.file.Files.write(java.nio.file.Paths.get(outputPath), 
+            ("<!-- CRM_COM.LF.M -->\n" + xmlLFM + "\n\n<!-- CRM_COM.LF.V -->\n" + xmlLFV).getBytes());
+        
+        System.out.println("=== CRM_COM.xml 已生成 ===");
+        System.out.println("路径：" + outputPath);
+        System.out.println("包含:");
+        System.out.println("  - crm_com.lf.m (列表修改模式)");
+        System.out.println("  - crm_com.lf.v (列表查看模式)");
+    }
 }
