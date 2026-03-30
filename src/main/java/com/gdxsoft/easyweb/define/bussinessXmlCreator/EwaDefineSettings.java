@@ -93,9 +93,33 @@ public class EwaDefineSettings {
     }
     
     /**
-     * 加载默认配置
+     * 加载默认配置（从配置文件读取，如果配置文件不存在则使用硬编码默认值）
      */
     private void loadDefaultSettings() {
+        // 尝试从配置文件读取
+        try {
+            InputStream is = getClass().getClassLoader()
+                .getResourceAsStream("system.xml/EwaDefineSettings.xml");
+            if (is != null) {
+                // 读取 InputStream 为 String
+                java.util.Scanner scanner = new java.util.Scanner(is, "UTF-8").useDelimiter("\\A");
+                String xmlContent = scanner.hasNext() ? scanner.next() : "";
+                is.close();
+                
+                if (!xmlContent.isEmpty()) {
+                    settingsDoc = UXml.asDocument(xmlContent);
+                    loadFrameSettings();
+                    loadListFrameSettings();
+                    loadFieldFormats();
+                    LOGGER.info("已从 EwaDefineSettings.xml 加载默认配置");
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("从配置文件加载默认配置失败，使用硬编码默认值：" + e.getMessage());
+        }
+        
+        // 硬编码默认值（后备方案）
         // Frame 隐藏规则
         frameHideSuffixes = new ArrayList<>();
         frameHideSuffixes.add("_CDATE");
