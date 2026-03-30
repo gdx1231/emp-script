@@ -259,4 +259,74 @@ public class DatabaseTableToXmlTest {
         System.out.println("=== Tree XML 预览 ===");
         System.out.println(xmlPreview.substring(0, Math.min(2000, xmlPreview.length())));
     }
+
+    /**
+     * 测试创建 CRM_COM.LF.V（列表查看模式）
+     */
+    @Test
+    public void testCreateCrmCom_LF_V_FromDatabase() throws Exception {
+        // 1. 创建参数
+        BusinessXmlCreateParams params = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "ListFrame",      // frameType
+            "V"               // operationType (View)
+        );
+        
+        // 2. 验证参数
+        assertTrue(params.validate(), "参数应该有效");
+        assertEquals("CRM_COM", params.getTableName());
+        assertEquals("ListFrame", params.getFrameType());
+        assertEquals("V", params.getOperationType());
+        
+        // 3. 创建 BusinessXmlCreator
+        BusinessXmlCreator creator = new BusinessXmlCreator(config, crmComTable);
+        
+        // 4. 生成预览 XML
+        String xmlPreview = creator.createShowXml(
+            params.getDb(),
+            params.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            params.getFrameType(),
+            params.getOperationType()
+        );
+        
+        // 5. 验证 XML
+        assertNotNull(xmlPreview);
+        assertTrue(xmlPreview.contains("CRM_COM.LF.V"), "XML 应该包含正确的名称");
+        assertTrue(xmlPreview.contains("ListFrame"), "XML 应该包含 ListFrame");
+        assertTrue(xmlPreview.contains("CRM_COM_ID"), "XML 应该包含主键字段");
+        
+        // 6. 验证 PageSize 配置
+        assertTrue(xmlPreview.contains("IsSplitPage=\"1\""), "应该启用分页");
+        assertTrue(xmlPreview.contains("KeyField=\"CRM_COM_ID\""), "应该设置主键字段");
+        assertTrue(xmlPreview.contains("PageSize=\"10\""), "应该设置每页 10 条");
+        assertTrue(xmlPreview.contains("Recycle=\"1\""), "应该启用回收站");
+        
+        // 7. 验证 ListUI 配置
+        assertTrue(xmlPreview.contains("luButtons=\"1\""), "应该显示按钮");
+        assertTrue(xmlPreview.contains("luSearch=\"1\""), "应该显示搜索");
+        assertTrue(xmlPreview.contains("luSelect=\"S\""), "应该是单选模式");
+        
+        // 8. 验证 OrderSearch 配置
+        assertTrue(xmlPreview.contains("CRM_COM_ID"), "应该包含 CRM_COM_ID 字段");
+        
+        // 9. 打印 XML 预览
+        System.out.println("=== ListFrame.V XML 预览 ===");
+        int dataItemIndex = xmlPreview.indexOf("<DataItem");
+        if (dataItemIndex > 0) {
+            String remaining = xmlPreview.substring(dataItemIndex);
+            int endIdx = remaining.indexOf("</XItems>");
+            if (endIdx > 0) {
+                System.out.println(remaining.substring(0, endIdx));
+            } else {
+                System.out.println(remaining.substring(0, Math.min(3000, remaining.length())));
+            }
+        }
+        
+        // 10. 保存完整 XML（使用临时文件）
+        System.out.println("=== ListFrame.V XML 已生成 ===");
+        System.out.println("预览模式，未保存文件");
+    }
 }
