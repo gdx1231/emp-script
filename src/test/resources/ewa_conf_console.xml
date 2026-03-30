@@ -71,7 +71,7 @@
 				maxActive="40"
 				maxIdle="120" maxWait="5000" poolType="druid"
 				driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
-				url="jdbc:sqlserver://localhost:1433;DatabaseName=OneWorld;applicationName=console">
+				url="jdbc:sqlserver://localhost:1433;DatabaseName=OneWorld;applicationName=console;trustServerCertificate=true">
 			</pool>
 		</database>
 
