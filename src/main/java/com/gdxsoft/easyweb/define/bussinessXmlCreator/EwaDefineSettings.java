@@ -64,114 +64,36 @@ public class EwaDefineSettings {
             InputStream is = getClass().getClassLoader()
                 .getResourceAsStream("system.xml/EwaDefineSettings.xml");
             if (is == null) {
-                LOGGER.warn("未找到 system.xml/EwaDefineSettings.xml，使用默认配置");
-                loadDefaultSettings();
-                return;
+                LOGGER.error("未找到 system.xml/EwaDefineSettings.xml，配置加载失败");
+                throw new RuntimeException("未找到 system.xml/EwaDefineSettings.xml 配置文件");
             }
-            
+
             // 读取 InputStream 为 String
             java.util.Scanner scanner = new java.util.Scanner(is, "UTF-8").useDelimiter("\\A");
             String xmlContent = scanner.hasNext() ? scanner.next() : "";
             is.close();
-            
+
+            if (xmlContent.isEmpty()) {
+                LOGGER.error("system.xml/EwaDefineSettings.xml 内容为空");
+                throw new RuntimeException("system.xml/EwaDefineSettings.xml 配置文件为空");
+            }
+
             settingsDoc = UXml.asDocument(xmlContent);
-            
+
             // 加载 Frame 配置
             loadFrameSettings();
-            
+
             // 加载 ListFrame 配置
             loadListFrameSettings();
-            
+
             // 加载字段格式配置
             loadFieldFormats();
-            
+
             LOGGER.info("EwaDefineSettings.xml 加载成功");
         } catch (Exception e) {
             LOGGER.error("加载 EwaDefineSettings.xml 失败：" + e.getMessage(), e);
-            loadDefaultSettings();
+            throw new RuntimeException("加载 EwaDefineSettings.xml 配置文件失败", e);
         }
-    }
-    
-    /**
-     * 加载默认配置（从配置文件读取，如果配置文件不存在则使用硬编码默认值）
-     */
-    private void loadDefaultSettings() {
-        // 尝试从配置文件读取
-        try {
-            InputStream is = getClass().getClassLoader()
-                .getResourceAsStream("system.xml/EwaDefineSettings.xml");
-            if (is != null) {
-                // 读取 InputStream 为 String
-                java.util.Scanner scanner = new java.util.Scanner(is, "UTF-8").useDelimiter("\\A");
-                String xmlContent = scanner.hasNext() ? scanner.next() : "";
-                is.close();
-                
-                if (!xmlContent.isEmpty()) {
-                    settingsDoc = UXml.asDocument(xmlContent);
-                    loadFrameSettings();
-                    loadListFrameSettings();
-                    loadFieldFormats();
-                    LOGGER.info("已从 EwaDefineSettings.xml 加载默认配置");
-                    return;
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("从配置文件加载默认配置失败，使用硬编码默认值：" + e.getMessage());
-        }
-        
-        // 硬编码默认值（后备方案）
-        // Frame 隐藏规则
-        frameHideSuffixes = new ArrayList<>();
-        frameHideSuffixes.add("_CDATE");
-        frameHideSuffixes.add("_MDATE");
-        frameHideSuffixes.add("_STATUS");
-        frameHideSuffixes.add("_STATE");
-        
-        frameHideTypes = new ArrayList<>();
-        frameHideTypes.add("IDENTITY");
-        
-        frameHideNames = new ArrayList<>();
-        
-        // Frame 页面配置
-        framePageSettings = new FramePageSettings();
-        framePageSettings.setWidth("700");
-        framePageSettings.setHiddenCaption("1");
-        framePageSettings.setFrameCols("C2");
-        framePageSettings.setHAlign("center");
-        framePageSettings.setVAlign("top");
-        
-        // ListFrame 页面配置
-        listFramePageSettings = new ListFramePageSettings();
-        listFramePageSettings.setWidth("100%");
-        listFramePageSettings.setHiddenCaption("");
-        listFramePageSettings.setFrameCols("");
-        listFramePageSettings.setHAlign("center");
-        listFramePageSettings.setVAlign("top");
-        listFramePageSettings.setPageSizeIsSplit("1");
-        listFramePageSettings.setPageSize("10");
-        listFramePageSettings.setRecycle("1");
-        listFramePageSettings.setLuButtons("1");
-        listFramePageSettings.setLuSearch("1");
-        listFramePageSettings.setLuSelect("S");
-        
-        // 字段格式默认配置
-        fieldFormats = new java.util.HashMap<>();
-        fieldFormats.put("DATETIME", "DateShortTime");
-        fieldFormats.put("TIMESTAMP", "DateShortTime");
-        fieldFormats.put("DATE", "Date");
-        fieldFormats.put("TIME", "Time");
-        fieldFormats.put("MONEY", "LeastMoney");
-        fieldFormats.put("DECIMAL", "LeastMoney");
-        fieldFormats.put("NUMERIC", "LeastMoney");
-        fieldFormats.put("INT", "Int");
-        fieldFormats.put("BIGINT", "Int");
-        fieldFormats.put("SMALLINT", "Int");
-        fieldFormats.put("TINYINT", "Int");
-        
-        numberScales = new java.util.HashMap<>();
-        numberScales.put("DECIMAL", "2");
-        numberScales.put("NUMERIC", "2");
-        numberScales.put("MONEY", "2");
     }
     
     /**
@@ -181,17 +103,16 @@ public class EwaDefineSettings {
         frameHideSuffixes = new ArrayList<>();
         frameHideTypes = new ArrayList<>();
         frameHideNames = new ArrayList<>();
-        
+
         // 查找 Frame/FieldHideRules 节点
         NodeList frameNodes = settingsDoc.getElementsByTagName("Frame");
         if (frameNodes.getLength() == 0) {
-            LOGGER.warn("未找到 Frame 配置，使用默认值");
-            loadDefaultFrameSettings();
-            return;
+            LOGGER.error("未找到 Frame 配置");
+            throw new RuntimeException("EwaDefineSettings.xml 中未找到 Frame 配置节点");
         }
-        
+
         Element frameElem = (Element) frameNodes.item(0);
-        
+
         // 加载字段隐藏规则
         NodeList hideRulesNodes = frameElem.getElementsByTagName("FieldHideRules");
         if (hideRulesNodes.getLength() > 0) {
@@ -246,24 +167,7 @@ public class EwaDefineSettings {
             framePageSettings = new FramePageSettings();
         }
     }
-    
-    /**
-     * 加载 Frame 默认配置
-     */
-    private void loadDefaultFrameSettings() {
-        frameHideSuffixes.add("_CDATE");
-        frameHideSuffixes.add("_MDATE");
-        frameHideSuffixes.add("_STATUS");
-        frameHideSuffixes.add("_STATE");
-        
-        frameHideTypes.add("IDENTITY");
-        
-        framePageSettings = new FramePageSettings();
-        framePageSettings.setWidth("700");
-        framePageSettings.setHiddenCaption("1");
-        framePageSettings.setFrameCols("C2");
-    }
-    
+
     /**
      * 加载 ListFrame 配置
      */
@@ -271,14 +175,13 @@ public class EwaDefineSettings {
         // 查找 ListFrame 节点
         NodeList listFrameNodes = settingsDoc.getElementsByTagName("ListFrame");
         if (listFrameNodes.getLength() == 0) {
-            LOGGER.warn("未找到 ListFrame 配置，使用默认值");
-            loadDefaultListFrameSettings();
-            return;
+            LOGGER.error("未找到 ListFrame 配置");
+            throw new RuntimeException("EwaDefineSettings.xml 中未找到 ListFrame 配置节点");
         }
-        
+
         Element listFrameElem = (Element) listFrameNodes.item(0);
         listFramePageSettings = new ListFramePageSettings();
-        
+
         // 加载页面配置
         NodeList pageSettingsNodes = listFrameElem.getElementsByTagName("PageSettings");
         if (pageSettingsNodes.getLength() > 0) {
@@ -314,44 +217,26 @@ public class EwaDefineSettings {
             }
         }
     }
-    
-    /**
-     * 加载 ListFrame 默认配置
-     */
-    private void loadDefaultListFrameSettings() {
-        listFramePageSettings = new ListFramePageSettings();
-        listFramePageSettings.setWidth("100%");
-        listFramePageSettings.setHiddenCaption("");
-        listFramePageSettings.setFrameCols("");
-        listFramePageSettings.setHAlign("center");
-        listFramePageSettings.setVAlign("top");
-        listFramePageSettings.setPageSizeIsSplit("1");
-        listFramePageSettings.setPageSize("10");
-        listFramePageSettings.setRecycle("1");
-        listFramePageSettings.setLuButtons("1");
-        listFramePageSettings.setLuSearch("1");
-        listFramePageSettings.setLuSelect("S");
-    }
-    
+
     /**
      * 加载字段格式配置
      */
     private void loadFieldFormats() {
         fieldFormats = new java.util.HashMap<>();
         numberScales = new java.util.HashMap<>();
-        
+
         // 加载 FieldFormats 配置
         NodeList fieldFormatsNodes = settingsDoc.getElementsByTagName("FieldFormats");
         if (fieldFormatsNodes.getLength() > 0) {
             Element fieldFormatsElem = (Element) fieldFormatsNodes.item(0);
-            
+
             // 加载 Format 配置
             NodeList formatNodes = fieldFormatsElem.getElementsByTagName("Format");
             for (int i = 0; i < formatNodes.getLength(); i++) {
                 Element formatElem = (Element) formatNodes.item(i);
                 String typeAttr = formatElem.getAttribute("Type");
                 String value = formatElem.getAttribute("Value");
-                
+
                 if (typeAttr != null && !typeAttr.isEmpty() && value != null && !value.isEmpty()) {
                     // 类型可能包含多个，用逗号分隔
                     String[] types = typeAttr.split(",");
@@ -360,14 +245,14 @@ public class EwaDefineSettings {
                     }
                 }
             }
-            
+
             // 加载 NumberScale 配置
             NodeList numberScaleNodes = fieldFormatsElem.getElementsByTagName("NumberScale");
             for (int i = 0; i < numberScaleNodes.getLength(); i++) {
                 Element numberScaleElem = (Element) numberScaleNodes.item(i);
                 String typeAttr = numberScaleElem.getAttribute("Type");
                 String value = numberScaleElem.getAttribute("Value");
-                
+
                 if (typeAttr != null && !typeAttr.isEmpty() && value != null && !value.isEmpty()) {
                     String[] types = typeAttr.split(",");
                     for (String type : types) {
@@ -375,23 +260,6 @@ public class EwaDefineSettings {
                     }
                 }
             }
-        } else {
-            // 使用默认值
-            fieldFormats.put("DATETIME", "DateShortTime");
-            fieldFormats.put("TIMESTAMP", "DateShortTime");
-            fieldFormats.put("DATE", "Date");
-            fieldFormats.put("TIME", "Time");
-            fieldFormats.put("MONEY", "LeastMoney");
-            fieldFormats.put("DECIMAL", "LeastMoney");
-            fieldFormats.put("NUMERIC", "LeastMoney");
-            fieldFormats.put("INT", "Int");
-            fieldFormats.put("BIGINT", "Int");
-            fieldFormats.put("SMALLINT", "Int");
-            fieldFormats.put("TINYINT", "Int");
-            
-            numberScales.put("DECIMAL", "2");
-            numberScales.put("NUMERIC", "2");
-            numberScales.put("MONEY", "2");
         }
     }
     
@@ -399,48 +267,48 @@ public class EwaDefineSettings {
      * 获取字段格式
      */
     public String getFormat(String fieldType) {
-        if (fieldType == null) return "";
+        if (fieldType == null || fieldFormats == null) return "";
         String typeUpper = fieldType.toUpperCase();
-        
+
         // 日期时间类型
         if (typeUpper.contains("DATETIME") || typeUpper.contains("TIMESTAMP")) {
-            return fieldFormats.getOrDefault("DATETIME", "DateShortTime");
+            return fieldFormats.getOrDefault("DATETIME", "");
         }
         if (typeUpper.contains("DATE") && !typeUpper.contains("TIME")) {
-            return fieldFormats.getOrDefault("DATE", "Date");
+            return fieldFormats.getOrDefault("DATE", "");
         }
         if (typeUpper.contains("TIME") && !typeUpper.contains("DATE")) {
-            return fieldFormats.getOrDefault("TIME", "Time");
+            return fieldFormats.getOrDefault("TIME", "");
         }
-        
+
         // 货币类型
         if (typeUpper.contains("MONEY") || typeUpper.contains("DECIMAL") || typeUpper.contains("NUMERIC")) {
-            return fieldFormats.getOrDefault("MONEY", "LeastMoney");
+            return fieldFormats.getOrDefault("MONEY", "");
         }
-        
+
         // 整数类型
         if (typeUpper.contains("INT") || typeUpper.contains("BIGINT") || 
             typeUpper.contains("SMALLINT") || typeUpper.contains("TINYINT")) {
-            return fieldFormats.getOrDefault("INT", "Int");
+            return fieldFormats.getOrDefault("INT", "");
         }
-        
+
         return "";
     }
-    
+
     /**
      * 获取数字精度
      */
     public String getNumberScale(String fieldType) {
-        if (fieldType == null) return "";
+        if (fieldType == null || numberScales == null) return "";
         String typeUpper = fieldType.toUpperCase();
-        
+
         // 检查配置
         for (String type : numberScales.keySet()) {
             if (typeUpper.contains(type)) {
                 return numberScales.get(type);
             }
         }
-        
+
         return "";
     }
     
