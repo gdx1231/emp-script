@@ -11,9 +11,9 @@ import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 
 /**
- * 从 SQL Server 数据库读取 bas_TAG 表创建 FrameTree 配置
+ * 从 SQL Server 数据库读取 bas_tag_cat 表创建 FrameTree 配置
  * 数据库：sqlserver (OneWorld)
- * 表：bas_TAG
+ * 表：bas_tag_cat (标签分类表，树形结构)
  */
 public class CreateBasTagTreeFromSqlServerTest {
 
@@ -34,12 +34,12 @@ public class CreateBasTagTreeFromSqlServerTest {
     }
 
     /**
-     * 从 SQL Server 读取 bas_TAG 表创建 Tree 配置
+     * 从 SQL Server 读取 bas_tag_cat 表创建 Tree 配置
      */
     @Test
     public void testCreateBasTagTree() throws Exception {
         System.out.println("\n========================================");
-        System.out.println("  从 SQL Server 读取 bas_TAG 创建 Tree 配置");
+        System.out.println("  从 SQL Server 读取 bas_tag_cat 创建 Tree 配置");
         System.out.println("========================================\n");
         
         // 步骤 1: 连接 SQL Server 数据库
@@ -51,37 +51,37 @@ public class CreateBasTagTreeFromSqlServerTest {
             System.out.println("  ✓ 数据库连接成功\n");
         }
         
-        // 步骤 2: 读取 bas_TAG 表结构
-        System.out.println("步骤 2: 读取 bas_TAG 表结构...");
-        basTagTable = readTableStructure(dbConnection);
+        // 步骤 2: 读取 bas_tag_cat 表结构
+        System.out.println("步骤 2: 读取 bas_tag_cat 表结构...");
+        basTagTable = readTableStructure(dbConnection, "bas_tag_cat");
         System.out.println("  表名：" + basTagTable.getName());
         System.out.println("  字段数：" + basTagTable.getFields().getFieldList().size());
         System.out.println("  主键字段：" + (basTagTable.getPk() != null ? basTagTable.getPk().getPkFields().size() : 0));
         System.out.println("  ✓ 表结构读取成功\n");
         
         // 步骤 3: 创建 Tree 配置
-        System.out.println("步骤 3: 创建 bas_TAG.T.M Tree 配置...");
+        System.out.println("步骤 3: 创建 bas_tag_cat.T.M Tree 配置...");
         String outputDir = "temp/ewa_script_test/bussiness";
         java.nio.file.Files.createDirectories(java.nio.file.Paths.get(outputDir));
         
-        // 创建 bas_TAG.xml 的根节点
+        // 创建 bas_tag_cat.xml 的根节点
         StringBuilder xmlContent = new StringBuilder();
         xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n");
         xmlContent.append("<EasyWebTemplates>\n");
         
         // 创建 Tree 配置
-        System.out.println("  创建 bas_TAG.T.M (Tree 模式)...");
+        System.out.println("  创建 bas_tag_cat.T.M (Tree 模式)...");
         String treeXml = createTreeConfig("Tree", "M");
-        xmlContent.append("  <!-- bas_tag.t.m (Tree 模式) -->\n");
+        xmlContent.append("  <!-- bas_tag_cat.t.m (Tree 模式) -->\n");
         xmlContent.append(extractEasyWebTemplate(treeXml));
         xmlContent.append("\n");
-        System.out.println("    ✓ bas_TAG.T.M 已生成");
+        System.out.println("    ✓ bas_tag_cat.T.M 已生成");
         
         // 关闭根节点
         xmlContent.append("</EasyWebTemplates>");
         
         // 保存 XML 到文件
-        String outputPath = outputDir + "/bas_TAG.xml";
+        String outputPath = outputDir + "/bas_tag_cat.xml";
         java.nio.file.Files.write(java.nio.file.Paths.get(outputPath), xmlContent.toString().getBytes("UTF-8"));
         
         System.out.println("\n========================================");
@@ -102,21 +102,21 @@ public class CreateBasTagTreeFromSqlServerTest {
             cnn.setConfigName("sqlserver");
             cnn.connect();
             
-            // 检查 bas_TAG 表是否存在
+            // 检查 bas_tag_cat 表是否存在
             try {
-                String checkSql = "SELECT COUNT(*) AS CNT FROM bas_TAG";
+                String checkSql = "SELECT COUNT(*) AS CNT FROM bas_tag_cat";
                 DTTable checkDt = DTTable.getJdbcTable(checkSql, cnn);
                 if (checkDt.getCount() >= 0) {
-                    System.out.println("    bas_TAG 表已存在，包含 " + checkDt.getCount() + " 条记录");
+                    System.out.println("    bas_tag_cat 表已存在，包含 " + checkDt.getCount() + " 条记录");
                 }
             } catch (Exception e) {
-                System.out.println("    警告：bas_TAG 表不存在或无法访问：" + e.getMessage());
+                System.out.println("    警告：bas_tag_cat 表不存在或无法访问：" + e.getMessage());
             }
             
             return cnn;
         } catch (Exception e) {
             System.out.println("    SQL Server 连接失败：" + e.getMessage());
-            System.out.println("    使用模拟的 bas_TAG 表结构");
+            System.out.println("    使用模拟的 bas_tag_cat 表结构");
             return null;
         }
     }
@@ -124,12 +124,14 @@ public class CreateBasTagTreeFromSqlServerTest {
     /**
      * 从数据库读取表结构
      * 如果数据库连接失败，使用模拟的表结构
+     * @param cnn 数据库连接
+     * @param tableName 表名
      */
-    private Table readTableStructure(DataConnection cnn) throws Exception {
+    private Table readTableStructure(DataConnection cnn, String tableName) throws Exception {
         if (cnn == null || cnn.getConnection() == null) {
-            // 使用模拟的 bas_TAG 表结构
-            System.out.println("    创建模拟的 bas_TAG 表结构...");
-            return createMockBasTagTable();
+            // 使用模拟的 bas_tag_cat 表结构
+            System.out.println("    创建模拟的 " + tableName + " 表结构...");
+            return createMockTable(tableName);
         }
         
         System.out.println("    使用 Table 类读取表结构...");
@@ -138,10 +140,10 @@ public class CreateBasTagTreeFromSqlServerTest {
             // SQL Server 的 schema 是 dbo
             String schemaName = "dbo";
             String configName = cnn.getCurrentConfig().getName();
-            System.out.println("    Config: " + configName + ", Schema: " + schemaName);
+            System.out.println("    Config: " + configName + ", Schema: " + schemaName + ", Table: " + tableName);
             
             // 使用 Table 的构造函数读取表结构
-            Table table = new Table("bas_TAG", schemaName, configName);
+            Table table = new Table(tableName, schemaName, configName);
             table.init();  // 初始化表结构
             
             System.out.println("    表名：" + table.getName());
@@ -151,14 +153,70 @@ public class CreateBasTagTreeFromSqlServerTest {
             return table;
         } catch (Exception e) {
             System.out.println("    读取表结构失败：" + e.getMessage());
-            System.out.println("    使用模拟的 bas_TAG 表结构...");
+            System.out.println("    使用模拟的 " + tableName + " 表结构...");
+            return createMockTable(tableName);
+        }
+    }
+    
+    /**
+     * 创建模拟的表结构
+     * 根据表名创建对应的模拟结构
+     */
+    private Table createMockTable(String tableName) {
+        if ("bas_tag_cat".equalsIgnoreCase(tableName)) {
+            return createMockBasTagCatTable();
+        } else {
             return createMockBasTagTable();
         }
     }
     
     /**
+     * 创建模拟的 bas_tag_cat 表结构
+     * bas_tag_cat 是标签分类表，具有树形结构
+     */
+    private Table createMockBasTagCatTable() {
+        Table table = new Table();
+        table.initBlankFrame();
+        table.setName("bas_tag_cat");
+        
+        // 创建主键对象
+        TablePk pk = new TablePk();
+        pk.setTableName("bas_tag_cat");
+        table.setPk(pk);
+        
+        // 添加 bas_tag_cat 表的字段（树形结构）
+        // BTC_ID: 主键
+        addField(table, "BTC_ID", "int", 0, true, true, false, "分类 ID", pk);
+        // BTC_PID: 父 ID (树形结构)
+        addField(table, "BTC_PID", "int", 0, false, false, true, "父分类 ID", pk);
+        // BTC_LVL: 层级
+        addField(table, "BTC_LVL", "int", 0, false, false, true, "层级", pk);
+        // BTC_ORD: 排序
+        addField(table, "BTC_ORD", "int", 0, false, false, true, "排序", pk);
+        // BTC_NAME: 名称
+        addField(table, "BTC_NAME", "nvarchar", 100, false, false, false, "分类名称", pk);
+        // BTC_NAME_EN: 英文名称
+        addField(table, "BTC_NAME_EN", "nvarchar", 100, false, false, true, "分类英文名称", pk);
+        // BTC_CODE: 编码
+        addField(table, "BTC_CODE", "nvarchar", 50, false, false, true, "分类编码", pk);
+        // BTC_STATUS: 状态
+        addField(table, "BTC_STATUS", "nvarchar", 20, false, false, true, "状态", pk);
+        // BTC_CDATE: 创建时间
+        addField(table, "BTC_CDATE", "datetime", 0, false, false, true, "创建时间", pk);
+        // BTC_MDATE: 修改时间
+        addField(table, "BTC_MDATE", "datetime", 0, false, false, true, "修改时间", pk);
+        // BTC_MEMO: 备注
+        addField(table, "BTC_MEMO", "nvarchar", 500, false, false, true, "备注", pk);
+        
+        System.out.println("    模拟表结构创建成功");
+        System.out.println("    字段数：" + table.getFields().getFieldList().size());
+        System.out.println("    主键字段：" + pk.getPkFields().size());
+        
+        return table;
+    }
+    
+    /**
      * 创建模拟的 bas_TAG 表结构
-     * 根据 bas_TAG 表的实际结构定义
      */
     private Table createMockBasTagTable() {
         Table table = new Table();
@@ -231,7 +289,7 @@ public class CreateBasTagTreeFromSqlServerTest {
     private String createTreeConfig(String frameType, String operationType) throws Exception {
         // 创建 BusinessXmlCreator
         BusinessXmlCreator creator = BusinessXmlCreator.create(config, basTagTable, frameType);
-        return creator.createShowXml("sqlserver", "bas_TAG", null, null, frameType, operationType);
+        return creator.createShowXml("sqlserver", basTagTable.getName(), null, null, frameType, operationType);
     }
     
     /**
