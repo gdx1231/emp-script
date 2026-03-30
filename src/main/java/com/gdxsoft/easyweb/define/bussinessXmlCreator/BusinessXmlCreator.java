@@ -234,7 +234,7 @@ public class BusinessXmlCreator {
             tag.appendChild(tagSet);
         }
         
-        // Frame 模式设置页面宽度为 700
+        // Frame 模式设置页面配置
         if (frameType.equalsIgnoreCase("Frame")) {
             org.w3c.dom.Element size = doc.createElement("Size");
             page.appendChild(size);
@@ -242,6 +242,8 @@ public class BusinessXmlCreator {
             sizeSet.setAttribute("HAlign", "center");
             sizeSet.setAttribute("VAlign", "top");
             sizeSet.setAttribute("Width", "700");
+            sizeSet.setAttribute("HiddenCaption", "1");
+            sizeSet.setAttribute("FrameCols", "C2");
             size.appendChild(sizeSet);
         }
 
@@ -447,7 +449,7 @@ public class BusinessXmlCreator {
     
     /**
      * 判断字段是否应该隐藏
-     * **_CDATE, **_MDATE, **_STATUS 字段以及自增主键不展示
+     * **_CDATE, **_MDATE, **_STATUS, **_STATE 字段以及自增主键不展示
      */
     private boolean shouldHideField(com.gdxsoft.easyweb.define.database.Field field) {
         String fieldName = field.getName().toUpperCase();
@@ -457,9 +459,9 @@ public class BusinessXmlCreator {
             return true;
         }
         
-        // **_CDATE, **_MDATE, **_STATUS 字段不展示（仅在 SQL 中出现）
+        // **_CDATE, **_MDATE, **_STATUS, **_STATE 字段不展示（仅在 SQL 中出现）
         if (fieldName.endsWith("_CDATE") || fieldName.endsWith("_MDATE") || 
-            fieldName.endsWith("_STATUS")) {
+            fieldName.endsWith("_STATUS") || fieldName.endsWith("_STATE")) {
             return true;
         }
         
