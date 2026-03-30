@@ -3,13 +3,22 @@ package com.gdxsoft.easyweb.define.bussinessXmlCreator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.data.DTRow;
+import com.gdxsoft.easyweb.define.database.Field;
 import com.gdxsoft.easyweb.define.database.Table;
+import com.gdxsoft.easyweb.define.database.TablePk;
 import com.gdxsoft.easyweb.script.template.EwaConfig;
+import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.testutils.SqlImporter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 从数据库表创建业务 XML 配置
  * 流程:
- * 1. 从 SqlImporter 创建 HSQL demo 数据
+ * 1. 从 SqlImporter 创建 HSQL demo 数据（保持连接打开）
  * 2. 读取 CRM_COM 表结构
  * 3. 创建 3 个业务 XML 配置 (LF.M, LF.V, F.NM)
  * 4. 合并到 CRM_COM.xml 文件
@@ -18,13 +27,14 @@ public class CreateBusinessXmlFromDbDemo {
 
     private static EwaConfig config;
     private static Table crmComTable;
+    private static DataConnection dbConnection;
 
     @BeforeAll
     public static void setUp() {
         try {
             // 加载 EwaConfig
             config = EwaConfig.instance();
-            System.out.println("=== EwaConfig 加载成功 ===");
+            System.out.println("=== EwaConfig 加载成功 ===\n");
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("初始化失败：" + e.getMessage());
@@ -33,7 +43,7 @@ public class CreateBusinessXmlFromDbDemo {
 
     /**
      * 完整流程:
-     * 1. 从 SqlImporter 创建 HSQL demo 数据
+     * 1. 从 SqlImporter 创建 HSQL demo 数据（保持连接打开）
      * 2. 读取 CRM_COM 表结构
      * 3. 创建 3 个业务 XML 配置
      */
@@ -43,14 +53,18 @@ public class CreateBusinessXmlFromDbDemo {
         System.out.println("  从 demo 数据库创建业务 XML 配置");
         System.out.println("========================================\n");
         
-        // 步骤 1: 从 SqlImporter 创建 HSQL demo 数据
+        // 步骤 1: 从 SqlImporter 创建 HSQL demo 数据（保持连接打开）
         System.out.println("步骤 1: 从 SqlImporter 创建 HSQL demo 数据...");
-        createDemoDatabase();
-        System.out.println("  ✓ demo 数据库创建成功\n");
+        dbConnection = createDemoDatabase();
+        if (dbConnection == null) {
+            System.out.println("  ✗ demo 数据库创建失败\n");
+            return;
+        }
+        System.out.println("  ✓ demo 数据库创建成功，连接保持打开\n");
         
         // 步骤 2: 读取 CRM_COM 表结构
         System.out.println("步骤 2: 读取 CRM_COM 表结构...");
-        crmComTable = readTableStructure();
+        crmComTable = readTableStructure(dbConnection);
         System.out.println("  表名：" + crmComTable.getName());
         System.out.println("  字段数：" + crmComTable.getFields().getFieldList().size());
         System.out.println("  主键字段：" + (crmComTable.getPk() != null ? crmComTable.getPk().getPkFields().size() : 0));
@@ -103,47 +117,40 @@ public class CreateBusinessXmlFromDbDemo {
         System.out.println("输出文件：" + outputPath);
         System.out.println("文件大小：" + xmlContent.length() + " 字节");
         System.out.println();
+        
+        // 注意：不要关闭数据库连接，留给其他测试使用
+        // if (dbConnection != null) {
+        //     dbConnection.close();
+        // }
     }
     
     /**
-     * 从 SqlImporter 创建 HSQL demo 数据
+     * 从 SqlImporter 创建 HSQL demo 数据（保持连接打开）
+     * @return 保持打开的数据库连接
      */
-    private void createDemoDatabase() throws Exception {
-        System.out.println("    检查 demo 数据库...");
+    private DataConnection createDemoDatabase() throws Exception {
+        System.out.println("    开始导入 SQL 文件...");
         
-        // 注意：demo 数据源需要在 ewa_conf.xml 中配置
-        // 如果 demo 数据源不存在，使用 HSQL 内存数据库创建测试数据
+        String sqlFile = "src/test/resources/sqls/demo_crm_hsql.sql";
+        System.out.println("    SQL 文件路径：" + sqlFile);
         
-        // 检查表是否存在
-        boolean tableExists = false;
-        try {
-            String checkSql = "SELECT COUNT(*) AS CNT FROM CRM_COM";
-            com.gdxsoft.easyweb.data.DTTable checkDt = com.gdxsoft.easyweb.data.DTTable.getJdbcTable(checkSql, "demo");
-            if (checkDt.getCount() >= 0) {
-                tableExists = true;
-                System.out.println("    CRM_COM 表已存在，包含 " + checkDt.getCount() + " 条记录");
-            }
-        } catch (Exception e) {
-            // 表不存在或 demo 数据源不存在
-            System.out.println("    demo 数据源未配置或 CRM_COM 表不存在");
-            System.out.println("    提示：请在 ewa_conf.xml 中配置 demo 数据源");
-            System.out.println("    或者使用已有的数据源替换 'demo' 字符串");
-        }
+        // 使用 SqlImporter 导入 SQL 文件并保持连接打开
+        DataConnection cnn = SqlImporter.importSqlFileKeepConnection("demo", sqlFile);
         
-        if (!tableExists) {
-            // 如果 demo 数据源不存在，使用模拟数据
-            System.out.println("    使用模拟数据创建表结构...");
-            // 这里不实际创建表，因为数据源不存在
-            // 实际使用时，请确保 demo 数据源已配置
-        }
+        // 验证 CRM_COM 表是否存在
+        String checkSql = "SELECT COUNT(*) AS CNT FROM CRM_COM";
+        DTTable checkDt = DTTable.getJdbcTable(checkSql, cnn);
+        System.out.println("    CRM_COM 表记录数：" + checkDt.getCount());
+        
+        return cnn;
     }
     
     /**
      * 从数据库读取表结构
      * 使用 INFORMATION_SCHEMA 查询获取字段信息
-     * 如果数据库不存在，使用模拟数据
+     * @param cnn 数据库连接（保持打开）
      */
-    private Table readTableStructure() throws Exception {
+    private Table readTableStructure(DataConnection cnn) throws Exception {
         System.out.println("    从 INFORMATION_SCHEMA 读取表结构...");
         
         Table table = new Table();
@@ -151,166 +158,120 @@ public class CreateBusinessXmlFromDbDemo {
         table.setName("CRM_COM");
         
         // 创建主键对象
-        com.gdxsoft.easyweb.define.database.TablePk pk = new com.gdxsoft.easyweb.define.database.TablePk();
+        TablePk pk = new TablePk();
         pk.setTableName("CRM_COM");
         table.setPk(pk);
         
-        // 尝试从数据库读取
-        boolean fromDatabase = false;
-        try {
-            // 1. 读取字段信息
-            String sql = "SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, " +
-                         "NUMERIC_PRECISION, NUMERIC_SCALE, IS_NULLABLE, COLUMN_DEFAULT " +
-                         "FROM INFORMATION_SCHEMA.COLUMNS " +
-                         "WHERE TABLE_NAME='CRM_COM' AND TABLE_SCHEMA='PUBLIC' " +
-                         "ORDER BY ORDINAL_POSITION";
-            
-            com.gdxsoft.easyweb.data.DTTable dt = com.gdxsoft.easyweb.data.DTTable.getJdbcTable(sql, "demo");
-            
-            if (dt.getCount() > 0) {
-                fromDatabase = true;
-                System.out.println("    找到 " + dt.getCount() + " 个字段");
-                
-                // 2. 读取主键信息
-                String pkSql = "SELECT CC.COLUMN_NAME " +
-                               "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC " +
-                               "JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CC " +
-                               "ON TC.CONSTRAINT_NAME = CC.CONSTRAINT_NAME " +
-                               "WHERE TC.TABLE_NAME='CRM_COM' AND TC.CONSTRAINT_TYPE='PRIMARY KEY'";
-                
-                java.util.Set<String> pkColumns = new java.util.HashSet<>();
-                try {
-                    com.gdxsoft.easyweb.data.DTTable pkDt = com.gdxsoft.easyweb.data.DTTable.getJdbcTable(pkSql, "demo");
-                    for (int i = 0; i < pkDt.getCount(); i++) {
-                        String pkColumnName = pkDt.getRows().getRow(i).getCell("COLUMN_NAME").toString();
-                        pkColumns.add(pkColumnName);
-                        System.out.println("    主键字段：" + pkColumnName);
-                    }
-                } catch (Exception e) {
-                    System.out.println("    未找到主键信息");
-                }
-                
-                // 3. 读取自增列信息
-                String identitySql = "SELECT COLUMN_NAME " +
-                                     "FROM INFORMATION_SCHEMA.COLUMNS " +
-                                     "WHERE TABLE_NAME='CRM_COM' AND TABLE_SCHEMA='PUBLIC' " +
-                                     "AND COLUMN_DEFAULT LIKE '%auto_increment%'";
-                
-                java.util.Set<String> identityColumns = new java.util.HashSet<>();
-                try {
-                    com.gdxsoft.easyweb.data.DTTable identityDt = com.gdxsoft.easyweb.data.DTTable.getJdbcTable(identitySql, "demo");
-                    for (int i = 0; i < identityDt.getCount(); i++) {
-                        String identityColumnName = identityDt.getRows().getRow(i).getCell("COLUMN_NAME").toString();
-                        identityColumns.add(identityColumnName);
-                        System.out.println("    自增字段：" + identityColumnName);
-                    }
-                } catch (Exception e) {
-                    // 没有自增列，忽略
-                }
-                
-                // 4. 创建字段对象
-                for (int i = 0; i < dt.getCount(); i++) {
-                    com.gdxsoft.easyweb.data.DTRow row = dt.getRows().getRow(i);
-                    
-                    String columnName = row.getCell("COLUMN_NAME").toString();
-                    String dataType = row.getCell("DATA_TYPE").toString();
-                    
-                    // 获取长度
-                    String charMaxLenStr = row.getCell("CHARACTER_MAXIMUM_LENGTH").toString();
-                    String numericPrecisionStr = row.getCell("NUMERIC_PRECISION").toString();
-                    int length = 0;
-                    if (charMaxLenStr != null && !charMaxLenStr.isEmpty() && !"null".equals(charMaxLenStr)) {
-                        try {
-                            length = Integer.parseInt(charMaxLenStr);
-                        } catch (NumberFormatException e) {
-                            length = 0;
-                        }
-                    } else if (numericPrecisionStr != null && !numericPrecisionStr.isEmpty() && !"null".equals(numericPrecisionStr)) {
-                        try {
-                            length = Integer.parseInt(numericPrecisionStr);
-                        } catch (NumberFormatException e) {
-                            length = 0;
-                        }
-                    }
-                    
-                    // 判断是否允许空
-                    String isNullable = row.getCell("IS_NULLABLE").toString();
-                    boolean nullable = "YES".equals(isNullable);
-                    
-                    // 判断是否是主键
-                    boolean isPk = pkColumns.contains(columnName);
-                    
-                    // 判断是否是自增列
-                    boolean isIdentity = identityColumns.contains(columnName) || 
-                                         (columnName.endsWith("_ID") && dataType.equals("INT"));
-                    
-                    // 创建字段
-                    com.gdxsoft.easyweb.define.database.Field field = 
-                        new com.gdxsoft.easyweb.define.database.Field();
-                    field.setName(columnName);
-                    field.setDatabaseType(dataType);
-                    field.setMaxlength(length);
-                    field.setNull(nullable);
-                    field.setPk(isPk);
-                    field.setIdentity(isIdentity);
-                    field.setDescription(columnName);
-                    
-                    table.getFields().put(field.getName(), field);
-                    table.getFields().getFieldList().add(field.getName());
-                    
-                    // 如果是主键字段，添加到 Pk 对象
-                    if (isPk) {
-                        pk.getPkFields().add(field);
-                    }
-                    
-                    System.out.println("    字段：" + columnName + " (" + dataType + ", " + length + ")");
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("    从数据库读取失败：" + e.getMessage());
-            System.out.println("    使用模拟数据...");
+        // 1. 读取字段信息
+        String sql = "SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, " +
+                     "NUMERIC_PRECISION, NUMERIC_SCALE, IS_NULLABLE, COLUMN_DEFAULT " +
+                     "FROM INFORMATION_SCHEMA.COLUMNS " +
+                     "WHERE TABLE_NAME='CRM_COM' AND TABLE_SCHEMA='PUBLIC' " +
+                     "ORDER BY ORDINAL_POSITION";
+        
+        DTTable dt = DTTable.getJdbcTable(sql, cnn);
+        
+        if (dt.getCount() == 0) {
+            throw new RuntimeException("CRM_COM 表不存在或没有字段");
         }
         
-        // 如果从数据库读取失败，使用模拟数据
-        if (!fromDatabase) {
-            System.out.println("    使用模拟数据创建表结构...");
-            addField(table, "CRM_COM_ID", "INT", 0, true, true, false, "公司 ID", pk);
-            addField(table, "CRM_COM_NAME", "VARCHAR", 200, false, false, false, "公司名称", pk);
-            addField(table, "CRM_COM_SNAME", "VARCHAR", 150, false, false, true, "公司简称", pk);
-            addField(table, "CRM_COM_CODE", "VARCHAR", 40, false, false, true, "公司代码", pk);
-            addField(table, "CRM_COM_ADDR", "VARCHAR", 500, false, false, true, "公司地址", pk);
-            addField(table, "CRM_COM_EMAIL", "VARCHAR", 100, false, false, true, "邮箱", pk);
-            addField(table, "CRM_COM_TELE", "VARCHAR", 100, false, false, true, "电话", pk);
-            addField(table, "CRM_COM_MOBILE", "VARCHAR", 50, false, false, true, "手机", pk);
-            addField(table, "CRM_COM_CDATE", "TIMESTAMP", 0, false, false, true, "创建时间", pk);
-            addField(table, "CRM_COM_MDATE", "TIMESTAMP", 0, false, false, true, "修改时间", pk);
-            addField(table, "CRM_COM_STATE", "VARCHAR", 10, false, false, true, "状态", pk);
+        System.out.println("    找到 " + dt.getCount() + " 个字段");
+        
+        // 2. 读取主键信息
+        String pkSql = "SELECT CC.COLUMN_NAME " +
+                       "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC " +
+                       "JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CC " +
+                       "ON TC.CONSTRAINT_NAME = CC.CONSTRAINT_NAME " +
+                       "WHERE TC.TABLE_NAME='CRM_COM' AND TC.CONSTRAINT_TYPE='PRIMARY KEY'";
+        
+        Set<String> pkColumns = new HashSet<>();
+        try {
+            DTTable pkDt = DTTable.getJdbcTable(pkSql, cnn);
+            for (int i = 0; i < pkDt.getCount(); i++) {
+                String pkColumnName = pkDt.getRows().getRow(i).getCell("COLUMN_NAME").toString();
+                pkColumns.add(pkColumnName);
+                System.out.println("    主键字段：" + pkColumnName);
+            }
+        } catch (Exception e) {
+            System.out.println("    未找到主键信息");
+        }
+        
+        // 3. 读取自增列信息
+        String identitySql = "SELECT COLUMN_NAME " +
+                             "FROM INFORMATION_SCHEMA.COLUMNS " +
+                             "WHERE TABLE_NAME='CRM_COM' AND TABLE_SCHEMA='PUBLIC' " +
+                             "AND COLUMN_DEFAULT LIKE '%GENERATED%'";
+        
+        Set<String> identityColumns = new HashSet<>();
+        try {
+            DTTable identityDt = DTTable.getJdbcTable(identitySql, cnn);
+            for (int i = 0; i < identityDt.getCount(); i++) {
+                String identityColumnName = identityDt.getRows().getRow(i).getCell("COLUMN_NAME").toString();
+                identityColumns.add(identityColumnName);
+                System.out.println("    自增字段：" + identityColumnName);
+            }
+        } catch (Exception e) {
+            // 没有自增列，忽略
+        }
+        
+        // 4. 创建字段对象
+        for (int i = 0; i < dt.getCount(); i++) {
+            DTRow row = dt.getRows().getRow(i);
+            
+            String columnName = row.getCell("COLUMN_NAME").toString();
+            String dataType = row.getCell("DATA_TYPE").toString();
+            
+            // 获取长度
+            String charMaxLenStr = row.getCell("CHARACTER_MAXIMUM_LENGTH").toString();
+            String numericPrecisionStr = row.getCell("NUMERIC_PRECISION").toString();
+            int length = 0;
+            if (charMaxLenStr != null && !charMaxLenStr.isEmpty() && !"null".equals(charMaxLenStr)) {
+                try {
+                    length = Integer.parseInt(charMaxLenStr);
+                } catch (NumberFormatException e) {
+                    length = 0;
+                }
+            } else if (numericPrecisionStr != null && !numericPrecisionStr.isEmpty() && !"null".equals(numericPrecisionStr)) {
+                try {
+                    length = Integer.parseInt(numericPrecisionStr);
+                } catch (NumberFormatException e) {
+                    length = 0;
+                }
+            }
+            
+            // 判断是否允许空
+            String isNullable = row.getCell("IS_NULLABLE").toString();
+            boolean nullable = "YES".equals(isNullable);
+            
+            // 判断是否是主键
+            boolean isPk = pkColumns.contains(columnName);
+            
+            // 判断是否是自增列
+            boolean isIdentity = identityColumns.contains(columnName) || 
+                                 (columnName.endsWith("_ID") && dataType.equals("INT"));
+            
+            // 创建字段
+            Field field = new Field();
+            field.setName(columnName);
+            field.setDatabaseType(dataType);
+            field.setMaxlength(length);
+            field.setNull(nullable);
+            field.setPk(isPk);
+            field.setIdentity(isIdentity);
+            field.setDescription(columnName);
+            
+            table.getFields().put(field.getName(), field);
+            table.getFields().getFieldList().add(field.getName());
+            
+            // 如果是主键字段，添加到 Pk 对象
+            if (isPk) {
+                pk.getPkFields().add(field);
+            }
+            
+            System.out.println("    字段：" + columnName + " (" + dataType + ", " + length + ")");
         }
         
         return table;
-    }
-    
-    /**
-     * 添加字段辅助方法
-     */
-    private void addField(Table table, String name, String type, int length, 
-                          boolean isPk, boolean isIdentity, boolean nullable, String comment, 
-                          com.gdxsoft.easyweb.define.database.TablePk pk) {
-        com.gdxsoft.easyweb.define.database.Field field = new com.gdxsoft.easyweb.define.database.Field();
-        field.setName(name);
-        field.setDatabaseType(type);
-        field.setMaxlength(length);
-        field.setPk(isPk);
-        field.setIdentity(isIdentity);
-        field.setNull(nullable);
-        field.setDescription(comment);
-        
-        table.getFields().put(field.getName(), field);
-        table.getFields().getFieldList().add(field.getName());
-        
-        if (isPk && pk != null) {
-            pk.getPkFields().add(field);
-        }
     }
     
     /**
