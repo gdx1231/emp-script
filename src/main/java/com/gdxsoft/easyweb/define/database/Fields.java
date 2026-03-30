@@ -413,13 +413,21 @@ public class Fields extends HashMap<String, Field> {
 	
 	/**
 	 * 获取 Tree 新增节点 SQL
-	 * @return INSERT INTO table (pid, level, name) VALUES (@pid, @level, @name)
+	 * 参考 SQL Server 模板:
+	 * INSERT INTO table (name, pid, level, order, cdate, mdate, status)
+	 * SELECT @text, ISNULL(@parent_key,0), ISNULL(max(level),-1)+1, isnull(max(order),0)+1, @date, @date, 'USED'
+	 * FROM table WHERE pid = @parent_key
+	 * @return INSERT INTO table (...) SELECT ... FROM table WHERE ...
 	 */
 	public String GetSqlTreeNodeNew() {
 		String pkField = getPrimaryKeyField();
 		String parentField = findFieldBySuffix("_PID");
 		String levelField = findFieldBySuffix("_LVL");
+		String orderField = findFieldBySuffix("_ORD");
 		String nameField = findFieldBySuffix("_NAME");
+		String cdateField = findFieldBySuffix("_CDATE");
+		String mdateField = findFieldBySuffix("_MDATE");
+		String statusField = findFieldBySuffix("_STATUS");
 		
 		if (pkField == null || pkField.isEmpty()) {
 			return "-- Primary key not found";
@@ -429,25 +437,81 @@ public class Fields extends HashMap<String, Field> {
 		sql.append("INSERT INTO ").append(this._TableName).append(" (");
 		
 		ArrayList<String> fields = new ArrayList<String>();
-		ArrayList<String> values = new ArrayList<String>();
+		ArrayList<String> selectFields = new ArrayList<String>();
+		ArrayList<String> fromTables = new ArrayList<String>();
+		ArrayList<String> whereConditions = new ArrayList<String>();
 		
-		if (parentField != null) {
-			fields.add(parentField);
-			values.add("@" + parentField);
-		}
-		if (levelField != null) {
-			fields.add(levelField);
-			values.add("@" + levelField);
-		}
+		// 名称字段
 		if (nameField != null) {
 			fields.add(nameField);
-			values.add("@" + nameField);
+			selectFields.add("@EWA_TREE_TEXT " + nameField);
 		}
 		
+		// 父 ID 字段
+		if (parentField != null) {
+			fields.add(parentField);
+			selectFields.add("ISNULL(@EWA_TREE_PARENT_KEY,0) " + parentField);
+		}
+		
+		// 层级字段
+		if (levelField != null) {
+			fields.add(levelField);
+			selectFields.add("ISNULL(MAX(pp." + levelField + "),-1)+1 " + levelField);
+			fromTables.add(this._TableName + " pp");
+		}
+		
+		// 排序字段
+		if (orderField != null) {
+			fields.add(orderField);
+			selectFields.add("ISNULL(MAX(pc." + orderField + "),0)+1 " + orderField);
+			if (fromTables.isEmpty()) {
+				fromTables.add(this._TableName + " pc");
+			} else {
+				// 使用 LEFT JOIN
+				String joinTable = this._TableName + " pc ON pc." + parentField + "=pp." + pkField;
+				if (!fromTables.get(0).contains("JOIN")) {
+					fromTables.set(0, fromTables.get(0) + " LEFT JOIN " + joinTable);
+				}
+			}
+		}
+		
+		// 创建时间字段
+		if (cdateField != null) {
+			fields.add(cdateField);
+			selectFields.add("@SYS_DATE " + cdateField);
+		}
+		
+		// 修改时间字段
+		if (mdateField != null) {
+			fields.add(mdateField);
+			selectFields.add("@SYS_DATE " + mdateField);
+		}
+		
+		// 状态字段
+		if (statusField != null) {
+			fields.add(statusField);
+			selectFields.add("'USED' " + statusField);
+		}
+		
+		// WHERE 条件
+		if (parentField != null && !fromTables.isEmpty()) {
+			whereConditions.add("WHERE pp." + parentField + "= @EWA_TREE_PARENT_KEY");
+		}
+		
+		// 构建 SQL
 		sql.append(String.join(", ", fields));
-		sql.append(") VALUES (");
-		sql.append(String.join(", ", values));
-		sql.append(")");
+		sql.append(") \nSELECT \t ");
+		sql.append(String.join(",\n\t ", selectFields));
+		
+		if (!fromTables.isEmpty()) {
+			sql.append("\nFROM ").append(String.join(" ", fromTables));
+		}
+		
+		if (!whereConditions.isEmpty()) {
+			sql.append("\n").append(String.join(" ", whereConditions));
+		}
+		
+		sql.append("\n-- auto ").append(pkField);
 		
 		return sql.toString();
 	}
