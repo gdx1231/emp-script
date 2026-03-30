@@ -354,19 +354,30 @@ public class Fields extends HashMap<String, Field> {
 	
 	/**
 	 * 获取 Tree 加载 SQL
-	 * @return SELECT * FROM table ORDER BY level, order
+	 * 如果存在 _STATUS 或 _STATE 字段，添加 WHERE status='USED' 条件
+	 * @return SELECT * FROM table WHERE status='USED' ORDER BY level, order
 	 */
 	public String GetSqlTreeLoad() {
 		String tableName = this._TableName;
 		String levelField = findFieldBySuffix("_LVL");
 		String orderField = findFieldBySuffix("_ORD");
+		String statusField = findStatusField();
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT * FROM ").append(tableName);
 		
+		// 如果有状态字段，添加 WHERE 条件
+		if (statusField != null) {
+			sql.append(" WHERE ").append(statusField).append("='USED'");
+		}
+		
 		// 添加 ORDER BY
 		if (levelField != null || orderField != null) {
-			sql.append(" ORDER BY ");
+			if (statusField == null) {
+				sql.append(" ORDER BY ");
+			} else {
+				sql.append(" ORDER BY ");
+			}
 			if (levelField != null) {
 				sql.append(levelField);
 				if (orderField != null) {
@@ -382,13 +393,22 @@ public class Fields extends HashMap<String, Field> {
 	
 	/**
 	 * 获取 Tree 删除节点 SQL
-	 * @return DELETE FROM table WHERE id = @id
+	 * 如果存在 _STATUS 或 _STATE 字段，改为 UPDATE status='DEL' 而不是 DELETE
+	 * @return DELETE FROM table WHERE id = @id 或 UPDATE table SET status='DEL' WHERE id = @id
 	 */
 	public String GetSqlTreeNodeDelete() {
 		String pkField = getPrimaryKeyField();
+		String statusField = findStatusField();
+		
 		if (pkField == null || pkField.isEmpty()) {
 			return "-- Primary key not found";
 		}
+		
+		// 如果有状态字段，使用 UPDATE 而不是 DELETE
+		if (statusField != null) {
+			return "UPDATE " + this._TableName + " SET " + statusField + "='DEL' WHERE " + pkField + " = @" + pkField;
+		}
+		
 		return "DELETE FROM " + this._TableName + " WHERE " + pkField + " = @" + pkField;
 	}
 	
@@ -430,7 +450,7 @@ public class Fields extends HashMap<String, Field> {
 		String nameField = findFieldBySuffix("_NAME");
 		String cdateField = findFieldBySuffix("_CDATE");
 		String mdateField = findFieldBySuffix("_MDATE");
-		String statusField = findFieldBySuffix("_STATUS");
+		String statusField = findStatusField();  // 使用 findStatusField 查找 _STATUS 或 _STATE
 		
 		if (pkField == null || pkField.isEmpty()) {
 			return "-- Primary key not found";
@@ -490,7 +510,7 @@ public class Fields extends HashMap<String, Field> {
 			selectFields.add("@SYS_DATE " + mdateField);
 		}
 		
-		// 状态字段
+		// 状态字段 - 默认值为 'USED'
 		if (statusField != null) {
 			fields.add(statusField);
 			selectFields.add("'USED' " + statusField);
@@ -525,6 +545,25 @@ public class Fields extends HashMap<String, Field> {
 	private String findFieldBySuffix(String suffix) {
 		for (String fieldName : this._FieldList) {
 			if (fieldName.toUpperCase().endsWith(suffix.toUpperCase())) {
+				return fieldName;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 查找状态字段 (_STATUS 或 _STATE)
+	 */
+	private String findStatusField() {
+		// 优先查找 _STATUS
+		for (String fieldName : this._FieldList) {
+			if (fieldName.toUpperCase().endsWith("_STATUS")) {
+				return fieldName;
+			}
+		}
+		// 查找 _STATE
+		for (String fieldName : this._FieldList) {
+			if (fieldName.toUpperCase().endsWith("_STATE")) {
 				return fieldName;
 			}
 		}
