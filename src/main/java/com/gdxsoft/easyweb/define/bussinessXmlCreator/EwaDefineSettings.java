@@ -2,9 +2,7 @@ package com.gdxsoft.easyweb.define.bussinessXmlCreator;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +15,18 @@ import com.gdxsoft.easyweb.utils.UXml;
 /**
  * EWA Define Settings 配置读取器
  * 读取 system.xml/EwaDefineSettings.xml 配置文件
+ * 
+ * 配置结构:
+ * EwaDefineSettings
+ *   ├─ Frame
+ *   │   ├─ FieldHideRules
+ *   │   │   ├─ HideBySuffix
+ *   │   │   ├─ HideByType
+ *   │   │   └─ HideByName
+ *   │   └─ PageSettings
+ *   └─ ListFrame
+ *       ├─ PageSettings
+ *       └─ OrderSearchRules
  */
 public class EwaDefineSettings {
     private static final Logger LOGGER = LoggerFactory.getLogger(EwaDefineSettings.class);
@@ -24,9 +34,9 @@ public class EwaDefineSettings {
     private static EwaDefineSettings instance;
     
     private Document settingsDoc;
-    private List<String> hideSuffixes;
-    private List<String> hideTypes;
-    private List<String> hideNames;
+    private List<String> frameHideSuffixes;
+    private List<String> frameHideTypes;
+    private List<String> frameHideNames;
     private FramePageSettings framePageSettings;
     private ListFramePageSettings listFramePageSettings;
     
@@ -64,11 +74,11 @@ public class EwaDefineSettings {
             
             settingsDoc = UXml.asDocument(xmlContent);
             
-            // 加载隐藏字段规则
-            loadHideFieldRules();
+            // 加载 Frame 配置
+            loadFrameSettings();
             
-            // 加载页面配置
-            loadPageSettings();
+            // 加载 ListFrame 配置
+            loadListFrameSettings();
             
             LOGGER.info("EwaDefineSettings.xml 加载成功");
         } catch (Exception e) {
@@ -81,17 +91,19 @@ public class EwaDefineSettings {
      * 加载默认配置
      */
     private void loadDefaultSettings() {
-        hideSuffixes = new ArrayList<>();
-        hideSuffixes.add("_CDATE");
-        hideSuffixes.add("_MDATE");
-        hideSuffixes.add("_STATUS");
-        hideSuffixes.add("_STATE");
+        // Frame 隐藏规则
+        frameHideSuffixes = new ArrayList<>();
+        frameHideSuffixes.add("_CDATE");
+        frameHideSuffixes.add("_MDATE");
+        frameHideSuffixes.add("_STATUS");
+        frameHideSuffixes.add("_STATE");
         
-        hideTypes = new ArrayList<>();
-        hideTypes.add("IDENTITY");
+        frameHideTypes = new ArrayList<>();
+        frameHideTypes.add("IDENTITY");
         
-        hideNames = new ArrayList<>();
+        frameHideNames = new ArrayList<>();
         
+        // Frame 页面配置
         framePageSettings = new FramePageSettings();
         framePageSettings.setWidth("700");
         framePageSettings.setHiddenCaption("1");
@@ -99,60 +111,81 @@ public class EwaDefineSettings {
         framePageSettings.setHAlign("center");
         framePageSettings.setVAlign("top");
         
+        // ListFrame 页面配置
         listFramePageSettings = new ListFramePageSettings();
         listFramePageSettings.setWidth("100%");
         listFramePageSettings.setHiddenCaption("");
         listFramePageSettings.setFrameCols("");
         listFramePageSettings.setHAlign("center");
         listFramePageSettings.setVAlign("top");
+        listFramePageSettings.setPageSizeIsSplit("1");
+        listFramePageSettings.setPageSize("10");
+        listFramePageSettings.setRecycle("1");
+        listFramePageSettings.setLuButtons("1");
+        listFramePageSettings.setLuSearch("1");
+        listFramePageSettings.setLuSelect("S");
     }
     
     /**
-     * 加载隐藏字段规则
+     * 加载 Frame 配置
      */
-    private void loadHideFieldRules() {
-        hideSuffixes = new ArrayList<>();
-        hideTypes = new ArrayList<>();
-        hideNames = new ArrayList<>();
+    private void loadFrameSettings() {
+        frameHideSuffixes = new ArrayList<>();
+        frameHideTypes = new ArrayList<>();
+        frameHideNames = new ArrayList<>();
         
-        NodeList suffixNodes = settingsDoc.getElementsByTagName("Suffix");
-        for (int i = 0; i < suffixNodes.getLength(); i++) {
-            Element suffixElem = (Element) suffixNodes.item(i);
-            String name = suffixElem.getAttribute("Name");
-            if (name != null && !name.isEmpty()) {
-                hideSuffixes.add(name.toUpperCase());
+        // 查找 Frame/FieldHideRules 节点
+        NodeList frameNodes = settingsDoc.getElementsByTagName("Frame");
+        if (frameNodes.getLength() == 0) {
+            LOGGER.warn("未找到 Frame 配置，使用默认值");
+            loadDefaultFrameSettings();
+            return;
+        }
+        
+        Element frameElem = (Element) frameNodes.item(0);
+        
+        // 加载字段隐藏规则
+        NodeList hideRulesNodes = frameElem.getElementsByTagName("FieldHideRules");
+        if (hideRulesNodes.getLength() > 0) {
+            Element hideRulesElem = (Element) hideRulesNodes.item(0);
+            
+            // 加载后缀规则
+            NodeList suffixNodes = hideRulesElem.getElementsByTagName("Suffix");
+            for (int i = 0; i < suffixNodes.getLength(); i++) {
+                Element suffixElem = (Element) suffixNodes.item(i);
+                String name = suffixElem.getAttribute("Name");
+                if (name != null && !name.isEmpty()) {
+                    frameHideSuffixes.add(name.toUpperCase());
+                }
+            }
+            
+            // 加载类型规则
+            NodeList typeNodes = hideRulesElem.getElementsByTagName("Type");
+            for (int i = 0; i < typeNodes.getLength(); i++) {
+                Element typeElem = (Element) typeNodes.item(i);
+                String name = typeElem.getAttribute("Name");
+                if (name != null && !name.isEmpty()) {
+                    frameHideTypes.add(name.toUpperCase());
+                }
+            }
+            
+            // 加载名称规则
+            NodeList nameNodes = hideRulesElem.getElementsByTagName("HideByName");
+            for (int i = 0; i < nameNodes.getLength(); i++) {
+                Element nameElem = (Element) nameNodes.item(i);
+                String name = nameElem.getAttribute("Name");
+                if (name != null && !name.isEmpty()) {
+                    frameHideNames.add(name.toUpperCase());
+                }
             }
         }
         
-        NodeList typeNodes = settingsDoc.getElementsByTagName("Type");
-        for (int i = 0; i < typeNodes.getLength(); i++) {
-            Element typeElem = (Element) typeNodes.item(i);
-            String name = typeElem.getAttribute("Name");
-            if (name != null && !name.isEmpty()) {
-                hideTypes.add(name.toUpperCase());
-            }
-        }
-        
-        NodeList nameNodes = settingsDoc.getElementsByTagName("HideByName");
-        for (int i = 0; i < nameNodes.getLength(); i++) {
-            Element nameElem = (Element) nameNodes.item(i);
-            String name = nameElem.getAttribute("Name");
-            if (name != null && !name.isEmpty()) {
-                hideNames.add(name.toUpperCase());
-            }
-        }
-    }
-    
-    /**
-     * 加载页面配置
-     */
-    private void loadPageSettings() {
-        // 加载 Frame 页面配置
-        NodeList frameSizeNodes = settingsDoc.getElementsByTagName("FramePageSettings");
-        if (frameSizeNodes.getLength() > 0) {
+        // 加载页面配置
+        NodeList pageSettingsNodes = frameElem.getElementsByTagName("PageSettings");
+        if (pageSettingsNodes.getLength() > 0) {
             framePageSettings = new FramePageSettings();
-            Element frameSizeElem = (Element) frameSizeNodes.item(0);
-            NodeList sizeNodes = frameSizeElem.getElementsByTagName("Size");
+            Element pageSettingsElem = (Element) pageSettingsNodes.item(0);
+            NodeList sizeNodes = pageSettingsElem.getElementsByTagName("Size");
             if (sizeNodes.getLength() > 0) {
                 Element sizeElem = (Element) sizeNodes.item(0);
                 framePageSettings.setWidth(sizeElem.getAttribute("Width"));
@@ -164,14 +197,47 @@ public class EwaDefineSettings {
         } else {
             framePageSettings = new FramePageSettings();
         }
+    }
+    
+    /**
+     * 加载 Frame 默认配置
+     */
+    private void loadDefaultFrameSettings() {
+        frameHideSuffixes.add("_CDATE");
+        frameHideSuffixes.add("_MDATE");
+        frameHideSuffixes.add("_STATUS");
+        frameHideSuffixes.add("_STATE");
         
-        // 加载 ListFrame 页面配置
-        NodeList listFrameSizeNodes = settingsDoc.getElementsByTagName("ListFramePageSettings");
-        if (listFrameSizeNodes.getLength() > 0) {
-            listFramePageSettings = new ListFramePageSettings();
-            Element listFrameSizeElem = (Element) listFrameSizeNodes.item(0);
+        frameHideTypes.add("IDENTITY");
+        
+        framePageSettings = new FramePageSettings();
+        framePageSettings.setWidth("700");
+        framePageSettings.setHiddenCaption("1");
+        framePageSettings.setFrameCols("C2");
+    }
+    
+    /**
+     * 加载 ListFrame 配置
+     */
+    private void loadListFrameSettings() {
+        // 查找 ListFrame 节点
+        NodeList listFrameNodes = settingsDoc.getElementsByTagName("ListFrame");
+        if (listFrameNodes.getLength() == 0) {
+            LOGGER.warn("未找到 ListFrame 配置，使用默认值");
+            loadDefaultListFrameSettings();
+            return;
+        }
+        
+        Element listFrameElem = (Element) listFrameNodes.item(0);
+        listFramePageSettings = new ListFramePageSettings();
+        
+        // 加载页面配置
+        NodeList pageSettingsNodes = listFrameElem.getElementsByTagName("PageSettings");
+        if (pageSettingsNodes.getLength() > 0) {
+            Element pageSettingsElem = (Element) pageSettingsNodes.item(0);
             
-            NodeList sizeNodes = listFrameSizeElem.getElementsByTagName("Size");
+            // 加载 Size 配置
+            NodeList sizeNodes = pageSettingsElem.getElementsByTagName("Size");
             if (sizeNodes.getLength() > 0) {
                 Element sizeElem = (Element) sizeNodes.item(0);
                 listFramePageSettings.setWidth(sizeElem.getAttribute("Width"));
@@ -181,7 +247,8 @@ public class EwaDefineSettings {
                 listFramePageSettings.setVAlign(sizeElem.getAttribute("VAlign"));
             }
             
-            NodeList pageSizeNodes = listFrameSizeElem.getElementsByTagName("PageSize");
+            // 加载 PageSize 配置
+            NodeList pageSizeNodes = pageSettingsElem.getElementsByTagName("PageSize");
             if (pageSizeNodes.getLength() > 0) {
                 Element pageSizeElem = (Element) pageSizeNodes.item(0);
                 listFramePageSettings.setPageSizeIsSplit(pageSizeElem.getAttribute("IsSplitPage"));
@@ -189,41 +256,58 @@ public class EwaDefineSettings {
                 listFramePageSettings.setRecycle(pageSizeElem.getAttribute("Recycle"));
             }
             
-            NodeList listUINodes = listFrameSizeElem.getElementsByTagName("ListUI");
+            // 加载 ListUI 配置
+            NodeList listUINodes = pageSettingsElem.getElementsByTagName("ListUI");
             if (listUINodes.getLength() > 0) {
                 Element listUIElem = (Element) listUINodes.item(0);
                 listFramePageSettings.setLuButtons(listUIElem.getAttribute("luButtons"));
                 listFramePageSettings.setLuSearch(listUIElem.getAttribute("luSearch"));
                 listFramePageSettings.setLuSelect(listUIElem.getAttribute("luSelect"));
             }
-        } else {
-            listFramePageSettings = new ListFramePageSettings();
         }
     }
     
     /**
-     * 判断字段是否应该隐藏
+     * 加载 ListFrame 默认配置
+     */
+    private void loadDefaultListFrameSettings() {
+        listFramePageSettings = new ListFramePageSettings();
+        listFramePageSettings.setWidth("100%");
+        listFramePageSettings.setHiddenCaption("");
+        listFramePageSettings.setFrameCols("");
+        listFramePageSettings.setHAlign("center");
+        listFramePageSettings.setVAlign("top");
+        listFramePageSettings.setPageSizeIsSplit("1");
+        listFramePageSettings.setPageSize("10");
+        listFramePageSettings.setRecycle("1");
+        listFramePageSettings.setLuButtons("1");
+        listFramePageSettings.setLuSearch("1");
+        listFramePageSettings.setLuSelect("S");
+    }
+    
+    /**
+     * 判断字段是否应该隐藏（Frame 模式）
      */
     public boolean shouldHideField(String fieldName, String fieldType) {
         String fieldNameUpper = fieldName.toUpperCase();
         String fieldTypeUpper = fieldType.toUpperCase();
         
         // 检查后缀
-        for (String suffix : hideSuffixes) {
+        for (String suffix : frameHideSuffixes) {
             if (fieldNameUpper.endsWith(suffix)) {
                 return true;
             }
         }
         
         // 检查类型
-        for (String type : hideTypes) {
+        for (String type : frameHideTypes) {
             if (fieldTypeUpper.contains(type)) {
                 return true;
             }
         }
         
         // 检查精确匹配
-        for (String name : hideNames) {
+        for (String name : frameHideNames) {
             if (fieldNameUpper.equals(name)) {
                 return true;
             }
