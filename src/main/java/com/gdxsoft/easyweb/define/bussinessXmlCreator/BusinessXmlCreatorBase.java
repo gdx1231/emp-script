@@ -634,4 +634,203 @@ public abstract class BusinessXmlCreatorBase {
         }
         return null;
     }
+    
+    /**
+     * 获取 ListFrame 的 SELECT 查询 SQL
+     * @param statusField 状态字段名
+     * @param includeRecycle 是否包含回收站
+     * @return
+     */
+    protected String getSqlSelectLF(String statusField, boolean includeRecycle) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SELECT A.* FROM ").append(this.table.getName()).append(" A WHERE 1=1");
+
+        if (includeRecycle && statusField != null) {
+            sb.append("\n\t-- @EWA_RECYCLE is null");
+            sb.append("\n\tAND A.").append(statusField).append(" = 'USED'");
+            sb.append("\n\t-- @EWA_RECYCLE = '1'");
+            sb.append("\n\tAND A.").append(statusField).append(" = 'DEL'");
+            sb.append("\n\t--");
+        }
+
+        // 默认按自增字段或修改日期排序
+        String orderField = findIdentityField();
+        if (orderField == null) {
+            orderField = findFieldBySuffix("_MDATE");
+        }
+        if (orderField != null) {
+            sb.append("\nORDER BY A.").append(orderField).append(" DESC");
+        }
+
+        return sb.toString();
+    }
+    
+    /**
+     * 逻辑删除 SQL（更新状态为 DEL）
+     * @param statusField 状态字段名
+     * @return
+     */
+    protected String getSqlDeleteA(String statusField) {
+        String pkField = getPrimaryKeyField();
+        if (pkField == null || pkField.isEmpty()) {
+            return "-- Primary key not found";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE ").append(this.table.getName()).append(" SET ").append(statusField).append("='DEL'");
+
+        String mdateField = findFieldBySuffix("_MDATE");
+        if (mdateField != null) {
+            sb.append(", ").append(mdateField).append(" = @sys_date");
+        }
+
+        sb.append(" WHERE ").append(pkField).append(" = @").append(pkField);
+
+        return sb.toString();
+    }
+    
+    /**
+     * 恢复数据 SQL（更新状态为 USED）
+     * @param statusField 状态字段名
+     * @return
+     */
+    protected String getSqlRestore(String statusField) {
+        String pkField = getPrimaryKeyField();
+        if (pkField == null || pkField.isEmpty()) {
+            return "-- Primary key not found";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE ").append(this.table.getName()).append(" SET ").append(statusField).append("='USED'");
+
+        String mdateField = findFieldBySuffix("_MDATE");
+        if (mdateField != null) {
+            sb.append(", ").append(mdateField).append(" = @sys_date");
+        }
+
+        sb.append(" WHERE ").append(pkField).append(" = @").append(pkField);
+
+        return sb.toString();
+    }
+    
+    /**
+     * 物理删除 SQL
+     * @return
+     */
+    protected String getSqlDelete() {
+        String pkField = getPrimaryKeyField();
+        if (pkField == null || pkField.isEmpty()) {
+            return "-- Primary key not found";
+        }
+        return "DELETE FROM " + this.table.getName() + " WHERE " + pkField + " = @" + pkField;
+    }
+    
+    /**
+     * 获取加载数据 SQL（单条记录）
+     * @return
+     */
+    protected String getSqlSelect() {
+        String pkField = getPrimaryKeyField();
+        if (pkField == null || pkField.isEmpty()) {
+            return "-- Primary key not found";
+        }
+        return "SELECT A.* FROM " + this.table.getName() + " A WHERE A." + pkField + " = @" + pkField;
+    }
+    
+    /**
+     * 获取更新 SQL
+     * @param statusField 状态字段名
+     * @return
+     */
+    protected String getSqlUpdate(String statusField) {
+        String pkField = getPrimaryKeyField();
+        if (pkField == null || pkField.isEmpty()) {
+            return "-- Primary key not found";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE ").append(this.table.getName()).append(" SET ");
+
+        java.util.ArrayList<String> sets = new java.util.ArrayList<String>();
+        String cdateField = findFieldBySuffix("_CDATE");
+
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            Field f = this.table.getFields().get(fieldName);
+            if (f == null) continue;
+
+            // 跳过自增字段、主键
+            if (f.isIdentity() || f.isPk()) {
+                continue;
+            }
+
+            // 跳过创建日期字段
+            if (cdateField != null && fieldName.toUpperCase().equals(cdateField.toUpperCase())) {
+                continue;
+            }
+
+            // 跳过状态字段
+            if (statusField != null && fieldName.toUpperCase().equals(statusField.toUpperCase())) {
+                continue;
+            }
+
+            sets.add(fieldName + " = @" + fieldName);
+        }
+
+        sb.append("\n\t").append(String.join(",\n\t", sets));
+        sb.append("\nWHERE ").append(pkField).append(" = @").append(pkField);
+
+        return sb.toString();
+    }
+    
+    /**
+     * 获取新增 SQL
+     * @param statusField 状态字段名
+     * @return
+     */
+    protected String getSqlNew(String statusField) {
+        StringBuilder sb1 = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
+
+        sb1.append("INSERT INTO ").append(this.table.getName()).append(" (");
+        sb2.append(") VALUES (");
+
+        java.util.ArrayList<String> fields = new java.util.ArrayList<String>();
+        java.util.ArrayList<String> values = new java.util.ArrayList<String>();
+
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            Field f = this.table.getFields().get(fieldName);
+            if (f == null) continue;
+
+            // 跳过自增字段
+            if (f.isIdentity()) {
+                continue;
+            }
+
+            fields.add(fieldName);
+
+            if (statusField != null && fieldName.toUpperCase().equals(statusField.toUpperCase())) {
+                values.add("'USED'");
+            } else {
+                values.add("@" + fieldName);
+            }
+        }
+
+        sb1.append(String.join(", ", fields));
+        sb2.append(String.join(", ", values)).append(")");
+
+        return sb1.toString() + sb2.toString();
+    }
+    
+    /**
+     * 查找自增字段
+     */
+    protected String findIdentityField() {
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            Field f = this.table.getFields().get(fieldName);
+            if (f != null && f.isIdentity()) {
+                return fieldName;
+            }
+        }
+        return null;
+    }
 }

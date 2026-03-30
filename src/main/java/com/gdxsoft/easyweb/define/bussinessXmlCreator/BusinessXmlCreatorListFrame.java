@@ -983,22 +983,22 @@ public class BusinessXmlCreatorListFrame extends BusinessXmlCreatorBase {
     private String parseFieldsMethod(String sqlContent) {
         if (sqlContent == null) return null;
 
-        String statusField = getStatusField();
+        String statusField = findStatusField();
 
         if (sqlContent.contains("this.Fields.GetSqlSelectLF()")) {
-            return this.table.getFields().GetSqlSelectLF(statusField, true);
+            return getSqlSelectLF(statusField, true);
         } else if (sqlContent.contains("this.Fields.GetSqlSelect()")) {
-            return this.table.getFields().GetSqlSelect();
+            return getSqlSelect();
         } else if (sqlContent.contains("this.Fields.GetSqlDeleteA()")) {
-            return this.table.getFields().GetSqlDeleteA(statusField);
+            return getSqlDeleteA(statusField);
         } else if (sqlContent.contains("this.Fields.GetSqlRestore()")) {
-            return this.table.getFields().GetSqlRestore(statusField);
+            return getSqlRestore(statusField);
         } else if (sqlContent.contains("this.Fields.GetSqlDelete()")) {
-            return this.table.getFields().GetSqlDelete();
+            return getSqlDelete();
         } else if (sqlContent.contains("this.Fields.GetSqlUpdate()")) {
-            return this.table.getFields().GetSqlUpdate(statusField);
+            return getSqlUpdate(statusField);
         } else if (sqlContent.contains("this.Fields.GetSqlNew()")) {
-            return this.table.getFields().GetSqlNew(statusField);
+            return getSqlNew(statusField);
         }
 
         return sqlContent;
@@ -1032,7 +1032,7 @@ public class BusinessXmlCreatorListFrame extends BusinessXmlCreatorBase {
         onLoadSql.setAttribute("Name", "OnPageLoad SQL");
         onLoadSql.setAttribute("SqlType", "query");
         Element onLoadSqlContent = doc.createElement("Sql");
-        onLoadSqlContent.setTextContent(this.table.getFields().GetSqlSelectLF(statusField, true));
+        onLoadSqlContent.setTextContent(getSqlSelectLF(statusField, true));
         onLoadSql.appendChild(onLoadSqlContent);
         onLoadSql.appendChild(doc.createElement("CSSet"));
         sqlSet.appendChild(onLoadSql);
@@ -1042,7 +1042,7 @@ public class BusinessXmlCreatorListFrame extends BusinessXmlCreatorBase {
             onDeleteSql.setAttribute("Name", "OnFrameDelete SQL");
             onDeleteSql.setAttribute("SqlType", "update");
             Element onDeleteSqlContent = doc.createElement("Sql");
-            onDeleteSqlContent.setTextContent(this.table.getFields().GetSqlDeleteA(statusField));
+            onDeleteSqlContent.setTextContent(getSqlDeleteA(statusField));
             onDeleteSql.appendChild(onDeleteSqlContent);
             onDeleteSql.appendChild(doc.createElement("CSSet"));
             sqlSet.appendChild(onDeleteSql);
@@ -1051,7 +1051,7 @@ public class BusinessXmlCreatorListFrame extends BusinessXmlCreatorBase {
             onRestoreSql.setAttribute("Name", "OnFrameRestore SQL");
             onRestoreSql.setAttribute("SqlType", "update");
             Element onRestoreSqlContent = doc.createElement("Sql");
-            onRestoreSqlContent.setTextContent(this.table.getFields().GetSqlRestore(statusField));
+            onRestoreSqlContent.setTextContent(getSqlRestore(statusField));
             onRestoreSql.appendChild(onRestoreSqlContent);
             onRestoreSql.appendChild(doc.createElement("CSSet"));
             sqlSet.appendChild(onRestoreSql);
