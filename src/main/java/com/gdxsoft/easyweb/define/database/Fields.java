@@ -413,9 +413,12 @@ public class Fields extends HashMap<String, Field> {
 	
 	/**
 	 * 获取 Tree 新增节点 SQL
-	 * 参考 SQL Server 模板:
+	 * 参考 SQL Server 模板，使用 CASE WHEN 适配不同数据库:
 	 * INSERT INTO table (name, pid, level, order, cdate, mdate, status)
-	 * SELECT @text, ISNULL(@parent_key,0), ISNULL(max(level),-1)+1, isnull(max(order),0)+1, @date, @date, 'USED'
+	 * SELECT @text, CASE WHEN @parent_key IS NULL THEN 0 ELSE @parent_key END,
+	 *        CASE WHEN MAX(level) IS NULL THEN -1 ELSE MAX(level) END+1,
+	 *        CASE WHEN MAX(order) IS NULL THEN 0 ELSE MAX(order) END+1,
+	 *        @date, @date, 'USED'
 	 * FROM table WHERE pid = @parent_key
 	 * @return INSERT INTO table (...) SELECT ... FROM table WHERE ...
 	 */
@@ -447,23 +450,23 @@ public class Fields extends HashMap<String, Field> {
 			selectFields.add("@EWA_TREE_TEXT " + nameField);
 		}
 		
-		// 父 ID 字段
+		// 父 ID 字段 - 使用 CASE WHEN 适配不同数据库
 		if (parentField != null) {
 			fields.add(parentField);
-			selectFields.add("ISNULL(@EWA_TREE_PARENT_KEY,0) " + parentField);
+			selectFields.add("CASE WHEN @EWA_TREE_PARENT_KEY IS NULL THEN 0 ELSE @EWA_TREE_PARENT_KEY END " + parentField);
 		}
 		
-		// 层级字段
+		// 层级字段 - 使用 CASE WHEN 适配不同数据库
 		if (levelField != null) {
 			fields.add(levelField);
-			selectFields.add("ISNULL(MAX(pp." + levelField + "),-1)+1 " + levelField);
+			selectFields.add("CASE WHEN MAX(pp." + levelField + ") IS NULL THEN -1 ELSE MAX(pp." + levelField + ") END+1 " + levelField);
 			fromTables.add(this._TableName + " pp");
 		}
 		
-		// 排序字段
+		// 排序字段 - 使用 CASE WHEN 适配不同数据库
 		if (orderField != null) {
 			fields.add(orderField);
-			selectFields.add("ISNULL(MAX(pc." + orderField + "),0)+1 " + orderField);
+			selectFields.add("CASE WHEN MAX(pc." + orderField + ") IS NULL THEN 0 ELSE MAX(pc." + orderField + ") END+1 " + orderField);
 			if (fromTables.isEmpty()) {
 				fromTables.add(this._TableName + " pc");
 			} else {
