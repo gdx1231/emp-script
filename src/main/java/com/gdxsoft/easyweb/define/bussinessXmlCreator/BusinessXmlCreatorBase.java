@@ -139,13 +139,25 @@ public abstract class BusinessXmlCreatorBase {
 
     /**
      * 获取 Tag 类型
+     * 参考 EwaConfig.xml/Items/XItems 中定义的 XItem Name
+     * 可用的类型：text, textarea, span, hidden, password, date, datetime, time, select, combo, checkbox, radio 等
      */
     protected String getTagType(String dbType) {
         if (dbType == null) return "text";
         String type = dbType.toUpperCase();
-        if (type.contains("DATE") || type.contains("TIME")) return "date";
-        if (type.contains("INT") || type.contains("DECIMAL") || type.contains("NUM")) return "number";
-        if (type.contains("TEXT") || type.contains("MEMO")) return "textarea";
+        
+        // 日期时间类型
+        if (type.contains("DATETIME") || type.contains("TIMESTAMP")) return "datetime";
+        if (type.contains("DATE") && !type.contains("TIME")) return "date";
+        if (type.contains("TIME") && !type.contains("DATE")) return "time";
+        
+        // 长文本类型
+        if (type.contains("TEXT") || type.contains("MEMO") || type.contains("LONGVARCHAR")) return "textarea";
+        
+        // 数字类型使用 text，通过 DataType 和 Valid 属性控制
+        // if (type.contains("INT") || type.contains("DECIMAL") || type.contains("NUM")) return "number";
+        
+        // 默认使用 text
         return "text";
     }
 
