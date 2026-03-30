@@ -272,13 +272,13 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         Element tree = doc.createElement("Tree");
         page.appendChild(tree);
         Element treeSet = doc.createElement("Set");
-        // Tree 配置属性
-        treeSet.setAttribute("Text", this.table.getName() + "_NAME");  // 显示文本字段
-        treeSet.setAttribute("Title", this.table.getName() + "_NAME_EN");  // 英文标题字段
-        treeSet.setAttribute("Key", getPrimaryKeyField());  // 主键字段
-        treeSet.setAttribute("ParentKey", this.table.getName() + "_PID");  // 父 ID 字段
-        treeSet.setAttribute("Level", this.table.getName() + "_LVL");  // 层级字段
-        treeSet.setAttribute("Order", this.table.getName() + "_ORD");  // 排序字段
+        // Tree 配置属性 - 根据实际字段名称推断
+        treeSet.setAttribute("Text", findFieldForText());  // 显示文本字段
+        treeSet.setAttribute("Title", findFieldForTitle());  // 英文标题字段
+        treeSet.setAttribute("Key", findPrimaryKeyField());  // 主键字段
+        treeSet.setAttribute("ParentKey", findParentKeyField());  // 父 ID 字段
+        treeSet.setAttribute("Level", findLevelField());  // 层级字段
+        treeSet.setAttribute("Order", findOrderField());  // 排序字段
         treeSet.setAttribute("RootId", "");  // 根 ID
         treeSet.setAttribute("LoadByLevel", "");  // 是否按层级加载
         treeSet.setAttribute("AddPara1", "");
@@ -596,5 +596,167 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
     private void createWorkflows(Document doc, Element root) {
         Element workflows = doc.createElement("Workflows");
         root.appendChild(workflows);
+    }
+    
+    /**
+     * 查找主键字段
+     */
+    private String findPrimaryKeyField() {
+        if (this.table.getPk() != null && !this.table.getPk().getPkFields().isEmpty()) {
+            return this.table.getPk().getPkFields().get(0).getName();
+        }
+        // 尝试查找以 _ID 结尾的字段
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.endsWith("_ID")) {
+                return fieldName;
+            }
+        }
+        // 返回第一个字段
+        if (!this.table.getFields().getFieldList().isEmpty()) {
+            return this.table.getFields().getFieldList().get(0);
+        }
+        return "";
+    }
+    
+    /**
+     * 查找父 ID 字段（树形结构）
+     */
+    private String findParentKeyField() {
+        String tableName = getTableNamePrefix();
+        // 尝试常见的父 ID 字段名
+        String[] possibleNames = {
+            tableName + "_PID",
+            tableName + "_P_ID",
+            "PARENT_ID",
+            "P_ID",
+            "PID"
+        };
+        for (String name : possibleNames) {
+            if (this.table.getFields().containsKey(name)) {
+                return name;
+            }
+        }
+        // 查找以 _PID 或 _P_ID 结尾的字段
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.endsWith("_PID") || fieldName.endsWith("_P_ID")) {
+                return fieldName;
+            }
+        }
+        return "";
+    }
+    
+    /**
+     * 查找层级字段
+     */
+    private String findLevelField() {
+        String tableName = getTableNamePrefix();
+        // 尝试常见的层级字段名
+        String[] possibleNames = {
+            tableName + "_LVL",
+            tableName + "_LEVEL",
+            "LVL",
+            "LEVEL",
+            "LAYER"
+        };
+        for (String name : possibleNames) {
+            if (this.table.getFields().containsKey(name)) {
+                return name;
+            }
+        }
+        // 查找以 _LVL 或 _LEVEL 结尾的字段
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.endsWith("_LVL") || fieldName.endsWith("_LEVEL") || fieldName.endsWith("_LAYER")) {
+                return fieldName;
+            }
+        }
+        return "";
+    }
+    
+    /**
+     * 查找排序字段
+     */
+    private String findOrderField() {
+        String tableName = getTableNamePrefix();
+        // 尝试常见的排序字段名
+        String[] possibleNames = {
+            tableName + "_ORD",
+            tableName + "_ORDER",
+            tableName + "_SORT",
+            "ORD",
+            "ORDER",
+            "SORT"
+        };
+        for (String name : possibleNames) {
+            if (this.table.getFields().containsKey(name)) {
+                return name;
+            }
+        }
+        // 查找以 _ORD、_ORDER 或 _SORT 结尾的字段
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.endsWith("_ORD") || fieldName.endsWith("_ORDER") || fieldName.endsWith("_SORT")) {
+                return fieldName;
+            }
+        }
+        return "";
+    }
+    
+    /**
+     * 查找显示文本字段（中文名称）
+     */
+    private String findFieldForText() {
+        String tableName = getTableNamePrefix();
+        // 尝试常见的名称字段名（优先中文）
+        String[] possibleNames = {
+            tableName + "_NAME",
+            "NAME",
+            "TITLE",
+            "NAME_CN"
+        };
+        for (String name : possibleNames) {
+            if (this.table.getFields().containsKey(name)) {
+                return name;
+            }
+        }
+        // 查找以 _NAME 结尾的字段（排除 _NAME_EN）
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.endsWith("_NAME") && !fieldName.endsWith("_NAME_EN")) {
+                return fieldName;
+            }
+        }
+        return "";
+    }
+    
+    /**
+     * 查找英文标题字段
+     */
+    private String findFieldForTitle() {
+        String tableName = getTableNamePrefix();
+        // 尝试常见的英文名称字段名
+        String[] possibleNames = {
+            tableName + "_NAME_EN",
+            "NAME_EN",
+            "TITLE_EN",
+            "EN_NAME",
+            "ENGLISH_NAME"
+        };
+        for (String name : possibleNames) {
+            if (this.table.getFields().containsKey(name)) {
+                return name;
+            }
+        }
+        // 查找以 _NAME_EN 或 _EN 结尾的字段
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.endsWith("_NAME_EN") || fieldName.endsWith("_EN")) {
+                return fieldName;
+            }
+        }
+        return "";
+    }
+    
+    /**
+     * 获取表名前缀（大写）
+     */
+    private String getTableNamePrefix() {
+        return this.table.getName().toUpperCase();
     }
 }
