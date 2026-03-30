@@ -155,7 +155,10 @@ public class BusinessXmlCreator {
             com.gdxsoft.easyweb.define.database.Field field = this.table.getFields().get(fieldName);
 
             org.w3c.dom.Element xitem = createXItem(doc, field, frameType, operationType, i);
-            xitems.appendChild(xitem);
+            // 如果字段应该隐藏，跳过
+            if (xitem != null) {
+                xitems.appendChild(xitem);
+            }
         }
 
         // 根据配置添加 Buttons（作为 XItem）
@@ -229,6 +232,17 @@ public class BusinessXmlCreator {
             org.w3c.dom.Element tagSet = doc.createElement("Set");
             tagSet.setAttribute("Tag", "span");
             tag.appendChild(tagSet);
+        }
+        
+        // Frame 模式设置页面宽度为 700
+        if (frameType.equalsIgnoreCase("Frame")) {
+            org.w3c.dom.Element size = doc.createElement("Size");
+            page.appendChild(size);
+            org.w3c.dom.Element sizeSet = doc.createElement("Set");
+            sizeSet.setAttribute("HAlign", "center");
+            sizeSet.setAttribute("VAlign", "top");
+            sizeSet.setAttribute("Width", "700");
+            size.appendChild(sizeSet);
         }
 
         // SkinName 节点
@@ -432,6 +446,27 @@ public class BusinessXmlCreator {
     }
     
     /**
+     * 判断字段是否应该隐藏
+     * **_CDATE, **_MDATE, **_STATUS 字段以及自增主键不展示
+     */
+    private boolean shouldHideField(com.gdxsoft.easyweb.define.database.Field field) {
+        String fieldName = field.getName().toUpperCase();
+        
+        // 自增主键不展示
+        if (field.isIdentity()) {
+            return true;
+        }
+        
+        // **_CDATE, **_MDATE, **_STATUS 字段不展示（仅在 SQL 中出现）
+        if (fieldName.endsWith("_CDATE") || fieldName.endsWith("_MDATE") || 
+            fieldName.endsWith("_STATUS")) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
      * 获取 Frame 名称
      */
     private String getFrameName(String frameType) {
@@ -466,43 +501,49 @@ public class BusinessXmlCreator {
         org.w3c.dom.Element xitem = doc.createElement("XItem");
         xitem.setAttribute("Name", field.getName());
 
+        // 检查字段是否应该隐藏
+        // **_CDATE, **_MDATE, **_STATUS 字段以及自增主键不展示
+        if (shouldHideField(field)) {
+            return null;
+        }
+
         // Tag 节点
         org.w3c.dom.Element tag = doc.createElement("Tag");
         org.w3c.dom.Element tagSet = doc.createElement("Set");
         tagSet.setAttribute("IsLFEdit", "0");
         tagSet.setAttribute("SpanShowAs", "");
-        
+
         // ListFrame 模式默认 tag=span（按钮除外）
         if (frameType.equalsIgnoreCase("ListFrame")) {
             tagSet.setAttribute("Tag", "span");
         } else {
             tagSet.setAttribute("Tag", getTagType(field.getDatabaseType()));
         }
-        
+
         tag.appendChild(tagSet);
         xitem.appendChild(tag);
-        
+
         // Name 节点
         org.w3c.dom.Element name = doc.createElement("Name");
         org.w3c.dom.Element nameSet = doc.createElement("Set");
         nameSet.setAttribute("Name", field.getName());
         name.appendChild(nameSet);
         xitem.appendChild(name);
-        
+
         // GroupIndex 节点
         org.w3c.dom.Element groupIndex = doc.createElement("GroupIndex");
         org.w3c.dom.Element groupIndexSet = doc.createElement("Set");
         groupIndexSet.setAttribute("GroupIndex", "0");
         groupIndex.appendChild(groupIndexSet);
         xitem.appendChild(groupIndex);
-        
+
         // InitValue 节点
         org.w3c.dom.Element initValue = doc.createElement("InitValue");
         org.w3c.dom.Element initValueSet = doc.createElement("Set");
         initValueSet.setAttribute("InitValue", "");
         initValue.appendChild(initValueSet);
         xitem.appendChild(initValue);
-        
+
         // DescriptionSet 节点
         org.w3c.dom.Element descSet = doc.createElement("DescriptionSet");
         org.w3c.dom.Element descSetZhcn = doc.createElement("Set");
@@ -516,25 +557,25 @@ public class BusinessXmlCreator {
         descSetEnus.setAttribute("Memo", "");
         descSet.appendChild(descSetEnus);
         xitem.appendChild(descSet);
-        
+
         // XStyle 节点
         org.w3c.dom.Element xstyle = doc.createElement("XStyle");
         xitem.appendChild(xstyle);
-        
+
         // Style 节点
         org.w3c.dom.Element style = doc.createElement("Style");
         org.w3c.dom.Element styleSet = doc.createElement("Set");
         styleSet.setAttribute("Style", "");
         style.appendChild(styleSet);
         xitem.appendChild(style);
-        
+
         // ParentStyle 节点
         org.w3c.dom.Element parentStyle = doc.createElement("ParentStyle");
         org.w3c.dom.Element parentStyleSet = doc.createElement("Set");
         parentStyleSet.setAttribute("ParentStyle", "");
         parentStyle.appendChild(parentStyleSet);
         xitem.appendChild(parentStyle);
-        
+
         // AttributeSet 节点
         org.w3c.dom.Element attributeSet = doc.createElement("AttributeSet");
         org.w3c.dom.Element attributeSetItem = doc.createElement("Set");
@@ -543,7 +584,7 @@ public class BusinessXmlCreator {
         attributeSetItem.setAttribute("AttValue", "");
         attributeSet.appendChild(attributeSetItem);
         xitem.appendChild(attributeSet);
-        
+
         // EventSet 节点
         org.w3c.dom.Element eventSet = doc.createElement("EventSet");
         org.w3c.dom.Element eventSetItem = doc.createElement("Set");
@@ -553,7 +594,7 @@ public class BusinessXmlCreator {
         eventSetItem.setAttribute("EventValue", "");
         eventSet.appendChild(eventSetItem);
         xitem.appendChild(eventSet);
-        
+
         // IsHtml 节点
         org.w3c.dom.Element isHtml = doc.createElement("IsHtml");
         xitem.appendChild(isHtml);
@@ -619,14 +660,17 @@ public class BusinessXmlCreator {
         maxMinValueSet.setAttribute("MinValue", "");
         maxMinValue.appendChild(maxMinValueSet);
         xitem.appendChild(maxMinValue);
-        
+
         // IsMustInput 节点
         org.w3c.dom.Element isMustInput = doc.createElement("IsMustInput");
         org.w3c.dom.Element isMustInputSet = doc.createElement("Set");
-        isMustInputSet.setAttribute("IsMustInput", field.isPk() ? "0" : "1");
+        // 根据字段的 null 属性来判断是否必填
+        // field.isNull() 返回 true 表示允许为空，IsMustInput=0
+        // field.isNull() 返回 false 表示不允许为空，IsMustInput=1
+        isMustInputSet.setAttribute("IsMustInput", field.isNull() ? "0" : "1");
         isMustInput.appendChild(isMustInputSet);
         xitem.appendChild(isMustInput);
-        
+
         // Switch 节点
         org.w3c.dom.Element switchNode = doc.createElement("Switch");
         xitem.appendChild(switchNode);
