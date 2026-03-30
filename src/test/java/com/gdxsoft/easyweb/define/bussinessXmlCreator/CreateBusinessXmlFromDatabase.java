@@ -176,7 +176,7 @@ public class CreateBusinessXmlFromDatabase {
     }
 
     /**
-     * 一次性创建所有 3 个配置
+     * 一次性创建所有 3 个配置，合并到同一个 CRM_COM.xml 文件
      */
     @Test
     public void testCreateAllCrmComConfigs() throws Exception {
@@ -186,31 +186,76 @@ public class CreateBusinessXmlFromDatabase {
         String outputDir = "temp/ewa_script_test/bussiness";
         java.nio.file.Files.createDirectories(java.nio.file.Paths.get(outputDir));
         
+        // 创建 CRM_COM.xml 的根节点
+        StringBuilder xmlContent = new StringBuilder();
+        xmlContent.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n");
+        xmlContent.append("<EasyWebTemplates>\n");
+        
         // 1. 创建 CRM_COM.LF.M
-        createConfig("ListFrame", "M", outputDir);
+        String lfMXml = createConfigXml("ListFrame", "M");
+        xmlContent.append("  <!-- crm_com.lf.m (列表修改模式) -->\n");
+        xmlContent.append(extractEasyWebTemplate(lfMXml));
+        xmlContent.append("\n");
+        System.out.println("  ✓ CRM_COM.LF.M 已添加");
         
         // 2. 创建 CRM_COM.LF.V
-        createConfig("ListFrame", "V", outputDir);
+        String lfVXml = createConfigXml("ListFrame", "V");
+        xmlContent.append("  <!-- crm_com.lf.v (列表查看模式) -->\n");
+        xmlContent.append(extractEasyWebTemplate(lfVXml));
+        xmlContent.append("\n");
+        System.out.println("  ✓ CRM_COM.LF.V 已添加");
         
         // 3. 创建 CRM_COM.F.NM
-        createConfig("Frame", "NM", outputDir);
+        String fNmXml = createConfigXml("Frame", "NM");
+        xmlContent.append("  <!-- crm_com.f.nm (框架新增修改模式) -->\n");
+        xmlContent.append(extractEasyWebTemplate(fNmXml));
+        xmlContent.append("\n");
+        System.out.println("  ✓ CRM_COM.F.NM 已添加");
+        
+        // 关闭根节点
+        xmlContent.append("</EasyWebTemplates>");
+        
+        // 保存 XML 到文件
+        String outputPath = outputDir + "/CRM_COM.xml";
+        java.nio.file.Files.write(java.nio.file.Paths.get(outputPath), xmlContent.toString().getBytes("UTF-8"));
         
         System.out.println("\n=== 所有配置已生成 ===");
-        System.out.println("输出目录：" + outputDir);
+        System.out.println("输出文件：" + outputPath);
+        System.out.println("文件大小：" + xmlContent.length() + " 字节");
     }
     
     /**
-     * 创建单个配置
+     * 从完整的 XML 中提取 EasyWebTemplate 节点内容
      */
-    private void createConfig(String frameType, String operationType, String outputDir) throws Exception {
-        String configName = "CRM_COM." + getFrameTypeShort(frameType) + "." + operationType;
-        System.out.println("\n创建 " + configName + "...");
+    private String extractEasyWebTemplate(String fullXml) {
+        // 移除 XML 声明
+        String xml = fullXml.replace("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n", "");
         
+        // 移除外层 EasyWebTemplates 标签
+        xml = xml.replace("<EasyWebTemplates>\n", "");
+        xml = xml.replace("</EasyWebTemplates>", "");
+        
+        // 找到 <EasyWebTemplate 和 </EasyWebTemplate>
+        int startIndex = xml.indexOf("<EasyWebTemplate");
+        int endIndex = xml.indexOf("</EasyWebTemplate>");
+        
+        if (startIndex >= 0 && endIndex > startIndex) {
+            endIndex += "</EasyWebTemplate>".length();
+            return xml.substring(startIndex, endIndex);
+        }
+        
+        return "";
+    }
+    
+    /**
+     * 创建单个配置的 XML
+     */
+    private String createConfigXml(String frameType, String operationType) throws Exception {
         // 创建 BusinessXmlCreator
         BusinessXmlCreator creator = BusinessXmlCreator.create(config, crmComTable, frameType);
         
         // 生成 XML
-        String xmlContent = creator.createShowXml(
+        return creator.createShowXml(
             "demo",
             "CRM_COM",
             null,
@@ -218,23 +263,5 @@ public class CreateBusinessXmlFromDatabase {
             frameType,
             operationType
         );
-        
-        // 保存 XML 到文件
-        String outputPath = outputDir + "/" + configName + ".xml";
-        java.nio.file.Files.write(java.nio.file.Paths.get(outputPath), xmlContent.getBytes("UTF-8"));
-        
-        System.out.println("  ✓ " + configName + ".xml 已生成 (" + xmlContent.length() + " 字节)");
-    }
-    
-    /**
-     * 获取 Frame 类型简写
-     */
-    private String getFrameTypeShort(String frameType) {
-        switch (frameType.toUpperCase()) {
-            case "FRAME": return "F";
-            case "LISTFRAME": return "LF";
-            case "TREE": return "T";
-            default: return frameType;
-        }
     }
 }
