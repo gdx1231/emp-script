@@ -1698,12 +1698,12 @@ public class BusinessXmlCreator {
             // 解析 XmlPath，例如 "EasyWebTemplate/Page/AddScript/Set/Bottom"
             String[] parts = xmlPath.split("/");
 
-            // 从根节点开始（跳过 EasyWebTemplate，因为已经是根了）
+            // 从根节点开始查找
+            // 现在根节点是 EasyWebTemplates，所以需要查找 EasyWebTemplate/Page/...
             org.w3c.dom.Element current = doc.getDocumentElement();
             
-            // 从第 2 个部分开始查找（跳过 EasyWebTemplate）
-            for (int i = 1; i < parts.length; i++) {
-                String part = parts[i];
+            // 遍历所有部分查找或创建节点
+            for (String part : parts) {
                 org.w3c.dom.Element child = findChildElement(current, part);
                 if (child == null) {
                     child = doc.createElement(part);
@@ -1714,6 +1714,10 @@ public class BusinessXmlCreator {
 
             // 设置内容
             if ("CDATA".equals(setMethod)) {
+                // 如果当前节点已有子节点，先清空
+                while (current.hasChildNodes()) {
+                    current.removeChild(current.getFirstChild());
+                }
                 org.w3c.dom.CDATASection cdata = doc.createCDATASection(content);
                 current.appendChild(cdata);
             } else {
