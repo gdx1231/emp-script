@@ -57,17 +57,23 @@
 
 	<!-- 数据库连接池 -->
 	<databases>
-		<!-- <database name="b2b" type="MYSQL" connectionString="jdbc/b2b" schemaName="b2b"> <pool
-		username="test" password="" driverClassName="com.mysql.cj.jdbc.Driver"
-			poolType="HikariCP"
-		url="jdbc:mysql://localhost/b2b?serverTimezone=GMT%2B8&amp;autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=utf-8">
-			</pool> </database> -->
-		<!-- <database name="ms" type="MSSQL" connectionString="jdbc/ms" schemaName="dbo"> <pool
-		username="sa" password="" maxActive="40"
-			maxIdle="120" maxWait="5000" poolType="druid"
-		driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
-		url="jdbc:sqlserver://localhost:1433;DatabaseName=OneWorld;applicationName=console">
-			</pool> </database> -->
+		<database name="mysql" type="MYSQL" connectionString="jdbc/b2b" schemaName="b2b">
+			<pool
+				username="test" password="file:///Users/admin/java/com.gdxsoft/database.pwss.txt"
+				driverClassName="com.mysql.cj.jdbc.Driver"
+				poolType="HikariCP"
+				url="jdbc:mysql://localhost/b2b?serverTimezone=GMT%2B8&amp;autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=utf-8">
+			</pool>
+		</database>
+		<database name="sqlserver" type="MSSQL" connectionString="jdbc/mssql" schemaName="dbo">
+			<pool
+				username="sa" password="file:///Users/admin/java/com.gdxsoft/database.pwss.txt"
+				maxActive="40"
+				maxIdle="120" maxWait="5000" poolType="druid"
+				driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+				url="jdbc:sqlserver://localhost:1433;DatabaseName=OneWorld;applicationName=console">
+			</pool>
+		</database>
 
 		<!-- HSQLDB 数据库连接 -->
 		<database name="demo" type="HSQLDB" connectionString="jdbc/demo" schemaName="demo">

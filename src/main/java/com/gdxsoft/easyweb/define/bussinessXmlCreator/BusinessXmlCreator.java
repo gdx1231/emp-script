@@ -36,6 +36,8 @@ public class BusinessXmlCreator {
             baseCreator = new BusinessXmlCreatorListFrame(config, table);
         } else if ("Frame".equalsIgnoreCase(frameType)) {
             baseCreator = new BusinessXmlCreatorFrame(config, table);
+        } else if ("Tree".equalsIgnoreCase(frameType)) {
+            baseCreator = new BusinessXmlCreatorTree(config, table);
         } else {
             LOGGER.warn("未知的 Frame 类型：{}，使用 ListFrame 创建器", frameType);
             baseCreator = new BusinessXmlCreatorListFrame(config, table);

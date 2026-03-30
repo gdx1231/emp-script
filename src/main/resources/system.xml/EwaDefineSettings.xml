@@ -10,15 +10,15 @@
     <FieldHideRules>
       <!-- 按字段后缀隐藏 -->
       <HideBySuffix>
-        <Suffix Name="_CDATE" Description="创建时间字段"/>
-        <Suffix Name="_MDATE" Description="修改时间字段"/>
-        <Suffix Name="_STATUS" Description="状态字段"/>
-        <Suffix Name="_STATE" Description="状态字段"/>
+        <Suffix Name="_CDATE" Description="创建时间字段" />
+        <Suffix Name="_MDATE" Description="修改时间字段" />
+        <Suffix Name="_STATUS" Description="状态字段" />
+        <Suffix Name="_STATE" Description="状态字段" />
       </HideBySuffix>
 
       <!-- 按字段类型隐藏 -->
       <HideByType>
-        <Type Name="IDENTITY" Description="自增字段"/>
+        <Type Name="IDENTITY" Description="自增字段" />
       </HideByType>
 
       <!-- 按字段名精确匹配隐藏 -->
@@ -29,33 +29,33 @@
 
     <!-- 页面配置 -->
     <PageSettings>
-      <Size Width="700" HiddenCaption="1" FrameCols="C2" HAlign="center" VAlign="top"/>
+      <Size Width="700" HiddenCaption="1" FrameCols="C2" HAlign="center" VAlign="top" />
     </PageSettings>
-    
+
     <!-- 字段 Tag 类型配置（Frame 模式） -->
     <FieldTags>
       <!-- 日期时间类型 -->
-      <Tag Type="DATETIME,TIMESTAMP" Value="datetime"/>
-      <Tag Type="DATE" Value="date"/>
-      <Tag Type="TIME" Value="time"/>
-      
+      <Tag Type="DATETIME,TIMESTAMP" Value="datetime" />
+      <Tag Type="DATE" Value="date" />
+      <Tag Type="TIME" Value="time" />
+
       <!-- 长文本类型 -->
-      <Tag Type="TEXT,MEMO,LONGVARCHAR,LONGNVARCHAR" Value="textarea"/>
-      
+      <Tag Type="TEXT,MEMO,LONGVARCHAR,LONGNVARCHAR" Value="textarea" />
+
       <!-- 特殊字段后缀匹配（按后缀自动选择编辑器） -->
       <!-- _SQL 字段：使用 SQL 编辑器 -->
-      <Tag Type="SQL" Value="sqlEditor"/>
+      <Tag Type="SQL" Value="sqlEditor" />
       <!-- _XML 字段：使用 XML 编辑器 -->
-      <Tag Type="XML" Value="xmlEditor"/>
+      <Tag Type="XML" Value="xmlEditor" />
       <!-- _JSON 字段：使用 JSON 编辑器 -->
-      <Tag Type="JSON" Value="jsonEditor"/>
+      <Tag Type="JSON" Value="jsonEditor" />
       <!-- _HTML 字段：使用 HTML5 编辑器 -->
-      <Tag Type="HTML" Value="dHtml5"/>
+      <Tag Type="HTML" Value="dHtml5" />
       <!-- _CSS 字段：使用 CSS 编辑器 -->
-      <Tag Type="CSS" Value="cssEditor"/>
-      
+      <Tag Type="CSS" Value="cssEditor" />
+
       <!-- 默认类型 -->
-      <Tag Type="DEFAULT" Value="text"/>
+      <Tag Type="DEFAULT" Value="text" />
     </FieldTags>
   </Frame>
 
@@ -63,59 +63,47 @@
   <ListFrame>
     <!-- 页面配置 -->
     <PageSettings>
-      <Size Width="100%" HiddenCaption="" FrameCols="" HAlign="center" VAlign="top"/>
-      <PageSize IsSplitPage="1" PageSize="10" Recycle="1"/>
-      <ListUI luButtons="1" luSearch="1" luSelect="S"/>
+      <Size Width="100%" HiddenCaption="" FrameCols="" HAlign="center" VAlign="top" />
+      <PageSize IsSplitPage="1" PageSize="10" Recycle="1" />
+      <ListUI luButtons="1" luSearch="1" luSelect="S" />
     </PageSettings>
 
     <!-- OrderSearch 配置规则 -->
     <OrderSearchRules>
       <!-- 数字类型：IsOrder=1, SearchType="" -->
-      <Rule Type="INT,DECIMAL,NUM,DOUBLE,FLOAT,MONEY" IsOrder="1" SearchType=""/>
+      <Rule Type="INT,DECIMAL,NUM,DOUBLE,FLOAT,MONEY" IsOrder="1" SearchType="" />
 
       <!-- 日期类型：IsOrder=1, SearchType="" -->
-      <Rule Type="DATE,TIME,TIMESTAMP" IsOrder="1" SearchType=""/>
+      <Rule Type="DATE,TIME,TIMESTAMP" IsOrder="1" SearchType="" />
 
       <!-- 文字类型<=100：IsOrder=1, SearchType="text" -->
-      <Rule Type="CHAR,TEXT" MaxLength="100" IsOrder="1" SearchType="text"/>
+      <Rule Type="CHAR,TEXT" MaxLength="100" IsOrder="1" SearchType="text" />
 
       <!-- 文字类型>100：IsOrder=0, SearchType="text" -->
-      <Rule Type="CHAR,TEXT" MaxLength="9999" IsOrder="0" SearchType="text"/>
+      <Rule Type="CHAR,TEXT" MaxLength="9999" IsOrder="0" SearchType="text" />
     </OrderSearchRules>
-    
+
     <!-- 字段 Tag 类型配置（ListFrame 模式） -->
     <FieldTags>
       <!-- ListFrame 默认所有字段都使用 span 显示 -->
-      <Tag Type="DEFAULT" Value="span"/>
-      
-      <!-- 特殊字段后缀匹配（按后缀自动选择编辑器） -->
-      <!-- _SQL 字段：使用 SQL 编辑器 -->
-      <Tag Type="SQL" Value="sqlEditor"/>
-      <!-- _XML 字段：使用 XML 编辑器 -->
-      <Tag Type="XML" Value="xmlEditor"/>
-      <!-- _JSON 字段：使用 JSON 编辑器 -->
-      <Tag Type="JSON" Value="jsonEditor"/>
-      <!-- _HTML 字段：使用 HTML5 编辑器 -->
-      <Tag Type="HTML" Value="dHtml5"/>
-      <!-- _CSS 字段：使用 CSS 编辑器 -->
-      <Tag Type="CSS" Value="cssEditor"/>
+      <Tag Type="DEFAULT" Value="span" />
     </FieldTags>
   </ListFrame>
 
   <!-- 字段格式配置（通用） -->
   <FieldFormats>
     <!-- 日期时间类型 -->
-    <Format Type="DATETIME,TIMESTAMP" Value="DateShortTime"/>
-    <Format Type="DATE" Value="Date"/>
-    <Format Type="TIME" Value="Time"/>
+    <Format Type="DATETIME,TIMESTAMP" Value="DateShortTime" />
+    <Format Type="DATE" Value="Date" />
+    <Format Type="TIME" Value="Time" />
 
     <!-- 货币类型 -->
-    <Format Type="MONEY,DECIMAL,NUMERIC" Value="LeastMoney"/>
+    <Format Type="MONEY,DECIMAL,NUMERIC" Value="LeastMoney" />
 
     <!-- 整数类型 -->
-    <Format Type="INT,BIGINT,SMALLINT,TINYINT" Value="Int"/>
+    <Format Type="INT,BIGINT,SMALLINT,TINYINT" Value="Int" />
 
     <!-- 数字精度配置 -->
-    <NumberScale Type="DECIMAL,NUMERIC,MONEY" Value="2"/>
+    <NumberScale Type="DECIMAL,NUMERIC,MONEY" Value="2" />
   </FieldFormats>
 </EwaDefineSettings>
