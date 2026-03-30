@@ -396,13 +396,41 @@ public class DatabaseTableToXmlTest {
         // 10. 保存 XML 文件到 temp 目录
         String outputPath = "temp/ewa_script_test/CRM_COM.xml";
         java.nio.file.Files.createDirectories(java.nio.file.Paths.get("temp/ewa_script_test"));
-        java.nio.file.Files.write(java.nio.file.Paths.get(outputPath), 
-            ("<!-- CRM_COM.LF.M -->\n" + xmlLFM + "\n\n<!-- CRM_COM.LF.V -->\n" + xmlLFV).getBytes());
+        
+        // 移除 XML 声明和 EasyWebTemplates 根节点，只保留 EasyWebTemplate 内容
+        String xmlLFMContent = extractEasyWebTemplateContent(xmlLFM);
+        String xmlLFVContent = extractEasyWebTemplateContent(xmlLFV);
+        
+        // 合并两个 EasyWebTemplate 到一个 EasyWebTemplates 根节点下
+        String combinedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+            "<EasyWebTemplates>\n" +
+            "  <!-- CRM_COM.LF.M (列表修改模式) -->\n" +
+            xmlLFMContent +
+            "\n\n  <!-- CRM_COM.LF.V (列表查看模式) -->\n" +
+            xmlLFVContent +
+            "\n</EasyWebTemplates>";
+        
+        java.nio.file.Files.write(java.nio.file.Paths.get(outputPath), combinedXml.getBytes());
         
         System.out.println("=== CRM_COM.xml 已生成 ===");
         System.out.println("路径：" + outputPath);
         System.out.println("包含:");
         System.out.println("  - crm_com.lf.m (列表修改模式)");
         System.out.println("  - crm_com.lf.v (列表查看模式)");
+    }
+    
+    /**
+     * 从 XML 字符串中提取 EasyWebTemplate 节点内容
+     * 移除 XML 声明和 EasyWebTemplates 根节点
+     */
+    private String extractEasyWebTemplateContent(String xml) {
+        String content = xml;
+        // 移除 XML 声明
+        content = content.replace("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n", "");
+        // 移除 EasyWebTemplates 开始标签
+        content = content.replace("<EasyWebTemplates>\n", "");
+        // 移除 EasyWebTemplates 结束标签
+        content = content.replace("\n</EasyWebTemplates>", "");
+        return content.trim();
     }
 }
