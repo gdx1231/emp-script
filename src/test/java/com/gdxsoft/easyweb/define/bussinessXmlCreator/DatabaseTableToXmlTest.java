@@ -331,12 +331,12 @@ public class DatabaseTableToXmlTest {
     }
     
     /**
-     * 测试创建 CRM_COM.xml（包含 LF.M 和 LF.V 两个例子）
+     * 测试创建 CRM_COM.xml（包含 LF.M、LF.V 和 F.NM 三个例子）
      */
     @Test
-    public void testCreateCrmComXml_With_LF_M_And_LF_V() throws Exception {
+    public void testCreateCrmComXml_With_LF_M_And_LF_V_And_F_NM() throws Exception {
         // 1. 创建参数 - LF.M
-        BusinessXmlCreateParams paramsM = new BusinessXmlCreateParams(
+        BusinessXmlCreateParams paramsLFM = new BusinessXmlCreateParams(
             "demo",           // db
             "CRM_COM",        // tableName
             "ListFrame",      // frameType
@@ -344,70 +344,98 @@ public class DatabaseTableToXmlTest {
         );
         
         // 2. 创建参数 - LF.V
-        BusinessXmlCreateParams paramsV = new BusinessXmlCreateParams(
+        BusinessXmlCreateParams paramsLFV = new BusinessXmlCreateParams(
             "demo",           // db
             "CRM_COM",        // tableName
             "ListFrame",      // frameType
             "V"               // operationType (View)
         );
         
-        // 3. 验证参数
-        assertTrue(paramsM.validate(), "LF.M 参数应该有效");
-        assertTrue(paramsV.validate(), "LF.V 参数应该有效");
+        // 3. 创建参数 - F.NM
+        BusinessXmlCreateParams paramsFNM = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "Frame",          // frameType
+            "NM"              // operationType (New/Modify)
+        );
         
-        // 4. 创建 BusinessXmlCreator
+        // 4. 验证参数
+        assertTrue(paramsLFM.validate(), "LF.M 参数应该有效");
+        assertTrue(paramsLFV.validate(), "LF.V 参数应该有效");
+        assertTrue(paramsFNM.validate(), "F.NM 参数应该有效");
+        
+        // 5. 创建 BusinessXmlCreator
         BusinessXmlCreator creator = new BusinessXmlCreator(config, crmComTable);
         
-        // 5. 生成 LF.M XML
+        // 6. 生成 LF.M XML
         String xmlLFM = creator.createShowXml(
-            paramsM.getDb(),
-            paramsM.getTableName(),
+            paramsLFM.getDb(),
+            paramsLFM.getTableName(),
             null,  // selectSql
             null,  // jsonParams
-            paramsM.getFrameType(),
-            paramsM.getOperationType()
+            paramsLFM.getFrameType(),
+            paramsLFM.getOperationType()
         );
         
-        // 6. 生成 LF.V XML
+        // 7. 生成 LF.V XML
         String xmlLFV = creator.createShowXml(
-            paramsV.getDb(),
-            paramsV.getTableName(),
+            paramsLFV.getDb(),
+            paramsLFV.getTableName(),
             null,  // selectSql
             null,  // jsonParams
-            paramsV.getFrameType(),
-            paramsV.getOperationType()
+            paramsLFV.getFrameType(),
+            paramsLFV.getOperationType()
         );
         
-        // 7. 验证 XML
+        // 8. 生成 F.NM XML
+        String xmlFNM = creator.createShowXml(
+            paramsFNM.getDb(),
+            paramsFNM.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            paramsFNM.getFrameType(),
+            paramsFNM.getOperationType()
+        );
+        
+        // 9. 验证 XML
         assertNotNull(xmlLFM, "LF.M XML 不应该为空");
         assertNotNull(xmlLFV, "LF.V XML 不应该为空");
+        assertNotNull(xmlFNM, "F.NM XML 不应该为空");
         
-        // 8. 验证 LF.M 内容
+        // 10. 验证 LF.M 内容
         assertTrue(xmlLFM.contains("CRM_COM.LF.M"), "LF.M XML 应该包含正确的名称");
         assertTrue(xmlLFM.contains("ListFrame"), "LF.M XML 应该包含 ListFrame");
         assertTrue(xmlLFM.contains("butNew"), "LF.M XML 应该包含 butNew 按钮");
         assertTrue(xmlLFM.contains("butModify"), "LF.M XML 应该包含 butModify 按钮");
         assertTrue(xmlLFM.contains("butDelete"), "LF.M XML 应该包含 butDelete 按钮");
         
-        // 9. 验证 LF.V 内容
+        // 11. 验证 LF.V 内容
         assertTrue(xmlLFV.contains("CRM_COM.LF.V"), "LF.V XML 应该包含正确的名称");
         assertTrue(xmlLFV.contains("ListFrame"), "LF.V XML 应该包含 ListFrame");
         
-        // 10. 保存 XML 文件到 temp 目录
+        // 12. 验证 F.NM 内容
+        assertTrue(xmlFNM.contains("CRM_COM.F.NM"), "F.NM XML 应该包含正确的名称");
+        assertTrue(xmlFNM.contains("Frame"), "F.NM XML 应该包含 Frame");
+        assertTrue(xmlFNM.contains("butOk"), "F.NM XML 应该包含 butOk 按钮");
+        
+        // 13. 保存 XML 文件到 temp 目录
         String outputPath = "temp/ewa_script_test/CRM_COM.xml";
         java.nio.file.Files.createDirectories(java.nio.file.Paths.get("temp/ewa_script_test"));
         
-        // 移除 XML 声明和 EasyWebTemplates 根节点，只保留 EasyWebTemplate 内容
+        // 提取 EasyWebTemplate 内容
         String xmlLFMContent = extractEasyWebTemplateContent(xmlLFM);
         String xmlLFVContent = extractEasyWebTemplateContent(xmlLFV);
+        String xmlFNMContent = extractEasyWebTemplateContent(xmlFNM);
         
-        // 合并两个 EasyWebTemplate 到一个 EasyWebTemplates 根节点下
+        // 合并三个 EasyWebTemplate 到一个 EasyWebTemplates 根节点下
         String combinedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
             "<EasyWebTemplates>\n" +
-            "  <!-- CRM_COM.LF.M (列表修改模式) -->\n" +
+            "  <!-- crm_com.lf.m (列表修改模式) -->\n" +
             xmlLFMContent +
-            "\n\n  <!-- CRM_COM.LF.V (列表查看模式) -->\n" +
+            "\n\n  <!-- crm_com.lf.v (列表查看模式) -->\n" +
             xmlLFVContent +
+            "\n\n  <!-- crm_com.f.nm (框架新增修改模式) -->\n" +
+            xmlFNMContent +
             "\n</EasyWebTemplates>";
         
         java.nio.file.Files.write(java.nio.file.Paths.get(outputPath), combinedXml.getBytes());
@@ -417,6 +445,7 @@ public class DatabaseTableToXmlTest {
         System.out.println("包含:");
         System.out.println("  - crm_com.lf.m (列表修改模式)");
         System.out.println("  - crm_com.lf.v (列表查看模式)");
+        System.out.println("  - crm_com.f.nm (框架新增修改模式)");
     }
     
     /**
