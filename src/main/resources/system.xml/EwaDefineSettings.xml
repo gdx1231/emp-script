@@ -64,14 +64,31 @@
     <Format Type="DATETIME,TIMESTAMP" Value="DateShortTime"/>
     <Format Type="DATE" Value="Date"/>
     <Format Type="TIME" Value="Time"/>
-    
+
     <!-- 货币类型 -->
     <Format Type="MONEY,DECIMAL,NUMERIC" Value="LeastMoney"/>
-    
+
     <!-- 整数类型 -->
     <Format Type="INT,BIGINT,SMALLINT,TINYINT" Value="Int"/>
-    
+
     <!-- 数字精度配置 -->
     <NumberScale Type="DECIMAL,NUMERIC,MONEY" Value="2"/>
   </FieldFormats>
+  
+  <!-- 字段 Tag 类型配置（通用） -->
+  <FieldTags>
+    <!-- 日期时间类型 -->
+    <Tag Type="DATETIME,TIMESTAMP" Value="datetime"/>
+    <Tag Type="DATE" Value="date"/>
+    <Tag Type="TIME" Value="time"/>
+    
+    <!-- 长文本类型 -->
+    <Tag Type="TEXT,MEMO,LONGVARCHAR,LONGNVARCHAR" Value="textarea"/>
+    
+    <!-- 数字类型：使用 text，通过 DataType 和 Valid 控制 -->
+    <!-- <Tag Type="INT,DECIMAL,NUM" Value="text"/> -->
+    
+    <!-- 默认类型 -->
+    <Tag Type="DEFAULT" Value="text"/>
+  </FieldTags>
 </EwaDefineSettings>

@@ -41,6 +41,7 @@ public class EwaDefineSettings {
     private ListFramePageSettings listFramePageSettings;
     private java.util.Map<String, String> fieldFormats;
     private java.util.Map<String, String> numberScales;
+    private java.util.Map<String, String> fieldTags;
     
     private EwaDefineSettings() {
         loadSettings();
@@ -88,6 +89,9 @@ public class EwaDefineSettings {
 
             // 加载字段格式配置
             loadFieldFormats();
+
+            // 加载字段 Tag 配置
+            loadFieldTags();
 
             LOGGER.info("EwaDefineSettings.xml 加载成功");
         } catch (Exception e) {
@@ -262,7 +266,83 @@ public class EwaDefineSettings {
             }
         }
     }
-    
+
+    /**
+     * 加载字段 Tag 配置
+     */
+    private void loadFieldTags() {
+        fieldTags = new java.util.HashMap<>();
+
+        // 加载 FieldTags 配置
+        NodeList fieldTagsNodes = settingsDoc.getElementsByTagName("FieldTags");
+        if (fieldTagsNodes.getLength() > 0) {
+            Element fieldTagsElem = (Element) fieldTagsNodes.item(0);
+
+            // 加载 Tag 配置
+            NodeList tagNodes = fieldTagsElem.getElementsByTagName("Tag");
+            for (int i = 0; i < tagNodes.getLength(); i++) {
+                Element tagElem = (Element) tagNodes.item(i);
+                String typeAttr = tagElem.getAttribute("Type");
+                String value = tagElem.getAttribute("Value");
+
+                if (typeAttr != null && !typeAttr.isEmpty() && value != null && !value.isEmpty()) {
+                    // 类型可能包含多个，用逗号分隔
+                    String[] types = typeAttr.split(",");
+                    for (String type : types) {
+                        fieldTags.put(type.trim().toUpperCase(), value);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取字段 Tag 类型
+     * 从 EwaDefineSettings.xml/FieldTags 读取配置
+     */
+    public String getTagType(String fieldType) {
+        if (fieldType == null || fieldTags == null) return "text";
+        String typeUpper = fieldType.toUpperCase();
+
+        // 从配置中查找匹配的类型
+        // 1. 精确匹配
+        if (fieldTags.containsKey(typeUpper)) {
+            return fieldTags.get(typeUpper);
+        }
+
+        // 2. 包含匹配
+        for (String configType : fieldTags.keySet()) {
+            if (typeUpper.contains(configType)) {
+                return fieldTags.get(configType);
+            }
+        }
+
+        // 3. 特殊处理日期时间类型
+        if (typeUpper.contains("DATETIME") || typeUpper.contains("TIMESTAMP")) {
+            String tag = fieldTags.get("DATETIME");
+            if (tag != null) return tag;
+        }
+        if (typeUpper.contains("DATE") && !typeUpper.contains("TIME")) {
+            String tag = fieldTags.get("DATE");
+            if (tag != null) return tag;
+        }
+        if (typeUpper.contains("TIME") && !typeUpper.contains("DATE")) {
+            String tag = fieldTags.get("TIME");
+            if (tag != null) return tag;
+        }
+
+        // 4. 特殊处理长文本类型
+        if (typeUpper.contains("TEXT") || typeUpper.contains("MEMO") || 
+            typeUpper.contains("LONGVARCHAR") || typeUpper.contains("LONGNVARCHAR")) {
+            String tag = fieldTags.get("TEXT");
+            if (tag != null) return tag;
+        }
+
+        // 5. 返回默认值或 DEFAULT 配置
+        String defaultTag = fieldTags.get("DEFAULT");
+        return defaultTag != null ? defaultTag : "text";
+    }
+
     /**
      * 获取字段格式
      */
