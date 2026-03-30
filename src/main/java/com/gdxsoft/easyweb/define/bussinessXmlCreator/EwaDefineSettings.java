@@ -301,44 +301,81 @@ public class EwaDefineSettings {
      * 从 EwaDefineSettings.xml/FieldTags 读取配置
      */
     public String getTagType(String fieldType) {
-        if (fieldType == null || fieldTags == null) return "text";
-        String typeUpper = fieldType.toUpperCase();
-
-        // 从配置中查找匹配的类型
-        // 1. 精确匹配
-        if (fieldTags.containsKey(typeUpper)) {
-            return fieldTags.get(typeUpper);
-        }
-
-        // 2. 包含匹配
-        for (String configType : fieldTags.keySet()) {
-            if (typeUpper.contains(configType)) {
-                return fieldTags.get(configType);
+        return getTagType(fieldType, null);
+    }
+    
+    /**
+     * 获取字段 Tag 类型（支持字段名后缀匹配）
+     * 从 EwaDefineSettings.xml/FieldTags 读取配置
+     * @param fieldType 数据库字段类型
+     * @param fieldName 字段名（用于后缀匹配，如 _SQL, _XML, _JSON 等）
+     * @return Tag 类型（text, textarea, date, datetime, sqlEditor, xmlEditor 等）
+     */
+    public String getTagType(String fieldType, String fieldName) {
+        if (fieldTags == null) return "text";
+        
+        // 1. 优先检查字段名后缀（特殊编辑器）
+        if (fieldName != null && !fieldName.isEmpty()) {
+            String fieldNameUpper = fieldName.toUpperCase();
+            
+            // 检查特殊后缀：_SQL, _XML, _JSON, _HTML, _CSS
+            if (fieldNameUpper.endsWith("_SQL")) {
+                String tag = fieldTags.get("SQL");
+                if (tag != null) return tag;
+            } else if (fieldNameUpper.endsWith("_XML")) {
+                String tag = fieldTags.get("XML");
+                if (tag != null) return tag;
+            } else if (fieldNameUpper.endsWith("_JSON") || fieldNameUpper.endsWith("_JSONB")) {
+                String tag = fieldTags.get("JSON");
+                if (tag != null) return tag;
+            } else if (fieldNameUpper.endsWith("_HTML") || fieldNameUpper.endsWith("_HTML5")) {
+                String tag = fieldTags.get("HTML");
+                if (tag != null) return tag;
+            } else if (fieldNameUpper.endsWith("_CSS")) {
+                String tag = fieldTags.get("CSS");
+                if (tag != null) return tag;
             }
         }
-
-        // 3. 特殊处理日期时间类型
-        if (typeUpper.contains("DATETIME") || typeUpper.contains("TIMESTAMP")) {
-            String tag = fieldTags.get("DATETIME");
-            if (tag != null) return tag;
+        
+        // 2. 根据数据库类型匹配
+        if (fieldType != null && !fieldType.isEmpty()) {
+            String typeUpper = fieldType.toUpperCase();
+            
+            // 2.1 精确匹配
+            if (fieldTags.containsKey(typeUpper)) {
+                return fieldTags.get(typeUpper);
+            }
+            
+            // 2.2 包含匹配
+            for (String configType : fieldTags.keySet()) {
+                if (typeUpper.contains(configType)) {
+                    return fieldTags.get(configType);
+                }
+            }
+            
+            // 2.3 特殊处理日期时间类型
+            if (typeUpper.contains("DATETIME") || typeUpper.contains("TIMESTAMP")) {
+                String tag = fieldTags.get("DATETIME");
+                if (tag != null) return tag;
+            }
+            if (typeUpper.contains("DATE") && !typeUpper.contains("TIME")) {
+                String tag = fieldTags.get("DATE");
+                if (tag != null) return tag;
+            }
+            if (typeUpper.contains("TIME") && !typeUpper.contains("DATE")) {
+                String tag = fieldTags.get("TIME");
+                if (tag != null) return tag;
+            }
+            
+            // 2.4 特殊处理长文本类型
+            if (typeUpper.contains("TEXT") || typeUpper.contains("MEMO") ||
+                typeUpper.contains("LONGVARCHAR") || typeUpper.contains("LONGNVARCHAR")) {
+                String tag = fieldTags.get("TEXT");
+                if (tag != null) return tag;
+            }
         }
-        if (typeUpper.contains("DATE") && !typeUpper.contains("TIME")) {
-            String tag = fieldTags.get("DATE");
-            if (tag != null) return tag;
-        }
-        if (typeUpper.contains("TIME") && !typeUpper.contains("DATE")) {
-            String tag = fieldTags.get("TIME");
-            if (tag != null) return tag;
-        }
-
-        // 4. 特殊处理长文本类型
-        if (typeUpper.contains("TEXT") || typeUpper.contains("MEMO") || 
-            typeUpper.contains("LONGVARCHAR") || typeUpper.contains("LONGNVARCHAR")) {
-            String tag = fieldTags.get("TEXT");
-            if (tag != null) return tag;
-        }
-
-        // 5. 返回默认值或 DEFAULT 配置
+        
+        // 3. 返回默认值或 DEFAULT 配置
         String defaultTag = fieldTags.get("DEFAULT");
         return defaultTag != null ? defaultTag : "text";
     }

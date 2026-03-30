@@ -246,7 +246,7 @@ public class BusinessXmlCreatorFrame extends BusinessXmlCreatorBase {
         Element tagSet = doc.createElement("Set");
         tagSet.setAttribute("IsLFEdit", "0");
         tagSet.setAttribute("SpanShowAs", "");
-        tagSet.setAttribute("Tag", getTagType(field.getDatabaseType()));
+        tagSet.setAttribute("Tag", getTagType(field.getDatabaseType(), field.getName()));
         tag.appendChild(tagSet);
         xitem.appendChild(tag);
 

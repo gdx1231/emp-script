@@ -142,10 +142,21 @@ public abstract class BusinessXmlCreatorBase {
      * 从 EwaDefineSettings.xml/FieldTags 读取配置
      * 参考 EwaConfig.xml/Items/XItems 中定义的 XItem Name
      * 可用的类型：text, textarea, span, hidden, password, date, datetime, time, select, combo, checkbox, radio 等
+     * 特殊后缀：_SQL→sqlEditor, _XML→xmlEditor, _JSON→jsonEditor, _HTML→dHtml5, _CSS→cssEditor
+     * @param dbType 数据库字段类型
+     * @param fieldName 字段名（用于后缀匹配）
+     * @return Tag 类型
+     */
+    protected String getTagType(String dbType, String fieldName) {
+        // 从配置读取 Tag 类型（支持字段名后缀匹配）
+        return EwaDefineSettings.getInstance().getTagType(dbType, fieldName);
+    }
+    
+    /**
+     * 获取 Tag 类型（不传字段名，仅根据数据库类型）
      */
     protected String getTagType(String dbType) {
-        // 从配置读取 Tag 类型
-        return EwaDefineSettings.getInstance().getTagType(dbType);
+        return getTagType(dbType, null);
     }
 
     /**

@@ -85,6 +85,18 @@
     <!-- 长文本类型 -->
     <Tag Type="TEXT,MEMO,LONGVARCHAR,LONGNVARCHAR" Value="textarea"/>
     
+    <!-- 特殊字段后缀匹配（按后缀自动选择编辑器） -->
+    <!-- _SQL 字段：使用 SQL 编辑器 -->
+    <Tag Type="SQL" Value="sqlEditor"/>
+    <!-- _XML 字段：使用 XML 编辑器 -->
+    <Tag Type="XML" Value="xmlEditor"/>
+    <!-- _JSON 字段：使用 JSON 编辑器 -->
+    <Tag Type="JSON" Value="jsonEditor"/>
+    <!-- _HTML 字段：使用 HTML5 编辑器 -->
+    <Tag Type="HTML" Value="dHtml5"/>
+    <!-- _CSS 字段：使用 CSS 编辑器 -->
+    <Tag Type="CSS" Value="cssEditor"/>
+    
     <!-- 默认类型 -->
     <Tag Type="DEFAULT" Value="text"/>
   </FieldTags>
