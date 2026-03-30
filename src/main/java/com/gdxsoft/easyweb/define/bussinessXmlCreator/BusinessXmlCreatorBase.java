@@ -145,18 +145,19 @@ public abstract class BusinessXmlCreatorBase {
      * 特殊后缀：_SQL→sqlEditor, _XML→xmlEditor, _JSON→jsonEditor, _HTML→dHtml5, _CSS→cssEditor
      * @param dbType 数据库字段类型
      * @param fieldName 字段名（用于后缀匹配）
+     * @param frameType Frame 类型（Frame 或 ListFrame），用于选择对应的配置
      * @return Tag 类型
      */
-    protected String getTagType(String dbType, String fieldName) {
-        // 从配置读取 Tag 类型（支持字段名后缀匹配）
-        return EwaDefineSettings.getInstance().getTagType(dbType, fieldName);
+    protected String getTagType(String dbType, String fieldName, String frameType) {
+        // 从配置读取 Tag 类型（支持字段名后缀匹配和 Frame 类型区分）
+        return EwaDefineSettings.getInstance().getTagType(dbType, fieldName, frameType);
     }
-    
+
     /**
-     * 获取 Tag 类型（不传字段名，仅根据数据库类型）
+     * 获取 Tag 类型（不传字段名和 frameType）
      */
     protected String getTagType(String dbType) {
-        return getTagType(dbType, null);
+        return getTagType(dbType, null, null);
     }
 
     /**
