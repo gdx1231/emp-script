@@ -47,8 +47,11 @@ public class EwaDefineSettings {
     private java.util.Map<String, String> listFrameFieldTags;
     private java.util.Map<String, String> fieldDefaultsBySuffix;
     private java.util.Map<String, String> fieldDefaultsByName;
+    private java.util.Map<String, Boolean> fieldWhereBySuffix;
+    private java.util.Map<String, Boolean> fieldWhereByName;
     private String statusFieldSuffix;
     private String statusFieldDefaultValue;
+    private boolean statusFieldWhere;
 
     private EwaDefineSettings() {
         loadSettings();
@@ -333,8 +336,11 @@ public class EwaDefineSettings {
     private void loadFieldDefaults() {
         fieldDefaultsBySuffix = new java.util.HashMap<>();
         fieldDefaultsByName = new java.util.HashMap<>();
+        fieldWhereBySuffix = new java.util.HashMap<>();
+        fieldWhereByName = new java.util.HashMap<>();
         statusFieldSuffix = null;
         statusFieldDefaultValue = null;
+        statusFieldWhere = false;
 
         // 加载 FieldDefaults 配置
         NodeList fieldDefaultsNodes = settingsDoc.getElementsByTagName("FieldDefaults");
@@ -350,11 +356,15 @@ public class EwaDefineSettings {
                     Element fieldElem = (Element) statusFieldNodes.item(i);
                     String suffix = fieldElem.getAttribute("Suffix");
                     String defaultValue = fieldElem.getAttribute("DefaultValue");
+                    String whereAttr = fieldElem.getAttribute("Where");
+                    boolean where = "true".equalsIgnoreCase(whereAttr);
+                    
                     if (suffix != null && !suffix.isEmpty() && defaultValue != null && !defaultValue.isEmpty()) {
                         // 保存第一个状态字段后缀和默认值
                         if (statusFieldSuffix == null) {
                             statusFieldSuffix = suffix;
                             statusFieldDefaultValue = defaultValue;
+                            statusFieldWhere = where;
                         }
                     }
                 }
@@ -369,8 +379,14 @@ public class EwaDefineSettings {
                     Element fieldElem = (Element) fieldNodes.item(i);
                     String suffix = fieldElem.getAttribute("Suffix");
                     String defaultValue = fieldElem.getAttribute("DefaultValue");
+                    String whereAttr = fieldElem.getAttribute("Where");
+                    boolean where = "true".equalsIgnoreCase(whereAttr);
+                    
                     if (suffix != null && !suffix.isEmpty() && defaultValue != null && !defaultValue.isEmpty()) {
                         fieldDefaultsBySuffix.put(suffix.toUpperCase(), defaultValue);
+                        if (where) {
+                            fieldWhereBySuffix.put(suffix.toUpperCase(), true);
+                        }
                     }
                 }
             }
@@ -384,8 +400,14 @@ public class EwaDefineSettings {
                     Element fieldElem = (Element) fieldNodes.item(i);
                     String name = fieldElem.getAttribute("Name");
                     String defaultValue = fieldElem.getAttribute("DefaultValue");
+                    String whereAttr = fieldElem.getAttribute("Where");
+                    boolean where = "true".equalsIgnoreCase(whereAttr);
+                    
                     if (name != null && !name.isEmpty() && defaultValue != null && !defaultValue.isEmpty()) {
                         fieldDefaultsByName.put(name.toUpperCase(), defaultValue);
+                        if (where) {
+                            fieldWhereByName.put(name.toUpperCase(), true);
+                        }
                     }
                 }
             }
@@ -794,5 +816,42 @@ public class EwaDefineSettings {
      */
     public String getStatusFieldDefaultValue() {
         return statusFieldDefaultValue;
+    }
+    
+    /**
+     * 获取状态字段是否需要添加到 WHERE 条件
+     * @return true 表示需要添加到 WHERE
+     */
+    public boolean isStatusFieldWhere() {
+        return statusFieldWhere;
+    }
+    
+    /**
+     * 获取字段是否需要添加到 WHERE 条件
+     * @param fieldName 字段名
+     * @return true 表示需要添加到 WHERE
+     */
+    public boolean isFieldWhere(String fieldName) {
+        if (fieldName == null || fieldName.isEmpty()) {
+            return false;
+        }
+        
+        String fieldNameUpper = fieldName.toUpperCase();
+        
+        // 1. 先检查精确匹配的名称
+        Boolean where = fieldWhereByName.get(fieldNameUpper);
+        if (where != null && where) {
+            return true;
+        }
+        
+        // 2. 检查后缀匹配
+        for (java.util.Map.Entry<String, Boolean> entry : fieldWhereBySuffix.entrySet()) {
+            String suffix = entry.getKey();
+            if (fieldNameUpper.endsWith(suffix) && entry.getValue()) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

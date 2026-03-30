@@ -111,8 +111,8 @@
   <FieldDefaults>
     <!-- 状态字段配置 -->
     <StatusFields>
-      <Field Suffix="_STATUS" DefaultValue="'USED'"/>
-      <Field Suffix="_STATE" DefaultValue="'USED'"/>
+      <Field Suffix="_STATUS" DefaultValue="'USED'" Where="true"/>
+      <Field Suffix="_STATE" DefaultValue="'USED'" Where="true"/>
     </StatusFields>
     
     <!-- 按字段后缀的默认值 -->
@@ -122,15 +122,8 @@
       <Field Suffix="_MDATE" DefaultValue="@SYS_DATE"/>
       <Field Suffix="_DATE" DefaultValue="@SYS_DATE"/>
       
-      <!-- 用户相关字段 -->
-      <Field Suffix="_ADM_ID" DefaultValue="@g_adm_id"/>
-      <Field Suffix="ADM_ID" DefaultValue="@g_adm_id"/>
-      <Field Suffix="_SUP_ID" DefaultValue="@g_sup_id"/>
-      <Field Suffix="SUP_ID" DefaultValue="@g_sup_id"/>
-      
       <!-- 唯一标识 -->
       <Field Suffix="_UNID" DefaultValue="@sys_unid"/>
-      <Field Suffix="UNID" DefaultValue="@sys_unid"/>
       
       <!-- 创建/修改人 -->
       <Field Suffix="_CREATOR" DefaultValue="@g_adm_id"/>
@@ -139,10 +132,18 @@
     
     <!-- 按字段名精确匹配 -->
     <ByName>
-      <Field Name="CREATED_BY" DefaultValue="@g_adm_id"/>
-      <Field Name="MODIFIED_BY" DefaultValue="@g_adm_id"/>
+      <!-- 时间字段 -->
       <Field Name="CREATED_DATE" DefaultValue="@SYS_DATE"/>
       <Field Name="MODIFIED_DATE" DefaultValue="@SYS_DATE"/>
+      
+      <!-- 用户相关字段 -->
+      <Field Name="CREATED_BY" DefaultValue="@g_adm_id"/>
+      <Field Name="MODIFIED_BY" DefaultValue="@g_adm_id"/>
+      <Field Name="ADM_ID" DefaultValue="@g_adm_id" Where="true"/>
+      <Field Name="SUP_ID" DefaultValue="@g_sup_id" Where="true"/>
+      
+      <!-- 唯一标识 -->
+      <Field Name="UNID" DefaultValue="@sys_unid"/>
     </ByName>
   </FieldDefaults>
 </EwaDefineSettings>

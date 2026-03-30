@@ -345,14 +345,35 @@ public abstract class BusinessXmlCreatorBase {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT * FROM ").append(tableName);
         
+        java.util.ArrayList<String> whereConditions = new java.util.ArrayList<String>();
+        
         // 如果有状态字段，添加 WHERE 条件
         if (statusField != null) {
-            sql.append(" WHERE ").append(statusField).append("='USED'");
+            boolean statusWhere = EwaDefineSettings.getInstance().isStatusFieldWhere();
+            if (statusWhere) {
+                whereConditions.add(statusField + "='USED'");
+            }
+        }
+        
+        // 添加配置的 WHERE 条件字段
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (EwaDefineSettings.getInstance().isFieldWhere(fieldName)) {
+                whereConditions.add(fieldName + "=@" + fieldName);
+            }
+        }
+        
+        // 添加 WHERE 子句
+        if (!whereConditions.isEmpty()) {
+            sql.append(" WHERE ").append(String.join(" AND ", whereConditions));
         }
         
         // 添加 ORDER BY
         if (levelField != null || orderField != null) {
-            sql.append(" ORDER BY ");
+            if (whereConditions.isEmpty()) {
+                sql.append(" ORDER BY ");
+            } else {
+                sql.append(" ORDER BY ");
+            }
             if (levelField != null) {
                 sql.append(levelField);
                 if (orderField != null) {
@@ -378,12 +399,26 @@ public abstract class BusinessXmlCreatorBase {
             return "-- Primary key not found";
         }
         
-        // 如果有状态字段，使用 UPDATE 而不是 DELETE
-        if (statusField != null) {
-            return "UPDATE " + this.table.getName() + " SET " + statusField + "='DEL' WHERE " + pkField + " = @" + pkField;
+        java.util.ArrayList<String> whereConditions = new java.util.ArrayList<String>();
+        whereConditions.add(pkField + " = @" + pkField);
+        
+        // 添加配置的 WHERE 条件字段
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.equals(pkField)) continue;  // 跳过主键
+            if (EwaDefineSettings.getInstance().isFieldWhere(fieldName)) {
+                whereConditions.add(fieldName + "=@" + fieldName);
+            }
         }
         
-        return "DELETE FROM " + this.table.getName() + " WHERE " + pkField + " = @" + pkField;
+        // 如果有状态字段，使用 UPDATE 而不是 DELETE
+        if (statusField != null) {
+            boolean statusWhere = EwaDefineSettings.getInstance().isStatusFieldWhere();
+            if (statusWhere) {
+                return "UPDATE " + this.table.getName() + " SET " + statusField + "='DEL' WHERE " + String.join(" AND ", whereConditions);
+            }
+        }
+        
+        return "DELETE FROM " + this.table.getName() + " WHERE " + String.join(" AND ", whereConditions);
     }
     
     /**
@@ -400,8 +435,19 @@ public abstract class BusinessXmlCreatorBase {
             return "-- Name field not found";
         }
         
+        java.util.ArrayList<String> whereConditions = new java.util.ArrayList<String>();
+        whereConditions.add(pkField + " = @" + pkField);
+        
+        // 添加配置的 WHERE 条件字段
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.equals(pkField)) continue;  // 跳过主键
+            if (EwaDefineSettings.getInstance().isFieldWhere(fieldName)) {
+                whereConditions.add(fieldName + "=@" + fieldName);
+            }
+        }
+        
         return "UPDATE " + this.table.getName() + " SET " + nameField + " = @" + nameField + 
-               " WHERE " + pkField + " = @" + pkField;
+               " WHERE " + String.join(" AND ", whereConditions);
     }
     
     /**
