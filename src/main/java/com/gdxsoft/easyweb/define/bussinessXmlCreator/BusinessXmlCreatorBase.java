@@ -331,4 +331,208 @@ public abstract class BusinessXmlCreatorBase {
         }
         return descSet;
     }
+    
+    /**
+     * 获取 Tree 加载 SQL
+     * 如果存在 _STATUS 或 _STATE 字段，添加 WHERE status='USED' 条件
+     */
+    protected String getSqlTreeLoad() {
+        String tableName = this.table.getName();
+        String levelField = findFieldBySuffix("_LVL");
+        String orderField = findFieldBySuffix("_ORD");
+        String statusField = findStatusField();
+        
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT * FROM ").append(tableName);
+        
+        // 如果有状态字段，添加 WHERE 条件
+        if (statusField != null) {
+            sql.append(" WHERE ").append(statusField).append("='USED'");
+        }
+        
+        // 添加 ORDER BY
+        if (levelField != null || orderField != null) {
+            sql.append(" ORDER BY ");
+            if (levelField != null) {
+                sql.append(levelField);
+                if (orderField != null) {
+                    sql.append(", ").append(orderField);
+                }
+            } else if (orderField != null) {
+                sql.append(orderField);
+            }
+        }
+        
+        return sql.toString();
+    }
+    
+    /**
+     * 获取 Tree 删除节点 SQL
+     * 如果存在 _STATUS 或 _STATE 字段，改为 UPDATE status='DEL' 而不是 DELETE
+     */
+    protected String getSqlTreeNodeDelete() {
+        String pkField = getPrimaryKeyField();
+        String statusField = findStatusField();
+        
+        if (pkField == null || pkField.isEmpty()) {
+            return "-- Primary key not found";
+        }
+        
+        // 如果有状态字段，使用 UPDATE 而不是 DELETE
+        if (statusField != null) {
+            return "UPDATE " + this.table.getName() + " SET " + statusField + "='DEL' WHERE " + pkField + " = @" + pkField;
+        }
+        
+        return "DELETE FROM " + this.table.getName() + " WHERE " + pkField + " = @" + pkField;
+    }
+    
+    /**
+     * 获取 Tree 重命名节点 SQL
+     */
+    protected String getSqlTreeNodeRename() {
+        String pkField = getPrimaryKeyField();
+        String nameField = findFieldBySuffix("_NAME");
+        
+        if (pkField == null || pkField.isEmpty()) {
+            return "-- Primary key not found";
+        }
+        if (nameField == null || nameField.isEmpty()) {
+            return "-- Name field not found";
+        }
+        
+        return "UPDATE " + this.table.getName() + " SET " + nameField + " = @" + nameField + 
+               " WHERE " + pkField + " = @" + pkField;
+    }
+    
+    /**
+     * 获取 Tree 新增节点 SQL
+     * 参考 SQL Server 模板，使用 CASE WHEN 适配不同数据库
+     */
+    protected String getSqlTreeNodeNew() {
+        String pkField = getPrimaryKeyField();
+        String parentField = findFieldBySuffix("_PID");
+        String levelField = findFieldBySuffix("_LVL");
+        String orderField = findFieldBySuffix("_ORD");
+        String nameField = findFieldBySuffix("_NAME");
+        String cdateField = findFieldBySuffix("_CDATE");
+        String mdateField = findFieldBySuffix("_MDATE");
+        String statusField = findStatusField();
+        
+        if (pkField == null || pkField.isEmpty()) {
+            return "-- Primary key not found";
+        }
+        
+        StringBuilder sql = new StringBuilder();
+        sql.append("INSERT INTO ").append(this.table.getName()).append(" (");
+        
+        java.util.ArrayList<String> fields = new java.util.ArrayList<String>();
+        java.util.ArrayList<String> selectFields = new java.util.ArrayList<String>();
+        java.util.ArrayList<String> fromTables = new java.util.ArrayList<String>();
+        java.util.ArrayList<String> whereConditions = new java.util.ArrayList<String>();
+        
+        // 名称字段
+        if (nameField != null) {
+            fields.add(nameField);
+            selectFields.add("@EWA_TREE_TEXT " + nameField);
+        }
+        
+        // 父 ID 字段 - 使用 CASE WHEN 适配不同数据库
+        if (parentField != null) {
+            fields.add(parentField);
+            selectFields.add("CASE WHEN @EWA_TREE_PARENT_KEY IS NULL THEN 0 ELSE @EWA_TREE_PARENT_KEY END " + parentField);
+        }
+        
+        // 层级字段 - 使用 CASE WHEN 适配不同数据库
+        if (levelField != null) {
+            fields.add(levelField);
+            selectFields.add("CASE WHEN MAX(pp." + levelField + ") IS NULL THEN -1 ELSE MAX(pp." + levelField + ") END+1 " + levelField);
+            fromTables.add(this.table.getName() + " pp");
+        }
+        
+        // 排序字段 - 使用 CASE WHEN 适配不同数据库
+        if (orderField != null) {
+            fields.add(orderField);
+            selectFields.add("CASE WHEN MAX(pc." + orderField + ") IS NULL THEN 0 ELSE MAX(pc." + orderField + ") END+1 " + orderField);
+            if (fromTables.isEmpty()) {
+                fromTables.add(this.table.getName() + " pc");
+            } else {
+                // 使用 LEFT JOIN
+                String joinTable = this.table.getName() + " pc ON pc." + parentField + "=pp." + pkField;
+                if (!fromTables.get(0).contains("JOIN")) {
+                    fromTables.set(0, fromTables.get(0) + " LEFT JOIN " + joinTable);
+                }
+            }
+        }
+        
+        // 创建时间字段
+        if (cdateField != null) {
+            fields.add(cdateField);
+            selectFields.add("@SYS_DATE " + cdateField);
+        }
+        
+        // 修改时间字段
+        if (mdateField != null) {
+            fields.add(mdateField);
+            selectFields.add("@SYS_DATE " + mdateField);
+        }
+        
+        // 状态字段 - 默认值为 'USED'
+        if (statusField != null) {
+            fields.add(statusField);
+            selectFields.add("'USED' " + statusField);
+        }
+        
+        // WHERE 条件
+        if (parentField != null && !fromTables.isEmpty()) {
+            whereConditions.add("WHERE pp." + parentField + "= @EWA_TREE_PARENT_KEY");
+        }
+        
+        // 构建 SQL
+        sql.append(String.join(", ", fields));
+        sql.append(") \nSELECT \t ");
+        sql.append(String.join(",\n\t ", selectFields));
+        
+        if (!fromTables.isEmpty()) {
+            sql.append("\nFROM ").append(String.join(" ", fromTables));
+        }
+        
+        if (!whereConditions.isEmpty()) {
+            sql.append("\n").append(String.join(" ", whereConditions));
+        }
+        
+        sql.append("\n-- auto ").append(pkField);
+        
+        return sql.toString();
+    }
+    
+    /**
+     * 查找带有指定后缀的字段
+     */
+    protected String findFieldBySuffix(String suffix) {
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.toUpperCase().endsWith(suffix.toUpperCase())) {
+                return fieldName;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * 查找状态字段 (_STATUS 或 _STATE)
+     */
+    protected String findStatusField() {
+        // 优先查找 _STATUS
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.toUpperCase().endsWith("_STATUS")) {
+                return fieldName;
+            }
+        }
+        // 查找 _STATE
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            if (fieldName.toUpperCase().endsWith("_STATE")) {
+                return fieldName;
+            }
+        }
+        return null;
+    }
 }

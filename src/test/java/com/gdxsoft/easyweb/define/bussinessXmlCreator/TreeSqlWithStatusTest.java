@@ -50,9 +50,15 @@ public class TreeSqlWithStatusTest {
         }
         
         // 验证 SQL
-        assert xml.contains("WHERE BT_STATUS='USED'") : "OnPageLoad SQL 应该包含 WHERE BT_STATUS='USED'";
-        assert xml.contains("SET BT_STATUS='DEL'") : "OnTreeNodeDelete SQL 应该是 UPDATE SET BT_STATUS='DEL'";
-        assert xml.contains("'USED' BT_STATUS") : "OnTreeNodeNew SQL 应该包含 'USED' BT_STATUS";
+        if (!xml.contains("WHERE BT_STATUS='USED'")) {
+            throw new AssertionError("OnPageLoad SQL 应该包含 WHERE BT_STATUS='USED'");
+        }
+        if (!xml.contains("SET BT_STATUS='DEL'")) {
+            throw new AssertionError("OnTreeNodeDelete SQL 应该是 UPDATE SET BT_STATUS='DEL'");
+        }
+        if (!xml.contains("'USED' BT_STATUS")) {
+            throw new AssertionError("OnTreeNodeNew SQL 应该包含 'USED' BT_STATUS");
+        }
         
         System.out.println("\n✓ 所有断言通过\n");
     }
@@ -82,9 +88,15 @@ public class TreeSqlWithStatusTest {
         }
         
         // 验证 SQL
-        assert xml.contains("WHERE BT_STATE='USED'") : "OnPageLoad SQL 应该包含 WHERE BT_STATE='USED'";
-        assert xml.contains("SET BT_STATE='DEL'") : "OnTreeNodeDelete SQL 应该是 UPDATE SET BT_STATE='DEL'";
-        assert xml.contains("'USED' BT_STATE") : "OnTreeNodeNew SQL 应该包含 'USED' BT_STATE";
+        if (!xml.contains("WHERE BT_STATE='USED'")) {
+            throw new AssertionError("OnPageLoad SQL 应该包含 WHERE BT_STATE='USED'");
+        }
+        if (!xml.contains("SET BT_STATE='DEL'")) {
+            throw new AssertionError("OnTreeNodeDelete SQL 应该是 UPDATE SET BT_STATE='DEL'");
+        }
+        if (!xml.contains("'USED' BT_STATE")) {
+            throw new AssertionError("OnTreeNodeNew SQL 应该包含 'USED' BT_STATE");
+        }
         
         System.out.println("\n✓ 所有断言通过\n");
     }

@@ -451,7 +451,7 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         onLoadSql.setAttribute("Name", "OnPageLoad SQL");
         onLoadSql.setAttribute("SqlType", "query");
         Element onLoadSqlContent = doc.createElement("Sql");
-        onLoadSqlContent.setTextContent(this.table.getFields().GetSqlTreeLoad());
+        onLoadSqlContent.setTextContent(getSqlTreeLoad());
         onLoadSql.appendChild(onLoadSqlContent);
         onLoadSql.appendChild(doc.createElement("CSSet"));
         sqlSet.appendChild(onLoadSql);
@@ -461,7 +461,7 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         onDeleteSql.setAttribute("Name", "OnTreeNodeDelete SQL");
         onDeleteSql.setAttribute("SqlType", "update");
         Element onDeleteSqlContent = doc.createElement("Sql");
-        onDeleteSqlContent.setTextContent(this.table.getFields().GetSqlTreeNodeDelete());
+        onDeleteSqlContent.setTextContent(getSqlTreeNodeDelete());
         onDeleteSql.appendChild(onDeleteSqlContent);
         onDeleteSql.appendChild(doc.createElement("CSSet"));
         sqlSet.appendChild(onDeleteSql);
@@ -471,7 +471,7 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         onRenameSql.setAttribute("Name", "OnTreeNodeRename SQL");
         onRenameSql.setAttribute("SqlType", "update");
         Element onRenameSqlContent = doc.createElement("Sql");
-        onRenameSqlContent.setTextContent(this.table.getFields().GetSqlTreeNodeRename());
+        onRenameSqlContent.setTextContent(getSqlTreeNodeRename());
         onRenameSql.appendChild(onRenameSqlContent);
         onRenameSql.appendChild(doc.createElement("CSSet"));
         sqlSet.appendChild(onRenameSql);
@@ -481,7 +481,7 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         onNewSql.setAttribute("Name", "OnTreeNodeNew SQL");
         onNewSql.setAttribute("SqlType", "update");
         Element onNewSqlContent = doc.createElement("Sql");
-        onNewSqlContent.setTextContent(this.table.getFields().GetSqlTreeNodeNew());
+        onNewSqlContent.setTextContent(getSqlTreeNodeNew());
         onNewSql.appendChild(onNewSqlContent);
         onNewSql.appendChild(doc.createElement("CSSet"));
         sqlSet.appendChild(onNewSql);
@@ -613,13 +613,13 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         if (sqlContent == null) return null;
 
         if (sqlContent.contains("this.Fields.GetSqlTreeLoad()")) {
-            return this.table.getFields().GetSqlTreeLoad();
+            return getSqlTreeLoad();
         } else if (sqlContent.contains("this.Fields.GetSqlTreeNodeDelete()")) {
-            return this.table.getFields().GetSqlTreeNodeDelete();
+            return getSqlTreeNodeDelete();
         } else if (sqlContent.contains("this.Fields.GetSqlTreeNodeRename()")) {
-            return this.table.getFields().GetSqlTreeNodeRename();
+            return getSqlTreeNodeRename();
         } else if (sqlContent.contains("this.Fields.GetSqlTreeNodeNew()")) {
-            return this.table.getFields().GetSqlTreeNodeNew();
+            return getSqlTreeNodeNew();
         }
 
         return sqlContent;
