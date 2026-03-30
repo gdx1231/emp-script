@@ -387,7 +387,7 @@ public class BusinessXmlCreator {
         org.w3c.dom.Element listUISet = doc.createElement("Set");
         listUISet.setAttribute("luButtons", "1");
         listUISet.setAttribute("luSearch", "1");
-        listUISet.setAttribute("luSelect", "s");
+        listUISet.setAttribute("luSelect", "S");
         listUI.appendChild(listUISet);
         
         // MenuShow 节点

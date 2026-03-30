@@ -155,7 +155,7 @@ public class DatabaseTableToXmlTest {
         // 7. 验证 ListUI 配置
         assertTrue(xmlPreview.contains("luButtons=\"1\""), "应该显示按钮");
         assertTrue(xmlPreview.contains("luSearch=\"1\""), "应该显示搜索");
-        assertTrue(xmlPreview.contains("luSelect=\"s\""), "应该是单选模式");
+        assertTrue(xmlPreview.contains("luSelect=\"S\""), "应该是单选模式");
         
         // 8. 验证 OrderSearch 配置
         // 数字类型 (CRM_COM_ID) 应该 IsOrder=1, SearchType=""
