@@ -85,9 +85,6 @@
     <!-- 长文本类型 -->
     <Tag Type="TEXT,MEMO,LONGVARCHAR,LONGNVARCHAR" Value="textarea"/>
     
-    <!-- 数字类型：使用 text，通过 DataType 和 Valid 控制 -->
-    <!-- <Tag Type="INT,DECIMAL,NUM" Value="text"/> -->
-    
     <!-- 默认类型 -->
     <Tag Type="DEFAULT" Value="text"/>
   </FieldTags>
