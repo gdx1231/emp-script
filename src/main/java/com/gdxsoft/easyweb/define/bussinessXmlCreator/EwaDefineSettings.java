@@ -45,6 +45,10 @@ public class EwaDefineSettings {
     private java.util.Map<String, String> numberScales;
     private java.util.Map<String, String> frameFieldTags;
     private java.util.Map<String, String> listFrameFieldTags;
+    private java.util.Map<String, String> fieldDefaultsBySuffix;
+    private java.util.Map<String, String> fieldDefaultsByName;
+    private String statusFieldSuffix;
+    private String statusFieldDefaultValue;
 
     private EwaDefineSettings() {
         loadSettings();
@@ -95,6 +99,9 @@ public class EwaDefineSettings {
 
             // 加载字段 Tag 配置（Frame 和 ListFrame 分别加载）
             loadFieldTags();
+
+            // 加载字段默认值配置
+            loadFieldDefaults();
 
             LOGGER.info("EwaDefineSettings.xml 加载成功");
         } catch (Exception e) {
@@ -321,9 +328,74 @@ public class EwaDefineSettings {
     }
 
     /**
+     * 加载字段默认值配置
+     */
+    private void loadFieldDefaults() {
+        fieldDefaultsBySuffix = new java.util.HashMap<>();
+        fieldDefaultsByName = new java.util.HashMap<>();
+        statusFieldSuffix = null;
+        statusFieldDefaultValue = null;
+
+        // 加载 FieldDefaults 配置
+        NodeList fieldDefaultsNodes = settingsDoc.getElementsByTagName("FieldDefaults");
+        if (fieldDefaultsNodes.getLength() > 0) {
+            Element fieldDefaultsElem = (Element) fieldDefaultsNodes.item(0);
+
+            // 加载状态字段配置
+            NodeList statusFieldsNodes = fieldDefaultsElem.getElementsByTagName("StatusFields");
+            if (statusFieldsNodes.getLength() > 0) {
+                Element statusFieldsElem = (Element) statusFieldsNodes.item(0);
+                NodeList statusFieldNodes = statusFieldsElem.getElementsByTagName("Field");
+                for (int i = 0; i < statusFieldNodes.getLength(); i++) {
+                    Element fieldElem = (Element) statusFieldNodes.item(i);
+                    String suffix = fieldElem.getAttribute("Suffix");
+                    String defaultValue = fieldElem.getAttribute("DefaultValue");
+                    if (suffix != null && !suffix.isEmpty() && defaultValue != null && !defaultValue.isEmpty()) {
+                        // 保存第一个状态字段后缀和默认值
+                        if (statusFieldSuffix == null) {
+                            statusFieldSuffix = suffix;
+                            statusFieldDefaultValue = defaultValue;
+                        }
+                    }
+                }
+            }
+
+            // 加载按后缀的默认值
+            NodeList bySuffixNodes = fieldDefaultsElem.getElementsByTagName("BySuffix");
+            if (bySuffixNodes.getLength() > 0) {
+                Element bySuffixElem = (Element) bySuffixNodes.item(0);
+                NodeList fieldNodes = bySuffixElem.getElementsByTagName("Field");
+                for (int i = 0; i < fieldNodes.getLength(); i++) {
+                    Element fieldElem = (Element) fieldNodes.item(i);
+                    String suffix = fieldElem.getAttribute("Suffix");
+                    String defaultValue = fieldElem.getAttribute("DefaultValue");
+                    if (suffix != null && !suffix.isEmpty() && defaultValue != null && !defaultValue.isEmpty()) {
+                        fieldDefaultsBySuffix.put(suffix.toUpperCase(), defaultValue);
+                    }
+                }
+            }
+
+            // 加载按名称的默认值
+            NodeList byNameNodes = fieldDefaultsElem.getElementsByTagName("ByName");
+            if (byNameNodes.getLength() > 0) {
+                Element byNameElem = (Element) byNameNodes.item(0);
+                NodeList fieldNodes = byNameElem.getElementsByTagName("Field");
+                for (int i = 0; i < fieldNodes.getLength(); i++) {
+                    Element fieldElem = (Element) fieldNodes.item(i);
+                    String name = fieldElem.getAttribute("Name");
+                    String defaultValue = fieldElem.getAttribute("DefaultValue");
+                    if (name != null && !name.isEmpty() && defaultValue != null && !defaultValue.isEmpty()) {
+                        fieldDefaultsByName.put(name.toUpperCase(), defaultValue);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * 获取字段 Tag 类型
      * 从 EwaDefineSettings.xml/FieldTags 读取配置
-     * 
+     *
      * @param fieldType 数据库字段类型
      * @return Tag 类型（text, textarea, date, datetime, sqlEditor, xmlEditor 等）
      */
@@ -677,5 +749,50 @@ public class EwaDefineSettings {
         public void setLuSelect(String luSelect) {
             this.luSelect = luSelect;
         }
+    }
+    
+    /**
+     * 获取字段默认值（按后缀或名称）
+     * @param fieldName 字段名
+     * @return 默认值表达式，如果没有配置则返回 null
+     */
+    public String getFieldDefaultValue(String fieldName) {
+        if (fieldName == null || fieldName.isEmpty()) {
+            return null;
+        }
+        
+        String fieldNameUpper = fieldName.toUpperCase();
+        
+        // 1. 先检查精确匹配的名称
+        String defaultValue = fieldDefaultsByName.get(fieldNameUpper);
+        if (defaultValue != null) {
+            return defaultValue;
+        }
+        
+        // 2. 检查后缀匹配
+        for (java.util.Map.Entry<String, String> entry : fieldDefaultsBySuffix.entrySet()) {
+            String suffix = entry.getKey();
+            if (fieldNameUpper.endsWith(suffix)) {
+                return entry.getValue();
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 获取状态字段后缀
+     * @return 状态字段后缀（如 _STATUS）
+     */
+    public String getStatusFieldSuffix() {
+        return statusFieldSuffix;
+    }
+    
+    /**
+     * 获取状态字段默认值
+     * @return 状态字段默认值（如 'USED'）
+     */
+    public String getStatusFieldDefaultValue() {
+        return statusFieldDefaultValue;
     }
 }

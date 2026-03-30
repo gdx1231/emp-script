@@ -467,19 +467,39 @@ public abstract class BusinessXmlCreatorBase {
         // 创建时间字段
         if (cdateField != null) {
             fields.add(cdateField);
-            selectFields.add("@SYS_DATE " + cdateField);
+            String defaultValue = EwaDefineSettings.getInstance().getFieldDefaultValue(cdateField);
+            selectFields.add((defaultValue != null ? defaultValue : "@SYS_DATE") + " " + cdateField);
         }
-        
+
         // 修改时间字段
         if (mdateField != null) {
             fields.add(mdateField);
-            selectFields.add("@SYS_DATE " + mdateField);
+            String defaultValue = EwaDefineSettings.getInstance().getFieldDefaultValue(mdateField);
+            selectFields.add((defaultValue != null ? defaultValue : "@SYS_DATE") + " " + mdateField);
         }
-        
-        // 状态字段 - 默认值为 'USED'
+
+        // 状态字段 - 从配置读取默认值
         if (statusField != null) {
             fields.add(statusField);
-            selectFields.add("'USED' " + statusField);
+            String defaultValue = EwaDefineSettings.getInstance().getStatusFieldDefaultValue();
+            selectFields.add((defaultValue != null ? defaultValue : "'USED'") + " " + statusField);
+        }
+        
+        // 其他字段 - 检查是否有配置的默认值
+        // 遍历所有字段，为有默认值配置的字段添加默认值
+        for (String fieldName : this.table.getFields().getFieldList()) {
+            // 跳过已处理的字段
+            if (fieldName.equals(pkField) || fieldName.equals(nameField) || 
+                fieldName.equals(parentField) || fieldName.equals(levelField) ||
+                fieldName.equals(orderField) || fieldName.equals(cdateField) ||
+                fieldName.equals(mdateField) || fieldName.equals(statusField)) {
+                
+                String defaultValue = EwaDefineSettings.getInstance().getFieldDefaultValue(fieldName);
+                if (defaultValue != null) {
+                    fields.add(fieldName);
+                    selectFields.add(defaultValue + " " + fieldName);
+                }
+            }
         }
         
         // WHERE 条件
@@ -521,6 +541,17 @@ public abstract class BusinessXmlCreatorBase {
      * 查找状态字段 (_STATUS 或 _STATE)
      */
     protected String findStatusField() {
+        // 从配置读取状态字段后缀
+        String statusSuffix = EwaDefineSettings.getInstance().getStatusFieldSuffix();
+        if (statusSuffix != null && !statusSuffix.isEmpty()) {
+            for (String fieldName : this.table.getFields().getFieldList()) {
+                if (fieldName.toUpperCase().endsWith(statusSuffix.toUpperCase())) {
+                    return fieldName;
+                }
+            }
+        }
+        
+        // 配置中没有或找不到，使用默认的后缀查找
         // 优先查找 _STATUS
         for (String fieldName : this.table.getFields().getFieldList()) {
             if (fieldName.toUpperCase().endsWith("_STATUS")) {
