@@ -39,6 +39,8 @@ public class EwaDefineSettings {
     private List<String> frameHideNames;
     private FramePageSettings framePageSettings;
     private ListFramePageSettings listFramePageSettings;
+    private java.util.Map<String, String> fieldFormats;
+    private java.util.Map<String, String> numberScales;
     
     private EwaDefineSettings() {
         loadSettings();
@@ -79,6 +81,9 @@ public class EwaDefineSettings {
             
             // 加载 ListFrame 配置
             loadListFrameSettings();
+            
+            // 加载字段格式配置
+            loadFieldFormats();
             
             LOGGER.info("EwaDefineSettings.xml 加载成功");
         } catch (Exception e) {
@@ -124,6 +129,25 @@ public class EwaDefineSettings {
         listFramePageSettings.setLuButtons("1");
         listFramePageSettings.setLuSearch("1");
         listFramePageSettings.setLuSelect("S");
+        
+        // 字段格式默认配置
+        fieldFormats = new java.util.HashMap<>();
+        fieldFormats.put("DATETIME", "DateShortTime");
+        fieldFormats.put("TIMESTAMP", "DateShortTime");
+        fieldFormats.put("DATE", "Date");
+        fieldFormats.put("TIME", "Time");
+        fieldFormats.put("MONEY", "LeastMoney");
+        fieldFormats.put("DECIMAL", "LeastMoney");
+        fieldFormats.put("NUMERIC", "LeastMoney");
+        fieldFormats.put("INT", "Int");
+        fieldFormats.put("BIGINT", "Int");
+        fieldFormats.put("SMALLINT", "Int");
+        fieldFormats.put("TINYINT", "Int");
+        
+        numberScales = new java.util.HashMap<>();
+        numberScales.put("DECIMAL", "2");
+        numberScales.put("NUMERIC", "2");
+        numberScales.put("MONEY", "2");
     }
     
     /**
@@ -283,6 +307,117 @@ public class EwaDefineSettings {
         listFramePageSettings.setLuButtons("1");
         listFramePageSettings.setLuSearch("1");
         listFramePageSettings.setLuSelect("S");
+    }
+    
+    /**
+     * 加载字段格式配置
+     */
+    private void loadFieldFormats() {
+        fieldFormats = new java.util.HashMap<>();
+        numberScales = new java.util.HashMap<>();
+        
+        // 加载 FieldFormats 配置
+        NodeList fieldFormatsNodes = settingsDoc.getElementsByTagName("FieldFormats");
+        if (fieldFormatsNodes.getLength() > 0) {
+            Element fieldFormatsElem = (Element) fieldFormatsNodes.item(0);
+            
+            // 加载 Format 配置
+            NodeList formatNodes = fieldFormatsElem.getElementsByTagName("Format");
+            for (int i = 0; i < formatNodes.getLength(); i++) {
+                Element formatElem = (Element) formatNodes.item(i);
+                String typeAttr = formatElem.getAttribute("Type");
+                String value = formatElem.getAttribute("Value");
+                
+                if (typeAttr != null && !typeAttr.isEmpty() && value != null && !value.isEmpty()) {
+                    // 类型可能包含多个，用逗号分隔
+                    String[] types = typeAttr.split(",");
+                    for (String type : types) {
+                        fieldFormats.put(type.trim().toUpperCase(), value);
+                    }
+                }
+            }
+            
+            // 加载 NumberScale 配置
+            NodeList numberScaleNodes = fieldFormatsElem.getElementsByTagName("NumberScale");
+            for (int i = 0; i < numberScaleNodes.getLength(); i++) {
+                Element numberScaleElem = (Element) numberScaleNodes.item(i);
+                String typeAttr = numberScaleElem.getAttribute("Type");
+                String value = numberScaleElem.getAttribute("Value");
+                
+                if (typeAttr != null && !typeAttr.isEmpty() && value != null && !value.isEmpty()) {
+                    String[] types = typeAttr.split(",");
+                    for (String type : types) {
+                        numberScales.put(type.trim().toUpperCase(), value);
+                    }
+                }
+            }
+        } else {
+            // 使用默认值
+            fieldFormats.put("DATETIME", "DateShortTime");
+            fieldFormats.put("TIMESTAMP", "DateShortTime");
+            fieldFormats.put("DATE", "Date");
+            fieldFormats.put("TIME", "Time");
+            fieldFormats.put("MONEY", "LeastMoney");
+            fieldFormats.put("DECIMAL", "LeastMoney");
+            fieldFormats.put("NUMERIC", "LeastMoney");
+            fieldFormats.put("INT", "Int");
+            fieldFormats.put("BIGINT", "Int");
+            fieldFormats.put("SMALLINT", "Int");
+            fieldFormats.put("TINYINT", "Int");
+            
+            numberScales.put("DECIMAL", "2");
+            numberScales.put("NUMERIC", "2");
+            numberScales.put("MONEY", "2");
+        }
+    }
+    
+    /**
+     * 获取字段格式
+     */
+    public String getFormat(String fieldType) {
+        if (fieldType == null) return "";
+        String typeUpper = fieldType.toUpperCase();
+        
+        // 日期时间类型
+        if (typeUpper.contains("DATETIME") || typeUpper.contains("TIMESTAMP")) {
+            return fieldFormats.getOrDefault("DATETIME", "DateShortTime");
+        }
+        if (typeUpper.contains("DATE") && !typeUpper.contains("TIME")) {
+            return fieldFormats.getOrDefault("DATE", "Date");
+        }
+        if (typeUpper.contains("TIME") && !typeUpper.contains("DATE")) {
+            return fieldFormats.getOrDefault("TIME", "Time");
+        }
+        
+        // 货币类型
+        if (typeUpper.contains("MONEY") || typeUpper.contains("DECIMAL") || typeUpper.contains("NUMERIC")) {
+            return fieldFormats.getOrDefault("MONEY", "LeastMoney");
+        }
+        
+        // 整数类型
+        if (typeUpper.contains("INT") || typeUpper.contains("BIGINT") || 
+            typeUpper.contains("SMALLINT") || typeUpper.contains("TINYINT")) {
+            return fieldFormats.getOrDefault("INT", "Int");
+        }
+        
+        return "";
+    }
+    
+    /**
+     * 获取数字精度
+     */
+    public String getNumberScale(String fieldType) {
+        if (fieldType == null) return "";
+        String typeUpper = fieldType.toUpperCase();
+        
+        // 检查配置
+        for (String type : numberScales.keySet()) {
+            if (typeUpper.contains(type)) {
+                return numberScales.get(type);
+            }
+        }
+        
+        return "";
     }
     
     /**

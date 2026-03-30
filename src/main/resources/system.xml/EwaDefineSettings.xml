@@ -57,4 +57,21 @@
       <Rule Type="CHAR,TEXT" MaxLength="9999" IsOrder="0" SearchType="text"/>
     </OrderSearchRules>
   </ListFrame>
+  
+  <!-- 字段格式配置（通用） -->
+  <FieldFormats>
+    <!-- 日期时间类型 -->
+    <Format Type="DATETIME,TIMESTAMP" Value="DateShortTime"/>
+    <Format Type="DATE" Value="Date"/>
+    <Format Type="TIME" Value="Time"/>
+    
+    <!-- 货币类型 -->
+    <Format Type="MONEY,DECIMAL,NUMERIC" Value="LeastMoney"/>
+    
+    <!-- 整数类型 -->
+    <Format Type="INT,BIGINT,SMALLINT,TINYINT" Value="Int"/>
+    
+    <!-- 数字精度配置 -->
+    <NumberScale Type="DECIMAL,NUMERIC,MONEY" Value="2"/>
+  </FieldFormats>
 </EwaDefineSettings>
