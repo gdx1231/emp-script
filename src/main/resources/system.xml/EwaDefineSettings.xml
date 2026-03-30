@@ -106,42 +106,42 @@
     <!-- 数字精度配置 -->
     <NumberScale Type="DECIMAL,NUMERIC,MONEY" Value="2" />
   </FieldFormats>
-  
+
   <!-- 字段默认值配置（Tree 新增节点时使用） -->
   <FieldDefaults>
     <!-- 状态字段配置 -->
     <StatusFields>
-      <Field Suffix="_STATUS" DefaultValue="'USED'" Where="true"/>
-      <Field Suffix="_STATE" DefaultValue="'USED'" Where="true"/>
+      <Field Suffix="_STATUS" DefaultValue="'USED'" DeleteValue="'DEL'" Where="true"/>
+      <Field Suffix="_STATE" DefaultValue="'USED'" DeleteValue="'DEL'" Where="true"/>
     </StatusFields>
-    
+
     <!-- 按字段后缀的默认值 -->
     <BySuffix>
       <!-- 时间字段 -->
       <Field Suffix="_CDATE" DefaultValue="@SYS_DATE"/>
       <Field Suffix="_MDATE" DefaultValue="@SYS_DATE"/>
       <Field Suffix="_DATE" DefaultValue="@SYS_DATE"/>
-      
+
       <!-- 唯一标识 -->
       <Field Suffix="_UNID" DefaultValue="@sys_unid"/>
-      
+
       <!-- 创建/修改人 -->
       <Field Suffix="_CREATOR" DefaultValue="@g_adm_id"/>
       <Field Suffix="_MODIFIER" DefaultValue="@g_adm_id"/>
     </BySuffix>
-    
+
     <!-- 按字段名精确匹配 -->
     <ByName>
       <!-- 时间字段 -->
       <Field Name="CREATED_DATE" DefaultValue="@SYS_DATE"/>
       <Field Name="MODIFIED_DATE" DefaultValue="@SYS_DATE"/>
-      
+
       <!-- 用户相关字段 -->
       <Field Name="CREATED_BY" DefaultValue="@g_adm_id"/>
       <Field Name="MODIFIED_BY" DefaultValue="@g_adm_id"/>
-      <Field Name="ADM_ID" DefaultValue="@g_adm_id" Where="true"/>
+      <Field Name="ADM_ID" DefaultValue="@g_adm_id" />
       <Field Name="SUP_ID" DefaultValue="@g_sup_id" Where="true"/>
-      
+
       <!-- 唯一标识 -->
       <Field Name="UNID" DefaultValue="@sys_unid"/>
     </ByName>

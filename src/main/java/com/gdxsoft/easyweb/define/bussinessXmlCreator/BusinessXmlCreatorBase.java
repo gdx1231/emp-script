@@ -414,7 +414,11 @@ public abstract class BusinessXmlCreatorBase {
         if (statusField != null) {
             boolean statusWhere = EwaDefineSettings.getInstance().isStatusFieldWhere();
             if (statusWhere) {
-                return "UPDATE " + this.table.getName() + " SET " + statusField + "='DEL' WHERE " + String.join(" AND ", whereConditions);
+                String deleteValue = EwaDefineSettings.getInstance().getStatusFieldDeleteValue();
+                if (deleteValue == null || deleteValue.isEmpty()) {
+                    deleteValue = "'DEL'";
+                }
+                return "UPDATE " + this.table.getName() + " SET " + statusField + "=" + deleteValue + " WHERE " + String.join(" AND ", whereConditions);
             }
         }
         

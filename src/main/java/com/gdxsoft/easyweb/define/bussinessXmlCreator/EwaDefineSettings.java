@@ -51,6 +51,7 @@ public class EwaDefineSettings {
     private java.util.Map<String, Boolean> fieldWhereByName;
     private String statusFieldSuffix;
     private String statusFieldDefaultValue;
+    private String statusFieldDeleteValue;
     private boolean statusFieldWhere;
 
     private EwaDefineSettings() {
@@ -340,6 +341,7 @@ public class EwaDefineSettings {
         fieldWhereByName = new java.util.HashMap<>();
         statusFieldSuffix = null;
         statusFieldDefaultValue = null;
+        statusFieldDeleteValue = null;
         statusFieldWhere = false;
 
         // 加载 FieldDefaults 配置
@@ -356,6 +358,7 @@ public class EwaDefineSettings {
                     Element fieldElem = (Element) statusFieldNodes.item(i);
                     String suffix = fieldElem.getAttribute("Suffix");
                     String defaultValue = fieldElem.getAttribute("DefaultValue");
+                    String deleteValue = fieldElem.getAttribute("DeleteValue");
                     String whereAttr = fieldElem.getAttribute("Where");
                     boolean where = "true".equalsIgnoreCase(whereAttr);
                     
@@ -364,6 +367,7 @@ public class EwaDefineSettings {
                         if (statusFieldSuffix == null) {
                             statusFieldSuffix = suffix;
                             statusFieldDefaultValue = defaultValue;
+                            statusFieldDeleteValue = deleteValue != null && !deleteValue.isEmpty() ? deleteValue : "'DEL'";
                             statusFieldWhere = where;
                         }
                     }
@@ -817,7 +821,15 @@ public class EwaDefineSettings {
     public String getStatusFieldDefaultValue() {
         return statusFieldDefaultValue;
     }
-    
+
+    /**
+     * 获取状态字段删除时的值
+     * @return 删除时的值（如 'DEL'）
+     */
+    public String getStatusFieldDeleteValue() {
+        return statusFieldDeleteValue;
+    }
+
     /**
      * 获取状态字段是否需要添加到 WHERE 条件
      * @return true 表示需要添加到 WHERE
