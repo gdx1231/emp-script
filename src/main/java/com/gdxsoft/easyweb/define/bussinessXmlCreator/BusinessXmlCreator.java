@@ -111,40 +111,44 @@ public class BusinessXmlCreator {
      */
     private Document create(String frameType, String operationType) throws Exception {
         Document doc = UXml.createBlankDocument();
-        
+
         // 获取 Tmp 配置
         String tmpName = getTmpNameByOperation(operationType);
         EwaDefineConfig.TmpConfig tmpConfig = defineConfig.getTmpConfig(frameType, tmpName);
-        
+
         if (tmpConfig == null) {
             LOGGER.warn("未找到配置：{}.{}，使用默认配置", frameType, tmpName);
         }
-        
-        // 创建根节点 EasyWebTemplate
+
+        // 创建根节点 EasyWebTemplates
+        org.w3c.dom.Element rootTemplates = doc.createElement("EasyWebTemplates");
+        doc.appendChild(rootTemplates);
+
+        // 创建 EasyWebTemplate 节点
         org.w3c.dom.Element root = doc.createElement("EasyWebTemplate");
-        doc.appendChild(root);
-        
+        rootTemplates.appendChild(root);
+
         // 设置根节点属性
         String itemName = this.table.getName() + "." + getFrameTypeShort(frameType) + "." + operationType;
         root.setAttribute("Name", itemName);
         root.setAttribute("Author", "System");
         root.setAttribute("CreateDate", getCurrentDateTime());
         root.setAttribute("UpdateDate", getCurrentDateTime());
-        
+
         // 创建 Page 节点
         org.w3c.dom.Element page = doc.createElement("Page");
         root.appendChild(page);
-        
+
         // 创建 Page 的基本配置节点
         createPageBasicConfig(doc, page, frameType, operationType, itemName);
-        
+
         // 创建 Action 节点
         createPageAction(doc, page, frameType, operationType, tmpConfig);
-        
+
         // 创建 XItems 节点
         org.w3c.dom.Element xitems = doc.createElement("XItems");
         page.appendChild(xitems);
-        
+
         // 根据表字段创建 XItem
         for (int i = 0; i < this.table.getFields().getFieldList().size(); i++) {
             String fieldName = this.table.getFields().getFieldList().get(i);
