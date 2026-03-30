@@ -281,26 +281,27 @@ public class BusinessXmlCreatorListFrame extends BusinessXmlCreatorBase {
         frameHtmlSet.appendChild(frameHtmlInner);
         frameHtml.appendChild(frameHtmlSet);
 
-        // PageSize 节点
+        // PageSize 节点（从配置读取）
+        EwaDefineSettings.ListFramePageSettings lfSettings = EwaDefineSettings.getInstance().getListFramePageSettings();
         Element pageSize = doc.createElement("PageSize");
         page.appendChild(pageSize);
         Element pageSizeSet = doc.createElement("Set");
-        pageSizeSet.setAttribute("IsSplitPage", "1");
-        pageSizeSet.setAttribute("PageSize", "10");
-        pageSizeSet.setAttribute("Recycle", "1");
+        pageSizeSet.setAttribute("IsSplitPage", lfSettings.getPageSizeIsSplit());
+        pageSizeSet.setAttribute("PageSize", lfSettings.getPageSize());
+        pageSizeSet.setAttribute("Recycle", lfSettings.getRecycle());
         String keyField = getPrimaryKeyField();
         if (keyField != null && !keyField.isEmpty()) {
             pageSizeSet.setAttribute("KeyField", keyField);
         }
         pageSize.appendChild(pageSizeSet);
 
-        // ListUI 节点
+        // ListUI 节点（从配置读取）
         Element listUI = doc.createElement("ListUI");
         page.appendChild(listUI);
         Element listUISet = doc.createElement("Set");
-        listUISet.setAttribute("luButtons", "1");
-        listUISet.setAttribute("luSearch", "1");
-        listUISet.setAttribute("luSelect", "S");
+        listUISet.setAttribute("luButtons", lfSettings.getLuButtons());
+        listUISet.setAttribute("luSearch", lfSettings.getLuSearch());
+        listUISet.setAttribute("luSelect", lfSettings.getLuSelect());
         listUI.appendChild(listUISet);
 
         // MenuShow 节点

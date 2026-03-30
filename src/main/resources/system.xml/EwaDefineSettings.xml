@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  EWA Define Settings - EWA 定义配置
+  用于配置 Frame 模式下字段的显示/隐藏规则
+-->
+<EwaDefineSettings>
+  <!-- Frame 模式字段隐藏配置 -->
+  <FrameFieldHideRules>
+    <!-- 按字段后缀隐藏 -->
+    <HideBySuffix>
+      <Suffix Name="_CDATE" Description="创建时间字段"/>
+      <Suffix Name="_MDATE" Description="修改时间字段"/>
+      <Suffix Name="_STATUS" Description="状态字段"/>
+      <Suffix Name="_STATE" Description="状态字段"/>
+    </HideBySuffix>
+    
+    <!-- 按字段类型隐藏 -->
+    <HideByType>
+      <Type Name="IDENTITY" Description="自增字段"/>
+    </HideByType>
+    
+    <!-- 按字段名精确匹配隐藏 -->
+    <HideByName>
+      <!-- 可添加特定字段名 -->
+    </HideByName>
+  </FrameFieldHideRules>
+  
+  <!-- ListFrame 模式字段显示配置 -->
+  <ListFrameFieldRules>
+    <!-- 默认所有字段都显示为 span -->
+    <DefaultTag>span</DefaultTag>
+    
+    <!-- OrderSearch 配置 -->
+    <OrderSearchRules>
+      <!-- 数字类型：IsOrder=1, SearchType="" -->
+      <Rule Type="INT,DECIMAL,NUM,DOUBLE,FLOAT,MONEY" IsOrder="1" SearchType=""/>
+      
+      <!-- 日期类型：IsOrder=1, SearchType="" -->
+      <Rule Type="DATE,TIME,TIMESTAMP" IsOrder="1" SearchType=""/>
+      
+      <!-- 文字类型<=100：IsOrder=1, SearchType="text" -->
+      <Rule Type="CHAR,TEXT" MaxLength="100" IsOrder="1" SearchType="text"/>
+      
+      <!-- 文字类型>100：IsOrder=0, SearchType="text" -->
+      <Rule Type="CHAR,TEXT" MaxLength="9999" IsOrder="0" SearchType="text"/>
+    </OrderSearchRules>
+  </ListFrameFieldRules>
+  
+  <!-- Frame 模式页面配置 -->
+  <FramePageSettings>
+    <Size Width="700" HiddenCaption="1" FrameCols="C2" HAlign="center" VAlign="top"/>
+  </FramePageSettings>
+  
+  <!-- ListFrame 模式页面配置 -->
+  <ListFramePageSettings>
+    <Size Width="100%" HiddenCaption="" FrameCols="" HAlign="center" VAlign="top"/>
+    <PageSize IsSplitPage="1" PageSize="10" Recycle="1"/>
+    <ListUI luButtons="1" luSearch="1" luSelect="S"/>
+  </ListFramePageSettings>
+</EwaDefineSettings>

@@ -126,15 +126,16 @@ public class BusinessXmlCreatorFrame extends BusinessXmlCreatorBase {
         frameTagSet.setAttribute("FrameTag", frameType);
         frameTag.appendChild(frameTagSet);
 
-        // Frame 模式设置页面配置
+        // Frame 模式设置页面配置（从配置读取）
+        EwaDefineSettings.FramePageSettings settings = EwaDefineSettings.getInstance().getFramePageSettings();
         Element size = doc.createElement("Size");
         page.appendChild(size);
         Element sizeSet = doc.createElement("Set");
-        sizeSet.setAttribute("HAlign", "center");
-        sizeSet.setAttribute("VAlign", "top");
-        sizeSet.setAttribute("Width", "700");
-        sizeSet.setAttribute("HiddenCaption", "1");
-        sizeSet.setAttribute("FrameCols", "C2");
+        sizeSet.setAttribute("HAlign", settings.getHAlign());
+        sizeSet.setAttribute("VAlign", settings.getVAlign());
+        sizeSet.setAttribute("Width", settings.getWidth());
+        sizeSet.setAttribute("HiddenCaption", settings.getHiddenCaption());
+        sizeSet.setAttribute("FrameCols", settings.getFrameCols());
         size.appendChild(sizeSet);
 
         // SkinName 节点
@@ -235,7 +236,8 @@ public class BusinessXmlCreatorFrame extends BusinessXmlCreatorBase {
         Element xitem = doc.createElement("XItem");
         xitem.setAttribute("Name", field.getName());
 
-        if (shouldHideField(field)) {
+        // 使用配置判断字段是否应该隐藏
+        if (EwaDefineSettings.getInstance().shouldHideField(field.getName(), field.getDatabaseType())) {
             return null;
         }
 
