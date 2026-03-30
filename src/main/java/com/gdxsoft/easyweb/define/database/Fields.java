@@ -351,4 +351,132 @@ public class Fields extends HashMap<String, Field> {
 			return f.getName();
 		}
 	}
+	
+	/**
+	 * 获取 Tree 加载 SQL
+	 * @return SELECT * FROM table ORDER BY level, order
+	 */
+	public String GetSqlTreeLoad() {
+		String tableName = this._TableName;
+		String levelField = findFieldBySuffix("_LVL");
+		String orderField = findFieldBySuffix("_ORD");
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT * FROM ").append(tableName);
+		
+		// 添加 ORDER BY
+		if (levelField != null || orderField != null) {
+			sql.append(" ORDER BY ");
+			if (levelField != null) {
+				sql.append(levelField);
+				if (orderField != null) {
+					sql.append(", ").append(orderField);
+				}
+			} else if (orderField != null) {
+				sql.append(orderField);
+			}
+		}
+		
+		return sql.toString();
+	}
+	
+	/**
+	 * 获取 Tree 删除节点 SQL
+	 * @return DELETE FROM table WHERE id = @id
+	 */
+	public String GetSqlTreeNodeDelete() {
+		String pkField = getPrimaryKeyField();
+		if (pkField == null || pkField.isEmpty()) {
+			return "-- Primary key not found";
+		}
+		return "DELETE FROM " + this._TableName + " WHERE " + pkField + " = @" + pkField;
+	}
+	
+	/**
+	 * 获取 Tree 重命名节点 SQL
+	 * @return UPDATE table SET name = @name WHERE id = @id
+	 */
+	public String GetSqlTreeNodeRename() {
+		String pkField = getPrimaryKeyField();
+		String nameField = findFieldBySuffix("_NAME");
+		
+		if (pkField == null || pkField.isEmpty()) {
+			return "-- Primary key not found";
+		}
+		if (nameField == null || nameField.isEmpty()) {
+			return "-- Name field not found";
+		}
+		
+		return "UPDATE " + this._TableName + " SET " + nameField + " = @" + nameField + 
+			   " WHERE " + pkField + " = @" + pkField;
+	}
+	
+	/**
+	 * 获取 Tree 新增节点 SQL
+	 * @return INSERT INTO table (pid, level, name) VALUES (@pid, @level, @name)
+	 */
+	public String GetSqlTreeNodeNew() {
+		String pkField = getPrimaryKeyField();
+		String parentField = findFieldBySuffix("_PID");
+		String levelField = findFieldBySuffix("_LVL");
+		String nameField = findFieldBySuffix("_NAME");
+		
+		if (pkField == null || pkField.isEmpty()) {
+			return "-- Primary key not found";
+		}
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO ").append(this._TableName).append(" (");
+		
+		ArrayList<String> fields = new ArrayList<String>();
+		ArrayList<String> values = new ArrayList<String>();
+		
+		if (parentField != null) {
+			fields.add(parentField);
+			values.add("@" + parentField);
+		}
+		if (levelField != null) {
+			fields.add(levelField);
+			values.add("@" + levelField);
+		}
+		if (nameField != null) {
+			fields.add(nameField);
+			values.add("@" + nameField);
+		}
+		
+		sql.append(String.join(", ", fields));
+		sql.append(") VALUES (");
+		sql.append(String.join(", ", values));
+		sql.append(")");
+		
+		return sql.toString();
+	}
+	
+	/**
+	 * 查找带有指定后缀的字段
+	 */
+	private String findFieldBySuffix(String suffix) {
+		for (String fieldName : this._FieldList) {
+			if (fieldName.toUpperCase().endsWith(suffix.toUpperCase())) {
+				return fieldName;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 获取主键字段名
+	 */
+	private String getPrimaryKeyField() {
+		if (this._PkFields != null && !this._PkFields.isEmpty()) {
+			return this._PkFields.get(0).getName();
+		}
+		// 尝试查找以 _ID 结尾的字段
+		for (String fieldName : this._FieldList) {
+			if (fieldName.toUpperCase().endsWith("_ID")) {
+				return fieldName;
+			}
+		}
+		return null;
+	}
 }

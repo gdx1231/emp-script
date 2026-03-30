@@ -334,6 +334,54 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         Element actionSet = doc.createElement("ActionSet");
         action.appendChild(actionSet);
 
+        // 从 EwaDefine.xml 的 Frame=Tree Tmp=M 读取 Action 配置
+        if (tmpConfig != null && !tmpConfig.getActionConfigs().isEmpty()) {
+            for (EwaDefineConfig.ActionConfig actConfig : tmpConfig.getActionConfigs()) {
+                actionSet.appendChild(createActionSetItem(doc, actConfig));
+            }
+
+            Element sqlSet = doc.createElement("SqlSet");
+            action.appendChild(sqlSet);
+
+            for (EwaDefineConfig.ActionConfig actConfig : tmpConfig.getActionConfigs()) {
+                if (actConfig.getSqlType() != null) {
+                    sqlSet.appendChild(createSqlSetItem(doc, actConfig));
+                }
+            }
+        } else {
+            // 使用默认配置
+            createDefaultTreeAction(doc, actionSet, action);
+        }
+
+        // JSONSet
+        action.appendChild(doc.createElement("JSONSet"));
+        // ClassSet
+        action.appendChild(doc.createElement("ClassSet"));
+        // XmlSet
+        action.appendChild(doc.createElement("XmlSet"));
+        // XmlSetData
+        action.appendChild(doc.createElement("XmlSetData"));
+        // ScriptSet
+        action.appendChild(doc.createElement("ScriptSet"));
+        // UrlSet
+        action.appendChild(doc.createElement("UrlSet"));
+        // CSSet
+        action.appendChild(doc.createElement("CSSet"));
+        // CallSet
+        Element callSet = doc.createElement("CallSet");
+        Element callSetItem = doc.createElement("Set");
+        callSetItem.setAttribute("CallIsChk", "");
+        callSetItem.setAttribute("CallName", "OnPageLoad SQL");
+        callSetItem.setAttribute("CallType", "SqlSet");
+        callSetItem.setAttribute("Test", "");
+        callSet.appendChild(callSetItem);
+        action.appendChild(callSet);
+    }
+
+    /**
+     * 创建默认的 Tree Action
+     */
+    private void createDefaultTreeAction(Document doc, Element actionSet, Element action) {
         // OnPageLoad Action
         Element onLoadAction = doc.createElement("Set");
         onLoadAction.setAttribute("Type", "OnPageLoad");
@@ -403,15 +451,7 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         onLoadSql.setAttribute("Name", "OnPageLoad SQL");
         onLoadSql.setAttribute("SqlType", "query");
         Element onLoadSqlContent = doc.createElement("Sql");
-        String statusField = getStatusField();
-        if (statusField != null) {
-            onLoadSqlContent.setTextContent("SELECT * FROM " + this.table.getName() + 
-                " WHERE " + statusField + " = 'USED' ORDER BY " + 
-                this.table.getName() + "_LVL, " + this.table.getName() + "_ORD");
-        } else {
-            onLoadSqlContent.setTextContent("SELECT * FROM " + this.table.getName() + 
-                " ORDER BY " + this.table.getName() + "_LVL, " + this.table.getName() + "_ORD");
-        }
+        onLoadSqlContent.setTextContent(this.table.getFields().GetSqlTreeLoad());
         onLoadSql.appendChild(onLoadSqlContent);
         onLoadSql.appendChild(doc.createElement("CSSet"));
         sqlSet.appendChild(onLoadSql);
@@ -421,7 +461,7 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         onDeleteSql.setAttribute("Name", "OnTreeNodeDelete SQL");
         onDeleteSql.setAttribute("SqlType", "update");
         Element onDeleteSqlContent = doc.createElement("Sql");
-        onDeleteSqlContent.setTextContent(" ");
+        onDeleteSqlContent.setTextContent(this.table.getFields().GetSqlTreeNodeDelete());
         onDeleteSql.appendChild(onDeleteSqlContent);
         onDeleteSql.appendChild(doc.createElement("CSSet"));
         sqlSet.appendChild(onDeleteSql);
@@ -431,6 +471,7 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         onRenameSql.setAttribute("Name", "OnTreeNodeRename SQL");
         onRenameSql.setAttribute("SqlType", "update");
         Element onRenameSqlContent = doc.createElement("Sql");
+        onRenameSqlContent.setTextContent(this.table.getFields().GetSqlTreeNodeRename());
         onRenameSql.appendChild(onRenameSqlContent);
         onRenameSql.appendChild(doc.createElement("CSSet"));
         sqlSet.appendChild(onRenameSql);
@@ -440,42 +481,27 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         onNewSql.setAttribute("Name", "OnTreeNodeNew SQL");
         onNewSql.setAttribute("SqlType", "update");
         Element onNewSqlContent = doc.createElement("Sql");
+        onNewSqlContent.setTextContent(this.table.getFields().GetSqlTreeNodeNew());
         onNewSql.appendChild(onNewSqlContent);
         onNewSql.appendChild(doc.createElement("CSSet"));
         sqlSet.appendChild(onNewSql);
-
-        // JSONSet
-        action.appendChild(doc.createElement("JSONSet"));
-        // ClassSet
-        action.appendChild(doc.createElement("ClassSet"));
-        // XmlSet
-        action.appendChild(doc.createElement("XmlSet"));
-        // XmlSetData
-        action.appendChild(doc.createElement("XmlSetData"));
-        // ScriptSet
-        action.appendChild(doc.createElement("ScriptSet"));
-        // UrlSet
-        action.appendChild(doc.createElement("UrlSet"));
-        // CSSet
-        action.appendChild(doc.createElement("CSSet"));
-        // CallSet
-        Element callSet = doc.createElement("CallSet");
-        Element callSetItem = doc.createElement("Set");
-        callSetItem.setAttribute("CallIsChk", "");
-        callSetItem.setAttribute("CallName", "OnPageLoad SQL");
-        callSetItem.setAttribute("CallType", "SqlSet");
-        callSetItem.setAttribute("Test", "");
-        callSet.appendChild(callSetItem);
-        action.appendChild(callSet);
     }
 
     private void createMenus(Document doc, Element root, String frameType) {
         Element menus = doc.createElement("Menus");
         root.appendChild(menus);
 
+        // 使用默认菜单
+        createDefaultMenus(doc, menus);
+    }
+
+    /**
+     * 创建默认菜单
+     */
+    private void createDefaultMenus(Document doc, Element menus) {
         // itemNew 菜单
         menus.appendChild(createMenu(doc, "itemNew", "新建", "New", 
-            "/EmpScriptV2/EWA_STYLE/images/defined/new.gif", "EWA.CurUI.NewNode();"));
+            "@SYS_CONTEXTPATH/EWA_STYLE/images/defined/new.gif", "EWA.CurUI.NewNode();"));
 
         // itemRename 菜单
         menus.appendChild(createMenu(doc, "itemRename", "修改名称", "Rename", 
@@ -487,7 +513,7 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
 
         // itemDelete 菜单
         menus.appendChild(createMenu(doc, "itemDelete", "删除", "Delete", 
-            "/EmpScriptV2/EWA_STYLE/images/defined/del.gif", "EWA.CurUI.Delete();"));
+            "@SYS_CONTEXTPATH/EWA_STYLE/images/defined/del.gif", "EWA.CurUI.Delete();"));
     }
 
     private Element createMenu(Document doc, String name, String infoZhcn, String infoEnus, 
@@ -536,6 +562,67 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         menu.appendChild(groupElem);
 
         return menu;
+    }
+
+    /**
+     * 创建 ActionSet 项
+     */
+    private Element createActionSetItem(Document doc, EwaDefineConfig.ActionConfig config) {
+        Element set = doc.createElement("Set");
+        set.setAttribute("LogMsg", "");
+        set.setAttribute("Transcation", "");
+        set.setAttribute("Type", config.getName());
+
+        Element callSet = doc.createElement("CallSet");
+        Element callSetItem = doc.createElement("Set");
+        callSetItem.setAttribute("CallIsChk", "");
+        callSetItem.setAttribute("CallName", config.getName() + " SQL");
+        callSetItem.setAttribute("CallType", "SqlSet");
+        callSetItem.setAttribute("Test", config.getTest());
+        callSet.appendChild(callSetItem);
+        set.appendChild(callSet);
+
+        return set;
+    }
+
+    /**
+     * 创建 SqlSet 项
+     */
+    private Element createSqlSetItem(Document doc, EwaDefineConfig.ActionConfig config) {
+        Element set = doc.createElement("Set");
+        set.setAttribute("Name", config.getName() + " SQL");
+        set.setAttribute("SqlType", config.getSqlType());
+
+        Element sql = doc.createElement("Sql");
+        String sqlContent = config.getSql();
+        if (sqlContent != null) {
+            // 解析 SQL 中的方法调用
+            sqlContent = parseFieldsMethod(sqlContent);
+        }
+        sql.setTextContent(sqlContent != null ? sqlContent : "");
+        set.appendChild(sql);
+        set.appendChild(doc.createElement("CSSet"));
+
+        return set;
+    }
+
+    /**
+     * 解析 Fields 方法调用
+     */
+    private String parseFieldsMethod(String sqlContent) {
+        if (sqlContent == null) return null;
+
+        if (sqlContent.contains("this.Fields.GetSqlTreeLoad()")) {
+            return this.table.getFields().GetSqlTreeLoad();
+        } else if (sqlContent.contains("this.Fields.GetSqlTreeNodeDelete()")) {
+            return this.table.getFields().GetSqlTreeNodeDelete();
+        } else if (sqlContent.contains("this.Fields.GetSqlTreeNodeRename()")) {
+            return this.table.getFields().GetSqlTreeNodeRename();
+        } else if (sqlContent.contains("this.Fields.GetSqlTreeNodeNew()")) {
+            return this.table.getFields().GetSqlTreeNodeNew();
+        }
+
+        return sqlContent;
     }
 
     private void createCharts(Document doc, Element root) {
