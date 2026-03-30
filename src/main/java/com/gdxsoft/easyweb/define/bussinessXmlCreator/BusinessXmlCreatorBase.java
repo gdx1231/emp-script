@@ -358,7 +358,13 @@ public abstract class BusinessXmlCreatorBase {
         // 添加配置的 WHERE 条件字段
         for (String fieldName : this.table.getFields().getFieldList()) {
             if (EwaDefineSettings.getInstance().isFieldWhere(fieldName)) {
-                whereConditions.add(fieldName + "=@" + fieldName);
+                // 获取字段默认值（如 @g_sup_id）
+                String defaultValue = EwaDefineSettings.getInstance().getFieldDefaultValue(fieldName);
+                if (defaultValue != null && !defaultValue.isEmpty()) {
+                    whereConditions.add(fieldName + "=" + defaultValue);
+                } else {
+                    whereConditions.add(fieldName + "=@" + fieldName);
+                }
             }
         }
         
@@ -406,7 +412,13 @@ public abstract class BusinessXmlCreatorBase {
         for (String fieldName : this.table.getFields().getFieldList()) {
             if (fieldName.equals(pkField)) continue;  // 跳过主键
             if (EwaDefineSettings.getInstance().isFieldWhere(fieldName)) {
-                whereConditions.add(fieldName + "=@" + fieldName);
+                // 获取字段默认值（如 @g_sup_id）
+                String defaultValue = EwaDefineSettings.getInstance().getFieldDefaultValue(fieldName);
+                if (defaultValue != null && !defaultValue.isEmpty()) {
+                    whereConditions.add(fieldName + "=" + defaultValue);
+                } else {
+                    whereConditions.add(fieldName + "=@" + fieldName);
+                }
             }
         }
         
@@ -446,7 +458,13 @@ public abstract class BusinessXmlCreatorBase {
         for (String fieldName : this.table.getFields().getFieldList()) {
             if (fieldName.equals(pkField)) continue;  // 跳过主键
             if (EwaDefineSettings.getInstance().isFieldWhere(fieldName)) {
-                whereConditions.add(fieldName + "=@" + fieldName);
+                // 获取字段默认值（如 @g_sup_id）
+                String defaultValue = EwaDefineSettings.getInstance().getFieldDefaultValue(fieldName);
+                if (defaultValue != null && !defaultValue.isEmpty()) {
+                    whereConditions.add(fieldName + "=" + defaultValue);
+                } else {
+                    whereConditions.add(fieldName + "=@" + fieldName);
+                }
             }
         }
         
