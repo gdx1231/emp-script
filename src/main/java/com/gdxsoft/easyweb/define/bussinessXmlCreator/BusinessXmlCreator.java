@@ -1640,22 +1640,36 @@ public class BusinessXmlCreator {
      */
     private String processJsExpression(String val) {
         if (val == null) return "";
-        
+
+        // 处理 define.Fields.GetPkParas() 调用
+        // 替换为实际的主键参数表达式，如 "CRM_COM_ID=@CRM_COM_ID"
+        String pkParas = this.table.getFields().GetPkParas();
+        if (pkParas != null && !pkParas.isEmpty()) {
+            // 移除开头的 & 符号
+            if (pkParas.startsWith("&")) {
+                pkParas = pkParas.substring(1);
+            }
+            // 替换多种可能的格式（先处理带引号和加号的格式）
+            val = val.replace("'+ define.Fields.GetPkParas() + '", pkParas);
+            val = val.replace("' + define.Fields.GetPkParas() + '", pkParas);
+            val = val.replace("define.Fields.GetPkParas()", pkParas);
+        }
+
         // 移除字符串连接的 '+' 符号，合并被分割的字符串
         // 例如：'EWA.F.FOS[&quot;@'+'sys_frame_unid&quot;]' → 'EWA.F.FOS[&quot;@sys_frame_unid&quot;]'
         String result = val.replace("'+'", "");
-        
+
         // 转义 XML 实体
         result = result.replace("&quot;", "\"")
                       .replace("&lt;", "<")
                       .replace("&gt;", ">")
                       .replace("&amp;", "&");
-        
+
         // 去除前后的单引号 '
         if (result.startsWith("'") && result.endsWith("'")) {
             result = result.substring(1, result.length() - 1);
         }
-        
+
         return result;
     }
     
