@@ -162,11 +162,11 @@ public class CreateBusinessXmlFromDbDemo {
         pk.setTableName("CRM_COM");
         table.setPk(pk);
         
-        // 1. 读取字段信息
+        // 1. 读取字段信息（HSQL 使用 INFORMATION_SCHEMA.COLUMNS）
         String sql = "SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, " +
                      "NUMERIC_PRECISION, NUMERIC_SCALE, IS_NULLABLE, COLUMN_DEFAULT " +
                      "FROM INFORMATION_SCHEMA.COLUMNS " +
-                     "WHERE TABLE_NAME='CRM_COM' AND TABLE_SCHEMA='PUBLIC' " +
+                     "WHERE TABLE_SCHEMA='PUBLIC' AND TABLE_NAME='CRM_COM' " +
                      "ORDER BY ORDINAL_POSITION";
         
         DTTable dt = DTTable.getJdbcTable(sql, cnn);
@@ -177,55 +177,30 @@ public class CreateBusinessXmlFromDbDemo {
         
         System.out.println("    找到 " + dt.getCount() + " 个字段");
         
-        // 2. 读取主键信息（HSQL 数据库）
-        // 尝试多种查询方式
-        String[] pkSqls = new String[] {
-            // 方式 1：使用 KEY_COLUMN_USAGE
-            "SELECT KCU.COLUMN_NAME " +
-            "FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE KCU " +
-            "JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC " +
-            "ON KCU.CONSTRAINT_NAME = TC.CONSTRAINT_NAME " +
-            "WHERE KCU.TABLE_NAME='CRM_COM' AND TC.CONSTRAINT_TYPE='PRIMARY KEY'",
-            
-            // 方式 2：使用 SYSTEM_PRIMARYKEYS（HSQL 特有）
-            "SELECT COLUMN_NAME " +
-            "FROM INFORMATION_SCHEMA.SYSTEM_PRIMARYKEYS " +
-            "WHERE TABLE_NAME='CRM_COM'",
-            
-            // 方式 3：使用 CONSTRAINT_COLUMN_USAGE
-            "SELECT CC.COLUMN_NAME " +
-            "FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CC " +
-            "JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC " +
-            "ON CC.CONSTRAINT_NAME = TC.CONSTRAINT_NAME " +
-            "WHERE CC.TABLE_NAME='CRM_COM' AND TC.CONSTRAINT_TYPE='PRIMARY KEY'"
-        };
+        // 2. 读取主键信息（HSQL 使用 INFORMATION_SCHEMA.SYSTEM_PRIMARYKEYS）
+        String pkSql = "SELECT COLUMN_NAME " +
+                       "FROM INFORMATION_SCHEMA.SYSTEM_PRIMARYKEYS " +
+                       "WHERE TABLE_SCHEM='PUBLIC' AND TABLE_NAME='CRM_COM'";
         
         Set<String> pkColumns = new HashSet<>();
-        for (String pkSql : pkSqls) {
-            try {
-                DTTable pkDt = DTTable.getJdbcTable(pkSql, cnn);
-                if (pkDt.getCount() > 0) {
-                    System.out.println("    主键查询成功：" + pkDt.getCount() + " 个字段");
-                    for (int i = 0; i < pkDt.getCount(); i++) {
-                        String pkColumnName = pkDt.getRows().getRow(i).getCell("COLUMN_NAME").toString();
-                        pkColumns.add(pkColumnName);
-                        System.out.println("    主键字段：" + pkColumnName);
-                    }
-                    break; // 找到主键后退出循环
+        try {
+            DTTable pkDt = DTTable.getJdbcTable(pkSql, cnn);
+            if (pkDt.getCount() > 0) {
+                System.out.println("    主键查询成功：" + pkDt.getCount() + " 个字段");
+                for (int i = 0; i < pkDt.getCount(); i++) {
+                    String pkColumnName = pkDt.getRows().getRow(i).getCell("COLUMN_NAME").toString();
+                    pkColumns.add(pkColumnName);
+                    System.out.println("    主键字段：" + pkColumnName);
                 }
-            } catch (Exception e) {
-                // 尝试下一种方式
             }
+        } catch (Exception e) {
+            System.out.println("    主键查询失败：" + e.getMessage());
         }
         
-        if (pkColumns.isEmpty()) {
-            System.out.println("    未找到主键信息，尝试通过字段名识别（_ID 后缀）");
-        }
-        
-        // 3. 读取自增列信息
+        // 3. 读取自增列信息（HSQL 使用 INFORMATION_SCHEMA.COLUMNS 的 IDENTITY 属性）
         String identitySql = "SELECT COLUMN_NAME " +
                              "FROM INFORMATION_SCHEMA.COLUMNS " +
-                             "WHERE TABLE_NAME='CRM_COM' AND TABLE_SCHEMA='PUBLIC' " +
+                             "WHERE TABLE_SCHEMA='PUBLIC' AND TABLE_NAME='CRM_COM' " +
                              "AND COLUMN_DEFAULT LIKE '%GENERATED%'";
         
         Set<String> identityColumns = new HashSet<>();
@@ -268,11 +243,11 @@ public class CreateBusinessXmlFromDbDemo {
             // 判断是否允许空
             String isNullable = row.getCell("IS_NULLABLE").toString();
             boolean nullable = "YES".equals(isNullable);
-
+            
             // 判断是否是主键
             boolean isPk = pkColumns.contains(columnName);
             
-            // 如果 pkColumns 为空，尝试通过字段名识别主键（_ID 后缀且为 INT 类型）
+            // 如果 pkColumns 为空，尝试通过字段名识别主键（_ID 后缀且为 INTEGER 类型）
             if (!isPk && pkColumns.isEmpty() && 
                 columnName.endsWith("_ID") && dataType.equals("INTEGER")) {
                 isPk = true;
@@ -302,7 +277,7 @@ public class CreateBusinessXmlFromDbDemo {
                 pk.getPkFields().add(field);                  // 添加到 Table._Pk.getPkFields
             }
             
-            System.out.println("    字段：" + columnName + " (" + dataType + ", " + length + ")");
+            System.out.println("    字段：" + columnName + " (" + dataType + ", " + length + ")" + (isPk ? " [PK]" : "") + (isIdentity ? " [Identity]" : ""));
         }
         
         return table;
