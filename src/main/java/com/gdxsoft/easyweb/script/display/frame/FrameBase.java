@@ -96,8 +96,11 @@ public class FrameBase {
 					UserXItemValue logicShow = logicShows.getItem(i);
 					// String name = logicShow.getItem("Name");
 					String paraExp = logicShow.getItem("ParaExp");
+					this.addDebug(this, "initHiddenFields", paraExp);
 					paraExp = iv.replaceLogicParameters(paraExp);
+					this.addDebug(this, "initHiddenFields", paraExp);
 					if (!ULogic.runLogic(paraExp)) {
+						this.addDebug(this, "initHiddenFields", "false");
 						continue;
 					}
 					String hiddenFields = logicShow.getItem("HiddenFields");
@@ -106,6 +109,7 @@ public class FrameBase {
 						String n = fields[k].trim().toUpperCase();
 						if (!this._HiddenFields.containsKey(n)) {
 							this._HiddenFields.add(n, true);
+							this.addDebug(this, "initHiddenFields", n);
 						}
 					}
 				}
