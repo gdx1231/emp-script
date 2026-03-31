@@ -1334,6 +1334,11 @@ public class FrameList extends FrameBase implements IFrame {
 	 * @throws Exception
 	 */
 	public String createItemHtmlsByFrameHtml(String template, String frameTag) throws Exception {
+		// 先处理 ewa_block_test 条件判断
+		template = super.createHtmlByEwaBlockTest(template);
+		// 再处理 ewa_test 条件判断
+		template = super.createHtmlByEwaTest(template);
+
 		ItemValues ivs = super.getHtmlClass().getItemValues();
 		Map<String, String> cellData = new HashMap<String, String>();
 		for (int i = 0; i < super.getHtmlClass().getUserConfig().getUserXItems().count(); i++) {

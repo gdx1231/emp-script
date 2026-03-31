@@ -299,6 +299,10 @@ public class FrameFrame extends FrameBase implements IFrame {
 		String lang = this.getHtmlClass().getSysParas().getLang();
 
 		String userHtml = this.getUserHtml();
+		// 先处理 ewa_block_test 条件判断
+		userHtml = super.createHtmlByEwaBlockTest(userHtml);
+		// 再处理 ewa_test 条件判断
+		userHtml = super.createHtmlByEwaTest(userHtml);
 		sb.append(userHtml);
 		Map<String, String> cellData = new HashMap<String, String>();
 		for (int i = 0; i < uc.getUserXItems().count(); i++) {

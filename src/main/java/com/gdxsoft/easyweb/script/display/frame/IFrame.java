@@ -211,4 +211,22 @@ public interface IFrame {
 
 	String createSelectReload() throws Exception;
 
+	/**
+	 * 根据逻辑判断组合HTML模板, 判断条件是 <b>"<!-- ewa_block_test -->"</b><br>
+	 * 用于控制HTML代码块的显示
+	 *
+	 * @param originalHtml 原始HTML模板
+	 * @return 处理后的HTML模板
+	 */
+	String createHtmlByEwaBlockTest(String originalHtml);
+
+	/**
+	 * 根据逻辑判断组合HTML模板, 判断条件是 <b>"<!-- ewa_test -->"</b><br>
+	 * 用于控制单行HTML的显示
+	 *
+	 * @param originalHtml 原始HTML模板
+	 * @return 处理后的HTML模板
+	 */
+	String createHtmlByEwaTest(String originalHtml);
+
 }

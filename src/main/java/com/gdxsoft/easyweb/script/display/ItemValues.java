@@ -439,14 +439,15 @@ public class ItemValues {
 		}
 		return sb.toString();
 	}
-
+	
 	/**
-	 * 替换逻辑表达式中参数，如果参数不存在，则替换为""
+	 * 替换逻辑表达式中参数，如果参数值为null，则替换成""或者"null"
 	 * 
-	 * @param s1
-	 * @return
+	 * @param s1       原始字符
+	 * @param keepNull 是否保留null字符串
+	 * @return 替换后的字符
 	 */
-	public String replaceLogicParameters(String s1) {
+	public String replaceLogicParameters(String s1, boolean keepNull) {
 		if (s1 == null)
 			return s1;
 		MListStr a = Utils.getParameters(s1, "@");
@@ -459,13 +460,26 @@ public class ItemValues {
 			} catch (Exception e) {
 				val = e.getLocalizedMessage();
 			}
-			if (val == null) {
-				val = "";
+			if (val == null ) {
+				if(keepNull) {
+					val = "null";
+				} else {
+					val = "";
+				}
 			}
 			String find = "@" + name;
 			sb.replace(find, val);
 		}
 		return sb.toString();
+	}
+	/**
+	 * 替换逻辑表达式中参数，如果参数不存在，则替换为""
+	 * 
+	 * @param s1
+	 * @return
+	 */
+	public String replaceLogicParameters(String s1) {
+		 return replaceLogicParameters(s1, false);
 	}
 
 	/**

@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 import com.gdxsoft.easyweb.conf.ConfAddedResource;
 import com.gdxsoft.easyweb.conf.ConfAddedResources;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.global.EwaGlobals;
 import com.gdxsoft.easyweb.global.EwaInfo;
@@ -1513,6 +1514,131 @@ public class FrameBase {
 	 */
 	public Map<String, DTTable> getSearchFixTables() {
 		return searchFixTables;
+	}
+
+	/**
+	 * 根据逻辑判断组合HTML模板, 判断条件是 <b>"<!-- ewa_block_test -->"</b><br>
+	 * 用于控制HTML代码块的显示
+	 *
+	 * @param originalHtml 原始HTML模板
+	 * @return 处理后的HTML模板
+	 */
+	public String createHtmlByEwaBlockTest(String originalHtml) {
+		if (originalHtml == null || originalHtml.toLowerCase().indexOf("ewa_block_test") == -1) {
+			return originalHtml;
+		}
+		DataConnection dc = this._HtmlClass.getItemValues().getDataConn();
+		
+		String[] lines = originalHtml.split("\n");
+		MStr str = new MStr();
+		str.setNewLine("\n");
+		boolean lastResult = true;
+		boolean inTestBlock = false;
+
+		for (int m = 0; m < lines.length; m++) {
+			String line = lines[m].trim();
+			String lineLower = line.toLowerCase();
+			if (!lineLower.startsWith("<!--")) {
+				if (!inTestBlock || lastResult) {
+					str.al(lines[m]); // 不改变原来HTML的前导空白
+				}
+				continue;
+			}
+
+			// 获取表达式，例如：<!-- ewa_block_test @abc is not null -->
+			int loc0 = lineLower.indexOf("ewa_block_test");
+			if (loc0 == -1) {
+				if (!inTestBlock || lastResult) {
+					str.al(lines[m]); // 不改变原来HTML的前导空白
+				}
+				continue;
+			}
+			String len2 = line.substring(loc0 + 14).trim(); // 去除ewa_block_test
+			// 去除 --> 结尾
+			if (len2.endsWith("-->")) {
+				len2 = len2.substring(0, len2.length() - 3).trim();
+			}
+			String exp = null;
+			if (len2.length() == 0) {
+				// <!-- ewa_block_test -->
+				inTestBlock = false;
+				lastResult = true;
+			} else {
+				// <!-- ewa_block_test @name is null or @name = '' -->
+				exp = dc.replaceSqlSelectParameters(len2, "HSQLDB");
+				// 利用HSQLDB数据库执行判断逻辑
+				lastResult = ULogic.runLogic(exp);
+				inTestBlock = true;
+			}
+			// 添加调试信息
+			this.addDebug(this, "createHtmlByEwaBlockTest", "ewa_block_test<" + lastResult + "> " + len2);
+		}
+		return str.toString();
+	}
+
+	/**
+	 * 根据逻辑判断组合HTML模板, 判断条件是 <b>"<!-- ewa_test -->"</b><br>
+	 * 用于控制单行HTML的显示<br>
+	 * 示例：<br>
+	 * &lt;div&gt;内容&lt;/div&gt;<br>
+	 * <!-- ewa_test @tag is not null --><br>
+	 * &lt;span&gt;@tag&lt;/span&gt;<br>
+	 * <!-- ewa_test @abc is not null --><br>
+	 * &lt;span&gt;额外内容&lt;/span&gt;<br>
+	 * <!-- ewa_test --><br>
+	 *
+	 * @param originalHtml 原始HTML模板
+	 * @return 处理后的HTML模板
+	 */
+	public String createHtmlByEwaTest(String originalHtml) {
+		if (originalHtml == null || originalHtml.toLowerCase().indexOf("ewa_test") == -1) {
+			return originalHtml;
+		}
+		DataConnection dc = this._HtmlClass.getItemValues().getDataConn();
+		
+		String[] lines = originalHtml.split("\n");
+		MStr str = new MStr();
+		str.setNewLine("\n");
+		boolean lastResult = true;
+
+		for (int m = 0; m < lines.length; m++) {
+			String line = lines[m].trim();
+			String lineLower = line.toLowerCase();
+			if (!lineLower.startsWith("<!--")) {
+				if (lastResult) {
+					str.al(lines[m]); // 不改变原来HTML的前导空白
+				}
+				continue;
+			}
+
+			// 获取表达式，例如：<!-- ewa_test @abc is not null -->
+			int loc0 = lineLower.indexOf("ewa_test");
+			if (loc0 == -1) {
+				if (lastResult) {
+					str.al(lines[m]); // 不改变原来HTML的前导空白
+				}
+				continue;
+			}
+			String len2 = line.substring(loc0 + 8).trim(); // 去除ewa_test
+			// 去除 --> 结尾
+			if (len2.endsWith("-->")) {
+				len2 = len2.substring(0, len2.length() - 3).trim();
+			}
+			String exp = null;
+			if (len2.length() == 0) {
+				// <!-- ewa_test -->
+				lastResult = true;
+			} else {
+				// <!-- ewa_test @name is null or @name = '' -->
+				exp = dc.replaceSqlSelectParameters(len2, "HSQLDB");
+				// 利用数据库执行判断逻辑
+				lastResult = ULogic.runLogic(exp);
+			}
+			// 添加调试信息
+			this.addDebug(this, "createHtmlByEwaTest", "ewa_test<" + lastResult + "> " + len2);
+		}
+
+		return str.toString();
 	}
 
 }
