@@ -1527,7 +1527,10 @@ public class FrameBase {
 		if (originalHtml == null || originalHtml.toLowerCase().indexOf("ewa_block_test") == -1) {
 			return originalHtml;
 		}
-		DataConnection dc = this._HtmlClass.getItemValues().getDataConn();
+		DataConnection dc = new DataConnection();
+		RequestValue rv = new RequestValue();
+		dc.setRequestValue(rv);
+		ItemValues ic = this._HtmlClass.getItemValues();
 		
 		String[] lines = originalHtml.split("\n");
 		MStr str = new MStr();
@@ -1564,6 +1567,7 @@ public class FrameBase {
 				inTestBlock = false;
 				lastResult = true;
 			} else {
+				this.ewaTestValues(len2, rv, ic);
 				// <!-- ewa_block_test @name is null or @name = '' -->
 				exp = dc.replaceSqlSelectParameters(len2, "HSQLDB");
 				// 利用HSQLDB数据库执行判断逻辑
@@ -1576,6 +1580,21 @@ public class FrameBase {
 		return str.toString();
 	}
 
+	private void ewaTestValues(String len2, RequestValue rv, ItemValues iv) {
+		MListStr al = Utils.getParameters(len2, "@");
+
+		for (int i = 0; i < al.size(); i++) {
+			String paramName = al.get(i);
+			try {
+				String paramValue = iv.getValue(paramName, paramName);
+				rv.addOrUpdateValue(paramName, paramValue);
+			} catch (Exception e) {
+				rv.addOrUpdateValue(paramName, null);
+				LOGGER.warn("Parameter not found: " + paramName);
+			}
+		}
+	}
+	
 	/**
 	 * 根据逻辑判断组合HTML模板, 判断条件是 <b>"<!-- ewa_test -->"</b><br>
 	 * 用于控制单行HTML的显示<br>
@@ -1594,7 +1613,11 @@ public class FrameBase {
 		if (originalHtml == null || originalHtml.toLowerCase().indexOf("ewa_test") == -1) {
 			return originalHtml;
 		}
-		DataConnection dc = this._HtmlClass.getItemValues().getDataConn();
+		DataConnection dc = new DataConnection();
+		RequestValue rv = new RequestValue();
+		dc.setRequestValue(rv);
+		
+		ItemValues ic = this._HtmlClass.getItemValues();
 		
 		String[] lines = originalHtml.split("\n");
 		MStr str = new MStr();
@@ -1629,6 +1652,7 @@ public class FrameBase {
 				// <!-- ewa_test -->
 				lastResult = true;
 			} else {
+				this.ewaTestValues(len2, rv, ic);
 				// <!-- ewa_test @name is null or @name = '' -->
 				exp = dc.replaceSqlSelectParameters(len2, "HSQLDB");
 				// 利用数据库执行判断逻辑
