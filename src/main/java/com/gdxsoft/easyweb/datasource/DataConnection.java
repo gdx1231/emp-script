@@ -1794,7 +1794,7 @@ public class DataConnection {
 	 * 例如 select * from users where id in(1,2,3) <br>
 	 * 2. SQL语句预替换，即在SQL语句执行前，替换SQL语句本身的参数 <br>
 	 * 例如 SELECT * FROM ~TB, 如参数TB是 USERS 则替换成 SELECT * FROM USERS
-	 * 
+	 *
 	 * @param sql
 	 * @param requestValue
 	 * @return
@@ -1817,22 +1817,22 @@ public class DataConnection {
 				throw new Exception("The param (~" + para + ") not exists");
 			}
 
-			if (!(pv.getPVTag() == PageValueTag.SESSION //
+			// 判断是否来自可信源
+			boolean fromTrustedSource = (pv.getPVTag() == PageValueTag.SESSION //
 					|| pv.getPVTag() == PageValueTag.SYSTEM //
 					|| pv.getPVTag() == PageValueTag.DTTABLE //
 					|| pv.getPVTag() == PageValueTag.OTHER //
-					|| pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS//
-			)) {
-				// form or query传递
-				if (!v1.matches("[a-zA-Z0-9_.\\-]*")) {
-					if (v1.indexOf("--") >= 0) {
-						LOGGER.error(this + ".rebuildSql, 参数" + para + "非法字符：" + v1);
-						throw new Exception("Invalid param (~" + para + ") -> " + v1);
-					}
-				}
-			}
+					|| pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS);
 
-			sql1 = sql1.replace("~" + para, v1);
+			// 使用完整的SQL标识符验证
+			try {
+				String validatedValue = SqlIdentifierValidator.validateTildeParam(para, v1, fromTrustedSource);
+				sql1 = sql1.replace("~" + para, validatedValue);
+			} catch (SecurityException | IllegalArgumentException e) {
+				LOGGER.error("Security violation in rebuildSql: parameter={}, value={}, error={}", 
+					para, v1, e.getMessage());
+				throw new Exception("SQL injection detected in parameter ~" + para + ": " + e.getMessage(), e);
+			}
 		}
 		// 根据逻辑判断组合SQL, 判断条件是 "-- ewa_block_test"
 		sql1 = this.createSqlByEwaBlockTest(sql1);
