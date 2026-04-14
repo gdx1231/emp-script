@@ -1829,8 +1829,8 @@ public class DataConnection {
 				String validatedValue = SqlIdentifierValidator.validateTildeParam(para, v1, fromTrustedSource);
 				sql1 = sql1.replace("~" + para, validatedValue);
 			} catch (SecurityException | IllegalArgumentException e) {
-				LOGGER.error("Security violation in rebuildSql: parameter={}, value={}, error={}", 
-					para, v1, e.getMessage());
+				LOGGER.error("Security violation in rebuildSql: parameter={}, value={}, error={}", para, v1,
+						e.getMessage());
 				throw new Exception("SQL injection detected in parameter ~" + para + ": " + e.getMessage(), e);
 			}
 		}
@@ -1967,6 +1967,7 @@ public class DataConnection {
 
 		return sql1;
 	}
+
 	/**
 	 * 替换select 查询中的参数名为具体值，原因是sqlserver在查询中出现参数表达式，会进行全表扫描<br>
 	 * 郭磊 2016-11-02
@@ -1977,6 +1978,7 @@ public class DataConnection {
 	public String replaceSqlSelectParameters(String sql) {
 		return this.replaceSqlSelectParameters(sql, this.getDatabaseType());
 	}
+
 	/**
 	 * 替换select 查询中的参数名为具体值，原因是sqlserver在查询中出现参数表达式，会进行全表扫描<br>
 	 * 郭磊 2016-11-02
@@ -2065,15 +2067,17 @@ public class DataConnection {
 
 		v1 = pv.getStringValue();
 		if (dt.equals("INT") || dt.equals("INTEGER")) {
-			return this.getParaInteger(pv).toString();
+
+			return String.valueOf(this.getParaInteger(pv));
 		} else if (dt.equals("LONG") || dt.equals("BIGINT")) {
-			return this.getParaLong(pv).toString();
+			return String.valueOf(this.getParaLong(pv));
 		} else if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("FLOAT")) {
-			return this.getParaBigDecimal(pv).toPlainString();
+			BigDecimal v = this.getParaBigDecimal(pv);
+			return v == null ? "null" : this.getParaBigDecimal(pv).toPlainString();
 		} else if (dt.equals("DATE")) {
 			return this.getDateTimePara(v1);
 		}
-		
+
 		// 字符串类型，处理@符号
 		String v1Exp = this.sqlParameterStringExp(v1, databaseType);
 		if (v1Exp.indexOf("@") < 0) {
@@ -2793,6 +2797,7 @@ public class DataConnection {
 			outValues.put(key, outValues1.get(key));
 		}
 	}
+
 	/**
 	 * SQL字符串参数值表达式，替换'号和\转译符号（mysql）
 	 * 
@@ -2802,6 +2807,7 @@ public class DataConnection {
 	public String sqlParameterStringExp(String parameter) {
 		return sqlParameterStringExp(parameter, this.getDatabaseType());
 	}
+
 	/**
 	 * SQL字符串参数值表达式，替换'号和\转译符号（mysql）
 	 * 
