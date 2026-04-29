@@ -4,6 +4,8 @@
 package com.gdxsoft.easyweb.conf;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -29,6 +32,7 @@ public class ConnectionConfig {
 	private String _SchemaName;
 	private MTableStr _Pool;
 	private boolean hiddenInDefine; // 在数据库类映射中隐含此数据库连接
+	private List<String> _Aliases; // 别名列表，用于多个配置使用同一个连接池
 
 	public ConnectionConfig(Node node) {
 		this.setObj(node);
@@ -45,6 +49,17 @@ public class ConnectionConfig {
 
 		// 2021-04-11 在数据库类映射中隐含此数据库连接
 		this.hiddenInDefine = Utils.cvtBool(params.containsKey("hiddenindefine"));
+
+		// 解析 alias 子节点
+		this._Aliases = new ArrayList<>();
+		NodeList aliasNodes = ele.getElementsByTagName("alias");
+		for (int i = 0; i < aliasNodes.getLength(); i++) {
+			Element aliasEle = (Element) aliasNodes.item(i);
+			String aliasName = aliasEle.getAttribute("name");
+			if (StringUtils.isNotBlank(aliasName)) {
+				_Aliases.add(aliasName.toLowerCase());
+			}
+		}
 
 		if (StringUtils.isBlank(_Name) || StringUtils.isBlank(_ConnectionString) || StringUtils.isBlank(_Type)
 				|| StringUtils.isBlank(_SchemaName)) {
@@ -161,6 +176,13 @@ public class ConnectionConfig {
 
 	public void setHiddenInDefine(boolean hiddenInDefine) {
 		this.hiddenInDefine = hiddenInDefine;
+	}
+
+	/**
+	 * @return the _Aliases
+	 */
+	public List<String> getAliases() {
+		return _Aliases;
 	}
 
 }

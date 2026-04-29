@@ -78,6 +78,8 @@
 			</pool>
 		</database>
 		<database name="work" type="MYSQL" connectionString="jdbc/work" schemaName="work">
+			<alias name="work1" description="别名 1"/>
+			<alias name="work2" description="别名 2" />
 			<pool username="user" password="" maxActive="40" maxIdle="120" maxWait="5000"
 				driverClassName="com.mysql.cj.jdbc.Driver"
 				url="jdbc:mysql://localhost:3306/b2b?nullCatalogMeansCurrent=true&amp;serverTimezone=GMT%2B8&amp;useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;useSSL=false">

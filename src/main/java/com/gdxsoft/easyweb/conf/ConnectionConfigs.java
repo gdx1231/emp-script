@@ -100,6 +100,16 @@ public class ConnectionConfigs extends HashMap<String, ConnectionConfig> {
 		super.put(key, cc);
 		_ListNames.add(key);
 		LOGGER.info("{}. Added ConCfg: {}, {}, {}", index, key, cc.getType(), cc.getConnectionString());
+
+		// 注册别名到连接配置映射
+		if (cc.getAliases() != null && !cc.getAliases().isEmpty()) {
+			for (String alias : cc.getAliases()) {
+				if (!super.containsKey(alias)) {
+					super.put(alias, cc);
+					LOGGER.info("{}. Added Alias: {} -> {}", index, alias, key);
+				}
+			}
+		}
 	}
 
 	public void addCfg(ConnectionConfig cc) {
