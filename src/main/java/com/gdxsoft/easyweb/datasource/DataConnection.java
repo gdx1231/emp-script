@@ -869,9 +869,13 @@ public class DataConnection {
 			writeDebug(this, "SQL", "[executeQuery(sql,rv)] End query.");
 			return true;
 		} catch (Exception e) {
+			StringBuilder errInfo = new StringBuilder();
+			errInfo.append("\nconnStr=").append(this._ConnectionString).append("\nCurrentConfig:\n")
+					.append(_IsTrans ? "Transaction," : "No Transaction,").append("\nname=")
+					.append(this._CurrentConfig.getName()).append("\n").append(this._CurrentConfig.getConnectionString())
+					.append("\n\n").append(sql1).append("\n\n").append(e.getLocalizedMessage());
 			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
-			LOGGER.error(e.getLocalizedMessage());
-			LOGGER.error(sql1);
+			LOGGER.error(errInfo.toString());
 			setError(e, sql1);
 			return false;
 		} finally {
