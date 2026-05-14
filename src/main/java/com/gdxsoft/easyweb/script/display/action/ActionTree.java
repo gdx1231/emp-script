@@ -65,8 +65,24 @@ public class ActionTree extends ActionBase implements IAction {
 		sp.setSql(sql);
 		String key = v.getItem("Key");
 		String pkey = v.getItem("ParentKey");
+		String rootId = v.getItem("RootId"); // 获取根节点ID配置
 
-		String s3 = "SELECT " + sp.getFields() + " FROM " + sp.getTableName() + " WHERE " + sp.getWhere();
+		String whereClause = StringUtils.isNotBlank(sp.getWhere()) ? " WHERE " + sp.getWhere() : "";
+		
+		// 构建第一级过滤条件: ParentKey IS NULL OR '0' OR '' OR RootId
+		String firstLevelCondition;
+		if (StringUtils.isNotBlank(rootId)) {
+			// 使用配置的RootId
+			String escapedRootId = rootId.replace("'", "''");
+			firstLevelCondition = "(" + pkey + " IS NULL OR " + pkey + "='0' OR " + pkey + "='' OR " + pkey + "='" + escapedRootId + "')";
+		} else {
+			// 默认: ParentKey IS NULL OR ParentKey = '0' OR ParentKey = ''
+			firstLevelCondition = "(" + pkey + " IS NULL OR " + pkey + "='0' OR " + pkey + "='')";
+		}
+		
+		String firstLevelWhere = whereClause + (whereClause.contains("WHERE") ? " AND " : " WHERE ") + firstLevelCondition;
+
+		String s3 = "SELECT " + sp.getFields() + " FROM " + sp.getTableName() + firstLevelWhere;
 		String s2 = "SELECT " + pkey + " EWAPID, COUNT(*) EWAMORECNT FROM " + sp.getTableName() + " GROUP BY " + pkey;
 		String s1 = "SELECT A.*, B.EWAMORECNT FROM (" + s3 + ") A \r\n LEFT JOIN (" + s2 + ") B ON A." + key
 				+ "=B.EWAPID ";
