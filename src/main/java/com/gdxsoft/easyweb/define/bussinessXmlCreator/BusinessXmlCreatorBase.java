@@ -51,6 +51,23 @@ public abstract class BusinessXmlCreatorBase {
     }
 
     /**
+     * 生成并保存业务 XML（简化版本，不需要 tableName 和 tableJson）
+     * 
+     * @param db            数据库名
+     * @param selectSql     查询 SQL
+     * @param frameType     Frame 类型 (ListFrame/Frame/Tree)
+     * @param operationType 操作类型 (N/M/V/NM)
+     * @param xmlName       配置名称
+     * @param itemName      配置项名
+     * @param admId         管理员ID
+     * @return 是否保存成功
+     */
+    public boolean createAndSave(String db, String selectSql, String frameType, String operationType,
+            String xmlName, String itemName, String admId) {
+        return createAndSave(db, this.table.getName(), selectSql, null, frameType, operationType, xmlName, itemName, admId);
+    }
+
+    /**
      * 生成预览 XML
      */
     public String createShowXml(String db, String tableName, String selectSql,
@@ -71,16 +88,7 @@ public abstract class BusinessXmlCreatorBase {
      * 将 Document 转换为字符串
      */
     private String docToString(Document doc) throws Exception {
-        javax.xml.transform.TransformerFactory tf = javax.xml.transform.TransformerFactory.newInstance();
-        javax.xml.transform.Transformer transformer = tf.newTransformer();
-        transformer.setOutputProperty(javax.xml.transform.OutputKeys.ENCODING, "UTF-8");
-        transformer.setOutputProperty(javax.xml.transform.OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-        
-        java.io.StringWriter writer = new java.io.StringWriter();
-        transformer.transform(new javax.xml.transform.dom.DOMSource(doc), 
-                             new javax.xml.transform.stream.StreamResult(writer));
-        return writer.toString();
+        return UXml.asXml(doc);
     }
 
     /**
@@ -105,10 +113,14 @@ public abstract class BusinessXmlCreatorBase {
      */
     protected String getFrameTypeShort(String frameType) {
         switch (frameType.toUpperCase()) {
-            case "FRAME": return "F";
-            case "LISTFRAME": return "LF";
-            case "TREE": return "T";
-            default: return frameType;
+            case "FRAME":
+                return "F";
+            case "LISTFRAME":
+                return "LF";
+            case "TREE":
+                return "T";
+            default:
+                return frameType;
         }
     }
 
@@ -117,10 +129,14 @@ public abstract class BusinessXmlCreatorBase {
      */
     protected String getFrameName(String frameType) {
         switch (frameType.toUpperCase()) {
-            case "FRAME": return "框架";
-            case "LISTFRAME": return "列表";
-            case "TREE": return "树形";
-            default: return frameType;
+            case "FRAME":
+                return "框架";
+            case "LISTFRAME":
+                return "列表";
+            case "TREE":
+                return "树形";
+            default:
+                return frameType;
         }
     }
 
@@ -129,11 +145,16 @@ public abstract class BusinessXmlCreatorBase {
      */
     protected String getOperationName(String operationType) {
         switch (operationType.toUpperCase()) {
-            case "N": return "新增";
-            case "M": return "修改";
-            case "V": return "查看";
-            case "NM": return "新增修改";
-            default: return operationType;
+            case "N":
+                return "新增";
+            case "M":
+                return "修改";
+            case "V":
+                return "查看";
+            case "NM":
+                return "新增修改";
+            default:
+                return operationType;
         }
     }
 
@@ -141,9 +162,12 @@ public abstract class BusinessXmlCreatorBase {
      * 获取 Tag 类型
      * 从 EwaDefineSettings.xml/FieldTags 读取配置
      * 参考 EwaConfig.xml/Items/XItems 中定义的 XItem Name
-     * 可用的类型：text, textarea, span, hidden, password, date, datetime, time, select, combo, checkbox, radio 等
-     * 特殊后缀：_SQL→sqlEditor, _XML→xmlEditor, _JSON→jsonEditor, _HTML→dHtml5, _CSS→cssEditor
-     * @param dbType 数据库字段类型
+     * 可用的类型：text, textarea, span, hidden, password, date, datetime, time, select,
+     * combo, checkbox, radio 等
+     * 特殊后缀：_SQL→sqlEditor, _XML→xmlEditor, _JSON→jsonEditor, _HTML→dHtml5,
+     * _CSS→cssEditor
+     * 
+     * @param dbType    数据库字段类型
      * @param fieldName 字段名（用于后缀匹配）
      * @param frameType Frame 类型（Frame 或 ListFrame），用于选择对应的配置
      * @return Tag 类型
@@ -164,11 +188,15 @@ public abstract class BusinessXmlCreatorBase {
      * 获取数据类型
      */
     protected String getDataType(String dbType) {
-        if (dbType == null) return "String";
+        if (dbType == null)
+            return "String";
         String type = dbType.toUpperCase();
-        if (type.contains("INT")) return "Int";
-        if (type.contains("DECIMAL") || type.contains("NUM")) return "Double";
-        if (type.contains("DATE") || type.contains("TIME")) return "Date";
+        if (type.contains("INT"))
+            return "Int";
+        if (type.contains("DECIMAL") || type.contains("NUM"))
+            return "Double";
+        if (type.contains("DATE") || type.contains("TIME"))
+            return "Date";
         return "String";
     }
 
@@ -192,11 +220,15 @@ public abstract class BusinessXmlCreatorBase {
      * 获取验证类型
      */
     protected String getValidType(String dbType) {
-        if (dbType == null) return "";
+        if (dbType == null)
+            return "";
         String type = dbType.toUpperCase();
-        if (type.contains("EMAIL")) return "Email";
-        if (type.contains("URL")) return "Url";
-        if (type.contains("INT") || type.contains("NUM")) return "Number";
+        if (type.contains("EMAIL"))
+            return "Email";
+        if (type.contains("URL"))
+            return "Url";
+        if (type.contains("INT") || type.contains("NUM"))
+            return "Number";
         return "";
     }
 
@@ -223,18 +255,18 @@ public abstract class BusinessXmlCreatorBase {
      */
     protected boolean shouldHideField(Field field) {
         String fieldName = field.getName().toUpperCase();
-        
+
         // 自增主键不展示
         if (field.isIdentity()) {
             return true;
         }
-        
+
         // **_CDATE, **_MDATE, **_STATUS, **_STATE 字段不展示
-        if (fieldName.endsWith("_CDATE") || fieldName.endsWith("_MDATE") || 
-            fieldName.endsWith("_STATUS") || fieldName.endsWith("_STATE")) {
+        if (fieldName.endsWith("_CDATE") || fieldName.endsWith("_MDATE") ||
+                fieldName.endsWith("_STATUS") || fieldName.endsWith("_STATE")) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -271,7 +303,8 @@ public abstract class BusinessXmlCreatorBase {
      * 处理 JavaScript 表达式
      */
     protected String processJsExpression(String val) {
-        if (val == null) return "";
+        if (val == null)
+            return "";
 
         // 处理 define.Fields.GetPkParas() 调用
         String pkParas = this.table.getFields().GetPkParas();
@@ -289,9 +322,9 @@ public abstract class BusinessXmlCreatorBase {
 
         // 转义 XML 实体
         result = result.replace("&quot;", "\"")
-                      .replace("&lt;", "<")
-                      .replace("&gt;", ">")
-                      .replace("&amp;", "&");
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&amp;", "&");
 
         // 去除前后的单引号 '
         if (result.startsWith("'") && result.endsWith("'")) {
@@ -331,7 +364,7 @@ public abstract class BusinessXmlCreatorBase {
         }
         return descSet;
     }
-    
+
     /**
      * 获取 Tree 加载 SQL
      * 如果存在 _STATUS 或 _STATE 字段，添加 WHERE status='USED' 条件
@@ -341,12 +374,12 @@ public abstract class BusinessXmlCreatorBase {
         String levelField = findFieldBySuffix("_LVL");
         String orderField = findFieldBySuffix("_ORD");
         String statusField = findStatusField();
-        
+
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT * FROM ").append(tableName);
-        
+
         java.util.ArrayList<String> whereConditions = new java.util.ArrayList<String>();
-        
+
         // 如果有状态字段，添加 WHERE 条件
         if (statusField != null) {
             boolean statusWhere = EwaDefineSettings.getInstance().isStatusFieldWhere();
@@ -354,7 +387,7 @@ public abstract class BusinessXmlCreatorBase {
                 whereConditions.add(statusField + "='USED'");
             }
         }
-        
+
         // 添加配置的 WHERE 条件字段
         for (String fieldName : this.table.getFields().getFieldList()) {
             if (EwaDefineSettings.getInstance().isFieldWhere(fieldName)) {
@@ -367,12 +400,12 @@ public abstract class BusinessXmlCreatorBase {
                 }
             }
         }
-        
+
         // 添加 WHERE 子句
         if (!whereConditions.isEmpty()) {
             sql.append(" WHERE ").append(String.join(" AND ", whereConditions));
         }
-        
+
         // 添加 ORDER BY
         if (levelField != null || orderField != null) {
             if (whereConditions.isEmpty()) {
@@ -389,10 +422,10 @@ public abstract class BusinessXmlCreatorBase {
                 sql.append(orderField);
             }
         }
-        
+
         return sql.toString();
     }
-    
+
     /**
      * 获取 Tree 删除节点 SQL
      * 如果存在 _STATUS 或 _STATE 字段，改为 UPDATE status='DEL' 而不是 DELETE
@@ -400,17 +433,18 @@ public abstract class BusinessXmlCreatorBase {
     protected String getSqlTreeNodeDelete() {
         String pkField = getPrimaryKeyField();
         String statusField = findStatusField();
-        
+
         if (pkField == null || pkField.isEmpty()) {
             return "-- Primary key not found";
         }
-        
+
         java.util.ArrayList<String> whereConditions = new java.util.ArrayList<String>();
         whereConditions.add(pkField + " = @" + pkField);
-        
+
         // 添加配置的 WHERE 条件字段
         for (String fieldName : this.table.getFields().getFieldList()) {
-            if (fieldName.equals(pkField)) continue;  // 跳过主键
+            if (fieldName.equals(pkField))
+                continue; // 跳过主键
             if (EwaDefineSettings.getInstance().isFieldWhere(fieldName)) {
                 // 获取字段默认值（如 @g_sup_id）
                 String defaultValue = EwaDefineSettings.getInstance().getFieldDefaultValue(fieldName);
@@ -421,7 +455,7 @@ public abstract class BusinessXmlCreatorBase {
                 }
             }
         }
-        
+
         // 如果有状态字段，使用 UPDATE 而不是 DELETE
         if (statusField != null) {
             boolean statusWhere = EwaDefineSettings.getInstance().isStatusFieldWhere();
@@ -430,33 +464,35 @@ public abstract class BusinessXmlCreatorBase {
                 if (deleteValue == null || deleteValue.isEmpty()) {
                     deleteValue = "'DEL'";
                 }
-                return "UPDATE " + this.table.getName() + " SET " + statusField + "=" + deleteValue + " WHERE " + String.join(" AND ", whereConditions);
+                return "UPDATE " + this.table.getName() + " SET " + statusField + "=" + deleteValue + " WHERE "
+                        + String.join(" AND ", whereConditions);
             }
         }
-        
+
         return "DELETE FROM " + this.table.getName() + " WHERE " + String.join(" AND ", whereConditions);
     }
-    
+
     /**
      * 获取 Tree 重命名节点 SQL
      */
     protected String getSqlTreeNodeRename() {
         String pkField = getPrimaryKeyField();
         String nameField = findFieldBySuffix("_NAME");
-        
+
         if (pkField == null || pkField.isEmpty()) {
             return "-- Primary key not found";
         }
         if (nameField == null || nameField.isEmpty()) {
             return "-- Name field not found";
         }
-        
+
         java.util.ArrayList<String> whereConditions = new java.util.ArrayList<String>();
         whereConditions.add(pkField + " = @" + pkField);
-        
+
         // 添加配置的 WHERE 条件字段
         for (String fieldName : this.table.getFields().getFieldList()) {
-            if (fieldName.equals(pkField)) continue;  // 跳过主键
+            if (fieldName.equals(pkField))
+                continue; // 跳过主键
             if (EwaDefineSettings.getInstance().isFieldWhere(fieldName)) {
                 // 获取字段默认值（如 @g_sup_id）
                 String defaultValue = EwaDefineSettings.getInstance().getFieldDefaultValue(fieldName);
@@ -467,11 +503,11 @@ public abstract class BusinessXmlCreatorBase {
                 }
             }
         }
-        
-        return "UPDATE " + this.table.getName() + " SET " + nameField + " = @" + nameField + 
-               " WHERE " + String.join(" AND ", whereConditions);
+
+        return "UPDATE " + this.table.getName() + " SET " + nameField + " = @" + nameField +
+                " WHERE " + String.join(" AND ", whereConditions);
     }
-    
+
     /**
      * 获取 Tree 新增节点 SQL
      * 参考 SQL Server 模板，使用 CASE WHEN 适配不同数据库
@@ -485,42 +521,45 @@ public abstract class BusinessXmlCreatorBase {
         String cdateField = findFieldBySuffix("_CDATE");
         String mdateField = findFieldBySuffix("_MDATE");
         String statusField = findStatusField();
-        
+
         if (pkField == null || pkField.isEmpty()) {
             return "-- Primary key not found";
         }
-        
+
         StringBuilder sql = new StringBuilder();
         sql.append("INSERT INTO ").append(this.table.getName()).append(" (");
-        
+
         java.util.ArrayList<String> fields = new java.util.ArrayList<String>();
         java.util.ArrayList<String> selectFields = new java.util.ArrayList<String>();
         java.util.ArrayList<String> fromTables = new java.util.ArrayList<String>();
         java.util.ArrayList<String> whereConditions = new java.util.ArrayList<String>();
-        
+
         // 名称字段
         if (nameField != null) {
             fields.add(nameField);
             selectFields.add("@EWA_TREE_TEXT " + nameField);
         }
-        
+
         // 父 ID 字段 - 使用 CASE WHEN 适配不同数据库
         if (parentField != null) {
             fields.add(parentField);
-            selectFields.add("CASE WHEN @EWA_TREE_PARENT_KEY IS NULL THEN 0 ELSE @EWA_TREE_PARENT_KEY END " + parentField);
+            selectFields
+                    .add("CASE WHEN @EWA_TREE_PARENT_KEY IS NULL THEN 0 ELSE @EWA_TREE_PARENT_KEY END " + parentField);
         }
-        
+
         // 层级字段 - 使用 CASE WHEN 适配不同数据库
         if (levelField != null) {
             fields.add(levelField);
-            selectFields.add("CASE WHEN MAX(pp." + levelField + ") IS NULL THEN -1 ELSE MAX(pp." + levelField + ") END+1 " + levelField);
+            selectFields.add("CASE WHEN MAX(pp." + levelField + ") IS NULL THEN -1 ELSE MAX(pp." + levelField
+                    + ") END+1 " + levelField);
             fromTables.add(this.table.getName() + " pp");
         }
-        
+
         // 排序字段 - 使用 CASE WHEN 适配不同数据库
         if (orderField != null) {
             fields.add(orderField);
-            selectFields.add("CASE WHEN MAX(pc." + orderField + ") IS NULL THEN 0 ELSE MAX(pc." + orderField + ") END+1 " + orderField);
+            selectFields.add("CASE WHEN MAX(pc." + orderField + ") IS NULL THEN 0 ELSE MAX(pc." + orderField
+                    + ") END+1 " + orderField);
             if (fromTables.isEmpty()) {
                 fromTables.add(this.table.getName() + " pc");
             } else {
@@ -531,7 +570,7 @@ public abstract class BusinessXmlCreatorBase {
                 }
             }
         }
-        
+
         // 创建时间字段
         if (cdateField != null) {
             fields.add(cdateField);
@@ -552,16 +591,16 @@ public abstract class BusinessXmlCreatorBase {
             String defaultValue = EwaDefineSettings.getInstance().getStatusFieldDefaultValue();
             selectFields.add((defaultValue != null ? defaultValue : "'USED'") + " " + statusField);
         }
-        
+
         // 其他字段 - 检查是否有配置的默认值
         // 遍历所有字段，为有默认值配置的字段添加默认值
         for (String fieldName : this.table.getFields().getFieldList()) {
             // 跳过已处理的字段
-            if (fieldName.equals(pkField) || fieldName.equals(nameField) || 
-                fieldName.equals(parentField) || fieldName.equals(levelField) ||
-                fieldName.equals(orderField) || fieldName.equals(cdateField) ||
-                fieldName.equals(mdateField) || fieldName.equals(statusField)) {
-                
+            if (fieldName.equals(pkField) || fieldName.equals(nameField) ||
+                    fieldName.equals(parentField) || fieldName.equals(levelField) ||
+                    fieldName.equals(orderField) || fieldName.equals(cdateField) ||
+                    fieldName.equals(mdateField) || fieldName.equals(statusField)) {
+
                 String defaultValue = EwaDefineSettings.getInstance().getFieldDefaultValue(fieldName);
                 if (defaultValue != null) {
                     fields.add(fieldName);
@@ -569,30 +608,30 @@ public abstract class BusinessXmlCreatorBase {
                 }
             }
         }
-        
+
         // WHERE 条件
         if (parentField != null && !fromTables.isEmpty()) {
             whereConditions.add("WHERE pp." + parentField + "= @EWA_TREE_PARENT_KEY");
         }
-        
+
         // 构建 SQL
         sql.append(String.join(", ", fields));
         sql.append(") \nSELECT \t ");
         sql.append(String.join(",\n\t ", selectFields));
-        
+
         if (!fromTables.isEmpty()) {
             sql.append("\nFROM ").append(String.join(" ", fromTables));
         }
-        
+
         if (!whereConditions.isEmpty()) {
             sql.append("\n").append(String.join(" ", whereConditions));
         }
-        
+
         sql.append("\n-- auto ").append(pkField);
-        
+
         return sql.toString();
     }
-    
+
     /**
      * 查找带有指定后缀的字段
      */
@@ -604,7 +643,7 @@ public abstract class BusinessXmlCreatorBase {
         }
         return null;
     }
-    
+
     /**
      * 查找状态字段 (_STATUS 或 _STATE)
      */
@@ -618,7 +657,7 @@ public abstract class BusinessXmlCreatorBase {
                 }
             }
         }
-        
+
         // 配置中没有或找不到，使用默认的后缀查找
         // 优先查找 _STATUS
         for (String fieldName : this.table.getFields().getFieldList()) {
@@ -634,10 +673,11 @@ public abstract class BusinessXmlCreatorBase {
         }
         return null;
     }
-    
+
     /**
      * 获取 ListFrame 的 SELECT 查询 SQL
-     * @param statusField 状态字段名
+     * 
+     * @param statusField    状态字段名
      * @param includeRecycle 是否包含回收站
      * @return
      */
@@ -664,9 +704,10 @@ public abstract class BusinessXmlCreatorBase {
 
         return sb.toString();
     }
-    
+
     /**
      * 逻辑删除 SQL（更新状态为 DEL）
+     * 
      * @param statusField 状态字段名
      * @return
      */
@@ -675,7 +716,7 @@ public abstract class BusinessXmlCreatorBase {
         if (pkField == null || pkField.isEmpty()) {
             return "-- Primary key not found";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE ").append(this.table.getName()).append(" SET ").append(statusField).append("='DEL'");
 
@@ -688,9 +729,10 @@ public abstract class BusinessXmlCreatorBase {
 
         return sb.toString();
     }
-    
+
     /**
      * 恢复数据 SQL（更新状态为 USED）
+     * 
      * @param statusField 状态字段名
      * @return
      */
@@ -699,7 +741,7 @@ public abstract class BusinessXmlCreatorBase {
         if (pkField == null || pkField.isEmpty()) {
             return "-- Primary key not found";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE ").append(this.table.getName()).append(" SET ").append(statusField).append("='USED'");
 
@@ -712,9 +754,10 @@ public abstract class BusinessXmlCreatorBase {
 
         return sb.toString();
     }
-    
+
     /**
      * 物理删除 SQL
+     * 
      * @return
      */
     protected String getSqlDelete() {
@@ -724,9 +767,10 @@ public abstract class BusinessXmlCreatorBase {
         }
         return "DELETE FROM " + this.table.getName() + " WHERE " + pkField + " = @" + pkField;
     }
-    
+
     /**
      * 获取加载数据 SQL（单条记录）
+     * 
      * @return
      */
     protected String getSqlSelect() {
@@ -736,9 +780,10 @@ public abstract class BusinessXmlCreatorBase {
         }
         return "SELECT A.* FROM " + this.table.getName() + " A WHERE A." + pkField + " = @" + pkField;
     }
-    
+
     /**
      * 获取更新 SQL
+     * 
      * @param statusField 状态字段名
      * @return
      */
@@ -747,7 +792,7 @@ public abstract class BusinessXmlCreatorBase {
         if (pkField == null || pkField.isEmpty()) {
             return "-- Primary key not found";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE ").append(this.table.getName()).append(" SET ");
 
@@ -756,7 +801,8 @@ public abstract class BusinessXmlCreatorBase {
 
         for (String fieldName : this.table.getFields().getFieldList()) {
             Field f = this.table.getFields().get(fieldName);
-            if (f == null) continue;
+            if (f == null)
+                continue;
 
             // 跳过自增字段、主键
             if (f.isIdentity() || f.isPk()) {
@@ -781,9 +827,10 @@ public abstract class BusinessXmlCreatorBase {
 
         return sb.toString();
     }
-    
+
     /**
      * 获取新增 SQL
+     * 
      * @param statusField 状态字段名
      * @return
      */
@@ -799,7 +846,8 @@ public abstract class BusinessXmlCreatorBase {
 
         for (String fieldName : this.table.getFields().getFieldList()) {
             Field f = this.table.getFields().get(fieldName);
-            if (f == null) continue;
+            if (f == null)
+                continue;
 
             // 跳过自增字段
             if (f.isIdentity()) {
@@ -820,7 +868,7 @@ public abstract class BusinessXmlCreatorBase {
 
         return sb1.toString() + sb2.toString();
     }
-    
+
     /**
      * 查找自增字段
      */

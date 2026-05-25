@@ -23,10 +23,12 @@ import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UpdateXmlImpl;
+import com.gdxsoft.easyweb.define.bussinessXmlCreator.BusinessXmlCreator;
 import com.gdxsoft.easyweb.define.database.Table;
 import com.gdxsoft.easyweb.define.database.Tables;
 import com.gdxsoft.easyweb.define.servlets.ApiTokenValidator.ValidationResult;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.template.EwaConfig;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.utils.UJSon;
@@ -69,6 +71,9 @@ public class ServletApi extends HttpServlet {
     private static final String PARAM_PAGE = "page";
     private static final String PARAM_PAGESIZE = "pagesize";
     private static final String PARAM_PK = "pk";
+    private static final String PARAM_FRAMETYPE = "frametype";
+    private static final String PARAM_OPERATIONTYPE = "operationtype";
+    private static final String PARAM_ADMID = "admid";
 
     // 输出格式常量
     private static final String OUTPUT_XML = "xml";
@@ -198,6 +203,12 @@ public class ServletApi extends HttpServlet {
                     break;
                 case "gettabledata":
                     result = getTableData(rv, response);
+                    break;
+                case "createbusinessxml":
+                    result = createBusinessXml(rv, admin);
+                    break;
+                case "previewbusinessxml":
+                    result = previewBusinessXml(rv);
                     break;
                 default:
                     result = createErrorResponse("Unknown method: " + method, 400);
@@ -743,6 +754,205 @@ public class ServletApi extends HttpServlet {
     }
 
     /**
+     * Create business XML from database table and save it
+     *
+     * @param rv RequestValue containing parameters
+     *           - db: database connection name
+     *           - tablename: table name
+     *           - frametype: Frame type (ListFrame/Frame/Tree)
+     *           - operationtype: Operation type (N/M/V/NM)
+     *           - xmlname: configuration file name (e.g., ewa/m)
+     *           - itemname: configuration item name
+     *           - admid: admin ID
+     * @param admin ConfAdmin instance
+     * @return JSON result with success/failure status
+     */
+    private JSONObject createBusinessXml(RequestValue rv, ConfAdmin admin) {
+        String db = rv.getString(PARAM_DB);
+        String tableName = rv.getString(PARAM_TABLENAME);
+        String frameType = rv.getString(PARAM_FRAMETYPE);
+        String operationType = rv.getString(PARAM_OPERATIONTYPE);
+        String xmlName = rv.getString(PARAM_XMLNAME);
+        String itemName = rv.getString(PARAM_ITEMNAME);
+        String admId = rv.getString(PARAM_ADMID);
+
+        // 参数验证
+        if (StringUtils.isBlank(db)) {
+            return UJSon.rstFalse("Missing db parameter");
+        }
+        if (StringUtils.isBlank(tableName)) {
+            return UJSon.rstFalse("Missing tablename parameter");
+        }
+        if (StringUtils.isBlank(frameType)) {
+            return UJSon.rstFalse("Missing frametype parameter");
+        }
+        if (StringUtils.isBlank(operationType)) {
+            return UJSon.rstFalse("Missing operationtype parameter");
+        }
+        if (StringUtils.isBlank(xmlName)) {
+            return UJSon.rstFalse("Missing xmlname parameter");
+        }
+        if (StringUtils.isBlank(itemName)) {
+            return UJSon.rstFalse("Missing itemname parameter");
+        }
+
+        // 验证 Frame 类型
+        String frameTypeUpper = frameType.toUpperCase();
+        if (!frameTypeUpper.equals("LISTFRAME") && !frameTypeUpper.equals("FRAME") && !frameTypeUpper.equals("TREE")) {
+            return UJSon.rstFalse("Invalid frametype. Allowed values: ListFrame, Frame, Tree");
+        }
+
+        // 验证操作类型
+        String operationTypeUpper = operationType.toUpperCase();
+        if (!operationTypeUpper.equals("N") && !operationTypeUpper.equals("M") &&
+            !operationTypeUpper.equals("V") && !operationTypeUpper.equals("NM")) {
+            return UJSon.rstFalse("Invalid operationtype. Allowed values: N, M, V, NM");
+        }
+
+        // 使用 admin 的 loginId 作为 admId（如果未提供）
+        if (StringUtils.isBlank(admId)) {
+            admId = admin.getLoginId();
+        }
+
+        try {
+            // 读取数据库表结构
+            Table table = new Table(tableName, db);
+            table.init();
+
+            // 创建 EwaConfig
+            IConfig configType = UserConfig.getConfig(xmlName, null);
+            if (configType == null) {
+                return UJSon.rstFalse("Configuration not found: " + xmlName);
+            }
+            EwaConfig config = (EwaConfig) configType;
+
+            // 创建 BusinessXmlCreator
+            BusinessXmlCreator creator = BusinessXmlCreator.create(config, table, frameTypeUpper);
+
+            // 生成并保存 XML
+            boolean success = creator.createAndSave(db, tableName, null, null,
+                    frameTypeUpper, operationTypeUpper, xmlName, itemName, admId);
+
+            if (success) {
+                JSONObject result = new JSONObject();
+                result.put("RST", true);
+                result.put("MSG", "Business XML created and saved successfully");
+                result.put("XMLNAME", xmlName);
+                result.put("ITEMNAME", itemName);
+                result.put("FRAMETYPE", frameTypeUpper);
+                result.put("OPERATIONTYPE", operationTypeUpper);
+                return result;
+            } else {
+                return UJSon.rstFalse("Failed to create or save business XML");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error creating business XML", e);
+            return UJSon.rstFalse("Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Preview business XML without saving
+     *
+     * @param rv RequestValue containing parameters
+     *           - db: database connection name
+     *           - tablename: table name
+     *           - frametype: Frame type (ListFrame/Frame/Tree)
+     *           - operationtype: Operation type (N/M/V/NM)
+     *           - xmlname: configuration file name (e.g., ewa/m)
+     *           - output: output format (xml/json), default xml
+     * @return JSON result with XML content
+     */
+    private JSONObject previewBusinessXml(RequestValue rv) {
+        String db = rv.getString(PARAM_DB);
+        String tableName = rv.getString(PARAM_TABLENAME);
+        String frameType = rv.getString(PARAM_FRAMETYPE);
+        String operationType = rv.getString(PARAM_OPERATIONTYPE);
+        String xmlName = rv.getString(PARAM_XMLNAME);
+        String output = rv.getString(PARAM_OUTPUT);
+
+        // 参数验证
+        if (StringUtils.isBlank(db)) {
+            return UJSon.rstFalse("Missing db parameter");
+        }
+        if (StringUtils.isBlank(tableName)) {
+            return UJSon.rstFalse("Missing tablename parameter");
+        }
+        if (StringUtils.isBlank(frameType)) {
+            return UJSon.rstFalse("Missing frametype parameter");
+        }
+        if (StringUtils.isBlank(operationType)) {
+            return UJSon.rstFalse("Missing operationtype parameter");
+        }
+        if (StringUtils.isBlank(xmlName)) {
+            return UJSon.rstFalse("Missing xmlname parameter");
+        }
+
+        // 默认输出格式为 xml
+        if (StringUtils.isBlank(output)) {
+            output = OUTPUT_XML;
+        }
+
+        // 验证 Frame 类型
+        String frameTypeUpper = frameType.toUpperCase();
+        if (!frameTypeUpper.equals("LISTFRAME") && !frameTypeUpper.equals("FRAME") && !frameTypeUpper.equals("TREE")) {
+            return UJSon.rstFalse("Invalid frametype. Allowed values: ListFrame, Frame, Tree");
+        }
+
+        // 验证操作类型
+        String operationTypeUpper = operationType.toUpperCase();
+        if (!operationTypeUpper.equals("N") && !operationTypeUpper.equals("M") &&
+            !operationTypeUpper.equals("V") && !operationTypeUpper.equals("NM")) {
+            return UJSon.rstFalse("Invalid operationtype. Allowed values: N, M, V, NM");
+        }
+
+        try {
+            // 读取数据库表结构
+            Table table = new Table(tableName, db);
+            table.init();
+
+            // 创建 EwaConfig
+            IConfig configType = UserConfig.getConfig(xmlName, null);
+            if (configType == null) {
+                return UJSon.rstFalse("Configuration not found: " + xmlName);
+            }
+            EwaConfig config = (EwaConfig) configType;
+
+            // 创建 BusinessXmlCreator
+            BusinessXmlCreator creator = BusinessXmlCreator.create(config, table, frameTypeUpper);
+
+            // 生成预览 XML
+            String xmlContent = creator.createShowXml(db, tableName, null, null,
+                    frameTypeUpper, operationTypeUpper);
+
+            if (xmlContent == null) {
+                return UJSon.rstFalse("Failed to generate business XML");
+            }
+
+            JSONObject result = new JSONObject();
+            result.put("RST", true);
+            result.put("XMLNAME", xmlName);
+            result.put("FRAMETYPE", frameTypeUpper);
+            result.put("OPERATIONTYPE", operationTypeUpper);
+            result.put("OUTPUT", output);
+
+            if (OUTPUT_JSON.equalsIgnoreCase(output)) {
+                // 将 XML 转换为 JSON
+                JSONObject xmlAsJson = XML.toJSONObject(xmlContent);
+                result.put("DATA", xmlAsJson);
+            } else {
+                // 默认输出 XML 格式
+                result.put("XML", xmlContent);
+            }
+
+            return result;
+        } catch (Exception e) {
+            LOGGER.error("Error previewing business XML", e);
+            return UJSon.rstFalse("Error: " + e.getMessage());
+        }
+    }
+
+    /**
      * Get API help documentation
      */
     private JSONObject getHelp() {
@@ -760,6 +970,8 @@ public class ServletApi extends HttpServlet {
         methods.put("getTables", "Get database tables list (params: db, filter, output[xml/json])");
         methods.put("getTable", "Get table structure details (params: db, tablename, output[xml/json])");
         methods.put("getTableData", "Get table data with pagination (params: db, tablename, [where, page, pagesize, pk, output])");
+        methods.put("createBusinessXml", "Create and save business XML from table (params: db, tablename, frametype, operationtype, xmlname, itemname, [admid])");
+        methods.put("previewBusinessXml", "Preview business XML without saving (params: db, tablename, frametype, operationtype, xmlname, [output])");
 
         result.put("methods", methods);
 
@@ -776,6 +988,9 @@ public class ServletApi extends HttpServlet {
         params.put("page", "Page number for getTableData (default 1)");
         params.put("pagesize", "Page size for getTableData (default 10, max 100)");
         params.put("pk", "Primary key field for pagination");
+        params.put("frametype", "Frame type for business XML: ListFrame, Frame, or Tree");
+        params.put("operationtype", "Operation type for business XML: N (new), M (modify), V (view), NM (new+modify)");
+        params.put("admid", "Admin ID for business XML creation (optional, uses authenticated user if not provided)");
 
         result.put("parameters", params);
         result.put("authentication", ApiTokenValidator.getSignatureAlgorithmDoc());
