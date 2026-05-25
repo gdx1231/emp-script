@@ -1012,7 +1012,7 @@ function AddToRelation(){
 			<Set Lang="zhcn" Info="生成树"><![CDATA[生成树<br>]]></Set>
 			<Set Lang="enus" Info="Create Tree config"><![CDATA[Create Frame config]]></Set>
 		</DescriptionSet>
-		<Tmp Name="Modify">
+		<Tmp Name="M">
 			<DescriptionSet>
 				<Set Lang="zhcn" Info="树修改"><![CDATA[
 <ol style='margin:0px'>

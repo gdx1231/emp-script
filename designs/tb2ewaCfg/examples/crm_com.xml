@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="UTF-8"?><EasyWebTemplates><EasyWebTemplate Author="" CreateDate="2019-11-22 11:59:28" Name="CRM_COM.F.Imports" UpdateDate="2024-01-06 15:40:39"><Page><Name><Set Name="CRM_COM.F.Imports"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="globaltravel"/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.web.acl.BusinessImpl"/></Acl><Log><Set Log="com.gdxsoft.web.log.EwaScriptLog"/></Log><DescriptionSet><Set Info="导入客户信息" Lang="zhcn" Memo=""/><Set Info="Import customer information" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><RowAttributeSet/><GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet><Size><Set FrameCols="C2" HAlign="center" Height="" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="1000"/></Size><AddHtml><Set><Top/><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[//提交后台数据时执行的检查或附加数据处理
+function do_pos_before_CRM_COM() {
+    var cfgs = [{
+        id: "CRM_COM_NAME",
+        name: "公司名称",
+        must: true
+    }, {
+        id: "AUS_CONTACT",
+        name: "联系人"
+    }, {
+        id: "CRM_COM_TELE",
+        name: "电话",
+        must: true
+    }, {
+        id: "CRM_COM_ADDR",
+        name: "公司地址",
+        must: true
+    }, {
+        id: "CRM_COM_SNAME",
+        name: "类别"
+    }, {
+        id: "CRM_COM_NOTE",
+        name: "备注"
+    }];
+    for (var i = 0; i < cfgs.length; i++) {
+        var cfg = cfgs[i];
+        cfg.data = [];
+    }
+
+    var tb = $('#EWA_FRAME_@SYS_FRAME_UNID');
+    var SALES_ID = tb.find("#SALES_ID").val();
+    if (!SALES_ID) {
+        alert('选择销售');
+        return;
+    }
+    if (EWA.F.FOS["@SYS_FRAME_UNID"]._IMPORT) {
+        alert('数据已经提交请关闭并，重新打开窗口');
+        return;
+    }
+
+    EWA.F.FOS["@SYS_FRAME_UNID"]._IMPORT = true;
+    var tempids = [];
+    // 粘贴处
+    var docbody = tb.find('.ewa-row-content iframe:eq(0)')[0].contentWindow.frames[0].document.body;
+    $(docbody).find('table tr:gt(0)').each(function(index) {
+        var tmpId = EWA_Utils.tempId("CRM_IMPORT");
+        $(this).attr('id', tmpId);
+        tempids.push(tmpId);
+        for (var i = 0; i < cfgs.length; i++) {
+            var cfg = cfgs[i];
+            var v = this.cells[i] ? this.cells[i].innerText : "";
+            v = v.replace(/`/ig, '').trim();
+            cfg.data.push(v);
+        }
+    });
+
+
+    var PostAddData = {
+        tempids: tempids.join('`')
+    };
+    for (var i = 0; i < cfgs.length; i++) {
+        var cfg = cfgs[i];
+        PostAddData[cfg.id + "S"] = cfg.data.join('`');
+    }
+
+
+    EWA.F.FOS["@SYS_FRAME_UNID"].__OK = false;
+    console.log(PostAddData);
+    $Tip('提交数据...', function() {
+        return EWA.F.FOS["@SYS_FRAME_UNID"].__OK;
+    });
+    var u = "@EWA.CP/business/sales/crm-com-imports.jsp?import=yes&SALES_ID=" + SALES_ID;
+    $JP(u, PostAddData, function(rst) {
+        EWA.F.FOS["@SYS_FRAME_UNID"].__OK = true;
+        var incnew = 0;
+        var increpeat = 0;
+        for (var n in rst) {
+            var imported = rst[n];
+            if (n == 'RST') {
+                continue;
+            }
+            if (!imported) { //重复
+                $(docbody).find('#' + n + ' td:eq(0)').prepend("【重复】").css('color', 'red');
+                increpeat++;
+            } else {
+                $(docbody).find('#' + n).hide();
+                incnew++;
+            }
+        }
+        alert('导入' + incnew + '记录，' + increpeat + '重复');
+    });
+
+    return false;
+}
+
+function loadCitys() {
+    var tb = $('#EWA_FRAME_@SYS_FRAME_UNID');
+    var PROVINCE_ID = tb.find("#PROVINCE_ID").val();
+    var url = EWA.F.FOS["@SYS_FRAME_UNID"].Url;
+    var u1 = new EWA_UrlClass();
+    u1.SetUrl(url);
+    u1.AddParameter("ewa_action", "loadCitys");
+    u1.AddParameter("ewa_ajax", "json");
+    u1.AddParameter("PROVINCE_ID", PROVINCE_ID);
+
+    var u = u1.GetUrl();
+    $J(u, tb.find("#CITY_ID")[0], 'CITY_NAME', 'CITY_ID', true, null, function(e) {
+
+    });
+}
+
+(function() {
+    //提交后台数据时执行的检查或附加数据处理
+    EWA.F.FOS["@SYS_FRAME_UNID"].DoPostBefore = do_pos_before_CRM_COM;
+    EWA.F.FOS["@SYS_FRAME_UNID"]._IMPORT = false;
+
+
+    var tb = $('#EWA_FRAME_@SYS_FRAME_UNID');
+    var down = "<table style='height:20px;float:left'><tr><td><img height=20 src='/EmpScriptV2/EWA_STYLE/images/file_png/XCEL.png'></td>" +
+        "<td><a  href='/static/prj/pf/doc-template/CrmImportTemplate.xls' target=_blank>导入模板下载.xls</a></td></tr></table>";
+    tb.find(".EWA_TD_B").prepend(down);
+
+
+
+
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.EWA_TD_M{width:400px;}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson><Set><RedrawJson/></Set></RedrawJson><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set LogMsg="" Transcation="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="OnPagePost SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="CheckError"><CallSet><Set CallIsChk="" CallName="CheckError SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="loadCitys"><CallSet><Set CallIsChk="" CallName="loadCity sql" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query"><Sql><![CDATA[SELECT * FROM CRM_COM WHERE CRM_COM_ID = @CRM_COM_ID
+	AND SUP_ID = @G_SUP_ID]]></Sql><CSSet/></Set><Set Name="OnPagePost SQL" SqlType="update"><Sql><![CDATA[UPDATE CRM_COM SET 
+	CRM_COM_NOTE = @CRM_COM_NOTE,
+	ADM_ID = @G_ADM_ID,
+	CITY_ID1 = @CITY_ID1
+WHERE CRM_COM_ID = @CRM_COM_ID
+	AND SUP_ID = @G_SUP_ID]]></Sql><CSSet/></Set><Set Name="CheckError SQL" SqlType="query"><Sql><![CDATA[-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2]]></Sql><CSSet/></Set><Set Name="loadCity sql" SqlType="query"><Sql><![CDATA[SELECT CITY_ID, CITY_NAME, CITY_NAME_EN FROM CITY WHERE CITY_PID = @PROVINCE_ID order by CITY_NAME ]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="SALES_ID"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="select"/></Tag><Name><Set Name="SALES_ID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="销售" Lang="zhcn" Memo=""/><Set Info="" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="SELECT ADM_ID, ADM_NAME, ADM_NAME_EN FROM ADM_USER WHERE ADM_USR_STA_TAG='OK' and sup_id=@g_sup_id and pid is null ORDER BY ADM_USR_STA_TAG" SearchType="fix"/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="SALES_ID" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List><Set DisplayField="ADM_NAME" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="PY" ListFilterType="json" ListShowType="" ParentField="" Sql="SELECT ADM_ID, ADM_NAME, ADM_NAME_EN&#10;     , left(ltrim(dbo.f_getpy(adm_name)),1) as PY&#10;FROM ADM_USER&#10;WHERE ADM_USR_STA_TAG = 'OK'&#10;&#9;AND sup_id = @g_sup_id&#10;&#9;AND pid IS NULL&#10;&#9;and adm_dep_id &gt;0&#10;ORDER BY adm_name" TitleField="ADM_NAME_EN" TitleList="" ValueField="ADM_ID" ValueList=""/></List><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="content"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="dHtmlNoImages"/></Tag><Name><Set Name="content"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="粘贴内容处" Lang="zhcn" Memo=""/><Set Info="" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength><Set MaxLength="1073741823" MinLength=""/></MaxMinLength><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem/><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="butOk"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="submit"/></Tag><Name><Set Name="butOk"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="导入" Lang="zhcn" Memo=""/><Set Info="" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem/><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem></XItems><Menus/><Charts/><PageInfos><PageInfo Name="msg0"><Name><Set Name="msg0"/></Name><DescriptionSet><Set Info="消息0" Lang="zhcn" Memo=""/><Set Info="Msg0" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg1"><Name><Set Name="msg1"/></Name><DescriptionSet><Set Info="消息1" Lang="zhcn" Memo=""/><Set Info="Msg1" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg2"><Name><Set Name="msg2"/></Name><DescriptionSet><Set Info="消息2" Lang="zhcn" Memo=""/><Set Info="Msg2" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate Author="" CreateDate="2020-02-18 19:34:18" Name="CRM_COM.F.Register" UpdateDate="2024-01-06 15:40:39"><Page><Name><Set Name="CRM_COM.F.Register"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="globaltravel"/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.web.acl.BusinessImpl"/></Acl><Log><Set Log="com.gdxsoft.web.log.EwaScriptLog"/></Log><DescriptionSet><Set Info="注册信息" Lang="zhcn" Memo=""/><Set Info="Registration information" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><RowAttributeSet/><GroupSet><Set GroupInfo="联系人信息,公司信息" GroupShow="LST" Lang="zhcn"/><Set GroupInfo="Contact information,Company information" GroupShow="LST" Lang="enus"/></GroupSet><Size><Set FrameCols="C2" HAlign="center" Height="" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="700"/></Size><AddHtml><Set><Top/><Bottom/></Set></AddHtml><AddScript><Set><Top><![CDATA[ ]]></Top><Bottom/></Set></AddScript><AddCss><Set><AddCss><![CDATA[#f_@sys_frame_unid .EWA_TD_L {
+    width: 200px
+}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson/><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame/><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set LogMsg="" Transcation="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="OnNew SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='N'"/></CallSet></Set><Set LogMsg="" Transcation="" Type="AddAction1"><CallSet><Set CallIsChk="" CallName="AddAction1 SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query"><Sql><![CDATA[SELECT * FROM CRM_COM cm left join (select top 1 CRM_COM_ID,CRM_CUS_NAME
+      ,CRM_CUS_TITLE
+      ,CRM_CUS_SEX
+      ,CRM_CUS_EMAIL
+      ,CRM_CUS_TELE
+      ,CRM_CUS_MOBILE
+      ,CRM_CUS_ADDR
+      ,CRM_CUS_JOB
+      ,CRM_CUS_HOBBY
+      ,CRM_CUS_CDATE
+      ,CRM_CUS_MDATE
+      ,CRM_CUS_LDATE
+      ,CRM_CUS_CNUM
+      ,CRM_CUS_NOTE
+      ,CRM_CUS_TAG
+      ,CRM_CUS_MASTER
+       from  CRM_CUS where CRM_CUS_MASTER='COM_YES') cs on cm.CRM_COM_ID=cs.CRM_COM_ID  WHERE CRM_COM_ID = @CRM_COM_ID]]></Sql><CSSet/></Set><Set Name="OnNew SQL" SqlType="update"><Sql><![CDATA[INSERT INTO CRM_COM (
+    SUP_ID, CRM_COM_NAME,CRM_COM_SNAME,CRM_COM_CODE, ARE_ID, CRM_COM_ARE_DES
+ , CRM_COM_ADDR, CRM_COM_ZIP, CRM_COM_EMAIL, CRM_COM_TELE, CRM_COM_MOBILE
+ , CRM_COM_SIZE_TAG, CRM_COM_TYPE_TAG, CRM_COM_CAL_TAG, CRM_COM_CDATE
+ , CRM_COM_MDATE, CRM_COM_STATE, CRM_COM_SALE, CRM_COM_NOTE, ADM_ID
+ ,ser_tag1,city_id1,CEM_COM_HTTP, CRM_COM_UNID,CRM_COM_FAX
+) VALUES ( 
+  3, @CRM_COM_NAME,@CRM_COM_SNAME, @CRM_COM_CODE, @ARE_ID, @CRM_COM_ARE_DES
+ , @CRM_COM_ADDR, @CRM_COM_ZIP, @CRM_CUS_EMAIL, @CRM_CUS_MOBILE, @CRM_CUS_MOBILE
+ , @CRM_COM_SIZE_TAG, @CRM_COM_TYPE_TAG, @CRM_COM_CAL_TAG, getdate()
+ , @CRM_COM_MDATE, @CRM_COM_STATE, @CRM_COM_SALE, @CRM_COM_NOTE, @def_adm_id
+ ,@SER_TAG1,@CITY_ID1,
+  @CEM_COM_HTTP
+  , @SYS_UNID, @CRM_COM_FAX
+)
+-- auto CRM_COM_ID
+;
+
+--添加联系人
+INSERT INTO CRM_CUS (
+      CRM_COM_ID, SUP_ID, CRM_CUS_NAME, CRM_CUS_TITLE
+    , CRM_CUS_EMAIL, CRM_CUS_TELE, CRM_CUS_MOBILE
+    , CRM_CUS_CDATE, CRM_CUS_CNUM, CRM_CUS_MASTER
+    , ADM_ID
+) 
+SELECT CRM_COM_ID, SUP_ID, @CRM_CUS_NAME, @CRM_CUS_TITLE
+    , @CRM_CUS_EMAIL, @CRM_CUS_MOBILE, @CRM_CUS_MOBILE
+    , @sys_DATE, 0,  'COM_YES', ADM_ID 
+FROM CRM_COM 
+    WHERE CRM_COM_ID=@CRM_COM_ID
+-- auto CRM_CUS_ID
+;
+
+
+INSERT INTO SUP_MAIN (
+      SUP_NAME,SUP_TAG, SUP_ADDR, SUP_TELE, SUP_EMAIL, SUP_MOBILE
+    , SUP_MEMO,SER_TAG1,CITY_ID1,SUP_ARE_DES,sup_http, SUP_UNID
+    , SUP_FAX
+) 
+select CRM_COM_NAME, CRM_COM_SNAME, CRM_COM_ADDR, CRM_COM_TELE, CRM_COM_EMAIL, CRM_COM_MOBILE
+    , CRM_COM_NOTE,SER_TAG1,CITY_ID1, CRM_COM_ARE_DES, CEM_COM_HTTP,@REF_UNID       
+    , CRM_COM_FAX 
+FROM CRM_COM 
+WHERE CRM_COM_ID=@CRM_COM_ID
+-- auto new_SUP_ID
+;
+
+INSERT INTO CRM_CONN(SUP_UP_ID,SUP_DOWN_ID,CRM_COM_ID,ADM_ID,CRM_CONN_TAG)
+    VALUES(3, @new_SUP_ID, @CRM_COM_ID, @def_adm_id, 'SUP_TYPE_CUS')
+;
+ 
+ 
+ 
+ 
+ ]]></Sql><CSSet/></Set><Set Name="ss" SqlType="query"><Sql><![CDATA[ ]]></Sql><CSSet/></Set><Set Name="AUTOSUP" SqlType="update"><Sql><![CDATA[ ]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnNew SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='N'"/></CallSet></Action><XItems><XItem Name="CRM_CUS_MOBILE"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="CRM_CUS_MOBILE"/></Name><GroupIndex><Set GroupIndex="0"/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="手机" Lang="zhcn" Memo="登录用，找回密码"/><Set Info="Cell phone" Lang="enus" Memo="Sign in with"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength><Set MaxLength="50" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="CRM_CUS_MOBILE" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid="Mobile"/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_CUS_EMAIL"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="CRM_CUS_EMAIL"/></Name><GroupIndex><Set GroupIndex="0"/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="电子邮件" Lang="zhcn" Memo="登录用，找回密码"/><Set Info="Email" Lang="enus" Memo="Sign in with"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength><Set MaxLength="50" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="CRM_CUS_EMAIL" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid="Email"/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="PWD"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="PWD"/></Name><GroupIndex><Set GroupIndex="0"/></GroupIndex><InitValue/><DescriptionSet><Set Info="设定登录密码" Lang="zhcn" Memo=""/><Set Info="Set your login password" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength><Set MaxLength="20" MinLength="8"/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="PWD" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="1" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_CUS_NAME"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="CRM_CUS_NAME"/></Name><GroupIndex><Set GroupIndex="0"/></GroupIndex><InitValue/><DescriptionSet><Set Info="您的姓名" Lang="zhcn" Memo=""/><Set Info="Name" Lang="enus" Memo="Contact name"/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="CRM_CUS_NAME" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_CUS_SEX"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="select"/></Tag><Name><Set Name="CRM_CUS_SEX"/></Name><GroupIndex><Set GroupIndex="0"/></GroupIndex><InitValue/><DescriptionSet><Set Info="性别" Lang="zhcn" Memo=""/><Set Info="Sex" Lang="enus" Memo="Sex"/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="CRM_CUS_SEX" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List><Set DisplayField="b" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="select bas_tag a,bas_tag_name b from BAS_TAG where bas_tag_grp='SEX' order by BAS_TAG_ORD" TitleField="" TitleList="" ValueField="a" ValueList=""/></List><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_CUS_TITLE"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="CRM_CUS_TITLE"/></Name><GroupIndex><Set GroupIndex="0"/></GroupIndex><InitValue/><DescriptionSet><Set Info="职位" Lang="zhcn" Memo=""/><Set Info="Post" Lang="enus" Memo="Post"/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="CRM_CUS_TITLE" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_COM_NAME"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="CRM_COM_NAME"/></Name><GroupIndex><Set GroupIndex="1"/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="公司名称" Lang="zhcn" Memo=""/><Set Info="Company name" Lang="enus" Memo="Company name"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength><Set MaxLength="200" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="CRM_COM_NAME" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CITY_ID1"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="droplist"/></Tag><Name><Set Name="CITY_ID1"/></Name><GroupIndex><Set GroupIndex="1"/></GroupIndex><InitValue/><DescriptionSet><Set Info="城市" Lang="zhcn" Memo=""/><Set Info="City" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="CITY_ID1" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame><Set CallItemName="CITY_LIVE.ListFrame.View" CallPara="a" CallXmlName="business/common/droplist.xml"/></Frame><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow><Set DlsAction="ExtendAction0" DlsAfterEvent="" DlsShow="@city_code (@city_name/@city_name_en)" isDlsEventLoad=""/></DopListShow><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_COM_ADDR"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="text"/></Tag><Name><Set Name="CRM_COM_ADDR"/></Name><GroupIndex><Set GroupIndex="1"/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="地址" Lang="zhcn" Memo=""/><Set Info="Address" Lang="enus" Memo="Address"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength><Set MaxLength="200" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="CRM_COM_ADDR" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_COM_SIZE_TAG"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="select"/></Tag><Name><Set Name="CRM_COM_SIZE_TAG"/></Name><GroupIndex><Set GroupIndex="1"/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="规模" Lang="zhcn" Memo=""/><Set Info="Scale" Lang="enus" Memo="Scale"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="CRM_COM_SIZE_TAG" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List><Set DisplayField="b" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="select bas_tag a,bas_tag_name b from BAS_TAG where bas_tag_grp='CRM_COM_SI' order by BAS_TAG_ORD" TitleField="" TitleList="" ValueField="a" ValueList=""/></List><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_COM_CAL_TAG"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="select"/></Tag><Name><Set Name="CRM_COM_CAL_TAG"/></Name><GroupIndex><Set GroupIndex="1"/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="行业" Lang="zhcn" Memo=""/><Set Info="Industry" Lang="enus" Memo="Industry"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="CRM_COM_CAL_TAG" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List><Set DisplayField="b" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="select bas_tag a,bas_tag_name b from BAS_TAG where bas_tag_grp='CRM_IND' order by BAS_TAG_ORD" TitleField="" TitleList="" ValueField="a" ValueList=""/></List><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="butOk"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="submit"/></Tag><Name><Set Name="butOk"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="确定" Lang="zhcn" Memo=""/><Set Info="Ok" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem/><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem></XItems><Menus/><Charts/><PageInfos/><Workflows/></EasyWebTemplate><EasyWebTemplate Author="" CreateDate="2018-12-27 16:08:31" Name="CRM_COM.Lf.M" UpdateDate="2024-01-06 15:40:39"><Page><Name><Set Name="CRM_COM.Lf.M"/></Name><FrameTag><Set FrameTag="ListFrame"/></FrameTag><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="globaltravel"/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.web.acl.BusinessImpl"/></Acl><Log><Set Log="com.gdxsoft.web.log.EwaScriptLog"/></Log><DescriptionSet><Set Info="客户关系列表" Lang="zhcn" Memo=""/><Set Info="List of CRM" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><RowAttributeSet/><GroupSet/><Size><Set FrameCols="" HAlign="center" Height="" HiddenCaption="" TextareaAuto="" VAlign="top" Width="100%"/></Size><AddHtml><Set><Top><![CDATA[ ]]></Top><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[function addNewCrmCom() {
+    EWA.UI.Dialog.OpenReloadClose('@SYS_FRAME_UNID',
+        '@xmlname', 'CRM_COM_NEW.Frame.NewModify', false, 'EWA_MTYPE=N');
+}
+
+function modifyCrmCom(id, name) {
+    if ("@y2019" == "1") {
+        var u = "@EWA.CP/robert/r_crm2.jsp?T=10&crm_com_id="+id;
+        if(top!=window && top.AddTab){
+            top.AddTab(u, name);
+        } else {
+            window.open(u);
+        }
+        return;
+    }
+    if ("@ewa_ajax" == 'INSTALL') {
+        var u = 'combine_crm.jsp?XML=crm_detail.xml&CRM_COM_ID=' + id;
+        window.location = u;
+    } else {
+        EWA.UI.Dialog.OpenReloadClose('@sys_frame_unid', '@xmlname', 'CRM_COM.Frame.NewModify',
+            false, 'CRM_COM_ID=' + id + '&EWA_MTYPE=M')
+    }
+
+}
+
+function oaInq(id, id1) {
+    if (id1 == null) {
+        id1 = '';
+    }
+
+    EWA.UI.Dialog.OpenReloadClose('@SYS_FRAME_UNID',
+        'business|oa|inq.xml', 'OA_INQ.Do', false, 'oa_inq_id=1&oa_ins_ref=CRM_COM&oa_ins_ref_id=' + id + '&CRM_COM_SCORE_FID=' + id1);
+}
+
+
+function allRecords(com_id) {
+    var u = '@ewa.cp/ewa?xmlname=@xmlname&itemname=CRM_RECORD.ListFrame.Modify&com_id=' + com_id
+        //alert(u)
+    window.parent.frames[1].location = u;
+    //alert(window.parent.frames[1].location);
+}
+
+function loginlist(com_id) {
+    var u = '@ewa.cp/ewa?xmlname=@xmlname&itemname=LOGIN_LIST&crm_com_id=' + com_id
+        //alert(u)
+    window.parent.frames[1].location = u;
+    //alert(window.parent.frames[1].location);
+}
+
+function showBankList(r_sup_id) {
+    if (r_sup_id !== 0) {
+        window.parent.frames[1].location = '@ewa.cp/ewa?xmlname=business/crm/sysconf.xml&ITEMNAME=SUP_ACCOUNT.ListFrame.Modify&SUP_ID=' + r_sup_id;
+
+    } else {
+        alert('请签约该客户');
+        return fasle;
+    }
+}
+
+function showhistry(id, id1) {
+    window.parent.frames[1].location = '@ewa.cp/ewa?xmlname=business/crm/crm.xml&ITEMNAME=OA_INQ_INST_LIST&CRM_COM_ID=' + id + '&CRM_COM_SCORE_FID=' + id1;
+}
+
+
+function showlink(id) {
+    if ('@EWA_AJAX' != 'INSTALL') {
+        window.parent.frames[1].location = '@ewa.cp/ewa?xmlname=business/crm/crm.xml&itemname=CRM_CUS.ListFrame.Modify&CRM_COM_ID=' + id;
+    }
+}
+
+function showCustomer(id) {
+
+    window.parent.frames[1].location = '@ewa.cp/ewa?xmlname=business/crm/crm.xml&itemname=' +
+        'CRM_CUS.ListFrame.Modify&CRM_COM_ID=' + id;
+
+}
+
+
+function check(tag, cid) {
+    if (tag != '已签约') {
+        alert('还不是签约客户，无法开通账号！');
+
+    } else {
+        EWA.UI.Dialog.OpenReloadClose('@SYS_FRAME_UNID', 'business/crm/crm.xml', 'CLIENT_ID', false, 'CRM_COM_ID=' + cid + '&EWA_MTYPE=N');
+    }
+}
+/**
+ * Frame 提交前进行检查，返回true，则可以提交数据
+ * 同时可以手动增加提交的参数
+ **/
+EWA.F.FOS["@sys_frame_unid"].ReloadAfter = function() {
+    // this.Merge('fromId','toId'); //合并单元格
+    // var exp="@@aa <h1>@@bb</h1> <div>@@cc</div>";
+    // this.MergeExp('toId', exp); //合并多个单元格
+    var c = this;
+    $('#EWA_LF_@SYS_FRAME_UNID input[type=checkbox]').on('click', function() {
+        var u1 = new EWA_UrlClass(c.Url);
+        u1.AddParameter("xmlname", "/business/common/common.xml");
+        u1.AddParameter("itemname", "WEB_FAV_MAIN.F.N");
+        u1.AddParameter("EWA_ACTION", "OnPagePost");
+        u1.AddParameter("EWA_AJAX", "JSON");
+
+        u1.AddParameter("REF_TAG", "CRM_COM");
+        u1.AddParameter("REF_ID", $(this).parent().attr('crm_com_id'));
+        u1.AddParameter("FAV_URL", location.href);
+
+        var u = u1.GetUrl();
+        $J1(u, function(rst) {
+            // console.log(rst);
+        });
+    });
+    $('#EWA_LF_@SYS_FRAME_UNID input[type=checkbox]').each(function() {
+        if ($(this).parent().attr('fav_id')) {
+            this.checked = true;
+        }
+    });
+};
+
+
+(function() {
+    EWA.F.FOS["@sys_frame_unid"].ReloadAfter();
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[td.ewa-col-FAV_ID {
+    padding: 0;
+    text-align: center;
+}]]></AddCss></Set></AddCss><ChartsShow><Set ChartsShow=""/></ChartsShow><RedrawJson/><BoxJson/><LeftJson><Set><LeftJson><![CDATA[{"u":"e_university2.jsp","default":"","key":"CRM_COM_ID=@CRM_COM_ID","title":"@CRM_COM_NAME","des":"ARE_NAME,CRM_COM_EMAIL,CRM_COM_TELE,CRM_COM_MOBILE,TAG,ADM_NAME,CRM_CUS_NAME","order":"CRM_COM_NAME","search":"CRM_COM_NAME"}]]></LeftJson></Set></LeftJson><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize><Set AllowExport="CRM_COM_ID" ColSize="" IsSplitPage="1" KeyField="CRM_COM_ID" PageSize="10" Recycle="" StatusField=""/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="1" luDblClick="" luDblClickIdx="" luSearch="1" luSelect="S"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="1" FrameSize="50%,*" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow/></Page><Action><ActionSet><Set LogMsg="" Transcation="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="OnFrameDelete"><CallSet><Set CallIsChk="" CallName="OnFrameDelete SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="ExtendAction0"><CallSet><Set CallIsChk="" CallName="ExtendAction0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="ExtendAction1"><CallSet><Set CallIsChk="" CallName="ExtendAction1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="ExtendAction2"><CallSet><Set CallIsChk="" CallName="ExtendAction2 SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query"><Sql><![CDATA[SELECT * FROM (
+    SELECT CASE WHEN BAS_TAG_NAME IS NULL THEN '发展中'ELSE '已签约' END AS TAG
+        , DEP_NAME
+        , CRM_CONN_TAG
+        , V.*
+        , isnull(cc.sup_down_id,0) r_sup_id
+        , CASE WHEN SUP_DOWN_ID IS NULL THEN 'SIGN_NO' ELSE 'SIGN_YES' END SIGN
+        , FAV.FAV_ID
+        , INCOME.*
+        , CASE WHEN BILL_PEOPLE_NUM =0 THEN NULL  ELSE BILL_RECEIVED / BILL_PEOPLE_NUM END AS UNIT_PRICE
+        , A0.ADM_NAME
+    FROM CRM_COM V 
+        LEFT JOIN CRM_CONN CC ON V.CRM_COM_ID = CC.CRM_COM_ID
+        LEFT JOIN BAS_TAG B1 ON B1.BAS_TAG = CRM_CONN_TAG
+        LEFT JOIN ADM_USER A0 ON V.ADM_ID = A0.ADM_ID
+        LEFT JOIN ADM_DEPT A1 ON A1.DEP_ID = A0.ADM_DEP_ID 
+        LEFT JOIN WEB_FAV_MAIN FAV ON V.CRM_COM_ID  = FAV.REF_ID
+            AND FAV.REF_TAG = 'CRM_COM' -- 我的关注
+        LEFT JOIN (
+            SELECT RELATE_SUP_ID
+                , SUM(BILL_RECEIVED) BILL_RECEIVED
+                , SUM(BILL_PEOPLE_NUM) BILL_PEOPLE_NUM 
+            FROM GRP_BILL
+            GROUP BY RELATE_SUP_ID
+        ) INCOME ON CC.SUP_DOWN_ID = INCOME.RELATE_SUP_ID
+    WHERE V.SUP_ID=@G_SUP_ID 
+      AND (
+            V.ADM_ID=@G_ADM_ID 
+            OR (@TEAM=1 AND v.ADM_ID in (@G_SUB_IDS_SPLIT))
+            OR (@TEAM=2 AND A0.ADM_DEP_ID=@TARGET_DEP_ID)
+          )
+      AND USE_STATE<>'DEL' 
+      and (@CRM_COM_ID is null or v.CRM_COM_ID=@CRM_COM_ID)
+) AS TE  
+WHERE 1=1 AND (
+  (@TAGA='QY' AND NOT CRM_CONN_TAG IS NULL)
+  OR
+  (@TAGA='QZ' AND CRM_CONN_TAG IS NULL)
+  OR
+  (@TAGA='UNIVERSITY' AND CRM_COM_CAL_TAG ='CRM_IND_UNIVERSITY')
+  OR
+  @TAGA IS NULL
+)
+order by FAV_ID desc, CRM_COM_ID desc]]></Sql><CSSet/></Set><Set Name="OnFrameDelete SQL" SqlType="update"><Sql><![CDATA[UPDATE CRM_COM SET USE_STATE='DEL' WHERE CRM_COM_ID = @CRM_COM_ID]]></Sql><CSSet/></Set><Set Name="ExtendAction0 SQL" SqlType="query"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="ExtendAction1 SQL" SqlType="query"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="ExtendAction2 SQL" SqlType="query"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="CRM_COM_ID1"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="CRM_COM_ID1"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="客户编号" Lang="zhcn" Memo=""/><Set Info="No" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="CRM_COM_ID" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_COM_NAME"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="linkButton"/></Tag><Name><Set Name="CRM_COM_NAME"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="公司名称" Lang="zhcn" Memo="公司名称"/><Set Info="Name" Lang="enus" Memo="The company name"/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="yes" XStyleColor="blue" XStyleCursor="" XStyleFixed="yes" XStyleNoWrap="yes" XStyleVAlign="" XStyleWidth="100px"/></XStyle><Style><Set Style="cursor:pointer"/></Style><ParentStyle><Set ParentStyle="cursor:pointer"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="onclick" EventType="Javascript" EventValue="window.open('@CEM_COM_HTTP');"/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text"/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="CRM_COM_NAME" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef><Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas><Set lkbButtonId="butModify"/></LinkButtonParas><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="BILL_RECEIVED"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="BILL_RECEIVED"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="收入" Lang="zhcn" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="BILL_RECEIVED" DataType="" DisableOnModify="" Format="Money" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="BILL_PEOPLE_NUM"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="BILL_PEOPLE_NUM"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="人数" Lang="zhcn" Memo="主邮件"/><Set Info="Email" Lang="enus" Memo="Main messages"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="0" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="BILL_PEOPLE_NUM" DataType="String" DisableOnModify="" Format="Int" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef><Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="UNIT_PRICE"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="UNIT_PRICE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="平均单价" Lang="zhcn" Memo="主电话"/><Set Info="Phone" Lang="enus" Memo="Primary phone"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="0" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="UNIT_PRICE" DataType="String" DisableOnModify="" Format="Money" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef><Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_COM_MOBILE"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="CRM_COM_MOBILE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="主手机" Lang="zhcn" Memo="主手机"/><Set Info="Mobile" Lang="enus" Memo="Main phone"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="0" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="CRM_COM_MOBILE" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef><Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_COM_CAL_NAME"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="CRM_COM_CAL_NAME"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="行业" Lang="zhcn" Memo=""/><Set Info="Industry" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="CRM_COM_CAL_NAME" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_CUS_NAME"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="CRM_CUS_NAME"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="主联系人" Lang="zhcn" Memo="主联系人"/><Set Info="Contact" Lang="enus" Memo="Primary contacts"/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text"/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="CRM_CUS_NAME" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_COM_SCORE"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="CRM_COM_SCORE"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="状态分" Lang="zhcn" Memo=""/><Set Info="Scores" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="number"/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="CRM_COM_SCORE" DataType="Number" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="ADM_NAME"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="ADM_NAME"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="销售" Lang="zhcn" Memo=""/><Set Info="Sales" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text"/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="ADM_NAME" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="DEP_NAME"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="DEP_NAME"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="部门" Lang="zhcn" Memo=""/><Set Info="Dept" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text"/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="DEP_NAME" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="CRM_COM_CDATE"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="CRM_COM_CDATE"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="创建时间" Lang="zhcn" Memo=""/><Set Info="Creation time" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="CRM_COM_CDATE" DataType="Date" DisableOnModify="" Format="DateShortTime" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="TAG"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="TAG"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="合作状态" Lang="zhcn" Memo="合作状态"/><Set Info="State coop" Lang="enus" Memo="State cooperation"/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="select CASE WHEN BAS_TAG='YES' THEN '已签约'  WHEN  BAS_TAG='NO' THEN '发展中' END AS A ,  CASE WHEN BAS_TAG='YES' THEN '已签约'  WHEN  BAS_TAG='NO' THEN '发展中' END AS B   from bas_tag where bas_tag_grp='Y_N'  " SearchType="fix"/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="TAG" DataType="Date" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef><Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="SIGN"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="SIGN"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="签约" Lang="zhcn" Memo=""/><Set Info="Agency" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="SIGN" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="FAV_ID"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="switch"/></Tag><Name><Set Name="FAV_ID"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="关注" Lang="zhcn" Memo=""/><Set Info="" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet><Set AttLogic="" AttName="crm_com_id" AttValue="@crm_com_id"/><Set AttLogic="" AttName="fav_id" AttValue="@fav_id"/></AttributeSet><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="FAV_ID" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem><XItem Name="butModify"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="button"/></Tag><Name><Set Name="butModify"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="查看" Lang="zhcn" Memo=""/><Set Info="Modify" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle="width:40px; text-align: center"/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="onclick" EventType="Javascript" EventValue="modifyCrmCom(@crm_com_id, &quot;@CRM_COM_NAME&quot;)"/></EventSet><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem/><DispEnc/><DataRef/><List/><UserSet/><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><ImageDefault/></XItem></XItems><Menus/><Charts/><PageInfos><PageInfo Name="butAdd"><Name><Set Name="butAdd"/></Name><DescriptionSet><Set Info="添加新的关系" Lang="zhcn" Memo=""/><Set Info="Add new relationships" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate><EasyWebTemplate Author="jzp" CreateDate="2025-10-09 10:08:00" Name="CRM_COM.F.leads_import" UpdateDate="2025-10-11 10:03:23"><Page><Name><Set Name="CRM_COM.F.leads_import"/></Name><FrameTag><Set FrameTag="Frame"/></FrameTag><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="globaltravel"/></DataSource><AllowJsonExport/><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Cached><Set CachedSeconds="" CachedType=""/></Cached><Acl><Set Acl="com.gdxsoft.web.acl.BusinessImpl"/></Acl><Log><Set Log="com.gdxsoft.web.log.EwaScriptLog"/></Log><DescriptionSet><Set Info="导入客户线索信息" Lang="zhcn" Memo=""/><Set Info="Import customer lead information" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><RowAttributeSet/><GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet><Size><Set FrameCols="C2" HAlign="center" Height="" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="1000"/></Size><AddHtml><Set><Top/><Bottom/></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[
+
+function loadCitys() {
+    var tb = $('#EWA_FRAME_@SYS_FRAME_UNID');
+    var PROVINCE_ID = tb.find("#PROVINCE_ID").val();
+    var url = EWA.F.FOS["@SYS_FRAME_UNID"].Url;
+    var u1 = new EWA_UrlClass();
+    u1.SetUrl(url);
+    u1.AddParameter("ewa_action", "loadCitys");
+    u1.AddParameter("ewa_ajax", "json");
+    u1.AddParameter("PROVINCE_ID", PROVINCE_ID);
+
+    var u = u1.GetUrl();
+    $J(u, tb.find("#CITY_ID")[0], 'CITY_"name"', 'CITY_ID', true, null, function(e) {
+
+    });
+}
+
+(function() {
+    //提交后台数据时执行的检查或附加数据处理
+    EWA.F.FOS["@SYS_FRAME_UNID"].DoPostBefore = function(){
+        var cfgs = [{
+            "id": "AUS_PAYDAYS",
+            "name": "搜索关键词",
+            "length":50
+        },{
+            "id": "AUS_STATEORPROVINCE",
+            "name": "省/直辖市",
+            "length":50
+        },{
+            "id": "CRM_COM_NAME",
+            "name": "机构名称",
+            "length":200,
+            "must": true
+        }, {
+            "id": "CRM_COM_ADDR",
+            "name": "地址",
+            "length":500
+        }, {
+            "id": "AUS_CONTACT",
+            "name": "联系人",
+            "length":50
+        }, {
+            "id": "CRM_COM_TELE",
+            "name": "电话",
+            "length":100
+        }, {
+            "id": "CRM_COM_MOBILE",
+            "name": "手机",
+            "length":50
+        }, {
+            "id": "CRM_COM_EMAIL",
+            "name": "邮箱",
+            "length":100
+        }, {
+            "id": "CEM_COM_HTTP",
+            "name": "网址",
+            "length":1000
+        }, {
+            "id": "CRM_COM_NOTE",
+            "name": "其他情况说明"
+        }];
+        
+        var tb = $('#EWA_FRAME_@SYS_FRAME_UNID');
+        var SALES_ID = tb.find("#SALES_ID").val();
+        if (!SALES_ID) {
+            $Tip('请选择采集人');
+            return;
+        }
+        let leadSource=getObj("#AUS_TYPE").val();
+        if(!leadSource){
+            $Tip('请选择线索来源');
+            return;
+        }
+        if (EWA.F.FOS["@SYS_FRAME_UNID"]._IMPORT) {
+            $Tip('数据已经提交，请等待或关闭当前窗口稍后再刷新列表');
+            return;
+        }
+    
+        // 粘贴处
+        var docbody = tb.find('.ewa-row-content iframe:eq(0)')[0].contentWindow.frames[0].document.body;
+        
+        let datas=[];
+        let idx = 0;
+        let errs = [];
+        $(docbody).find("table>tbody:eq(0)").children("tr:gt(0)").each(function(){
+            let tds=$(this).children("td");
+            let row={};
+            let contacts=[];
+            let mobiles=[];
+            for(let i=0;i<cfgs.length;i++){
+                let cfg=cfgs[i];
+                let v = this.cells[i] ? this.cells[i].innerText : "";
+                if((cfg.id=="AUS_CONTACT" || cfg.id=="CRM_COM_MOBILE") && v.indexOf("、")>0){
+                    let arr = v.split("、");
+                    if(cfg.id=="AUS_CONTACT"){
+                        contacts = arr;
+                    }else{
+                        mobiles = arr;
+                    }
+                    v = arr[0];
+                }
+                row[cfg.id]=v;
+                if(cfg["length"] && v.length>cfg["length"]){
+                    errs.push("第"+(idx+1)+"行，【"+cfg.name+"】内容长度超过"+cfg["length"]+"，不能导入");
+                }
+            }
+            if(mobiles.length>1){
+                row["OTHER_CONTACTS"]=[];
+                for(let i=1;i<mobiles.length;i++){
+                   let mobile=mobiles[i];
+                   let contact=contacts[i]||"未知";
+                   row["OTHER_CONTACTS"].push({"CONTACT":contact,"MOBILE":mobile});
+                }
+            }
+            
+            $(this).attr("id","row_"+(idx++));
+            datas.push(row);
+        });
+        if(datas.length==0){
+            $Tip("没有数据啊");
+            return;
+        }
+        if(errs.length>0){
+            let h="<div style='width:600px;height:400px;overflow:auto;'>";
+            h+=errs.join("<br>");
+            h+="</div>";
+            $DialogHtml(h,"错误","620px","420px");
+            return;
+        }
+    
+        EWA.F.FOS["@SYS_FRAME_UNID"]._IMPORT = true;
+        
+        var PostAddData = {
+            datas: JSON.stringify(datas),
+            cfgs: JSON.stringify(cfgs)
+        };
+    
+    
+        EWA.F.FOS["@SYS_FRAME_UNID"].__OK = false;
+        
+        $Tip('提交数据...', function() {
+            return EWA.F.FOS["@SYS_FRAME_UNID"].__OK;
+        });
+        
+        var u = "@EWA.CP/business/sales/customer-leads-import.jsp?import=yes&SALES_ID=" + SALES_ID;
+        u+= "&AUS_TYPE="+leadSource;
+        let provinceId=getObj("PROVINCE_ID").val();
+        if(provinceId){
+            u+="&PROVINCE_ID="+provinceId;
+        }
+        $JP(u, PostAddData, function(rst) {
+            EWA.F.FOS["@SYS_FRAME_UNID"].__OK = true;
+            
+            EWA.OW.Load();
+            EWA.OW.PWin.EWA.F.FOS["@EWA_PARENT_FRAME"].Reload();
+            
+            var incnew = 0;
+            var increpeat = 0;
+            for (var n in rst) {
+                var imported = rst[n];
+                if (n == 'RST') {
+                    continue;
+                }
+                if (!imported) { //重复
+                    $(docbody).find('#' + n + ' td:eq(2)').prepend("【重复】").css('color', 'red');
+                    increpeat++;
+                } else {
+                    $(docbody).find('#' + n).hide();
+                    incnew++;
+                }
+            }
+            
+            alert('导入' + incnew + '记录，' + increpeat + '重复');
+        });
+    
+        return false;
+    }
+    EWA.F.FOS["@SYS_FRAME_UNID"]._IMPORT = false;
+    
+    function getObj(exp) {
+        return $('#f_@sys_frame_unid').find(exp);
+    }
+
+
+    var tb = $('#EWA_FRAME_@SYS_FRAME_UNID');
+    var down = `<table style='height:20px;float:left'><tr><td><img height=20 src='/EmpScriptV2/EWA_STYLE/images/file_png/XCEL.png'></td>
+                <td><a  href='/static/prj/pf/doc-template/Customer-Leads-Import-Template.xls' target=_blank>导入模板下载.xls</a></td>
+                <td><span style='color:#999'>复制粘贴内容需包含表头</span></td>
+                </tr></table>`
+    tb.find(".EWA_TD_B").prepend(down);
+
+
+    // 默认自己
+    getObj("#SALES_ID").val("@G_ADM_ID");
+
+
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[.EWA_TD_M{width:400px;}]]></AddCss></Set></AddCss><ChartsShow/><RedrawJson><Set><RedrawJson/></Set></RedrawJson><BoxJson/><LeftJson/><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize/><ListUI/><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="PROVINCE_ID" Name="1=1" ParaExp="1=1"/></LogicShow></Page><Action><ActionSet><Set LogMsg="" Transcation="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="OnPagePost"><CallSet><Set CallIsChk="" CallName="OnPagePost SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="CheckError"><CallSet><Set CallIsChk="" CallName="CheckError SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="loadCitys"><CallSet><Set CallIsChk="" CallName="loadCity sql" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query"><Sql><![CDATA[SELECT * FROM CRM_COM WHERE CRM_COM_ID = @CRM_COM_ID
+	AND SUP_ID = @G_SUP_ID]]></Sql><CSSet/></Set><Set Name="OnPagePost SQL" SqlType="update"><Sql><![CDATA[UPDATE CRM_COM SET 
+	CRM_COM_NOTE = @CRM_COM_NOTE,
+	ADM_ID = @G_ADM_ID,
+	CITY_ID1 = @CITY_ID1
+WHERE CRM_COM_ID = @CRM_COM_ID
+	AND SUP_ID = @G_SUP_ID]]></Sql><CSSet/></Set><Set Name="CheckError SQL" SqlType="query"><Sql><![CDATA[-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2]]></Sql><CSSet/></Set><Set Name="loadCity sql" SqlType="query"><Sql><![CDATA[SELECT CITY_ID, CITY_NAME, CITY_NAME_EN FROM CITY WHERE CITY_PID = @PROVINCE_ID order by CITY_NAME ]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="AUS_TYPE"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="select"/></Tag><Name><Set Name="AUS_TYPE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="线索来源" Lang="zhcn" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="SELECT BAS_TAG, BAS_TAG_NAME, BAS_TAG_NAME_EN FROM BAS_TAG WHERE BAS_TAG_GRP = 'CUSTOMER_SOURCE' ORDER BY BAS_TAG_ORD" SearchType="fix"/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="AUS_TYPE" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List><Set DisplayField="BAS_TAG_NAME" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="SELECT BAS_TAG, BAS_TAG_NAME, BAS_TAG_NAME_EN FROM BAS_TAG WHERE BAS_TAG_GRP = 'CUSTOMER_SOURCE' ORDER BY BAS_TAG_ORD" TitleField="BAS_TAG_NAME_EN" TitleList="" ValueField="BAS_TAG" ValueList=""/></List><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><QRCode/><ImageDefault/></XItem><XItem Name="SALES_ID"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="select"/></Tag><Name><Set Name="SALES_ID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="采集人" Lang="zhcn" Memo=""/><Set Info="Collector" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="SELECT ADM_ID, ADM_NAME, ADM_NAME_EN FROM ADM_USER WHERE ADM_USR_STA_TAG='OK' and sup_id=@g_sup_id and pid is null ORDER BY ADM_USR_STA_TAG" SearchType="fix"/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch/><DataItem><Set DataField="SALES_ID" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List><Set DisplayField="ADM_NAME" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="PY" ListFilterType="json" ListShowType="" ParentField="" Sql="SELECT ADM_ID, ADM_NAME, ADM_NAME_EN&#10;     , left(ltrim(dbo.f_getpy(adm_name)),1) as PY&#10;FROM ADM_USER&#10;WHERE ADM_USR_STA_TAG = 'OK'&#10;&#9;AND sup_id = @g_sup_id&#10;&#9;AND pid IS NULL&#10;&#9;and adm_dep_id &gt;0&#10;ORDER BY adm_name" TitleField="ADM_NAME_EN" TitleList="" ValueField="ADM_ID" ValueList=""/></List><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><QRCode/><ImageDefault/></XItem><XItem Name="PROVINCE_ID"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="select"/></Tag><Name><Set Name="PROVINCE_ID"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="省/直辖市" Lang="zhcn" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="SELECT CITY_ID, CITY_NAME, CITY_NAME_EN FROM CITY WHERE COUNTRY_ID=@COUNTRY_ID ORDER BY CITY_NAME" SearchType="fix"/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="PROVINCE_ID" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List><Set DisplayField="CITY_NAME" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="SELECT CITY_PSOT_CODE,CITY_NAME  FROM CITY WHERE COUNTRY_ID=52 AND CITY_LVL_NEW=3 AND CITY_STATUS='USED' AND CITY_PSOT_CODE&gt;0" TitleField="" TitleList="" ValueField="CITY_PSOT_CODE" ValueList=""/></List><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><QRCode/><ImageDefault/></XItem><XItem Name="content"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="dHtmlNoImages"/></Tag><Name><Set Name="content"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="粘贴内容处" Lang="zhcn" Memo=""/><Set Info="Paste the content" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style><Set Style="height:300px"/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength><Set MaxLength="1073741823" MinLength=""/></MaxMinLength><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><QRCode/><ImageDefault/></XItem><XItem Name="butOk"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="submit"/></Tag><Name><Set Name="butOk"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue/><DescriptionSet><Set Info="导入" Lang="zhcn" Memo=""/><Set Info="" Lang="enus" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch/><MaxMinLength/><MaxMinValue/><IsMustInput><Set IsMustInput="0"/></IsMustInput><Switch/><DataItem><Set DataField="" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><QRCode/><ImageDefault/></XItem></XItems><Menus/><Charts/><PageInfos><PageInfo Name="msg0"><Name><Set Name="msg0"/></Name><DescriptionSet><Set Info="消息0" Lang="zhcn" Memo=""/><Set Info="Msg0" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg1"><Name><Set Name="msg1"/></Name><DescriptionSet><Set Info="消息1" Lang="zhcn" Memo=""/><Set Info="Msg1" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg2"><Name><Set Name="msg2"/></Name><DescriptionSet><Set Info="消息2" Lang="zhcn" Memo=""/><Set Info="Msg2" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate></EasyWebTemplates>

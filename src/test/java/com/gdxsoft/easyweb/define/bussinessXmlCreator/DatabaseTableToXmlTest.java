@@ -1,0 +1,465 @@
+package com.gdxsoft.easyweb.define.bussinessXmlCreator;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import com.gdxsoft.easyweb.define.database.Field;
+import com.gdxsoft.easyweb.define.database.Table;
+import com.gdxsoft.easyweb.define.database.TablePk;
+import com.gdxsoft.easyweb.script.template.EwaConfig;
+
+/**
+ * 测试从数据库表结构创建业务 XML
+ * 表：demo.crm_com
+ * 
+ * 注意：由于无法直接从 HSQLDB 获取表结构，使用模拟数据
+ */
+public class DatabaseTableToXmlTest {
+
+    private static EwaConfig config;
+    private static Table crmComTable;
+
+    @BeforeAll
+    public static void setUp() {
+        try {
+            // 加载 EwaConfig
+            config = EwaConfig.instance();
+            
+            // 创建模拟的 CRM_COM 表结构（模拟从数据库读取的表结构）
+            crmComTable = createCrmComFromDatabase();
+            
+            assertNotNull(crmComTable, "CRM_COM 表应该存在");
+            System.out.println("表名：" + crmComTable.getName());
+            System.out.println("字段数：" + crmComTable.getFields().getFieldList().size());
+            System.out.println("主键字段 (Table.Pk)：" + (crmComTable.getPk() != null ? crmComTable.getPk().getPkFields().size() : 0));
+            System.out.println("主键字段 (Fields.PkFields)：" + crmComTable.getFields().getPkFields().size());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("初始化失败：" + e.getMessage());
+        }
+    }
+    
+    /**
+     * 创建模拟的 CRM_COM 表结构（模拟从数据库读取）
+     */
+    private static Table createCrmComFromDatabase() {
+        Table table = new Table();
+        table.initBlankFrame();
+        table.setName("CRM_COM");
+        table.setSchemaName("dbo");
+        
+        // 先添加所有字段（不设置主键）
+        addField(table, "CRM_COM_ID", "INT", 0, false, true, false, "公司 ID", null);
+        addField(table, "CRM_COM_NAME", "NVARCHAR", 200, false, false, false, "公司名称", null);
+        addField(table, "CRM_COM_SNAME", "NVARCHAR", 150, false, false, true, "公司简称", null);
+        addField(table, "CRM_COM_CODE", "VARCHAR", 40, false, false, true, "公司代码", null);
+        addField(table, "CRM_COM_ADDR", "VARCHAR", 500, false, false, true, "公司地址", null);
+        addField(table, "CRM_COM_EMAIL", "VARCHAR", 100, false, false, true, "邮箱", null);
+        addField(table, "CRM_COM_TELE", "VARCHAR", 100, false, false, true, "电话", null);
+        addField(table, "CRM_COM_MOBILE", "VARCHAR", 50, false, false, true, "手机", null);
+        addField(table, "CRM_COM_CDATE", "DATETIME", 0, false, false, true, "创建时间", null);
+        addField(table, "CRM_COM_MDATE", "DATETIME", 0, false, false, true, "修改时间", null);
+        addField(table, "CRM_COM_STATE", "VARCHAR", 10, false, false, true, "状态", null);
+        
+        // 所有字段添加完成后，再设置主键
+        TablePk pk = new TablePk();
+        pk.setTableName("CRM_COM");
+        // 获取 CRM_COM_ID 字段并设置为主键
+        Field pkField = table.getFields().get("CRM_COM_ID");
+        pkField.setPk(true);
+        pk.getPkFields().add(pkField);
+        table.setPk(pk);
+        
+        // 重置 Fields 的主键初始化标志，以便重新初始化
+        // 注意：这里不能调用 table.getFields()，因为这会触发初始化
+        // 而是直接访问 _Fields 字段
+        try {
+            java.lang.reflect.Field fieldsField = Table.class.getDeclaredField("_Fields");
+            fieldsField.setAccessible(true);
+            com.gdxsoft.easyweb.define.database.Fields fields = 
+                (com.gdxsoft.easyweb.define.database.Fields) fieldsField.get(table);
+            if (fields != null) {
+                fields.setPkInitialized(false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return table;
+    }
+    
+    /**
+     * 添加字段辅助方法
+     */
+    private static void addField(Table table, String name, String type, int length, 
+                                  boolean isPk, boolean isIdentity, boolean nullable, String comment, TablePk pk) {
+        Field field = new Field();
+        field.setName(name);
+        field.setDatabaseType(type);
+        field.setMaxlength(length);
+        field.setPk(isPk);
+        field.setIdentity(isIdentity);
+        field.setNull(nullable);
+        field.setDescription(comment);
+        
+        table.getFields().put(field.getName(), field);
+        table.getFields().getFieldList().add(field.getName());
+    }
+
+    /**
+     * 测试创建 CRM_COM.LF.M（列表修改模式）
+     */
+    @Test
+    public void testCreateCrmCom_LF_M_FromDatabase() throws Exception {
+        // 1. 创建参数
+        BusinessXmlCreateParams params = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "ListFrame",      // frameType
+            "M"               // operationType (Modify)
+        );
+        
+        // 2. 验证参数
+        assertTrue(params.validate(), "参数应该有效");
+        
+        // 3. 创建 BusinessXmlCreator
+        BusinessXmlCreator creator = new BusinessXmlCreator(config, crmComTable);
+        
+        // 4. 生成预览 XML
+        String xmlPreview = creator.createShowXml(
+            params.getDb(),
+            params.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            params.getFrameType(),
+            params.getOperationType()
+        );
+        
+        // 5. 验证 XML
+        assertNotNull(xmlPreview);
+        assertTrue(xmlPreview.contains("CRM_COM.LF.M"), "XML 应该包含正确的名称");
+        assertTrue(xmlPreview.contains("ListFrame"), "XML 应该包含 ListFrame");
+        assertTrue(xmlPreview.contains("CRM_COM_ID"), "XML 应该包含主键字段");
+        assertTrue(xmlPreview.contains("butNew"), "XML 应该包含 butNew 按钮");
+        assertTrue(xmlPreview.contains("butModify"), "XML 应该包含 butModify 按钮");
+        assertTrue(xmlPreview.contains("butDelete"), "XML 应该包含 butDelete 按钮");
+        
+        // 6. 验证 PageSize 配置
+        assertTrue(xmlPreview.contains("IsSplitPage=\"1\""), "应该启用分页");
+        assertTrue(xmlPreview.contains("KeyField=\"CRM_COM_ID\""), "应该设置主键字段");
+        assertTrue(xmlPreview.contains("PageSize=\"10\""), "应该设置每页 10 条");
+        assertTrue(xmlPreview.contains("Recycle=\"1\""), "应该启用回收站");
+        
+        // 7. 验证 ListUI 配置
+        assertTrue(xmlPreview.contains("luButtons=\"1\""), "应该显示按钮");
+        assertTrue(xmlPreview.contains("luSearch=\"1\""), "应该显示搜索");
+        assertTrue(xmlPreview.contains("luSelect=\"S\""), "应该是单选模式");
+        
+        // 8. 验证 OrderSearch 配置
+        // 数字类型 (CRM_COM_ID) 应该 IsOrder=1, SearchType=""
+        assertTrue(xmlPreview.contains("CRM_COM_ID"), "应该包含 CRM_COM_ID 字段");
+        
+        // 9. 打印 XML 预览（输出包含 DateItem 的部分）
+        System.out.println("=== XML 预览 ===");
+        int dataItemIndex = xmlPreview.indexOf("<DataItem");
+        if (dataItemIndex > 0) {
+            // 输出所有 DataItem
+            String remaining = xmlPreview.substring(dataItemIndex);
+            int endIdx = remaining.indexOf("</XItems>");
+            if (endIdx > 0) {
+                System.out.println(remaining.substring(0, endIdx));
+            } else {
+                System.out.println(remaining.substring(0, Math.min(3000, remaining.length())));
+            }
+        } else {
+            System.out.println(xmlPreview.substring(0, Math.min(2000, xmlPreview.length())));
+        }
+        
+        // 10. 保存完整 XML（使用临时文件）
+        System.out.println("=== XML 已生成 ===");
+        System.out.println("预览模式，未保存文件");
+    }
+
+    /**
+     * 测试创建 CRM_COM.F.NM（框架新增修改模式）
+     */
+    @Test
+    public void testCreateCrmCom_F_NM_FromDatabase() throws Exception {
+        // 1. 创建参数
+        BusinessXmlCreateParams params = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "Frame",          // frameType
+            "NM"              // operationType (New/Modify)
+        );
+        
+        // 2. 验证参数
+        assertTrue(params.validate(), "参数应该有效");
+        
+        // 3. 创建 BusinessXmlCreator
+        BusinessXmlCreator creator = new BusinessXmlCreator(config, crmComTable);
+        
+        // 4. 生成预览 XML
+        String xmlPreview = creator.createShowXml(
+            params.getDb(),
+            params.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            params.getFrameType(),
+            params.getOperationType()
+        );
+        
+        // 5. 验证 XML
+        assertNotNull(xmlPreview);
+        assertTrue(xmlPreview.contains("CRM_COM.F.NM"), "XML 应该包含正确的名称");
+        assertTrue(xmlPreview.contains("Frame"), "XML 应该包含 Frame");
+        
+        // 6. 打印 XML 预览
+        System.out.println("=== Frame XML 预览 ===");
+        System.out.println(xmlPreview.substring(0, Math.min(2000, xmlPreview.length())));
+    }
+
+    /**
+     * 测试创建 CRM_COM.T.M（树形修改模式）
+     */
+    @Test
+    public void testCreateCrmCom_T_M_FromDatabase() throws Exception {
+        // 1. 创建参数
+        BusinessXmlCreateParams params = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "Tree",           // frameType
+            "M"               // operationType (Modify)
+        );
+        
+        // 2. 验证参数
+        assertTrue(params.validate(), "参数应该有效");
+        
+        // 3. 创建 BusinessXmlCreator
+        BusinessXmlCreator creator = new BusinessXmlCreator(config, crmComTable);
+        
+        // 4. 生成预览 XML
+        String xmlPreview = creator.createShowXml(
+            params.getDb(),
+            params.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            params.getFrameType(),
+            params.getOperationType()
+        );
+        
+        // 5. 验证 XML
+        assertNotNull(xmlPreview);
+        assertTrue(xmlPreview.contains("CRM_COM.T.M"), "XML 应该包含正确的名称");
+        assertTrue(xmlPreview.contains("Tree"), "XML 应该包含 Tree");
+        
+        // 6. 打印 XML 预览
+        System.out.println("=== Tree XML 预览 ===");
+        System.out.println(xmlPreview.substring(0, Math.min(2000, xmlPreview.length())));
+    }
+
+    /**
+     * 测试创建 CRM_COM.LF.V（列表查看模式）
+     */
+    @Test
+    public void testCreateCrmCom_LF_V_FromDatabase() throws Exception {
+        // 1. 创建参数
+        BusinessXmlCreateParams params = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "ListFrame",      // frameType
+            "V"               // operationType (View)
+        );
+        
+        // 2. 验证参数
+        assertTrue(params.validate(), "参数应该有效");
+        assertEquals("CRM_COM", params.getTableName());
+        assertEquals("ListFrame", params.getFrameType());
+        assertEquals("V", params.getOperationType());
+        
+        // 3. 创建 BusinessXmlCreator
+        BusinessXmlCreator creator = new BusinessXmlCreator(config, crmComTable);
+        
+        // 4. 生成预览 XML
+        String xmlPreview = creator.createShowXml(
+            params.getDb(),
+            params.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            params.getFrameType(),
+            params.getOperationType()
+        );
+        
+        // 5. 验证 XML
+        assertNotNull(xmlPreview);
+        assertTrue(xmlPreview.contains("CRM_COM.LF.V"), "XML 应该包含正确的名称");
+        assertTrue(xmlPreview.contains("ListFrame"), "XML 应该包含 ListFrame");
+        assertTrue(xmlPreview.contains("CRM_COM_ID"), "XML 应该包含主键字段");
+        
+        // 6. 验证 PageSize 配置
+        assertTrue(xmlPreview.contains("IsSplitPage=\"1\""), "应该启用分页");
+        assertTrue(xmlPreview.contains("KeyField=\"CRM_COM_ID\""), "应该设置主键字段");
+        assertTrue(xmlPreview.contains("PageSize=\"10\""), "应该设置每页 10 条");
+        assertTrue(xmlPreview.contains("Recycle=\"1\""), "应该启用回收站");
+        
+        // 7. 验证 ListUI 配置
+        assertTrue(xmlPreview.contains("luButtons=\"1\""), "应该显示按钮");
+        assertTrue(xmlPreview.contains("luSearch=\"1\""), "应该显示搜索");
+        assertTrue(xmlPreview.contains("luSelect=\"S\""), "应该是单选模式");
+        
+        // 8. 验证 OrderSearch 配置
+        assertTrue(xmlPreview.contains("CRM_COM_ID"), "应该包含 CRM_COM_ID 字段");
+        
+        // 9. 打印 XML 预览
+        System.out.println("=== ListFrame.V XML 预览 ===");
+        int dataItemIndex = xmlPreview.indexOf("<DataItem");
+        if (dataItemIndex > 0) {
+            String remaining = xmlPreview.substring(dataItemIndex);
+            int endIdx = remaining.indexOf("</XItems>");
+            if (endIdx > 0) {
+                System.out.println(remaining.substring(0, endIdx));
+            } else {
+                System.out.println(remaining.substring(0, Math.min(3000, remaining.length())));
+            }
+        }
+        
+        // 10. 保存完整 XML（使用临时文件）
+        System.out.println("=== ListFrame.V XML 已生成 ===");
+        System.out.println("预览模式，未保存文件");
+    }
+    
+    /**
+     * 测试创建 CRM_COM.xml（包含 LF.M、LF.V 和 F.NM 三个例子）
+     */
+    @Test
+    public void testCreateCrmComXml_With_LF_M_And_LF_V_And_F_NM() throws Exception {
+        // 1. 创建参数 - LF.M
+        BusinessXmlCreateParams paramsLFM = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "ListFrame",      // frameType
+            "M"               // operationType (Modify)
+        );
+        
+        // 2. 创建参数 - LF.V
+        BusinessXmlCreateParams paramsLFV = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "ListFrame",      // frameType
+            "V"               // operationType (View)
+        );
+        
+        // 3. 创建参数 - F.NM
+        BusinessXmlCreateParams paramsFNM = new BusinessXmlCreateParams(
+            "demo",           // db
+            "CRM_COM",        // tableName
+            "Frame",          // frameType
+            "NM"              // operationType (New/Modify)
+        );
+        
+        // 4. 验证参数
+        assertTrue(paramsLFM.validate(), "LF.M 参数应该有效");
+        assertTrue(paramsLFV.validate(), "LF.V 参数应该有效");
+        assertTrue(paramsFNM.validate(), "F.NM 参数应该有效");
+        
+        // 5. 创建 BusinessXmlCreator
+        BusinessXmlCreator creator = new BusinessXmlCreator(config, crmComTable);
+        
+        // 6. 生成 LF.M XML
+        String xmlLFM = creator.createShowXml(
+            paramsLFM.getDb(),
+            paramsLFM.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            paramsLFM.getFrameType(),
+            paramsLFM.getOperationType()
+        );
+        
+        // 7. 生成 LF.V XML
+        String xmlLFV = creator.createShowXml(
+            paramsLFV.getDb(),
+            paramsLFV.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            paramsLFV.getFrameType(),
+            paramsLFV.getOperationType()
+        );
+        
+        // 8. 生成 F.NM XML
+        String xmlFNM = creator.createShowXml(
+            paramsFNM.getDb(),
+            paramsFNM.getTableName(),
+            null,  // selectSql
+            null,  // jsonParams
+            paramsFNM.getFrameType(),
+            paramsFNM.getOperationType()
+        );
+        
+        // 9. 验证 XML
+        assertNotNull(xmlLFM, "LF.M XML 不应该为空");
+        assertNotNull(xmlLFV, "LF.V XML 不应该为空");
+        assertNotNull(xmlFNM, "F.NM XML 不应该为空");
+        
+        // 10. 验证 LF.M 内容
+        assertTrue(xmlLFM.contains("CRM_COM.LF.M"), "LF.M XML 应该包含正确的名称");
+        assertTrue(xmlLFM.contains("ListFrame"), "LF.M XML 应该包含 ListFrame");
+        assertTrue(xmlLFM.contains("butNew"), "LF.M XML 应该包含 butNew 按钮");
+        assertTrue(xmlLFM.contains("butModify"), "LF.M XML 应该包含 butModify 按钮");
+        assertTrue(xmlLFM.contains("butDelete"), "LF.M XML 应该包含 butDelete 按钮");
+        
+        // 11. 验证 LF.V 内容
+        assertTrue(xmlLFV.contains("CRM_COM.LF.V"), "LF.V XML 应该包含正确的名称");
+        assertTrue(xmlLFV.contains("ListFrame"), "LF.V XML 应该包含 ListFrame");
+        
+        // 12. 验证 F.NM 内容
+        assertTrue(xmlFNM.contains("CRM_COM.F.NM"), "F.NM XML 应该包含正确的名称");
+        assertTrue(xmlFNM.contains("Frame"), "F.NM XML 应该包含 Frame");
+        assertTrue(xmlFNM.contains("butOk"), "F.NM XML 应该包含 butOk 按钮");
+        
+        // 13. 保存 XML 文件到 temp 目录
+        String outputPath = "temp/ewa_script_test/CRM_COM.xml";
+        java.nio.file.Files.createDirectories(java.nio.file.Paths.get("temp/ewa_script_test"));
+        
+        // 提取 EasyWebTemplate 内容
+        String xmlLFMContent = extractEasyWebTemplateContent(xmlLFM);
+        String xmlLFVContent = extractEasyWebTemplateContent(xmlLFV);
+        String xmlFNMContent = extractEasyWebTemplateContent(xmlFNM);
+        
+        // 合并三个 EasyWebTemplate 到一个 EasyWebTemplates 根节点下
+        String combinedXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+            "<EasyWebTemplates>\n" +
+            "  <!-- crm_com.lf.m (列表修改模式) -->\n" +
+            xmlLFMContent +
+            "\n\n  <!-- crm_com.lf.v (列表查看模式) -->\n" +
+            xmlLFVContent +
+            "\n\n  <!-- crm_com.f.nm (框架新增修改模式) -->\n" +
+            xmlFNMContent +
+            "\n</EasyWebTemplates>";
+        
+        java.nio.file.Files.write(java.nio.file.Paths.get(outputPath), combinedXml.getBytes());
+        
+        System.out.println("=== CRM_COM.xml 已生成 ===");
+        System.out.println("路径：" + outputPath);
+        System.out.println("包含:");
+        System.out.println("  - crm_com.lf.m (列表修改模式)");
+        System.out.println("  - crm_com.lf.v (列表查看模式)");
+        System.out.println("  - crm_com.f.nm (框架新增修改模式)");
+    }
+    
+    /**
+     * 从 XML 字符串中提取 EasyWebTemplate 节点内容
+     * 移除 XML 声明和 EasyWebTemplates 根节点
+     */
+    private String extractEasyWebTemplateContent(String xml) {
+        String content = xml;
+        // 移除 XML 声明
+        content = content.replace("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n", "");
+        // 移除 EasyWebTemplates 开始标签
+        content = content.replace("<EasyWebTemplates>\n", "");
+        // 移除 EasyWebTemplates 结束标签
+        content = content.replace("\n</EasyWebTemplates>", "");
+        return content.trim();
+    }
+}

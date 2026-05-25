@@ -1,0 +1,1968 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EasyWebTemplates>
+  <EasyWebTemplate Author="gl" CreateDate="2026-03-06 14:56:50" Name="PRODUCT_CAT.F.NM" UpdateDate="2026-03-06 15:01:40">
+    <Page>
+      <Name>
+        <Set Name="PRODUCT_CAT.F.NM"/>
+      </Name>
+      <FrameTag>
+        <Set FrameTag="Frame"/>
+      </FrameTag>
+      <SkinName>
+        <Set IsXhtml="0" SkinName="Test1"/>
+      </SkinName>
+      <DataSource>
+        <Set DataSource="ow_main"/>
+      </DataSource>
+      <AllowJsonExport>
+        <Set AllowJsonExport=""/>
+      </AllowJsonExport>
+      <ConfigMemo>
+        <Set>
+          <ConfigMemo/>
+        </Set>
+      </ConfigMemo>
+      <Acl>
+        <Set Acl=""/>
+      </Acl>
+      <Log>
+        <Set Log=""/>
+      </Log>
+      <DescriptionSet>
+        <Set Info="系统资源子类" Lang="zhcn" Memo=""/>
+        <Set Info="System resource subclass" Lang="enus" Memo=""/>
+      </DescriptionSet>
+      <PageAttributeSet>
+        <Set PageAttName="" PageAttValue=""/>
+      </PageAttributeSet>
+      <RowAttributeSet>
+        <Set RowAttLogic="" RowAttName="" RowAttValue=""/>
+      </RowAttributeSet>
+      <GroupSet>
+        <Set GroupInfo="" GroupShow="" Lang=""/>
+      </GroupSet>
+      <Size>
+        <Set FrameCols="C2" HAlign="center" Height="" HiddenCaption="1" TextareaAuto="" VAlign="top" Width="700"/>
+      </Size>
+      <AddHtml>
+        <Set>
+          <Top/>
+          <Bottom/>
+        </Set>
+      </AddHtml>
+      <AddScript>
+        <Set>
+          <Top/>
+          <Bottom><![CDATA[(function() {
+    const ewa = EWA.F.FOS["@SYS_FRAME_UNID"];
+    //提交后台数据时执行的检查或附加数据处理
+    ewa.DoPostBefore = function() {
+        //附加数据处理
+        // ewa.PostAddData = {add1:'a',add2:2};
+        return true;
+    };
+
+    function getObj(exp) {
+        return exp ? $('#f_@sys_frame_unid').find(exp) : $('#f_@sys_frame_unid');
+    }
+
+    function loadActionJson_SAct0() {
+        const serId = getObj('#PC_SER_ID').val();
+        let u1 = new EWA_UrlClass(EWA.F.FOS["@SYS_FRAME_UNID"].Url);
+        u1.AddParameter("ewa_action", "SAct0");
+        u1.AddParameter("ewa_ajax", "json");
+        u1.AddParameter("PC_SER_ID", serId);
+
+        let u = u1.GetUrl();
+        $J(u, getObj('#PC_SER_TAG_ID')[0], 'SER_TAG_NAME', 'SER_TAG_ID', true, '@PC_SER_TAG_ID', function(s) {
+            if ("@PC_SER_TAG_ID1") {
+                getObj('#PC_SER_TAG_ID').trigger('change');
+            }
+        });
+    }
+
+    function loadActionJson_SAct1() {
+        const serId = getObj('#PC_SER_ID').val();
+        const serTagId = getObj('#PC_SER_TAG_ID').val();
+        let u1 = new EWA_UrlClass(EWA.F.FOS["@SYS_FRAME_UNID"].Url);
+        u1.AddParameter("ewa_action", "SAct1");
+        u1.AddParameter("ewa_ajax", "json");
+        u1.AddParameter("PC_SER_ID", serId);
+        u1.AddParameter("PC_SER_TAG_ID", serTagId);
+
+        let u = u1.GetUrl();
+        $J(u, getObj('#PC_SER_TAG_ID1')[0], 'SER_TAG_NAME', 'SER_TAG_ID', true, '@PC_SER_TAG_ID1', function(s) {
+            console.log(s)
+        });
+    }
+
+    function init() {
+        getObj('#PC_SER_ID').on('change', loadActionJson_SAct0)
+        getObj('#PC_SER_TAG_ID').on('change', loadActionJson_SAct1)
+        if ("@PC_SER_ID") {
+            getObj('#PC_SER_ID').trigger('change');
+        }
+    }
+    init();
+})();]]></Bottom>
+        </Set>
+      </AddScript>
+      <AddCss>
+        <Set>
+          <AddCss><![CDATA[#f_@SYS_FRAME_UNID .EWA_TD_M{width:400px;}]]></AddCss>
+        </Set>
+      </AddCss>
+      <ChartsShow/>
+      <RedrawJson>
+        <Set>
+          <RedrawJson/>
+        </Set>
+      </RedrawJson>
+      <BoxJson/>
+      <LeftJson/>
+      <FrameHtml>
+        <Set>
+          <FrameHtml/>
+        </Set>
+      </FrameHtml>
+      <PageSize/>
+      <ListUI/>
+      <MenuShow/>
+      <Menu/>
+      <Tree/>
+      <HtmlFrame>
+        <Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/>
+      </HtmlFrame>
+      <TreeIconSet/>
+      <MGAxisX/>
+      <MGAxisY/>
+      <MGCell/>
+      <LogicShow>
+        <Set HiddenFields="" Name="" ParaExp=""/>
+      </LogicShow>
+    </Page>
+    <Action>
+      <ActionSet>
+        <Set LogMsg="" Transcation="" Type="OnPageLoad">
+          <CallSet>
+            <Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"/>
+          </CallSet>
+        </Set>
+        <Set LogMsg="" Transcation="" Type="OnPagePost">
+          <CallSet>
+            <Set CallIsChk="" CallName="OnNew SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='N' or '@EWA_MTYPE'='C'"/>
+            <Set CallIsChk="" CallName="OnModify SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M'"/>
+          </CallSet>
+        </Set>
+        <Set LogMsg="" Transcation="" Type="UAct0">
+          <CallSet>
+            <Set CallIsChk="" CallName="UAct0 SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+        <Set LogMsg="" Transcation="" Type="UAct1">
+          <CallSet>
+            <Set CallIsChk="" CallName="UAct1 SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+        <Set LogMsg="" Transcation="" Type="SAct0">
+          <CallSet>
+            <Set CallIsChk="" CallName="SAct0 SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+        <Set LogMsg="" Transcation="" Type="SAct1">
+          <CallSet>
+            <Set CallIsChk="" CallName="SAct1 SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+        <Set LogMsg="" Transcation="" Type="CheckError">
+          <CallSet>
+            <Set CallIsChk="" CallName="CheckError SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+      </ActionSet>
+      <SqlSet>
+        <Set Name="OnPageLoad SQL" SqlType="query">
+          <Sql><![CDATA[SELECT A.* FROM product_CAT A WHERE A.pc_ID = @pc_ID]]></Sql>
+          <CSSet/>
+        </Set>
+        <Set Name="OnNew SQL" SqlType="update">
+          <Sql><![CDATA[INSERT INTO
+    product_CAT (
+        PC_NAME,
+        PC_NAME_EN,
+        PC_MEMO,
+        PC_MEMO_EN,
+        PC_PID,
+        PC_LVL,
+        PC_ORD,
+        PC_CDATE,
+        PC_MDATE,
+        PC_SER_ID,
+        PC_SER_TAG_ID,
+        PC_STATUS
+    )
+VALUES
+    (
+        @PC_NAME,
+        @PC_NAME_EN,
+        @PC_MEMO,
+        @PC_MEMO_EN,
+        @PC_PID,
+        @PC_LVL,
+        @PC_ORD,
+        @SYS_DATE,
+        @SYS_DATE,
+        @PC_SER_ID,
+        @PC_SER_TAG_ID,
+        'USED'
+    )]]></Sql>
+          <CSSet/>
+        </Set>
+        <Set Name="OnModify SQL" SqlType="update">
+          <Sql><![CDATA[UPDATE product_CAT SET 
+	pc_NAME = @pc_NAME,
+	pc_NAME_EN = @pc_NAME_EN,
+	pc_MEMO = @pc_MEMO,
+	pc_MEMO_EN = @pc_MEMO_EN,
+	pc_PID = @pc_PID,
+	pc_LVL = @pc_LVL,
+	pc_ORD = @pc_ORD,
+	pc_MDATE = @SYS_DATE,
+	pc_SER_ID = @pc_SER_ID,
+	pc_SER_TAG_ID = @pc_SER_TAG_ID
+WHERE pc_ID = @pc_ID]]></Sql>
+          <CSSet/>
+        </Set>
+        <Set Name="UAct0 SQL" SqlType="update">
+          <Sql><![CDATA[-- write your sql]]></Sql>
+          <CSSet/>
+        </Set>
+        <Set Name="UAct1 SQL" SqlType="update">
+          <Sql><![CDATA[-- write your sql]]></Sql>
+          <CSSet/>
+        </Set>
+        <Set Name="SAct0 SQL" SqlType="query">
+          <Sql><![CDATA[SELECT
+    SER_TAG_ID,
+    SER_TAG_NAME,
+    SER_TAG_NAME_EN
+FROM
+    ser_tag
+WHERE
+    SER_ID = @pc_ser_id
+    AND ser_tag = 'NAME'
+    AND SER_TAG_STATUS = 'USED']]></Sql>
+          <CSSet/>
+        </Set>
+        <Set Name="SAct1 SQL" SqlType="query">
+          <Sql><![CDATA[SELECT
+    a.SER_TAG_ID,
+    a.SER_TAG_NAME,
+    a.SER_TAG_NAME_EN
+FROM
+    ser_tag a 
+    inner join ser_tag b on a.ser_tag = b.SER_TAG_FOR_TAG 
+        and b.SER_TAG_ID = @pc_ser_tag_id
+WHERE
+    a.SER_ID = @pc_ser_id
+    AND a.SER_TAG_STATUS = 'USED']]></Sql>
+          <CSSet/>
+        </Set>
+        <Set Name="CheckError SQL" SqlType="query">
+          <Sql><![CDATA[-- select 不能执行 as EWA_ERR_OUT FROM xxx where 1=2]]></Sql>
+          <CSSet/>
+        </Set>
+      </SqlSet>
+      <JSONSet/>
+      <ClassSet/>
+      <XmlSet/>
+      <XmlSetData/>
+      <ScriptSet/>
+      <UrlSet/>
+      <CSSet/>
+      <CallSet>
+        <Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="'@EWA_MTYPE'='M' or '@EWA_MTYPE'='C'"/>
+      </CallSet>
+    </Action>
+    <XItems>
+      <XItem Name="PC_NAME">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="PC_NAME"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="名称" Lang="zhcn" Memo=""/>
+          <Set Info="Name" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="50" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="PC_NAME" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+      <XItem Name="PC_NAME_EN">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="PC_NAME_EN"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="英文" Lang="zhcn" Memo=""/>
+          <Set Info="English" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="100" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="0"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="PC_NAME_EN" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+      <XItem Name="PC_SER_ID">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="select"/>
+        </Tag>
+        <Name>
+          <Set Name="PC_SER_ID"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="关联服务" Lang="zhcn" Memo=""/>
+          <Set Info="Associated services" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick="1" OrderExp="" SearchExp="" SearchMulti="2" SearchSql="SELECT SER_ID, SER_NAME, SER_NAME_EN FROM SER_MAIN WHERE SER_OB3='USED' ORDER BY SER_NAME" SearchType="fix"/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="10" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="0"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="PC_SER_ID" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="SER_NAME" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="SELECT&#10;    SER_ID,&#10;    SER_NAME,&#10;    SER_NAME_EN&#10;FROM&#10;    SER_MAIN&#10;WHERE&#10;    SER_OB3 = 'USED'&#10;ORDER BY&#10;    SER_ORD" TitleField="SER_NAME_EN" TitleList="" ValueField="SER_ID" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+      <XItem Name="PC_SER_TAG_ID">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="select"/>
+        </Tag>
+        <Name>
+          <Set Name="PC_SER_TAG_ID"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="关联服务类型" Lang="zhcn" Memo=""/>
+          <Set Info="Associate service type" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="10" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="0"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="PC_SER_TAG_ID" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+      <XItem Name="PC_SER_TAG_ID1">
+        <Tag>
+          <Set IsLFEdit="" SpanShowAs="" Tag="select"/>
+        </Tag>
+        <Name>
+          <Set Name="PC_SER_TAG_ID1"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue/>
+        <DescriptionSet>
+          <Set Info="关联服务类型1" Lang="zhcn" Memo=""/>
+        </DescriptionSet>
+        <XStyle/>
+        <Style/>
+        <ParentStyle/>
+        <AttributeSet/>
+        <EventSet/>
+        <IsHtml/>
+        <OrderSearch/>
+        <MaxMinLength/>
+        <MaxMinValue/>
+        <IsMustInput>
+          <Set IsMustInput="0"/>
+        </IsMustInput>
+        <Switch/>
+        <DataItem>
+          <Set DataField="PC_SER_TAG_ID1" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc/>
+        <DataRef/>
+        <List/>
+        <UserSet/>
+        <CallAction/>
+        <OpenFrame/>
+        <Frame/>
+        <UserControl/>
+        <DefineFrame/>
+        <PopFrame/>
+        <signature/>
+        <Upload/>
+        <VaildEx/>
+        <MGAddField/>
+        <AnchorParas/>
+        <LinkButtonParas/>
+        <DopListShow/>
+        <ReportCfg/>
+        <CombineFrame/>
+        <AddrMapRels/>
+        <QRCode/>
+        <ImageDefault/>
+      </XItem>
+      <XItem Name="PC_PID">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="PC_PID"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="上级编号" Lang="zhcn" Memo=""/>
+          <Set Info="Superior number" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="10" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="PC_PID" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+      <XItem Name="PC_LVL">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="PC_LVL"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="级别" Lang="zhcn" Memo=""/>
+          <Set Info="level" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="10" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="PC_LVL" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+      <XItem Name="PC_ORD">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="text"/>
+        </Tag>
+        <Name>
+          <Set Name="PC_ORD"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="排序" Lang="zhcn" Memo=""/>
+          <Set Info="Sort" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="10" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="1"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="PC_ORD" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+      <XItem Name="PC_MEMO">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="textarea"/>
+        </Tag>
+        <Name>
+          <Set Name="PC_MEMO"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="备注" Lang="zhcn" Memo=""/>
+          <Set Info="Note:" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="2147483647" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="0"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="PC_MEMO" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+      <XItem Name="PC_MEMO_EN">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="textarea"/>
+        </Tag>
+        <Name>
+          <Set Name="PC_MEMO_EN"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="备注英文" Lang="zhcn" Memo=""/>
+          <Set Info="Notes in English" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle=""/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="2147483647" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="0"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="PC_MEMO_EN" DataType="String" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+      <XItem Name="butOk">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="submit"/>
+        </Tag>
+        <Name>
+          <Set Name="butOk"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="确定" Lang="zhcn" Memo=""/>
+          <Set Info="Ok" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle="width:40px; text-align: center"/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="0"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="butOk" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+      <XItem Name="butClose">
+        <Tag>
+          <Set IsLFEdit="0" SpanShowAs="" Tag="button"/>
+        </Tag>
+        <Name>
+          <Set Name="butClose"/>
+        </Name>
+        <GroupIndex>
+          <Set GroupIndex=""/>
+        </GroupIndex>
+        <InitValue>
+          <Set InitValue=""/>
+        </InitValue>
+        <DescriptionSet>
+          <Set Info="关闭" Lang="zhcn" Memo=""/>
+          <Set Info="Cancel" Lang="enus" Memo=""/>
+        </DescriptionSet>
+        <XStyle>
+          <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/>
+        </XStyle>
+        <Style>
+          <Set Style=""/>
+        </Style>
+        <ParentStyle>
+          <Set ParentStyle="width:40px; text-align: center"/>
+        </ParentStyle>
+        <AttributeSet>
+          <Set AttLogic="" AttName="" AttValue=""/>
+        </AttributeSet>
+        <EventSet>
+          <Set EventLogic="" EventName="" EventType="" EventValue=""/>
+        </EventSet>
+        <IsHtml>
+          <Set IsHtml=""/>
+        </IsHtml>
+        <OrderSearch>
+          <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/>
+        </OrderSearch>
+        <MaxMinLength>
+          <Set MaxLength="" MinLength=""/>
+        </MaxMinLength>
+        <MaxMinValue>
+          <Set MaxValue="" MinValue=""/>
+        </MaxMinValue>
+        <IsMustInput>
+          <Set IsMustInput="0"/>
+        </IsMustInput>
+        <Switch>
+          <Set SwtAction="" SwtOnValue=""/>
+        </Switch>
+        <DataItem>
+          <Set DataField="butClose" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/>
+        </DataItem>
+        <DispEnc>
+          <Set EncShowUrl="" EncType=""/>
+        </DispEnc>
+        <DataRef>
+          <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/>
+        </DataRef>
+        <List>
+          <Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/>
+        </List>
+        <UserSet>
+          <Set Lang="" User=""/>
+        </UserSet>
+        <CallAction>
+          <Set Action="" AfterTip="" ConfirmInfo=""/>
+        </CallAction>
+        <OpenFrame>
+          <Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/>
+        </OpenFrame>
+        <Frame>
+          <Set CallItemName="" CallPara="" CallXmlName=""/>
+        </Frame>
+        <UserControl>
+          <Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/>
+        </UserControl>
+        <DefineFrame>
+          <Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/>
+        </DefineFrame>
+        <PopFrame>
+          <Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/>
+        </PopFrame>
+        <signature>
+          <Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/>
+        </signature>
+        <Upload>
+          <Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/>
+        </Upload>
+        <VaildEx>
+          <Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/>
+        </VaildEx>
+        <MGAddField>
+          <Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/>
+        </MGAddField>
+        <AnchorParas>
+          <Set aHref="" aTarget=""/>
+        </AnchorParas>
+        <LinkButtonParas>
+          <Set lkbButtonId=""/>
+        </LinkButtonParas>
+        <DopListShow>
+          <Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/>
+        </DopListShow>
+        <ReportCfg>
+          <Set IsReportRepeat="" ReportAction="">
+            <ReportTemplate/>
+          </Set>
+        </ReportCfg>
+        <CombineFrame>
+          <Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName="">
+            <CbJs/>
+          </Set>
+        </CombineFrame>
+        <AddrMapRels>
+          <Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/>
+        </AddrMapRels>
+        <QRCode>
+          <Set QRLogoUrl=""/>
+        </QRCode>
+        <ImageDefault>
+          <Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/>
+        </ImageDefault>
+      </XItem>
+    </XItems>
+    <Menus/>
+    <Charts/>
+    <PageInfos>
+      <PageInfo Name="msg0">
+        <Name>
+          <Set Name="msg0"/>
+        </Name>
+        <DescriptionSet>
+          <Set Info="消息0" Lang="zhcn" Memo=""/>
+          <Set Info="Msg0" Lang="enus" Memo=""/>
+        </DescriptionSet>
+      </PageInfo>
+      <PageInfo Name="msg1">
+        <Name>
+          <Set Name="msg1"/>
+        </Name>
+        <DescriptionSet>
+          <Set Info="消息1" Lang="zhcn" Memo=""/>
+          <Set Info="Msg1" Lang="enus" Memo=""/>
+        </DescriptionSet>
+      </PageInfo>
+      <PageInfo Name="msg2">
+        <Name>
+          <Set Name="msg2"/>
+        </Name>
+        <DescriptionSet>
+          <Set Info="消息2" Lang="zhcn" Memo=""/>
+          <Set Info="Msg2" Lang="enus" Memo=""/>
+        </DescriptionSet>
+      </PageInfo>
+    </PageInfos>
+    <Workflows/>
+  </EasyWebTemplate>
+  <EasyWebTemplate Author="gl" CreateDate="2026-03-06 14:56:45" Name="PRODUCT_CAT.T.M" UpdateDate="2026-03-06 15:02:49">
+    <Page>
+      <Name>
+        <Set Name="PRODUCT_CAT.T.M"/>
+      </Name>
+      <FrameTag>
+        <Set FrameTag="Tree"/>
+      </FrameTag>
+      <SkinName>
+        <Set IsXhtml="0" SkinName="Test1"/>
+      </SkinName>
+      <DataSource>
+        <Set DataSource="ow_main"/>
+      </DataSource>
+      <AllowJsonExport>
+        <Set AllowJsonExport=""/>
+      </AllowJsonExport>
+      <ConfigMemo>
+        <Set>
+          <ConfigMemo/>
+        </Set>
+      </ConfigMemo>
+      <Acl>
+        <Set Acl=""/>
+      </Acl>
+      <Log>
+        <Set Log=""/>
+      </Log>
+      <DescriptionSet>
+        <Set Info="系统资源子类" Lang="zhcn" Memo=""/>
+        <Set Info="System resource subclass" Lang="enus" Memo=""/>
+      </DescriptionSet>
+      <PageAttributeSet>
+        <Set PageAttName="" PageAttValue=""/>
+      </PageAttributeSet>
+      <RowAttributeSet>
+        <Set RowAttLogic="" RowAttName="" RowAttValue=""/>
+      </RowAttributeSet>
+      <GroupSet/>
+      <Size>
+        <Set FrameCols="C2" HAlign="center" Height="" HiddenCaption="0" TextareaAuto="" VAlign="top" Width="100%"/>
+      </Size>
+      <AddHtml>
+        <Set>
+          <Top/>
+          <Bottom/>
+        </Set>
+      </AddHtml>
+      <AddScript>
+        <Set>
+          <Top/>
+          <Bottom><![CDATA[EWA.F.FOS["@sys_frame_unid"].link = function (smcId) {
+    const u = new EWA_UrlClass(this.Url);
+    u.AddParameter("itemname", "PRODUCT_CAT.F.NM");
+    u.AddParameter("PC_ID",smcId);
+    u.AddParameter("EWA_MTYPE", "M");
+    $Install(u, 'F1_@sys_frame_unid', function(){
+        
+    });
+}]]></Bottom>
+        </Set>
+      </AddScript>
+      <AddCss>
+        <Set>
+          <AddCss/>
+        </Set>
+      </AddCss>
+      <ChartsShow/>
+      <RedrawJson/>
+      <BoxJson/>
+      <LeftJson/>
+      <FrameHtml/>
+      <PageSize/>
+      <ListUI/>
+      <MenuShow/>
+      <Menu/>
+      <Tree>
+        <Set AddPara1="" AddPara2="" AddPara3="" Key="PC_ID" Level="PC_LVL" LoadByLevel="" MenuGroup="" Order="PC_ORD" ParentKey="PC_PID" RootId="" Text="PC_NAME" Title="PC_NAME_EN"/>
+      </Tree>
+      <HtmlFrame>
+        <Set FrameBorder="" FrameSize="200,*" FrameSubUrl="" FrameType="H5"/>
+      </HtmlFrame>
+      <TreeIconSet>
+        <Set Close="" Filter="" Open="" Test=""/>
+      </TreeIconSet>
+      <MGAxisX/>
+      <MGAxisY/>
+      <MGCell/>
+      <LogicShow/>
+    </Page>
+    <Action>
+      <ActionSet>
+        <Set LogMsg="" Transcation="" Type="OnPageLoad">
+          <CallSet>
+            <Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+        <Set LogMsg="" Transcation="" Type="OnTreeNodeDelete">
+          <CallSet>
+            <Set CallIsChk="" CallName="OnTreeNodeDelete SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+        <Set LogMsg="" Transcation="" Type="OnTreeNodeRename">
+          <CallSet>
+            <Set CallIsChk="" CallName="OnTreeNodeRename SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+        <Set LogMsg="" Transcation="" Type="OnTreeNodeNew">
+          <CallSet>
+            <Set CallIsChk="" CallName="OnTreeNodeNew SQL" CallType="SqlSet" Test=""/>
+          </CallSet>
+        </Set>
+      </ActionSet>
+      <SqlSet>
+        <Set Name="OnPageLoad SQL" SqlType="query">
+          <Sql><![CDATA[SELECT
+    *
+FROM
+    product_CAT
+WHERE
+    pc_status = 'USED'
+ORDER BY
+    pc_LVL,
+    pc_ORD]]></Sql>
+          <CSSet/>
+        </Set>
+        <Set Name="OnTreeNodeDelete SQL" SqlType="update">
+          <Sql><![CDATA[ ]]></Sql>
+          <CSSet/>
+        </Set>
+        <Set Name="OnTreeNodeRename SQL" SqlType="update">
+          <Sql/>
+          <CSSet/>
+        </Set>
+        <Set Name="OnTreeNodeNew SQL" SqlType="update">
+          <Sql/>
+          <CSSet/>
+        </Set>
+      </SqlSet>
+      <JSONSet/>
+      <ClassSet/>
+      <XmlSet/>
+      <XmlSetData/>
+      <ScriptSet/>
+      <UrlSet/>
+      <CSSet/>
+      <CallSet>
+        <Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/>
+      </CallSet>
+    </Action>
+    <XItems/>
+    <Menus>
+      <Menu Name="itemNew">
+        <Name>
+          <Set Name="itemNew"/>
+        </Name>
+        <DescriptionSet>
+          <Set Info="新建" Lang="zhcn"/>
+          <Set Info="New" Lang="enus"/>
+        </DescriptionSet>
+        <Icon>
+          <Set Icon="/EmpScriptV2/EWA_STYLE/images/defined/new.gif"/>
+        </Icon>
+        <Cmd>
+          <Set Cmd="EWA.CurUI.NewNode();"/>
+        </Cmd>
+        <Group>
+          <Set Group=""/>
+        </Group>
+      </Menu>
+      <Menu Name="itemRename">
+        <Name>
+          <Set Name="itemRename"/>
+        </Name>
+        <DescriptionSet>
+          <Set Info="修改名称" Lang="zhcn"/>
+          <Set Info="Rename" Lang="enus"/>
+        </DescriptionSet>
+        <Icon>
+          <Set Icon=""/>
+        </Icon>
+        <Cmd>
+          <Set Cmd="EWA.CurUI.Rename();"/>
+        </Cmd>
+        <Group>
+          <Set Group=""/>
+        </Group>
+      </Menu>
+      <Menu Name="line">
+        <Name>
+          <Set Name="line"/>
+        </Name>
+        <DescriptionSet>
+          <Set Info="&lt;hr&gt;" Lang="zhcn"/>
+          <Set Info="&lt;hr&gt;" Lang="enus"/>
+        </DescriptionSet>
+        <Icon>
+          <Set Icon=""/>
+        </Icon>
+        <Cmd>
+          <Set Cmd=""/>
+        </Cmd>
+        <Group>
+          <Set Group=""/>
+        </Group>
+      </Menu>
+      <Menu Name="itemDelete">
+        <Name>
+          <Set Name="itemDelete"/>
+        </Name>
+        <DescriptionSet>
+          <Set Info="删除" Lang="zhcn"/>
+          <Set Info="Delete" Lang="enus"/>
+        </DescriptionSet>
+        <Icon>
+          <Set Icon="/EmpScriptV2/EWA_STYLE/images/defined/del.gif"/>
+        </Icon>
+        <Cmd>
+          <Set Cmd="EWA.CurUI.Delete();"/>
+        </Cmd>
+        <Group>
+          <Set Group=""/>
+        </Group>
+      </Menu>
+    </Menus>
+    <Charts/>
+    <PageInfos/>
+    <Workflows/>
+  </EasyWebTemplate>
+</EasyWebTemplates>

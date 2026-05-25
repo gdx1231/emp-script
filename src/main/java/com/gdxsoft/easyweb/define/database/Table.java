@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.commons.lang3.Strings;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -248,6 +251,62 @@ public class Table {
 		_Pk = new TablePk();
 		_Fks = new ArrayList<TableFk>();
 		this._Indexes = new ArrayList<TableIndex>();
+	}
+
+	/**
+	 * 将表元数据转换为 JSON 对象
+	 * 使用 toXml() + XML.toJSONObject() 方式
+	 * @return JSON 对象
+	 */
+	public JSONObject toJson() {
+		// 使用 toXml() 生成 XML，然后转换为 JSON
+		String xml = this.toXml();
+		JSONObject json = XML.toJSONObject(xml);
+		
+		// 获取 Table 节点
+		if (json.has("root") && json.getJSONObject("root").has("Table")) {
+			JSONObject tableJson = json.getJSONObject("root").getJSONObject("Table");
+			
+			// 添加表属性
+			JSONObject result = new JSONObject();
+			result.put("TableName", this._Name);
+			if (this._SchemaName != null) {
+				result.put("SchemaName", this._SchemaName);
+			}
+			if (this._CatalogName != null) {
+				result.put("CatalogName", this._CatalogName);
+			}
+			if (this._TableType != null) {
+				result.put("TableType", this._TableType);
+			}
+			if (this._DatabaseType != null) {
+				result.put("DatabaseType", this._DatabaseType);
+			}
+			if (this._ConnectionConfigName != null) {
+				result.put("ConnectionConfigName", this._ConnectionConfigName);
+			}
+			if (this._SqlTable != null) {
+				result.put("DDL", this._SqlTable);
+			}
+			
+			// 从 XML JSON 中复制 Fields, Pk, Fks, Indexes
+			if (tableJson.has("Fields")) {
+				result.put("Fields", tableJson.get("Fields"));
+			}
+			if (tableJson.has("Pk")) {
+				result.put("Pk", tableJson.get("Pk"));
+			}
+			if (tableJson.has("Fks")) {
+				result.put("Fks", tableJson.get("Fks"));
+			}
+			if (tableJson.has("Indexes")) {
+				result.put("Indexes", tableJson.get("Indexes"));
+			}
+			
+			return result;
+		}
+		
+		return json;
 	}
 
 	public String toXml() {
@@ -883,6 +942,11 @@ public class Table {
 	 * @param dataMeta
 	 */
 	private void initPk(DatabaseMetaData dataMeta) {
+		// 如果已经有_Pk 且不为空，说明已经初始化过了，直接返回
+		if (this._Pk != null && !this._Pk.getPkFields().isEmpty()) {
+			return;
+		}
+		
 		this._Pk = new TablePk();
 		this._Pk.setTableName(this._Name);
 		ResultSet rs = null;
@@ -996,8 +1060,26 @@ public class Table {
 	}
 
 	public Fields getFields() {
+		// 如果已经有 Fields 且主键已初始化，直接返回
+		if (this._Fields != null && this._Fields.isPkInitialized()) {
+			return _Fields;
+		}
+		
+		// 如果 Fields 为空，初始化
 		if (this._Fields == null) {
 			this.init();
+		}
+		
+		// 初始化 Fields 的表名和主键信息（只初始化一次）
+		if (this._Fields != null && this._Name != null && !this._Fields.isPkInitialized()) {
+			this._Fields.setTableName(this._Name);
+			// 设置主键信息
+			if (this._Pk != null && !this._Pk.getPkFields().isEmpty()) {
+				for (Field pkField : this._Pk.getPkFields()) {
+					this._Fields.addPkField(pkField);
+				}
+			}
+			this._Fields.setPkInitialized(true);
 		}
 		return _Fields;
 	}
@@ -1028,6 +1110,11 @@ public class Table {
 	 * @return the _Pk
 	 */
 	public TablePk getPk() {
+		// 如果已经有_Pk 且不为空，直接返回
+		if (this._Pk != null && !this._Pk.getPkFields().isEmpty()) {
+			return _Pk;
+		}
+		// 否则尝试从数据库初始化
 		if (this._Fields == null) {
 			this.init();
 		}

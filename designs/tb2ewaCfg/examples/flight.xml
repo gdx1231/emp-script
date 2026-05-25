@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?><EasyWebTemplates><EasyWebTemplate Author="gl" CreateDate="2025-12-24 15:02:19" Name="ENQ_JNY_FLIGHT.LF.pickup" UpdateDate="2025-12-25 09:41:33"><Page><Name><Set Name="ENQ_JNY_FLIGHT.LF.pickup"/></Name><FrameTag><Set FrameTag="ListFrame"/></FrameTag><SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName><DataSource><Set DataSource="globaltravel"/></DataSource><AllowJsonExport><Set AllowJsonExport=""/></AllowJsonExport><ConfigMemo><Set><ConfigMemo/></Set></ConfigMemo><Acl><Set Acl=""/></Acl><Log><Set Log=""/></Log><DescriptionSet><Set Info="设定航班日期" Lang="zhcn" Memo=""/><Set Info="Set your flight date" Lang="enus" Memo=""/></DescriptionSet><PageAttributeSet><Set PageAttName="" PageAttValue=""/></PageAttributeSet><RowAttributeSet><Set RowAttLogic="" RowAttName="" RowAttValue="@F_ADD"/><Set RowAttLogic="" RowAttName="" RowAttValue="@CITY_ID"/><Set RowAttLogic="" RowAttName="" RowAttValue="@ENQ_JNY_ID"/><Set RowAttLogic="" RowAttName="" RowAttValue="@ENQ_JNY_DATE"/></RowAttributeSet><GroupSet/><Size><Set FrameCols="C2" HAlign="center" Height="" HiddenCaption="0" TextareaAuto="" VAlign="top" Width="700px"/></Size><AddHtml><Set><Top><![CDATA[<div id='opts_@sys_frame_unid'>
+    
+</div>
+				]]></Top><Bottom><![CDATA[<div id='flights_@sys_frame_unid' style="display: none">
+    
+</div>
+<div style="text-align:center; padding: 10px">
+    <input type='submit' id='butOk' value="确定" onclick='EWA.F.FOS["@sys_frame_unid"].ext_set()'>
+</div>
+				]]></Bottom></Set></AddHtml><AddScript><Set><Top/><Bottom><![CDATA[function refreshSerConns(rst) {
+    if ("@EWA_PARENT_FRAME") {
+        EWA.F.FOS["@EWA_PARENT_FRAME"].Reload();
+    }
+    // 删除窗口
+    $('#opts_@SYS_FRAME_UNID').closest('.ewa-ui-dialog').remove()
+}
+(function() {
+    const ewa = EWA.F.FOS['@SYS_FRAME_UNID'];
+    ewa.ReloadAfter = function(httpReferer) {
+
+    };
+    ewa.ext_set = function() {
+        let isok = true;
+        $('#opts_@sys_frame_unid select').each(function() {
+            if (!this.value) {
+                $Tip('请选择' + $(this).closest('tr').find('.EWA_TD_L').text());
+                $Mark(this);
+                isok = false;
+            }
+        });
+        if (!isok) {
+            return;
+        }
+        changes();
+        $('#flights_@sys_frame_unid #butOk1').trigger('click');
+    }
+
+    function changes() {
+        let index = 0;
+        $(`#flights_@sys_frame_unid .ewa-lf-frame:gt(0)`).remove();
+        const ewa1 = EWA.F.getSubEwas('#flights_@sys_frame_unid')[0];
+        getObj('input#ENQ_JNY_ID:checked').each(function() {
+            const tr = $(this).closest('tr');
+            if (index > 0) {
+                $('#flights_@sys_frame_unid #butAdd').trigger('click');
+            }
+            let target = $(`#flights_@sys_frame_unid .ewa-lf-frame:eq(${index})`);
+
+            const depatureCity = target.find('#A_D_CITY_ID');
+            depatureCity.val(tr[0].dataset.fAdd);
+            ewa1._GetDropListValue1(depatureCity.prev()[0], depatureCity[0]);
+
+            const arrivalCity = target.find('#A_A_CITY_ID');
+            arrivalCity.val(tr[0].dataset.cityId);
+            ewa1._GetDropListValue1(arrivalCity.prev()[0], arrivalCity[0]);
+
+            target.find('#A_BEGIN').val(tr[0].dataset.enqJnyDate.split(' ')[0])
+            target.find('#A_END').val(tr[0].dataset.enqJnyDate.split(' ')[0])
+            index++;
+        });
+    };
+
+    function getObj(exp) {
+        return exp ? $('#EWA_LF_@sys_frame_unid').find(exp) : $('#EWA_LF_@sys_frame_unid');
+    }
+
+    function init() {
+        ewa.ReloadAfter();
+        // tag3 = 113 团体
+        // tag4 = 115 经济舱
+        // tag6 = 2872 简单模式
+        const u = "@ewa.cp/ewa?xmlName=/business/crm/sup_ser.xml&ITEMNAME=2025_SER_SET_SIG_SUP.F.Flight" +
+            "&IATA=--&sup_id=3&SER_PRICE=0&coin_id=1&ewa_mtype=N&ser_id=1&TAG6=2872" +
+            "&TAG3=113&TAG4=115&callback=refreshSerConns";
+        $Install(u, 'flights_@sys_frame_unid', function() {
+            const tag3 = $('#flights_@sys_frame_unid .ewa-row-TAG3').clone();
+            const tag4 = $('#flights_@sys_frame_unid .ewa-row-TAG4').clone();
+            console.log(tag3, tag4)
+            $('#opts_@sys_frame_unid').append(tag3).append(tag4);
+            $('#opts_@sys_frame_unid').find('select').on('change', function() {
+                $(`#flights_@sys_frame_unid #${this.id}`).val(this.value);
+            });
+        });
+        //getObj('input#ENQ_JNY_ID').on('change', changes);
+    }
+    init();
+})();]]></Bottom></Set></AddScript><AddCss><Set><AddCss><![CDATA[#opts_@sys_frame_unid tr,
+#opts_@sys_frame_unid td {
+    display: inline-block;
+    width: auto;
+}
+
+#opts_@sys_frame_unid select {
+    width: auto;
+}
+
+#opts_@sys_frame_unid .EWA_TD_L::after {
+    content: "*";
+    color: orangered;
+    margin-left: 2px;
+}]]></AddCss></Set></AddCss><ChartsShow><Set ChartsShow=""/></ChartsShow><RedrawJson/><BoxJson><Set><BoxJson/></Set></BoxJson><LeftJson><Set><LeftJson/></Set></LeftJson><FrameHtml><Set><FrameHtml/></Set></FrameHtml><PageSize><Set AllowExport="" ColSize="" IsSplitPage="0" KeyField="EA_ID" PageSize="101" Recycle="0" StatusField="A_STATUS"/></PageSize><ListUI><Set luAddPreRowFunc="" luButtons="0" luDblClick="0" luDblClickIdx="0" luSearch="0" luSelect="S" luStickyHeaders="1"/></ListUI><MenuShow/><Menu/><Tree/><HtmlFrame><Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType=""/></HtmlFrame><TreeIconSet/><MGAxisX/><MGAxisY/><MGCell/><LogicShow><Set HiddenFields="" Name="" ParaExp=""/></LogicShow></Page><Action><ActionSet><Set LogMsg="" Transcation="" Type="OnPageLoad"><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="OnFrameDelete"><CallSet><Set CallIsChk="" CallName="OnFrameDelete SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="OnFrameRestore"><CallSet><Set CallIsChk="" CallName="OnFrameRestore SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="SAct0"><CallSet><Set CallIsChk="" CallName="SAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="SAct1"><CallSet><Set CallIsChk="" CallName="SAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="SAct2"><CallSet><Set CallIsChk="" CallName="SAct2 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="UAct0"><CallSet><Set CallIsChk="" CallName="UAct0 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="UAct1"><CallSet><Set CallIsChk="" CallName="UAct1 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="UAct2"><CallSet><Set CallIsChk="" CallName="UAct2 SQL" CallType="SqlSet" Test=""/></CallSet></Set><Set LogMsg="" Transcation="" Type="CheckError"><CallSet><Set CallIsChk="" CallName="CheckError SQL" CallType="SqlSet" Test=""/></CallSet></Set></ActionSet><SqlSet><Set Name="OnPageLoad SQL" SqlType="query"><Sql><![CDATA[SELECT
+    A.*,
+    c.city_cou_name AS deprture_city,
+    d.city_cou_name AS arrival_city
+FROM
+    ENQ_JNY a
+    INNER JOIN v_city c ON a.F_ADD = c.city_id
+    INNER JOIN v_city d ON a.CITY_ID = d.city_id
+WHERE
+    A.ENQ_ID = @ENQ_ID
+    and TRAFFIC ='AIR' -- 过滤需要机票
+ORDER BY
+    A.ENQ_JNY_DAY]]></Sql><CSSet/></Set><Set Name="OnFrameDelete SQL" SqlType="update"><Sql><![CDATA[UPDATE ENQ_JNY_SER_SUB_FLIGHT SET A_STATUS='DEL' , A_MDATE = @sys_date WHERE EA_ID = @EA_ID
+	AND SUP_ID = @G_SUP_ID]]></Sql><CSSet/></Set><Set Name="OnFrameRestore SQL" SqlType="update"><Sql><![CDATA[UPDATE ENQ_JNY_SER_SUB_FLIGHT SET A_STATUS='USED' , A_MDATE = @sys_date WHERE EA_ID = @EA_ID
+	AND SUP_ID = @G_SUP_ID]]></Sql><CSSet/></Set><Set Name="SAct0 SQL" SqlType="query"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="SAct1 SQL" SqlType="query"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="SAct2 SQL" SqlType="query"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="UAct0 SQL" SqlType="update"><Sql><![CDATA[delete FROM ENQ_JNY_SER_SUB_FLIGHT WHERE EA_ENQ_JNY_SER_SUB_ID = -1 
+    and EA_TMP_ID = @JSESSIONID
+    and A_ID in (
+        select col from ewa_split (@aids, ',') a
+    )
+;
+WITH
+    paras AS (
+        SELECT
+            a.col AS ea_id,
+            b.col AS EA_ENQ_JNY_ID,
+            c.col AS a_id
+        FROM
+            ewa_split (@eaIds, ',') a
+            INNER JOIN ewa_split (@eaEnqJnyIds, ',') b ON a.idx = b.idx
+            INNER JOIN ewa_split (@aids, ',') c ON c.idx = a.idx
+    )
+INSERT INTO
+    ENQ_JNY_SER_SUB_FLIGHT (
+        EA_ENQ_JNY_SER_SUB_ID,
+        A_ID,
+        A_D_CITY_ID,
+        A_A_CITY_ID,
+        A_CODE,
+        A_IATA,
+        A_D_TIME,
+        A_A_TIME,
+        A_D_AIRPORT,
+        A_A_AIRPORT,
+        A_D_AIRPORT_ID,
+        A_A_AIRPORT_ID,
+        A_TRANSFOR,
+        A_PLANE,
+        A_TIME,
+        A_EAT,
+        A_REF,
+        A_DISTANCE,
+        A_DESCRIPTION,
+        A_CDATE,
+        A_STATUS,
+        SUP_ID,
+        ADM_ID,
+        A_SER_CONN_ID,
+        A_BEGIN,
+        A_END,
+        EA_ENQ_JNY_DATE,
+        EA_ENQ_JNY_ID,
+        EA_ENQ_ID,
+        EA_GRP_ID,
+        EA_TMP_ID
+    )
+SELECT
+    -1,
+    a.A_ID,
+    a.A_D_CITY_ID,
+    a.A_A_CITY_ID,
+    a.A_CODE,
+    a.A_IATA,
+    a.A_D_TIME,
+    a.A_A_TIME,
+    a.A_D_AIRPORT,
+    a.A_A_AIRPORT,
+    a.A_D_AIRPORT_ID,
+    a.A_A_AIRPORT_ID,
+    a.A_TRANSFOR,
+    a.A_PLANE,
+    a.A_TIME,
+    a.A_EAT,
+    a.A_REF,
+    a.A_DISTANCE,
+    a.A_DESCRIPTION,
+    @sys_date,
+    'USED',
+    @G_SUP_ID,
+    @G_ADM_ID,
+    a.A_SER_CONN_ID,
+    a.A_BEGIN,
+    a.A_END,
+    c.ENQ_JNY_DATE,
+    b.EA_ENQ_JNY_ID,
+    @ENQ_ID,
+    c.GRP_ID,
+    @JSESSIONID
+FROM
+    SER_CONN_FLIGHT a
+    INNER JOIN paras b ON a.a_id = b.a_id
+        AND ea_id = -1
+    INNER JOIN enq_jny c ON b.EA_ENQ_JNY_ID = c.enq_jny_id
+        AND c.ENQ_ID = @ENQ_ID
+WHERE
+    a.A_STATUS = 'USED'
+select 1 a]]></Sql><CSSet/></Set><Set Name="UAct1 SQL" SqlType="update"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="UAct2 SQL" SqlType="update"><Sql><![CDATA[-- enter your sql]]></Sql><CSSet/></Set><Set Name="CheckError SQL" SqlType="query"><Sql><![CDATA[-- select 不能执行/javascript_func() as EWA_ERR_OUT FROM xxx where 1=2]]></Sql><CSSet/></Set></SqlSet><JSONSet/><ClassSet/><XmlSet/><XmlSetData/><ScriptSet/><UrlSet/><CSSet/><CallSet><Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet></Action><XItems><XItem Name="ENQ_JNY_ID"><Tag><Set IsLFEdit="" SpanShowAs="" Tag="checkboxgrid"/></Tag><Name><Set Name="ENQ_JNY_ID"/></Name><GroupIndex/><InitValue/><DescriptionSet><Set Info="选择" Lang="zhcn" Memo=""/></DescriptionSet><XStyle/><Style/><ParentStyle/><AttributeSet/><EventSet/><IsHtml/><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength/><MaxMinValue/><IsMustInput/><Switch/><DataItem><Set DataField="ENQ_JNY_ID" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/></DataItem><DispEnc/><DataRef/><List/><UserSet/><CallAction/><OpenFrame/><Frame/><UserControl/><DefineFrame/><PopFrame/><signature/><Upload/><VaildEx/><MGAddField/><AnchorParas/><LinkButtonParas/><DopListShow/><ReportCfg/><CombineFrame/><AddrMapRels/><QRCode/><ImageDefault/></XItem><XItem Name="ENQ_JNY_DATE"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="ENQ_JNY_DATE"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="日期" Lang="zhcn" Memo=""/><Set Info="Select the schedule" Lang="enus" Memo=""/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength><Set MaxLength="10" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch><Set SwtAction="" SwtOnValue=""/></Switch><DataItem><Set DataField="ENQ_JNY_DATE" DataType="Date" DisableOnModify="" Format="Date" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/></DataItem><DispEnc><Set EncShowUrl="" EncType=""/></DispEnc><DataRef><Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef><List><Set DisplayField="des" DisplayList="" GroupField="" ListAddBlank="1" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="SELECT&#10;    ENQ_JNY_ID,&#10;    'D' + convert(varchar, ENQ_JNY_DAY) + ' ' + convert(varchar, enq_jny_date, 111) + ' ' + dbo.f_stradd_citys (ENQ_JNY_ID, @ewa_lang) AS DES,&#10;    enq_jny_date,&#10;    f_add,&#10;    to_add,&#10;    to_add2,&#10;    city_id&#10;FROM&#10;    ENQ_JNY&#10;WHERE&#10;    enq_id = @enq_id&#10;    and TRAFFIC ='AIR' -- 过滤需要机票&#10;ORDER BY&#10;    ENQ_JNY_DAY" TitleField="" TitleList="" ValueField="ENQ_JNY_ID" ValueList=""/></List><UserSet><Set Lang="" User=""/></UserSet><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame><Frame><Set CallItemName="" CallPara="" CallXmlName=""/></Frame><UserControl><Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/></UserControl><DefineFrame><Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/></DefineFrame><PopFrame><Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/></PopFrame><signature><Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/></signature><Upload><Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/></Upload><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx><MGAddField><Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/></MGAddField><AnchorParas><Set aHref="" aTarget=""/></AnchorParas><LinkButtonParas><Set lkbButtonId=""/></LinkButtonParas><DopListShow><Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/></DopListShow><ReportCfg><Set IsReportRepeat="" ReportAction=""><ReportTemplate/></Set></ReportCfg><CombineFrame><Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName=""><CbJs/></Set></CombineFrame><AddrMapRels><Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/></AddrMapRels><QRCode><Set QRLogoUrl=""/></QRCode><ImageDefault><Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/></ImageDefault></XItem><XItem Name="deprture_city"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="deprture_city"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="出发城市" Lang="zhcn" Memo=""/><Set Info="Departure city" Lang="enus" Memo=""/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength><Set MaxLength="10" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch><Set SwtAction="" SwtOnValue=""/></Switch><DataItem><Set DataField="deprture_city" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/></DataItem><DispEnc><Set EncShowUrl="" EncType=""/></DispEnc><DataRef><Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef><List><Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/></List><UserSet><Set Lang="" User=""/></UserSet><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame><Frame><Set CallItemName="" CallPara="" CallXmlName=""/></Frame><UserControl><Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/></UserControl><DefineFrame><Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/></DefineFrame><PopFrame><Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/></PopFrame><signature><Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/></signature><Upload><Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/></Upload><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx><MGAddField><Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/></MGAddField><AnchorParas><Set aHref="" aTarget=""/></AnchorParas><LinkButtonParas><Set lkbButtonId=""/></LinkButtonParas><DopListShow><Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/></DopListShow><ReportCfg><Set IsReportRepeat="" ReportAction=""><ReportTemplate/></Set></ReportCfg><CombineFrame><Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName=""><CbJs/></Set></CombineFrame><AddrMapRels><Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/></AddrMapRels><QRCode><Set QRLogoUrl=""/></QRCode><ImageDefault><Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/></ImageDefault></XItem><XItem Name="arrival_city"><Tag><Set IsLFEdit="0" SpanShowAs="" Tag="span"/></Tag><Name><Set Name="arrival_city"/></Name><GroupIndex><Set GroupIndex=""/></GroupIndex><InitValue><Set InitValue=""/></InitValue><DescriptionSet><Set Info="抵达城市" Lang="zhcn" Memo=""/><Set Info="Arrive in the city" Lang="enus" Memo=""/></DescriptionSet><XStyle><Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="" XStyleNoWrap="" XStyleVAlign="" XStyleWidth=""/></XStyle><Style><Set Style=""/></Style><ParentStyle><Set ParentStyle=""/></ParentStyle><AttributeSet><Set AttLogic="" AttName="" AttValue=""/></AttributeSet><EventSet><Set EventLogic="" EventName="" EventType="" EventValue=""/></EventSet><IsHtml><Set IsHtml=""/></IsHtml><OrderSearch><Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick="" OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType=""/></OrderSearch><MaxMinLength><Set MaxLength="10" MinLength=""/></MaxMinLength><MaxMinValue><Set MaxValue="" MinValue=""/></MaxMinValue><IsMustInput><Set IsMustInput="1"/></IsMustInput><Switch><Set SwtAction="" SwtOnValue=""/></Switch><DataItem><Set DataField="arrival_city" DataType="Int" DisableOnModify="" Format="" FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget="" Translation="" TriggerValid="" Trim="" Valid=""/></DataItem><DispEnc><Set EncShowUrl="" EncType=""/></DispEnc><DataRef><Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle="" RefShowType="" RefSql=""/></DataRef><List><Set DisplayField="" DisplayList="" GroupField="" ListAddBlank="" ListFilterField="" ListFilterType="" ListShowType="" ParentField="" Sql="" TitleField="" TitleList="" ValueField="" ValueList=""/></List><UserSet><Set Lang="" User=""/></UserSet><CallAction><Set Action="" AfterTip="" ConfirmInfo=""/></CallAction><OpenFrame><Set AttatchParas="" CallItemName="" CallMethod="" CallParas="" CallXmlName=""/></OpenFrame><Frame><Set CallItemName="" CallPara="" CallXmlName=""/></Frame><UserControl><Set UCCallItem="" UCCallItemName="" UCCallPara="" UCCallXmlName=""/></UserControl><DefineFrame><Set CallItemName="" CallPara="" CallUrlMethod="" CallXmlName=""/></DefineFrame><PopFrame><Set PopItemName="" PopPara="" PopTitleField="" PopXmlName=""/></PopFrame><signature><Set SignBgColor="" SignColor="" SignFormat="" SignLineWidth="" SignPath=""/></signature><Upload><Set NewSizesIn="" RunUpSQLResized="" UpDelete="" UpExts="" UpJsonEncyrpt="" UpLimit="" UpMulti="" UpNewSizes="" UpPath="" UpSQL="" UpSaveMethod="" UpUnZip=""/></Upload><VaildEx><Set VXAction="" VXFail="" VXJs="" VXMode="" VXOk=""/></VaildEx><MGAddField><Set MgfCalc="" MgfComput="" MgfId="" MgfTarget=""/></MGAddField><AnchorParas><Set aHref="" aTarget=""/></AnchorParas><LinkButtonParas><Set lkbButtonId=""/></LinkButtonParas><DopListShow><Set DlsAction="" DlsAfterEvent="" DlsShow="" isDlsEventLoad=""/></DopListShow><ReportCfg><Set IsReportRepeat="" ReportAction=""><ReportTemplate/></Set></ReportCfg><CombineFrame><Set CbAll="" CbGrp="" CbInstall="" CbItemName="" CbJsRename="" CbLst="" CbMearge="" CbPara="" CbXmlName=""><CbJs/></Set></CombineFrame><AddrMapRels><Set AmrCity="" AmrCountry="" AmrLat="" AmrLng="" AmrProvince="" AmrZip=""/></AddrMapRels><QRCode><Set QRLogoUrl=""/></QRCode><ImageDefault><Set ImageDefault="" ImageLazyLoad="" ImageUrl=""/></ImageDefault></XItem></XItems><Menus/><Charts/><PageInfos><PageInfo Name="msg0"><Name><Set Name="msg0"/></Name><DescriptionSet><Set Info="消息0" Lang="zhcn" Memo=""/><Set Info="Msg0" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg1"><Name><Set Name="msg1"/></Name><DescriptionSet><Set Info="消息1" Lang="zhcn" Memo=""/><Set Info="Msg1" Lang="enus" Memo=""/></DescriptionSet></PageInfo><PageInfo Name="msg2"><Name><Set Name="msg2"/></Name><DescriptionSet><Set Info="消息2" Lang="zhcn" Memo=""/><Set Info="Msg2" Lang="enus" Memo=""/></DescriptionSet></PageInfo></PageInfos><Workflows/></EasyWebTemplate></EasyWebTemplates>
