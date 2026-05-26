@@ -60,6 +60,8 @@ EWA API 调用脚本 v${VERSION}
   getTables <db> [filter] [output]        获取数据库表列表
   getTable <db> <tablename> [output]      获取表结构详情
   getTableData <db> <tablename> [where] [output]  获取表数据(最多10条)
+  previewBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> [output]  预览业务XML(不保存)
+  createBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid]  生成并保存业务XML
   help                            显示 API 帮助
 
 选项:
@@ -534,6 +536,51 @@ do_help() {
     curl -s "${API_BASE_URL}?method=help" | format_json
 }
 
+# 预览业务 XML（不保存）
+do_preview_business_xml() {
+    local db="$1"
+    local tablename="$2"
+    local frametype="$3"
+    local operationtype="$4"
+    local xmlname="$5"
+    local output="${6:-json}"
+
+    if [ -z "$db" ] || [ -z "$tablename" ] || [ -z "$frametype" ] || [ -z "$operationtype" ] || [ -z "$xmlname" ]; then
+        log_error "缺少参数"
+        echo "用法: $0 previewBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> [output]"
+        echo "  frametype: ListFrame | Frame | Tree"
+        echo "  operationtype: N | M | V | NM"
+        exit 1
+    fi
+
+    log_info "预览业务 XML: $db / $tablename ($frametype, $operationtype)"
+    send_request "method=previewBusinessXml&db=${db}&tablename=${tablename}&frametype=${frametype}&operationtype=${operationtype}&xmlname=${xmlname}&output=${output}"
+}
+
+# 生成并保存业务 XML
+do_create_business_xml() {
+    local db="$1"
+    local tablename="$2"
+    local frametype="$3"
+    local operationtype="$4"
+    local xmlname="$5"
+    local itemname="$6"
+    local admid="$7"
+
+    if [ -z "$db" ] || [ -z "$tablename" ] || [ -z "$frametype" ] || [ -z "$operationtype" ] || [ -z "$xmlname" ] || [ -z "$itemname" ]; then
+        log_error "缺少参数"
+        echo "用法: $0 createBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid]"
+        echo "  frametype: ListFrame | Frame | Tree"
+        echo "  operationtype: N | M | V | NM"
+        exit 1
+    fi
+
+    log_info "生成业务 XML: $db / $tablename -> $xmlname / $itemname ($frametype, $operationtype)"
+    local params="method=createBusinessXml&db=${db}&tablename=${tablename}&frametype=${frametype}&operationtype=${operationtype}&xmlname=${xmlname}&itemname=${itemname}"
+    [ -n "$admid" ] && params="${params}&admid=${admid}"
+    send_request "$params"
+}
+
 # ==================== 主程序 ====================
 
 VERBOSE="false"
@@ -622,6 +669,12 @@ case "$COMMAND" in
         ;;
     getTableData)
         do_get_table_data "$@"
+        ;;
+    previewBusinessXml)
+        do_preview_business_xml "$@"
+        ;;
+    createBusinessXml)
+        do_create_business_xml "$@"
         ;;
     help)
         do_help

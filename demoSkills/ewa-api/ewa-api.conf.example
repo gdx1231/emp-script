@@ -10,7 +10,7 @@
 # ==================== API 配置 ====================
 
 # API 基础地址（必填）
-export EWA_API_URL="https://your-server/ewa/servletApi"
+export EWA_API_URL="https://gdx/cm/EWA_DEFINE/cgi-bin/api"
 
 # 登录凭据（必填）
 export EWA_API_LOGIN_ID="admin"
