@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import com.gdxsoft.easyweb.script.template.EwaConfig;
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.define.database.Table;
 import com.gdxsoft.easyweb.utils.UXml;
 
@@ -21,7 +21,7 @@ public class BusinessXmlCreator {
     /**
      * 构造函数 - 根据表结构自动选择创建器
      */
-    public BusinessXmlCreator(EwaConfig config, Table table) {
+    public BusinessXmlCreator(IConfig config, Table table) {
         // 默认使用 ListFrame 创建器
         this.creator = new BusinessXmlCreatorListFrame(config, table);
     }
@@ -29,7 +29,7 @@ public class BusinessXmlCreator {
     /**
      * 创建指定 Frame 类型的创建器
      */
-    public static BusinessXmlCreator create(EwaConfig config, Table table, String frameType) {
+    public static BusinessXmlCreator create(IConfig config, Table table, String frameType) {
         BusinessXmlCreatorBase baseCreator;
 
         if ("ListFrame".equalsIgnoreCase(frameType)) {

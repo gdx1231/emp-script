@@ -3,7 +3,7 @@ package com.gdxsoft.easyweb.define.bussinessXmlCreator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.gdxsoft.easyweb.script.template.EwaConfig;
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.define.database.Field;
 import com.gdxsoft.easyweb.define.database.Table;
 
@@ -12,7 +12,7 @@ import com.gdxsoft.easyweb.define.database.Table;
  */
 public class BusinessXmlCreatorListFrame extends BusinessXmlCreatorBase {
 
-    public BusinessXmlCreatorListFrame(EwaConfig config, Table table) {
+    public BusinessXmlCreatorListFrame(IConfig config, Table table) {
         super(config, table);
     }
 
@@ -96,13 +96,6 @@ public class BusinessXmlCreatorListFrame extends BusinessXmlCreatorBase {
         return doc;
     }
 
-    @Override
-    protected boolean save(String xmlContent, String xmlName, String itemName, String admId) {
-        // TODO: 实现保存逻辑
-        LOGGER.info("XML 已生成：{}", xmlName);
-        return true;
-    }
-
     /**
      * 根据操作类型获取 Tmp 名称
      */
@@ -131,7 +124,7 @@ public class BusinessXmlCreatorListFrame extends BusinessXmlCreatorBase {
         Element frameTag = doc.createElement("FrameTag");
         page.appendChild(frameTag);
         Element frameTagSet = doc.createElement("Set");
-        frameTagSet.setAttribute("FrameTag", frameType);
+        frameTagSet.setAttribute("FrameTag", toProperFrameType(frameType));
         frameTag.appendChild(frameTagSet);
 
         // ListFrame 模式添加 Tag 配置
@@ -470,7 +463,7 @@ public class BusinessXmlCreatorListFrame extends BusinessXmlCreatorBase {
         }
 
         orderSearchSet.setAttribute("IsOrder", order);
-        orderSearchSet.setAttribute("IsSearchQuick", "1");
+        //orderSearchSet.setAttribute("IsSearchQuick", "1");
         orderSearchSet.setAttribute("OrderExp", "");
         orderSearchSet.setAttribute("SearchExp", "");
         orderSearchSet.setAttribute("SearchMulti", "2");

@@ -385,7 +385,28 @@ public class SysParameters {
 	 * @param frameType the _FrameType to set
 	 */
 	public void setFrameType(String frameType) {
-		_FrameType = frameType;
+		// 统一转为标准大小写，避免大小写敏感比较问题
+		_FrameType = toProperFrameType(frameType);
+	}
+
+	/**
+	 * Frame 类型标准化（ListFrame / Frame / Tree 等）
+	 */
+	private String toProperFrameType(String frameType) {
+		if (frameType == null) return null;
+		switch (frameType.toUpperCase()) {
+			case "LISTFRAME": return "ListFrame";
+			case "FRAME":     return "Frame";
+			case "TREE":      return "Tree";
+			case "GRID":      return "Grid";
+			case "MENU":      return "Menu";
+			case "MULTIGRID": return "MultiGrid";
+			case "LOGIC":     return "Logic";
+			case "REPORT":    return "Report";
+			case "COMBINE":   return "Combine";
+			case "COMPLEX":   return "Complex";
+			default:          return frameType;
+		}
 	}
 
 	/**

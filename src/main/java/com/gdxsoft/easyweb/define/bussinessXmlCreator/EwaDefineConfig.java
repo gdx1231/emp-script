@@ -39,12 +39,13 @@ public class EwaDefineConfig {
                 LOGGER.error("无法找到 system.xml/EwaDefine.xml");
                 return;
             }
-            // 读取 InputStream 为 String
-            java.util.Scanner scanner = new java.util.Scanner(is, "UTF-8").useDelimiter("\\A");
-            String xmlContent = scanner.hasNext() ? scanner.next() : "";
-            is.close();
-            
-            defineDoc = UXml.asDocument(xmlContent);
+            try (// 读取 InputStream 为 String
+			java.util.Scanner scanner = new java.util.Scanner(is, "UTF-8").useDelimiter("\\A")) {
+				String xmlContent = scanner.hasNext() ? scanner.next() : "";
+				is.close();
+				
+				defineDoc = UXml.asDocument(xmlContent);
+			}
             frameConfigs = new HashMap<>();
             parseFrameConfigs();
             LOGGER.info("EwaDefine.xml 加载成功，共 {} 个 Frame 配置", frameConfigs.size());
@@ -246,10 +247,21 @@ public class EwaDefineConfig {
     }
     
     /**
-     * 获取 Frame 配置
+     * 获取 Frame 配置（不区分大小写）
      */
     public FrameConfig getFrameConfig(String frameName) {
-        return frameConfigs.get(frameName);
+        if (frameName == null) return null;
+        // 先尝试直接匹配
+        FrameConfig config = frameConfigs.get(frameName);
+        if (config != null) return config;
+        // 不区分大小写查找
+        String upperInput = frameName.toUpperCase();
+        for (Map.Entry<String, FrameConfig> entry : frameConfigs.entrySet()) {
+            if (entry.getKey().toUpperCase().equals(upperInput)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
     
     /**
@@ -277,7 +289,18 @@ public class EwaDefineConfig {
         public void setDescriptionSet(Map<String, String> descriptionSet) { this.descriptionSet = descriptionSet; }
         public Map<String, TmpConfig> getTmpConfigs() { return tmpConfigs; }
         public void setTmpConfigs(Map<String, TmpConfig> tmpConfigs) { this.tmpConfigs = tmpConfigs; }
-        public TmpConfig getTmpConfig(String tmpName) { return tmpConfigs.get(tmpName); }
+        public TmpConfig getTmpConfig(String tmpName) {
+            if (tmpName == null) return null;
+            TmpConfig config = tmpConfigs.get(tmpName);
+            if (config != null) return config;
+            String upperInput = tmpName.toUpperCase();
+            for (Map.Entry<String, TmpConfig> entry : tmpConfigs.entrySet()) {
+                if (entry.getKey().toUpperCase().equals(upperInput)) {
+                    return entry.getValue();
+                }
+            }
+            return null;
+        }
         public void addTmpConfig(String tmpName, TmpConfig config) { tmpConfigs.put(tmpName, config); }
     }
     

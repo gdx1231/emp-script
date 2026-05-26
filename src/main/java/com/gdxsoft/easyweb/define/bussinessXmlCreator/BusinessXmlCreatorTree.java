@@ -3,7 +3,7 @@ package com.gdxsoft.easyweb.define.bussinessXmlCreator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.gdxsoft.easyweb.script.template.EwaConfig;
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.define.database.Table;
 
 /**
@@ -11,7 +11,7 @@ import com.gdxsoft.easyweb.define.database.Table;
  */
 public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
 
-    public BusinessXmlCreatorTree(EwaConfig config, Table table) {
+    public BusinessXmlCreatorTree(IConfig config, Table table) {
         super(config, table);
     }
 
@@ -73,12 +73,6 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         return doc;
     }
 
-    @Override
-    protected boolean save(String xmlContent, String xmlName, String itemName, String admId) {
-        LOGGER.info("XML 已生成：{}", xmlName);
-        return true;
-    }
-
     private String getTmpNameByOperation(String operationType) {
         if (operationType.equals("N")) return "N";
         if (operationType.equals("M")) return "M";
@@ -101,7 +95,7 @@ public class BusinessXmlCreatorTree extends BusinessXmlCreatorBase {
         Element frameTag = doc.createElement("FrameTag");
         page.appendChild(frameTag);
         Element frameTagSet = doc.createElement("Set");
-        frameTagSet.setAttribute("FrameTag", frameType);
+        frameTagSet.setAttribute("FrameTag", toProperFrameType(frameType));
         frameTag.appendChild(frameTagSet);
 
         // SkinName 节点

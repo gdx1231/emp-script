@@ -17,3 +17,4 @@ ewa_conf_console.xml
 *.lck
 *.iml
 /temp/
+/debug/

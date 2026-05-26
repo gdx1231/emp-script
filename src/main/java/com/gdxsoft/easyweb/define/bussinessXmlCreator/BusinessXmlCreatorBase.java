@@ -6,9 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.gdxsoft.easyweb.script.template.EwaConfig;
+import com.gdxsoft.easyweb.define.ConfigUtils;
+import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.database.Field;
 import com.gdxsoft.easyweb.define.database.Table;
+import com.gdxsoft.easyweb.script.userConfig.IConfig;
 import com.gdxsoft.easyweb.utils.UXml;
 
 /**
@@ -18,12 +20,12 @@ import com.gdxsoft.easyweb.utils.UXml;
 public abstract class BusinessXmlCreatorBase {
     protected static final Logger LOGGER = LoggerFactory.getLogger(BusinessXmlCreatorBase.class);
 
-    protected EwaConfig config;
+    protected IConfig config;
     protected Table table;
     protected Document xmlDoc;
     protected EwaDefineConfig defineConfig;
 
-    public BusinessXmlCreatorBase(EwaConfig config, Table table) {
+    public BusinessXmlCreatorBase(IConfig config, Table table) {
         this.config = config;
         this.table = table;
         this.defineConfig = new EwaDefineConfig();
@@ -97,9 +99,26 @@ public abstract class BusinessXmlCreatorBase {
     protected abstract Document create(String frameType, String operationType) throws Exception;
 
     /**
-     * 保存 XML（由子类实现）
+     * 保存 XML 到配置库
      */
-    protected abstract boolean save(String xmlContent, String xmlName, String itemName, String admId);
+    protected boolean save(String xmlContent, String xmlName, String itemName, String admId) {
+        try {
+            IUpdateXml ux = ConfigUtils.getUpdateXml(xmlName);
+            if (ux == null) {
+                LOGGER.error("无法获取 UpdateXml 对象: {}", xmlName);
+                return false;
+            }
+
+            if (admId != null) {
+                ux.setAdmin(admId);
+            }
+
+            return ux.saveXml(itemName, xmlContent);
+        } catch (Exception e) {
+            LOGGER.error("保存 XML 失败: {} / {}", xmlName, itemName, e);
+            return false;
+        }
+    }
 
     /**
      * 获取当前日期时间
@@ -121,6 +140,19 @@ public abstract class BusinessXmlCreatorBase {
                 return "T";
             default:
                 return frameType;
+        }
+    }
+
+    /**
+     * 获取 Frame 类型的标准大小写（FrameTag 使用）
+     */
+    protected String toProperFrameType(String frameType) {
+        if (frameType == null) return frameType;
+        switch (frameType.toUpperCase()) {
+            case "LISTFRAME": return "ListFrame";
+            case "FRAME": return "Frame";
+            case "TREE": return "Tree";
+            default: return frameType;
         }
     }
 
@@ -686,11 +718,11 @@ public abstract class BusinessXmlCreatorBase {
         sb.append("SELECT A.* FROM ").append(this.table.getName()).append(" A WHERE 1=1");
 
         if (includeRecycle && statusField != null) {
-            sb.append("\n\t-- @EWA_RECYCLE is null");
+            sb.append("\n\t-- ewa_test @EWA_RECYCLE is null");
             sb.append("\n\tAND A.").append(statusField).append(" = 'USED'");
-            sb.append("\n\t-- @EWA_RECYCLE = '1'");
+            sb.append("\n\t-- ewa_test @EWA_RECYCLE = '1'");
             sb.append("\n\tAND A.").append(statusField).append(" = 'DEL'");
-            sb.append("\n\t--");
+            sb.append("\n\t-- ewa_test");
         }
 
         // 默认按自增字段或修改日期排序

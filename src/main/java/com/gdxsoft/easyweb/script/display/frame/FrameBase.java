@@ -1208,7 +1208,7 @@ public class FrameBase {
 
 		if (mainWidth != null) {
 			String ft = this._HtmlClass.getSysParas().getFrameType();
-			if (ft.equals("COMBINE")) {
+			if (ft.equalsIgnoreCase("COMBINE")) {
 				doc.addCss(".ewa_cb_box{" + mainWidth + "}");
 			}
 		}
