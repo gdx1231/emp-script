@@ -1,0 +1,1154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EasyWebTemplates>
+<!-- ==================================================================== -->
+<!-- 1. XmlSelect.LF.M — XML 文件列表（入口页）                             -->
+<!-- ==================================================================== -->
+<EasyWebTemplate Name="XmlSelect.LF.M">
+  <Page>
+    <FrameTag><Set FrameTag="ListFrame"/></FrameTag>
+    <Name><Set Name="XmlSelect.LF.M"/></Name>
+    <SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName>
+    <DescriptionSet>
+      <Set Info="XML 文件列表 — 选择要编辑的 XML 配置文件" Lang="zhcn" Memo=""/>
+      <Set Info="XML File List — Select XML config file to edit" Lang="enus" Memo=""/>
+    </DescriptionSet>
+    <Size><Set FrameCols="C3" HAlign="center" HiddenCaption="0" VAlign="top" Width="100%"/></Size>
+    <AddScript><Set><Top><![CDATA[
+function loadItems(xmlPath) {
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=ItemSelect.LF.M&XML_PATH=' + encodeURIComponent(xmlPath);
+    EWA.F.jump(url);
+}
+    ]]></Top><Bottom><![CDATA[
+// 初始化
+function init_xml_select() {
+    // 页面加载后自动请求数据
+    $.getJSON('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XmlSelect.LF.M&EWA_AJAX=json&EWA_ACTION=loadData', function(res) {
+        if (res && res.success && res.data) {
+            renderXmlList(res.data);
+        }
+    });
+}
+function renderXmlList(data) {
+    var html = '<table class="ewa-table"><thead><tr>'
+        + '<th>#</th><th>XML 路径</th><th>Item 数量</th><th>类型分布</th><th>操作</th>'
+        + '</tr></thead><tbody>';
+    for (var i = 0; i < data.length; i++) {
+        var d = data[i];
+        var types = '';
+        if (d.frameTypes) {
+            for (var k in d.frameTypes) {
+                types += k + '(' + d.frameTypes[k] + ') ';
+            }
+        }
+        html += '<tr><td>' + (i+1) + '</td>'
+            + '<td>' + d.xmlName + '</td>'
+            + '<td>' + d.itemCount + '</td>'
+            + '<td>' + types + '</td>'
+            + '<td><button onclick="loadItems(\'' + d.xmlName + '\')">选择</button></td></tr>';
+    }
+    html += '</tbody></table>';
+    $('#ewa_list_body').html(html);
+}
+addEvent(window, 'load', init_xml_select);
+    ]]></Bottom></Set></AddScript>
+    <PageSize><Set IsSplitPage="0"/></PageSize>
+    <ListUI><Set luButtons="0" luSearch="0" luSelect="N"/></ListUI>
+  </Page>
+  <Action>
+    <ActionSet>
+      <Set Type="OnPageLoad">
+        <CallSet><Set CallName="loadData" CallType="ScriptSet" Test=""/></CallSet>
+      </Set>
+      <Set Type="loadData">
+        <CallSet><Set CallName="listXmlFiles" CallType="Action" Test=""/></CallSet>
+      </Set>
+    </ActionSet>
+    <SqlSet/>
+    <ScriptSet>
+      <Set Name="loadData" ScriptType="javascript">
+        <Script><![CDATA[
+// Ajax 调用 UpdateCfgAction 获取 XML 文件列表
+String url = "./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XmlSelect.LF.M";
+// 后端直接输出 JSON
+        ]]></Script>
+      </Set>
+    </ScriptSet>
+  </Action>
+  <XItems>
+    <XItem Name="xml_path">
+      <Tag><Set Tag="span"/></Tag>
+      <Name><Set Name="xml_path"/></Name>
+      <DescriptionSet><Set Info="XML 路径" Lang="zhcn"/><Set Info="XML Path" Lang="enus"/></DescriptionSet>
+      <DataItem><Set DataField="XML_PATH" DataType="String"/></DataItem>
+      <XStyle><Set XStyleWidth="300px"/></XStyle>
+    </XItem>
+    <XItem Name="item_count">
+      <Tag><Set Tag="span"/></Tag>
+      <Name><Set Name="item_count"/></Name>
+      <DescriptionSet><Set Info="Item 数量" Lang="zhcn"/><Set Info="Item Count" Lang="enus"/></DescriptionSet>
+      <DataItem><Set DataField="ITEM_COUNT" DataType="Int"/></DataItem>
+      <XStyle><Set XStyleWidth="80px"/></XStyle>
+    </XItem>
+    <XItem Name="butSelect">
+      <Tag><Set Tag="button"/></Tag>
+      <Name><Set Name="butSelect"/></Name>
+      <DescriptionSet><Set Info="选择" Lang="zhcn"/><Set Info="Select" Lang="enus"/></DescriptionSet>
+      <EventSet><Set EventName="ewa_click" EventType="Javascript" EventValue="loadItems('@xml_path')"/></EventSet>
+    </XItem>
+  </XItems>
+</EasyWebTemplate>
+
+<!-- ==================================================================== -->
+<!-- 2. ItemSelect.LF.M — 选择 EasyWebTemplate（Item）                      -->
+<!-- ==================================================================== -->
+<EasyWebTemplate Name="ItemSelect.LF.M">
+  <Page>
+    <FrameTag><Set FrameTag="ListFrame"/></FrameTag>
+    <Name><Set Name="ItemSelect.LF.M"/></Name>
+    <SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName>
+    <DescriptionSet>
+      <Set Info="模板列表 — 选择要编辑的 EasyWebTemplate" Lang="zhcn" Memo=""/>
+      <Set Info="Template List — Select EasyWebTemplate to edit" Lang="enus" Memo=""/>
+    </DescriptionSet>
+    <Size><Set FrameCols="C3" HAlign="center" HiddenCaption="0" VAlign="top" Width="100%"/></Size>
+    <AddHtml><Set><Top><![CDATA[
+<div id="current_xml_info" style="padding:10px;background:#f5f5f5;margin-bottom:10px;">
+  当前 XML: <b id="lbl_xml_path">@XML_PATH</b>
+  &nbsp;|&nbsp;
+  <a href="javascript:EWA.F.jump('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XmlSelect.LF.M')">返回 XML 列表</a>
+</div>
+<div style="padding:10px;border-bottom:1px solid #ddd;margin-bottom:10px;">
+  <b>操作</b>:
+  <button onclick="openXItemList()">XItem 管理</button>
+  <button onclick="openSqlList()">SQL + ActionSet 管理</button>
+  &nbsp; <span style="color:#999;">请先在下方选择一个模板</span>
+</div>
+<div id="ewa_list_body"></div>
+    ]]></Top></Set></AddHtml>
+    <AddScript><Set><Top><![CDATA[
+var gXmlPath = '@XML_PATH';
+var gItemName = '';
+
+function openXItemList() {
+    if (!gItemName) { alert('请先选择模板'); return; }
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XItemCfg.LF.M&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName);
+    EWA.F.jump(url);
+}
+function openSqlList() {
+    if (!gItemName) { alert('请先选择模板'); return; }
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=SqlCfg.LF.M&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName);
+    EWA.F.jump(url);
+}
+    ]]></Top><Bottom><![CDATA[
+function init_item_select() {
+    $.getJSON('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=ItemSelect.LF.M&EWA_AJAX=json', {
+        method: 'listItems',
+        XML_PATH: gXmlPath
+    }, function(res) {
+        if (res && res.success && res.data) {
+            renderItemList(res.data);
+        } else {
+            $('#ewa_list_body').html('<p style="color:red;">加载失败: ' + (res ? res.message : '未知错误') + '</p>');
+        }
+    });
+}
+function renderItemList(data) {
+    var html = '<table class="ewa-table"><thead><tr>'
+        + '<th>#</th><th>模板名称</th><th>中文描述</th><th>英文描述</th>'
+        + '<th>XItem 数</th><th>SQL 数</th><th>操作</th>'
+        + '</tr></thead><tbody>';
+    for (var i = 0; i < data.length; i++) {
+        var d = data[i];
+        html += '<tr>'
+            + '<td>' + (i+1) + '</td>'
+            + '<td><a href="javascript:selectItem(\'' + d.name + '\')">' + d.name + '</a></td>'
+            + '<td>' + (d.descZh||'') + '</td>'
+            + '<td>' + (d.descEn||'') + '</td>'
+            + '<td>' + d.xitemCount + '</td>'
+            + '<td>' + d.sqlCount + '</td>'
+            + '<td><button onclick="selectItem(\'' + d.name + '\')">选择</button></td>'
+            + '</tr>';
+    }
+    html += '</tbody></table>';
+    $('#ewa_list_body').html(html);
+}
+function selectItem(name) {
+    gItemName = name;
+    $('#lbl_current_item').text(name);
+    // 高亮选中行
+    $('#ewa_list_body tr').removeClass('selected');
+    $('#ewa_list_body tr').each(function() {
+        if ($(this).find('td').eq(1).text() === name) {
+            $(this).addClass('selected');
+        }
+    });
+}
+addEvent(window, 'load', init_item_select);
+    ]]></Bottom></Set></AddScript>
+    <PageSize><Set IsSplitPage="0"/></PageSize>
+    <ListUI><Set luButtons="0" luSearch="0" luSelect="N"/></ListUI>
+  </Page>
+  <Action>
+    <ActionSet>
+      <Set Type="OnPageLoad">
+        <CallSet><Set CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet>
+      </Set>
+    </ActionSet>
+    <SqlSet>
+      <Set Name="OnPageLoad SQL" SqlType="query" TransType="no">
+        <Sql><![CDATA[SELECT '@XML_PATH' AS xml_path, '@ITEM_NAME' AS item_name, '1' AS initialized]]></Sql>
+      </Set>
+    </SqlSet>
+  </Action>
+  <XItems>
+    <XItem Name="xml_path">
+      <Tag><Set Tag="span"/></Tag>
+      <Name><Set Name="xml_path"/></Name>
+      <DescriptionSet><Set Info="XML 路径" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="XML_PATH" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="item_name">
+      <Tag><Set Tag="span"/></Tag>
+      <Name><Set Name="item_name"/></Name>
+      <DescriptionSet><Set Info="当前模板" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="ITEM_NAME" DataType="String"/></DataItem>
+    </XItem>
+  </XItems>
+</EasyWebTemplate>
+
+<!-- ==================================================================== -->
+<!-- 3. XItemCfg.LF.M — XItem 列表                                         -->
+<!-- ==================================================================== -->
+<EasyWebTemplate Name="XItemCfg.LF.M">
+  <Page>
+    <FrameTag><Set FrameTag="ListFrame"/></FrameTag>
+    <Name><Set Name="XItemCfg.LF.M"/></Name>
+    <SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName>
+    <DescriptionSet>
+      <Set Info="XItem 列表 — 管理表单元素" Lang="zhcn" Memo=""/>
+      <Set Info="XItem List — Manage form elements" Lang="enus" Memo=""/>
+    </DescriptionSet>
+    <Size><Set FrameCols="C3" HAlign="center" HiddenCaption="0" VAlign="top" Width="100%"/></Size>
+    <AddHtml><Set><Top><![CDATA[
+<div style="padding:10px;background:#f5f5f5;margin-bottom:10px;">
+  XML: <b id="lbl_xml">@XML_PATH</b>
+  &nbsp;|&nbsp; 模板: <b id="lbl_item">@ITEM_NAME</b>
+  &nbsp;|&nbsp;
+  <a href="javascript:EWA.F.jump('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=ItemSelect.LF.M&XML_PATH=@XML_PATH')">返回模板列表</a>
+</div>
+<div style="padding:10px;border-bottom:1px solid #ddd;margin-bottom:10px;">
+  <button onclick="addXItem()">+ 新增 XItem</button>
+</div>
+<div id="ewa_list_body"></div>
+    ]]></Top></Set></AddHtml>
+    <AddScript><Set><Top><![CDATA[
+var gXmlPath = '@XML_PATH';
+var gItemName = '@ITEM_NAME';
+
+function addXItem() {
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XItemCfg.F.NM&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName);
+    EWA.F.jump(url);
+}
+function editXItem(name) {
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XItemCfg.F.NM&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName) + '&XITEM_NAME=' + encodeURIComponent(name);
+    EWA.F.jump(url);
+}
+function deleteXItem(name) {
+    if (!confirm('确定删除 XItem: ' + name + ' ?')) return;
+    $.post('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XItemCfg.LF.M&EWA_AJAX=json', {
+        method: 'deleteXItem',
+        XML_PATH: gXmlPath,
+        ITEM_NAME: gItemName,
+        XITEM_NAME: name
+    }, function(res) {
+        if (res && res.success) {
+            alert('删除成功');
+            loadData();
+        } else {
+            alert('删除失败: ' + (res ? res.message : '未知错误'));
+        }
+    });
+}
+function moveXItem(name, dir) {
+    $.post('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XItemCfg.LF.M&EWA_AJAX=json', {
+        method: 'moveXItem',
+        XML_PATH: gXmlPath,
+        ITEM_NAME: gItemName,
+        XITEM_NAME: name,
+        direction: dir
+    }, function(res) {
+        if (res && res.success) {
+            loadData();
+        } else {
+            alert(res ? res.message : '移动失败');
+        }
+    });
+}
+    ]]></Top><Bottom><![CDATA[
+function loadData() {
+    $.getJSON('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XItemCfg.LF.M&EWA_AJAX=json', {
+        method: 'listXItems',
+        XML_PATH: gXmlPath,
+        ITEM_NAME: gItemName
+    }, function(res) {
+        if (res && res.success && res.data) {
+            renderXItemList(res.data);
+        } else {
+            $('#ewa_list_body').html('<p style="color:red;">加载失败: ' + (res ? res.message : '未知错误') + '</p>');
+        }
+    });
+}
+function renderXItemList(data) {
+    var html = '<table class="ewa-table"><thead><tr>'
+        + '<th>#</th><th>Name</th><th>Tag</th><th>中文描述</th><th>英文描述</th>'
+        + '<th>DataField</th><th>DataType</th><th>必填</th><th>排序</th>'
+        + '<th>操作</th>'
+        + '</tr></thead><tbody>';
+    for (var i = 0; i < data.length; i++) {
+        var d = data[i];
+        html += '<tr>'
+            + '<td>' + (i+1) + '</td>'
+            + '<td>' + d.name + '</td>'
+            + '<td>' + (d.tag||'') + '</td>'
+            + '<td>' + (d.descZh||'') + '</td>'
+            + '<td>' + (d.descEn||'') + '</td>'
+            + '<td>' + (d.dataField||'') + '</td>'
+            + '<td>' + (d.dataType||'') + '</td>'
+            + '<td>' + (d.isMustInput=='1'?'是':'') + '</td>'
+            + '<td>' + (d.isOrder||'') + '</td>'
+            + '<td>'
+            + '<button onclick="moveXItem(\''+d.name+'\','up')">↑</button> '
+            + '<button onclick="moveXItem(\''+d.name+'\','down')">↓</button> '
+            + '<button onclick="editXItem(\''+d.name+'\')">编辑</button> '
+            + '<button onclick="deleteXItem(\''+d.name+'\')">删除</button>'
+            + '</td></tr>';
+    }
+    html += '</tbody></table>';
+    $('#ewa_list_body').html(html);
+}
+addEvent(window, 'load', loadData);
+    ]]></Bottom></Set></AddScript>
+    <PageSize><Set IsSplitPage="0"/></PageSize>
+    <ListUI><Set luButtons="0" luSearch="0" luSelect="N"/></ListUI>
+  </Page>
+  <Action>
+    <ActionSet>
+      <Set Type="OnPageLoad">
+        <CallSet><Set CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet>
+      </Set>
+    </ActionSet>
+    <SqlSet>
+      <Set Name="OnPageLoad SQL" SqlType="query" TransType="no">
+        <Sql><![CDATA[SELECT '@XML_PATH' AS xml_path, '@ITEM_NAME' AS item_name]]></Sql>
+      </Set>
+    </SqlSet>
+  </Action>
+  <XItems/>
+</EasyWebTemplate>
+
+<!-- ==================================================================== -->
+<!-- 4. XItemCfg.F.NM — 新增/修改 XItem                                     -->
+<!-- ==================================================================== -->
+<EasyWebTemplate Name="XItemCfg.F.NM">
+  <Page>
+    <FrameTag><Set FrameTag="Frame"/></FrameTag>
+    <Name><Set Name="XItemCfg.F.NM"/></Name>
+    <SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName>
+    <DescriptionSet>
+      <Set Info="新增/修改 XItem" Lang="zhcn" Memo=""/>
+      <Set Info="Add/Edit XItem" Lang="enus" Memo=""/>
+    </DescriptionSet>
+    <Size><Set FrameCols="C2" HAlign="center" HiddenCaption="1" VAlign="top" Width="900"/></Size>
+    <AddHtml><Set><Top><![CDATA[
+<div style="padding:10px;background:#f5f5f5;margin-bottom:10px;">
+  XML: <b>@XML_PATH</b> | 模板: <b>@ITEM_NAME</b> | XItem: <b id="lbl_xitem">@XITEM_NAME</b>
+  &nbsp;|&nbsp; <a href="javascript:goBack()">返回列表</a>
+</div>
+    ]]></Top></Set></AddHtml>
+    <AddScript><Set><Top><![CDATA[
+var gXmlPath = '@XML_PATH';
+var gItemName = '@ITEM_NAME';
+var gXItemName = '@XITEM_NAME';
+var gOldXItemName = gXItemName; // 修改时原始名称
+
+function goBack() {
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XItemCfg.LF.M&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName);
+    EWA.F.jump(url);
+}
+    ]]></Top><Bottom><![CDATA[
+function init_xitem_form() {
+    if (gXItemName) {
+        // 编辑模式：加载数据
+        $.getJSON('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=XItemCfg.F.NM&EWA_AJAX=json', {
+            method: 'getXItem',
+            XML_PATH: gXmlPath,
+            ITEM_NAME: gItemName,
+            XITEM_NAME: gXItemName
+        }, function(res) {
+            if (res && res.success && res.data) {
+                fillForm(res.data);
+            }
+        });
+    }
+}
+function fillForm(data) {
+    // 由 EWA 自动绑定，此处可做额外处理
+    $('#lbl_xitem').text(data.name || '');
+}
+// 提交前检查
+function do_pos_before_xitem() {
+    if (!$('#XITEM_NAME').val()) {
+        alert('XItem 名称不能为空');
+        return false;
+    }
+    return true;
+}
+addEvent(window, 'load', init_xitem_form);
+    ]]></Bottom></Set></AddScript>
+    <GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet>
+  </Page>
+  <Action>
+    <ActionSet>
+      <Set Type="OnPageLoad">
+        <CallSet><Set CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet>
+      </Set>
+      <Set Type="OnPagePost">
+        <CallSet><Set CallName="saveXItem" CallType="SqlSet" Test=""/></CallSet>
+      </Set>
+    </ActionSet>
+    <SqlSet>
+      <Set Name="OnPageLoad SQL" SqlType="query" TransType="no">
+        <Sql><![CDATA[SELECT 
+  '@XML_PATH' AS xml_path,
+  '@ITEM_NAME' AS item_name,
+  '@XITEM_NAME' AS xitem_name,
+  '@XITEM_NAME' AS OLD_XITEM_NAME,
+  '' AS TAG,
+  '' AS DESC_ZH,
+  '' AS DESC_EN,
+  '' AS DATA_FIELD,
+  'String' AS DATA_TYPE,
+  '' AS IS_ENCRYPT,
+  '' AS VALID,
+  '' AS FORMAT,
+  '' AS IS_MUST_INPUT,
+  '' AS MAX_LENGTH,
+  '' AS MIN_LENGTH,
+  '' AS MAX_VALUE,
+  '' AS MIN_VALUE,
+  '' AS IS_ORDER,
+  '' AS SEARCH_TYPE,
+  '' AS ORDER_EXP,
+  '' AS STYLE,
+  '' AS PARENT_STYLE,
+  '' AS XSTYLE,
+  '' AS EVENT_NAME,
+  '' AS EVENT_TYPE,
+  '' AS EVENT_VALUE,
+  '' AS CALL_ACTION,
+  '' AS CONFIRM_INFO,
+  '' AS LIST_SQL,
+  '' AS LIST_VALUE_LIST,
+  '' AS LIST_DISPLAY_LIST,
+  '' AS USER_SET]]></Sql>
+      </Set>
+      <Set Name="saveXItem" SqlType="update" TransType="no">
+        <Sql><![CDATA[-- XItem 保存由后端 UpdateCfgAction 处理
+-- 通过 Ajax POST 到 method=saveXItem]]></Sql>
+      </Set>
+    </SqlSet>
+  </Action>
+  <XItems>
+    <!-- ====== 基础组 ====== -->
+    <XItem Name="XITEM_NAME">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="XITEM_NAME"/></Name>
+      <DescriptionSet><Set Info="XItem 名称" Lang="zhcn"/><Set Info="XItem Name" Lang="enus"/></DescriptionSet>
+      <IsMustInput><Set IsMustInput="1"/></IsMustInput>
+      <MaxMinLength><Set MaxLength="100"/></MaxMinLength>
+      <DataItem><Set DataField="XITEM_NAME" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="TAG">
+      <Tag><Set Tag="select"/></Tag>
+      <Name><Set Name="TAG"/></Name>
+      <DescriptionSet><Set Info="类型 (Tag)" Lang="zhcn"/><Set Info="Type (Tag)" Lang="enus"/></DescriptionSet>
+      <IsMustInput><Set IsMustInput="1"/></IsMustInput>
+      <List><Set ValueList="text,password,span,select,multiselect,textarea,dHtml5,submit,button,checkbox,radio,hidden,h5upload,smsValid,date,dateRange,file,image,label" DisplayList="文本,密码,文本显示,下拉框,多选下拉,多行文本,编辑器,提交按钮,普通按钮,复选框,单选框,隐藏域,H5上传,短信验证,日期,日期范围,文件,图片,标签"/></List>
+      <DataItem><Set DataField="TAG" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="DESC_ZH">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="DESC_ZH"/></Name>
+      <DescriptionSet><Set Info="中文描述" Lang="zhcn"/></DescriptionSet>
+      <MaxMinLength><Set MaxLength="200"/></MaxMinLength>
+      <DataItem><Set DataField="DESC_ZH" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="DESC_EN">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="DESC_EN"/></Name>
+      <DescriptionSet><Set Info="英文描述" Lang="zhcn"/><Set Info="English Description" Lang="enus"/></DescriptionSet>
+      <MaxMinLength><Set MaxLength="200"/></MaxMinLength>
+      <DataItem><Set DataField="DESC_EN" DataType="String"/></DataItem>
+    </XItem>
+
+    <!-- ====== 数据组 ====== -->
+    <XItem Name="DATA_FIELD">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="DATA_FIELD"/></Name>
+      <DescriptionSet><Set Info="数据字段" Lang="zhcn"/><Set Info="Data Field" Lang="enus"/></DescriptionSet>
+      <MaxMinLength><Set MaxLength="100"/></MaxMinLength>
+      <DataItem><Set DataField="DATA_FIELD" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="DATA_TYPE">
+      <Tag><Set Tag="select"/></Tag>
+      <Name><Set Name="DATA_TYPE"/></Name>
+      <DescriptionSet><Set Info="数据类型" Lang="zhcn"/><Set Info="Data Type" Lang="enus"/></DescriptionSet>
+      <List><Set ValueList="String,Int,Long,Double,Date,Boolean,Binary" DisplayList="字符串,整数,长整型,双精度,日期,布尔,二进制"/></List>
+      <DataItem><Set DataField="DATA_TYPE" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="IS_ENCRYPT">
+      <Tag><Set Tag="select"/></Tag>
+      <Name><Set Name="IS_ENCRYPT"/></Name>
+      <DescriptionSet><Set Info="是否加密" Lang="zhcn"/></DescriptionSet>
+      <List><Set ValueList="0,1" DisplayList="否,是"/></List>
+      <DataItem><Set DataField="IS_ENCRYPT" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="VALID">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="VALID"/></Name>
+      <DescriptionSet><Set Info="验证表达式" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="VALID" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="FORMAT">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="FORMAT"/></Name>
+      <DescriptionSet><Set Info="格式化" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="FORMAT" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="IS_MUST_INPUT">
+      <Tag><Set Tag="select"/></Tag>
+      <Name><Set Name="IS_MUST_INPUT"/></Name>
+      <DescriptionSet><Set Info="是否必填" Lang="zhcn"/></DescriptionSet>
+      <List><Set ValueList="0,1" DisplayList="否,是"/></List>
+      <DataItem><Set DataField="IS_MUST_INPUT" DataType="String"/></DataItem>
+    </XItem>
+
+    <!-- ====== 验证组 ====== -->
+    <XItem Name="MAX_LENGTH">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="MAX_LENGTH"/></Name>
+      <DescriptionSet><Set Info="最大长度" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="MAX_LENGTH" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="MIN_LENGTH">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="MIN_LENGTH"/></Name>
+      <DescriptionSet><Set Info="最小长度" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="MIN_LENGTH" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="MAX_VALUE">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="MAX_VALUE"/></Name>
+      <DescriptionSet><Set Info="最大值" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="MAX_VALUE" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="MIN_VALUE">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="MIN_VALUE"/></Name>
+      <DescriptionSet><Set Info="最小值" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="MIN_VALUE" DataType="String"/></DataItem>
+    </XItem>
+
+    <!-- ====== 列表排序组 ====== -->
+    <XItem Name="IS_ORDER">
+      <Tag><Set Tag="select"/></Tag>
+      <Name><Set Name="IS_ORDER"/></Name>
+      <DescriptionSet><Set Info="是否可排序" Lang="zhcn"/></DescriptionSet>
+      <List><Set ValueList="0,1" DisplayList="否,是"/></List>
+      <DataItem><Set DataField="IS_ORDER" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="SEARCH_TYPE">
+      <Tag><Set Tag="select"/></Tag>
+      <Name><Set Name="SEARCH_TYPE"/></Name>
+      <DescriptionSet><Set Info="搜索类型" Lang="zhcn"/></DescriptionSet>
+      <List><Set ValueList="like,left_like,right_like,eq" DisplayList="包含,左包含,右包含,等于"/></List>
+      <DataItem><Set DataField="SEARCH_TYPE" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="ORDER_EXP">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="ORDER_EXP"/></Name>
+      <DescriptionSet><Set Info="排序表达式" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="ORDER_EXP" DataType="String"/></DataItem>
+    </XItem>
+
+    <!-- ====== 样式组 ====== -->
+    <XItem Name="STYLE">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="STYLE"/></Name>
+      <DescriptionSet><Set Info="CSS 样式" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="STYLE" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="PARENT_STYLE">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="PARENT_STYLE"/></Name>
+      <DescriptionSet><Set Info="父容器样式" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="PARENT_STYLE" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="XSTYLE">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="XSTYLE"/></Name>
+      <DescriptionSet><Set Info="扩展样式" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="XSTYLE" DataType="String"/></DataItem>
+    </XItem>
+
+    <!-- ====== 事件组 ====== -->
+    <XItem Name="EVENT_NAME">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="EVENT_NAME"/></Name>
+      <DescriptionSet><Set Info="事件名称" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="EVENT_NAME" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="EVENT_TYPE">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="EVENT_TYPE"/></Name>
+      <DescriptionSet><Set Info="事件类型" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="EVENT_TYPE" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="EVENT_VALUE">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="EVENT_VALUE"/></Name>
+      <DescriptionSet><Set Info="事件值" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="EVENT_VALUE" DataType="String"/></DataItem>
+    </XItem>
+
+    <!-- ====== 调用组 ====== -->
+    <XItem Name="CALL_ACTION">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="CALL_ACTION"/></Name>
+      <DescriptionSet><Set Info="调用 Action" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="CALL_ACTION" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="CONFIRM_INFO">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="CONFIRM_INFO"/></Name>
+      <DescriptionSet><Set Info="确认信息" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="CONFIRM_INFO" DataType="String"/></DataItem>
+    </XItem>
+
+    <!-- ====== 数据源组 ====== -->
+    <XItem Name="LIST_SQL">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="LIST_SQL"/></Name>
+      <DescriptionSet><Set Info="下拉 SQL" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="LIST_SQL" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="LIST_VALUE_LIST">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="LIST_VALUE_LIST"/></Name>
+      <DescriptionSet><Set Info="值列表" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="LIST_VALUE_LIST" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="LIST_DISPLAY_LIST">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="LIST_DISPLAY_LIST"/></Name>
+      <DescriptionSet><Set Info="显示列表" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="LIST_DISPLAY_LIST" DataType="String"/></DataItem>
+    </XItem>
+
+    <!-- ====== 自定义 ====== -->
+    <XItem Name="USER_SET">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="USER_SET"/></Name>
+      <DescriptionSet><Set Info="自定义 HTML" Lang="zhcn"/></DescriptionSet>
+      <DataItem><Set DataField="USER_SET" DataType="String"/></DataItem>
+    </XItem>
+
+    <!-- ====== 按钮 ====== -->
+    <XItem Name="butOk">
+      <Tag><Set Tag="submit"/></Tag>
+      <Name><Set Name="butOk"/></Name>
+      <DescriptionSet><Set Info="保存" Lang="zhcn"/><Set Info="Save" Lang="enus"/></DescriptionSet>
+      <ParentStyle><Set ParentStyle="width:60px; text-align:center"/></ParentStyle>
+      <EventSet><Set EventName="ewa_click" EventType="Javascript" EventValue="saveXItem()"/></EventSet>
+    </XItem>
+    <XItem Name="butClose">
+      <Tag><Set Tag="button"/></Tag>
+      <Name><Set Name="butClose"/></Name>
+      <DescriptionSet><Set Info="返回" Lang="zhcn"/><Set Info="Back" Lang="enus"/></DescriptionSet>
+      <ParentStyle><Set ParentStyle="width:60px; text-align:center"/></ParentStyle>
+      <EventSet><Set EventName="ewa_click" EventType="Javascript" EventValue="goBack()"/></EventSet>
+    </XItem>
+  </XItems>
+</EasyWebTemplate>
+
+<!-- ==================================================================== -->
+<!-- 5. SqlCfg.LF.M — Action / SqlSet 列表                                  -->
+<!-- ==================================================================== -->
+<EasyWebTemplate Name="SqlCfg.LF.M">
+  <Page>
+    <FrameTag><Set FrameTag="ListFrame"/></FrameTag>
+    <Name><Set Name="SqlCfg.LF.M"/></Name>
+    <SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName>
+    <DescriptionSet>
+      <Set Info="SQL + ActionSet 管理" Lang="zhcn" Memo=""/>
+      <Set Info="SQL + ActionSet Management" Lang="enus" Memo=""/>
+    </DescriptionSet>
+    <Size><Set FrameCols="C3" HAlign="center" HiddenCaption="0" VAlign="top" Width="100%"/></Size>
+    <AddHtml><Set><Top><![CDATA[
+<div style="padding:10px;background:#f5f5f5;margin-bottom:10px;">
+  XML: <b>@XML_PATH</b> | 模板: <b>@ITEM_NAME</b>
+  &nbsp;|&nbsp;
+  <a href="javascript:EWA.F.jump('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=ItemSelect.LF.M&XML_PATH=@XML_PATH')">返回模板列表</a>
+</div>
+<div style="padding:10px;border-bottom:1px solid #ddd;margin-bottom:10px;">
+  <button onclick="addSqlSet()">+ 新增 SqlSet</button>
+  &nbsp;
+  <button onclick="addScriptSet()">+ 新增 ScriptSet</button>
+</div>
+<div id="ewa_list_body"></div>
+    ]]></Top></Set></AddHtml>
+    <AddScript><Set><Top><![CDATA[
+var gXmlPath = '@XML_PATH';
+var gItemName = '@ITEM_NAME';
+
+function addSqlSet() {
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=SqlCfg.F.NM&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName);
+    EWA.F.jump(url);
+}
+function editSqlSet(name) {
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=SqlCfg.F.NM&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName) + '&SQL_NAME=' + encodeURIComponent(name);
+    EWA.F.jump(url);
+}
+function addScriptSet() {
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=ScriptCfg.F.NM&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName);
+    EWA.F.jump(url);
+}
+function editScriptSet(name) {
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=ScriptCfg.F.NM&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName) + '&SCRIPT_NAME=' + encodeURIComponent(name);
+    EWA.F.jump(url);
+}
+function deleteSqlSet(name) {
+    if (!confirm('确定删除 SqlSet: ' + name + ' ?\n注意: 请先确认没有 ActionSet 引用它。')) return;
+    $.post('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=SqlCfg.LF.M&EWA_AJAX=json', {
+        method: 'deleteSqlSet',
+        XML_PATH: gXmlPath,
+        ITEM_NAME: gItemName,
+        SQL_NAME: name
+    }, function(res) {
+        if (res && res.success) {
+            alert('删除成功');
+            loadData();
+        } else {
+            alert('删除失败: ' + (res ? res.message : '未知错误'));
+        }
+    });
+}
+    ]]></Top><Bottom><![CDATA[
+function loadData() {
+    $.getJSON('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=SqlCfg.LF.M&EWA_AJAX=json', {
+        method: 'listActions',
+        XML_PATH: gXmlPath,
+        ITEM_NAME: gItemName
+    }, function(res) {
+        if (res && res.success && res.data) {
+            renderActions(res.data);
+        } else {
+            $('#ewa_list_body').html('<p style="color:red;">加载失败: ' + (res ? res.message : '未知错误') + '</p>');
+        }
+    });
+}
+function renderActions(data) {
+    var html = '';
+    
+    // ===== ActionSet 部分 =====
+    html += '<h3>ActionSet (执行流程)</h3>';
+    html += '<table class="ewa-table"><thead><tr>'
+        + '<th>Action 类型</th><th>调用列表</th>'
+        + '</tr></thead><tbody>';
+    if (data.actions && data.actions.length > 0) {
+        for (var i = 0; i < data.actions.length; i++) {
+            var a = data.actions[i];
+            var callsHtml = '';
+            for (var j = 0; j < a.calls.length; j++) {
+                var c = a.calls[j];
+                var badge = c.callType == 'SqlSet' ? 'SQL' : 'Script';
+                callsHtml += '<span style="display:inline-block;margin:2px;padding:2px 6px;background:#e8f4fd;border-radius:3px;">'
+                    + badge + ': ' + c.callName
+                    + (c.test ? ' <i>(条件: ' + c.test + ')</i>' : '')
+                    + '</span> ';
+            }
+            html += '<tr><td><b>' + a.type + '</b></td><td>' + callsHtml + '</td></tr>';
+        }
+    } else {
+        html += '<tr><td colspan="2" style="color:#999;">无 ActionSet 配置</td></tr>';
+    }
+    html += '</tbody></table>';
+
+    // ===== SqlSet 部分 =====
+    html += '<h3 style="margin-top:20px;">SqlSet (SQL 定义)</h3>';
+    html += '<table class="ewa-table"><thead><tr>'
+        + '<th>#</th><th>SQL 名称</th><th>类型</th><th>事务</th>'
+        + '<th>SQL 预览</th><th>被引用</th><th>操作</th>'
+        + '</tr></thead><tbody>';
+    if (data.sqlSets && data.sqlSets.length > 0) {
+        for (var i = 0; i < data.sqlSets.length; i++) {
+            var s = data.sqlSets[i];
+            var refBy = '';
+            if (s.referencedBy && s.referencedBy.length > 0) {
+                for (var k = 0; k < s.referencedBy.length; k++) {
+                    refBy += s.referencedBy[k] + ' ';
+                }
+            } else {
+                refBy = '<span style="color:#999;">未被引用</span>';
+            }
+            html += '<tr>'
+                + '<td>' + (i+1) + '</td>'
+                + '<td><b>' + s.name + '</b></td>'
+                + '<td>' + s.sqlType + '</td>'
+                + '<td>' + s.transType + '</td>'
+                + '<td><pre style="max-height:60px;overflow:hidden;margin:0;">' + (s.sqlPreview||'') + '</pre></td>'
+                + '<td>' + refBy + '</td>'
+                + '<td>'
+                + '<button onclick="editSqlSet(\''+s.name+'\')">编辑</button> '
+                + '<button onclick="deleteSqlSet(\''+s.name+'\')">删除</button>'
+                + '</td></tr>';
+        }
+    } else {
+        html += '<tr><td colspan="7" style="color:#999;">无 SqlSet 配置</td></tr>';
+    }
+    html += '</tbody></table>';
+
+    // ===== ScriptSet 部分 =====
+    html += '<h3 style="margin-top:20px;">ScriptSet (脚本定义)</h3>';
+    html += '<table class="ewa-table"><thead><tr>'
+        + '<th>#</th><th>脚本名称</th><th>类型</th>'
+        + '<th>脚本预览</th><th>操作</th>'
+        + '</tr></thead><tbody>';
+    if (data.scriptSets && data.scriptSets.length > 0) {
+        for (var i = 0; i < data.scriptSets.length; i++) {
+            var sc = data.scriptSets[i];
+            html += '<tr>'
+                + '<td>' + (i+1) + '</td>'
+                + '<td><b>' + sc.name + '</b></td>'
+                + '<td>' + sc.scriptType + '</td>'
+                + '<td><pre style="max-height:60px;overflow:hidden;margin:0;">' + (sc.scriptPreview||'') + '</pre></td>'
+                + '<td>'
+                + '<button onclick="editScriptSet(\''+sc.name+'\')">编辑</button>'
+                + '</td></tr>';
+        }
+    } else {
+        html += '<tr><td colspan="5" style="color:#999;">无 ScriptSet 配置</td></tr>';
+    }
+    html += '</tbody></table>';
+
+    $('#ewa_list_body').html(html);
+}
+addEvent(window, 'load', loadData);
+    ]]></Bottom></Set></AddScript>
+    <PageSize><Set IsSplitPage="0"/></PageSize>
+    <ListUI><Set luButtons="0" luSearch="0" luSelect="N"/></ListUI>
+  </Page>
+  <Action>
+    <ActionSet>
+      <Set Type="OnPageLoad">
+        <CallSet><Set CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet>
+      </Set>
+    </ActionSet>
+    <SqlSet>
+      <Set Name="OnPageLoad SQL" SqlType="query" TransType="no">
+        <Sql><![CDATA[SELECT '@XML_PATH' AS xml_path, '@ITEM_NAME' AS item_name]]></Sql>
+      </Set>
+    </SqlSet>
+  </Action>
+  <XItems/>
+</EasyWebTemplate>
+
+<!-- ==================================================================== -->
+<!-- 6. SqlCfg.F.NM — 新增/修改 SqlSet                                      -->
+<!-- ==================================================================== -->
+<EasyWebTemplate Name="SqlCfg.F.NM">
+  <Page>
+    <FrameTag><Set FrameTag="Frame"/></FrameTag>
+    <Name><Set Name="SqlCfg.F.NM"/></Name>
+    <SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName>
+    <DescriptionSet>
+      <Set Info="新增/修改 SqlSet" Lang="zhcn" Memo=""/>
+      <Set Info="Add/Edit SqlSet" Lang="enus" Memo=""/>
+    </DescriptionSet>
+    <Size><Set FrameCols="C2" HAlign="center" HiddenCaption="1" VAlign="top" Width="1000"/></Size>
+    <AddHtml><Set><Top><![CDATA[
+<div style="padding:10px;background:#f5f5f5;margin-bottom:10px;">
+  XML: <b>@XML_PATH</b> | 模板: <b>@ITEM_NAME</b> | SQL: <b id="lbl_sql">@SQL_NAME</b>
+  &nbsp;|&nbsp; <a href="javascript:goBack()">返回列表</a>
+</div>
+    ]]></Top></Set></AddHtml>
+    <AddScript><Set><Top><![CDATA[
+var gXmlPath = '@XML_PATH';
+var gItemName = '@ITEM_NAME';
+var gSqlName = '@SQL_NAME';
+var gOldSqlName = gSqlName;
+
+function goBack() {
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=SqlCfg.LF.M&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName);
+    EWA.F.jump(url);
+}
+    ]]></Top><Bottom><![CDATA[
+function init_sql_form() {
+    if (gSqlName) {
+        $.getJSON('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=SqlCfg.F.NM&EWA_AJAX=json', {
+            method: 'getSqlSet',
+            XML_PATH: gXmlPath,
+            ITEM_NAME: gItemName,
+            SQL_NAME: gSqlName
+        }, function(res) {
+            if (res && res.success && res.data) {
+                $('#lbl_sql').text(res.data.name);
+                $('#SQL_TYPE').val(res.data.sqlType || '');
+                $('#TRANS_TYPE').val(res.data.transType || '');
+                if (typeof EWA_setEditorContent === 'function') {
+                    EWA_setEditorContent('SQL_CONTENT', res.data.sqlContent || '');
+                } else {
+                    $('#SQL_CONTENT').val(res.data.sqlContent || '');
+                }
+            }
+        });
+    }
+}
+function saveSql() {
+    var name = $('#SQL_NAME').val();
+    if (!name) { alert('SQL 名称不能为空'); return; }
+    
+    var sqlContent = '';
+    if (typeof EWA_getEditorContent === 'function') {
+        sqlContent = EWA_getEditorContent('SQL_CONTENT');
+    } else {
+        sqlContent = $('#SQL_CONTENT').val();
+    }
+    
+    $.post('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=SqlCfg.F.NM&EWA_AJAX=json', {
+        method: 'saveSqlSet',
+        XML_PATH: gXmlPath,
+        ITEM_NAME: gItemName,
+        SQL_NAME: name,
+        OLD_SQL_NAME: gOldSqlName,
+        SQL_TYPE: $('#SQL_TYPE').val(),
+        TRANS_TYPE: $('#TRANS_TYPE').val(),
+        SQL_CONTENT: sqlContent
+    }, function(res) {
+        if (res && res.success) {
+            alert('保存成功');
+            goBack();
+        } else {
+            alert('保存失败: ' + (res ? res.message : '未知错误'));
+        }
+    });
+}
+addEvent(window, 'load', init_sql_form);
+    ]]></Bottom></Set></AddScript>
+    <GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet>
+  </Page>
+  <Action>
+    <ActionSet>
+      <Set Type="OnPageLoad">
+        <CallSet><Set CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet>
+      </Set>
+    </ActionSet>
+    <SqlSet>
+      <Set Name="OnPageLoad SQL" SqlType="query" TransType="no">
+        <Sql><![CDATA[SELECT 
+  '@XML_PATH' AS xml_path,
+  '@ITEM_NAME' AS item_name,
+  '@SQL_NAME' AS sql_name,
+  '' AS SQL_TYPE,
+  'update' AS TRANS_TYPE]]></Sql>
+      </Set>
+    </SqlSet>
+  </Action>
+  <XItems>
+    <XItem Name="SQL_NAME">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="SQL_NAME"/></Name>
+      <DescriptionSet><Set Info="SQL 名称" Lang="zhcn"/><Set Info="SQL Name" Lang="enus"/></DescriptionSet>
+      <IsMustInput><Set IsMustInput="1"/></IsMustInput>
+      <MaxMinLength><Set MaxLength="200"/></MaxMinLength>
+      <DataItem><Set DataField="SQL_NAME" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="SQL_TYPE">
+      <Tag><Set Tag="select"/></Tag>
+      <Name><Set Name="SQL_TYPE"/></Name>
+      <DescriptionSet><Set Info="SQL 类型" Lang="zhcn"/></DescriptionSet>
+      <List><Set ValueList="query,update" DisplayList="查询,更新"/></List>
+      <DataItem><Set DataField="SQL_TYPE" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="TRANS_TYPE">
+      <Tag><Set Tag="select"/></Tag>
+      <Name><Set Name="TRANS_TYPE"/></Name>
+      <DescriptionSet><Set Info="事务类型" Lang="zhcn"/></DescriptionSet>
+      <List><Set ValueList="no,yes," DisplayList="否,是,默认"/></List>
+      <DataItem><Set DataField="TRANS_TYPE" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="SQL_CONTENT">
+      <Tag><Set Tag="textarea"/></Tag>
+      <Name><Set Name="SQL_CONTENT"/></Name>
+      <DescriptionSet><Set Info="SQL 内容" Lang="zhcn"/><Set Info="SQL Content" Lang="enus"/></DescriptionSet>
+      <Style><Set Style="width:100%;height:300px;font-family:monospace;"/></Style>
+      <IsMustInput><Set IsMustInput="1"/></IsMustInput>
+      <DataItem><Set DataField="SQL_CONTENT" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="butOk">
+      <Tag><Set Tag="submit"/></Tag>
+      <Name><Set Name="butOk"/></Name>
+      <DescriptionSet><Set Info="保存" Lang="zhcn"/><Set Info="Save" Lang="enus"/></DescriptionSet>
+      <ParentStyle><Set ParentStyle="width:60px; text-align:center"/></ParentStyle>
+      <EventSet><Set EventName="ewa_click" EventType="Javascript" EventValue="saveSql()"/></EventSet>
+    </XItem>
+    <XItem Name="butClose">
+      <Tag><Set Tag="button"/></Tag>
+      <Name><Set Name="butClose"/></Name>
+      <DescriptionSet><Set Info="返回" Lang="zhcn"/><Set Info="Back" Lang="enus"/></DescriptionSet>
+      <ParentStyle><Set ParentStyle="width:60px; text-align:center"/></ParentStyle>
+      <EventSet><Set EventName="ewa_click" EventType="Javascript" EventValue="goBack()"/></EventSet>
+    </XItem>
+  </XItems>
+</EasyWebTemplate>
+
+<!-- ==================================================================== -->
+<!-- 7. ScriptCfg.F.NM — 新增/修改 ScriptSet                                -->
+<!-- ==================================================================== -->
+<EasyWebTemplate Name="ScriptCfg.F.NM">
+  <Page>
+    <FrameTag><Set FrameTag="Frame"/></FrameTag>
+    <Name><Set Name="ScriptCfg.F.NM"/></Name>
+    <SkinName><Set IsXhtml="0" SkinName="Test1"/></SkinName>
+    <DescriptionSet>
+      <Set Info="新增/修改 ScriptSet" Lang="zhcn" Memo=""/>
+      <Set Info="Add/Edit ScriptSet" Lang="enus" Memo=""/>
+    </DescriptionSet>
+    <Size><Set FrameCols="C2" HAlign="center" HiddenCaption="1" VAlign="top" Width="1000"/></Size>
+    <AddHtml><Set><Top><![CDATA[
+<div style="padding:10px;background:#f5f5f5;margin-bottom:10px;">
+  XML: <b>@XML_PATH</b> | 模板: <b>@ITEM_NAME</b> | Script: <b id="lbl_script">@SCRIPT_NAME</b>
+  &nbsp;|&nbsp; <a href="javascript:goBack()">返回列表</a>
+</div>
+    ]]></Top></Set></AddHtml>
+    <AddScript><Set><Top><![CDATA[
+var gXmlPath = '@XML_PATH';
+var gItemName = '@ITEM_NAME';
+var gScriptName = '@SCRIPT_NAME';
+var gOldScriptName = gScriptName;
+
+function goBack() {
+    var url = './?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=SqlCfg.LF.M&XML_PATH=' + encodeURIComponent(gXmlPath) + '&ITEM_NAME=' + encodeURIComponent(gItemName);
+    EWA.F.jump(url);
+}
+    ]]></Top><Bottom><![CDATA[
+function init_script_form() {
+    if (gScriptName) {
+        $.getJSON('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=ScriptCfg.F.NM&EWA_AJAX=json', {
+            method: 'getScriptSet',
+            XML_PATH: gXmlPath,
+            ITEM_NAME: gItemName,
+            SCRIPT_NAME: gScriptName
+        }, function(res) {
+            if (res && res.success && res.data) {
+                $('#lbl_script').text(res.data.name);
+                $('#SCRIPT_TYPE').val(res.data.scriptType || 'javascript');
+                if (typeof EWA_setEditorContent === 'function') {
+                    EWA_setEditorContent('SCRIPT_CONTENT', res.data.scriptContent || '');
+                } else {
+                    $('#SCRIPT_CONTENT').val(res.data.scriptContent || '');
+                }
+            }
+        });
+    }
+}
+function saveScript() {
+    var name = $('#SCRIPT_NAME').val();
+    if (!name) { alert('脚本名称不能为空'); return; }
+    
+    var scriptContent = '';
+    if (typeof EWA_getEditorContent === 'function') {
+        scriptContent = EWA_getEditorContent('SCRIPT_CONTENT');
+    } else {
+        scriptContent = $('#SCRIPT_CONTENT').val();
+    }
+    
+    $.post('./?XMLNAME=/ewa/UPDATE_CFG.xml&ITEMNAME=ScriptCfg.F.NM&EWA_AJAX=json', {
+        method: 'saveScriptSet',
+        XML_PATH: gXmlPath,
+        ITEM_NAME: gItemName,
+        SCRIPT_NAME: name,
+        OLD_SCRIPT_NAME: gOldScriptName,
+        SCRIPT_TYPE: $('#SCRIPT_TYPE').val(),
+        SCRIPT_CONTENT: scriptContent
+    }, function(res) {
+        if (res && res.success) {
+            alert('保存成功');
+            goBack();
+        } else {
+            alert('保存失败: ' + (res ? res.message : '未知错误'));
+        }
+    });
+}
+addEvent(window, 'load', init_script_form);
+    ]]></Bottom></Set></AddScript>
+    <GroupSet><Set GroupInfo="" GroupShow="" Lang=""/></GroupSet>
+  </Page>
+  <Action>
+    <ActionSet>
+      <Set Type="OnPageLoad">
+        <CallSet><Set CallName="OnPageLoad SQL" CallType="SqlSet" Test=""/></CallSet>
+      </Set>
+    </ActionSet>
+    <SqlSet>
+      <Set Name="OnPageLoad SQL" SqlType="query" TransType="no">
+        <Sql><![CDATA[SELECT 
+  '@XML_PATH' AS xml_path,
+  '@ITEM_NAME' AS item_name,
+  '@SCRIPT_NAME' AS script_name,
+  'javascript' AS SCRIPT_TYPE]]></Sql>
+      </Set>
+    </SqlSet>
+  </Action>
+  <XItems>
+    <XItem Name="SCRIPT_NAME">
+      <Tag><Set Tag="text"/></Tag>
+      <Name><Set Name="SCRIPT_NAME"/></Name>
+      <DescriptionSet><Set Info="脚本名称" Lang="zhcn"/><Set Info="Script Name" Lang="enus"/></DescriptionSet>
+      <IsMustInput><Set IsMustInput="1"/></IsMustInput>
+      <MaxMinLength><Set MaxLength="200"/></MaxMinLength>
+      <DataItem><Set DataField="SCRIPT_NAME" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="SCRIPT_TYPE">
+      <Tag><Set Tag="select"/></Tag>
+      <Name><Set Name="SCRIPT_TYPE"/></Name>
+      <DescriptionSet><Set Info="脚本类型" Lang="zhcn"/></DescriptionSet>
+      <List><Set ValueList="javascript,vbscript,groovy" DisplayList="JavaScript,VBScript,Groovy"/></List>
+      <DataItem><Set DataField="SCRIPT_TYPE" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="SCRIPT_CONTENT">
+      <Tag><Set Tag="textarea"/></Tag>
+      <Name><Set Name="SCRIPT_CONTENT"/></Name>
+      <DescriptionSet><Set Info="脚本内容" Lang="zhcn"/><Set Info="Script Content" Lang="enus"/></DescriptionSet>
+      <Style><Set Style="width:100%;height:300px;font-family:monospace;"/></Style>
+      <IsMustInput><Set IsMustInput="1"/></IsMustInput>
+      <DataItem><Set DataField="SCRIPT_CONTENT" DataType="String"/></DataItem>
+    </XItem>
+    <XItem Name="butOk">
+      <Tag><Set Tag="submit"/></Tag>
+      <Name><Set Name="butOk"/></Name>
+      <DescriptionSet><Set Info="保存" Lang="zhcn"/><Set Info="Save" Lang="enus"/></DescriptionSet>
+      <ParentStyle><Set ParentStyle="width:60px; text-align:center"/></ParentStyle>
+      <EventSet><Set EventName="ewa_click" EventType="Javascript" EventValue="saveScript()"/></EventSet>
+    </XItem>
+    <XItem Name="butClose">
+      <Tag><Set Tag="button"/></Tag>
+      <Name><Set Name="butClose"/></Name>
+      <DescriptionSet><Set Info="返回" Lang="zhcn"/><Set Info="Back" Lang="enus"/></DescriptionSet>
+      <ParentStyle><Set ParentStyle="width:60px; text-align:center"/></ParentStyle>
+      <EventSet><Set EventName="ewa_click" EventType="Javascript" EventValue="goBack()"/></EventSet>
+    </XItem>
+  </XItems>
+</EasyWebTemplate>
+
+</EasyWebTemplates>
