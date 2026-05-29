@@ -23,6 +23,7 @@ import com.gdxsoft.easyweb.conf.ConfScriptPath;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UpdateXmlImpl;
+import com.gdxsoft.easyweb.define.UpdateXmlJdbcImpl;
 import com.gdxsoft.easyweb.define.bussinessXmlCreator.BusinessXmlCreator;
 import com.gdxsoft.easyweb.define.database.Table;
 import com.gdxsoft.easyweb.define.database.Tables;
@@ -1003,8 +1004,16 @@ public class ServletApi extends HttpServlet {
 			if (scriptPath == null) {
 				return null;
 			}
-
-			return new UpdateXmlImpl(configType);
+			if (scriptPath.isResources()) {
+				throw new UnsupportedOperationException(
+						"Resource-based configurations are read-only and do not support updates");
+			} else if (scriptPath.isReadOnly()) {
+				throw new UnsupportedOperationException("This configuration is read-only and does not support updates");
+			} else if (scriptPath.isJdbc()) {
+				return new UpdateXmlJdbcImpl(configType);
+			} else {
+				return new UpdateXmlImpl(configType);
+			}
 		} catch (Exception e) {
 			LOGGER.error("Error getting UpdateXml for: " + xmlName, e);
 			return null;
