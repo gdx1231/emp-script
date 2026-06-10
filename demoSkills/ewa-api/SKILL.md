@@ -78,6 +78,86 @@ source ewa-api.conf
   X-Api-Signature: 签名值
 ```
 
+## updateConfItem 大 XML 更新（Fetch → Modify → Push）
+
+URL 参数过长会触发 Nginx 414 错误，大 XML（> 2KB）需通过 POST body 提交。
+
+### Step 1: Fetch — 获取配置项
+
+```bash
+./ewa-api.sh --simple getConfItem "/business/ai/ai_chat.xml" "ITEM.NAME" xml 2>/dev/null > /tmp/item.xml
+```
+
+**关键陷阱**：
+- `[INFO]` 行带有 ANSI 颜色代码，必须用 `2>/dev/null` 重定向
+- 响应是 JSON 包裹，XML 在 `"XML"` 字段（不是 `"DATA"`）
+- JSON 中 `/` 被转义为 `\/`，解析后需 `.replace('\\/', '/')`
+
+### Step 2: Modify — 解析并修改 XML
+
+```bash
+python3 << 'PYEOF'
+import json, re
+
+with open('/tmp/item.xml', 'rb') as f:
+    raw = f.read()
+
+# 跳过 ANSI 行
+idx = raw.index(b'{')
+d = json.loads(raw[idx:])
+
+# 提取 XML（在 "XML" 字段），反转义斜杠
+xml = d['XML'].replace('\\/', '/')
+
+# 修改示例：更新 SQL
+xml = xml.replace('WHERE 1=1', 'WHERE 1=1 AND ai_id = @ai_id', 1)
+
+# 修改示例：更新 JS（CDATA 内）
+cdata_start, cdata_end = '<![CDATA[', ']]>'
+idx_start = xml.index(cdata_start) + len(cdata_start)
+idx_end = xml.index(cdata_end)
+xml = xml[:idx_start] + '新 JS 代码' + xml[idx_end:]
+
+with open('/tmp/item_updated.xml', 'w') as f:
+    f.write(xml)
+PYEOF
+```
+
+### Step 3: Push — curl POST body 提交
+
+方式一：`--data-urlencode` 文件模式
+```bash
+source ewa-api.conf
+curl -s -X POST \
+  "${EWA_API_URL}?method=updateConfItem&xmlname=/business/ai/ai_chat.xml&itemname=ITEM.NAME" \
+  -H "X-Api-Token: $(cat /tmp/.ewa_api_token)" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  --data-urlencode "xml@/tmp/item_updated.xml"
+```
+
+方式二：手动 URL 编码
+```bash
+source ewa-api.conf
+ENCODED_XML=$(python3 -c "import urllib.parse; print(urllib.parse.quote(open('/tmp/item_updated.xml').read(), safe=''))")
+curl -s -X POST \
+  "${EWA_API_URL}?method=updateConfItem&xmlname=/business/ai/ai_chat.xml&itemname=ITEM.NAME" \
+  -H "X-Api-Token: $(cat /tmp/.ewa_api_token)" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "xml=${ENCODED_XML}"
+```
+
+**成功响应**：`{"MSG":"Item updated successfully","RST":true,...}`
+
+**常见陷阱**：
+
+| 陷阱 | 解决 |
+|------|------|
+| ANSI 颜色代码导致 JSON 解析失败 | `2>/dev/null` 或 `raw.index(b'{')` 跳过 |
+| XML 在 `d['XML']` 不是 `d['DATA']` | 使用 `d['XML']` |
+| JSON 中 `/` 转义为 `\/` | `.replace('\\/', '/')` |
+| Token 过期（401） | 重新 `./ewa-api.sh login` |
+| 缺失 Content-Type | 必须设 `application/x-www-form-urlencoded` |
+
 ## 注意事项
 
 - `description` 为技能发现入口，触发关键词需保留在 frontmatter 中。
