@@ -29,8 +29,9 @@ source ewa-api.conf
 | `getTables` | `<db> [filter] [output]` | 获取数据库表列表 |
 | `getTable` | `<db> <tablename> [output]` | 获取表结构详情 |
 | `getTableData` | `<db> <tablename> [where] [output] [page] [pagesize]` | 获取表数据（分页） |
-| `previewBusinessXml` | `<db> <tablename> <frametype> <operationtype> <xmlname> [output]` | 预览业务 XML（不保存） |
-| `createBusinessXml` | `<db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid]` | 生成并保存业务 XML |
+| `previewBusinessXml` | `<db> <tablename> <frametype> <operationtype> <xmlname> [output] [scriptpath]` | 预览业务 XML（不保存，容器不存在自动创建） |
+| `createBusinessXml` | `<db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid] [scriptpath]` | 生成并保存业务 XML，容器不存在自动创建 |
+| `showScriptPaths` | — | 列出所有可用配置存储路径 |
 
 ### 参数说明
 
@@ -47,6 +48,7 @@ source ewa-api.conf
 | `pagesize` | 每页记录数（默认 10，最大 100） |
 | `pk` | 主键字段（用于 getTableData 分页） |
 | `admid` | 管理员 ID（createBusinessXml 可选，默认使用当前登录用户） |
+| `scriptpath` | 指定配置存储路径名称，如 `pf` / `b2b`。不提供则自动选择第一个可写路径。通过 `showScriptPaths` 查询可用路径 |
 
 ## 示例
 
@@ -77,11 +79,23 @@ source ewa-api.conf
 # 预览学校主表列表 XML（不保存，用于确认生成结果）
 ./ewa-api.sh previewBusinessXml globalTravel ESL_SA_MAIN ListFrame V ewa/studyabroad json
 
+# 指定保存到 pf（jdbc:ewa2023）
+./ewa-api.sh previewBusinessXml globalTravel ESL_SA_MAIN ListFrame V ewa/studyabroad json pf
+
 # 生成并保存学校主表表单 XML（新增+修改）
 ./ewa-api.sh createBusinessXml globalTravel ESL_SA_MAIN Frame NM ewa/studyabroad ESL_SA_MAIN.F.NM
 
+# 指定保存到 pf
+./ewa-api.sh createBusinessXml globalTravel ESL_SA_MAIN Frame NM ewa/studyabroad ESL_SA_MAIN.F.NM pf
+
 # 生成专业表列表 XML
 ./ewa-api.sh createBusinessXml globalTravel ESL_SA_MAJOR ListFrame V ewa/studyabroad ESL_SA_MAJOR.LF.V
+```
+
+### 配置存储路径
+```bash
+# 列出所有可用配置存储路径
+./ewa-api.sh showScriptPaths
 ```
 
 ### 配置项操作

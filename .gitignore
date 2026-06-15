@@ -17,4 +17,5 @@ ewa_conf_console.xml
 *.lck
 *.iml
 /temp/
-/debug/
+/debug/ewa-api.conf
+demoSkills/ewa-api/ewa-api.conf

@@ -60,8 +60,9 @@ EWA API 调用脚本 v${VERSION}
   getTables <db> [filter] [output]        获取数据库表列表
   getTable <db> <tablename> [output]      获取表结构详情
   getTableData <db> <tablename> [where] [output]  获取表数据(最多10条)
-  previewBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> [output]  预览业务XML(不保存)
-  createBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid]  生成并保存业务XML
+  previewBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> [output] [scriptpath]  预览业务XML(不保存)
+  createBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid] [scriptpath]  生成并保存业务XML
+  showScriptPaths                 列出所有可用配置存储路径
   help                            显示 API 帮助
 
 选项:
@@ -530,6 +531,12 @@ do_get_table_data() {
     send_request "$params"
 }
 
+# 列出所有可用配置存储路径
+do_show_script_paths() {
+    log_info "获取配置存储路径..."
+    send_request "method=showScriptPaths"
+}
+
 # 获取帮助（不需要认证）
 do_help() {
     log_info "获取 API 帮助..."
@@ -544,17 +551,20 @@ do_preview_business_xml() {
     local operationtype="$4"
     local xmlname="$5"
     local output="${6:-json}"
+    local scriptpath="$7"
 
     if [ -z "$db" ] || [ -z "$tablename" ] || [ -z "$frametype" ] || [ -z "$operationtype" ] || [ -z "$xmlname" ]; then
         log_error "缺少参数"
-        echo "用法: $0 previewBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> [output]"
+        echo "用法: $0 previewBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> [output] [scriptpath]"
         echo "  frametype: ListFrame | Frame | Tree"
         echo "  operationtype: N | M | V | NM"
         exit 1
     fi
 
     log_info "预览业务 XML: $db / $tablename ($frametype, $operationtype)"
-    send_request "method=previewBusinessXml&db=${db}&tablename=${tablename}&frametype=${frametype}&operationtype=${operationtype}&xmlname=${xmlname}&output=${output}"
+    local params="method=previewBusinessXml&db=${db}&tablename=${tablename}&frametype=${frametype}&operationtype=${operationtype}&xmlname=${xmlname}&output=${output}"
+    [ -n "$scriptpath" ] && params="${params}&scriptpath=${scriptpath}"
+    send_request "$params"
 }
 
 # 生成并保存业务 XML
@@ -566,10 +576,11 @@ do_create_business_xml() {
     local xmlname="$5"
     local itemname="$6"
     local admid="$7"
+    local scriptpath="$8"
 
     if [ -z "$db" ] || [ -z "$tablename" ] || [ -z "$frametype" ] || [ -z "$operationtype" ] || [ -z "$xmlname" ] || [ -z "$itemname" ]; then
         log_error "缺少参数"
-        echo "用法: $0 createBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid]"
+        echo "用法: $0 createBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid] [scriptpath]"
         echo "  frametype: ListFrame | Frame | Tree"
         echo "  operationtype: N | M | V | NM"
         exit 1
@@ -578,6 +589,7 @@ do_create_business_xml() {
     log_info "生成业务 XML: $db / $tablename -> $xmlname / $itemname ($frametype, $operationtype)"
     local params="method=createBusinessXml&db=${db}&tablename=${tablename}&frametype=${frametype}&operationtype=${operationtype}&xmlname=${xmlname}&itemname=${itemname}"
     [ -n "$admid" ] && params="${params}&admid=${admid}"
+    [ -n "$scriptpath" ] && params="${params}&scriptpath=${scriptpath}"
     send_request "$params"
 }
 
@@ -678,6 +690,9 @@ case "$COMMAND" in
         ;;
     help)
         do_help
+        ;;
+    showScriptPaths)
+        do_show_script_paths
         ;;
     "")
         print_help

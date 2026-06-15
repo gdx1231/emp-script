@@ -58,6 +58,9 @@ if /i "%~1"=="deleteConfItem" goto :do_delete_conf_item
 if /i "%~1"=="getTables" goto :do_get_tables
 if /i "%~1"=="getTable" goto :do_get_table
 if /i "%~1"=="getTableData" goto :do_get_table_data
+if /i "%~1"=="previewBusinessXml" goto :do_preview_business_xml
+if /i "%~1"=="createBusinessXml" goto :do_create_business_xml
+if /i "%~1"=="showScriptPaths" goto :do_show_script_paths
 if /i "%~1"=="help" goto :do_help
 
 echo [ERROR] 未知选项或命令: %~1
@@ -120,6 +123,9 @@ echo   deleteConfItem ^<xmlname^> ^<item^>         删除配置项
 echo   getTables ^<db^> [filter] [output]        获取数据库表列表
 echo   getTable ^<db^> ^<tablename^> [output]      获取表结构详情
 echo   getTableData ^<db^> ^<tablename^> [where] [output]  获取表数据(最多10条)
+echo   previewBusinessXml ^<db^> ^<tablename^> ^<frametype^> ^<operationtype^> ^<xmlname^> [output] [scriptpath]  预览业务XML(不保存)
+echo   createBusinessXml ^<db^> ^<tablename^> ^<frametype^> ^<operationtype^> ^<xmlname^> ^<itemname^> [admid] [scriptpath]  生成业务XML
+echo   showScriptPaths                 列出可用配置存储路径
 echo   help                            显示 API 帮助
 echo.
 echo 选项:
@@ -426,6 +432,54 @@ if not "%~4"=="" (
 if "%VERBOSE%"=="true" echo [INFO] 获取表数据: %~2 / %~3 ^(格式: %OUTPUT_FORMAT%, 最多10条^)
 set PARAMS=method=getTableData^&db=%~2^&tablename=%~3^&output=%OUTPUT_FORMAT%
 if not "%WHERE_CLAUSE%"=="" set PARAMS=%PARAMS%^&where=%WHERE_CLAUSE%
+call :send_request "%PARAMS%"
+exit /b 0
+
+:do_preview_business_xml
+REM 用法: previewBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> [output] [scriptpath]
+set PREVIEW_DB=%~2
+set PREVIEW_TABLE=%~3
+set PREVIEW_FTYPE=%~4
+set PREVIEW_OTYPE=%~5
+set PREVIEW_XML=%~6
+set PREVIEW_OUT=json
+if not "%~7"=="" set PREVIEW_OUT=%~7
+set PREVIEW_SPATH=
+if not "%~8"=="" set PREVIEW_SPATH=^&scriptpath=%~8
+if "%VERBOSE%"=="true" echo [INFO] 预览业务 XML: %PREVIEW_DB% / %PREVIEW_TABLE% (%PREVIEW_FTYPE%, %PREVIEW_OTYPE%)
+set PARAMS=method=previewBusinessXml^&db=%PREVIEW_DB%^&tablename=%PREVIEW_TABLE%^&frametype=%PREVIEW_FTYPE%^&operationtype=%PREVIEW_OTYPE%^&xmlname=%PREVIEW_XML%^&output=%PREVIEW_OUT%%PREVIEW_SPATH%
+call :send_request "%PARAMS%"
+exit /b 0
+
+:do_create_business_xml
+REM 用法: createBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid] [scriptpath]
+set CREATE_DB=%~2
+set CREATE_TABLE=%~3
+set CREATE_FTYPE=%~4
+set CREATE_OTYPE=%~5
+set CREATE_XML=%~6
+set CREATE_ITEM=%~7
+set CREATE_ADMID=
+if not "%~8"=="" (
+    REM check if %~8 looks like a number (admid) or a scriptpath name
+    echo %~8|findstr /r "^[0-9][0-9]*$" >nul
+    if not errorlevel 1 (
+        set CREATE_ADMID=^&admid=%~8
+        set CREATE_SPATH=
+        if not "%~9"=="" set CREATE_SPATH=^&scriptpath=%~9
+    ) else (
+        set CREATE_ADMID=
+        set CREATE_SPATH=^&scriptpath=%~8
+    )
+)
+if "%VERBOSE%"=="true" echo [INFO] 生成业务 XML: %CREATE_DB% / %CREATE_TABLE% -^> %CREATE_XML% / %CREATE_ITEM%
+set PARAMS=method=createBusinessXml^&db=%CREATE_DB%^&tablename=%CREATE_TABLE%^&frametype=%CREATE_FTYPE%^&operationtype=%CREATE_OTYPE%^&xmlname=%CREATE_XML%^&itemname=%CREATE_ITEM%%CREATE_ADMID%%CREATE_SPATH%
+call :send_request "%PARAMS%"
+exit /b 0
+
+:do_show_script_paths
+if "%VERBOSE%"=="true" echo [INFO] 获取配置存储路径...
+set PARAMS=method=showScriptPaths
 call :send_request "%PARAMS%"
 exit /b 0
 
