@@ -75,6 +75,7 @@ public class ServletApi extends HttpServlet {
 	private static final String PARAM_OPERATIONTYPE = "operationtype";
 	private static final String PARAM_ADMID = "admid";
 	private static final String PARAM_SCRIPTPATH = "scriptpath";
+	private static final String PARAM_NEW_ITEMNAME = "new_itemname";
 
 	// 输出格式常量
 	private static final String OUTPUT_XML = "xml";
@@ -213,6 +214,9 @@ public class ServletApi extends HttpServlet {
 				break;
 			case "showscriptpaths":
 				result = showScriptPaths();
+				break;
+			case "getxmlfile":
+				result = getXmlFile(rv);
 				break;
 			default:
 				result = createErrorResponse("Unknown method: " + method, 400);
@@ -356,6 +360,80 @@ public class ServletApi extends HttpServlet {
 			return result;
 		} catch (Exception e) {
 			LOGGER.error("Error getting conf item", e);
+			return UJSon.rstFalse("Error: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Read XML file content directly from configuration storage (file or JDBC).
+	 *
+	 * @param rv RequestValue with xmlname, optional scriptpath
+	 * @return JSON result with raw XML content
+	 */
+	private JSONObject getXmlFile(RequestValue rv) {
+		String xmlName = rv.getString(PARAM_XMLNAME);
+		String scriptPath = rv.getString(PARAM_SCRIPTPATH);
+		String output = rv.getString(PARAM_OUTPUT);
+
+		if (StringUtils.isBlank(xmlName)) {
+			return UJSon.rstFalse("Missing xmlname parameter");
+		}
+
+		if (StringUtils.isBlank(output)) {
+			output = OUTPUT_XML;
+		}
+
+		try {
+			IConfig configType;
+			if (StringUtils.isNotBlank(scriptPath)) {
+				configType = getConfigByPath(scriptPath, xmlName);
+				if (configType == null) {
+					return UJSon.rstFalse("Configuration not found: " + scriptPath + " / " + xmlName);
+				}
+			} else {
+				configType = UserConfig.getConfig(xmlName, null);
+			}
+
+			if (configType == null) {
+				return UJSon.rstFalse("Configuration not found: " + xmlName);
+			}
+
+			// 读取 XML 内容
+			String xmlContent;
+			ConfScriptPath sp = configType.getScriptPath();
+			if (sp != null && sp.isJdbc()) {
+				// JDBC 模式：从数据库加载
+				Document doc = configType.loadConfiguration();
+				if (doc == null) {
+					return UJSon.rstFalse("Failed to load configuration from JDBC: " + xmlName);
+				}
+				xmlContent = UXml.asXml(doc);
+			} else {
+				// File 模式：直接读取文件
+				String rootPath = sp != null ? sp.getPath() : configType.getPath();
+				String filePath = rootPath + UserConfig.filterXmlName(xmlName);
+				File file = new File(filePath);
+				if (!file.exists()) {
+					return UJSon.rstFalse("XML file not found: " + filePath);
+				}
+				xmlContent = java.nio.file.Files.readString(file.toPath(), java.nio.charset.StandardCharsets.UTF_8);
+			}
+
+			JSONObject result = new JSONObject();
+			result.put("RST", true);
+			result.put("XMLNAME", xmlName);
+			result.put("OUTPUT", output);
+
+			if (OUTPUT_JSON.equalsIgnoreCase(output)) {
+				JSONObject xmlAsJson = XML.toJSONObject(xmlContent);
+				result.put("DATA", xmlAsJson);
+			} else {
+				result.put("XML", xmlContent);
+			}
+
+			return result;
+		} catch (Exception e) {
+			LOGGER.error("Error reading XML file", e);
 			return UJSon.rstFalse("Error: " + e.getMessage());
 		}
 	}
@@ -1090,8 +1168,8 @@ public class ServletApi extends HttpServlet {
 				"Create and save business XML from table (params: db, tablename, frametype, operationtype, xmlname, itemname, [admid])");
 		methods.put("previewBusinessXml",
 				"Preview business XML without saving (params: db, tablename, frametype, operationtype, xmlname, [output, scriptpath])");
-		methods.put("showScriptPaths",
-				"Show all available script paths for configuration storage");
+		methods.put("getXmlFile",
+				"Read XML file content directly from storage (params: xmlname, [output, scriptpath])");
 
 		result.put("methods", methods);
 

@@ -1,6 +1,6 @@
 ---
 name: ewa-api
-description: "Use when: 调用 EWA Servlet API、查询数据库表结构与数据、读取或修改 EWA XML 配置项、生成业务 XML（自动创建容器）、查看配置存储路径（showScriptPaths）、需要脚本化执行 login/getTables/getTable/getTableData/getConfItem/previewBusinessXml/createBusinessXml/showScriptPaths。"
+description: "Use when: 调用 EWA Servlet API、查询数据库表结构与数据、读取或修改 EWA XML 配置项、生成业务 XML（自动创建容器）、查看配置存储路径（showScriptPaths）、直接读取 XML 文件（getXmlFile）、需要脚本化执行 login/getTables/getTable/getTableData/getConfItem/previewBusinessXml/createBusinessXml/showScriptPaths/getXmlFile。"
 ---
 
 # EWA API Skill
@@ -52,6 +52,7 @@ source ewa-api.conf
 | `previewBusinessXml` | `<db> <tablename> <frametype> <operationtype> <xmlname> [output] [scriptpath]` | 预览业务 XML（不保存，容器不存在自动创建） |
 | `createBusinessXml` | `<db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid] [scriptpath]` | 生成并保存业务 XML，容器不存在自动创建 |
 | `showScriptPaths` | — | 列出所有可用配置存储路径 |
+| `getXmlFile` | `<xmlname> [output] [scriptpath]` | 直接读取 XML 文件内容（File/JDBC） |
 
 **frametype**: `ListFrame` \| `Frame` \| `Tree`  
 **operationtype**: `N`（新增）\| `M`（修改）\| `V`（查看）\| `NM`（新增+修改）
@@ -83,6 +84,8 @@ source ewa-api.conf
 ```bash
 ./ewa-api.sh help
 ./ewa-api.sh showScriptPaths                         # 列出可用配置存储路径
+./ewa-api.sh getXmlFile /test/ser_tag.xml xml        # 直接读取 XML 文件
+./ewa-api.sh getXmlFile /test/ser_tag.xml xml pf     # 指定路径读取
 ./ewa-api.sh getTable work ADM_USER json
 ./ewa-api.sh getTableData work ADM_USER "" json
 ./ewa-api.sh getConfItem "/meta-data/services/ser_main.xml" "SER_MAIN_CAT.T.Modify" json
