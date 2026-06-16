@@ -1,5 +1,6 @@
 package com.gdxsoft.easyweb.define.servlets;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -20,6 +21,8 @@ import org.w3c.dom.Document;
 import com.gdxsoft.easyweb.conf.ConfAdmin;
 import com.gdxsoft.easyweb.conf.ConfDefine;
 import com.gdxsoft.easyweb.conf.ConfScriptPath;
+import com.gdxsoft.easyweb.conf.ConfScriptPaths;
+import com.gdxsoft.easyweb.define.ConfigUtils;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.define.IUpdateXml;
 import com.gdxsoft.easyweb.define.UpdateXmlImpl;
@@ -30,7 +33,9 @@ import com.gdxsoft.easyweb.define.database.Tables;
 import com.gdxsoft.easyweb.define.servlets.ApiTokenValidator.ValidationResult;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.IConfig;
+import com.gdxsoft.easyweb.script.userConfig.JdbcConfigOperation;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
+import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UJSon;
 import com.gdxsoft.easyweb.utils.UXml;
 
@@ -69,6 +74,7 @@ public class ServletApi extends HttpServlet {
 	private static final String PARAM_FRAMETYPE = "frametype";
 	private static final String PARAM_OPERATIONTYPE = "operationtype";
 	private static final String PARAM_ADMID = "admid";
+	private static final String PARAM_SCRIPTPATH = "scriptpath";
 
 	// 输出格式常量
 	private static final String OUTPUT_XML = "xml";
@@ -204,6 +210,9 @@ public class ServletApi extends HttpServlet {
 				break;
 			case "previewbusinessxml":
 				result = previewBusinessXml(rv);
+				break;
+			case "showscriptpaths":
+				result = showScriptPaths();
 				break;
 			default:
 				result = createErrorResponse("Unknown method: " + method, 400);
@@ -813,10 +822,22 @@ public class ServletApi extends HttpServlet {
 			if (table.getFields().size() == 0) {
 				return UJSon.rstFalse("Table has no fields or failed to read table structure: " + tableName);
 			}
-			// 获取配置路径
-			IConfig configType = UserConfig.getConfig(xmlName, null);
-			if (configType == null) {
-				return UJSon.rstFalse("Configuration not found: " + xmlName);
+			// 获取配置路径（容器不存在则自动创建）
+			String scriptPath = rv.getString(PARAM_SCRIPTPATH);
+			IConfig configType = null;
+			if (StringUtils.isNotBlank(scriptPath)) {
+				configType = getConfigByPath(scriptPath, xmlName);
+				if (configType == null) {
+					return UJSon.rstFalse("Configuration not found in specified path: " + scriptPath + " / " + xmlName);
+				}
+			} else {
+				configType = UserConfig.getConfig(xmlName, null);
+				if (configType == null) {
+					configType = autoCreateConfig(xmlName, admId);
+					if (configType == null) {
+						return UJSon.rstFalse("Configuration not found and auto-create failed: " + xmlName);
+					}
+				}
 			}
 
 			// 创建 BusinessXmlCreator
@@ -902,10 +923,22 @@ public class ServletApi extends HttpServlet {
 			Table table = new Table(tableName, db);
 			table.init();
 
-			// 创建 EwaConfig
-			IConfig configType = UserConfig.getConfig(xmlName, null);
-			if (configType == null) {
-				return UJSon.rstFalse("Configuration not found: " + xmlName);
+			// 创建 EwaConfig（容器不存在则自动创建）
+			String scriptPath = rv.getString(PARAM_SCRIPTPATH);
+			IConfig configType = null;
+			if (StringUtils.isNotBlank(scriptPath)) {
+				configType = getConfigByPath(scriptPath, xmlName);
+				if (configType == null) {
+					return UJSon.rstFalse("Configuration not found in specified path: " + scriptPath + " / " + xmlName);
+				}
+			} else {
+				configType = UserConfig.getConfig(xmlName, null);
+				if (configType == null) {
+					configType = autoCreateConfig(xmlName, "api");
+					if (configType == null) {
+						return UJSon.rstFalse("Configuration not found and auto-create failed: " + xmlName);
+					}
+				}
 			}
 
 			// 创建 BusinessXmlCreator
@@ -942,6 +975,99 @@ public class ServletApi extends HttpServlet {
 	}
 
 	/**
+	/**
+	 * Get IConfig from a specific script path by name.
+	 *
+	 * @param scriptPathName script path name (e.g., "pf", "b2b")
+	 * @param xmlName        configuration file name
+	 * @return IConfig if found, null otherwise
+	 */
+	private IConfig getConfigByPath(String scriptPathName, String xmlName) {
+		ConfScriptPaths sps = ConfScriptPaths.getInstance();
+		for (ConfScriptPath sp : sps.getLst()) {
+			if (scriptPathName.equals(sp.getName())) {
+				return UserConfig.createConfig(sp, xmlName, null);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Auto-create XML configuration container in the first writable
+	 * ConfScriptPath. Supports both JDBC and File storage modes.
+	 *
+	 * @param xmlName configuration file name (e.g., /business/camp/camp_act_template.xml)
+	 * @param admId   admin login ID for the creator (nullable, defaults to "api")
+	 * @return IConfig if created successfully, null if all writable paths failed
+	 */
+	private IConfig autoCreateConfig(String xmlName, String admId) {
+		if (StringUtils.isBlank(admId)) {
+			admId = "api";
+		}
+		ConfScriptPaths sps = ConfScriptPaths.getInstance();
+
+		for (ConfScriptPath sp : sps.getLst()) {
+			// Skip resource-based and read-only paths
+			if (sp.isResources() || sp.isReadOnly()) {
+				continue;
+			}
+
+			try {
+				if (sp.isJdbc()) {
+					// JDBC mode: create container in EWA_CFG_TREE + EWA_CFG tables
+					JdbcConfigOperation op = new JdbcConfigOperation(sp);
+					op.createXml(xmlName, admId);
+				} else {
+					// File mode: create container XML file on disk
+					String root = sp.getPath();
+					String filteredName = UserConfig.filterXmlName(xmlName);
+					java.io.File file = new java.io.File(root + filteredName);
+					java.io.File parent = file.getParentFile();
+					if (parent != null && !parent.exists()) {
+						parent.mkdirs();
+					}
+					UFile.createNewTextFile(file.getAbsolutePath(), ConfigUtils.XML_ROOT);
+				}
+
+				// Verify creation succeeded
+				IConfig configType = UserConfig.createConfig(sp, xmlName, null);
+				if (configType != null && configType.checkConfigurationExists()) {
+					LOGGER.info("Auto-created XML container: {} in path: {}", xmlName, sp.getPath());
+					return configType;
+				}
+			} catch (Exception e) {
+				LOGGER.warn("Failed to auto-create config in path {}: {}", sp.getPath(), xmlName, e);
+			}
+		}
+
+		LOGGER.error("Failed to auto-create config in any writable path: {}", xmlName);
+		return null;
+	}
+	/**
+	 * Show all available script paths for configuration storage.
+	 *
+	 * @return JSON result with script paths list
+	 */
+	private JSONObject showScriptPaths() {
+		ConfScriptPaths sps = ConfScriptPaths.getInstance();
+		JSONObject result = new JSONObject();
+		result.put("RST", true);
+
+		JSONArray paths = new JSONArray();
+		for (ConfScriptPath sp : sps.getLst()) {
+			JSONObject spObj = new JSONObject();
+			spObj.put("name", sp.getName());
+			spObj.put("path", sp.getPath());
+			spObj.put("isResources", sp.isResources());
+			spObj.put("isJdbc", sp.isJdbc());
+			spObj.put("isReadOnly", sp.isReadOnly());
+			paths.put(spObj);
+		}
+		result.put("scriptPaths", paths);
+		return result;
+	}
+
+	/**
 	 * Get API help documentation
 	 */
 	private JSONObject getHelp() {
@@ -963,7 +1089,9 @@ public class ServletApi extends HttpServlet {
 		methods.put("createBusinessXml",
 				"Create and save business XML from table (params: db, tablename, frametype, operationtype, xmlname, itemname, [admid])");
 		methods.put("previewBusinessXml",
-				"Preview business XML without saving (params: db, tablename, frametype, operationtype, xmlname, [output])");
+				"Preview business XML without saving (params: db, tablename, frametype, operationtype, xmlname, [output, scriptpath])");
+		methods.put("showScriptPaths",
+				"Show all available script paths for configuration storage");
 
 		result.put("methods", methods);
 
@@ -983,6 +1111,7 @@ public class ServletApi extends HttpServlet {
 		params.put("frametype", "Frame type for business XML: ListFrame, Frame, or Tree");
 		params.put("operationtype", "Operation type for business XML: N (new), M (modify), V (view), NM (new+modify)");
 		params.put("admid", "Admin ID for business XML creation (optional, uses authenticated user if not provided)");
+		params.put("scriptpath", "Optional script path name for createBusinessXml/previewBusinessXml (e.g., \"pf\"). If omitted, auto-creates in first writable path.");
 
 		result.put("parameters", params);
 		result.put("authentication", ApiTokenValidator.getSignatureAlgorithmDoc());

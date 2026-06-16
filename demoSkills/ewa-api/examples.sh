@@ -68,8 +68,20 @@ echo "命令: ./ewa-api.sh getConfItem \"/meta-data/services/ser_main.xml\" \"SE
 echo "说明: 获取指定配置项的内容"
 echo ""
 
-# ==================== 示例 9: 注销 ====================
-echo -e "${GREEN}示例 9: 注销 Token${NC}"
+# ==================== 示例 9: 显示配置存储路径 ====================
+echo -e "${GREEN}示例 9: 列出所有可用配置存储路径${NC}"
+echo "命令: ./ewa-api.sh showScriptPaths"
+echo "说明: 查看 JDBC/File 模式的所有可写路径"
+echo ""
+
+# ==================== 示例 10: 指定 scriptpath 生成业务 XML ====================
+echo -e "${GREEN}示例 10: 指定 scriptpath 生成业务 XML${NC}"
+echo "命令: ./ewa-api.sh createBusinessXml \$EWA_DEFAULT_DB MY_TABLE Frame NM my_xml MY_TABLE.F.NM pf"
+echo "说明: 指定保存到 pf 路径（跳过 auto-create 自动选择）"
+echo ""
+
+# ==================== 示例 11: 注销 ====================
+echo -e "${GREEN}示例 11: 注销 Token${NC}"
 echo "命令: ./ewa-api.sh logout"
 echo "说明: 撤销当前 Token"
 echo ""

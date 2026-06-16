@@ -11,8 +11,9 @@
       "Bash(git checkout *)",
       "Bash(awk *)",
       "Bash(mv *)",
-      "Bash(rm *)"
+      "Bash(rm *)",
+      "Read(//opt/homebrew/lib/node_modules/@qwen-code/qwen-code/bundled/qc-helper/docs/configuration/**)"
     ]
   },
-  "$version": 3
+  "$version": 4
 }
