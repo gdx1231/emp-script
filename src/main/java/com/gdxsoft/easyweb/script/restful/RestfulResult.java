@@ -1,4 +1,4 @@
-package com.gdxsoft.easyweb.script.servlets;
+package com.gdxsoft.easyweb.script.restful;
 
 import java.util.Iterator;
 
