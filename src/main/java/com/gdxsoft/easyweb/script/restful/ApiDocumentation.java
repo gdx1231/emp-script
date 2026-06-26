@@ -90,7 +90,7 @@ public class ApiDocumentation {
     /**
      * 创建单个端点的描述
      */
-    private static JSONObject createEndpointDescription(DTRow methodRow, DTRow catalogRow) {
+    private static JSONObject createEndpointDescription(DTRow methodRow, DTRow catalogRow) throws Exception {
         JSONObject endpoint = new JSONObject();
         
         endpoint.put("path", catalogRow.getCell("cat_path_full") != null ? catalogRow.getCell("cat_path_full").toString() : "");

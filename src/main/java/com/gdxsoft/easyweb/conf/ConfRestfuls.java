@@ -13,7 +13,7 @@ import org.w3c.dom.NodeList;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.script.RequestValue;
-import com.gdxsoft.easyweb.script.servlets.RestfulResult;
+import com.gdxsoft.easyweb.script.restful.RestfulResult;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
