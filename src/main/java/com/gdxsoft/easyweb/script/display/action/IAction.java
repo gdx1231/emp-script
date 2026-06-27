@@ -3,8 +3,8 @@ package com.gdxsoft.easyweb.script.display.action;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.gdxsoft.easyweb.datasource.UpdateChanges;
 import com.gdxsoft.easyweb.script.display.HtmlClass;

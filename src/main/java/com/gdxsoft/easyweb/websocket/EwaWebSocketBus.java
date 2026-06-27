@@ -3,12 +3,12 @@ package com.gdxsoft.easyweb.websocket;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.RemoteEndpoint.Async;
-import javax.websocket.Session;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.RemoteEndpoint.Async;
+import jakarta.websocket.Session;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;

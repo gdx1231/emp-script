@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
-import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload2.core.FileItem;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1036,7 +1036,7 @@ public class Upload {
 
 		} else {
 			FileItem item = (FileItem) itemobj;
-			item.write(uploadedFile);
+			item.write(uploadedFile.toPath());
 		}
 	}
 

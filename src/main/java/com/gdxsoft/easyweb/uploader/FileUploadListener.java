@@ -8,8 +8,8 @@
  */
 package com.gdxsoft.easyweb.uploader;
 
-import org.apache.commons.fileupload.ProgressListener;
-import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.fileupload2.core.ProgressListener;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Deprecated
 public class FileUploadListener implements ProgressListener {

@@ -16,7 +16,7 @@ import java.net.ServerSocket;
  *
  */
 public class ConfSOffice {
-	private static Logger LOGGER = LoggerFactory.getLogger(ConfSecurities.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(ConfSOffice.class);
 	private static ConfSOffice INST = null;
 	private static long PROP_TIME = 0;
 

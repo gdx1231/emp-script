@@ -28,10 +28,14 @@ public class OpenOfficeInstance {
 	private static String HTML = "<!DOCTYPE HTML><html><head>\n"
 			+ "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1\">\n"
 			+ "<meta  charset=\"UTF-8\">\n</head>\n<body>";
-	public static OfficeManager officeManager;
+	private static OfficeManager officeManager;
 	public static boolean SERVICE_START = false;
 
 	public synchronized static void startService() {
+		if (officeManager != null) {
+			stopService();
+		}
+
 		ConfSOffice conf = ConfSOffice.getInstance();
 		String officeHome = conf.getSofficePath();
 		int[] ports = conf.getPorts();
@@ -168,6 +172,11 @@ public class OpenOfficeInstance {
 		DocumentFormatRegistry dfr = DefaultDocumentFormatRegistry.getInstance();
 		DocumentFormat formatInput = dfr.getFormatByExtension(UFile.getFileExt(inputFile.getName()));
 
+		if (formatInput == null) {
+			LOGGER.error("Unsupported input format for extension: {}", UFile.getFileExt(inputFile.getName()));
+			return;
+		}
+
 		PageCounterFilter pageCounterFilter = new PageCounterFilter();
 		PagesSelectorFilter firstSelectorFilter = null;
 
@@ -216,11 +225,11 @@ public class OpenOfficeInstance {
 				try {
 					UFile.createNewTextFile(outFile.getAbsolutePath(), sbHtml.toString());
 				} catch (IOException e) {
-					LOGGER.error("Fail to create html file ", e.getLocalizedMessage());
+					LOGGER.error("Fail to create html file", e);
 				}
 			}
 		} catch (OfficeException e) {
-			LOGGER.error("Convert fail", e.getLocalizedMessage());
+			LOGGER.error("Convert fail", e);
 		}
 
 	}

@@ -1,6 +1,6 @@
 package com.gdxsoft.easyweb.script.display.items;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 

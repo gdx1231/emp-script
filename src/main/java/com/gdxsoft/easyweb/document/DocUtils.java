@@ -4,11 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.PumpStreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,31 +44,44 @@ public class DocUtils {
 				+ (sourcePath.endsWith(java.io.File.separatorChar + "") ? "" : java.io.File.separatorChar) + "*.*";
 		LOGGER.info(cmd);
 
-		CommandLine commandLine = CommandLine.parse(cmd);
-		DefaultExecutor executor = new DefaultExecutor();
-		executor.setExitValue(0);
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(60000);
-		executor.setWatchdog(watchdog);
-
-		// PumpStreamHandler h = new PumpStreamHandler(System.out, System.err,
-		// System.in);
-
-		// executor.setStreamHandler(h);
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
-		executor.setStreamHandler(streamHandler);
+		String[] args = cmd.split(" ");
+		ProcessBuilder pb = new ProcessBuilder(args);
+		pb.redirectErrorStream(true);
+		long t0 = System.currentTimeMillis();
 		try {
-			executor.execute(commandLine);
-			String s = outputStream.toString();
-			outputStream.close();
-			LOGGER.info(s);
+			Process process = pb.start();
 
-			return true;
-		} catch (ExecuteException e) {
-			LOGGER.error("zipWith7zip: " + e.getMessage());
-			return false;
+			StringBuilder output = new StringBuilder();
+			Thread reader = new Thread(() -> {
+				try {
+					byte[] buf = new byte[1024];
+					int len;
+					while ((len = process.getInputStream().read(buf)) != -1) {
+						output.append(new String(buf, 0, len));
+					}
+				} catch (IOException ignored) {
+				}
+			});
+			reader.setDaemon(true);
+			reader.start();
+
+			boolean finished = process.waitFor(60, java.util.concurrent.TimeUnit.SECONDS);
+			if (!finished) {
+				process.destroyForcibly();
+				LOGGER.warn("zipWith7zip timed out ({}ms)", System.currentTimeMillis() - t0);
+				return false;
+			}
+			reader.join(3000);
+			int exitCode = process.exitValue();
+			LOGGER.info("zipWith7zip completed ({}ms, exit={}): {}",
+					System.currentTimeMillis() - t0, exitCode, output.toString().trim());
+			return exitCode == 0;
 		} catch (IOException e) {
-			LOGGER.error("zipWith7zip: " + e.getMessage());
+			LOGGER.error("zipWith7zip failed ({}ms): {}", System.currentTimeMillis() - t0, e.getMessage());
+			return false;
+		} catch (InterruptedException e) {
+			LOGGER.error("zipWith7zip interrupted ({}ms)", System.currentTimeMillis() - t0);
+			Thread.currentThread().interrupt();
 			return false;
 		}
 	}

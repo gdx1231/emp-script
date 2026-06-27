@@ -3,7 +3,7 @@ package com.gdxsoft.easyweb.script.display.items;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONObject;
@@ -907,7 +907,7 @@ public class ItemBase implements IItem {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IItem#setResponse(javax.servlet.http
+	 * @see com.gdxsoft.easyweb.script.display.IItem#setResponse(jakarta.servlet.http
 	 * .HttpServletResponse)
 	 */
 	public void setResponse(HttpServletResponse response) {

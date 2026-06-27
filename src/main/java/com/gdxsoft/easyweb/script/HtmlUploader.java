@@ -3,11 +3,11 @@ package com.gdxsoft.easyweb.script;
 import java.io.File;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.core.FileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.jakarta.servlet5.JakartaServletFileUpload;
 
 import com.gdxsoft.easyweb.uploader.Upload;
 import com.gdxsoft.easyweb.utils.UPath;
@@ -31,15 +31,23 @@ public class HtmlUploader {
 
 		HttpServletRequest request = rv.getRequest();
 
-		DiskFileItemFactory factory = new DiskFileItemFactory();
+		DiskFileItemFactory factory = null;
 		// 设置内存缓冲区，超过后写入临时文件
 		int bufferSize = 1024 * 1024 * 10; // 10M
 
-		factory.setSizeThreshold(bufferSize);// 设置缓冲区大小，这里是10M
+		// factory.setSizeThreshold(bufferSize);// 设置缓冲区大小，这里是10M
 		// 设置临时文件存储位置
 		File tempPath = new File(UPath.getPATH_UPLOAD() + "/" + Upload.DEFAULT_UPLOAD_PATH);
-		factory.setRepository(tempPath);
-		ServletFileUpload upload = new ServletFileUpload(factory);
+		// factory.setRepository(tempPath);
+		try {
+			factory = DiskFileItemFactory.builder()
+				.setPath((tempPath).toPath())
+				.setBufferSize((int)(bufferSize))
+				.get();
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to create DiskFileItemFactory", e);
+		}
+		JakartaServletFileUpload upload = new JakartaServletFileUpload(factory);
 
 		long maxSize = 1024 * 1024 * 1024 * 2; // 2g
 		upload.setSizeMax(maxSize);

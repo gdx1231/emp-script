@@ -2,7 +2,7 @@ package com.gdxsoft.easyweb.script.display;
 
 import java.util.HashMap;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.global.EwaGlobals;

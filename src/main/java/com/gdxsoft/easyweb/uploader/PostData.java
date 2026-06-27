@@ -5,13 +5,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.core.FileItem;
+import org.apache.commons.fileupload2.core.FileUploadException;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.jakarta.servlet5.JakartaServletFileUpload;
 
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -50,7 +50,7 @@ public class PostData {
 	}
 
 	public void doPost() throws IOException {
-		boolean isMultipart = ServletFileUpload.isMultipartContent(_request);
+		boolean isMultipart = JakartaServletFileUpload.isMultipartContent(_request);
 		if (_request.getParameter("EWA_UP_GUID") == null) {
 			return;
 		}
@@ -152,12 +152,16 @@ public class PostData {
 	 * 处理文件上传
 	 */
 	private void processFileUpload() {
-		DiskFileItemFactory factory = new DiskFileItemFactory();
-		// 设置内存缓冲区，超过后写入临时文件
-		factory.setSizeThreshold(10240000);
-		// 设置临时文件存储位置
-		factory.setRepository(new File(this._uploadTempDir));
-		ServletFileUpload upload = new ServletFileUpload(factory);
+		DiskFileItemFactory factory;
+		try {
+			factory = DiskFileItemFactory.builder()
+					.setPath(new File(this._uploadTempDir).toPath())
+					.setBufferSize(10240000)
+					.get();
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to create DiskFileItemFactory", e);
+		}
+		JakartaServletFileUpload upload = new JakartaServletFileUpload(factory);
 		// 设置单个文件的最大上传值
 		upload.setFileSizeMax(102400000);
 		// 设置整个request的最大值
@@ -189,7 +193,7 @@ public class PostData {
 					FileUpload fu = this.addFileUpload(satusBean, item, i);
 
 					File uploadedFile = new File(fu.getSavePath());
-					item.write(uploadedFile);
+					item.write(uploadedFile.toPath());
 
 					saveStatusBean(_request, satusBean);
 					Thread.sleep(500);

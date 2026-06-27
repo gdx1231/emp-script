@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -1324,7 +1324,7 @@ public class ActionBase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gdxsoft.easyweb.script.display.IAction#setResponse(javax.servlet.
+	 * @see com.gdxsoft.easyweb.script.display.IAction#setResponse(jakarta.servlet.
 	 * http.HttpServletResponse)
 	 */
 	public void setResponse(HttpServletResponse response) {

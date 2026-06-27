@@ -4,25 +4,27 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.PumpStreamHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.utils.UPath;
 
+/**
+ * @deprecated Flash/SWF is end-of-life (Adobe discontinued Flash Player on 2020-12-31).
+ * Use PDF or HTML5 based solutions instead.
+ */
+@Deprecated
 public class Pdf2Swf {
+	private static Logger LOGGER = LoggerFactory.getLogger(Pdf2Swf.class);
+
 	/**
 	 * 转换Pdf到Swf
-	 * 
+	 *
 	 * @param src
 	 * @param target
-	 * @throws ExecuteException
 	 * @throws IOException
 	 */
-	public boolean cvt2Swf(String src, String target) throws ExecuteException,
-			IOException {
+	public boolean cvt2Swf(String src, String target) throws IOException {
 		return this.cvt2Swf(new File(src), new File(target));
 	}
 
@@ -31,11 +33,9 @@ public class Pdf2Swf {
 	 * 
 	 * @param src
 	 * @param target
-	 * @throws ExecuteException
 	 * @throws IOException
 	 */
-	public boolean cvt2Swf(File src, File target) throws ExecuteException,
-			IOException {
+	public boolean cvt2Swf(File src, File target) throws IOException {
 		// Usage: pdf2swf.exe [-options] file.pdf -o file.swf
 		String path = UPath.getCVT_SWFTOOL_HOME();
 		File f = new File(path);
@@ -61,32 +61,46 @@ public class Pdf2Swf {
 	}
 
 	private boolean runCvt(String line) {
-		CommandLine commandLine = CommandLine.parse(line);
-		DefaultExecutor executor = new DefaultExecutor();
-		executor.setExitValue(0);
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(60000);
-		executor.setWatchdog(watchdog);
-		
-		//PumpStreamHandler h = new PumpStreamHandler(System.out, System.err, System.in);
-		 
-		//executor.setStreamHandler(h);
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
-		executor.setStreamHandler(streamHandler);
+		LOGGER.info("Pdf2Swf: {}", line);
+		String[] args = line.split(" ");
+		ProcessBuilder pb = new ProcessBuilder(args);
+		pb.redirectErrorStream(true);
+		long t0 = System.currentTimeMillis();
 		try {
-			executor.execute(commandLine);
-			String s=outputStream.toString();
-			outputStream.close();
-			System.out.println(s);
-			
-			return true;
-		} catch (ExecuteException e) {
-			System.out.println(this + ": " + e.getMessage());
-		} catch (IOException e) {
-			System.out.println(this + ": " + e.getMessage());
-		}
+			Process process = pb.start();
 
-	
-		return false;
+			StringBuilder output = new StringBuilder();
+			Thread reader = new Thread(() -> {
+				try {
+					byte[] buf = new byte[1024];
+					int len;
+					while ((len = process.getInputStream().read(buf)) != -1) {
+						output.append(new String(buf, 0, len));
+					}
+				} catch (IOException ignored) {
+				}
+			});
+			reader.setDaemon(true);
+			reader.start();
+
+			boolean finished = process.waitFor(60, java.util.concurrent.TimeUnit.SECONDS);
+			if (!finished) {
+				process.destroyForcibly();
+				LOGGER.warn("Pdf2Swf timed out ({}ms)", System.currentTimeMillis() - t0);
+				return false;
+			}
+			reader.join(3000);
+			int exitCode = process.exitValue();
+			LOGGER.info("Pdf2Swf completed ({}ms, exit={}): {}",
+					System.currentTimeMillis() - t0, exitCode, output.toString().trim());
+			return exitCode == 0;
+		} catch (IOException e) {
+			LOGGER.error("Pdf2Swf failed ({}ms): {}", System.currentTimeMillis() - t0, e.getMessage());
+			return false;
+		} catch (InterruptedException e) {
+			LOGGER.error("Pdf2Swf interrupted ({}ms)", System.currentTimeMillis() - t0);
+			Thread.currentThread().interrupt();
+			return false;
+		}
 	}
 }
