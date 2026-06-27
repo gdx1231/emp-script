@@ -97,9 +97,8 @@ public class ServletRestful extends HttpServlet {
 //		UUrl u = new UUrl(request);
 //		String path = u.getName();
 
-		// 特殊接口：生成帮助文档（JSON）
+		// 特殊接口：生成帮助文档（HTML/JSON）
 		if (path.endsWith("/ewa-help-documents")) {
-			response.setContentType("application/json");
 			return this.ewaHelpDocuments(request, response);
 		}
 
@@ -358,11 +357,39 @@ public class ServletRestful extends HttpServlet {
 	}
 
 	/**
-	 * 生成帮助文档（API自我描述）
+	 * 生成帮助文档（API自我描述），支持 HTML/JSON 双格式输出
+	 * 优先级：query 参数 format > Accept 头 > 默认 HTML
 	 */
 	private String ewaHelpDocuments(HttpServletRequest request, HttpServletResponse response) {
-		JSONObject result = ApiDocumentation.getApiDocumentation();
-		return result.toString();
+		boolean wantJson = false;
+
+		// 1. query 参数优先
+		String format = request.getParameter("format");
+		if ("json".equalsIgnoreCase(format)) {
+			wantJson = true;
+		} else if ("html".equalsIgnoreCase(format)) {
+			wantJson = false;
+		} else {
+			// 2. Accept 头
+			String accept = request.getHeader("Accept");
+			if (accept != null) {
+				boolean hasJson = accept.contains("application/json");
+				boolean hasHtml = accept.contains("text/html");
+				if (hasJson && !hasHtml) {
+					wantJson = true;
+				}
+			}
+			// 3. 默认 HTML（浏览器访问）
+		}
+
+		if (wantJson) {
+			response.setContentType("application/json; charset=utf-8");
+			JSONObject result = ApiDocumentation.getApiDocumentation();
+			return result.toString();
+		} else {
+			response.setContentType("text/html; charset=utf-8");
+			return ApiDocumentation.getApiDocumentationHtml();
+		}
 	}
 
 	/**
