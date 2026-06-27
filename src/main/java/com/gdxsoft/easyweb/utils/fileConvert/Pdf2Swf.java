@@ -12,6 +12,11 @@ import org.apache.commons.exec.PumpStreamHandler;
 
 import com.gdxsoft.easyweb.utils.UPath;
 
+/**
+ * @deprecated Flash/SWF is end-of-life (Adobe discontinued Flash Player on 2020-12-31).
+ * Use PDF or HTML5 based solutions instead.
+ */
+@Deprecated
 public class Pdf2Swf {
 	/**
 	 * 转换Pdf到Swf

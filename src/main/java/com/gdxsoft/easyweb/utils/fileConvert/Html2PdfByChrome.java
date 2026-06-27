@@ -3,13 +3,10 @@ package com.gdxsoft.easyweb.utils.fileConvert;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import com.gdxsoft.easyweb.utils.UPath;
 
 import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
-import org.apache.commons.exec.ExecuteWatchdog;
-import org.apache.commons.exec.PumpStreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,39 +59,133 @@ public class Html2PdfByChrome {
 	 * @param pdfFile
 	 */
 	public void convert2PDF(File inputFile, File pdfFile) {
-		String cmd = this.getChromeCmd();
-		cmd += " --headless --disable-gpu " + (this.noHeaderAndFooter ? "--no-pdf-header-footer" : "")
-				+ " --print-to-pdf=\"" + pdfFile.toString() + "\" \"file://" + inputFile.getAbsolutePath() + "\" ";
+		String cmd = this.buildBaseCmd();
+		cmd += " --print-to-pdf=\"" + pdfFile.toString() + "\" \"file://" + inputFile.getAbsolutePath() + "\" ";
 
 		this.runCvt(cmd);
 	}
 
 	/**
-	 * 获取 chrome 的执行目录
-	 * 
+	 * 构建 Chrome 基础命令参数，使用独立临时目录避免读取当前用户的 Chrome 默认配置
+	 */
+	private String buildBaseCmd() {
+		String cmd = this.getChromeCmd();
+		cmd += " --headless=new --disable-gpu --disable-extensions";
+		if (this.noHeaderAndFooter) {
+			cmd += " --no-pdf-header-footer";
+		}
+		File dir = getOrCreateUserDataDir();
+		if (dir != null) {
+			cmd += " --user-data-dir=\"" + dir.getAbsolutePath() + "\"";
+		}
+		return cmd;
+	}
+
+	/**
+	 * 获取或创建共享的临时 user-data-dir，同一 JVM 生命周期内只创建一次
+	 */
+	private static File getOrCreateUserDataDir() {
+		if (userDataDir != null && userDataDir.exists()) {
+			return userDataDir;
+		}
+		synchronized (Html2PdfByChrome.class) {
+			if (userDataDir != null && userDataDir.exists()) {
+				return userDataDir;
+			}
+			long t0 = System.currentTimeMillis();
+			try {
+				userDataDir = Files.createTempDirectory("ewa-chrome-").toFile();
+				Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+					deleteRecursive(userDataDir);
+				}));
+				long span = System.currentTimeMillis() - t0;
+				LOGGER.info("Created shared user-data-dir ({}ms): {}", span, userDataDir.getAbsolutePath());
+				return userDataDir;
+			} catch (IOException e) {
+				long span = System.currentTimeMillis() - t0;
+				LOGGER.warn("Failed to create temp user-data-dir ({}ms)", span, e);
+				return null;
+			}
+		}
+	}
+
+	private static void deleteRecursive(File file) {
+		if (file == null || !file.exists()) {
+			return;
+		}
+		File[] children = file.listFiles();
+		if (children != null) {
+			for (File child : children) {
+				deleteRecursive(child);
+			}
+		}
+		file.delete();
+	}
+
+	// 缓存探测到的浏览器路径，避免每次调用都重新查找
+	private static volatile String detectedBrowser = null;
+
+	// 复用的临时 user-data-dir，避免每次转换都初始化新 Chrome profile
+	private static volatile File userDataDir = null;
+
+	/**
+	 * 获取 Chrome 或 Edge 的执行路径，优先使用 Chrome，不存在时回退到 Edge
+	 *
 	 * @return
 	 */
 	public String getChromeCmd() {
-		String os = System.getProperty("os.name");
-		if (os == null) {
-			os = "??";
-		} else {
-			os = os.toUpperCase();
-		}
-		String cmd = "";
 		if (this.chromeCmd != null) {
-			cmd = this.chromeCmd;
-		} else if (os.indexOf("MAC") >= 0) {
-			cmd = "\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\"";
-		} else if (os.indexOf("WINDOWS") >= 0) {
-			cmd = "chrome";
-			String userName = System.getProperty("user.name");
-			cmd = "C:\\Users\\" + userName + "\\AppData\\Local\\Google\\Chrome\\Application\\" + cmd;
+			return this.chromeCmd;
+		}
+		if (detectedBrowser != null) {
+			return detectedBrowser;
+		}
+		synchronized (Html2PdfByChrome.class) {
+			if (detectedBrowser != null) {
+				return detectedBrowser;
+			}
+			detectedBrowser = detectBrowser();
+			return detectedBrowser;
+		}
+	}
+
+	private static String detectBrowser() {
+		String os = System.getProperty("os.name");
+		if (os != null) {
+			os = os.toUpperCase();
 		} else {
-			cmd = "chrome";
+			os = "";
 		}
 
-		return cmd;
+		if (os.contains("MAC")) {
+			return findExistingBrowser(
+					"\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\"",
+					"\"/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge\"");
+		} else if (os.contains("WIN")) {
+			String userHome = System.getProperty("user.home");
+			return findExistingBrowser(
+					"\"" + userHome + "\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe\"",
+					"\"C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe\"",
+					"\"C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe\"");
+		} else {
+			return findExistingBrowser(
+					"google-chrome-stable", "google-chrome",
+					"microsoft-edge-stable", "microsoft-edge");
+		}
+	}
+
+	private static String findExistingBrowser(String... candidates) {
+		for (String candidate : candidates) {
+			// 去掉引号后检查文件是否存在
+			String path = candidate.replace("\"", "");
+			File f = new File(path);
+			if (f.exists()) {
+				LOGGER.info("Found browser: {}", path);
+				return candidate;
+			}
+		}
+		LOGGER.warn("No Chromium-based browser found, falling back to: {}", candidates[0]);
+		return candidates[0];
 	}
 
 	/**
@@ -112,41 +203,79 @@ public class Html2PdfByChrome {
 	}
 
 	public void convertUrl2PDF(String url, File pdfFile) {
-		String cmd = this.getChromeCmd();
-
-		cmd += " --headless --disable-gpu " + (this.noHeaderAndFooter ? "--no-pdf-header-footer" : "")
-				+ " --print-to-pdf=\"" + pdfFile.toString() + "\" \"" + url + "\" ";
+		String cmd = this.buildBaseCmd();
+		cmd += " --print-to-pdf=\"" + pdfFile.toString() + "\" \"" + url + "\" ";
 
 		this.runCvt(cmd);
 	}
 
 	private boolean runCvt(String line) {
-		LOGGER.info(line);
+		LOGGER.info("Chrome convert start: {}", line);
 
 		CommandLine commandLine = CommandLine.parse(line);
-		DefaultExecutor executor = new DefaultExecutor();
-		executor.setExitValue(0);
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(60000);
-		executor.setWatchdog(watchdog);
-
-		// PumpStreamHandler h = new PumpStreamHandler(System.out, System.err,
-		// System.in);
-
-		// executor.setStreamHandler(h);
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream);
-		executor.setStreamHandler(streamHandler);
+		long t0 = System.currentTimeMillis();
 		try {
-			executor.execute(commandLine);
-			String s = outputStream.toString();
-			outputStream.close();
-			System.out.println(s);
-			LOGGER.info(s);
-			return true;
-		} catch (ExecuteException e) {
-			LOGGER.error(e.getMessage());
+			ProcessBuilder pb = new ProcessBuilder(commandLine.toStrings());
+			pb.redirectErrorStream(true);
+			Process process = pb.start();
+
+			StringBuilder output = new StringBuilder();
+			final boolean[] success = { false };
+			final Object lock = new Object();
+
+			// 读取输出，检测到完成标记后立即通知主线程
+			Thread reader = new Thread(() -> {
+				try {
+					byte[] buf = new byte[1024];
+					int len;
+					while ((len = process.getInputStream().read(buf)) != -1) {
+						String chunk = new String(buf, 0, len);
+						synchronized (output) {
+							output.append(chunk);
+						}
+						if (chunk.contains("written to file")) {
+							synchronized (lock) {
+								success[0] = true;
+								lock.notifyAll();
+							}
+						}
+					}
+				} catch (IOException ignored) {
+				}
+			});
+			reader.setDaemon(true);
+			reader.start();
+
+			// 等待完成信号或超时
+			synchronized (lock) {
+				if (!success[0]) {
+					lock.wait(60000);
+				}
+			}
+
+			// Chrome 生成 PDF 后不会自行退出，主动终止
+			if (process.isAlive()) {
+				process.destroyForcibly();
+				process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
+			}
+			reader.join(3000);
+
+			long span = System.currentTimeMillis() - t0;
+			String result = output.toString();
+			if (success[0]) {
+				LOGGER.info("Chrome convert completed ({}ms): {}", span, result.trim());
+				return true;
+			} else {
+				LOGGER.warn("Chrome convert timeout or failed ({}ms): {}", span, result.trim());
+				return false;
+			}
 		} catch (IOException e) {
-			LOGGER.error(e.getMessage());
+			long span = System.currentTimeMillis() - t0;
+			LOGGER.error("Chrome conversion failed ({}ms)", span, e);
+		} catch (InterruptedException e) {
+			long span = System.currentTimeMillis() - t0;
+			LOGGER.error("Chrome conversion interrupted ({}ms)", span, e);
+			Thread.currentThread().interrupt();
 		}
 
 		return false;

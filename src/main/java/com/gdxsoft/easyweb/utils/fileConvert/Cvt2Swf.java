@@ -3,6 +3,11 @@ package com.gdxsoft.easyweb.utils.fileConvert;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.msnet.MTableStr;
 
+/**
+ * @deprecated Flash/SWF is end-of-life (Adobe discontinued Flash Player on 2020-12-31).
+ * Use PDF or HTML5 based solutions instead.
+ */
+@Deprecated
 public class Cvt2Swf {
 
 	private static String NO_PDF_EXTS = "pdf"; //,jpg,jpeg,gif
