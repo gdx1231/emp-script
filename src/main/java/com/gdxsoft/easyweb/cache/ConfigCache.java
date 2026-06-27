@@ -29,11 +29,12 @@ public class ConfigCache {
 	 */
 	@SuppressWarnings("unchecked")
 	public static UserConfig getUserConfig(String xmlName, String itemName) {
-		if (!_Objects.containsKey(xmlName)) {
+		Object obj = _Objects.get(xmlName);
+		if (obj == null) {
 			return null;
 		}
 
-		CacheGroup<UserConfig> cg = (CacheGroup<UserConfig>) _Objects.get(xmlName);
+		CacheGroup<UserConfig> cg = (CacheGroup<UserConfig>) obj;
 		UserConfig uc = cg.getItem(itemName);
 
 		if (uc == null) {
@@ -182,7 +183,11 @@ public class ConfigCache {
 	}
 
 	public static void clearCache() {
-		String[] aa = getArrayKey().split(",");
+		String keys = getArrayKey();
+		if (keys.isEmpty()) {
+			return;
+		}
+		String[] aa = keys.split(",");
 		clearCache(aa);
 	}
 

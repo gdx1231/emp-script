@@ -14,7 +14,7 @@ import com.gdxsoft.easyweb.script.userConfig.UserConfig;
  *
  */
 public class ConfigCacheWidthSqlCached {
-	private static Logger LOOGER = LoggerFactory.getLogger(ConfigCacheWidthSqlCached.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(ConfigCacheWidthSqlCached.class);
 
 	/**
 	 * 获取配置文件的缓存key
@@ -147,11 +147,11 @@ public class ConfigCacheWidthSqlCached {
 			uc = UserConfig.fromSerialize(userConfigSerialized.getBinary());
 			return uc;
 		} catch (ClassNotFoundException e) {
-			LOOGER.error(e.getMessage());
+			LOGGER.error(e.getMessage());
 			removeUserConfig(xmlFileName);
 			return null;
 		} catch (IOException e) {
-			LOOGER.error(e.getMessage());
+			LOGGER.error(e.getMessage());
 			removeUserConfig(xmlFileName);
 			return null;
 		}
@@ -199,7 +199,7 @@ public class ConfigCacheWidthSqlCached {
 		String[] removeKeys = new String[keys.size()];
 		removeKeys = keys.toArray(removeKeys);
 		for (int i = 0; i < removeKeys.length; i++) {
-			LOOGER.info("Del " + removeKeys[i]);
+			LOGGER.info("Del " + removeKeys[i]);
 		}
 		cached.removes(removeKeys, "BIN");
 	}
@@ -219,7 +219,7 @@ public class ConfigCacheWidthSqlCached {
 			meta = CachedXmlFileMeta.fromSerialize(cvFile.getBinary());
 			return meta;
 		} catch (Exception err) {
-			LOOGER.warn("Unabled from serialize", err.getMessage());
+			LOGGER.warn("Unabled from serialize", err);
 			return null;
 		}
 
@@ -256,7 +256,7 @@ public class ConfigCacheWidthSqlCached {
 					meta = null;
 				}
 			} catch (Exception err) {
-				LOOGER.warn("Unabled from serialize", err.getMessage());
+				LOGGER.warn("Unabled from serialize", err);
 			}
 		}
 		if (meta == null) {
@@ -270,9 +270,9 @@ public class ConfigCacheWidthSqlCached {
 		// 记录文件信息到缓存
 		try {
 			cached.add(file_key, meta.toSerialize(), xmlFileName);
-			LOOGER.info("Add " + file_key);
+			LOGGER.info("Add " + file_key);
 		} catch (IOException e1) {
-			LOOGER.error(e1.getLocalizedMessage());
+			LOGGER.error(e1.getLocalizedMessage());
 			return;
 		}
 
@@ -283,16 +283,14 @@ public class ConfigCacheWidthSqlCached {
 		try {
 			// 记录配置项信息到缓存
 			cached.add(key, userConfig.toSerialize(), xmlFileName + "::" + itemName);
-			LOOGER.info("Add " + key);
+			LOGGER.info("Add " + key);
 		} catch (IOException e) {
-			LOOGER.error("", e);
+			LOGGER.error("", e);
 		}
 	}
 
 	private static CachedXmlFileMeta createCachedXmlFileMeta(String fileKey, ConfigStatus fileStatus) {
 		CachedXmlFileMeta meta = new CachedXmlFileMeta();
-
-		meta = new CachedXmlFileMeta();
 		meta.setCode(fileStatus.getStatusCode());
 		meta.setFile(fileStatus.getFixedXmlName());
 		meta.setKey(fileKey);
