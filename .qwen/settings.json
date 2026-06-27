@@ -13,7 +13,13 @@
       "Bash(mv *)",
       "Bash(rm *)",
       "Read(//opt/homebrew/lib/node_modules/@qwen-code/qwen-code/bundled/qc-helper/docs/configuration/**)",
-      "Read(//Users/admin/Library/Application Support/Code/User/**)"
+      "Read(//Users/admin/Library/Application Support/Code/User/**)",
+      "Bash(which *)",
+      "Bash(brew *)",
+      "Bash(ls *)",
+      "Bash(pip list)",
+      "Bash(npm *)",
+      "Bash(mdfind *)"
     ]
   },
   "$version": 4

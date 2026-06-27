@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.gdxsoft.easyweb.define.UpdateCfgXmlTest" time="0.269" tests="14" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="21"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/Users/admin/java/com.gdxsoft/emp-script/target17/test-classes:/Users/admin/java/com.gdxsoft/emp-script/target17/classes:/Users/admin/.m2/repository/com/gdxsoft/easyweb/emp-script-utils-jdk17/1.1.10/emp-script-utils-jdk17-1.1.10.jar:/Users/admin/.m2/repository/org/json/json/20260522/json-20260522.jar:/Users/admin/.m2/repository/com/google/zxing/core/3.5.4/core-3.5.4.jar:/Users/admin/.m2/repository/net/coobird/thumbnailator/0.4.21/thumbnailator-0.4.21.jar:/Users/admin/.m2/repository/org/eclipse/angus/jakarta.mail/2.0.3/jakarta.mail-2.0.3.jar:/Users/admin/.m2/repository/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar:/Users/admin/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/Users/admin/.m2/repository/org/bouncycastle/bcprov-jdk18on/1.84/bcprov-jdk18on-1.84.jar:/Users/admin/.m2/repository/org/hsqldb/hsqldb/2.7.4/hsqldb-2.7.4.jar:/Users/admin/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:/Users/admin/.m2/repository/redis/clients/jedis/3.8.0/jedis-3.8.0.jar:/Users/admin/.m2/repository/org/apache/commons/commons-pool2/2.11.1/commons-pool2-2.11.1.jar:/Users/admin/.m2/repository/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar:/Users/admin/.m2/repository/org/apache/commons/commons-fileupload2-core/2.0.0-M2/commons-fileupload2-core-2.0.0-M2.jar:/Users/admin/.m2/repository/org/apache/commons/commons-fileupload2-jakarta-servlet5/2.0.0-M2/commons-fileupload2-jakarta-servlet5-2.0.0-M2.jar:/Users/admin/.m2/repository/commons-io/commons-io/2.20.0/commons-io-2.20.0.jar:/Users/admin/.m2/repository/net/sourceforge/jexcelapi/jxl/2.6.12/jxl-2.6.12.jar:/Users/admin/.m2/repository/com/zaxxer/HikariCP/4.0.3/HikariCP-4.0.3.jar:/Users/admin/.m2/repository/com/alibaba/druid/1.2.21/druid-1.2.21.jar:/Users/admin/.m2/repository/org/jsoup/jsoup/1.17.2/jsoup-1.17.2.jar:/Users/admin/.m2/repository/jakarta/servlet/jakarta.servlet-api/5.0.0/jakarta.servlet-api-5.0.0.jar:/Users/admin/.m2/repository/jakarta/websocket/jakarta.websocket-api/2.0.0/jakarta.websocket-api-2.0.0.jar:/Users/admin/.m2/repository/org/jodconverter/jodconverter-core/4.4.4/jodconverter-core-4.4.4.jar:/Users/admin/.m2/repository/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar:/Users/admin/.m2/repository/org/jodconverter/jodconverter-local/4.4.4/jodconverter-local-4.4.4.jar:/Users/admin/.m2/repository/org/openoffice/juh/4.1.2/juh-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/jurt/4.1.2/jurt-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/ridl/4.1.2/ridl-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/unoil/4.1.2/unoil-4.1.2.jar:/Users/admin/.m2/repository/jdbf/jdbf/1.0/jdbf-1.0.jar:/Users/admin/.m2/repository/org/slf4j/slf4j-jdk14/1.7.32/slf4j-jdk14-1.7.32.jar:/Users/admin/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.7.1/junit-jupiter-api-5.7.1.jar:/Users/admin/.m2/repository/org/apiguardian/apiguardian-api/1.1.0/apiguardian-api-1.1.0.jar:/Users/admin/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/Users/admin/.m2/repository/org/junit/platform/junit-platform-commons/1.7.1/junit-platform-commons-1.7.1.jar:/Users/admin/.m2/repository/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar:/Users/admin/.m2/repository/com/google/protobuf/protobuf-java/4.26.1/protobuf-java-4.26.1.jar:/Users/admin/.m2/repository/com/microsoft/sqlserver/mssql-jdbc/12.4.3.jre8/mssql-jdbc-12.4.3.jre8.jar:"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Asia/Shanghai"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="java.vm.specification.version" value="21"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="CN"/>
+    <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/graalvm-jdk-21/Contents/Home/lib"/>
+    <property name="sun.java.command" value="/Users/admin/java/com.gdxsoft/emp-script/target17/surefire/surefirebooter-20260627160138548_3.jar /Users/admin/java/com.gdxsoft/emp-script/target17/surefire 2026-06-27T16-01-38_484-jvmRun1 surefire-20260627160138548_1tmp surefire_0-20260627160138548_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/Users/admin/java/com.gdxsoft/emp-script/target17/test-classes:/Users/admin/java/com.gdxsoft/emp-script/target17/classes:/Users/admin/.m2/repository/com/gdxsoft/easyweb/emp-script-utils-jdk17/1.1.10/emp-script-utils-jdk17-1.1.10.jar:/Users/admin/.m2/repository/org/json/json/20260522/json-20260522.jar:/Users/admin/.m2/repository/com/google/zxing/core/3.5.4/core-3.5.4.jar:/Users/admin/.m2/repository/net/coobird/thumbnailator/0.4.21/thumbnailator-0.4.21.jar:/Users/admin/.m2/repository/org/eclipse/angus/jakarta.mail/2.0.3/jakarta.mail-2.0.3.jar:/Users/admin/.m2/repository/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar:/Users/admin/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/Users/admin/.m2/repository/org/bouncycastle/bcprov-jdk18on/1.84/bcprov-jdk18on-1.84.jar:/Users/admin/.m2/repository/org/hsqldb/hsqldb/2.7.4/hsqldb-2.7.4.jar:/Users/admin/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:/Users/admin/.m2/repository/redis/clients/jedis/3.8.0/jedis-3.8.0.jar:/Users/admin/.m2/repository/org/apache/commons/commons-pool2/2.11.1/commons-pool2-2.11.1.jar:/Users/admin/.m2/repository/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar:/Users/admin/.m2/repository/org/apache/commons/commons-fileupload2-core/2.0.0-M2/commons-fileupload2-core-2.0.0-M2.jar:/Users/admin/.m2/repository/org/apache/commons/commons-fileupload2-jakarta-servlet5/2.0.0-M2/commons-fileupload2-jakarta-servlet5-2.0.0-M2.jar:/Users/admin/.m2/repository/commons-io/commons-io/2.20.0/commons-io-2.20.0.jar:/Users/admin/.m2/repository/net/sourceforge/jexcelapi/jxl/2.6.12/jxl-2.6.12.jar:/Users/admin/.m2/repository/com/zaxxer/HikariCP/4.0.3/HikariCP-4.0.3.jar:/Users/admin/.m2/repository/com/alibaba/druid/1.2.21/druid-1.2.21.jar:/Users/admin/.m2/repository/org/jsoup/jsoup/1.17.2/jsoup-1.17.2.jar:/Users/admin/.m2/repository/jakarta/servlet/jakarta.servlet-api/5.0.0/jakarta.servlet-api-5.0.0.jar:/Users/admin/.m2/repository/jakarta/websocket/jakarta.websocket-api/2.0.0/jakarta.websocket-api-2.0.0.jar:/Users/admin/.m2/repository/org/jodconverter/jodconverter-core/4.4.4/jodconverter-core-4.4.4.jar:/Users/admin/.m2/repository/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar:/Users/admin/.m2/repository/org/jodconverter/jodconverter-local/4.4.4/jodconverter-local-4.4.4.jar:/Users/admin/.m2/repository/org/openoffice/juh/4.1.2/juh-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/jurt/4.1.2/jurt-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/ridl/4.1.2/ridl-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/unoil/4.1.2/unoil-4.1.2.jar:/Users/admin/.m2/repository/jdbf/jdbf/1.0/jdbf-1.0.jar:/Users/admin/.m2/repository/org/slf4j/slf4j-jdk14/1.7.32/slf4j-jdk14-1.7.32.jar:/Users/admin/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.7.1/junit-jupiter-api-5.7.1.jar:/Users/admin/.m2/repository/org/apiguardian/apiguardian-api/1.1.0/apiguardian-api-1.1.0.jar:/Users/admin/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/Users/admin/.m2/repository/org/junit/platform/junit-platform-commons/1.7.1/junit-platform-commons-1.7.1.jar:/Users/admin/.m2/repository/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar:/Users/admin/.m2/repository/com/google/protobuf/protobuf-java/4.26.1/protobuf-java-4.26.1.jar:/Users/admin/.m2/repository/com/microsoft/sqlserver/mssql-jdbc/12.4.3.jre8/mssql-jdbc-12.4.3.jre8.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/Users/admin"/>
+    <property name="user.language" value="zh"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2026-04-21"/>
+    <property name="java.home" value="/Library/Java/JavaVirtualMachines/graalvm-jdk-21/Contents/Home"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/Users/admin/java/com.gdxsoft/emp-script"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="jdk.internal.vm.ci.enabled" value="true"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="apple.awt.application.name" value="ForkedBooter"/>
+    <property name="surefire.real.class.path" value="/Users/admin/java/com.gdxsoft/emp-script/target17/surefire/surefirebooter-20260627160138548_3.jar"/>
+    <property name="junit.platform.listeners.uid.tracking.enabled" value="true"/>
+    <property name="user.script" value="Hans"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="junit.platform.listeners.uid.tracking.output.dir" value="/Users/admin/java/com.gdxsoft/emp-script/target17/test-ids"/>
+    <property name="java.runtime.version" value="21.0.11+9-LTS-jvmci-23.1-b92"/>
+    <property name="user.name" value="admin"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="15.5"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Oracle GraalVM 21.0.11+9.1"/>
+    <property name="localRepository" value="/Users/admin/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/var/folders/qc/18ckd6wn3c949_y7rbw9f6vr0000gn/T/"/>
+    <property name="com.zaxxer.hikari.pool_number" value="1"/>
+    <property name="java.version" value="21.0.11"/>
+    <property name="user.dir" value="/Users/admin/java/com.gdxsoft/emp-script"/>
+    <property name="os.arch" value="aarch64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/Users/admin/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="21.0.11+9-LTS-jvmci-23.1-b92"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="java.class.version" value="65.0"/>
+  </properties>
+  <testcase name="testXmlParseable" classname="testXmlParseable()" time="0.03">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m准备测试环境&amp#27;[0m
+======================================================================
+测试目录: /var/folders/qc/18ckd6wn3c949_y7rbw9f6vr0000gn/T/update_cfg_test_11641033960561407222
+测试 XML: /var/folders/qc/18ckd6wn3c949_y7rbw9f6vr0000gn/T/update_cfg_test_11641033960561407222/admin.xml
+样本 XML 大小: 260881 bytes
+复制后大小: 260881 bytes
+
+======================================================================
+  &amp#27;[32;1m0. 基础 XML 解析测试&amp#27;[0m
+======================================================================
+模板数量: 14
+  [0] ADM_USER.Frame.ChangeMobile
+  [1] ADM_USER.Frame.ChangePWD
+  [2] ADM_USER.Frame.SysChangePwd
+  [3] ADM_USER.PIC
+  [4] ADM_USER.SIGN_PIC
+  [5] ADM_USER.TakePhoto
+  [6] Login.Robert-少参数
+  [7] ADM_USER.F.login_old
+  [8] ADM_USER.F.M_Must
+  [9] EMAIL_SMTP_CFG.F.NM
+  [10] ADM_USER.Frame.NewModify
+  [11] ADM_USER.Lf.MultiByPhone
+  [12] ADM_USER.F.loginSms
+  [13] ADM_USER.F.login
+]]></system-out>
+  </testcase>
+  <testcase name="testFindTargetItem" classname="testFindTargetItem()" time="0.016">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m0.1 查找目标模板&amp#27;[0m
+======================================================================
+找到模板: ADM_USER.Frame.ChangePWD
+  ActionSet: 存在
+  SqlSet: 存在
+  XItems: 存在
+  XItem 数量: 6
+    [0] ADM_LID
+    [1] ADM_NAME
+    [2] ADM_PWD
+    [3] adm_pwd1
+    [4] butOk
+    [5] butClose
+  SqlSet 数量: 2
+    [0] OnPageLoad SQL (query)
+    [1] OnPagePost SQL (update)
+]]></system-out>
+  </testcase>
+  <testcase name="testListXItems" classname="testListXItems()" time="0.008">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m1. listXItems 测试&amp#27;[0m
+======================================================================
+XItem 总数: 6
+第一个 XItem: ADM_LID
+  Tag: span
+  中文描述: 登录名
+]]></system-out>
+  </testcase>
+  <testcase name="testAddXItem" classname="testAddXItem()" time="0.035">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m2. 新增 XItem 测试&amp#27;[0m
+======================================================================
+新增 XItem 验证成功: TEST_XITEM_1782547299750
+  Tag: text
+  DataField: TEST_FIELD
+  IsMustInput: 1
+]]></system-out>
+  </testcase>
+  <testcase name="testModifyXItem" classname="testModifyXItem()" time="0.025">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m3. 修改 XItem 测试&amp#27;[0m
+======================================================================
+修改前: 测试字段
+修改后: 修改后的测试字段
+DataField 修改: TEST_FIELD -> MODIFIED_FIELD
+]]></system-out>
+  </testcase>
+  <testcase name="testDeleteXItem" classname="testDeleteXItem()" time="0.02">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m4. 删除 XItem 测试&amp#27;[0m
+======================================================================
+已删除 XItem: TEST_XITEM_1782547299750
+删除验证成功
+]]></system-out>
+  </testcase>
+  <testcase name="testListSqlSets" classname="testListSqlSets()" time="0.008">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m5. listSqlSets 测试&amp#27;[0m
+======================================================================
+SqlSet 总数: 2
+  [0] OnPageLoad SQL (type=query, trans=)
+       SQL 预览: 
+            SELECT adm_lid,adm_name FROM ADM_USER WHERE ADM_ID = @G_ADM_ID
+    ...
+  [1] OnPagePost SQL (type=update, trans=)
+       SQL 预览: UPDATE ADM_USER SET 
+	ADM_PWD = @ADM_PWD,
+	ADM_mdate = @sys_date
+WHERE ADM_ID = ...
+]]></system-out>
+  </testcase>
+  <testcase name="testAddSqlSet" classname="testAddSqlSet()" time="0.021">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m6. 新增 SqlSet 测试&amp#27;[0m
+======================================================================
+新增 SqlSet 验证成功: TEST_SQL_1782547299751
+]]></system-out>
+  </testcase>
+  <testcase name="testModifySqlSet" classname="testModifySqlSet()" time="0.018">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m7. 修改 SqlSet 测试&amp#27;[0m
+======================================================================
+修改 SqlSet 验证成功
+]]></system-out>
+  </testcase>
+  <testcase name="testDeleteSqlSet" classname="testDeleteSqlSet()" time="0.018">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m8. 删除 SqlSet 测试&amp#27;[0m
+======================================================================
+已删除 SqlSet: TEST_SQL_1782547299751
+删除验证成功
+]]></system-out>
+  </testcase>
+  <testcase name="testAddScriptSet" classname="testAddScriptSet()" time="0.017">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m9. 新增 ScriptSet 测试&amp#27;[0m
+======================================================================
+新增 ScriptSet 验证成功: TEST_SCRIPT_1782547299752
+]]></system-out>
+  </testcase>
+  <testcase name="testDeleteScriptSet" classname="testDeleteScriptSet()" time="0.016">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m9.1 删除 ScriptSet 测试&amp#27;[0m
+======================================================================
+删除 ScriptSet 验证成功
+]]></system-out>
+  </testcase>
+  <testcase name="testMultiLineSqlCData" classname="testMultiLineSqlCData()" time="0.02">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m10. 多行 SQL CDATA 保持测试&amp#27;[0m
+======================================================================
+多行 SQL 内容:
+---
+-- 多语句测试
+SELECT COUNT(1) AS cnt FROM DUAL;
+SELECT 'step2' AS step;
+UPDATE test SET col = 'val' WHERE id = 1;
+---
+]]></system-out>
+  </testcase>
+  <testcase name="testActionSetReferences" classname="testActionSetReferences()" time="0.005">
+    <system-out><![CDATA[
+======================================================================
+  &amp#27;[32;1m11. ActionSet 引用关系测试&amp#27;[0m
+======================================================================
+SqlSet 名称列表: [OnPageLoad SQL, OnPagePost SQL]
+Action: OnPageLoad
+  -> OnPageLoad SQL (SqlSet)
+Action: 
+Action: OnPagePost
+  -> OnPagePost SQL (SqlSet)
+Action: 
+]]></system-out>
+  </testcase>
+</testsuite>

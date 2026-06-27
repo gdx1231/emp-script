@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <echo>copy emp-script-jdk17-1.1.10.jar to
+									/Users/admin/java/com.gdxsoft/emp-script/../../workspace.newVersion/allclass/lib/</echo>
+  <copy todir="/Users/admin/java/com.gdxsoft/emp-script/../../workspace.newVersion/allclass/lib/">
+    <fileset dir="/Users/admin/java/com.gdxsoft/emp-script/target17">
+      <include name="emp-script-jdk17-1.1.10*"/>
+    </fileset>
+  </copy>
+</target>
+</project>

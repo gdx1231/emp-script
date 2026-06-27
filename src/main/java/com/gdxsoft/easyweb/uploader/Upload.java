@@ -33,7 +33,6 @@ import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UImages;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
-import com.gdxsoft.easyweb.utils.fileConvert.Cvt2Swf;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
 public class Upload {
@@ -62,7 +61,6 @@ public class Upload {
 
 	private String _upSql;
 	// private String _upSaveMethod = "File";
-	private String _upSwf;
 	private String _upDelete;
 	private String _upUnZip;
 	private DataConnection _Conn;
@@ -206,12 +204,6 @@ public class Upload {
 		// 是在客户端还是服务器端生成新尺寸图片
 		if (u.testName("NewSizesIn")) {
 			this._NewSizesIn = u.getItem("NewSizesIn");
-		}
-		if (u.testName("Up2Swf")) {
-			_upSwf = u.getItem("Up2Swf");
-			if (_upSwf.equalsIgnoreCase("yes")) {
-				this._UpExts.put("SWF", true);
-			}
 		}
 		if (u.testName("UpDelete")) {
 			_upDelete = u.getItem("UpDelete");
@@ -674,25 +666,6 @@ public class Upload {
 					fu.getSubs().add(lst.get(i));
 				}
 			}
-		} else if (_upSwf != null && _upSwf.equalsIgnoreCase("yes")) {
-			Cvt2Swf swf = new Cvt2Swf();
-			String targetPath = UFile.changeFileExt(uploadedFile.getAbsolutePath(), "swf");
-			File target = new File(targetPath);
-			boolean rst = swf.cvt2Swf(uploadedFile.getAbsolutePath(), target.getAbsolutePath());
-			if (rst) {
-				fu.setSaveFileName(target.getName());
-				fu.setSavePath(target.getAbsolutePath());
-				String fileUrl = target.getAbsolutePath().replace(this._rootPath, "/").replace("\\", "/").replace("//",
-						"/");
-				fu.setFileUrl(fileUrl);
-
-				// 删除上传原始文件
-				if (this._upDelete != null && this._upDelete.equalsIgnoreCase("yes")) {
-					swf.deletePdf();
-					swf.deleteSource();
-				}
-			}
-			this._AlFiles.add(fu);
 		}
 	}
 
@@ -1082,14 +1055,6 @@ public class Upload {
 
 	public void setUpSql(String upSql) {
 		this._upSql = upSql;
-	}
-
-	public String getUpSwf() {
-		return _upSwf;
-	}
-
-	public void setUpSwf(String upSwf) {
-		this._upSwf = upSwf;
 	}
 
 	public String getUpUnZip() {

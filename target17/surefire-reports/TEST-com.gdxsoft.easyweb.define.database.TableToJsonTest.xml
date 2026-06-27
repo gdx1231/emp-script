@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.gdxsoft.easyweb.define.database.TableToJsonTest" time="0.257" tests="2" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="21"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/Users/admin/java/com.gdxsoft/emp-script/target17/test-classes:/Users/admin/java/com.gdxsoft/emp-script/target17/classes:/Users/admin/.m2/repository/com/gdxsoft/easyweb/emp-script-utils-jdk17/1.1.10/emp-script-utils-jdk17-1.1.10.jar:/Users/admin/.m2/repository/org/json/json/20260522/json-20260522.jar:/Users/admin/.m2/repository/com/google/zxing/core/3.5.4/core-3.5.4.jar:/Users/admin/.m2/repository/net/coobird/thumbnailator/0.4.21/thumbnailator-0.4.21.jar:/Users/admin/.m2/repository/org/eclipse/angus/jakarta.mail/2.0.3/jakarta.mail-2.0.3.jar:/Users/admin/.m2/repository/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar:/Users/admin/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/Users/admin/.m2/repository/org/bouncycastle/bcprov-jdk18on/1.84/bcprov-jdk18on-1.84.jar:/Users/admin/.m2/repository/org/hsqldb/hsqldb/2.7.4/hsqldb-2.7.4.jar:/Users/admin/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:/Users/admin/.m2/repository/redis/clients/jedis/3.8.0/jedis-3.8.0.jar:/Users/admin/.m2/repository/org/apache/commons/commons-pool2/2.11.1/commons-pool2-2.11.1.jar:/Users/admin/.m2/repository/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar:/Users/admin/.m2/repository/org/apache/commons/commons-fileupload2-core/2.0.0-M2/commons-fileupload2-core-2.0.0-M2.jar:/Users/admin/.m2/repository/org/apache/commons/commons-fileupload2-jakarta-servlet5/2.0.0-M2/commons-fileupload2-jakarta-servlet5-2.0.0-M2.jar:/Users/admin/.m2/repository/commons-io/commons-io/2.20.0/commons-io-2.20.0.jar:/Users/admin/.m2/repository/net/sourceforge/jexcelapi/jxl/2.6.12/jxl-2.6.12.jar:/Users/admin/.m2/repository/com/zaxxer/HikariCP/4.0.3/HikariCP-4.0.3.jar:/Users/admin/.m2/repository/com/alibaba/druid/1.2.21/druid-1.2.21.jar:/Users/admin/.m2/repository/org/jsoup/jsoup/1.17.2/jsoup-1.17.2.jar:/Users/admin/.m2/repository/jakarta/servlet/jakarta.servlet-api/5.0.0/jakarta.servlet-api-5.0.0.jar:/Users/admin/.m2/repository/jakarta/websocket/jakarta.websocket-api/2.0.0/jakarta.websocket-api-2.0.0.jar:/Users/admin/.m2/repository/org/jodconverter/jodconverter-core/4.4.4/jodconverter-core-4.4.4.jar:/Users/admin/.m2/repository/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar:/Users/admin/.m2/repository/org/jodconverter/jodconverter-local/4.4.4/jodconverter-local-4.4.4.jar:/Users/admin/.m2/repository/org/openoffice/juh/4.1.2/juh-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/jurt/4.1.2/jurt-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/ridl/4.1.2/ridl-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/unoil/4.1.2/unoil-4.1.2.jar:/Users/admin/.m2/repository/jdbf/jdbf/1.0/jdbf-1.0.jar:/Users/admin/.m2/repository/org/slf4j/slf4j-jdk14/1.7.32/slf4j-jdk14-1.7.32.jar:/Users/admin/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.7.1/junit-jupiter-api-5.7.1.jar:/Users/admin/.m2/repository/org/apiguardian/apiguardian-api/1.1.0/apiguardian-api-1.1.0.jar:/Users/admin/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/Users/admin/.m2/repository/org/junit/platform/junit-platform-commons/1.7.1/junit-platform-commons-1.7.1.jar:/Users/admin/.m2/repository/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar:/Users/admin/.m2/repository/com/google/protobuf/protobuf-java/4.26.1/protobuf-java-4.26.1.jar:/Users/admin/.m2/repository/com/microsoft/sqlserver/mssql-jdbc/12.4.3.jre8/mssql-jdbc-12.4.3.jre8.jar:"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Asia/Shanghai"/>
+    <property name="os.name" value="Mac OS X"/>
+    <property name="java.vm.specification.version" value="21"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="CN"/>
+    <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/graalvm-jdk-21/Contents/Home/lib"/>
+    <property name="sun.java.command" value="/Users/admin/java/com.gdxsoft/emp-script/target17/surefire/surefirebooter-20260627160138548_3.jar /Users/admin/java/com.gdxsoft/emp-script/target17/surefire 2026-06-27T16-01-38_484-jvmRun1 surefire-20260627160138548_1tmp surefire_0-20260627160138548_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/Users/admin/java/com.gdxsoft/emp-script/target17/test-classes:/Users/admin/java/com.gdxsoft/emp-script/target17/classes:/Users/admin/.m2/repository/com/gdxsoft/easyweb/emp-script-utils-jdk17/1.1.10/emp-script-utils-jdk17-1.1.10.jar:/Users/admin/.m2/repository/org/json/json/20260522/json-20260522.jar:/Users/admin/.m2/repository/com/google/zxing/core/3.5.4/core-3.5.4.jar:/Users/admin/.m2/repository/net/coobird/thumbnailator/0.4.21/thumbnailator-0.4.21.jar:/Users/admin/.m2/repository/org/eclipse/angus/jakarta.mail/2.0.3/jakarta.mail-2.0.3.jar:/Users/admin/.m2/repository/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar:/Users/admin/.m2/repository/jakarta/activation/jakarta.activation-api/2.1.3/jakarta.activation-api-2.1.3.jar:/Users/admin/.m2/repository/org/bouncycastle/bcprov-jdk18on/1.84/bcprov-jdk18on-1.84.jar:/Users/admin/.m2/repository/org/hsqldb/hsqldb/2.7.4/hsqldb-2.7.4.jar:/Users/admin/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:/Users/admin/.m2/repository/redis/clients/jedis/3.8.0/jedis-3.8.0.jar:/Users/admin/.m2/repository/org/apache/commons/commons-pool2/2.11.1/commons-pool2-2.11.1.jar:/Users/admin/.m2/repository/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar:/Users/admin/.m2/repository/org/apache/commons/commons-fileupload2-core/2.0.0-M2/commons-fileupload2-core-2.0.0-M2.jar:/Users/admin/.m2/repository/org/apache/commons/commons-fileupload2-jakarta-servlet5/2.0.0-M2/commons-fileupload2-jakarta-servlet5-2.0.0-M2.jar:/Users/admin/.m2/repository/commons-io/commons-io/2.20.0/commons-io-2.20.0.jar:/Users/admin/.m2/repository/net/sourceforge/jexcelapi/jxl/2.6.12/jxl-2.6.12.jar:/Users/admin/.m2/repository/com/zaxxer/HikariCP/4.0.3/HikariCP-4.0.3.jar:/Users/admin/.m2/repository/com/alibaba/druid/1.2.21/druid-1.2.21.jar:/Users/admin/.m2/repository/org/jsoup/jsoup/1.17.2/jsoup-1.17.2.jar:/Users/admin/.m2/repository/jakarta/servlet/jakarta.servlet-api/5.0.0/jakarta.servlet-api-5.0.0.jar:/Users/admin/.m2/repository/jakarta/websocket/jakarta.websocket-api/2.0.0/jakarta.websocket-api-2.0.0.jar:/Users/admin/.m2/repository/org/jodconverter/jodconverter-core/4.4.4/jodconverter-core-4.4.4.jar:/Users/admin/.m2/repository/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar:/Users/admin/.m2/repository/org/jodconverter/jodconverter-local/4.4.4/jodconverter-local-4.4.4.jar:/Users/admin/.m2/repository/org/openoffice/juh/4.1.2/juh-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/jurt/4.1.2/jurt-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/ridl/4.1.2/ridl-4.1.2.jar:/Users/admin/.m2/repository/org/openoffice/unoil/4.1.2/unoil-4.1.2.jar:/Users/admin/.m2/repository/jdbf/jdbf/1.0/jdbf-1.0.jar:/Users/admin/.m2/repository/org/slf4j/slf4j-jdk14/1.7.32/slf4j-jdk14-1.7.32.jar:/Users/admin/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.7.1/junit-jupiter-api-5.7.1.jar:/Users/admin/.m2/repository/org/apiguardian/apiguardian-api/1.1.0/apiguardian-api-1.1.0.jar:/Users/admin/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/Users/admin/.m2/repository/org/junit/platform/junit-platform-commons/1.7.1/junit-platform-commons-1.7.1.jar:/Users/admin/.m2/repository/com/mysql/mysql-connector-j/9.1.0/mysql-connector-j-9.1.0.jar:/Users/admin/.m2/repository/com/google/protobuf/protobuf-java/4.26.1/protobuf-java-4.26.1.jar:/Users/admin/.m2/repository/com/microsoft/sqlserver/mssql-jdbc/12.4.3.jre8/mssql-jdbc-12.4.3.jre8.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/Users/admin"/>
+    <property name="user.language" value="zh"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2026-04-21"/>
+    <property name="java.home" value="/Library/Java/JavaVirtualMachines/graalvm-jdk-21/Contents/Home"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/Users/admin/java/com.gdxsoft/emp-script"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="jdk.internal.vm.ci.enabled" value="true"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="apple.awt.application.name" value="ForkedBooter"/>
+    <property name="surefire.real.class.path" value="/Users/admin/java/com.gdxsoft/emp-script/target17/surefire/surefirebooter-20260627160138548_3.jar"/>
+    <property name="junit.platform.listeners.uid.tracking.enabled" value="true"/>
+    <property name="user.script" value="Hans"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="junit.platform.listeners.uid.tracking.output.dir" value="/Users/admin/java/com.gdxsoft/emp-script/target17/test-ids"/>
+    <property name="java.runtime.version" value="21.0.11+9-LTS-jvmci-23.1-b92"/>
+    <property name="user.name" value="admin"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="15.5"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Oracle GraalVM 21.0.11+9.1"/>
+    <property name="localRepository" value="/Users/admin/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/var/folders/qc/18ckd6wn3c949_y7rbw9f6vr0000gn/T/"/>
+    <property name="com.zaxxer.hikari.pool_number" value="1"/>
+    <property name="java.version" value="21.0.11"/>
+    <property name="user.dir" value="/Users/admin/java/com.gdxsoft/emp-script"/>
+    <property name="os.arch" value="aarch64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/Users/admin/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="21.0.11+9-LTS-jvmci-23.1-b92"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeBig"/>
+    <property name="java.class.version" value="65.0"/>
+  </properties>
+  <testcase name="testToJson_fromXml" classname="testToJson_fromXml()" time="0.005">
+    <system-out><![CDATA[开始导入 SQL 文件：src/test/resources/sqls/demo_crm_hsql.sql
+SQL 文件存在
+SQL 文件导入成功：src/test/resources/sqls/demo_crm_hsql.sql, 执行了 8 条 SQL
+CRM_COM 表数量：1
+SQL 文件导入成功，连接保持打开
+]]></system-out>
+    <system-err><![CDATA[6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataHelper createMyDatasourcesHikariCP
+信息: Using HikariCP for config: demo
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataHelper createMyDatasourcesHikariCP
+警告: Invalid maxActive value 'null', using default 40
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataHelper createMyDatasourcesHikariCP
+警告: Invalid maxWait value 'null', using default 30 minutes for maxLifetime
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataHelper createMyDatasourcesHikariCP
+信息: HikariCP DataSource 'DEMO' created successfully.
+6月 27, 2026 4:01:39 下午 com.zaxxer.hikari.HikariDataSource getConnection
+信息: HikariPool-1 - Starting...
+6月 27, 2026 4:01:39 下午 com.zaxxer.hikari.pool.PoolBase getAndSetNetworkTimeout
+信息: HikariPool-1 - Driver does not support get/set network timeout for connections. (feature not supported)
+6月 27, 2026 4:01:39 下午 com.zaxxer.hikari.HikariDataSource getConnection
+信息: HikariPool-1 - Start completed.
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataConnection executeUpdate
+严重: Cannot invoke "com.gdxsoft.easyweb.script.RequestValue.getPageValues()" because "this._RequestValue" is null
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataConnection executeUpdate
+严重: Cannot invoke "com.gdxsoft.easyweb.script.RequestValue.getPageValues()" because "this._RequestValue" is null
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataConnection executeUpdate
+严重: Cannot invoke "com.gdxsoft.easyweb.script.RequestValue.getPageValues()" because "this._RequestValue" is null
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataConnection executeUpdate
+严重: Cannot invoke "com.gdxsoft.easyweb.script.RequestValue.getPageValues()" because "this._RequestValue" is null
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataConnection executeUpdateNoParameter
+严重: user lacks privilege or object not found: CRM_RECORD
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataConnection executeUpdateNoParameter
+严重: INSERT INTO CRM_RECORD (CRM_RECORD_WAY,CRM_RECORD_CONTENT,CRM_CUS_ID,ADM_ID,SUP_ID,CRM_RECORD_TIME,CRM_RECORD_OB1,CRM_RECORD_OB2,CRM_RECORD_OB3,NEXT_TIME,CRM_RECORD_STATUS) VALUES
+('CRM_RECORD_WAY1','国际传媒分公司',200006,35,3,'2011-11-30 00:00:00.000','昝致','','',NULL,'USED'),
+('CRM_RECORD_WAY1','黄河制药美发有限责任公司',200007,35,3,'2011-11-30 00:00:00.000','邓星鹏','','',NULL,'USED'),
+('CRM_RECORD_WAY1','华夏酒店中介院',200008,35,3,'1900-01-01 00:00:00.000','房士','','',NULL,'USED'),
+('CRM_RECORD_WAY1','很多海淀区学校都有友好校，暑假寒假一般都去友好校交流！但是经学校同意，可以做游学！',200009,35,3,'1900-01-01 00:00:00.000','郭弘盛','','',NULL,'USED'),
+('CRM_RECORD_WAY1','111',200662,19,3,'2012-03-05 16:15:26.427','1',NULL,NULL,'2012-03-13 16:15:00.000','USED'),
+('CRM_RECORD_WAY5','通过QQ联系报价问题，由于同一个团报价第二次高于第一次，在qq上与Kendy达成一致，最终按第一次报价确认价格。',200661,456,3,'2013-11-07 17:48:08.410','供应商报价',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY3','新增澳洲团组行程报价，已通过邮件发送给Kendy，周一回复',200661,456,3,'2013-11-08 14:49:21.693','新增澳洲团组行程报价',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY5','通过qq联系向kendy发送团组名单并索要酒店信息及地接函',200661,456,3,'2013-11-12 12:04:01.867','提供酒店信息及地接函',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY5','通过qq联系，咨询对方有关澳洲公务信息',308219,456,3,'2013-11-19 16:34:00.003','咨询澳洲公务',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY5','通过qq跟kendy商量付款方式，最后确认可先付80%，另外20%可等回团后支付',200661,456,3,'2013-11-25 16:05:49.057','确认付款方式',NULL,NULL,NULL,'USED')
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataConnection executeUpdateNoParameter
+严重: user lacks privilege or object not found: CRM_RECORD
+6月 27, 2026 4:01:39 下午 com.gdxsoft.easyweb.datasource.DataConnection executeUpdateNoParameter
+严重: INSERT INTO CRM_RECORD (CRM_RECORD_WAY,CRM_RECORD_CONTENT,CRM_CUS_ID,ADM_ID,SUP_ID,CRM_RECORD_TIME,CRM_RECORD_OB1,CRM_RECORD_OB2,CRM_RECORD_OB3,NEXT_TIME,CRM_RECORD_STATUS) VALUES
+('CRM_RECORD_WAY1','西亚券商有限公司',311126,93,3,'2013-12-11 14:37:55.430','茹龙',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY5','通过qq跟kendy确认付款时间，已跟kendy商量定为团组出发前14天付团款的80%',200661,456,3,'2013-12-17 17:35:57.213','跟kendy商量付款事宜',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY1','让找留学中心，23259222  23280324',311299,93,3,'2013-12-19 15:01:24.830','敖秀',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY1','云璐',200010,93,3,'2013-12-19 15:40:20.793','姬荷',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY1','以前祁国斌联系过的，他们是ISIS Education&Travel，跟天津外国语大学合作的机构，网站：http://www.isischina.com。他们做英国的接待和营地，想让我们推他们的。美国的资源他们没有，有美国团可以给我们做。',311299,93,3,'2013-12-19 17:13:33.510','乌淑薇',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY5','通过qq跟kendy联系，商量团组最终预定后的价格，最终达成一致，081，059团澳洲段地接价格均有减少',200661,456,3,'2014-01-03 14:48:24.857','团组价格问题',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY1','介绍路嘉国际游学，不需要。',311756,440,3,'2014-01-10 09:52:14.683','路嘉国际游学',NULL,NULL,NULL,'USED'),
+('CRM_RECORD_WAY2','123123',200662,19,3,'2014-07-14 19:26:54.870','123',NULL,NULL,NULL,'USED')
+]]></system-err>
+  </testcase>
+  <testcase name="testToJson" classname="testToJson()" time="0.001"/>
+</testsuite>

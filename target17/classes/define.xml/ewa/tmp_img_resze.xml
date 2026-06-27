@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><EasyWebTemplates>
+	<EasyWebTemplate CreateDate="2011-05-13 14:42:45" Name="img_main" UpdateDate="2011-12-03 15:21:51">
+		<Page>
+			<FrameTag>
+				<Set FrameTag="Frame"/>
+			</FrameTag>
+			<Name>
+				<Set Name="img_main"/>
+			</Name>
+			<SkinName>
+				<Set IsXhtml="" SkinName="Blue"/>
+			</SkinName>
+			<DataSource>
+				<Set DataSource=""/>
+			</DataSource>
+			<Cached>
+				<Set CachedSeconds="" CachedType="none"/>
+			</Cached>
+			<Acl>
+				<Set Acl="com.gdxsoft.easyweb.define.DefineAcl"/>
+			</Acl>
+			<Log/>
+			<DescriptionSet>
+				<Set Info="adsadasdsdsadasdasdasd asdasdasdsfasfasd sadasd" Lang="zhcn" Memo=""/>
+				<Set Info="About us" Lang="enus" Memo=""/>
+			</DescriptionSet>
+			<PageAttributeSet/>
+			<GroupSet/>
+			<Size>
+				<Set HAlign="center" Height="" HiddenCaption="1" VAlign="top" Width="300"/>
+			</Size>
+			<AddHtml>
+				<Set>
+					<Top><![CDATA[<div class='img' id="layer2">
+</div>
+<div class='mv' id="layer1" onselectstart="return false;">
+  <table border="0" cellpadding="0" cellspacing="0">
+   <tr>
+    <td>1</td>
+    <td width="5">1</td>
+   </tr>
+   <tr>
+    <td>1</td>
+    <td width="5" height="5">
+    <div id="ss" ewa_move="no">1</div>
+    </td>
+   </tr>
+  </table>
+ </div>
+ <img border="0" id='aa' src="@EWA.CP/uploads/@img" 
+	 onload="this.setAttribute('w',this.width);this.setAttribute('h',this.height)"  />
+ ]]></Top>
+					<Bottom/>
+				</Set>
+			</AddHtml>
+			<AddScript>
+				<Set>
+					<Top><![CDATA[document.body.style.overflow='hidden';
+					]]></Top>
+					<Bottom><![CDATA[var clsMove;
+function mv(){
+	 var p = $X('layer2');
+	 var w1 = p.offsetWidth;
+	 var h1 = p.offsetHeight;
+ 
+	 var w2 = $X('aa').getAttribute('w') * 1;
+	 var h2 = $X('aa').getAttribute('h') * 1;
+ 
+	 var r = w1/h1;
+	 var r1 = w2/h2;
+ 	var w,h;
+ 	if(r1 > r){
+  		w = h1/r;
+  		h = h1;
+ 	} else {
+  		w=w1;
+  		h= w1* r;
+ 	}
+ 	$X('aa').style.width = w + 'px';
+ 	$X('aa').style.height = h + 'px';
+	 p.appendChild(aa);
+	 p.style.width=w+'px';
+	 p.style.height=h+'px';
+	 clsMove = new EWA.UI.Move();
+	 clsMove.Init(clsMove);
+ 	clsMove.AddMoveObject($X('layer1'), $X('layer1'),null, $X('layer2'));
+ 	clsMove.AddSizeObject($X('ss'),$X('layer1'), null, $X('layer2'), true);
+} 
+addEvent(window, 'load' , mv);]]></Bottom>
+				</Set>
+			</AddScript>
+			<AddCss>
+				<Set>
+					<AddCss><![CDATA[.img {
+	position: absolute; 
+	width: 800px; 
+	height: 600px; 
+	z-index: 2;
+	border:  1px solid red;
+}
+.mv{position: absolute; 
+	width: 192px; 
+	height: 172px; 
+	z-index: 12; 
+	left:127px; 
+	top:295px;
+	border: 1px solid black;
+	cursor:move
+}
+.mv table {
+	font-size:2px;
+	height: 100%;
+	width: 100%;
+	filter: alpha(opacity=50);
+	background-color:yellow
+} 
+.mv div{
+	width:5px;
+	height:5px; 
+	background-color:black;
+	cursor:nw-resize;
+}]]></AddCss>
+				</Set>
+			</AddCss>
+			<ChartsShow/>
+			<FrameHtml>
+				<Set>
+					<FrameHtml/>
+				</Set>
+			</FrameHtml>
+			<PageSize/>
+			<ListUI/>
+			<MenuShow/>
+			<Menu/>
+			<Tree/>
+			<HtmlFrame/>
+			<TreeIconSet/>
+			<MGAxisX/>
+			<MGAxisY/>
+			<MGCell/>
+		</Page>
+		<Action>
+			<ActionSet/>
+			<SqlSet/>
+			<ClassSet/>
+			<XmlSet/>
+			<XmlSetData/>
+			<ScriptSet/>
+			<UrlSet/>
+			<CSSet/>
+			<CallSet/>
+		</Action>
+		<XItems/>
+		<Menus/>
+		<Charts/>
+		<PageInfos/>
+	</EasyWebTemplate>
+
+	<EasyWebTemplate CreateDate="2011-05-13 14:42:45" Name="img_main1" UpdateDate="2011-12-03 15:39:50">
+		<Page>
+			<FrameTag>
+				<Set FrameTag="Menu"/>
+			</FrameTag>
+			<Name>
+				<Set Name="img_main"/>
+			</Name>
+			<SkinName>
+				<Set IsXhtml="" SkinName="Test1"/>
+			</SkinName>
+			<DataSource>
+				<Set DataSource=""/>
+			</DataSource>
+			<Cached/>
+			<Acl>
+				<Set Acl=""/>
+			</Acl>
+			<Log/>
+			<DescriptionSet>
+				<Set Info="aa" Lang="zhcn" Memo=""/>
+			<Set Info="aa" Lang="enus" Memo=""/></DescriptionSet>
+			<PageAttributeSet/>
+			<GroupSet/>
+			<Size>
+				<Set HAlign="" Height="" HiddenCaption="1" VAlign="" Width=""/>
+			</Size>
+ 
+		</Page>
+		<Action>
+			<ActionSet/>
+			<SqlSet/>
+			<ClassSet/>
+			<XmlSet/>
+			<XmlSetData/>
+			<ScriptSet/>
+			<UrlSet/>
+			<CSSet/>
+			<CallSet/>
+		</Action>
+		<XItems/>
+		<Menus/>
+		<Charts/>
+		<PageInfos/>
+	</EasyWebTemplate>
+</EasyWebTemplates>

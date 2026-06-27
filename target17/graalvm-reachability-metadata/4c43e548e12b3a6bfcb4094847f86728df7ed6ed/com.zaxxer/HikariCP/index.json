@@ -1,0 +1,11 @@
+[
+  {
+    "metadata-version" : "5.0.1",
+    "tested-versions" : [
+      "5.0.1",
+      "5.1.0"
+    ],
+    "latest" : true,
+    "module" : "com.zaxxer:HikariCP"
+  }
+]
