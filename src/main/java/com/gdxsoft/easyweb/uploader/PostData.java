@@ -163,9 +163,9 @@ public class PostData {
 		}
 		JakartaServletFileUpload upload = new JakartaServletFileUpload(factory);
 		// 设置单个文件的最大上传值
-		upload.setFileSizeMax(102400000);
+		upload.setMaxFileSize(102400000L);
 		// 设置整个request的最大值
-		upload.setSizeMax(102400000);
+		upload.setMaxSize(102400000L);
 		upload.setProgressListener(new FileUploadListener(_request));
 		// 保存初始化后的FileUploadStatus Bean
 		saveStatusBean(_request, initStatusBean());

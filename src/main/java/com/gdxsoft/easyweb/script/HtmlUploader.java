@@ -50,7 +50,7 @@ public class HtmlUploader {
 		JakartaServletFileUpload upload = new JakartaServletFileUpload(factory);
 
 		long maxSize = 1024 * 1024 * 1024 * 2; // 2g
-		upload.setSizeMax(maxSize);
+		upload.setMaxSize(maxSize);
 
 		List<?> items = null;
 		try {
