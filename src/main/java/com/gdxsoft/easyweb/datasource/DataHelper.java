@@ -232,15 +232,11 @@ public class DataHelper {
 	}
 
 	/**
-	 * 使用 HikariCP（默认）
-	 *
-	 * @return
-	 * @throws Exception
+	 * 校验并返回连接池基本配置项，失败抛异常
 	 */
-	private DataSource createMyDatasourcesHikariCP() throws Exception {
-		LOGGER.info("Using HikariCP for config: {}", _Cfg.getName());
-		String driverClassName = _Cfg.getPool().get("driverClassName");
+	private void validatePoolBasicConfig() throws Exception {
 		MStr errors = new MStr();
+		String driverClassName = _Cfg.getPool().get("driverClassName");
 		if (StringUtils.isBlank(driverClassName)) {
 			LOGGER.error("driverClassName not defined in config: {}", _Cfg.getName());
 			errors.al("driverClassName not defined");
@@ -255,11 +251,29 @@ public class DataHelper {
 			LOGGER.error("username not defined in config: {}", _Cfg.getName());
 			errors.al("username not defined");
 		}
-
+		String password = _Cfg.getPool().get("password");
+		if (StringUtils.isBlank(password)) {
+			LOGGER.error("password not defined in config: {}", _Cfg.getName());
+			errors.al("password not defined");
+		}
 		if (errors.length() > 0) {
 			throw new Exception(errors.toString());
 		}
+	}
 
+	/**
+	 * 使用 HikariCP（默认）
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	private DataSource createMyDatasourcesHikariCP() throws Exception {
+		LOGGER.info("Using HikariCP for config: {}", _Cfg.getName());
+		validatePoolBasicConfig();
+
+		String driverClassName = _Cfg.getPool().get("driverClassName");
+		String url = _Cfg.getPool().get("url");
+		String username = _Cfg.getPool().get("username");
 		String password = _Cfg.getPool().get("password");
 		String maxActiveStr = _Cfg.getPool().get("maxActive");
 		String maxWaitStr = _Cfg.getPool().get("maxWait");
@@ -306,32 +320,12 @@ public class DataHelper {
 	 */
 	private DataSource createMyDatasourcesDruids() throws Exception {
 		LOGGER.info("Using Druid for config: {}", _Cfg.getName());
+		validatePoolBasicConfig();
+
 		String driverClassName = _Cfg.getPool().get("driverClassName");
-		MStr errors = new MStr();
-		if (StringUtils.isBlank(driverClassName)) {
-			LOGGER.error("driverClassName not defined in config: {}", _Cfg.getName());
-			errors.al("driverClassName not defined");
-		}
 		String url = _Cfg.getPool().get("url");
-		if (StringUtils.isBlank(url)) {
-			LOGGER.error("url not defined in config: {}", _Cfg.getName());
-			errors.al("url not defined");
-		}
 		String username = _Cfg.getPool().get("username");
-		if (StringUtils.isBlank(username)) {
-			LOGGER.error("username not defined in config: {}", _Cfg.getName());
-			errors.al("username not defined");
-		}
 		String password = _Cfg.getPool().get("password");
-		if (StringUtils.isBlank(password)) {
-			LOGGER.error("password not defined in config: {}", _Cfg.getName());
-			errors.al("password not defined");
-		}
-
-		if (errors.length() > 0) {
-			throw new Exception(errors.toString());
-		}
-
 		String maxActiveStr = _Cfg.getPool().get("maxActive");
 		String maxWaitStr = _Cfg.getPool().get("maxWait");
 
@@ -442,6 +436,7 @@ public class DataHelper {
 				this._ErrorMsg += "\r\n" + e.getMessage();
 			}
 		}
+		this._ListCallable.clear();
 		for (int i = 0; i < this._ListStatement.size(); i++) {
 			try {
 				this._ListStatement.get(i).close();
@@ -449,6 +444,7 @@ public class DataHelper {
 				this._ErrorMsg += "\r\n" + e.getMessage();
 			}
 		}
+		this._ListStatement.clear();
 		for (int i = 0; i < this._ListPrepared.size(); i++) {
 			try {
 				this._ListPrepared.get(i).close();
@@ -456,6 +452,7 @@ public class DataHelper {
 				this._ErrorMsg += "\r\n" + e.getMessage();
 			}
 		}
+		this._ListPrepared.clear();
 		try {
 			if (_conn != null) {
 				_conn.close();

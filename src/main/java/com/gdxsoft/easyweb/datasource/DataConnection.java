@@ -1436,8 +1436,24 @@ public class DataConnection {
 	}
 
 	/**
+	 * 重建SQL并执行临时数据处理，失败抛异常
+	 */
+	private String prepareSqlForUpdate(String sql) throws Exception {
+		try {
+			String sql1 = rebuildSql(sql);
+			this.createEwaSplitTempData();
+			this.executeEwaFunctions();
+			return sql1;
+		} catch (Exception e) {
+			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
+			LOGGER.error(e.getLocalizedMessage());
+			throw e;
+		}
+	}
+
+	/**
 	 * 执行更新
-	 * 
+	 *
 	 * @param sql
 	 */
 	public boolean executeUpdate(String sql) {
@@ -1447,16 +1463,11 @@ public class DataConnection {
 
 		String sql1;
 		try {
-			sql1 = rebuildSql(sql);
+			sql1 = prepareSqlForUpdate(sql);
 		} catch (Exception e) {
-			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
-			LOGGER.error(e.getLocalizedMessage());
 			setError(e, sql);
 			return false;
 		}
-
-		this.createEwaSplitTempData(); // guolei 2015-09-08
-		this.executeEwaFunctions(); // guolei 2021-03-16
 
 		MListStr parameters = Utils.getParameters(sql1, "@");
 		if (parameters.size() == 0) {
@@ -1484,19 +1495,7 @@ public class DataConnection {
 					|| sql.toLowerCase().indexOf("delete") != -1) {
 				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + _pst.getUpdateCount());
 			} else {
-				// print语句的输出可通过SQLWarnings获得
-				SQLWarning warning = _pst.getWarnings();
-				int incWarings = 0;
-				while (warning != null) {
-					String msg = warning.getLocalizedMessage();
-					if (incWarings == 0) {
-						LOGGER.warn("SQL: {}", sql);
-					}
-					LOGGER.warn("Warning: {}", msg);
-					this.writeDebug(this, "SQL-INFO", msg);
-					warning = warning.getNextWarning();
-					incWarings++;
-				}
+				this.logSqlWarnings(_pst.getWarnings(), sql);
 			}
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
 			if (!this._IsTrans) {
@@ -1566,16 +1565,11 @@ public class DataConnection {
 
 		String sql1;
 		try {
-			sql1 = rebuildSql(sql);
+			sql1 = prepareSqlForUpdate(sql);
 		} catch (Exception e) {
-			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
-			LOGGER.error(e.getLocalizedMessage());
 			setError(e, sql);
 			return null;
 		}
-
-		this.createEwaSplitTempData(); // guolei 2015-09-08
-		this.executeEwaFunctions();// guolei 2021-03-16
 
 		SqlPart sp = new SqlPart();
 		String sqlDbType = this.getDatabaseType().toLowerCase();
@@ -1661,19 +1655,7 @@ public class DataConnection {
 					|| sql.toLowerCase().indexOf("delete") != -1) {
 				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + st.getUpdateCount());
 			} else {
-				// print语句的输出可通过SQLWarnings获得
-				SQLWarning warning = st.getWarnings();
-				int incWarings = 0;
-				while (warning != null) {
-					String msg = warning.getLocalizedMessage();
-					if (incWarings == 0) {
-						LOGGER.warn("SQL: {}", sql);
-					}
-					LOGGER.warn("Warning: {}", msg);
-					this.writeDebug(this, "SQL-INFO", msg);
-					warning = warning.getNextWarning();
-					incWarings++;
-				}
+				this.logSqlWarnings(st.getWarnings(), sql);
 			}
 
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql,rv)] End update.");
@@ -1766,7 +1748,7 @@ public class DataConnection {
 			// if (des.indexOf("End update") > 0) {
 			// System.out.println(this._RequestValue.listValues(false));
 			// }
-			System.out.println(log);
+			LOGGER.debug(log);
 			// }
 		}
 		if (this._DebugFrames == null)
@@ -2481,6 +2463,11 @@ public class DataConnection {
 		this.clearResultSets();
 		this.closeStatment(this._pst);
 		this.closeStatment(this._queryStatement);
+		this._pst = null;
+		this._queryStatement = null;
+		this._Connection = null;
+		this._IsTrans = false;
+		this.updateBatchTables = null;
 		if (_DebugFrames != null) {
 			_DebugFrames.addDebug(this, "SQL", "[close] Close connection.");
 		}
@@ -2698,19 +2685,7 @@ public class DataConnection {
 
 			ResultSet rs = cst.executeQuery();
 
-			// print语句的输出可通过SQLWarnings获得
-			SQLWarning warning = cst.getWarnings();
-			int incWarings = 0;
-			while (warning != null) {
-				String msg = warning.getLocalizedMessage();
-				if (incWarings == 0) {
-					LOGGER.warn("SQL: {}", sql);
-				}
-				LOGGER.warn("Warning: {}", msg);
-				this.writeDebug(this, "SQL-INFO", msg);
-				warning = warning.getNextWarning();
-				incWarings++;
-			}
+			this.logSqlWarnings(cst.getWarnings(), sql);
 
 			if (!this._ds.getConnection().getAutoCommit()) {
 				this._ds.getConnection().commit();
@@ -2755,19 +2730,7 @@ public class DataConnection {
 			CallableStatement cst = this._ds.getCallableStatement(sql);
 			cst.execute();
 
-			// print语句的输出可通过SQLWarnings获得
-			SQLWarning warning = cst.getWarnings();
-			int incWarings = 0;
-			while (warning != null) {
-				String msg = warning.getLocalizedMessage();
-				if (incWarings == 0) {
-					LOGGER.warn("SQL: {}", sql);
-				}
-				LOGGER.warn("Warning: {}", msg);
-				this.writeDebug(this, "SQL-INFO", msg);
-				warning = warning.getNextWarning();
-				incWarings++;
-			}
+			this.logSqlWarnings(cst.getWarnings(), sql);
 
 			if (!this._ds.getConnection().getAutoCommit()) {
 				this._ds.getConnection().commit();
@@ -2799,6 +2762,23 @@ public class DataConnection {
 		outValues.clear();
 		for (String key : outValues1.keySet()) {
 			outValues.put(key, outValues1.get(key));
+		}
+	}
+
+	/**
+	 * 输出 SQLWarning 日志
+	 */
+	private void logSqlWarnings(SQLWarning warning, String sql) {
+		int incWarnings = 0;
+		while (warning != null) {
+			String msg = warning.getLocalizedMessage();
+			if (incWarnings == 0) {
+				LOGGER.warn("SQL: {}", sql);
+			}
+			LOGGER.warn("Warning: {}", msg);
+			this.writeDebug(this, "SQL-INFO", msg);
+			warning = warning.getNextWarning();
+			incWarnings++;
 		}
 	}
 
@@ -2942,7 +2922,7 @@ public class DataConnection {
 	}
 
 	public Connection getConnection() {
-		if (this._Connection == null) {
+		if (this._Connection == null && this._ds != null) {
 			this._Connection = _ds.getConnection();
 		}
 		return _Connection;
