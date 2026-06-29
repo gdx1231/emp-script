@@ -86,7 +86,7 @@ jdbc:hsqldb:file:hsqldb/emp_portal
 unzip hsqldb-data.zip -d .
 
 # 重新打包（数据修改后）
-zip -r hsqldb-data.zip hsqldb/ -x "hsqldb/*.lck" "hsqldb/*.log" "hsqldb/*.tmp*"
+bin/compress-hsqldb.sh
 ```
 
 ## 配置
