@@ -19,3 +19,17 @@ ewa_conf_console.xml
 /temp/
 /debug/
 demoSkills/ewa-api/ewa-api.conf
+/target17/
+
+# tomcat10demo 运行时文件
+/tomcat10demo/spy.log
+/tomcat10demo/hsqldb/*.log
+/tomcat10demo/hsqldb/*.tmp
+/tomcat10demo/hsqldb/*.lobs
+/tomcat10demo/bin/*.log
+/tomcat10demo/bin/*.pid
+/tomcat10demo/target/
+/tomcat10demo/tomcat.*/
+
+# 备份文件
+*~

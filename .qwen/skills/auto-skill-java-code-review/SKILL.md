@@ -180,7 +180,66 @@ if (process.isAlive()) process.destroyForcibly();
 // 实际转换 2.4s 而非 60s
 ```
 
-### 13. Logger 类名错误
+### 13. 资源集合清理不完整
+**模式**: close() 关闭了列表中每个资源但未 clear()
+```java
+// ❌ 关闭后列表未清空，实例复用时会重复关闭已关闭的资源
+public void close() {
+    for (Statement st : _ListStatement) {
+        try { st.close(); } catch (SQLException e) { ... }
+    }
+    // 缺少 _ListStatement.clear()
+}
+
+// ✅ 每个列表关闭后立即 clear
+public void close() {
+    for (Statement st : _ListStatement) {
+        try { st.close(); } catch (SQLException e) { ... }
+    }
+    _ListStatement.clear();
+    // 同理 _ListPrepared.clear(), _ListCallable.clear()
+}
+```
+
+### 14. 重复校验/创建逻辑
+**模式**: 多个工厂方法包含几乎相同的参数校验代码
+```java
+// ❌ createHikariCP() 和 createDruid() 各 30 行重复的 driver/url/user/password 校验
+private DataSource createHikariCP() {
+    MStr errors = new MStr();
+    if (StringUtils.isBlank(driverClassName)) errors.al("...");
+    if (StringUtils.isBlank(url)) errors.al("...");
+    // ...
+}
+private DataSource createDruid() {
+    MStr errors = new MStr();
+    if (StringUtils.isBlank(driverClassName)) errors.al("...");
+    if (StringUtils.isBlank(url)) errors.al("...");
+    // ...
+}
+
+// ✅ 提取公共校验方法
+private void validatePoolBasicConfig() throws Exception {
+    MStr errors = new MStr();
+    if (StringUtils.isBlank(driverClassName)) errors.al("...");
+    if (StringUtils.isBlank(url)) errors.al("...");
+    if (StringUtils.isBlank(username)) errors.al("...");
+    if (StringUtils.isBlank(password)) errors.al("...");
+    if (errors.length() > 0) throw new Exception(errors.toString());
+}
+// 各工厂方法先调用 validatePoolBasicConfig()，只保留差异化代码
+```
+
+### 15. 校验逻辑不一致
+**模式**: 两个工厂方法对同一配置项的校验规则不同
+```java
+// ❌ createHikariCP() 不校验 password，createDruid() 校验了
+// 原因: 两段校验代码独立维护，差异未被发现
+
+// ✅ 统一使用公共校验方法（见 #14），天然保证一致性
+```
+
+### 16. Logger 类名错误
 **模式**: `LoggerFactory.getLogger()` 传入了错误的类
 ```java
 // ❌ 日志来源标记为其他类
@@ -196,7 +255,7 @@ private static Logger LOGGER = LoggerFactory.getLogger(ConfSOffice.class);
 ## 审查流程
 
 1. **读取目标文件**: 列出目录，读取所有 `.java` 文件
-2. **逐项检查**: 对照上述 13 项逐一扫描
+2. **逐项检查**: 对照上述 16 项逐一扫描
 3. **汇总报告**: 以表格形式列出发现的问题、文件、行号、修复建议
 4. **逐项修复**: 每个 fix 单独 edit，修复后立即 `mvn compile` 验证
 5. **编写测试**: 为纯函数和无状态路径编写 JUnit 5 测试
@@ -205,6 +264,6 @@ private static Logger LOGGER = LoggerFactory.getLogger(ConfSOffice.class);
 ## 修复优先级
 
 - **P0**: 并发竞态(#1)、资源泄漏(#2)、NPE(#3)、外部进程配置隔离(#11)、外部进程不退出(#12)（影响稳定性/安全性/性能）
-- **P1**: 异常堆栈丢失(#4)、耗时操作未缓存(#10)（影响可调试性/性能）
-- **P2**: 空字符串拆分(#5)、命名错误(#6)、System.out 代替 LOGGER(#9)、Logger 类名错误(#13)（影响正确性/可读性/可维护性）
+- **P1**: 异常堆栈丢失(#4)、耗时操作未缓存(#10)、资源集合清理不完整(#13)（影响可调试性/性能/健壮性）
+- **P2**: 空字符串拆分(#5)、命名错误(#6)、System.out 代替 LOGGER(#9)、Logger 类名错误(#16)、重复校验/创建逻辑(#14)、校验逻辑不一致(#15)（影响正确性/可读性/可维护性）
 - **P3**: 访问修饰符(#7)、重复实例化(#8)（影响代码质量）

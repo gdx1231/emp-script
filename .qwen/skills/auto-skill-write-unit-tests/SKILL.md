@@ -190,6 +190,68 @@ void testNeedsChrome() {
 }
 ```
 
+## Testing DataSource-layer Classes (DataConnection, etc.)
+
+Classes like `DataConnection` have heavy dependencies (JDBC, connection pools) but expose many testable static utilities and pure functions.
+
+### Static utility methods (no instance needed)
+
+```java
+// SQL parsing — all delegate to SqlUtils, all static
+DataConnection.getSqls("SELECT 1; SELECT 2");
+DataConnection.checkIsSelect(sql);
+DataConnection.checkIsProcdure(sql);
+DataConnection.checkStartWord(sql, "SELECT");
+DataConnection.removeSqlMuitiComment(sql);
+DataConnection.isComparativeChanges(sql);
+DataConnection.getAutoField(sql);
+```
+
+### Pure instance methods with explicit databaseType param
+
+`sqlParameterStringExp(String parameter, String databaseType)` takes the DB type explicitly — no `_DatabaseType` needed:
+
+```java
+DataConnection dc = new DataConnection(); // safe even without ewa_conf
+assertEquals("NULL", dc.sqlParameterStringExp(null, "MYSQL"));
+assertEquals("N'hello'", dc.sqlParameterStringExp("hello", "MSSQL"));
+```
+
+### Instance methods that need _DatabaseType — use minimal ConnectionConfig
+
+`initConnection()` creates `new DataHelper(cfg)` which only stores the config reference. Actual pool connection is deferred to `connect()`, so dummy pool params are safe:
+
+```java
+private void setDbType(String type) {
+    ConnectionConfig cfg = new ConnectionConfig();
+    cfg.setName("test");
+    cfg.setType(type);           // ← MYSQL / MSSQL / ORACLE etc.
+    cfg.setConnectionString("test");
+    MTableStr pool = new MTableStr();
+    pool.put("driverClassName", "org.hsqldb.jdbc.JDBCDriver");
+    pool.put("url", "jdbc:hsqldb:mem:test");
+    pool.put("username", "sa");
+    pool.put("password", "");
+    cfg.setPool(pool);
+    dc.setCurrentConfig(cfg);    // calls initConnection() → DataHelper(cfg)
+}
+```
+
+Now `sqlFieldOrTableExp()` and `getDateTimePara()` work without a real DB.
+
+### Null/error-state safety (always testable)
+
+```java
+DataConnection dc = new DataConnection();
+assertNull(dc.getConnection());     // _ds is null
+assertDoesNotThrow(() -> dc.close()); // close with null _ds
+assertFalse(dc.isTrans());
+dc.setErrorMsg("err");
+assertEquals("err", dc.getErrorMsg());
+dc.clearErrorMsg();
+assertNull(dc.getErrorMsg());
+```
+
 ## Test Organization for fileConvert Package
 
 ```

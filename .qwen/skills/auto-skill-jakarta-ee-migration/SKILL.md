@@ -219,6 +219,41 @@ item.write(uploadedFile.toPath());
   - Variable declarations: `ServletFileUpload upload` → `JakartaServletFileUpload upload`
   - Static calls: `ServletFileUpload.isMultipartContent(...)` → `JakartaServletFileUpload.isMultipartContent(...)`
 
+### M2→M5 Size Limit API Changes
+
+When upgrading commons-fileupload2 from 2.0.0-M2 to 2.0.0-M5, two size-limit methods were renamed:
+
+```java
+// OLD (M2)                              // NEW (M5)
+upload.setSizeMax(long)        →         upload.setMaxSize(long)
+upload.setFileSizeMax(int)     →         upload.setMaxFileSize(long)  // int → long!
+```
+
+**Affected files** (4 files, all use `JakartaServletFileUpload`):
+- `src/main/java/.../script/servlets/ServletRestful.java`
+- `src/main/java/.../script/servlets/ServletUpload.java`
+- `src/main/java/.../script/HtmlUploader.java`
+- `src/main/java/.../uploader/PostData.java`
+
+**Example fix** (ServletRestful.java): `upload.setSizeMax(maxSize)` → `upload.setMaxSize(maxSize)`
+
+**PostData.java** has both, also int→long type change:
+```java
+// OLD
+upload.setFileSizeMax(102400000);
+upload.setSizeMax(102400000);
+
+// NEW
+upload.setMaxFileSize(102400000L);
+upload.setMaxSize(102400000L);
+```
+
+To verify the latest API when upgrading: decompile from local Maven repository:
+```bash
+mvn dependency:copy -Dartifact=org.apache.commons:commons-fileupload2-jakarta-servlet5:<version> -DoutputDirectory=/tmp/fu
+javap -public org/apache/commons/fileupload2/jakarta/servlet5/JakartaServletFileUpload.class
+```
+
 ## Verification
 
 ```bash
