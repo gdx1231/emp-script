@@ -1,15 +1,16 @@
 # Tomcat 10 Embedded Demo
 
-基于 emp-script 框架的嵌入式 Tomcat 10 演示项目，集成 HSQLDB 数据库和完整的后台管理系统。
+基于 emp-script 框架的嵌入式 Tomcat 10 演示项目，集成 HSQLDB（文件模式）和完整的后台管理系统。
 
 ## 特性
 
-- **嵌入式 Tomcat 10.1.40** - Jakarta EE 9 支持
-- **HSQLDB 服务器模式** - 端口 11002，包含 3 个数据库
-- **自动数据解压** - 首次启动自动从 zip 解压 HSQLDB 数据
-- **P6Spy SQL 日志** - 完整的 SQL 执行跟踪
-- **后台管理系统** - 基于 EWA HtmlControl 的管理界面
-- **Oracle 语法兼容** - HSQLDB 启用 Oracle 语法模式
+- **嵌入式 Tomcat 10.1.40** — Jakarta EE 9 支持
+- **HSQLDB 文件模式** — 无需独立数据库服务器进程
+- **自动数据解压** — 首次启动自动从 zip 解压数据
+- **P6Spy SQL 日志** — 完整的 SQL 执行跟踪
+- **后台管理系统** — 基于 EWA HtmlControl 的管理界面
+- **配置文件驱动** — 端口、数据目录等通过 `application.properties` 配置
+- **自定义 ACL** — 本地 BackAdminImpl 实现，无需外部依赖
 
 ## 快速开始
 
@@ -39,9 +40,10 @@ bin/stop.sh
 
 ## 数据库
 
-### HSQLDB 服务器
+### HSQLDB 文件模式
 
-- **端口**: 11002
+HSQLDB 以文件模式运行，无需独立服务进程。数据文件存储在 `hsqldb/` 目录。
+
 - **用户**: sa
 - **密码**: (空)
 
@@ -55,13 +57,13 @@ bin/stop.sh
 ### 连接方式
 
 ```
-jdbc:hsqldb:hsql://localhost:11002/emp_ewa
-jdbc:hsqldb:hsql://localhost:11002/emp_portal
+jdbc:hsqldb:file:hsqldb/emp_ewa
+jdbc:hsqldb:file:hsqldb/emp_portal
 ```
 
 ### 数据初始化
 
-数据文件以 zip 格式存储（11MB），首次启动自动解压（323MB）：
+数据以 zip 格式存储（11MB），首次启动自动解压（323MB）：
 
 ```bash
 # 手动解压（如需要）
@@ -69,6 +71,23 @@ unzip hsqldb-data.zip -d .
 
 # 重新打包（数据修改后）
 zip -r hsqldb-data.zip hsqldb/ -x "hsqldb/*.lck" "hsqldb/*.log" "hsqldb/*.tmp*"
+```
+
+## 配置
+
+### application.properties
+
+```properties
+# Tomcat 端口
+tomcat.port=8080
+
+# HSQLDB 模式 (file | server)
+hsqldb.mode=file
+# HSQLDB 数据目录
+hsqldb.data.dir=hsqldb
+
+# 数据库列表
+hsqldb.databases=emp_ewa,emp_portal
 ```
 
 ## 项目结构
@@ -87,23 +106,29 @@ tomcat10demo/
 │   └── emp_portal.sql
 ├── src/main/
 │   ├── java/com/gdxsoft/emp/demo/
-│   │   ├── Tomcat10EmbeddedServer.java    # 主入口
-│   │   ├── HsqldbServerManager.java       # HSQLDB 管理
-│   │   ├── MysqlToHsqldbExporter.java     # MySQL 导出工具
-│   │   ├── MergeDatabases.java            # 数据库合并工具
-│   │   └── HelloServlet.java              # 示例 Servlet
+│   │   ├── ConfigLoader.java                # 配置加载器
+│   │   ├── Tomcat10EmbeddedServer.java      # 主入口
+│   │   ├── HsqldbServerManager.java         # HSQLDB 管理
+│   │   ├── MysqlToHsqldbExporter.java       # MySQL 导出工具
+│   │   ├── MergeDatabases.java              # 数据库合并工具
+│   │   ├── HelloServlet.java                # 示例 Servlet
+│   │   └── acl/
+│   │       ├── AclBase.java                 # ACL 基类
+│   │       └── BackAdminImpl.java           # ACL 实现
 │   ├── resources/
-│   │   ├── ewa_conf.xml                   # EWA 配置
-│   │   └── spy.properties                 # P6Spy 配置
+│   │   ├── application.properties           # 应用配置
+│   │   ├── ewa_conf.xml                     # EWA 配置
+│   │   └── spy.properties                   # P6Spy 配置
 │   └── webapp/
 │       ├── back_admin/
-│       │   ├── login.jsp                  # 登录页（HtmlControl）
-│       │   └── index.jsp                  # 管理首页（HtmlControl）
-│       ├── WEB-INF/web.xml                # Servlet 配置
-│       ├── index.jsp                      # 首页
-│       └── hello.jsp                      # 示例 JSP
+│       │   ├── login.jsp                    # 登录页（HtmlControl）
+│       │   └── index.jsp                    # 管理首页（HtmlControl）
+│       ├── WEB-INF/web.xml                  # Servlet 配置
+│       ├── index.jsp                        # 首页
+│       └── hello.jsp                        # 示例 JSP
 ├── spy.log                      # SQL 日志（运行时生成）
-└── pom.xml                      # Maven 配置
+├── pom.xml                      # Maven 配置
+└── README.md                    # 本文件
 ```
 
 ## 核心组件
@@ -111,17 +136,24 @@ tomcat10demo/
 ### Tomcat10EmbeddedServer
 
 主启动类，负责：
-1. 检查并解压 HSQLDB 数据文件
-2. 启动 HSQLDB 服务器
-3. 启动嵌入式 Tomcat
-4. 注册关闭钩子
+1. 检查并解压 HSQLDB 数据文件（自动初始化）
+2. 启动嵌入式 Tomcat（端口通过配置控制）
+3. 注册关闭钩子
 
-### HsqldbServerManager
+### ConfigLoader
 
-HSQLDB 服务器管理器：
-- 启动/停止 HSQLDB 服务器
-- 自动启用 Oracle 语法兼容模式
-- 支持多数据库
+从 `application.properties` 加载配置，提供类型安全的访问：
+- `getTomcatPort()` — Tomcat 端口
+- `getHsqldbMode()` — HSQLDB 模式（file/server）
+- `getHsqldbDataDir()` — 数据目录
+- `getHsqldbDatabases()` — 数据库列表
+
+### acl/BackAdminImpl
+
+本地 ACL 实现，替代 `emp-script-web` 中的 `com.gdxsoft.web.acl.BackAdminImpl`：
+- 检查用户登录状态（G_ADM_ID / G_SUP_ID）
+- 未登录时自动跳转登录页
+- 无需外部项目依赖
 
 ### P6Spy SQL 日志
 
@@ -152,13 +184,13 @@ mvn exec:java -Dexec.mainClass="com.gdxsoft.emp.demo.MysqlToHsqldbExporter" \
 
 ### ewa_conf.xml
 
-数据库连接配置：
+数据库连接配置（file 模式）：
 
 ```xml
 <database name="emp_portal" type="HSQLDB" connectionstring="emp_portal" schemaname="PUBLIC">
     <alias name="emp"/>
-    <pool driverClassName="com.p6spy.engine.spy.P6SpyDriver" 
-          url="jdbc:p6spy:hsqldb:hsql://localhost:11002/emp_portal"
+    <pool driverClassName="com.p6spy.engine.spy.P6SpyDriver"
+          url="jdbc:p6spy:hsqldb:file:hsqldb/emp_portal"
           username="sa" password="" maxActive="20" maxIdle="10" />
 </database>
 ```
@@ -176,10 +208,13 @@ mvn exec:java -Dexec.mainClass="com.gdxsoft.emp.demo.MysqlToHsqldbExporter" \
 ```bash
 # 查看占用端口的进程
 lsof -i:8080
-lsof -i:11002
 
 # 停止服务
 bin/stop.sh
+
+# 修改端口
+vim src/main/resources/application.properties
+# tomcat.port=8080 改为其他端口
 ```
 
 ### 数据文件损坏
@@ -203,7 +238,7 @@ logfile=spy.log
 
 - **Java**: 17
 - **Tomcat**: 10.1.40 (Jakarta EE 9)
-- **HSQLDB**: 2.7.4
+- **HSQLDB**: 2.7.4（文件模式）
 - **emp-script**: 1.1.10 (jdk17)
 - **P6Spy**: 3.9.1
 - **Maven**: 3.x
