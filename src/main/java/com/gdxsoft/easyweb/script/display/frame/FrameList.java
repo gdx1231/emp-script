@@ -1654,7 +1654,7 @@ public class FrameList extends FrameBase implements IFrame {
 	 * @throws Exception
 	 */
 	private void loadWorkFlowApp() throws Exception {
-		if (this._WorkFlowBut != null) {
+		if (this._WorkFlowBut == null) {
 			return;
 		}
 		RequestValue rv = super.getHtmlClass().getItemValues().getRequestValue();

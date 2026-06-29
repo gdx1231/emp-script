@@ -426,6 +426,40 @@ public class DataHelper {
 	}
 
 	/**
+	 * 关闭指定名称的连接池并清理缓存
+	 *
+	 * @param configName 配置名称，如 "sqlprofiler_1"
+	 */
+	public static void closeDataSource(String configName) {
+		String key = configName.toUpperCase().trim();
+		DataSource ds = DATASOURCES.remove(key);
+		if (ds == null) {
+			return;
+		}
+		DS_LOCK_FACTORIES.remove(key);
+		try {
+			if (ds instanceof HikariDataSource) {
+				LOGGER.info("Closing HikariDataSource {}", key);
+				((HikariDataSource) ds).close();
+			} else if (ds instanceof DruidDataSource) {
+				LOGGER.info("Closing DruidDataSource {}", key);
+				((DruidDataSource) ds).close();
+			} else {
+				try {
+					java.lang.reflect.Method m = ds.getClass().getMethod("close");
+					m.setAccessible(true);
+					m.invoke(ds);
+					LOGGER.info("Invoked close() on DataSource {} of type {}", key, ds.getClass().getName());
+				} catch (NoSuchMethodException nsme) {
+					LOGGER.debug("DataSource {} has no close() method: {}", key, ds.getClass().getName());
+				}
+			}
+		} catch (Throwable t) {
+			LOGGER.error("Error closing DataSource {}: {}", key, t.getMessage(), t);
+		}
+	}
+
+	/**
 	 * 关闭数据库连接
 	 */
 	public void close() {
