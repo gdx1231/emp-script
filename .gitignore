@@ -25,7 +25,6 @@ demoSkills/ewa-api/ewa-api.conf
 /tomcat10demo/spy.log
 /tomcat10demo/hsqldb/*.log
 /tomcat10demo/hsqldb/*.tmp
-/tomcat10demo/hsqldb/*.lobs
 /tomcat10demo/bin/*.log
 /tomcat10demo/bin/*.pid
 /tomcat10demo/target/
