@@ -26,6 +26,17 @@ bin/start.sh
 bin/debug.sh
 ```
 
+**Windows：**
+```cmd
+cd tomcat10demo
+
+:: 后台启动
+bin\start.bat
+
+:: 调试模式
+bin\debug.bat
+```
+
 ### 2. 访问应用
 
 - **首页**: http://localhost:8080/
@@ -36,6 +47,11 @@ bin/debug.sh
 
 ```bash
 bin/stop.sh
+```
+
+**Windows：**
+```cmd
+bin\shutdown.bat
 ```
 
 ## 数据库
@@ -95,9 +111,12 @@ hsqldb.databases=emp_ewa,emp_portal
 ```
 tomcat10demo/
 ├── bin/                          # 启动脚本
-│   ├── start.sh                 # 后台启动
-│   ├── stop.sh                  # 停止服务
-│   └── debug.sh                 # 调试模式
+│   ├── start.sh                 # 后台启动 (Linux/macOS)
+│   ├── start.bat                # 后台启动 (Windows)
+│   ├── stop.sh                  # 停止服务 (Linux/macOS)
+│   ├── shutdown.bat             # 停止服务 (Windows)
+│   ├── debug.sh                 # 调试模式 (Linux/macOS)
+│   └── debug.bat                # 调试模式 (Windows)
 ├── hsqldb/                      # HSQLDB 数据目录（运行时生成）
 ├── hsqldb-data.zip              # 压缩的数据库文件
 ├── sql/                         # SQL 初始化脚本
