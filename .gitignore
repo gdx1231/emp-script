@@ -23,8 +23,14 @@ demoSkills/ewa-api/ewa-api.conf
 
 # tomcat10demo 运行时文件
 /tomcat10demo/spy.log
+/tomcat10demo/hsqldb/*.script
+/tomcat10demo/hsqldb/*.lobs
+/tomcat10demo/hsqldb/*.properties
 /tomcat10demo/hsqldb/*.log
+/tomcat10demo/hsqldb/*.lck
 /tomcat10demo/hsqldb/*.tmp
+/tomcat10demo/hsqldb/*.tmp/*
+!/tomcat10demo/hsqldb/.gitkeep
 /tomcat10demo/bin/*.log
 /tomcat10demo/bin/*.pid
 /tomcat10demo/target/

@@ -3,7 +3,7 @@ name: embedded-tomcat-demo
 description: Create embedded Tomcat 10 demo sub-project with emp-script integration, HSQLDB server mode, and MySQL data export
 source: auto-skill
 extracted_at: '2026-06-29T03:21:49.632Z'
-updated_at: '2026-06-29T07:22:42.042Z'
+updated_at: '2026-06-29T07:45:00.000Z'
 ---
 
 # Embedded Tomcat 10 Demo with emp-script
@@ -569,3 +569,71 @@ awk -F'|' '$2+0 > 100' spy.log
 ```
 
 **Why P6Spy over code-level logging:** No need to modify `DataConnection` or any emp-script source code. P6Spy works at the JDBC driver level, capturing all SQL regardless of which code path executes it. The `spy.properties` file allows tuning log format, filtering, and slow query thresholds without recompilation.
+
+## Git LFS for HSQLDB .lobs Files
+
+HSQLDB stores large objects (BLOB/CLOB data) in `.lobs` files alongside the `.script` files. These can easily exceed GitHub's 100MB file size limit (e.g., `emp_portal.lobs` at 260MB).
+
+### Setup
+
+```bash
+# 1. Install Git LFS (if not installed)
+brew install git-lfs   # macOS
+# or download from https://git-lfs.github.com/
+
+# 2. Initialize LFS in the repository
+git lfs install
+
+# 3. Track .lobs files
+git lfs track "*.lobs"
+
+# 4. This creates/updates .gitattributes — commit it
+git add .gitattributes
+```
+
+### .gitignore Configuration
+
+Remove `.lobs` from `.gitignore` (LFS handles them). Keep ignoring other runtime files:
+```gitignore
+# tomcat10demo runtime files
+/tomcat10demo/spy.log
+/tomcat10demo/hsqldb/*.log
+/tomcat10demo/hsqldb/*.tmp
+/tomcat10demo/bin/*.log
+/tomcat10demo/bin/*.pid
+/tomcat10demo/target/
+/tomcat10demo/tomcat.*/
+
+# Backup files
+*~
+```
+
+### Verification
+
+```bash
+# Check LFS-tracked files
+git lfs ls-files
+# Output:
+# 6f6cf39623 * tomcat10demo/hsqldb/emp_ewa.lobs
+# 2c9f6e73a3 * tomcat10demo/hsqldb/emp_main_data.lobs
+# 397289f774 * tomcat10demo/hsqldb/emp_portal.lobs
+
+# Push (LFS files upload separately)
+git push origin jdk17
+# Output: Uploading LFS objects: 100% (3/3), 370 MB | 4.8 MB/s, done.
+```
+
+### Other Developers
+
+```bash
+# After cloning, install LFS and pull large files
+git lfs install
+git lfs pull
+```
+
+### GitHub LFS Limits (Free Tier)
+- 1 GB storage
+- 1 GB/month bandwidth
+- Current usage: ~370 MB for tomcat10demo .lobs files
+
+**Why:** Without LFS, `git push` fails with `GH001: Large files detected`. The `.lobs` files are essential for HSQLDB databases that contain BLOB/CLOB data — without them, the database loses large object content on restart.
