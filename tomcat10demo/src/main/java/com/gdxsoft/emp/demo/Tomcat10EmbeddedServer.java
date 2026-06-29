@@ -7,37 +7,27 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.catalina.Context;
-import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.startup.Tomcat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 嵌入式 Tomcat 10 + HSQLDB Server 启动入口
+ * 嵌入式 Tomcat 10 启动入口
  * <p>
- * 启动顺序：检查并解压数据文件 → HSQLDB Server → Tomcat
+ * HSQLDB 使用 file 模式，无需启动独立服务器进程
  */
 public class Tomcat10EmbeddedServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(Tomcat10EmbeddedServer.class);
 
-    private static final int TOMCAT_PORT = 8080;
-    private static final int HSQLDB_PORT = 11002;
-    private static final String HSQLDB_DATA_DIR = "hsqldb";
-    private static final String HSQLDB_ZIP_FILE = "hsqldb-data.zip";
-    private static final String[] DATABASES = {"emp_ewa", "emp_portal"};
-
-    private static HsqldbServerManager hsqldbServer;
     private static Tomcat tomcat;
 
     public static void main(String[] args) throws Exception {
         LOGGER.info("=== Tomcat 10 Embedded Server ===");
+        LOGGER.info("Configuration: tomcat.port={}, hsqldb.mode={}, hsqldb.data.dir={}", 
+            ConfigLoader.getTomcatPort(), ConfigLoader.getHsqldbMode(), ConfigLoader.getHsqldbDataDir());
 
         // 0. 检查并解压 HSQLDB 数据文件
         ensureHsqldbData();
-
-        // 1. 启动 HSQLDB Server
-        hsqldbServer = new HsqldbServerManager(HSQLDB_PORT, HSQLDB_DATA_DIR, DATABASES);
-        hsqldbServer.start();
 
         // 注册关闭钩子
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -50,12 +40,9 @@ public class Tomcat10EmbeddedServer {
             } catch (Exception e) {
                 LOGGER.error("Tomcat stop error", e);
             }
-            if (hsqldbServer != null) {
-                hsqldbServer.stop();
-            }
         }));
 
-        // 2. 启动 Tomcat
+        // 1. 启动 Tomcat
         startTomcat();
     }
 
@@ -63,9 +50,9 @@ public class Tomcat10EmbeddedServer {
         String webappDir = new File("src/main/webapp").getAbsolutePath();
 
         tomcat = new Tomcat();
-        tomcat.setPort(TOMCAT_PORT);
+        tomcat.setPort(ConfigLoader.getTomcatPort());
         tomcat.getConnector(); // 触发默认 Connector 创建
-        tomcat.setHostname("0.0.0.0");
+        tomcat.setHostname(ConfigLoader.getTomcatHost());
 
         // 启用 JNDI
         tomcat.enableNaming();
@@ -77,12 +64,12 @@ public class Tomcat10EmbeddedServer {
         // 解决 Jasper (JSP) 的 ClassLoader 问题
         ctx.setParentClassLoader(Tomcat10EmbeddedServer.class.getClassLoader());
 
-        // Session 超时（分钟），不在 web.xml 中定义 session-config
+        // Session 超时（分钟）
         ctx.setSessionTimeout(30);
 
         tomcat.start();
-        LOGGER.info("Tomcat started on http://localhost:{}", TOMCAT_PORT);
-        LOGGER.info("HSQLDB Server on port {}", HSQLDB_PORT);
+        LOGGER.info("Tomcat started on http://{}:{}", ConfigLoader.getTomcatHost(), ConfigLoader.getTomcatPort());
+        LOGGER.info("HSQLDB mode: file (data dir: {})", ConfigLoader.getHsqldbDataDir());
         LOGGER.info("Press Ctrl+C to stop");
 
         tomcat.getServer().await();
@@ -92,13 +79,17 @@ public class Tomcat10EmbeddedServer {
      * 检查 HSQLDB 数据文件是否存在，如果不存在则从 zip 文件解压
      */
     private static void ensureHsqldbData() throws Exception {
-        File dataDir = new File(HSQLDB_DATA_DIR);
-        File zipFile = new File(HSQLDB_ZIP_FILE);
+        String dataDir = ConfigLoader.getHsqldbDataDir();
+        String zipFile = "hsqldb-data.zip";
+        String[] databases = ConfigLoader.getHsqldbDatabases();
+        
+        File dataDirFile = new File(dataDir);
+        File zipFilePath = new File(zipFile);
         
         // 检查是否存在关键数据文件（.script 文件）
         boolean dataExists = true;
-        for (String dbName : DATABASES) {
-            File scriptFile = new File(dataDir, dbName + ".script");
+        for (String dbName : databases) {
+            File scriptFile = new File(dataDirFile, dbName + ".script");
             if (!scriptFile.exists()) {
                 dataExists = false;
                 break;
@@ -106,26 +97,26 @@ public class Tomcat10EmbeddedServer {
         }
         
         if (dataExists) {
-            LOGGER.info("HSQLDB data files found in {}", HSQLDB_DATA_DIR);
+            LOGGER.info("HSQLDB data files found in {}", dataDir);
             return;
         }
         
         // 数据文件不存在，尝试从 zip 解压
-        if (!zipFile.exists()) {
-            LOGGER.error("HSQLDB data zip file not found: {}", HSQLDB_ZIP_FILE);
+        if (!zipFilePath.exists()) {
+            LOGGER.error("HSQLDB data zip file not found: {}", zipFile);
             LOGGER.error("Please run MysqlToHsqldbExporter to create the data files first");
             throw new RuntimeException("HSQLDB data files not found");
         }
         
-        LOGGER.info("Extracting HSQLDB data from {}...", HSQLDB_ZIP_FILE);
+        LOGGER.info("Extracting HSQLDB data from {}...", zipFile);
         
         // 创建数据目录
-        if (!dataDir.exists()) {
-            dataDir.mkdirs();
+        if (!dataDirFile.exists()) {
+            dataDirFile.mkdirs();
         }
         
         // 解压 zip 文件
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFilePath))) {
             ZipEntry entry;
             byte[] buffer = new byte[8192];
             int count = 0;
@@ -154,7 +145,7 @@ public class Tomcat10EmbeddedServer {
                 zis.closeEntry();
             }
             
-            LOGGER.info("Extracted {} files from {}", count, HSQLDB_ZIP_FILE);
+            LOGGER.info("Extracted {} files from {}", count, zipFile);
         }
     }
 }

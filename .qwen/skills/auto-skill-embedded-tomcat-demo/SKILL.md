@@ -1,9 +1,9 @@
 ---
 name: embedded-tomcat-demo
-description: Create embedded Tomcat 10 demo sub-project with emp-script integration, HSQLDB server mode, and MySQL data export
+description: Create embedded Tomcat 10 demo sub-project with emp-script integration. Supports both HSQLDB server mode and file mode. Includes configurable properties, zip-based data initialization, and P6Spy SQL logging.
 source: auto-skill
-extracted_at: '2026-06-29T03:21:49.632Z'
-updated_at: '2026-06-29T07:45:00.000Z'
+extracted_at: '2026-06-29T07:53:08.135Z'
+updated_at: '2026-06-29T07:58:00.000Z'
 ---
 
 # Embedded Tomcat 10 Demo with emp-script
@@ -28,16 +28,23 @@ tomcat10demo/
 │   └── emp_portal.sql
 ├── hsqldb/               # HSQLDB 数据文件 (git 保留)
 ├── src/main/java/com/gdxsoft/emp/demo/
-│   ├── Tomcat10EmbeddedServer.java    # Main entry: HSQLDB + Tomcat
-│   ├── HsqldbServerManager.java       # HSQLDB Server mode manager
+│   ├── Tomcat10EmbeddedServer.java    # Main entry: auto-extract zip → start Tomcat
+│   ├── HsqldbServerManager.java       # HSQLDB Server mode manager (可选, file 模式下不需要)
+│   ├── ConfigLoader.java              # 配置加载器 (读取 application.properties)
 │   ├── MysqlToHsqldbExporter.java     # 双模式: SQL 文件导入 / MySQL 导出
 │   └── HelloServlet.java
+├── src/main/resources/
+│   ├── application.properties         # 配置文件 (端口, 数据库路径等)
+│   ├── spy.properties                 # P6Spy 配置 (SQL 日志)
+│   └── ewa_conf.xml                   # EWA 框架配置 (数据源, scriptPaths 等)
 ├── src/main/webapp/
 │   ├── WEB-INF/web.xml                # emp-script servlets
-│   ├── index.html
-│   └── hello.jsp
-└── src/main/resources/
-    └── ewa_conf.xml                   # HSQLDB datasource only
+│   ├── back_admin/
+│   │   ├── login.jsp                  # 登录页 (HtmlControl)
+│   │   └── index.jsp                  # 管理首页 (HtmlControl)
+│   ├── index.jsp                      # 首页
+│   └── hello.jsp                      # 示例 JSP
+├── hsqldb/               # HSQLDB 数据文件 (git 保留)
 ```
 
 ## pom.xml Dependencies
@@ -359,6 +366,135 @@ Now both `emp_portal` and `emp` resolve to the same connection pool.
 
 **Why:** XML configurations in emp-script reference databases by name (e.g., `DataSource="main_data"`). Aliases allow these references to work without renaming all XML configs when database names change.
 
+## HSQLDB File Mode (替代 Server Mode)
+
+HSQLDB 支持两种连接模式：
+
+| 模式 | JDBC URL | 特点 |
+|------|----------|------|
+| **Server** | `jdbc:hsqldb:hsql://host:port/dbname` | 独立进程，支持多客户端 |
+| **File** | `jdbc:hsqldb:file:/path/to/dbname` | 同一进程内，无需服务器 |
+
+**File 模式优势：**
+- 无需启动 HSQLDB 服务器进程
+- 无端口占用（不占用 11002）
+- 启动更快（省去 server 初始化）
+- 部署更简单（无需管理独立进程）
+- 适用于单机 demo/开发环境
+
+### File 模式配置
+
+**ewa_conf.xml 中的 JDBC URL：**
+```xml
+<!-- Server 模式 -->
+<database name="emp_ewa" type="HSQLDB" connectionstring="emp_ewa" schemaname="PUBLIC">
+    <pool driverClassName="com.p6spy.engine.spy.P6SpyDriver"
+          url="jdbc:p6spy:hsqldb:hsql://localhost:11002/emp_ewa" .../>
+</database>
+
+<!-- File 模式（不需要 HSQLDB 服务器） -->
+<database name="emp_ewa" type="HSQLDB" connectionstring="emp_ewa" schemaname="PUBLIC">
+    <pool driverClassName="com.p6spy.engine.spy.P6SpyDriver"
+          url="jdbc:p6spy:hsqldb:file:hsqldb/emp_ewa" .../>
+</database>
+```
+
+**URL 转换规则：** `jdbc:p6spy:hsqldb:hsql://host:port/db` → `jdbc:p6spy:hsqldb:file:hsqldb/db`
+
+### File 模式的启动代码
+
+File 模式下不需要启动 HSQLDB 服务器，Tomcat10EmbeddedServer 简化为只启动 Tomcat：
+
+```java
+public class Tomcat10EmbeddedServer {
+    public static void main(String[] args) throws Exception {
+        // 1. 解压数据文件（如果需要）
+        ensureHsqldbData();
+
+        // 2. 启动 Tomcat（HSQLDB file 模式随 Tomcat 启动自动连接）
+        startTomcat();
+    }
+}
+```
+
+不需要 `HsqldbServerManager`，不需要 `server.start()`，不需要端口检测。
+
+### 切换模式
+
+在 `application.properties` 中配置：
+```properties
+hsqldb.mode=file         # 或 server
+hsqldb.port=11002        # 仅 server 模式使用
+```
+
+## Configuration File Pattern
+
+使用 `application.properties` + `ConfigLoader` 集中管理所有配置，避免硬编码。
+
+### application.properties
+
+```properties
+# Tomcat 配置
+tomcat.port=8080
+tomcat.host=0.0.0.0
+
+# HSQLDB 配置
+hsqldb.mode=file
+hsqldb.data.dir=hsqldb
+hsqldb.port=11002              # 仅 server 模式使用
+hsqldb.databases=emp_ewa,emp_portal
+
+# P6Spy 日志
+p6spy.enabled=true
+```
+
+### ConfigLoader.java
+
+```java
+public class ConfigLoader {
+    private static Properties props = new Properties();
+
+    static {
+        try (InputStream is = ConfigLoader.class.getClassLoader()
+                .getResourceAsStream("application.properties")) {
+            props.load(is);
+        }
+    }
+
+    public static int getTomcatPort() {
+        return getInt("tomcat.port", 8080);
+    }
+
+    public static String getHsqldbMode() {
+        return get("hsqldb.mode", "file");
+    }
+
+    public static String[] getHsqldbDatabases() {
+        String dbs = get("hsqldb.databases", "emp_ewa,emp_portal");
+        return dbs.split(",");
+    }
+
+    private static int getInt(String key, int def) { ... }
+    private static String get(String key, String def) { ... }
+    private static boolean getBoolean(String key, boolean def) { ... }
+}
+```
+
+### 使用 ConfigLoader
+
+在 Tomcat10EmbeddedServer 中：
+```java
+tomcat.setPort(ConfigLoader.getTomcatPort());
+tomcat.setHostname(ConfigLoader.getTomcatHost());
+
+String dataDir = ConfigLoader.getHsqldbDataDir();
+String[] databases = ConfigLoader.getHsqldbDatabases();
+```
+
+**Why:** 硬编码的端口、路径等在多环境部署时容易出错。属性文件 + ConfigLoader 提供统一的配置入口，支持默认值，便于维护和部署。
+
+**How to apply:** 创建新 demo 项目时，始终使用 `application.properties` + `ConfigLoader` 模式。配置项包括所有可变参数（端口、路径、数据库列表等）。Tomcat 和 HSQLDB 的配置参数从 ConfigLoader 读取而非硬编码。
+
 ## Merging HSQLDB Databases
 
 When consolidating databases (e.g., merging emp_main_data into emp_portal), use `MergeDatabases.java`:
@@ -404,7 +540,43 @@ mvn exec:java -Dexec.mainClass="com.gdxsoft.emp.demo.Tomcat10EmbeddedServer"
 
 # → http://localhost:8080/
 # → http://localhost:8080/back_admin/login.jsp (后台管理)
-# HSQLDB: jdbc:hsqldb:hsql://localhost:11002/emp_ewa (user: sa, password: empty)
+
+# HSQLDB 连接（File 模式）:
+jdbc:hsqldb:file:hsqldb/emp_ewa (user: sa, password: empty)
+# HSQLDB 连接（Server 模式）:
+jdbc:hsqldb:hsql://localhost:11002/emp_ewa (user: sa, password: empty)
+```
+
+## Systemd Service (可选)
+
+如需将 tomcat10demo 注册为系统服务，创建 `/etc/systemd/system/tomcat10demo.service`：
+
+```ini
+[Unit]
+Description=Tomcat 10 Embedded Demo
+After=network.target
+
+[Service]
+Type=simple
+User=admin
+WorkingDirectory=/opt/tomcat10demo
+ExecStart=/opt/tomcat10demo/bin/debug.sh
+ExecStop=/opt/tomcat10demo/bin/stop.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+# 启用
+sudo systemctl start tomcat10demo
+sudo systemctl enable tomcat10demo
+# 查看日志
+sudo journalctl -u tomcat10demo -f
 ```
 
 ## Back Admin JSP Pages
@@ -570,70 +742,133 @@ awk -F'|' '$2+0 > 100' spy.log
 
 **Why P6Spy over code-level logging:** No need to modify `DataConnection` or any emp-script source code. P6Spy works at the JDBC driver level, capturing all SQL regardless of which code path executes it. The `spy.properties` file allows tuning log format, filtering, and slow query thresholds without recompilation.
 
-## Git LFS for HSQLDB .lobs Files
+## Zip Compression for HSQLDB Data Files (替代 Git LFS)
 
-HSQLDB stores large objects (BLOB/CLOB data) in `.lobs` files alongside the `.script` files. These can easily exceed GitHub's 100MB file size limit (e.g., `emp_portal.lobs` at 260MB).
+HSQLDB 数据文件（.script + .lobs）可达 323MB+，超过 GitHub 100MB 限制。使用 zip 压缩 + 启动时自动解压替代 Git LFS。
 
-### Setup
+### 压缩效果
+
+| 项目 | 大小 |
+|------|------|
+| hsqldb/ 原始目录 | 323 MB |
+| hsqldb-data.zip | 11 MB |
+| 压缩率 | 97% |
+
+### 创建压缩包
 
 ```bash
-# 1. Install Git LFS (if not installed)
-brew install git-lfs   # macOS
-# or download from https://git-lfs.github.com/
-
-# 2. Initialize LFS in the repository
-git lfs install
-
-# 3. Track .lobs files
-git lfs track "*.lobs"
-
-# 4. This creates/updates .gitattributes — commit it
-git add .gitattributes
+cd tomcat10demo
+# 停止服务后压缩（排除运行时文件）
+zip -r hsqldb-data.zip hsqldb/ \
+  -x "hsqldb/*.lck" "hsqldb/*.log" "hsqldb/*.tmp" "hsqldb/*.tmp/*"
 ```
 
-### .gitignore Configuration
+### 自动解压实现
 
-Remove `.lobs` from `.gitignore` (LFS handles them). Keep ignoring other runtime files:
+在 `Tomcat10EmbeddedServer.java` 中添加 `ensureHsqldbData()` 方法：
+
+```java
+private static final String HSQLDB_ZIP_FILE = "hsqldb-data.zip";
+
+private static void ensureHsqldbData() throws Exception {
+    File dataDir = new File(HSQLDB_DATA_DIR);
+    File zipFile = new File(HSQLDB_ZIP_FILE);
+    
+    // 检查关键数据文件是否存在
+    boolean dataExists = true;
+    for (String dbName : DATABASES) {
+        if (!new File(dataDir, dbName + ".script").exists()) {
+            dataExists = false;
+            break;
+        }
+    }
+    
+    if (dataExists) {
+        LOGGER.info("HSQLDB data files found in {}", HSQLDB_DATA_DIR);
+        return;
+    }
+    
+    if (!zipFile.exists()) {
+        throw new RuntimeException("HSQLDB data zip not found: " + HSQLDB_ZIP_FILE);
+    }
+    
+    LOGGER.info("Extracting HSQLDB data from {}...", HSQLDB_ZIP_FILE);
+    dataDir.mkdirs();
+    
+    // 解压
+    try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
+        ZipEntry entry;
+        byte[] buffer = new byte[8192];
+        while ((entry = zis.getNextEntry()) != null) {
+            File outFile = new File(entry.getName());
+            if (entry.isDirectory()) {
+                outFile.mkdirs();
+            } else {
+                File parent = outFile.getParentFile();
+                if (parent != null) parent.mkdirs();
+                try (FileOutputStream fos = new FileOutputStream(outFile)) {
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+                }
+            }
+            zis.closeEntry();
+        }
+    }
+    LOGGER.info("HSQLDB data extracted successfully");
+}
+```
+
+在 `main()` 中，启动 HSQLDB Server 之前调用：
+```java
+ensureHsqldbData();
+hsqldbServer = new HsqldbServerManager(...);
+hsqldbServer.start();
+```
+
+### .gitignore 配置
+
 ```gitignore
-# tomcat10demo runtime files
+# tomcat10demo 运行时文件
 /tomcat10demo/spy.log
+/tomcat10demo/hsqldb/*.script
+/tomcat10demo/hsqldb/*.lobs
+/tomcat10demo/hsqldb/*.properties
 /tomcat10demo/hsqldb/*.log
+/tomcat10demo/hsqldb/*.lck
 /tomcat10demo/hsqldb/*.tmp
+/tomcat10demo/hsqldb/*.tmp/*
+!/tomcat10demo/hsqldb/.gitkeep
 /tomcat10demo/bin/*.log
 /tomcat10demo/bin/*.pid
 /tomcat10demo/target/
 /tomcat10demo/tomcat.*/
-
-# Backup files
-*~
 ```
 
-### Verification
+**关键：** 忽略解压后的数据文件，但保留 `hsqldb-data.zip` 和 `hsqldb/.gitkeep`。
+
+### 数据更新流程
+
+当数据库内容变更（新增表、导入数据等）后，重新打包：
 
 ```bash
-# Check LFS-tracked files
-git lfs ls-files
-# Output:
-# 6f6cf39623 * tomcat10demo/hsqldb/emp_ewa.lobs
-# 2c9f6e73a3 * tomcat10demo/hsqldb/emp_main_data.lobs
-# 397289f774 * tomcat10demo/hsqldb/emp_portal.lobs
-
-# Push (LFS files upload separately)
-git push origin jdk17
-# Output: Uploading LFS objects: 100% (3/3), 370 MB | 4.8 MB/s, done.
+cd tomcat10demo
+bin/stop.sh
+zip -r hsqldb-data.zip hsqldb/ -x "hsqldb/*.lck" "hsqldb/*.log" "hsqldb/*.tmp" "hsqldb/*.tmp/*"
+git add hsqldb-data.zip
+git commit -m "chore: update hsqldb data"
+git push
 ```
 
-### Other Developers
+### 优势（对比 Git LFS）
 
-```bash
-# After cloning, install LFS and pull large files
-git lfs install
-git lfs pull
-```
+| 特性 | Git LFS | Zip 压缩 |
+|------|---------|----------|
+| 额外依赖 | 需要 git-lfs | 无 |
+| 带宽限制 | 1GB/月（免费） | 无 |
+| clone 速度 | 需要额外 pull | 一次 clone |
+| 存储大小 | 370MB | 11MB |
+| 自动初始化 | 无 | 启动时自动解压 |
 
-### GitHub LFS Limits (Free Tier)
-- 1 GB storage
-- 1 GB/month bandwidth
-- Current usage: ~370 MB for tomcat10demo .lobs files
-
-**Why:** Without LFS, `git push` fails with `GH001: Large files detected`. The `.lobs` files are essential for HSQLDB databases that contain BLOB/CLOB data — without them, the database loses large object content on restart.
+**Why:** Git LFS 有存储和带宽限制，且其他开发者需要额外安装 git-lfs 并执行 `git lfs pull`。Zip 压缩方案更简单：11MB 的 zip 文件直接在 git 中，首次启动自动解压，无需任何额外工具。

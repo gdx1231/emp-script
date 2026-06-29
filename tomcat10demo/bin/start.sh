@@ -16,12 +16,10 @@ if [ -f "$PID_FILE" ]; then
 fi
 
 # 检查端口占用
-for PORT in 8080 11002; do
-    if lsof -ti:$PORT >/dev/null 2>&1; then
-        echo "端口 $PORT 被占用，请先执行 bin/stop.sh"
-        exit 1
-    fi
-done
+if lsof -ti:8080 >/dev/null 2>&1; then
+    echo "端口 8080 被占用，请先执行 bin/stop.sh"
+    exit 1
+fi
 
 echo "启动 Tomcat 10 Embedded Server..."
 nohup mvn -q exec:java -Dexec.mainClass="com.gdxsoft.emp.demo.Tomcat10EmbeddedServer" >> "$LOG_FILE" 2>&1 &

@@ -5,14 +5,12 @@ cd "$(dirname "$0")/.."
 APP_DIR=$(pwd)
 PID_FILE="$APP_DIR/bin/app.pid"
 
-# 释放端口 8080 (Tomcat) 和 11002 (HSQLDB)
-for PORT in 8080 11002; do
-    PIDS=$(lsof -ti:$PORT 2>/dev/null)
-    if [ -n "$PIDS" ]; then
-        echo "释放端口 $PORT (PID: $PIDS)"
-        echo "$PIDS" | xargs kill -9 2>/dev/null
-    fi
-done
+# 释放端口 8080 (Tomcat)
+PIDS=$(lsof -ti:8080 2>/dev/null)
+if [ -n "$PIDS" ]; then
+    echo "释放端口 8080 (PID: $PIDS)"
+    echo "$PIDS" | xargs kill -9 2>/dev/null
+fi
 
 if [ -f "$PID_FILE" ]; then
     PID=$(cat "$PID_FILE")
