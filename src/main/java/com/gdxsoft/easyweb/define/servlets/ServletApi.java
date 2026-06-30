@@ -504,6 +504,12 @@ public class ServletApi extends HttpServlet {
 			return UJSon.rstFalse("Missing xml parameter");
 		}
 
+		// 校验 XML 合法性和 Tag 值
+		ConfigValidator.ValidationResult vr = ConfigValidator.validateItemXml(xml, itemName);
+		if (!vr.isValid()) {
+			return UJSon.rstFalse("XML 校验不通过: " + vr.getErrorMessage());
+		}
+
 		try {
 			IUpdateXml updateXml = getUpdateXml(xmlName);
 			if (updateXml == null) {
@@ -876,17 +882,18 @@ public class ServletApi extends HttpServlet {
 		}
 
 		// 验证 Frame 类型
-		String frameTypeUpper = frameType.toUpperCase();
-		if (!frameTypeUpper.equals("LISTFRAME") && !frameTypeUpper.equals("FRAME") && !frameTypeUpper.equals("TREE")) {
-			return UJSon.rstFalse("Invalid frametype. Allowed values: ListFrame, Frame, Tree");
+		ConfigValidator.ValidationResult ftResult = ConfigValidator.validateFrameType(frameType);
+		if (!ftResult.isValid()) {
+			return UJSon.rstFalse(ftResult.getErrorMessage());
 		}
+		String frameTypeUpper = frameType.toUpperCase();
 
 		// 验证操作类型
-		String operationTypeUpper = operationType.toUpperCase();
-		if (!operationTypeUpper.equals("N") && !operationTypeUpper.equals("M") && !operationTypeUpper.equals("V")
-				&& !operationTypeUpper.equals("NM")) {
-			return UJSon.rstFalse("Invalid operationtype. Allowed values: N, M, V, NM");
+		ConfigValidator.ValidationResult otResult = ConfigValidator.validateOperationType(operationType);
+		if (!otResult.isValid()) {
+			return UJSon.rstFalse(otResult.getErrorMessage());
 		}
+		String operationTypeUpper = operationType.toUpperCase();
 
 		// 使用 admin 的 loginId 作为 admId（如果未提供）
 		if (StringUtils.isBlank(admId)) {
@@ -984,17 +991,18 @@ public class ServletApi extends HttpServlet {
 		}
 
 		// 验证 Frame 类型
-		String frameTypeUpper = frameType.toUpperCase();
-		if (!frameTypeUpper.equals("LISTFRAME") && !frameTypeUpper.equals("FRAME") && !frameTypeUpper.equals("TREE")) {
-			return UJSon.rstFalse("Invalid frametype. Allowed values: ListFrame, Frame, Tree");
+		ConfigValidator.ValidationResult ftResult = ConfigValidator.validateFrameType(frameType);
+		if (!ftResult.isValid()) {
+			return UJSon.rstFalse(ftResult.getErrorMessage());
 		}
+		String frameTypeUpper = frameType.toUpperCase();
 
 		// 验证操作类型
-		String operationTypeUpper = operationType.toUpperCase();
-		if (!operationTypeUpper.equals("N") && !operationTypeUpper.equals("M") && !operationTypeUpper.equals("V")
-				&& !operationTypeUpper.equals("NM")) {
-			return UJSon.rstFalse("Invalid operationtype. Allowed values: N, M, V, NM");
+		ConfigValidator.ValidationResult otResult = ConfigValidator.validateOperationType(operationType);
+		if (!otResult.isValid()) {
+			return UJSon.rstFalse(otResult.getErrorMessage());
 		}
+		String operationTypeUpper = operationType.toUpperCase();
 
 		try {
 			// 读取数据库表结构

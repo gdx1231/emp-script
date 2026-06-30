@@ -57,6 +57,181 @@ source ewa-api.conf
 **frametype**: `ListFrame` \| `Frame` \| `Tree`  
 **operationtype**: `N`（新增）\| `M`（修改）\| `V`（查看）\| `NM`（新增+修改）
 
+## XItem Tag 类型参考
+
+配置项中的 `<XItem Tag="..." />` 定义了页面元素的渲染类型。
+
+### 标准对象 (Standard)
+
+| Tag | 说明 | 对应 HTML |
+|-----|------|-----------|
+| `text` | 单行文本 | `<input type="text">` |
+| `textarea` | 多行文本 | `<textarea>` |
+| `span` | 文本标签 | `<span>` |
+| `hidden` | 隐含字段 | `<input type="hidden">` |
+| `password` | 密码输入 | `<input type="password">` |
+| `passwordWithEye` | 可查看密码 | `<input type="password">` ＋ 眼睛图标 |
+| `combo` | 组合框（可搜索下拉） | `<div class="ewa-combo-box">` |
+| `select` | 下拉选择 | `<select>` |
+| `checkbox` | 多选 | `<input type="checkbox">`（可重复） |
+| `switch` | 开关 | `<div class='ewa-switch'>` |
+| `radio` | 单选 | `<input type="radio">`（可重复） |
+| `checkboxgrid` | 列表复选框 | `<input type="checkbox">` |
+| `radiogrid` | 列表单选 | `<input type="radio">` |
+| `anchor` | 链接（显示描述） | `<a class="ewa-anchor">` |
+| `anchor2` | 链接（显示值内容） | `<a class="ewa-anchor">` |
+| `linkButton` | 链接按钮 | `<a>` 触发表单按钮 click |
+| `droplist` | 动态列表（自动补全） | `<input class="ewa-ipt-droplist">` |
+| `submit` | 提交按钮 | `<input type="submit">` |
+| `button` | 按钮 | `<input type="button">` |
+| `butFlow` | 流程控制按钮 | `<input type="button" ewa_tag="butFlow">` |
+| `QRCode` | 二维码 | `<img class="ewa-qrcode">` |
+
+### 扩展对象 (Extend)
+
+| Tag | 说明 | 备注 |
+|-----|------|------|
+| `date` | 日期选择 | 弹出日期面板 |
+| `datetime` | 日期时间选择 | 弹出日期时间面板 |
+| `time` | 时间选择 | 弹出时间面板 |
+| `dHtml5` | HTML5 编辑器 | 含图片上传 |
+| `markDown` | Markdown 编辑器 | 嵌入 iframe 编辑器 |
+| `h5upload` | HTML5 文件上传 | 多文件、缩略图 → 见下方参数详解 |
+| `h5TakePhoto` | HTML5 拍照 | 调用摄像头拍照 |
+| `valid` | 验证码 | 图形验证码 |
+| `smsValid` | 短信验证码 | 发送短信验证 |
+| `signature` | 手写签名 | Canvas 签名板 |
+| `user` | 自定义渲染 | 通过 Java 类自定义输出 |
+| `userControl` | 控件 | 嵌入自定义控件 |
+| `dataType` | 数据类型（无 UI） | 仅定义数据类型，不渲染 |
+| `addressMap` | 带地图的地址栏 | 集成地图选择 |
+| `gridImage` | 列表图片 | 点击放大 |
+| `gridBgImage` | 列表背景图片 | 懒加载背景图 |
+| `popselect` | 弹出选择 | 弹出对话框选择数据 |
+| `ewaconfigitem` | EWA 配置项引用 | 嵌入其他配置项 |
+| `MGAddField` | 多维表格汇总字段 | MultiGrid 专用 |
+| `LogicItem` | 复合逻辑条目 | Logic 框架专用 |
+| `ReportItem` | 报表项 | Report 框架专用 |
+| `CombineItem` | 组合配置项 | Combine 框架专用 |
+| `ComplexItem` | 复合配置项 | Complex 框架专用 |
+| `SqlEditor` | SQL 编辑器 | 基于 CodeMirror |
+| `JsEditor` | JavaScript 编辑器 | 基于 CodeMirror |
+| `CssEditor` | CSS 编辑器 | 基于 CodeMirror |
+| `XMLEditor` | XML 编辑器 | 基于 CodeMirror |
+| `idempotence` | 幂等性字段 | 防重复提交，Frame 专用 |
+
+### 基本参数说明
+
+所有 XItem 共用的参数（配置在 `<XItem>` 标签属性或 `AttributeSet` 中）。
+
+**主信息 (Main)**：
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `Tag` | 多值 | 对象类型，即上表中的 Tag 值 |
+| `Name` | string | 唯一名称，生成 HTML `id` 和 `name` 属性 |
+| `GroupIndex` | int | 分组索引，控制 Frame 中字段排列顺序 |
+| `DescriptionSet` | 多值 | 描述集：`Lang`（国别）、`Info`（显示文本）、`Memo`（备注） |
+| `InitValue` | group | 初始值，页面加载时预填 |
+
+**数据 (Data)**：
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `DataItem` | 多值 | 数据项绑定，含字段名、类型、格式化等 |
+| `DataRef` | 引用 | 数据引用，关联其他数据源 |
+| `OrderSearch` | 多值 | ListFrame 中是否可排序/搜索 |
+| `List` | 多值 | 静态列表数据（用于 select / checkbox / radio） |
+| `DispEnc` | 多值 | 加密显示，如手机号/身份证脱敏 |
+
+**界面 (UI)**：
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `XStyle` | 多值 | 标准样式：`XStyleAlign`（居中）、`XStyleVAlign`（垂直居中）、`XStyleNoWrap`（不换行）、`XStyleFixed`（固定宽度）、`XStyleColor`（颜色）、`XStyleBold`（加粗）、`XStyleCursor`（鼠标图标）、`XStyleWidth`（宽度） |
+| `Style` | string | 自定义 CSS 样式，直接写入 `style` 属性 |
+| `ParentStyle` | string | 父容器样式（`<td>` 或 `<div>`） |
+| `IsHtml` | group | 值是否以 HTML 渲染 |
+
+**验证 (Valid)**：
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `IsMustInput` | group | 必填项，显示 `*` 标记 |
+| `MaxMinLength` | 多值 | 最大/最小长度，含 JS 校验提示 |
+| `MaxMinValue` | 多值 | 最大/最小值，含 JS 校验提示 |
+| `VaildEx` | 多值 | 高级验证：`VXMode`（模式）、`VXJs`（JS 校验）、`VXAction`（后端校验）、`VXOk`/`VXFail`（回调） |
+
+**扩展 (Others)**：
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `AttributeSet` | 多值 | 自定义属性键值对，写入 HTML 标签 |
+| `EventSet` | 多值 | 事件绑定键值对，如 `onclick`、`onchange` |
+| `Upload` | 多值 | 文件上传配置 → 见下方 h5upload |
+| `Switch` | 多值 | 开关控件配置 |
+| `CallAction` | 多值 | 按钮绑定的后端动作 |
+| `OpenFrame` | 多值 | 按钮打开的 Frame 配置 |
+
+> **Tag 取值来源参考**：`src/main/resources/system.xml/EwaConfig.xml` → `/EasyWebConfig/Items/XItems/XItem`
+
+### h5upload 参数详解
+
+`h5upload` 是 HTML5 文件上传控件，在 AttributeSet 中配置 `Upload` 参数组。
+
+**基础参数（AttributeSet）**：
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| `UpMulti` | group（yes/no） | 多文件上传，设为 `yes` 开启 |
+| `UpExts` | string | 允许的扩展名，逗号分隔，如 `jpg,png,gif,pdf` |
+| `UpLimit` | string | 文件大小限制，如 `100k`、`12m`、`2g` |
+| `UpPath` | string | 自定义上传路径（服务器端目录） |
+| `UpSaveMethod` | group | 保存模式 → [WithFrame 可用变量](#upsavemethod-withframe-变量) |
+| `UpSQL` | sql | 自定义保存 SQL → [可用变量](#upsql-变量) |
+| `UpNewSizes` | string | 图片缩略图尺寸，如 `100x50,200x100`（宽x高，逗号分隔） |
+| `NewSizesIn` | group | 缩略图生成方式 |
+| `UpUnZip` | group（yes/no） | 上传后自动解压 zip 文件 |
+| `UpDelete` | group | 删除已上传文件（数据库保存模式下） |
+| `UpJsonEncyrpt` | group | 返回 JSON 是否加密 |
+
+**UpSaveMethod WithFrame 变量**：
+
+| 变量 | 说明 |
+|------|------|
+| `{NAME}` | 文件二进制 |
+| `{NAME}_NAME` | 文件服务器名称 |
+| `{NAME}_PATH` | 文件服务器保存位置 |
+| `{NAME}_PATH_SHORT` | 文件服务器保存位置（短路径） |
+| `{NAME}_LOCAL_NAME` | 用户本地文件名称 |
+| `{NAME}_URL` | 文件 HTTP URL |
+| `{NAME}_EXT` | 文件扩展名 |
+| `{NAME}_MD5` | 文件 MD5 |
+| `{NAME}_SIZE` | 文件长度 |
+| `{NAME}_LENGTH` | 文件长度（同 SIZE） |
+| `{NAME}_UP_UNID` | 上传文件的 UNID |
+| `{NAME}_CT` | 上传文件 URL 前缀 |
+
+**UpSQL 变量**：
+
+| 变量 | 说明 |
+|------|------|
+| `EWA_UP_FILE` | 文件二进制 |
+| `EWA_UP_NAME` | 文件服务器名称 |
+| `EWA_UP_URL` | 文件 HTTP URL |
+| `EWA_UP_EXT` | 文件扩展名 |
+| `EWA_UP_PATH` | 文件服务器保存位置 |
+| `EWA_UP_PATH_SHORT` | 文件服务器保存位置（去除上传根路径） |
+| `EWA_UP_TYPE` | 文件 HTTP Content-Type |
+| `EWA_UP_UNID` | 文件 GUNID |
+| `EWA_UP_FROM` | 来源（用于图片重新生成） |
+| `EWA_UP_LOCAL` | 服务器本地路径 |
+| `EWA_UP_LENGTH` | 文件长度 |
+| `EWA_UP_MD5` | 文件 MD5 |
+| `EWA_UP_LOCAL` | 用户本地文件名称 |
+
+> **注意**：`{NAME}` 占位符中的 `NAME` 是该 XItem 的 `Name` 属性值，多个上传字段会自动区分。
+
 ## 新增参数
 
 **`scriptpath`**（可选）— 指定配置存储路径名称（如 `pf`）。用于 `createBusinessXml` / `previewBusinessXml`：
