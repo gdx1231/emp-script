@@ -246,71 +246,76 @@ get_cached_token() {
 send_token_request() {
     local params="$1"
     local token
-    
+
     token=$(get_cached_token)
-    
+
     if [ -z "$token" ]; then
         log_info "Token 不存在，正在登录..."
         do_login >/dev/null
         token=$(get_cached_token)
     fi
-    
-    curl -s -H "X-Api-Token: $token" "${API_BASE_URL}?${params}" | format_json
+
+    curl -s -X POST -H "X-Api-Token: $token" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "${params}" "${API_BASE_URL}" | format_json
 }
 
 # 发送 HMAC 签名请求
 send_hmac_request() {
     local params="$1"
-    local http_method="GET"
-    
+    local http_method="POST"
+
     if [ -z "$API_PASSWORD" ]; then
         log_error "HMAC 模式需要密码，请使用 -p 参数或设置 EWA_API_PASSWORD 环境变量"
         exit 1
     fi
-    
+
     local timestamp
     timestamp=$(get_timestamp)
-    
+
     local nonce
     nonce=$(generate_nonce)
-    
+
     # 从 URL 提取路径
     local path
     path=$(echo "$API_BASE_URL" | sed 's|^[^/]*//[^/]*||')
-    
+
     # 构建签名字符串
     local string_to_sign="${http_method}
 ${timestamp}
 ${nonce}
 ${path}
 ${params}"
-    
+
     # 计算签名
     local signature
     signature=$(hmac_sha256 "$API_PASSWORD" "$string_to_sign")
-    
+
     log_info "时间戳: $timestamp"
     log_info "Nonce: $nonce"
     log_info "签名: $signature"
-    
-    curl -s \
+
+    curl -s -X POST \
         -H "X-Api-Key: $API_LOGIN_ID" \
         -H "X-Api-Timestamp: $timestamp" \
         -H "X-Api-Nonce: $nonce" \
         -H "X-Api-Signature: $signature" \
-        "${API_BASE_URL}?${params}" | format_json
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "${params}" "${API_BASE_URL}" | format_json
 }
 
 # 发送简单 Token 请求
 send_simple_request() {
     local params="$1"
-    
+
     if [ -z "$API_PASSWORD" ]; then
         log_error "简单 Token 模式需要密码，请使用 -p 参数或设置 EWA_API_PASSWORD 环境变量"
         exit 1
     fi
-    
-    curl -s -H "token: $API_PASSWORD" "${API_BASE_URL}?${params}" | format_json
+
+    curl -s -X POST -H "token: $API_PASSWORD" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -d "${params}" "${API_BASE_URL}" | format_json
 }
 
 # 发送请求（根据认证模式）
