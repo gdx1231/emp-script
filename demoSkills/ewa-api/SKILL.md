@@ -57,6 +57,189 @@ source ewa-api.conf
 **frametype**: `ListFrame` \| `Frame` \| `Tree`  
 **operationtype**: `N`（新增）\| `M`（修改）\| `V`（查看）\| `NM`（新增+修改）
 
+## DOM 节点路径参考
+
+EWA 配置 XML 的 DOM 结构及 XPath 路径，便于 AI 定位和修改节点。
+
+### 容器结构
+
+| 路径 | 说明 | 关键属性 |
+|------|------|----------|
+| `/EasyWebTemplates` | 文件根节点 | — |
+| `/EasyWebTemplates/EasyWebTemplate` | 单个配置项 | `@Name`（唯一标识）, `@CreateDate`, `@UpdateDate`, `@Author` |
+
+### Page 页面配置
+
+| 路径 | 说明 | 关键属性 / 子节点 |
+|------|------|-------------------|
+| `EasyWebTemplate/Page` | 页面配置容器 | — |
+| `Page/FrameTag/Set` | 页面框架类型 | `@FrameTag`：`ListFrame`\|`Frame`\|`Tree`\|`Menu`\|`Grid`\|`MultiGrid`\|`Logic`\|`Report`\|`Combine`\|`Complex` |
+| `Page/Name/Set` | 页面名称 | `@Name`（提交时 fixXml 自动与根 Name 同步） |
+| `Page/SkinName/Set` | 皮肤 | `@SkinName`（如 `Test1`, `Blue`）, `@IsXhtml` |
+| `Page/DataSource/Set` | 数据库连接 | `@DataSource`（如 `ewa`, `globalTravel`） |
+| `Page/DescriptionSet/Set` | 页面描述 | `@Info`, `@Lang`（`zhcn`\|`enus`）, `@Memo` |
+| `Page/Size/Set` | 页面尺寸 | `@Width`, `@Height`, `@HAlign`, `@VAlign`, `@HiddenCaption`（0\|1）, `@FrameCols` |
+| `Page/Cached/Set` | 缓存配置 | `@CachedType`（`none`\|`all`）, `@CachedSeconds` |
+| `Page/Acl/Set` | 权限控制 | `@Acl`（Java 类全名） |
+| `Page/Log/Set` | 日志配置 | `@Log` |
+| `Page/ConfigMemo/Set` | 配置备注 | `@ConfigMemo` |
+| `Page/AllowJsonExport/Set` | 允许 JSON 导出 | `@AllowJsonExport` |
+
+### Page 扩展配置
+
+| 路径 | 说明 | 关键属性 |
+|------|------|----------|
+| `Page/AddHtml/Set/Top` | 页面顶部 HTML | CDATA |
+| `Page/AddHtml/Set/Bottom` | 页面底部 HTML | CDATA |
+| `Page/AddScript/Set/Top` | 顶部脚本 | CDATA（JavaScript） |
+| `Page/AddScript/Set/Bottom` | 底部脚本 | CDATA |
+| `Page/AddCss/Set` | 附加 CSS | CDATA |
+| `Page/PageAttributeSet/Set` | 页面级 HTML 属性 | `@PageAttName`, `@PageAttValue`（键值对，可多个） |
+| `Page/RowAttributeSet/Set` | 行级 HTML 属性 | `@RowAttName`, `@RowAttValue`（可多个） |
+| `Page/GroupSet/Set` | 分组定义 | `@GroupName`, `@GroupIndex`, `@GroupCols` |
+
+### Page/ListFrame 专用
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `Page/ListUI/Set` | 列表交互 | `@luButtons`（0\|1）, `@luSelect`（S\|M）, `@luSearch`（0\|1）, `@luDblClick` |
+| `Page/PageSize/Set` | 分页 | `@PageSize`, `@KeyField`, `@IsSplitPage`（0\|1）, `@StatusField`, `@Recycle` |
+| `Page/BoxJson/Set` | 顶部搜索区 | `@Json`（JSON 定义） |
+| `Page/LeftJson/Set` | 左侧筛选 | `@Json`（JSON 定义） |
+| `Page/ChartsShow/Set` | 图表展示 | `@ChartType`, `@ChartSize`（宽x高） |
+| `Page/RedrawJson/Set` | 表单重绘 | `@Json`（JSON 定义） |
+
+### Page/Tree 专用
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `Page/Tree/Set` | 树形配置 | `@Key`, `@ParentKey`, `@Text`, `@Title`, `@Level`, `@Order`, `@RootId`, `@LoadByLevel`（1）, `@MenuGroup`, `@AddPara1` |
+| `Page/TreeIconSet/Set` | 树节点图标 | `@Test`（条件）, `@Open`, `@Close`, `@Filter` |
+
+### Page/Menu 专用
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `Page/Menu/Set` | 菜单配置 | `@Key`, `@ParentKey`, `@Text`, `@Icon`, `@IconType`, `@Cmd`, `@RootId` |
+| `Page/MenuShow/Set` | 菜单展示 | `@MenuShow`（`EWA_MENU`\|`menus`） |
+
+### Page/Frame 专用
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `Page/HtmlFrame/Set` | 框架布局 | `@FrameType`（H\|V）, `@FrameBorder`（0\|1）, `@FrameSize`（如 `50%,*`） |
+| `Page/FrameHtml/Set` | 框架 HTML | CDATA |
+
+### Page/Logic & MultiGrid
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `Page/LogicShow/Set` | 逻辑条件展示 | `@Name`, `@ParaExp`（如 `'@linktype'='group'`） |
+| `Page/XItems/XItem/MGAddField/Set` | 多维表格汇总 | `@MGAddField` |
+| `Page/XItems/XItem/CombineFrame/Set` | 组合框架引用 | `@CombineFrame` |
+
+### XItems / XItem 通用参数
+
+| 路径 | 说明 | 关键属性 |
+|------|------|----------|
+| `Page/XItems` | XItem 容器 | — |
+| `Page/XItems/XItem` | 单个页面元素 | — |
+| `XItem/Tag/Set` | **元素类型（必填）** | `@Tag`（见上表 Tag 值）, `@IsLFEdit`（0\|1\|2：列表可编辑）, `@SpanShowAs` |
+| `XItem/Name/Set` | **字段名称（必填）** | `@Name` |
+| `XItem/DescriptionSet/Set` | 字段描述 | `@Info`, `@Lang`（`zhcn`\|`enus`）, `@Memo` |
+| `XItem/GroupIndex/Set` | 分组索引 | `@GroupIndex`（整数，控制排列顺序） |
+| `XItem/InitValue/Set` | 初始值 | `@InitValue`（如 `SEQID` 自增） |
+
+### XItem 数据参数 (Data)
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `XItem/DataItem/Set` | 数据绑定 | `@DataField`（字段名）, `@DataType`（String\|Int\|Date\|Binary\|...）, `@Format`（date\|DateTime\|DateShortTime\|...）, `@IsEncrypt`, `@Valid`（Email\|...） |
+| `XItem/DataRef/Set` | 数据引用 | `@DataRef` |
+| `XItem/OrderSearch/Set` | 排序搜索 | `@IsOrder`（0\|1）, `@SearchType`（text\|date\|...）, `@IsGroup`, `@IsGroupDefault` |
+| `XItem/List/Set` | 静态列表/SQL 列表 | `@Sql`（SQL）, `@DisplayField`, `@ValueField`, `@DisplayList`, `@ValueList`, `@ListShowType`（Key-Text）, `@ListFilterType`（text）, `@ListAddBlank`（1） |
+| `XItem/DispEnc/Set` | 加密显示 | `@DispEnc`（脱敏规则） |
+
+### XItem 界面参数 (UI)
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `XItem/XStyle/Set` | 标准样式 | `@XStyleAlign`, `@XStyleVAlign`, `@XStyleNoWrap`, `@XStyleFixed`, `@XStyleColor`, `@XStyleBold`, `@XStyleCursor`, `@XStyleWidth` |
+| `XItem/Style/Set` | CSS 样式 | `@Style`（直接写入 style 属性） |
+| `XItem/ParentStyle/Set` | 父容器样式 | `@ParentStyle`（如 `width:400px`） |
+| `XItem/IsHtml/Set` | HTML 渲染 | `@IsHtml`（0\|1） |
+
+### XItem 验证参数 (Valid)
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `XItem/IsMustInput/Set` | 必填项 | `@IsMustInput`（0\|1） |
+| `XItem/MaxMinLength/Set` | 长度限制 | `@MaxLength`, `@MinLength` |
+| `XItem/MaxMinValue/Set` | 值范围 | `@MaxValue`, `@MinValue` |
+| `XItem/VaildEx/Set` | 高级验证 | `@VXMode`（js\|action）, `@VXJs`, `@VXAction`, `@VXOk`, `@VXFail` |
+
+### XItem 扩展参数 (Others)
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `XItem/AttributeSet/Set` | 自定义属性 | `@AttName`（属性名）, `@AttValue`（属性值，可多个） |
+| `XItem/EventSet/Set` | 事件绑定 | `@EventName`（`onclick`\|`onchange`\|`onblur`\|...）, `@EventType`（Javascript）, `@EventValue`（JS 代码） |
+| `XItem/Upload/Set` | 上传配置 | `@UpMulti`（yes\|no）, `@UpExts`, `@UpLimit`, `@UpPath`, `@UpType`, `@UpNewSizes`, `@UpSaveMethod`, `@UpSQL`, `@UpDelete`, `@UpUnZip`, `@UpJsonEncyrpt` |
+| `XItem/Switch/Set` | 开关配置 | `@SwtAction`, `@SwtOnText`, `@SwtOffText` |
+| `XItem/CallAction/Set` | 按钮动作 | `@Action`（动作名）, `@ConfirmInfo`（确认提示） |
+| `XItem/OpenFrame/Set` | 按钮弹窗 | `@CallXmlName`, `@CallItemName`, `@CallMethod`（OpenReloadClose）, `@CallParas` |
+| `XItem/AnchorParas/Set` | 链接参数 | `@aHref`, `@aTarget` |
+| `XItem/LinkButtonParas/Set` | 链接按钮 | `@lkbButtonId` |
+| `XItem/DopListShow/Set` | 动态列表 | `@DopListShow` |
+| `XItem/Frame/Set` | 框架引用 | `@Frame` |
+| `XItem/PopFrame/Set` | 弹窗框架 | `@PopXmlName`, `@PopItemName`, `@PopPara` |
+| `XItem/UserSet/Set` | 自定义渲染 | `@Lang`, 其他自定义参数 |
+| `XItem/UserControl/Set` | 控件 | `@UserControl` |
+| `XItem/ImageDefault/Set` | 默认图片 | `@ImageDefault` |
+| `XItem/AddrMapRels/Set` | 地图关联 | `@AmrCountry`, `@AmrProvince`, `@AmrCity`, `@AmrZip`, `@AmrLat`, `@AmrLng` |
+| `XItem/signature/Set` | 签名配置 | `@SignColor`, `@SignBgColor`, `@SignFormat`, `@SignLineWidth`, `@SignPath` |
+| `XItem/ReportCfg/Set` | 报表配置 | `@ReportCfg` |
+
+### Action 动作配置（Page 同级）
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `EasyWebTemplate/Action` | 动作容器 | — |
+| `Action/ActionSet/Set` | 动作定义 | `@Type`（`OnPagePost`\|`loadAll`\|`CheckError`）, `@IsPostMsg`（yes\|no） |
+| `Action/ActionSet/Set/CallSet/Set` | 动作调用链 | `@CallName`（如 `OnFrameRestore SQL`）, `@CallType`（`SqlSet`\|`UrlSet`\|`ScriptSet`\|`XmlSet`\|`ClassSet`）, `@Test`（条件表达式） |
+| `Action/SqlSet/Set` | SQL 动作 | `@Name`, `@SqlType`（`query`\|`update`）, `@TransType`（yes\|no） |
+| `Action/SqlSet/Set/CSSet/Set` | SQL 参数 | `@ParaName`, `@Name`, `@CSType`（all）, `@Option`（C） |
+| `Action/UrlSet/Set` | URL 跳转 | `@Name`, `@Url` |
+| `Action/UrlSet/Set/CSSet/Set` | URL 参数 | `@ParaName`, `@Name`, `@CSType`（all）, `@Domain`, `@Life` |
+| `Action/ScriptSet/Set` | 脚本动作 | `@Name`, `@ScriptType`（javascript） |
+| `Action/XmlSet/Set` | XML 数据动作 | `@Name`, `@XmlAction`（load\|deletes\|inertOrUpdate）, `@XmlSetData`, `@XmlWhere` |
+| `Action/XmlSetData/Set` | XML 数据源 | `@Name`, `@XmlName`（路径）, `@XmlFields`, `@XmlTagPath`, `@XmlLoadType`（attribute） |
+| `Action/ClassSet/Set` | Java 类动作 | `@Name`, `@ClassName`, `@MethodName`, `@ConData`, `@MethodData`, `@XmlTag` |
+| `Action/CSSet/Set` | 跨动作参数 | `@ParaName`, `@Name`, `@CSType`, `@Option` |
+
+### Menus 菜单（Page 同级）
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `EasyWebTemplate/Menus/Menu` | 菜单容器 | — |
+| `Menus/Menu/Name/Set` | 菜单名称 | `@Name` |
+| `Menus/Menu/DescriptionSet/Set` | 菜单描述 | `@Info`, `@Lang` |
+| `Menus/Menu/Cmd/Set` | 菜单命令 | `@Cmd`（JS 函数名） |
+| `Menus/Menu/Icon/Set` | 菜单图标 | `@Icon`（路径） |
+| `Menus/Menu/Group/Set` | 菜单分组 | `@Group`（0\|1\|2...） |
+
+### PageInfos 页面信息（Page 同级）
+
+| 路径 | 说明 | 属性 |
+|------|------|------|
+| `EasyWebTemplate/PageInfos/PageInfo` | 信息容器 | — |
+| `PageInfos/PageInfo/Name/Set` | 信息标识 | `@Name`（如 `DEL_ITEM`, `CommonTitle`） |
+| `PageInfos/PageInfo/DescriptionSet/Set` | 信息文本 | `@Info`, `@Lang` |
+
+> **读取方式**：`UXml.retNode(doc, "Page/FrameTag/Set").getAttribute("FrameTag")`
+> **写入方式**：`ele.setAttribute("FrameTag", "ListFrame")`
+> **路径基准**：文档根为 `<EasyWebTemplate>`，路径从根下第一级开始（不含根元素名）。
+
 ## XItem Tag 类型参考
 
 配置项中的 `<XItem Tag="..." />` 定义了页面元素的渲染类型。

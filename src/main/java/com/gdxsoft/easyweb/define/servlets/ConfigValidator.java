@@ -1,6 +1,7 @@
 package com.gdxsoft.easyweb.define.servlets;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,9 +24,15 @@ public class ConfigValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigValidator.class);
 
     /** 合法的 FrameTag 值（来源：EwaConfig.xml → /EasyWebConfig/Frames/Frame@Name） */
-    private static final Set<String> VALID_FRAME_TAGS = new HashSet<>(Arrays.asList(
-            "ListFrame", "Frame", "Tree", "Menu", "Grid", "MultiGrid", "Logic", "Report", "Combine", "Complex"
-    ));
+    private static final Set<String> VALID_FRAME_TAGS;
+    static {
+        Set<String> tags = new HashSet<>();
+        for (String t : new String[] { "ListFrame", "Frame", "Tree", "Menu", "Grid",
+                "MultiGrid", "Logic", "Report", "Combine", "Complex" }) {
+            tags.add(t.toUpperCase());
+        }
+        VALID_FRAME_TAGS = Collections.unmodifiableSet(tags);
+    }
 
     /** 合法的 XItem 指令 Tag 值（EwaConfig.xml → /EasyWebConfig/Items/XItems/XItem@Name），延迟加载 */
     private static volatile Set<String> VALID_XITEM_TAGS;
@@ -60,6 +67,9 @@ public class ConfigValidator {
         }
 
         // 2. 根元素校验
+        if (doc == null) {
+            return ValidationResult.invalid("XML 解析失败：无法生成 Document");
+        }
         Element root = doc.getDocumentElement();
         if (root == null) {
             return ValidationResult.invalid("XML 缺少根元素，期望 <" + ITEM_ROOT_ELEMENT + ">");
@@ -79,10 +89,10 @@ public class ConfigValidator {
                     + "\" 与请求的 itemname \"" + itemName + "\" 不匹配");
         }
 
-        // 4. Page 节点校验
-        Node pageNode = UXml.retNode(doc, ITEM_ROOT_ELEMENT + "/Page");
+        // 4. Page 节点校验（doc 根即 EasyWebTemplate）
+        Node pageNode = UXml.retNode(doc, "Page");
         if (pageNode == null) {
-            return ValidationResult.invalid("缺少 <Page> 节点（路径：" + ITEM_ROOT_ELEMENT + "/Page）");
+            return ValidationResult.invalid("缺少 <Page> 节点（doc 根为 EasyWebTemplate，期望子元素 Page）");
         }
 
         // 5. FrameTag 校验
@@ -97,14 +107,14 @@ public class ConfigValidator {
             return xitemsResult;
         }
 
-        // 7. Page/Name 校验
-        Node pageNameSet = UXml.retNode(doc, ITEM_ROOT_ELEMENT + "/Page/Name/Set");
+        // 7. Page/Name 一致性（非阻断：UpdateXmlBase.fixXml 会自动修正）
+        Node pageNameSet = UXml.retNode(doc, "Page/Name/Set");
         if (pageNameSet != null) {
             Element nameSet = (Element) pageNameSet;
             String pageItemName = nameSet.getAttribute("Name");
             if (StringUtils.isNotBlank(pageItemName) && itemName != null && !itemName.equals(pageItemName)) {
-                return ValidationResult.invalid("Page/Name/Set 的 Name 属性 \"" + pageItemName
-                        + "\" 与根元素 Name \"" + rootName + "\" 不一致");
+                LOGGER.debug("Page/Name/Set Name=\"{}\" 与根 Name=\"{}\" 不一致（提交时 fixXml 自动修正）",
+                        pageItemName, rootName);
             }
         }
 
@@ -147,11 +157,11 @@ public class ConfigValidator {
      * 校验 FrameTag 节点
      */
     private static ValidationResult validateFrameTag(Document doc) {
-        Node frameTagNode = UXml.retNode(doc, ITEM_ROOT_ELEMENT + "/Page/FrameTag");
+        Node frameTagNode = UXml.retNode(doc, "Page/FrameTag");
         if (frameTagNode == null) {
-            return ValidationResult.invalid("缺少 <FrameTag> 节点（路径：" + ITEM_ROOT_ELEMENT + "/Page/FrameTag）");
+            return ValidationResult.invalid("缺少 <FrameTag> 节点（路径：Page/FrameTag）");
         }
-        Node setNode = UXml.retNode(doc, ITEM_ROOT_ELEMENT + "/Page/FrameTag/Set");
+        Node setNode = UXml.retNode(doc, "Page/FrameTag/Set");
         if (setNode == null) {
             return ValidationResult.invalid("<FrameTag> 内缺少 <Set FrameTag=\"...\"/> 子节点");
         }
@@ -160,7 +170,7 @@ public class ConfigValidator {
         if (StringUtils.isBlank(frameTagValue)) {
             return ValidationResult.invalid("<FrameTag>/<Set> 缺少 FrameTag 属性");
         }
-        if (!VALID_FRAME_TAGS.contains(frameTagValue)) {
+        if (!VALID_FRAME_TAGS.contains(frameTagValue.toUpperCase())) {
             return ValidationResult.invalid("无效的 FrameTag 值: \"" + frameTagValue
                     + "\"，允许值：" + VALID_FRAME_TAGS);
         }
@@ -247,7 +257,10 @@ public class ConfigValidator {
                         "valid", "smsValid", "signature", "user", "userControl", "dataType",
                         "addressMap", "gridImage", "gridBgImage", "popselect", "ewaconfigitem",
                         "MGAddField", "LogicItem", "ReportItem", "CombineItem", "ComplexItem",
-                        "SqlEditor", "JsEditor", "CssEditor", "XMLEditor", "QRCode", "idempotence"
+                        "SqlEditor", "JsEditor", "CssEditor", "XMLEditor", "QRCode", "idempotence",
+                        // 已废弃但仍存在于历史配置中的 Tag
+                        "file", "dHtml", "dHtmlNoImages", "image",
+                        "swffile", "SwfDoc", "SwfTakePhoto"
                 ));
             }
             VALID_XITEM_TAGS = tags;

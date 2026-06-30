@@ -110,6 +110,47 @@ source ewa-api.conf
 ./ewa-api.sh deleteConfItem "ewa/studyabroad" "ESL_SA_MAIN.F.NM"
 ```
 
+## DOM 节点路径参考
+
+完整 DOM 结构及 XPath 路径详见 [SKILL.md → DOM 节点路径参考](SKILL.md#dom-节点路径参考)。摘要如下：
+
+```
+EasyWebTemplates                          # 文件根
+└── EasyWebTemplate (@Name)              # 单个配置项
+    ├── Page
+    │   ├── FrameTag/Set (@FrameTag)      # ListFrame|Frame|Tree|...
+    │   ├── Name/Set (@Name)
+    │   ├── DataSource/Set (@DataSource)
+    │   ├── DescriptionSet/Set (@Info, @Lang, @Memo)
+    │   ├── Size/Set (@Width, @Height, ...)
+    │   ├── SkinName/Set (@SkinName)
+    │   ├── Cached/Set / Acl/Set / Log/Set
+    │   ├── XItems
+    │   │   └── XItem
+    │   │       ├── Tag/Set (@Tag)         # 必填：元素类型
+    │   │       ├── Name/Set (@Name)       # 必填：字段名
+    │   │       ├── DataItem/Set           # 数据绑定
+    │   │       ├── DescriptionSet/Set     # 标签
+    │   │       └── ...                    # 见 SKILL.md
+    │   ├── AddHtml / AddScript / AddCss   # 自定义代码
+    │   ├── PageAttributeSet / GroupSet    # 属性/分组
+    │   ├── ListUI / PageSize              # ListFrame 专用
+    │   ├── Tree / TreeIconSet             # Tree 专用
+    │   ├── Menu / MenuShow                # Menu 专用
+    │   ├── HtmlFrame / FrameHtml          # Frame 专用
+    │   └── LogicShow                      # Logic 专用
+    ├── Action                             # 后端动作
+    │   ├── ActionSet / CallSet
+    │   ├── SqlSet / UrlSet / ScriptSet
+    │   ├── XmlSet / XmlSetData / ClassSet
+    │   └── CSSet
+    ├── Menus / Menu                       # 菜单定义
+    └── PageInfos / PageInfo               # 页面信息文本
+```
+
+> **读取节点**：`UXml.retNode(doc, "Page/FrameTag/Set").getAttribute("FrameTag")`
+> **路径基准**：文档根为 `<EasyWebTemplate>`，路径从根下第一级开始。
+
 ## XItem Tag 类型参考
 
 配置项中的 `<XItem Tag="..." />` 定义了页面元素的渲染类型，Tag 值来源于 `EwaConfig.xml` 的 `/EasyWebConfig/Items/XItems/XItem`。
