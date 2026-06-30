@@ -3,6 +3,7 @@ package com.gdxsoft.easyweb.define.servlets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +15,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXParseException;
 
-import com.gdxsoft.easyweb.utils.UPath;
+import com.gdxsoft.easyweb.SystemXmlUtils;
 import com.gdxsoft.easyweb.utils.UXml;
 
 /**
@@ -36,6 +37,15 @@ public class ConfigValidator {
 
     /** 合法的 XItem 指令 Tag 值（EwaConfig.xml → /EasyWebConfig/Items/XItems/XItem@Name），延迟加载 */
     private static volatile Set<String> VALID_XITEM_TAGS;
+
+    /** AddHtml/AddScript 的 Set 节点下合法子元素 */
+    private static final Set<String> VALID_ADD_HTML_SCRIPT_CHILDREN;
+    static {
+        Set<String> set = new LinkedHashSet<>();
+        set.add("Top");
+        set.add("Bottom");
+        VALID_ADD_HTML_SCRIPT_CHILDREN = Collections.unmodifiableSet(set);
+    }
 
     /** 合法的操作类型 */
     private static final Set<String> VALID_OPERATION_TYPES = new HashSet<>(Arrays.asList("N", "M", "V", "NM"));
@@ -108,6 +118,14 @@ public class ConfigValidator {
         }
 
         // 7. Page/Name 一致性（非阻断：UpdateXmlBase.fixXml 会自动修正）
+
+        // 8. AddHtml/AddScript 子元素校验
+        ValidationResult addHtmlScriptResult = validateAddHtmlScriptChildren(doc);
+        if (!addHtmlScriptResult.isValid()) {
+            return addHtmlScriptResult;
+        }
+
+        // 9. Page/Name 一致性（非阻断：UpdateXmlBase.fixXml 会自动修正）
         Node pageNameSet = UXml.retNode(doc, "Page/Name/Set");
         if (pageNameSet != null) {
             Element nameSet = (Element) pageNameSet;
@@ -178,6 +196,33 @@ public class ConfigValidator {
     }
 
     /**
+     * 校验 AddHtml/Set 和 AddScript/Set 的子元素，只允许 Top 和 Bottom
+     */
+    private static ValidationResult validateAddHtmlScriptChildren(Document doc) {
+        String[] parents = { "Page/AddHtml/Set", "Page/AddScript/Set" };
+        for (String parentPath : parents) {
+            Node setNode = UXml.retNode(doc, parentPath);
+            if (setNode == null) {
+                continue;
+            }
+            NodeList children = setNode.getChildNodes();
+            for (int i = 0; i < children.getLength(); i++) {
+                Node child = children.item(i);
+                if (child.getNodeType() != Node.ELEMENT_NODE) {
+                    continue;
+                }
+                String childName = child.getNodeName();
+                if (!VALID_ADD_HTML_SCRIPT_CHILDREN.contains(childName)) {
+                    String tagName = parentPath.startsWith("Page/AddHtml") ? "AddHtml" : "AddScript";
+                    return ValidationResult.invalid("<" + tagName
+                            + ">/<Set> 内只允许 <Top> 和 <Bottom> 子元素，发现非法子元素 <" + childName + ">");
+                }
+            }
+        }
+        return ValidationResult.valid();
+    }
+
+    /**
      * 校验所有 XItem 的 Tag 值是否在 EwaConfig.xml 定义的合法列表中
      */
     private static ValidationResult validateXItemTags(Document doc) {
@@ -223,7 +268,8 @@ public class ConfigValidator {
     }
 
     /**
-     * 从 EwaConfig.xml 加载合法 XItem Tag 列表（缓存）
+     * 从 EwaConfig.xml 加载合法 XItem Tag 列表（缓存）。
+     * 通过 SystemXmlUtils 自动适配 JAR 内 classpath 和文件系统两种部署模式。
      */
     private static Set<String> getValidXItemTags() {
         if (VALID_XITEM_TAGS != null) {
@@ -234,35 +280,43 @@ public class ConfigValidator {
                 return VALID_XITEM_TAGS;
             }
             Set<String> tags = new HashSet<>();
+
             try {
-                String pathConfigDoc = UPath.getConfigPath() + "/EwaConfig.xml";
-                Document docConfig = UXml.retDocument(pathConfigDoc);
-                NodeList nl = docConfig.getElementsByTagName("XItem");
-                for (int i = 0; i < nl.getLength(); i++) {
-                    Element ele = (Element) nl.item(i);
-                    String name = ele.getAttribute("Name");
-                    if (StringUtils.isNotBlank(name)) {
-                        tags.add(name.trim());
+                String xml = SystemXmlUtils.getSystemConfContent("EwaConfig.xml");
+                if (xml != null) {
+                    Document doc = UXml.asDocument(xml);
+                    if (doc != null) {
+                        NodeList nl = doc.getElementsByTagName("XItem");
+                        for (int i = 0; i < nl.getLength(); i++) {
+                            Element ele = (Element) nl.item(i);
+                            String name = ele.getAttribute("Name");
+                            if (StringUtils.isNotBlank(name)) {
+                                tags.add(name.trim());
+                            }
+                        }
+                        LOGGER.info("Loaded {} valid XItem tags from EwaConfig.xml", tags.size());
+                        VALID_XITEM_TAGS = tags;
+                        return VALID_XITEM_TAGS;
                     }
                 }
-                LOGGER.info("Loaded {} valid XItem tags from EwaConfig.xml", tags.size());
             } catch (Exception e) {
-                LOGGER.warn("Failed to load EwaConfig.xml for tag validation, fallback to static list", e);
-                // 降级：使用常见 Tag 值（基本类型）
-                tags.addAll(Arrays.asList(
-                        "text", "textarea", "span", "hidden", "password", "passwordWithEye",
-                        "combo", "select", "checkbox", "switch", "radio", "checkboxgrid", "radiogrid",
-                        "anchor", "anchor2", "linkButton", "droplist", "submit", "button", "butFlow",
-                        "date", "datetime", "time", "dHtml5", "markDown", "h5upload", "h5TakePhoto",
-                        "valid", "smsValid", "signature", "user", "userControl", "dataType",
-                        "addressMap", "gridImage", "gridBgImage", "popselect", "ewaconfigitem",
-                        "MGAddField", "LogicItem", "ReportItem", "CombineItem", "ComplexItem",
-                        "SqlEditor", "JsEditor", "CssEditor", "XMLEditor", "QRCode", "idempotence",
-                        // 已废弃但仍存在于历史配置中的 Tag
-                        "file", "dHtml", "dHtmlNoImages", "image",
-                        "swffile", "SwfDoc", "SwfTakePhoto"
-                ));
+                LOGGER.debug("Failed to load EwaConfig.xml via SystemXmlUtils: {}", e.getMessage());
             }
+
+            // 降级：静态列表（包含历史配置中的废弃 Tag）
+            LOGGER.debug("EwaConfig.xml not available, using static fallback list");
+            tags.addAll(Arrays.asList(
+                    "text", "textarea", "span", "hidden", "password", "passwordWithEye",
+                    "combo", "select", "checkbox", "switch", "radio", "checkboxgrid", "radiogrid",
+                    "anchor", "anchor2", "linkButton", "droplist", "submit", "button", "butFlow",
+                    "date", "datetime", "time", "dHtml5", "markDown", "h5upload", "h5TakePhoto",
+                    "valid", "smsValid", "signature", "user", "userControl", "dataType",
+                    "addressMap", "gridImage", "gridBgImage", "popselect", "ewaconfigitem",
+                    "MGAddField", "LogicItem", "ReportItem", "CombineItem", "ComplexItem",
+                    "SqlEditor", "JsEditor", "CssEditor", "XMLEditor", "QRCode", "idempotence",
+                    "file", "dHtml", "dHtmlNoImages", "image",
+                    "swffile", "SwfDoc", "SwfTakePhoto"
+            ));
             VALID_XITEM_TAGS = tags;
             return VALID_XITEM_TAGS;
         }
