@@ -1,0 +1,1329 @@
+<EasyWebTemplate Author="gl" CreateDate="2013-09-05 11:53:57" Name="adm_menu.listframe.view"
+    UpdateDate="2026-06-30 13:20:32">
+    <Page>
+        <Name>
+            <Set Name="ADM_MENU.ListFrame.View" />
+        </Name>
+        <FrameTag>
+            <Set FrameTag="ListFrame" />
+        </FrameTag>
+        <SkinName>
+            <Set IsXhtml="0" SkinName="Test1" />
+        </SkinName>
+        <DataSource>
+            <Set DataSource="ow_main" />
+        </DataSource>
+        <AllowJsonExport />
+        <ConfigMemo>
+            <Set>
+                <ConfigMemo />
+            </Set>
+        </ConfigMemo>
+        <Acl>
+            <Set Acl="com.gdxsoft.cm.Acl" />
+        </Acl>
+        <Log>
+            <Set Log="" />
+        </Log>
+        <DescriptionSet>
+            <Set Info="菜单信息" Lang="zhcn" Memo="" />
+            <Set Info="Menu information" Lang="enus" Memo="" />
+        </DescriptionSet>
+        <PageAttributeSet>
+            <Set PageAttName="" PageAttValue="" />
+        </PageAttributeSet>
+        <RowAttributeSet />
+        <GroupSet />
+        <Size>
+            <Set FrameCols="C3" HAlign="center" Height="" HiddenCaption="0" TextareaAuto=""
+                VAlign="top" Width="100%" />
+        </Size>
+        <AddHtml>
+            <Set>
+                <Top><![CDATA[ <script type="text/javascript" src="@RV_EWA_STYLE_PATH/EWA_STYLE/js/UTILS/EWA_UT_TRANS.js"></script>
+ <input type='button' onclick='EWA.F.FOS["@SYS_FRAME_UNID"].submit_chooese()' value='保存选择'>]]></Top>
+                <Bottom />
+            </Set>
+        </AddHtml>
+        <AddScript>
+            <Set>
+                <Top><![CDATA[var trans;
+
+function aa(fromObj) {
+    var obj1 = fromObj.parentNode.parentNode.cells[2].getElementsByTagName('span')[0];
+    if (obj1 == null) {
+        return;
+    }
+    if (obj1.innerHTML != '') {
+        return;
+    }
+    if (trans == null) {
+        trans = new EWA_UT_TRANS();
+    }
+    trans.TransToEn(fromObj.innerHTML, obj1);
+}
+
+function bb() {
+    if (idx <= ipts.length - 1) {
+        aa(ipts[idx]);
+        idx++;
+        setTimeout(bb, 123);
+        return;
+    }
+    setTimeout(cc, 1231);
+}
+
+function cc() {
+    var ids = [];
+    var vals = [];
+    for (var i = 0; i < ipts.length; i++) {
+        var tr = ipts[i].parentNode.parentNode;
+        var span = tr.cells[2].getElementsByTagName('span')[0];
+        if (span.getAttribute('ewa_trans_end') == 'ok') {
+            ids.push(tr.getAttribute('EWA_KEY'));
+            vals.push(GetInnerText(span));
+        }
+    }
+    if (ids.length == 0) {
+        return;
+    }
+    var ajax = new EWA_AjaxClass();
+    ajax.AddParameter('ids', ids.join('`'));
+    ajax.AddParameter('vals', vals.join('`'));
+    ajax.AddParameter('EWA_ACTION', 'EXTENDACTION2');
+    ajax.AddParameter('EWA_AJAX', 'JSON');
+    ajax.PostNew(window.location.href, function() {
+        if (ajax.IsRunEnd()) {
+            alert('ok');
+        }
+    });
+}
+var ipts;
+var idx;
+
+function tall() {
+    ipts = $F(document.body, 'span', 'id', 'MNU_TEXT');
+    idx = 0;
+    bb();
+}]]></Top>
+                <Bottom><![CDATA[(function() {
+    let ewa = EWA.F.FOS['@SYS_FRAME_UNID'];
+
+    ewa.ReloadAfter = function(httpReferer) {
+        ewa.Merge('MNU_TEXT_EN', 'MNU_TEXT', '');
+        ewa.Merge('P_MNU_TEXT_EN', 'P_MNU_TEXT','<br>');
+    };
+
+    ewa.submit_chooese = function() {
+        let ids = ewa.SelectChecked();
+        if (ids == '') {
+            $Tip('请先选择');
+            return;
+        }
+        if ("@MG_TAG") {
+            var u1 = new EWA_UrlClass(EWA.F.FOS["@SYS_FRAME_UNID"].Url);
+            u1.AddParameter("ewa_action", "ExtendAction0");
+            u1.AddParameter("ewa_ajax", "json");
+            var u = u1.GetUrl();
+            let data = {
+                ids: ids,
+                mg_tag: "@MG_TAG"
+            }
+            $JP(u, data, function(rst) {
+                $Tip('提交完毕')
+            });
+        } else {
+             $Tip('未知的操作方法');
+            return;
+        }
+        
+    };
+
+    function getObj(exp) {
+        return exp ? $('#EWA_LF_@sys_frame_unid').find(exp) : $('#EWA_LF_@sys_frame_unid');
+    }
+
+    // 执行刷新后事件
+    function init() {
+        ewa.ReloadAfter();
+    }
+    init();
+})();]]></Bottom>
+                <AddPreRow><![CDATA[
+(function() {
+    let ewa = EWA.F.FOS['@SYS_FRAME_UNID'];
+    
+    ewa.AddPreRow(function(frameUnid, tr, key, newTr, evt) {
+        var cnt_td = newTr.cells[0];
+        var u1 = new EWA_UrlClass(EWA.F.FOS["@SYS_FRAME_UNID"].Url);
+        u1.AddParameter("XMLNAME", "/2014_center/base/bk_menu.xml");
+        u1.AddParameter("ITEMNAME", "ADM_MENU_EWA.LF.M");
+        u1.AddParameter("MNU_GRP", "@MNU_GRP");
+        u1.AddParameter("ewa_pagesize", 1000);
+        
+        var ajax_url = u1.GetUrl();
+        $Install(ajax_url, cnt_td, function() {
+            // loaded
+        });
+    });
+})();
+]]></AddPreRow>
+            </Set>
+        </AddScript>
+        <AddCss>
+            <Set>
+                <AddCss />
+            </Set>
+        </AddCss>
+        <ChartsShow>
+            <Set ChartsShow="" />
+        </ChartsShow>
+        <RedrawJson />
+        <BoxJson />
+        <LeftJson />
+        <FrameHtml>
+            <Set>
+                <FrameHtml />
+            </Set>
+        </FrameHtml>
+        <PageSize>
+            <Set AllowExport="" ColSize="" IsSplitPage="1" KeyField="MNU_ID" PageSize="10"
+                Recycle="" StatusField="" />
+        </PageSize>
+        <ListUI>
+            <Set luAddPreRowFunc="" luButtons="1" luDblClick="0" luDblClickIdx="0" luSearch="1"
+                luSelect="M" luStickyHeaders="" />
+        </ListUI>
+        <MenuShow />
+        <Menu />
+        <Tree />
+        <HtmlFrame>
+            <Set FrameBorder="" FrameSize="" FrameSubUrl="" FrameType="" />
+        </HtmlFrame>
+        <TreeIconSet />
+        <MGAxisX />
+        <MGAxisY />
+        <MGCell />
+        <LogicShow>
+            <Set HiddenFields="" Name="" ParaExp="" />
+        </LogicShow>
+    </Page>
+    <Action>
+        <ActionSet>
+            <Set LogMsg="" Transcation="" Type="OnPageLoad">
+                <CallSet>
+                    <Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="" />
+                </CallSet>
+            </Set>
+            <Set LogMsg="" Transcation="" Type="ExtendAction0">
+                <CallSet>
+                    <Set CallIsChk="" CallName="ExtendAction0 SQL" CallType="SqlSet" Test="" />
+                </CallSet>
+            </Set>
+            <Set LogMsg="" Transcation="" Type="ExtendAction1">
+                <CallSet>
+                    <Set CallIsChk="" CallName="ExtendAction1 SQL" CallType="SqlSet" Test="" />
+                </CallSet>
+            </Set>
+            <Set LogMsg="" Transcation="" Type="ExtendAction2">
+                <CallSet>
+                    <Set CallIsChk="" CallName="ExtendAction2 SQL" CallType="SqlSet" Test="" />
+                </CallSet>
+            </Set>
+        </ActionSet>
+        <SqlSet>
+            <Set Name="OnPageLoad SQL" SqlType="query">
+                <Sql><![CDATA[WITH MenuTree AS (
+		-- 定位点：起始节点
+		SELECT mnu_id, mnu_pid, 0 AS level
+		FROM adm_menu
+		WHERE mnu_id = @mnu_pid
+		UNION ALL
+		-- 递归点：查找子节点
+		SELECT m.mnu_id, m.mnu_pid, mt.level + 1
+		FROM adm_menu m
+		INNER JOIN MenuTree mt ON m.mnu_pid = mt.mnu_id
+	)
+SELECT A.*, B.*
+FROM ADM_MENU A
+    inner join MenuTree mt on a.mnu_id=mt.mnu_id
+	LEFT JOIN (
+		SELECT B.MNU_ID AS ID, B.MNU_TEXT AS P_MNU_TEXT, B.MNU_TEXT_EN AS P_MNU_TEXT_EN
+		FROM ADM_MENU B
+	) B
+	ON A.MNU_PID = B.ID
+WHERE a.mnu_id!=@MNU_PID
+    AND
+     (A.MNU_GRP = @MNU_GRP 	OR @MNU_GRP IS NULL)
+ORDER BY  A.MNU_ORD]]></Sql>
+                <CSSet />
+            </Set>
+            <Set Name="ExtendAction0 SQL" SqlType="query">
+                <Sql><![CDATA[delete FROM ADM_MENU_GRP_IDS where MG_TAG = @MG_TAG;
+
+insert INTO ADM_MENU_GRP_IDS(MG_TAG, MNU_ID)
+SELECT @MG_TAG, MNU_ID FROM ADM_MENU A 
+    INNER JOIN EWA_SPLIT(@IDS, ',') B ON A.MNU_ID = B.COL
+;
+
+UPDATE ADM_MENU_GRP SET MNU_IDS = @IDS WHERE MG_TAG = @MG_TAG;]]></Sql>
+                <CSSet />
+            </Set>
+            <Set Name="ExtendAction1 SQL" SqlType="query">
+                <Sql><![CDATA[-- enter your sql]]></Sql>
+                <CSSet />
+            </Set>
+            <Set Name="ExtendAction2 SQL" SqlType="update">
+                <Sql><![CDATA[UPDATE ADM_MENU SET MNU_TEXT_EN=V FROM (
+  	SELECT A.COL ID, B.COL V FROM F_SPLITA(@IDS,'`') A
+  		INNER JOIN F_SPLITA(@VALS,'`') B ON A.IDX=B.IDX
+  ) A
+WHERE A.ID = MNU_ID
+]]></Sql>
+                <CSSet />
+            </Set>
+        </SqlSet>
+        <JSONSet />
+        <ClassSet />
+        <XmlSet />
+        <XmlSetData />
+        <ScriptSet />
+        <UrlSet />
+        <CSSet />
+        <CallSet>
+            <Set CallIsChk="" CallName="OnPageLoad SQL" CallType="SqlSet" Test="" />
+        </CallSet>
+    </Action>
+    <XItems>
+        <XItem Name="CHOOESE">
+            <Tag>
+                <Set IsLFEdit="" SpanShowAs="" Tag="checkbox" />
+            </Tag>
+            <Name>
+                <Set Name="CHOOESE" />
+            </Name>
+            <GroupIndex />
+            <InitValue />
+            <DescriptionSet>
+                <Set Info="选择" Lang="zhcn" Memo="" />
+            </DescriptionSet>
+            <XStyle />
+            <Style />
+            <ParentStyle />
+            <AttributeSet />
+            <EventSet />
+            <IsHtml />
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_ID" DataType="" DisableOnModify="" Format="" FrameOneCell=""
+                    Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget=""
+                    Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef />
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="MNU_ID">
+            <Tag>
+                <Set IsLFEdit="0" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="MNU_ID" />
+            </Name>
+            <GroupIndex>
+                <Set GroupIndex="" />
+            </GroupIndex>
+            <InitValue>
+                <Set InitValue="" />
+            </InitValue>
+            <DescriptionSet>
+                <Set Info="菜单编号" Lang="zhcn" Memo="菜单编号" />
+                <Set Info="Menu item" Lang="enus" Memo="Menu item" />
+            </DescriptionSet>
+            <XStyle>
+                <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed=""
+                    XStyleNoWrap="" XStyleVAlign="" XStyleWidth="" />
+            </XStyle>
+            <Style>
+                <Set Style="" />
+            </Style>
+            <ParentStyle>
+                <Set ParentStyle="" />
+            </ParentStyle>
+            <AttributeSet>
+                <Set AttLogic="" AttName="" AttValue="" />
+            </AttributeSet>
+            <EventSet>
+                <Set EventLogic="" EventName="" EventType="" EventValue="" />
+            </EventSet>
+            <IsHtml>
+                <Set IsHtml="" />
+            </IsHtml>
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_ID" DataType="Int" DisableOnModify="" Format="" FrameOneCell=""
+                    Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget=""
+                    Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef>
+                <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle=""
+                    RefShowType="" RefSql="" />
+            </DataRef>
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="MNU_ICON">
+            <Tag>
+                <Set IsLFEdit="0" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="MNU_ICON" />
+            </Name>
+            <GroupIndex>
+                <Set GroupIndex="" />
+            </GroupIndex>
+            <InitValue>
+                <Set InitValue="" />
+            </InitValue>
+            <DescriptionSet>
+                <Set Info="图标" Lang="zhcn" Memo="图标" />
+                <Set Info="Icon" Lang="enus" Memo="Icon" />
+            </DescriptionSet>
+            <XStyle>
+                <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed=""
+                    XStyleNoWrap="" XStyleVAlign="" XStyleWidth="" />
+            </XStyle>
+            <Style>
+                <Set Style="" />
+            </Style>
+            <ParentStyle>
+                <Set ParentStyle="" />
+            </ParentStyle>
+            <AttributeSet>
+                <Set AttLogic="" AttName="" AttValue="" />
+            </AttributeSet>
+            <EventSet>
+                <Set EventLogic="" EventName="" EventType="" EventValue="" />
+            </EventSet>
+            <IsHtml>
+                <Set IsHtml="" />
+            </IsHtml>
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_ICON" DataType="String" DisableOnModify="" Format=""
+                    FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom=""
+                    TransTarget="" Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef>
+                <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle=""
+                    RefShowType="" RefSql="" />
+            </DataRef>
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="MNU_LVL">
+            <Tag>
+                <Set IsLFEdit="0" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="MNU_LVL" />
+            </Name>
+            <GroupIndex>
+                <Set GroupIndex="" />
+            </GroupIndex>
+            <InitValue>
+                <Set InitValue="" />
+            </InitValue>
+            <DescriptionSet>
+                <Set Info="级别" Lang="zhcn" Memo="级别" />
+                <Set Info="Level" Lang="enus" Memo="Level" />
+            </DescriptionSet>
+            <XStyle>
+                <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed=""
+                    XStyleNoWrap="" XStyleVAlign="" XStyleWidth="" />
+            </XStyle>
+            <Style>
+                <Set Style="" />
+            </Style>
+            <ParentStyle>
+                <Set ParentStyle="" />
+            </ParentStyle>
+            <AttributeSet>
+                <Set AttLogic="" AttName="" AttValue="" />
+            </AttributeSet>
+            <EventSet>
+                <Set EventLogic="" EventName="" EventType="" EventValue="" />
+            </EventSet>
+            <IsHtml>
+                <Set IsHtml="" />
+            </IsHtml>
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_LVL" DataType="Int" DisableOnModify="" Format="" FrameOneCell=""
+                    Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget=""
+                    Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef>
+                <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle=""
+                    RefShowType="" RefSql="" />
+            </DataRef>
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="MNU_TEXT">
+            <Tag>
+                <Set IsLFEdit="0" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="MNU_TEXT" />
+            </Name>
+            <GroupIndex>
+                <Set GroupIndex="" />
+            </GroupIndex>
+            <InitValue>
+                <Set InitValue="" />
+            </InitValue>
+            <DescriptionSet>
+                <Set Info="文字" Lang="zhcn" Memo="文字" />
+                <Set Info="Text" Lang="enus" Memo="Text" />
+            </DescriptionSet>
+            <XStyle>
+                <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="yes"
+                    XStyleNoWrap="yes" XStyleVAlign="" XStyleWidth="150px" />
+            </XStyle>
+            <Style>
+                <Set Style="" />
+            </Style>
+            <ParentStyle>
+                <Set ParentStyle="" />
+            </ParentStyle>
+            <AttributeSet>
+                <Set AttLogic="" AttName="" AttValue="" />
+            </AttributeSet>
+            <EventSet>
+                <Set EventLogic="" EventName="" EventType="" EventValue="" />
+            </EventSet>
+            <IsHtml>
+                <Set IsHtml="" />
+            </IsHtml>
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_TEXT" DataType="String" DisableOnModify="" Format=""
+                    FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom=""
+                    TransTarget="" Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef>
+                <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle=""
+                    RefShowType="" RefSql="" />
+            </DataRef>
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="MNU_TEXT_EN">
+            <Tag>
+                <Set IsLFEdit="0" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="MNU_TEXT_EN" />
+            </Name>
+            <GroupIndex>
+                <Set GroupIndex="" />
+            </GroupIndex>
+            <InitValue>
+                <Set InitValue="" />
+            </InitValue>
+            <DescriptionSet>
+                <Set Info="英文名称" Lang="zhcn" Memo="英文名称" />
+                <Set Info="The English name" Lang="enus" Memo="The English name" />
+            </DescriptionSet>
+            <XStyle>
+                <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed=""
+                    XStyleNoWrap="" XStyleVAlign="" XStyleWidth="" />
+            </XStyle>
+            <Style>
+                <Set Style="" />
+            </Style>
+            <ParentStyle>
+                <Set ParentStyle="" />
+            </ParentStyle>
+            <AttributeSet>
+                <Set AttLogic="" AttName="" AttValue="" />
+            </AttributeSet>
+            <EventSet>
+                <Set EventLogic="" EventName="" EventType="" EventValue="" />
+            </EventSet>
+            <IsHtml>
+                <Set IsHtml="" />
+            </IsHtml>
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_TEXT_EN" DataType="String" DisableOnModify="" Format=""
+                    FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom=""
+                    TransTarget="" Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef>
+                <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle=""
+                    RefShowType="" RefSql="" />
+            </DataRef>
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="MNU_PID">
+            <Tag>
+                <Set IsLFEdit="0" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="MNU_PID" />
+            </Name>
+            <GroupIndex>
+                <Set GroupIndex="" />
+            </GroupIndex>
+            <InitValue>
+                <Set InitValue="" />
+            </InitValue>
+            <DescriptionSet>
+                <Set Info="父健" Lang="zhcn" Memo="父健" />
+                <Set Info="Parent" Lang="enus" Memo="Parent health" />
+            </DescriptionSet>
+            <XStyle>
+                <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed=""
+                    XStyleNoWrap="" XStyleVAlign="" XStyleWidth="" />
+            </XStyle>
+            <Style>
+                <Set Style="" />
+            </Style>
+            <ParentStyle>
+                <Set ParentStyle="" />
+            </ParentStyle>
+            <AttributeSet>
+                <Set AttLogic="" AttName="" AttValue="" />
+            </AttributeSet>
+            <EventSet>
+                <Set EventLogic="" EventName="" EventType="" EventValue="" />
+            </EventSet>
+            <IsHtml>
+                <Set IsHtml="" />
+            </IsHtml>
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_PID" DataType="Int" DisableOnModify="" Format="" FrameOneCell=""
+                    Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget=""
+                    Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef>
+                <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle=""
+                    RefShowType="" RefSql="" />
+            </DataRef>
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="P_MNU_TEXT">
+            <Tag>
+                <Set IsLFEdit="" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="P_MNU_TEXT" />
+            </Name>
+            <GroupIndex />
+            <InitValue />
+            <DescriptionSet>
+                <Set Info="上级" Lang="zhcn" Memo="" />
+            </DescriptionSet>
+            <XStyle />
+            <Style />
+            <ParentStyle />
+            <AttributeSet />
+            <EventSet />
+            <IsHtml />
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="P_MNU_TEXT" DataType="" DisableOnModify="" Format="" FrameOneCell=""
+                    Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget=""
+                    Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef />
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="P_MNU_TEXT_EN">
+            <Tag>
+                <Set IsLFEdit="" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="P_MNU_TEXT_EN" />
+            </Name>
+            <GroupIndex />
+            <InitValue />
+            <DescriptionSet>
+                <Set Info="上级英文" Lang="zhcn" Memo="" />
+            </DescriptionSet>
+            <XStyle />
+            <Style />
+            <ParentStyle />
+            <AttributeSet />
+            <EventSet />
+            <IsHtml />
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="P_MNU_TEXT_EN" DataType="" DisableOnModify="" Format=""
+                    FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom=""
+                    TransTarget="" Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef />
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="MNU_ORD">
+            <Tag>
+                <Set IsLFEdit="0" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="MNU_ORD" />
+            </Name>
+            <GroupIndex>
+                <Set GroupIndex="" />
+            </GroupIndex>
+            <InitValue>
+                <Set InitValue="" />
+            </InitValue>
+            <DescriptionSet>
+                <Set Info="排序" Lang="zhcn" Memo="排序" />
+                <Set Info="Sorting" Lang="enus" Memo="Sorting" />
+            </DescriptionSet>
+            <XStyle>
+                <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed=""
+                    XStyleNoWrap="" XStyleVAlign="" XStyleWidth="" />
+            </XStyle>
+            <Style>
+                <Set Style="" />
+            </Style>
+            <ParentStyle>
+                <Set ParentStyle="" />
+            </ParentStyle>
+            <AttributeSet>
+                <Set AttLogic="" AttName="" AttValue="" />
+            </AttributeSet>
+            <EventSet>
+                <Set EventLogic="" EventName="" EventType="" EventValue="" />
+            </EventSet>
+            <IsHtml>
+                <Set IsHtml="" />
+            </IsHtml>
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_ORD" DataType="Int" DisableOnModify="" Format="" FrameOneCell=""
+                    Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget=""
+                    Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef>
+                <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle=""
+                    RefShowType="" RefSql="" />
+            </DataRef>
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="MNU_CMD">
+            <Tag>
+                <Set IsLFEdit="0" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="MNU_CMD" />
+            </Name>
+            <GroupIndex>
+                <Set GroupIndex="" />
+            </GroupIndex>
+            <InitValue>
+                <Set InitValue="" />
+            </InitValue>
+            <DescriptionSet>
+                <Set Info="脚本" Lang="zhcn" Memo="脚本" />
+                <Set Info="Script" Lang="enus" Memo="Script" />
+            </DescriptionSet>
+            <XStyle>
+                <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed="yes"
+                    XStyleNoWrap="yes" XStyleVAlign="" XStyleWidth="220px" />
+            </XStyle>
+            <Style>
+                <Set Style="" />
+            </Style>
+            <ParentStyle>
+                <Set ParentStyle="" />
+            </ParentStyle>
+            <AttributeSet>
+                <Set AttLogic="" AttName="" AttValue="" />
+            </AttributeSet>
+            <EventSet>
+                <Set EventLogic="" EventName="" EventType="" EventValue="" />
+            </EventSet>
+            <IsHtml>
+                <Set IsHtml="" />
+            </IsHtml>
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_CMD" DataType="String" DisableOnModify="" Format=""
+                    FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom=""
+                    TransTarget="" Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef>
+                <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle=""
+                    RefShowType="" RefSql="" />
+            </DataRef>
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="MNU_GRP">
+            <Tag>
+                <Set IsLFEdit="0" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="MNU_GRP" />
+            </Name>
+            <GroupIndex>
+                <Set GroupIndex="" />
+            </GroupIndex>
+            <InitValue>
+                <Set InitValue="" />
+            </InitValue>
+            <DescriptionSet>
+                <Set Info="分组" Lang="zhcn" Memo="分组" />
+                <Set Info="Grouping" Lang="enus" Memo="Grouping" />
+            </DescriptionSet>
+            <XStyle>
+                <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed=""
+                    XStyleNoWrap="" XStyleVAlign="" XStyleWidth="" />
+            </XStyle>
+            <Style>
+                <Set Style="" />
+            </Style>
+            <ParentStyle>
+                <Set ParentStyle="" />
+            </ParentStyle>
+            <AttributeSet>
+                <Set AttLogic="" AttName="" AttValue="" />
+            </AttributeSet>
+            <EventSet>
+                <Set EventLogic="" EventName="" EventType="" EventValue="" />
+            </EventSet>
+            <IsHtml>
+                <Set IsHtml="" />
+            </IsHtml>
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_GRP" DataType="String" DisableOnModify="" Format=""
+                    FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom=""
+                    TransTarget="" Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef>
+                <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle=""
+                    RefShowType="" RefSql="" />
+            </DataRef>
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="MNU_REF">
+            <Tag>
+                <Set IsLFEdit="0" SpanShowAs="" Tag="span" />
+            </Tag>
+            <Name>
+                <Set Name="MNU_REF" />
+            </Name>
+            <GroupIndex>
+                <Set GroupIndex="" />
+            </GroupIndex>
+            <InitValue>
+                <Set InitValue="" />
+            </InitValue>
+            <DescriptionSet>
+                <Set Info="标记" Lang="zhcn" Memo="标记？" />
+                <Set Info="Mark?" Lang="enus" Memo="Mark?" />
+            </DescriptionSet>
+            <XStyle>
+                <Set XStyleAlign="" XStyleBold="" XStyleColor="" XStyleCursor="" XStyleFixed=""
+                    XStyleNoWrap="" XStyleVAlign="" XStyleWidth="" />
+            </XStyle>
+            <Style>
+                <Set Style="" />
+            </Style>
+            <ParentStyle>
+                <Set ParentStyle="" />
+            </ParentStyle>
+            <AttributeSet>
+                <Set AttLogic="" AttName="" AttValue="" />
+            </AttributeSet>
+            <EventSet>
+                <Set EventLogic="" EventName="" EventType="" EventValue="" />
+            </EventSet>
+            <IsHtml>
+                <Set IsHtml="" />
+            </IsHtml>
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="1" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="text" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="MNU_REF" DataType="String" DisableOnModify="" Format=""
+                    FrameOneCell="" Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom=""
+                    TransTarget="" Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef>
+                <Set RefKey="" RefMulti="" RefMultiSplit="" RefShow="" RefShowStyle=""
+                    RefShowType="" RefSql="" />
+            </DataRef>
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="butModify">
+            <Tag>
+                <Set IsLFEdit="" SpanShowAs="" Tag="button" />
+            </Tag>
+            <Name>
+                <Set Name="butModify" />
+            </Name>
+            <GroupIndex />
+            <InitValue />
+            <DescriptionSet>
+                <Set Info="修改" Lang="zhcn" Memo="" />
+            </DescriptionSet>
+            <XStyle />
+            <Style />
+            <ParentStyle />
+            <AttributeSet />
+            <EventSet />
+            <IsHtml />
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="butModify" DataType="" DisableOnModify="" Format="" FrameOneCell=""
+                    Icon="" IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget=""
+                    Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef />
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame>
+                <Set AttatchParas="" CallItemName="adm_menu.F.2019" CallMethod="OpenReloadClose"
+                    CallParas="mnu_id=@mnu_id" CallXmlName="/2014_center/base/bk_menu.xml" />
+            </OpenFrame>
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+        <XItem Name="BUTTRANS">
+            <Tag>
+                <Set IsLFEdit="" SpanShowAs="" Tag="button" />
+            </Tag>
+            <Name>
+                <Set Name="BUTTRANS" />
+            </Name>
+            <GroupIndex />
+            <InitValue />
+            <DescriptionSet>
+                <Set Info="翻译" Lang="zhcn" Memo="" />
+                <Set Info="Translate" Lang="enus" Memo="" />
+            </DescriptionSet>
+            <XStyle />
+            <Style />
+            <ParentStyle />
+            <AttributeSet />
+            <EventSet>
+                <Set EventLogic="" EventName="ewa_click" EventType="Javascript" EventValue="tall();" />
+            </EventSet>
+            <IsHtml />
+            <OrderSearch>
+                <Set GroupTestLength="" IsGroup="" IsGroupDefault="" IsOrder="0" IsSearchQuick=""
+                    OrderExp="" SearchExp="" SearchMulti="" SearchSql="" SearchType="" />
+            </OrderSearch>
+            <MaxMinLength />
+            <MaxMinValue />
+            <IsMustInput />
+            <Switch />
+            <DataItem>
+                <Set DataField="" DataType="" DisableOnModify="" Format="" FrameOneCell="" Icon=""
+                    IconLoction="" IsEncrypt="" NumberScale="" SumBottom="" TransTarget=""
+                    Translation="" TriggerValid="" Trim="" Valid="" />
+            </DataItem>
+            <DispEnc />
+            <DataRef />
+            <List />
+            <UserSet />
+            <CallAction />
+            <OpenFrame />
+            <Frame />
+            <UserControl />
+            <DefineFrame />
+            <PopFrame />
+            <signature />
+            <Upload />
+            <VaildEx />
+            <MGAddField />
+            <AnchorParas />
+            <LinkButtonParas />
+            <DopListShow />
+            <ReportCfg />
+            <CombineFrame />
+            <AddrMapRels />
+            <QRCode />
+            <ImageDefault />
+        </XItem>
+    </XItems>
+    <Menus />
+    <Charts />
+    <PageInfos />
+    <Workflows />
+</EasyWebTemplate>

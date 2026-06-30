@@ -4,6 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
@@ -28,8 +29,11 @@ public class SqlSyntaxCheck {
 	 */
 	public String checkSyntax() {
 		try {
-			if (this._Cnn.getDatabaseType().equals("MSSQL")) {
+			String dbType = this._Cnn.getDatabaseType();
+			if (SqlUtils.isSqlServer(dbType)) {
 				return this.mssql();
+			} else if (SqlUtils.isOracle(dbType)) {
+				return this.oracle();
 			} else {
 				return this.mysql();
 			}
@@ -47,6 +51,13 @@ public class SqlSyntaxCheck {
 	private String mysql() {
 		String sql = this._Rv.getString("SQL");
 		String[] sqls = sql.split(";");
+
+		// Safety check: block dangerous operations before execution
+		String safetyErr = SqlUtils.checkSqlSafety(sql);
+		if (safetyErr != null) {
+			return "{\"RST\":false,\"ERR\":\"" + safetyErr + "\"}";
+		}
+
 		_Cnn.transBegin();
 		for (int i = 0; i < sqls.length; i++) {
 			String s = sqls[i].trim();
@@ -75,6 +86,42 @@ public class SqlSyntaxCheck {
 		}
 		_Cnn.transRollback();
 		_Cnn.transClose();
+		return "{\"RST\":true}";
+	}
+
+	/**
+	 * Oracle: use DBMS_SQL.PARSE for pure parse-only validation.
+	 * No transaction, no execution — zero side effects.
+	 */
+	private String oracle() {
+		String sql = this._Rv.getString("SQL");
+		String[] sqls = sql.split(";");
+
+		for (int i = 0; i < sqls.length; i++) {
+			String s = sqls[i].trim();
+			if (s.isEmpty()) {
+				continue;
+			}
+
+			// Escape single quotes for PL/SQL string literal
+			String escaped = s.replace("'", "''");
+			String plsql = "DECLARE c INTEGER; BEGIN c := DBMS_SQL.OPEN_CURSOR; "
+					+ "DBMS_SQL.PARSE(c, '" + escaped + "', DBMS_SQL.NATIVE); "
+					+ "DBMS_SQL.CLOSE_CURSOR(c); END;";
+
+			_Cnn.executeUpdate(plsql);
+			if (_Cnn.getErrorMsg() != null) {
+				String err = _Cnn.getErrorMsg();
+				_Cnn.clearErrorMsg();
+
+				String prefix = sqls.length > 1 ? " (stmt #" + (i + 1) + ")" : "";
+				JSONObject json = new JSONObject();
+				String[] parts = err.split("<br>");
+				json.put("ERR", (parts.length > 1 ? parts[1] : err) + prefix);
+				json.put("RST", false);
+				return json.toString();
+			}
+		}
 		return "{\"RST\":true}";
 	}
 

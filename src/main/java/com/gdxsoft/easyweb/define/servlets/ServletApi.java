@@ -218,6 +218,9 @@ public class ServletApi extends HttpServlet {
 			case "getxmlfile":
 				result = getXmlFile(rv);
 				break;
+			case "validatesql":
+				result = validateSql(rv);
+				break;
 			default:
 				result = createErrorResponse("Unknown method: " + method, 400);
 				response.setStatus(400);
@@ -1154,6 +1157,29 @@ public class ServletApi extends HttpServlet {
 	}
 
 	/**
+	 * Validate SQL syntax against a database connection. Executes the SQL in a
+	 * transaction and rolls back, so no data is modified.
+	 *
+	 * @param rv RequestValue with db (database name) and sql (SQL to validate)
+	 * @return JSON result with RST=true on success, or RST=false with error details
+	 */
+	private JSONObject validateSql(RequestValue rv) {
+		String db = rv.getString(PARAM_DB);
+		String sql = rv.getString("sql");
+
+		ConfigValidator.ValidationResult vr = ConfigValidator.validateSql(db, sql);
+		if (vr.isValid()) {
+			JSONObject result = new JSONObject();
+			result.put("RST", true);
+			result.put("DB", db);
+			result.put("MSG", "SQL 语法校验通过");
+			return result;
+		} else {
+			return UJSon.rstFalse(vr.getErrorMessage());
+		}
+	}
+
+	/**
 	 * Get API help documentation
 	 */
 	private JSONObject getHelp() {
@@ -1178,6 +1204,8 @@ public class ServletApi extends HttpServlet {
 				"Preview business XML without saving (params: db, tablename, frametype, operationtype, xmlname, [output, scriptpath])");
 		methods.put("getXmlFile",
 				"Read XML file content directly from storage (params: xmlname, [output, scriptpath])");
+		methods.put("validateSql",
+				"Validate SQL syntax against database (params: db, sql)");
 
 		result.put("methods", methods);
 
@@ -1186,6 +1214,7 @@ public class ServletApi extends HttpServlet {
 		params.put("itemname", "Configuration item name");
 		params.put("output", "Output format: xml, json, or csv");
 		params.put("xml", "XML content for update");
+		params.put("sql", "SQL statement(s) to validate (supports multiple statements separated by ;)");
 		params.put("new_itemname", "New item name for copy operation");
 		params.put("db", "Database connection name (defined in ewa_conf.xml)");
 		params.put("tablename", "Table name");

@@ -7,6 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -16,6 +17,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXParseException;
 
 import com.gdxsoft.easyweb.SystemXmlUtils;
+import com.gdxsoft.easyweb.define.database.SqlSyntaxCheck;
+import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.utils.UXml;
 
 /**
@@ -167,6 +170,45 @@ public class ConfigValidator {
                     + "，允许值：" + VALID_OPERATION_TYPES);
         }
         return ValidationResult.valid();
+    }
+
+    /**
+     * 校验 SQL 合法性，通过数据库连接执行语法检查（事务内执行并回滚，不会产生副作用）。
+     * <p>
+     * 委托给 {@link SqlSyntaxCheck}，支持多种数据库：
+     * MySQL/MariaDB 使用事务回滚机制，MSSQL 使用 SET NOEXEC ON/OFF。
+     * SQL 可以为多条语句（分号分隔），逐条检查。
+     * </p>
+     *
+     * @param db  数据库连接配置名（对应 ewa_conf.xml 中的 DataSource Name）
+     * @param sql SQL 语句（支持多条，分号分隔；支持 SELECT / INSERT / UPDATE / DELETE / DDL 等）
+     * @return 校验结果
+     */
+    public static ValidationResult validateSql(String db, String sql) {
+        if (StringUtils.isBlank(db)) {
+            return ValidationResult.invalid("数据库连接名（db）不能为空");
+        }
+        if (StringUtils.isBlank(sql)) {
+            return ValidationResult.invalid("SQL 不能为空");
+        }
+
+        RequestValue rv = new RequestValue();
+        rv.addOrUpdateValue("DB", db);
+        rv.addOrUpdateValue("SQL", sql);
+
+        SqlSyntaxCheck check = new SqlSyntaxCheck(rv);
+        String result = check.checkSyntax();
+
+        try {
+            JSONObject json = new JSONObject(result);
+            if (json.getBoolean("RST")) {
+                return ValidationResult.valid();
+            } else {
+                return ValidationResult.invalid("SQL 语法错误: " + json.getString("ERR"));
+            }
+        } catch (Exception e) {
+            return ValidationResult.invalid("SQL 校验结果解析失败: " + e.getMessage());
+        }
     }
 
     // ==================== 私有方法 ====================

@@ -1,6 +1,9 @@
 package com.gdxsoft.easyweb.datasource;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -593,5 +596,143 @@ public class SqlUtils {
 		}
 
 		return temp.replace("[FIELD]", fieldName);
+	}
+
+	// ==================== SQL Safety Check ====================
+
+	/** Allowed DDL prefixes — checked first, before blacklist */
+	private static final Set<String> ALLOWED_DDL = new HashSet<>(Arrays.asList(
+			"CREATE TEMPORARY ", "CREATE GLOBAL TEMPORARY ", "CREATE LOCAL TEMPORARY ",
+			"CREATE TEMP ", "DROP TEMPORARY "
+	));
+
+	/** Forbidden statement prefixes — any statement starting with these is blocked */
+	private static final Set<String> FORBIDDEN_PREFIXES = new HashSet<>(Arrays.asList(
+			"CREATE ", "ALTER ", "DROP ", "TRUNCATE ", "RENAME ",
+			"GRANT ", "REVOKE ", "KILL ", "SHUTDOWN ", "FLUSH ",
+			"PURGE ", "RESET ", "LOCK ", "HANDLER ", "INSTALL ", "UNINSTALL ",
+			"ANALYZE ", "CHECKSUM ", "OPTIMIZE ", "REPAIR ",
+			"CACHE ", "BACKUP ", "RESTORE ", "CHECK TABLE ",
+			"LOAD ", "REPLACE ", "XA ",
+			"SET GLOBAL ", "SET PERSIST "
+	));
+
+	/** Forbidden substrings — statement containing these anywhere is blocked */
+	private static final Set<String> FORBIDDEN_CONTAINS = new HashSet<>(Arrays.asList(
+			" INTO OUTFILE ", " INTO DUMPFILE "
+	));
+
+	/**
+	 * Check SQL for dangerous operations (DDL, destructive DML, file I/O, admin
+	 * commands). MySQL DDL causes implicit commit, making transaction rollback
+	 * ineffective — must be blocked before execution.
+	 *
+	 * @param sql raw SQL (supports multiple statements separated by ;)
+	 * @return null if safe, or error message string if dangerous
+	 */
+	public static String checkSqlSafety(String sql) {
+		if (sql == null || sql.trim().isEmpty()) {
+			return null;
+		}
+		// Block MySQL executable comments /*!...*/
+		if (sql.contains("/*!")) {
+			return "MySQL executable comment /*! not allowed";
+		}
+
+		// Remove comments before splitting by ; to prevent /*;*/ bypass
+		String noComments = sql.replaceAll("(?s)/\\*.*?\\*/", " ");
+		noComments = removeSqlMuitiComment(noComments);
+
+		String[] sqls = noComments.split(";");
+		for (int i = 0; i < sqls.length; i++) {
+			String upper = cleanAndUpper(sqls[i]);
+			if (upper.isEmpty()) {
+				continue;
+			}
+			String prefix = sqls.length > 1 ? " (stmt #" + (i + 1) + ")" : "";
+
+			// 1. Whitelist check — skip if statement matches an allowed prefix
+			if (startsWithAny(upper, ALLOWED_DDL)) {
+				continue;
+			}
+
+			// 2. Blacklist prefix check
+			if (startsWithAny(upper, FORBIDDEN_PREFIXES)) {
+				return "DDL not allowed" + prefix;
+			}
+
+			// 3. Blacklist substring check
+			if (containsAny(upper, FORBIDDEN_CONTAINS)) {
+				return "INTO OUTFILE / DUMPFILE not allowed" + prefix;
+			}
+
+			// 4. DELETE without WHERE
+			if (upper.startsWith("DELETE ") && !upper.contains(" WHERE ")) {
+				return "DELETE requires WHERE clause" + prefix;
+			}
+
+			// 5. SELECT INTO (creates new table, not INSERT INTO).
+			//    Allow INTO @variable (MySQL user variable assignment).
+			if (!upper.startsWith("INSERT ")) {
+				int si = upper.indexOf("SELECT ");
+				int ii = si >= 0 ? upper.indexOf(" INTO ", si) : -1;
+				if (ii >= 0) {
+					String afterInto = upper.substring(ii + 6).trim();
+					if (!afterInto.startsWith("@")) {
+						int fi = upper.indexOf(" FROM ", ii);
+						if (fi < 0 || ii < fi) {
+							return "SELECT INTO not allowed" + prefix;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	private static boolean startsWithAny(String s, Set<String> prefixes) {
+		for (String p : prefixes) {
+			if (s.startsWith(p)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static boolean containsAny(String s, Set<String> substrings) {
+		for (String sub : substrings) {
+			if (s.contains(sub)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Remove SQL comments (&#47;* *&#47; and --), normalize whitespace to single
+	 * spaces, and convert to uppercase.
+	 */
+	private static String cleanAndUpper(String stmt) {
+		// Replace /* ... */ with a space (not empty) to keep word boundaries.
+		// (?s) = DOTALL flag so .*? matches across newlines.
+		String cleaned = stmt.replaceAll("(?s)/\\*.*?\\*/", " ");
+		// Also handle nested/edge cases with the existing method
+		cleaned = removeSqlMuitiComment(cleaned);
+		StringBuilder sb = new StringBuilder();
+		for (String line : cleaned.split("\n")) {
+			// Strip -- comments
+			int commentIdx = line.indexOf("--");
+			if (commentIdx < 0) {
+				// Strip # comments (MySQL)
+				commentIdx = line.indexOf("#");
+			}
+			if (commentIdx >= 0) {
+				line = line.substring(0, commentIdx);
+			}
+			sb.append(line).append(" ");
+		}
+		// Normalize whitespace including Unicode (NBSP, en space, em space, etc.)
+		// (?U) = UNICODE_CHARACTER_CLASS flag so \s matches all Unicode whitespace
+		return sb.toString().replaceAll("(?U)\\s+", " ").trim().toUpperCase();
 	}
 }
