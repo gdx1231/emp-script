@@ -9,7 +9,7 @@ EWA 框架共有 **14 个 Servlet**，分为两大类：
 |---------|---------|------|
 | **ServletMain** | `/ewa`, `/EWA_STYLE/cgi-bin/index.jsp` | 主入口，处理页面请求 |
 | **ServletUpload** | `/EWA_STYLE/cgi-bin/_up_/index.jsp` | 文件上传 |
-| **ServletCode** | `/EWA_STYLE/cgi-bin/_co_/index.jsp` | 验证码生成 (已废弃) |
+| **ServletCode** | `/EWA_STYLE/cgi-bin/_co_/index.jsp` | 验证码生成 |
 | **ServletResources** | `/r.ewa`, `/r1.ewa`, `/EWA_STYLE/cgi-bin/_re_/index.jsp` | 静态资源、JS/CSS 合并 |
 | **ServletStatus** | `/EWA_STYLE/cgi-bin/_st_/index.jsp` | 树状态保存/恢复 |
 | **ServletError** | `/EWA_STYLE/cgi-bin/_er_/index.jsp` | 错误页面 |
@@ -459,7 +459,8 @@ private void show(HttpServletRequest request, HttpServletResponse response) {
 }
 ```
 
-**注意**: 该 Servlet 已废弃，建议使用 `ServletMain` 的 `ewa_ajax=validcode` 参数。
+### 验证码配置
+验证码位数和类型可通过 XML 配置中的 `UserConfig` 进行设置。
 
 ---
 

@@ -9,7 +9,7 @@ The EWA framework has **14 Servlets** in total, divided into two categories:
 |---------|-------------|---------|
 | **ServletMain** | `/ewa`, `/EWA_STYLE/cgi-bin/index.jsp` | Main entry point, handles page requests |
 | **ServletUpload** | `/EWA_STYLE/cgi-bin/_up_/index.jsp` | File upload |
-| **ServletCode** | `/EWA_STYLE/cgi-bin/_co_/index.jsp` | Verification code generation (deprecated) |
+| **ServletCode** | `/EWA_STYLE/cgi-bin/_co_/index.jsp` | Verification code generation |
 | **ServletResources** | `/r.ewa`, `/r1.ewa`, `/EWA_STYLE/cgi-bin/_re_/index.jsp` | Static resources, JS/CSS combining |
 | **ServletStatus** | `/EWA_STYLE/cgi-bin/_st_/index.jsp` | Tree state save/restore |
 | **ServletError** | `/EWA_STYLE/cgi-bin/_er_/index.jsp` | Error page |
@@ -459,7 +459,8 @@ private void show(HttpServletRequest request, HttpServletResponse response) {
 }
 ```
 
-**Note**: This Servlet is deprecated; use `ServletMain` with the `ewa_ajax=validcode` parameter instead.
+### Verification Code Configuration
+The number of digits and type of verification code can be configured via `UserConfig` in the XML configuration.
 
 ---
 
