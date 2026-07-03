@@ -8,6 +8,49 @@ trigger: ewa-sql, EWA SQL, SqlSet, ewa_test, ewa_block_test, EWA_SQL_SPLIT_NO, -
 
 EWA 框架的 SQL 定义在 XML 配置文件的 `<SqlSet>` 中，通过参数绑定和 SQL 注释标记实现动态 SQL 模板。所有注释标记由 `SqlUtils.java` 解析。
 
+## 参考示例
+
+示例配置在缓存目录 `/Users/admin/java/ewa_page_cached_pf2023/scripts_cached/examples/`：
+
+```
+index.xml           # 首页列表
+member_card.xml     # 会员卡（含多种 SqlSet）
+product_cat.xml     # 产品分类（Tree SQL）
+sysatts.xml         # 文件附件
+```
+
+**自动触发**：当用户要求编写 EWA SQL 时，先读取示例参考实际用法：
+```
+read_file /Users/admin/java/ewa_page_cached_pf2023/scripts_cached/examples/member_card.xml
+```
+
+## 框架文档参考
+
+遇到数据库调用、SQL 条件执行等概念不确定时，读取框架文档获取权威解释：
+
+| 文档 | 说明 |
+|------|------|
+| `framework/emp-script/docs/zhcn/DATABASE_USAGE.md` | 数据库调用方式（DTTable/DataConnection/SqlCached） |
+| `framework/emp-script/docs/zhcn/EWA_TEST_USAGE.md` | ewa_test/ewa_block_test 条件化 SQL 详细用法 |
+
+**自动触发**：当对数据库调用方式、SQL 执行流程、条件注释等概念不确定时，先 `read_file` 对应框架文档再操作。
+
+## SQL Server 版本约束
+
+生产环境为 **SQL Server 2008 R2**，禁止使用以下语法：
+
+| 禁止语法 | 最低版本 | 替代方案 |
+|----------|----------|----------|
+| `IIF(cond, a, b)` | 2012 | `CASE WHEN cond THEN a ELSE b END` |
+| `TRY_CONVERT(type, expr)` | 2012 | `CASE WHEN ISDATE(expr)=1 THEN CONVERT(...) END` |
+| `FORMAT(val, fmt)` | 2012 | `CONVERT(varchar, val, style)` |
+| `CONCAT(a, b, ...)` | 2012 | `a + b` 或 `ISNULL(a,'') + ISNULL(b,'')` |
+| `STRING_AGG(col, sep)` | 2017 | `FOR XML PATH(',')` |
+| `TRIM(str)` | 2017 | `LTRIM(RTRIM(str))` |
+| `LEAD` / `LAG` | 2012 | 子查询 + `ROW_NUMBER()` |
+| `OFFSET...FETCH` | 2012 | `ROW_NUMBER() + WHERE rn BETWEEN` |
+| `THROW` | 2012 | `RAISERROR` |
+
 ---
 
 ## 1. XML SQL 定义结构

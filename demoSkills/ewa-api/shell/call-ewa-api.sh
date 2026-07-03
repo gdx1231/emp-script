@@ -63,6 +63,8 @@ EWA API 调用脚本 v${VERSION}
   previewBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> [output] [scriptpath]  预览业务XML(不保存)
   createBusinessXml <db> <tablename> <frametype> <operationtype> <xmlname> <itemname> [admid] [scriptpath]  生成并保存业务XML
   showScriptPaths                 列出所有可用配置存储路径
+  getXmlFile <xmlname> [output] [scriptpath]  直接读取 XML 文件内容
+  validateSql <db> <sql>          校验 SQL 语法安全性
   help                            显示 API 帮助
 
 选项:
@@ -404,24 +406,32 @@ do_run_conf_item() {
 do_update_conf_item() {
     local xmlname="$1"
     local itemname="$2"
-    local xml="$3"
-    
-    if [ -z "$xmlname" ] || [ -z "$itemname" ] || [ -z "$xml" ]; then
+    local xml_arg="$3"
+
+    if [ -z "$xmlname" ] || [ -z "$itemname" ] || [ -z "$xml_arg" ]; then
         log_error "缺少参数"
-        echo "用法: $0 updateConfItem <xmlname> <itemname> <xml>"
+        echo "用法: $0 updateConfItem <xmlname> <itemname> <xml|@file>"
+        echo "  xml:  XML 字符串（小内容）"
+        echo "  @file: 从文件读取（推荐，避免引号问题）"
         exit 1
     fi
-    
+
     log_info "更新配置项: $xmlname / $itemname"
-    
-    # URL 编码 XML
+
     local encoded_xml
-    if command -v python3 >/dev/null 2>&1; then
-        encoded_xml=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$xml'''))")
+    if [[ "$xml_arg" == @* ]]; then
+        # 从文件读取，用环境变量传递路径，避免引号问题
+        local filepath="${xml_arg#@}"
+        if [ ! -f "$filepath" ]; then
+            log_error "文件不存在: $filepath"
+            exit 1
+        fi
+        encoded_xml=$(FILE_PATH="$filepath" python3 -c "import urllib.parse,os; print(urllib.parse.quote(open(os.environ['FILE_PATH']).read()))")
     else
-        encoded_xml=$(echo "$xml" | sed 's/&/%26/g; s/</%3C/g; s/>/%3E/g; s/"/%22/g')
+        # 直接传 XML 字符串（仅适用于不含引号的简单内容）
+        encoded_xml=$(XML_ARG="$xml_arg" python3 -c "import urllib.parse,os; print(urllib.parse.quote(os.environ['XML_ARG']))")
     fi
-    
+
     send_request "method=updateConfItem&xmlname=${xmlname}&itemname=${itemname}&xml=${encoded_xml}"
 }
 
@@ -540,6 +550,51 @@ do_get_table_data() {
 do_show_script_paths() {
     log_info "获取配置存储路径..."
     send_request "method=showScriptPaths"
+}
+
+# 直接读取 XML 文件内容
+do_get_xml_file() {
+    local xmlname="$1"
+    local output="$2"
+    local scriptpath="$3"
+
+    if [ -z "$xmlname" ]; then
+        log_error "缺少 xmlname 参数"
+        echo "用法: $0 getXmlFile <xmlname> [output] [scriptpath]"
+        echo "  xmlname: XML 文件名，如 /test/ser_tag.xml"
+        echo "  output: xml (默认) 或 json"
+        echo "  scriptpath: 配置存储路径名称（可选）"
+        exit 1
+    fi
+
+    [ -z "$output" ] && output="xml"
+
+    log_info "读取 XML 文件: $xmlname (格式: $output)"
+    local params="method=getXmlFile&xmlname=${xmlname}&output=${output}"
+    [ -n "$scriptpath" ] && params="${params}&scriptpath=${scriptpath}"
+    send_request "$params"
+}
+
+# 校验 SQL 语法安全性
+do_validate_sql() {
+    local db="$1"
+    local sql="$2"
+
+    if [ -z "$db" ] || [ -z "$sql" ]; then
+        log_error "缺少参数"
+        echo "用法: $0 validateSql <db> <sql>"
+        echo "  db: 数据库连接名称"
+        echo "  sql: 要校验的 SQL 语句（支持分号分隔的多条语句）"
+        echo ""
+        echo "拒绝的危险操作: DROP, DELETE without WHERE, ALTER, CREATE, TRUNCATE,"
+        echo "  GRANT, REVOKE, REPLACE, LOCK TABLES, SET GLOBAL, KILL, FLUSH 等"
+        exit 1
+    fi
+
+    log_info "校验 SQL: $db"
+    local encoded_sql
+    encoded_sql=$(SQL_ARG="$sql" python3 -c "import urllib.parse,os; print(urllib.parse.quote(os.environ['SQL_ARG']))")
+    send_request "method=validateSql&db=${db}&sql=${encoded_sql}"
 }
 
 # 获取帮助（不需要认证）
@@ -698,6 +753,12 @@ case "$COMMAND" in
         ;;
     showScriptPaths)
         do_show_script_paths
+        ;;
+    getXmlFile)
+        do_get_xml_file "$@"
+        ;;
+    validateSql)
+        do_validate_sql "$@"
         ;;
     "")
         print_help
