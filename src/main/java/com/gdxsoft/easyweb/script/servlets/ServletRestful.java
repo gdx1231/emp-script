@@ -623,8 +623,14 @@ public class ServletRestful extends HttpServlet {
 		if ("POST".equals(conf.getMethod())) {
 			result.setSuccess(true);
 			result.setHttpStatusCode(201); // created
-			if (ht.getLastTable() != null && ht.getLastTable().getCount() > 0) {
-				result.setData(ht.getLastTable().getRow(0).toJson());
+			if (ht.getLastTable() != null) {
+				if( ht.getLastTable().getCount() == 1) {
+					// 返回创建的资源对象
+					result.setData(ht.getLastTable().getRow(0).toJson());
+				} else {
+					// 返回创建的资源集合
+					result.setData(ht.getLastTable().toJSONArray());
+				}
 			}
 			return;
 		}

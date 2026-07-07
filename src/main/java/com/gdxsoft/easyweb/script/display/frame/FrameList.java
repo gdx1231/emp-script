@@ -132,13 +132,15 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 		int pagesize = -1231;
 		int pageCurrent = -1;
-		try {
-			// 每页面的记录数
-			PageSplit ps = (PageSplit) tb.getAttsTable().get(ActionListFrame.PAGE_SIZE);
-			pagesize = ps.getPageSize();
-			pageCurrent = ps.getPageCurrent();
-		} catch (Exception err) {
-			LOGGER.warn(err.getLocalizedMessage());
+		if (tb.getAttsTable().get(ActionListFrame.PAGE_SIZE) != null) {
+			try {
+				// 每页面的记录数
+				PageSplit ps = (PageSplit) tb.getAttsTable().get(ActionListFrame.PAGE_SIZE);
+				pagesize = ps.getPageSize();
+				pageCurrent = ps.getPageCurrent();
+			} catch (Exception err) {
+				LOGGER.warn(err.getLocalizedMessage());
+			}
 		}
 		if (tb.getCount() == 0 || (pageCurrent <= 1 && tb.getCount() < pagesize)) {
 			// 返回的数量 < 分页记录数
@@ -623,9 +625,8 @@ public class FrameList extends FrameBase implements IFrame {
 
 			if (!isApp) {
 				// 鼠标滑出脚本
-				top = top.replace("<table",
-						"<table onmouseout='if(window.EWA && EWA.F && EWA.F.FOS && " + fos + "){" + fos
-								+ ".MOut(event)}'");
+				top = top.replace("<table", "<table onmouseout='if(window.EWA && EWA.F && EWA.F.FOS && " + fos + "){"
+						+ fos + ".MOut(event)}'");
 			}
 			doc.addScriptHtml(top);
 			doc.addFrameHtml(top);

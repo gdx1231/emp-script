@@ -84,17 +84,11 @@ public class WsContextListener implements ServletContextListener {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private ServerEndpointConfig buildConfig(ConfWebSocket ws) {
-        // 加载 endpoint class
-        Class<? extends javax.websocket.Endpoint> endpointClass;
+        // 加载 endpoint class（注解模式 POJO 不需要 extends Endpoint）
+        Class<?> endpointClass;
         try {
-            Class<?> clz = Class.forName(ws.getClazz());
-            if (!javax.websocket.Endpoint.class.isAssignableFrom(clz)) {
-                LOGGER.warn("ws {} 的 class {} 不是 Endpoint 子类，跳过", ws.getName(), ws.getClazz());
-                return null;
-            }
-            endpointClass = (Class<? extends javax.websocket.Endpoint>) clz;
+            endpointClass = Class.forName(ws.getClazz());
         } catch (ClassNotFoundException e) {
             LOGGER.warn("ws {} 的 class {} 未找到，跳过", ws.getName(), ws.getClazz());
             return null;

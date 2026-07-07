@@ -163,13 +163,35 @@ public class EwaWebSocketBus {
 
 	/**
 	 * 发生错误时调用
-	 * 
-	 * @param session
-	 * @param error
 	 */
 	@OnError
 	public void onError(Session session, Throwable error) {
-		LOGGER.error(error.getMessage());
+		LOGGER.error("WebSocket error, unid={}: {}", this.unid_, error.getMessage(), error);
+
+		// 1. 尝试告知客户端（尽力而为）
+		if (session != null && session.isOpen()) {
+			try {
+				JSONObject errMsg = new JSONObject();
+				errMsg.put("RST", false);
+				errMsg.put("ERR", "Server error: " + error.getMessage());
+				errMsg.put("METHOD", "error");
+				session.getBasicRemote().sendText(errMsg.toString());
+			} catch (Exception e) {
+				// 发不出去也不管了
+			}
+		}
+
+		// 2. 从容器移除（避免广播到已断开的连接）
+		EwaWebSocketContainer.remove(this);
+
+		// 3. 关闭会话
+		if (session != null && session.isOpen()) {
+			try {
+				session.close();
+			} catch (Exception e) {
+				// ignore
+			}
+		}
 	}
 
 	public Session getSession() {
