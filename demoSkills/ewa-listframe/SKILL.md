@@ -11,6 +11,38 @@ trigger: ewa-listframe, EWA ListFrame, 列表操作, 行数据, SelectChecked, G
 > `ewa` 变量 = `EWA.F.FOS['@SYS_FRAME_UNID']` — 当前 ListFrame 实例。
 > 列表帧容器 ID 为 `#EWA_LF_@SYS_FRAME_UNID`。
 
+## 参考示例
+
+示例配置在缓存目录 `/Users/admin/java/ewa_page_cached_pf2023/scripts_cached/examples/`：
+
+```
+index.xml           # 首页列表
+member_card.xml     # 会员卡（合并列 + ReloadAfter）
+product_cat.xml     # 产品分类（Tree）
+sysatts.xml         # 文件附件（MergeExp + DOM 操作）
+```
+
+**自动触发**：当用户要求编写 ListFrame 相关代码时，先读取示例参考实际用法：
+```
+read_file /Users/admin/java/ewa_page_cached_pf2023/scripts_cached/examples/member_card.xml
+```
+
+## 框架文档参考
+
+遇到 ListFrame 配置、luButtons/luSearch 等概念不确定时，读取框架文档获取权威解释：
+
+| 文档 | 说明 |
+|------|------|
+| `framework/emp-script/docs/zhcn/LISTFRAME_EXECUTION.md` | ListFrame 执行流程（分页/搜索/排序/按钮重绘） |
+| `framework/emp-script/docs/zhcn/EWA_PARAMETERS.md` | EWA URL 参数（EWA_LU_BUTTONS 等） |
+| `framework/emp-script/docs/zhcn/EWA_TEMPLATE_REFERENCE.md` | XML 模板属性完整参考（ListUI/Set） |
+
+| 易错概念 | 正确含义 |
+|----------|----------|
+| `luButtons="1"` | 重绘按钮到工具栏（不是"启用按钮"） |
+
+**自动触发**：当对 ListUI 属性、按钮行为、URL 参数等概念不确定时，先 `read_file` 对应框架文档再操作。
+
 ---
 
 ## 速查表
@@ -270,6 +302,23 @@ ewa.IsNotMDownAutoChecked = true;
 // 点击行时不自动勾选 checkbox
 ```
 
+### 单选 + checkbox 多选混合模式
+
+`luSelect="S"`（单选）+ 每行加 `<input type="checkbox">` 可实现：点行 = 单选，点 checkbox = 多选。
+
+原理：`checkMDownEnable()` 检测到点击目标是 `INPUT` 时返回 `false`，行选择流程不执行，checkbox 原生 toggle 不受干扰。点击行（TD）时，`mDownAutoCheck()` 自动勾选当前行 checkbox。
+
+```xml
+<!-- XML 中设置单选 + 添加 checkbox 列 -->
+<ListUI><Set luSelect="S"/></ListUI>
+<XItem Name="CK">
+    <Tag><Set Tag="checkbox"/></Tag>
+    <DataItem><Set DataField="ID"/></DataItem>
+</XItem>
+```
+
+`SelectChecked()` 优先从 checkbox 的 `checked` 状态取值，所以混合模式下能正确返回所有勾选行的 ID。
+
 ---
 
 ## 6. 动态列操作
@@ -336,6 +385,16 @@ ewa.reCalcBottoms();
 ---
 
 ## 8. 合并列
+
+> **重要**：`ewa.Merge` / `ewa.MergeExp` 等数据加载后需要渲染的操作，必须放在 `ewa.ReloadAfter` 函数内，确保每次列表刷新后都能正确执行：
+> 
+> ```javascript
+> ewa.ReloadAfter = function(httpReferer) {
+>     // 数据加载完后的渲染操作
+>     ewa.Merge('COL_A', 'COL_B', ' ~ ');
+>     ewa.Merge('COL_C', 'COL_D', '<br>');
+> };
+> ```
 
 ### 简单合并
 

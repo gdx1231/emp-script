@@ -10,6 +10,34 @@ trigger: ewa-form, EWA form, 表单提交, DoPostBefore, doPostAfter, setMust, C
 
 > `ewa` 变量 = `EWA.F.FOS['@SYS_FRAME_UNID']` — 当前帧实例。`@SYS_FRAME_UNID` 是服务端替换的占位符，运行时为实际帧 ID 字符串。
 
+## 参考示例
+
+示例配置在缓存目录 `/Users/admin/java/ewa_page_cached_pf2023/scripts_cached/examples/`：
+
+```
+index.xml           # 首页列表
+member_card.xml     # 会员卡（Frame 表单）
+product_cat.xml     # 产品分类（Tree + Form）
+sysatts.xml         # 文件附件
+```
+
+**自动触发**：当用户要求编写 Form 表单相关代码时，先读取示例参考实际用法：
+```
+read_file /Users/admin/java/ewa_page_cached_pf2023/scripts_cached/examples/member_card.xml
+```
+
+## 框架文档参考
+
+遇到 Frame 表单配置、Action/SqlSet 执行流程等概念不确定时，读取框架文档获取权威解释：
+
+| 文档 | 说明 |
+|------|------|
+| `framework/emp-script/docs/zhcn/FRAME_EXECUTION.md` | Frame 表单执行流程（新增/修改/复制/按钮渲染） |
+| `framework/emp-script/docs/zhcn/FRAME_CALLS.md` | Frame 各类型调用方式详解 |
+| `framework/emp-script/docs/zhcn/EWA_TEMPLATE_REFERENCE.md` | XML 模板属性完整参考（Frame/Set） |
+
+**自动触发**：当对 Frame 属性、Action 类型、表单提交流程等概念不确定时，先 `read_file` 对应框架文档再操作。
+
 ---
 
 ## 速查表
