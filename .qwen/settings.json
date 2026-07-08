@@ -13,7 +13,9 @@
       "Bash(mv *)",
       "Bash(rm *)",
       "Read(//opt/homebrew/lib/node_modules/@qwen-code/qwen-code/bundled/qc-helper/docs/configuration/**)",
-      "Read(//Users/admin/Library/Application Support/Code/User/**)"
+      "Read(//Users/admin/Library/Application Support/Code/User/**)",
+      "Agent(Explore)",
+      "Bash(git rm *)"
     ]
   },
   "$version": 4

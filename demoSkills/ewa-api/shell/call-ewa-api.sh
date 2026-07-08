@@ -191,7 +191,7 @@ do_login() {
     fi
 
     local response
-    response=$(curl -s -X POST "${API_BASE_URL}?method=login" \
+    response=$(curl -ks -X POST "${API_BASE_URL}?method=login" \
         -H "Content-Type: application/x-www-form-urlencoded" \
         -d "login_id=${API_LOGIN_ID}&password=${API_PASSWORD}")
 
@@ -230,7 +230,7 @@ do_logout() {
     fi
     
     log_info "正在注销..."
-    curl -s -X POST "${API_BASE_URL}?method=logout" \
+    curl -ks -X POST "${API_BASE_URL}?method=logout" \
         -H "X-Api-Token: $token" | format_json
     
     rm -f "$TOKEN_FILE"
@@ -257,7 +257,7 @@ send_token_request() {
         token=$(get_cached_token)
     fi
 
-    curl -s -X POST -H "X-Api-Token: $token" \
+    curl -ks -X POST -H "X-Api-Token: $token" \
         -H "Content-Type: application/x-www-form-urlencoded" \
         -d "${params}" "${API_BASE_URL}" | format_json
 }
@@ -297,7 +297,7 @@ ${params}"
     log_info "Nonce: $nonce"
     log_info "签名: $signature"
 
-    curl -s -X POST \
+    curl -ks -X POST \
         -H "X-Api-Key: $API_LOGIN_ID" \
         -H "X-Api-Timestamp: $timestamp" \
         -H "X-Api-Nonce: $nonce" \
@@ -315,7 +315,7 @@ send_simple_request() {
         exit 1
     fi
 
-    curl -s -X POST -H "token: $API_PASSWORD" \
+    curl -ks -X POST -H "token: $API_PASSWORD" \
         -H "Content-Type: application/x-www-form-urlencoded" \
         -d "${params}" "${API_BASE_URL}" | format_json
 }
@@ -600,7 +600,7 @@ do_validate_sql() {
 # 获取帮助（不需要认证）
 do_help() {
     log_info "获取 API 帮助..."
-    curl -s "${API_BASE_URL}?method=help" | format_json
+    curl -ks "${API_BASE_URL}?method=help" | format_json
 }
 
 # 预览业务 XML（不保存）
