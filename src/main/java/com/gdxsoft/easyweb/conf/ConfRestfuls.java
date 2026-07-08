@@ -1,6 +1,8 @@
 package com.gdxsoft.easyweb.conf;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,6 +27,13 @@ public class ConfRestfuls {
 	private static long PROP_TIME = 0;
 
 	private static Map<String, Map<String, ConfRestful>> CONFS;
+
+	/**
+	 * ewa_restful_catalog 表中 p0..pN 列的最大深度。当前部署的 schema 中实际可用列数为 10（即 p0..p9）。
+	 * 请求路径段数超过此深度时，无法用 schema 完整约束；具体决策由
+	 * {@link #getJdbcRestfulCatalog(String, RestfulResult)} 处理。
+	 */
+	private static final int SCHEMA_MAX_DEPTH = 10;
 
 	public static ConfRestfuls getInstance() {
 		if (INST != null) {
@@ -143,7 +152,8 @@ public class ConfRestfuls {
 
 			Map<String, ConfRestful> map;
 			if (!CONFS.containsKey(restfulPath)) {
-				map = new HashMap<String, ConfRestful>();
+				// C1: 用 LinkedHashMap 保留 restfulPath 的声明顺序，便于 getConfRestfulFromEwaConf 按声明优先级匹配
+				map = new LinkedHashMap<String, ConfRestful>();
 				CONFS.put(restfulPath, map);
 			} else {
 				map = CONFS.get(restfulPath);
@@ -266,15 +276,24 @@ public class ConfRestfuls {
 		}
 		String[] requestPathsDepth = path.split("/");
 
+		// schema 列数上限：ewa_restful_catalog 已部署的 schema 中 p0..p(SCHEMA_MAX_DEPTH-1) 实际可用列数。
+		// 超过此深度的请求路径无法用 schema 完整约束 p10+ 列；这种情况下直接跳过模糊匹配，
+		// 让精确匹配 SQL（cat_path_full 在本方法第一段已执行）单独判定。
+		// 调用方在没找到时返回 404，符合 HTTP 语义。
+		int schemaMaxDepth = SCHEMA_MAX_DEPTH;
+		if (requestPathsDepth.length > schemaMaxDepth) {
+			return null;
+		}
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("select * from ewa_restful_catalog where cat_status='USED'");
-		int index = 0;
 		for (int i = 0; i < requestPathsDepth.length; i++) {
 			sb.append("\n and (p" + i + " = @p" + i + " or (p" + i + " like '{%' and p" + i + " like '%}'))");
 			rv1.addOrUpdateValue("p" + i, requestPathsDepth[i]);
-			index++;
 		}
-		for (int i = index; i < 10; i++) {
+		// 路径段数小于 schema 上限时，对未覆盖的更高段位追加"必须为 null"约束，
+		// 防止"短路径"被"长路径"的目录偶然匹配（与历史行为保持一致）。
+		for (int i = requestPathsDepth.length; i < schemaMaxDepth; i++) {
 			sb.append("\n and p" + i + " is null");
 		}
 		tb = DTTable.getJdbcTable(sb.toString(), this.getDataSource(), rv1);
@@ -328,29 +347,52 @@ public class ConfRestfuls {
 		}
 		String[] requestPathsDepth = path.split("/");
 
+		// C7: 模糊匹配不再在遇到第一个 method-miss 时立即返回 501，而是收集所有路径匹配的候选，
+		// 然后按优先级（路径段数越多越具体，声明靠前越优先）挑选最合适的，实现 method 支持的命中。
+		// 结构：score 越大越优先；(score, restfulPath, paths[])
+		List<Object[]> candidates = new ArrayList<>();
 		for (String restfulPath : map.keySet()) {
 			String[] paths = restfulPath.split("/");
-			boolean isMatched = this.findMapMethod(requestPathsDepth, paths);
-			if (!isMatched) {
+			if (!this.findMapMethod(requestPathsDepth, paths)) {
 				continue;
 			}
+			candidates.add(new Object[] { this.scorePathMatch(paths), restfulPath, paths });
+		}
+		// 按 score 降序（paths.length * 1000 - 字面量段数；高 score = 路径越具体且声明靠前）
+		candidates.sort((a, b) -> Integer.compare((Integer) b[0], (Integer) a[0]));
 
-			// GET/POST/PUT/DELETE/PATCH
+		for (Object[] cand : candidates) {
+			String restfulPath = (String) cand[1];
+			String[] paths = (String[]) cand[2];
 			Map<String, ConfRestful> mapMethod = map.get(restfulPath);
 			if (mapMethod.containsKey(httpMethod)) {
-				// path="chatRooms/{cht_rom_id}"
+				// path="chatRooms/{cht_rom_id}" —— 回填路径参数到 rv
 				this.addPathParametersToRv(requestPathsDepth, paths, rv);
-
 				return mapMethod.get(httpMethod);
-			} else {
-				result.setMessage("not implemented");
-				result.setHttpStatusCode(501);// Method is not implemented
-				return null;
 			}
+		}
+		if (!candidates.isEmpty()) {
+			// 路径全部匹配但都缺 method，返回 501
+			result.setMessage("not implemented");
+			result.setHttpStatusCode(501);
+			return null;
 		}
 		result.setMessage("not found");
 		result.setHttpStatusCode(404);
 		return null;
+	}
+
+	/**
+	 * 路径匹配评分。分数越高越优先： - 路径段总数 × 1000（段数越多越具体） - 加上字面量段数（同等段数下，字面量越多越具体）
+	 */
+	private int scorePathMatch(String[] paths) {
+		int literalCount = 0;
+		for (String p : paths) {
+			if (!this.pathIsParameter(p)) {
+				literalCount++;
+			}
+		}
+		return paths.length * 1000 + literalCount;
 	}
 
 	/**

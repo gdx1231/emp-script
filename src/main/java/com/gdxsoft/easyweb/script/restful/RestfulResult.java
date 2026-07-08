@@ -55,6 +55,15 @@ public class RestfulResult<T> {
 		this.code_ = code;
 	}
 
+	/**
+	 * Integer 重载，允许显式置 null（与 JSON {@code null} ↔ 未设的语义保持一致）。
+	 *
+	 * @param code 业务码，传 null 表示"未设置"
+	 */
+	public void setCode(Integer code) {
+		this.code_ = code;
+	}
+
 	public String getMessage() {
 		return message_;
 	}
@@ -73,24 +82,51 @@ public class RestfulResult<T> {
 
 	public JSONObject toJson() {
 		JSONObject obj = new JSONObject();
-		obj.put("code", this.code_);
-		obj.put("http_status_code", this.httpStatusCode_);
 		obj.put("success", success_);
-		obj.put("message", this.message_);
-		obj.put("data", this.data_);
-		obj.put("ewa_page_cur", ewaPageCur);
-		obj.put("ewa_page_size", ewaPageSize);
-		obj.put("page_count", this.pageCount);
-		obj.put("record_count", this.recordCount);
-		obj.put("start", this.start);
-		obj.put("end", this.end);
+		// 仅在已设置时输出数值字段，避免客户端 json.optInt 等调用出现歧义
+		if (this.code_ != null) {
+			obj.put("code", this.code_);
+		}
+		if (this.httpStatusCode_ != null) {
+			obj.put("http_status_code", this.httpStatusCode_);
+		}
+		if (this.message_ != null) {
+			obj.put("message", this.message_);
+		}
+		if (this.data_ != null) {
+			obj.put("data", this.data_);
+		}
+		if (this.ewaPageCur != null) {
+			obj.put("ewa_page_cur", this.ewaPageCur);
+		}
+		if (this.ewaPageSize != null) {
+			obj.put("ewa_page_size", this.ewaPageSize);
+		}
+		if (this.pageCount != null) {
+			obj.put("page_count", this.pageCount);
+		}
+		if (this.recordCount != null) {
+			obj.put("record_count", this.recordCount);
+		}
+		if (this.start != null) {
+			obj.put("start", this.start);
+		}
 		if (this.end != null) {
-			obj.put("duriation", this.end - this.start);
+			obj.put("end", this.end);
+			if (this.start != null) {
+				long duration = this.end - this.start;
+				obj.put("duriation", duration); // 历史拼写，向后兼容
+				obj.put("duration", duration); // 新字段（正确拼写）
+			}
 		}
 		return obj;
 	}
 
 	public void parse(String result) {
+		if(result == null || result.trim().length() == 0) {
+			return;
+		}
+
 		this.returnResult = result;
 		try {
 			JSONObject obj = new JSONObject(result);
@@ -99,31 +135,54 @@ public class RestfulResult<T> {
 			Iterator<String> keys = obj.keys();
 			while (keys.hasNext()) {
 				String key = keys.next();
-				if (key.equals("http_status_code")) {
-					this.setHttpStatusCode(obj.optInt(key));
+				if (key.equals("code")) {
+					if (!obj.isNull(key)) {
+						this.setCode(obj.optInt(key));
+					}
+				} else if (key.equals("http_status_code")) {
+					if (!obj.isNull(key)) {
+						this.setHttpStatusCode(obj.optInt(key));
+					}
 				} else if (key.equals("message")) {
 					this.setMessage(obj.optString(key));
 				} else if (key.equals("ewa_page_cur")) {
-					this.setEwaPageCur(obj.optInt(key));
+					if (!obj.isNull(key)) {
+						this.setEwaPageCur(obj.optInt(key));
+					}
 				} else if (key.equals("ewa_page_size")) {
-					this.setEwaPageSize(obj.optInt(key));
+					if (!obj.isNull(key)) {
+						this.setEwaPageSize(obj.optInt(key));
+					}
 				} else if (key.equals("record_count")) {
-					this.setRecordCount(obj.optInt(key));
+					if (!obj.isNull(key)) {
+						this.setRecordCount(obj.optInt(key));
+					}
 				} else if (key.equals("page_count")) {
-					this.setPageCount(obj.optInt(key));
+					if (!obj.isNull(key)) {
+						this.setPageCount(obj.optInt(key));
+					}
 				} else if (key.equals("data")) {
 					Object data = obj.get(key);
 					this.setRawData(data);
 				} else if (key.equals("success")) {
 					this.setSuccess(obj.optBoolean(key));
 				} else if (key.equals("start")) {
-					this.setStart(obj.optLong(key));
+					if (!obj.isNull(key)) {
+						this.setStart(obj.optLong(key));
+					}
 				} else if (key.equals("end")) {
-					this.setEnd(obj.optLong(key));
+					if (!obj.isNull(key)) {
+						this.setEnd(obj.optLong(key));
+					}
+				} else if (key.equals("duration") || key.equals("duriation")) {
+					// 历史字段名 duriation 也读，仅用于日志，不影响业务字段
+					if (!obj.isNull(key)) {
+						LOGGER.debug("RestfulResult duration: {}ms", obj.optLong(key));
+					}
 				}
 			}
 		} catch (Exception err) {
-			LOGGER.warn("Pasre RestfulResult error! source: {}, error: {}", result, err.getMessage());
+			LOGGER.warn("Parse RestfulResult error! source: {}, error: {}", result, err.getMessage());
 		}
 
 	}
