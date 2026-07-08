@@ -37,6 +37,7 @@
 #       SKILL.md
 #     ewa-listframe/
 #     ewa-sql/
+#     ewa-stored-procedure/
 #     html-control/
 #
 # ============================================================================

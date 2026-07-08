@@ -41,9 +41,9 @@ description: "Use when: 调用 EWA Servlet API、查询数据库表结构与数�
 
 | 文档 | 说明 |
 |------|------|
-| `framework/emp-script/docs/zhcn/API_USAGE.md` | ServletApi REST API 使用说明 |
-| `framework/emp-script/docs/zhcn/API_TOKEN.md` | 三种认证模式（HMAC/JWT/Session） |
-| `framework/emp-script/docs/zhcn/SERVLETS.md` | 14 个 Servlet 详解（URL 映射/处理逻辑） |
+| `docs/zhcn/API_USAGE.md` | ServletApi REST API 使用说明 |
+| `docs/zhcn/API_TOKEN.md` | 三种认证模式（HMAC/JWT/Session） |
+| `docs/zhcn/SERVLETS.md` | 14 个 Servlet 详解（URL 映射/处理逻辑） |
 
 **自动触发**：当对 API 认证机制、Servlet 路由、请求处理流程等概念不确定时，先 `read_file` 对应框架文档再操作。
 
@@ -53,8 +53,6 @@ description: "Use when: 调用 EWA Servlet API、查询数据库表结构与数�
 - `shell/call-ewa-api.sh` — Linux/macOS 主调用脚本
 - `shell/call-ewa-api.bat` — Windows 主调用脚本
 - `ewa-api.conf.example` — 配置模板（复制为 `ewa-api.conf` 后使用）
-- `ewa-api.md` — 完整方法参考文档
-- `examples.sh` — 常用示例
 
 ## 快速开始
 
@@ -133,19 +131,6 @@ source ewa-api.conf
 ./ewa-api.sh validateSql globalTravel "SELECT * FROM ADM_USER WHERE ADM_ID = 1"
 ./ewa-api.sh validateSql globalTravel "DROP TABLE ADM_USER"               # 会被拒绝
 ./ewa-api.sh validateSql globalTravel "DELETE FROM ADM_USER"              # 无 WHERE 会被拒绝
-```
-
-## 认证说明（HMAC 模式）
-
-```
-签名字符串 = METHOD + "\n" + TIMESTAMP + "\n" + NONCE + "\n" + PATH + "\n" + SORTED_QUERY_PARAMS
-签名值     = lowercase(HMAC-SHA256(secret, 签名字符串))
-
-请求头:
-  X-Api-Key:       登录 ID
-  X-Api-Timestamp: 当前毫秒时间戳
-  X-Api-Nonce:     随机字符串（防重放）
-  X-Api-Signature: 签名值
 ```
 
 ## updateConfItem 大 XML 更新（Fetch → Modify → Push）
