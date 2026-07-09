@@ -1,5 +1,10 @@
 package com.gdxsoft.easyweb.define.bussinessXmlCreator;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -901,8 +906,32 @@ public class BusinessXmlCreatorListFrame extends BusinessXmlCreatorBase {
             Element actionSet = doc.createElement("ActionSet");
             action.appendChild(actionSet);
 
+            // 按 actionName 分组（有 actionName 时用它做 Type，同组合并 CallSet）
+            Map<String, List<EwaDefineConfig.ActionConfig>> grouped = new LinkedHashMap<>();
             for (EwaDefineConfig.ActionConfig actConfig : tmpConfig.getActionConfigs()) {
-                actionSet.appendChild(createActionSetItem(doc, actConfig));
+                String key = (actConfig.getActionName() != null && !actConfig.getActionName().isEmpty())
+                        ? actConfig.getActionName() : actConfig.getName();
+                grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(actConfig);
+            }
+
+            for (Map.Entry<String, List<EwaDefineConfig.ActionConfig>> entry : grouped.entrySet()) {
+                String typeName = entry.getKey();
+                List<EwaDefineConfig.ActionConfig> configs = entry.getValue();
+                Element setElem = doc.createElement("Set");
+                setElem.setAttribute("LogMsg", "");
+                setElem.setAttribute("Transcation", configs.size() > 1 ? "yes" : "");
+                setElem.setAttribute("Type", typeName);
+                Element callSet = doc.createElement("CallSet");
+                for (EwaDefineConfig.ActionConfig cfg : configs) {
+                    Element callSetItem = doc.createElement("Set");
+                    callSetItem.setAttribute("CallIsChk", "");
+                    callSetItem.setAttribute("CallName", cfg.getName() + " SQL");
+                    callSetItem.setAttribute("CallType", "SqlSet");
+                    callSetItem.setAttribute("Test", cfg.getTest());
+                    callSet.appendChild(callSetItem);
+                }
+                setElem.appendChild(callSet);
+                actionSet.appendChild(setElem);
             }
 
             Element sqlSet = doc.createElement("SqlSet");
