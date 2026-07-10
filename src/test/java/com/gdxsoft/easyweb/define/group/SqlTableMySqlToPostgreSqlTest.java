@@ -418,4 +418,65 @@ public class SqlTableMySqlToPostgreSqlTest {
         assertTrue(ddl.contains("serial"));
         assertEquals("POSTGRESQL", st.getDatabaseType());
     }
+
+    // ======================== Regression: PRIMARY index name filtering ========================
+    // MySQL's default PK index is named "PRIMARY" — must be filtered like pk_/xxx_pk
+
+    @Test
+    public void testPrimaryNamedIndexFiltered() throws Exception {
+        // "PRIMARY" is a reserved word in PostgreSQL; must be filtered out
+        Table t = new Table();
+        t.initBlankFrame();
+        t.setName("test_primary_idx");
+        t.setDatabaseType("MYSQL");
+        t.getPk().setPkName("PRIMARY");
+
+        addFieldToTable(t, createField("id", "INT", false, true, false, 10));
+
+        com.gdxsoft.easyweb.define.database.TableIndex idx =
+                new com.gdxsoft.easyweb.define.database.TableIndex();
+        idx.setIndexName("PRIMARY");
+        idx.setUnique(true);
+        com.gdxsoft.easyweb.define.database.IndexField idxF =
+                new com.gdxsoft.easyweb.define.database.IndexField();
+        idxF.setName("id");
+        idxF.setAsc(true);
+        idx.getIndexFields().add(idxF);
+        t.getIndexes().add(idx);
+
+        SqlTable st = new SqlTable();
+        st.createSqlTable(t, "POSTGRESQL");
+
+        ArrayList<String> indexes = st.getIndexes();
+        assertEquals(0, indexes.size(),
+                "Unique index named 'PRIMARY' must be filtered out (PK already created)");
+    }
+
+    @Test
+    public void testPrimaryLowercaseAlsoFiltered() throws Exception {
+        Table t = new Table();
+        t.initBlankFrame();
+        t.setName("test_primary_lower");
+        t.setDatabaseType("MYSQL");
+        t.getPk().setPkName("PRIMARY");
+
+        addFieldToTable(t, createField("id", "INT", false, true, false, 10));
+
+        com.gdxsoft.easyweb.define.database.TableIndex idx =
+                new com.gdxsoft.easyweb.define.database.TableIndex();
+        idx.setIndexName("primary"); // lowercase
+        idx.setUnique(true);
+        com.gdxsoft.easyweb.define.database.IndexField idxF =
+                new com.gdxsoft.easyweb.define.database.IndexField();
+        idxF.setName("id");
+        idxF.setAsc(true);
+        idx.getIndexFields().add(idxF);
+        t.getIndexes().add(idx);
+
+        SqlTable st = new SqlTable();
+        st.createSqlTable(t, "POSTGRESQL");
+
+        assertEquals(0, st.getIndexes().size(),
+                "Lowercase 'primary' should also be filtered");
+    }
 }
