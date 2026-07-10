@@ -42,6 +42,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 	private String _MeargeMap;
 	private boolean _IsRedrawJson;
 	private int _ColSize;
+	private ArrayList<String> _JsonUsedFields;
 
 	/*
 	 * (non-Javadoc)
@@ -133,44 +134,93 @@ public class FrameFrame extends FrameBase implements IFrame {
 			return sb.toString();
 		}
 		MList tbs = super.getHtmlClass().getItemValues().getDTTables();
-		if (len == 1) {
-			DTTable dt = (DTTable) tbs.get(0);
-			String s1 = dt.toJson(rv);
-			sb.a(s1);
-			return sb.toString();
-		}
 		// 合并表
-		DTTable mainTb = null;
-		for (int i = 0; i < len; i++) {
-			DTTable dt1 = (DTTable) tbs.get(i);
-			if (dt1.getCount() == 0) {
-				continue;
+		DTTable mainTb;
+		if (len == 1) {
+			mainTb = (DTTable) tbs.get(0);
+		} else {
+			// 找到第一个非空表作为主表
+			int startIdx = -1;
+			for (int i = 0; i < len; i++) {
+				if (((DTTable) tbs.get(i)).getCount() > 0) {
+					startIdx = i;
+					break;
+				}
 			}
-			if (mainTb == null) {
-				mainTb = dt1;
-				continue;
-
+			if (startIdx < 0) {
+				sb.a("[]");
+				return sb.toString();
 			}
-			for (int m = 0; m < dt1.getColumns().getCount(); m++) {
-				DTColumn col = dt1.getColumns().getColumn(m);
-				String name = dt1.getColumns().getColumn(m).getName();
-				if (mainTb.getColumns().testName(name)) {
+			mainTb = (DTTable) tbs.get(startIdx);
+			// 将后续非空表的列合并到主表
+			for (int i = startIdx + 1; i < len; i++) {
+				DTTable dt1 = (DTTable) tbs.get(i);
+				if (dt1.getCount() == 0) {
 					continue;
 				}
-				DTCell v = dt1.getRow(0).getCell(m);
-				mainTb.getColumns().addColumn(col);
-				DTRow row = mainTb.getRow(0);
-				row.addData(v);
+				for (int m = 0; m < dt1.getColumns().getCount(); m++) {
+					DTColumn col = dt1.getColumns().getColumn(m);
+					String name = col.getName();
+					if (mainTb.getColumns().testName(name)) {
+						continue;
+					}
+					DTCell v = dt1.getRow(0).getCell(m);
+					mainTb.getColumns().addColumn(col);
+					mainTb.getRow(0).addData(v);
+				}
 			}
 		}
-		if (mainTb != null) {
+		if (!skipUnDefined) {
 			String s1 = mainTb.toJson(rv);
 			sb.a(s1);
 			return sb.toString();
-		} else {
-			sb.a("[]");
-			return sb.toString();
 		}
+		// skipUnDefined=true: 仅输出 UserXItems 中定义的字段
+		sb.a("[");
+		HashMap<String, Boolean> definedMap = new HashMap<>();
+		if (_JsonUsedFields == null) {
+			_JsonUsedFields = new ArrayList<>();
+		}
+		boolean isUnScaned = _JsonUsedFields.isEmpty() && mainTb.getCount() > 0;
+		for (int i = 0; i < super.getHtmlClass().getUserConfig().getUserXItems().count(); i++) {
+			UserXItem uxi = super.getHtmlClass().getUserConfig().getUserXItems().getItem(i);
+			definedMap.put(uxi.getName().toUpperCase().trim(), true);
+		}
+		if (isUnScaned) {
+			for (int i = 0; i < mainTb.getColumns().getCount(); i++) {
+				String name = mainTb.getColumns().getColumn(i).getName();
+				if (!definedMap.containsKey(name.toUpperCase().trim())) {
+					_JsonUsedFields.add(name);
+				}
+			}
+		}
+		for (int r = 0; r < mainTb.getCount(); r++) {
+			DTRow row = mainTb.getRow(r);
+			if (r > 0) {
+				sb.a(",");
+			}
+			sb.a("{");
+			boolean first = true;
+			for (int i = 0; i < super.getHtmlClass().getUserConfig().getUserXItems().count(); i++) {
+				UserXItem uxi = super.getHtmlClass().getUserConfig().getUserXItems().getItem(i);
+				String fieldName = uxi.getName();
+				if (!mainTb.getColumns().testName(fieldName)) {
+					continue;
+				}
+				if (!first) {
+					sb.a(", ");
+				}
+				first = false;
+				DTCell cell = row.getCell(fieldName);
+				Object v = cell.isNull() ? null : cell.getValue();
+				sb.append("\"" + Utils.textToJscript(fieldName) + "\"");
+				sb.a(": ");
+				sb.a(v == null ? "null" : "\"" + Utils.textToJscript(v.toString()) + "\"");
+			}
+			sb.a("}");
+		}
+		sb.a("]");
+		return sb.toString();
 	}
 
 	/**

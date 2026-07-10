@@ -1394,7 +1394,9 @@ public class HtmlCreator {
 		}
 		String cfgs = this._Frame.createJsonFrameAIPrompt();
 		JSONArray jsonCfg = new JSONArray(cfgs);
+
 		String dataJson = this._Frame.createJsonContent(true);
+
 		Map<String, Integer> map = new HashMap<>();
 		for (int i = 0; i < jsonCfg.length(); i++) {
 			JSONObject cfg = jsonCfg.getJSONObject(i);

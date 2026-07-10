@@ -216,6 +216,7 @@ public class HtmlControl {
 			this.initHtmlCreator(hc);
 		} catch (Exception e) {
 			isError = true;
+			this.Html=e.getLocalizedMessage();
 			LOGGER.error(e.getLocalizedMessage());
 		}
 
