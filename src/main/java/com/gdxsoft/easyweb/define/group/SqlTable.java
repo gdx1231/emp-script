@@ -368,9 +368,11 @@ public class SqlTable {
 		this.setIndexes(new ArrayList<String>());
 		for (int i = 0; i < _Table.getIndexes().size(); i++) {
 			TableIndex idx = _Table.getIndexes().get(i);
-			if (idx.isUnique() && (idx.getIndexName().toLowerCase().startsWith("pk_")
-					|| idx.getIndexName().toLowerCase().endsWith("_pk"))) {
-				// 主键已经创建
+			String idxNameLower = idx.getIndexName().toLowerCase();
+			if (idx.isUnique() && (idxNameLower.startsWith("pk_")
+					|| idxNameLower.endsWith("_pk")
+					|| idxNameLower.equals("primary"))) {
+				// 主键已经创建 (MySQL 默认主键索引名为 "PRIMARY")
 				continue;
 			}
 
