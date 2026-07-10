@@ -419,7 +419,7 @@ public class ServletApi extends HttpServlet {
 				if (!file.exists()) {
 					return UJSon.rstFalse("XML file not found: " + filePath);
 				}
-				xmlContent = java.nio.file.Files.readString(file.toPath(), java.nio.charset.StandardCharsets.UTF_8);
+				xmlContent = new String(java.nio.file.Files.readAllBytes(file.toPath()), java.nio.charset.StandardCharsets.UTF_8);
 			}
 
 			JSONObject result = new JSONObject();
