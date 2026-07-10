@@ -97,6 +97,10 @@ public class ImportTables {
 			table.setImportTables(this);
 			table.setReplaceMetaDatabaseName(this.replaceMetaDatabaseName);
 			table.setReplaceWorkDatabaseName(this.replaceWorkDatabaseName);
+			// Set target schema name (used as prefix for PG/Oracle DDL)
+			if (this._Conn != null && this._Conn.getCurrentConfig() != null) {
+				table.setSchemaName(this._Conn.getCurrentConfig().getSchemaName());
+			}
 			this._Tables[i] = table;
 		}
 	}

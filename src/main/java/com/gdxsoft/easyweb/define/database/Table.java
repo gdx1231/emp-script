@@ -92,12 +92,19 @@ public class Table {
 		if (this.getReplaceMetaDatabaseName() == null || this.getReplaceMetaDatabaseName().trim().length() == 0) {
 			return "";
 		}
-		// PostgreSQL/Oracle: database name ≠ schema name, skip prefix
-		// (tables are created in the default schema, e.g. "public")
-		if (SqlUtils.isPostgreSql(targetDatabaseType) || SqlUtils.isOracle(targetDatabaseType)) {
+		boolean isPostgreSql = SqlUtils.isPostgreSql(targetDatabaseType);
+		boolean isOracle = SqlUtils.isOracle(targetDatabaseType);
+		boolean isSqlServer = SqlUtils.isSqlServer(targetDatabaseType);
+
+		// PostgreSQL/Oracle: 使用 SchemaName 而非数据库名作为前缀
+		if (isPostgreSql || isOracle) {
+			String schema = this.getSchemaName();
+			if (schema != null && schema.trim().length() > 0) {
+				return schema + ".";
+			}
 			return "";
 		}
-		boolean isSqlServer = SqlUtils.isSqlServer(targetDatabaseType);
+
 		StringBuilder sb = new StringBuilder();
 		if (this.fromMetaDatabase()) {
 			sb.append(this.getReplaceMetaDatabaseName());
