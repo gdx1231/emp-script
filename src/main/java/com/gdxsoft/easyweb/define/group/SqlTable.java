@@ -175,8 +175,15 @@ public class SqlTable {
 			// 数据库类型一致的话则保持原始数据类型，不用转换
 			return mapType;
 		}
-		MapFieldType[] b = mapType.getEwa().getMapTo().get(databaseType);
-		if (b.length == 0) {
+		if (mapType.getEwa() == null || mapType.getEwa().getMapTo() == null) {
+			throw new Exception("数据类型：" + fieldType + "未找到对应的EWA类型");
+		}
+		// Normalize to uppercase for case-insensitive HashMap lookup
+		// (TypesMap.xml stores keys as uppercase, but DataConnection.getDatabaseType()
+		//  may return mixed-case like "PostgreSql")
+		String dbTypeUpper = databaseType.toUpperCase().trim();
+		MapFieldType[] b = mapType.getEwa().getMapTo().get(dbTypeUpper);
+		if (b == null || b.length == 0) {
 			throw new Exception("数据类型：" + fieldType + "未找到对应的类型《" + databaseType + "》！");
 		}
 		return b[0];

@@ -232,6 +232,29 @@ public class UObjectValue {
 			}
 			return src;
 		}
+		if (java.util.List.class.isAssignableFrom(t)) {
+			if (src.getClass().getName().equals("java.lang.String")) {
+				String s = src.toString();
+				// Skip conversion if string appears to be Java object references
+				// (e.g., "[com.gdxsoft.easyweb.define.database.Field@4eeac485, ...]")
+				// Java's default toString() format: ClassName@hashcode
+				// Let the original t.cast() handle this case (returns CAST_ERROR)
+				if (s.contains("@")) {
+					// Fall through to t.cast(src) below — will fail gracefully as before
+				} else {
+					if (s.trim().length() == 0) {
+						return new java.util.ArrayList<>();
+					}
+					String[] parts = s.split(",");
+					java.util.ArrayList<String> list = new java.util.ArrayList<>();
+					for (String part : parts) {
+						list.add(part.trim());
+					}
+					return list;
+				}
+			}
+			// non-String sources fall through to t.cast(src) below
+		}
 		String name = t.getName();
 		if (name.equals("com.gdxsoft.easyweb.script.RequestValue")) {
 			if (src.getClass().getName().equalsIgnoreCase("com.gdxsoft.easyweb.script.RequestValue")) {
