@@ -805,7 +805,7 @@ public class ServletApi extends HttpServlet {
 				pkField = "1"; // 默认使用第一列
 			}
 
-			LOGGER.info("getTableData SQL: {}, page: {}, pageSize: {}", sql.toString(), page, pageSize);
+			// LOGGER.info("getTableData SQL: {}, page: {}, pageSize: {}", sql.toString(), page, pageSize);
 
 			// 使用分页查询
 			DTTable dtTable = DTTable.getJdbcTable(sql.toString(), pkField, pageSize, page, db, rv);
