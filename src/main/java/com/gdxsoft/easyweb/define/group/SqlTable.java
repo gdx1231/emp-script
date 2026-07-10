@@ -216,9 +216,9 @@ public class SqlTable {
 		// 自增序列
 		if (f.isIdentity() && isPostgresql) {
 			fieldType1 = " serial ";
-			if ("bigint".equals(mapTo.getName())) {
+			if ("bigint".equalsIgnoreCase(fieldType) || "bigint".equalsIgnoreCase(mapTo.getName())) {
 				fieldType1 = " bigserial ";
-			} else if ("smallint".equals(mapTo.getName())) {
+			} else if ("smallint".equalsIgnoreCase(fieldType) || "smallint".equalsIgnoreCase(mapTo.getName())) {
 				fieldType1 = " smallserial ";
 			}
 		}
@@ -334,8 +334,8 @@ public class SqlTable {
 		this.setIndexes(new ArrayList<String>());
 		for (int i = 0; i < _Table.getIndexes().size(); i++) {
 			TableIndex idx = _Table.getIndexes().get(i);
-			if (idx.isUnique() && idx.getIndexName().toLowerCase().startsWith("pk_")
-					|| idx.getIndexName().toLowerCase().endsWith("_pk")) {
+			if (idx.isUnique() && (idx.getIndexName().toLowerCase().startsWith("pk_")
+					|| idx.getIndexName().toLowerCase().endsWith("_pk"))) {
 				// 主键已经创建
 				continue;
 			}
