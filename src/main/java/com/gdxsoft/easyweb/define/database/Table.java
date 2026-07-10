@@ -92,6 +92,11 @@ public class Table {
 		if (this.getReplaceMetaDatabaseName() == null || this.getReplaceMetaDatabaseName().trim().length() == 0) {
 			return "";
 		}
+		// PostgreSQL/Oracle: database name ≠ schema name, skip prefix
+		// (tables are created in the default schema, e.g. "public")
+		if (SqlUtils.isPostgreSql(targetDatabaseType) || SqlUtils.isOracle(targetDatabaseType)) {
+			return "";
+		}
 		boolean isSqlServer = SqlUtils.isSqlServer(targetDatabaseType);
 		StringBuilder sb = new StringBuilder();
 		if (this.fromMetaDatabase()) {
