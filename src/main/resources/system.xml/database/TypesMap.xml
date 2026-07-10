@@ -95,6 +95,7 @@
 				<MapTo Name="INT" />
 				<MapTo Name="SMALLINT" />
 				<MapTo Name="MEDIUMINT" />
+				<MapTo Name="TINYINT" />
 
 				<MapTo Name="MEDIUMINT UNSIGNED" />
 				<MapTo Name="INT UNSIGNED" />
@@ -433,6 +434,25 @@
 			</Database>
 			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
 				<MapTo Name="VARCHAR(50)" />
+			</Database>
+		</Map>
+		<Map Name="BOOLEAN" CreateNumber="0" InsertPrefix="" Desc="">
+			<Database Name="MSSQL" Desc="微软SQL SERVER">
+				<MapTo Name="BIT" />
+			</Database>
+			<Database Name="ORACLE" Desc="ORACLE">
+				<MapTo Name="NUMBER" Fixed="1" />
+			</Database>
+			<Database Name="MYSQL" Desc="MySQL">
+				<MapTo Name="BOOLEAN" />
+				<MapTo Name="BOOL" />
+				<MapTo Name="TINYINT(1)" />
+			</Database>
+			<Database Name="HSQLDB" Desc="HSQLDB">
+				<MapTo Name="BOOLEAN" />
+			</Database>
+			<Database Name="POSTGRESQL" Desc="POSTGRESQL">
+				<MapTo Name="BOOLEAN" />
 			</Database>
 		</Map>
 	</EwaMap>
