@@ -20,7 +20,9 @@
       "Bash(pip list)",
       "Bash(npm *)",
       "Bash(mdfind *)",
-      "WebFetch(search.maven.org)"
+      "WebFetch(search.maven.org)",
+      "Bash(cp *)",
+      "Bash(git show *)"
     ]
   },
   "$version": 4

@@ -188,6 +188,25 @@ public class SqlPart {
 
 		this._TableName = s2[0];
 
+		// 没有 WHERE 条件时，用 1=1 占位，从 s2[0] 中继续解析 GROUP BY / HAVING / ORDER BY
+		if (s2.length < 2) {
+			this._Where = "1=1";
+
+			String[] s3 = getSqlSplit(s2[0], "order\\s*by");
+			String[] orderPart = this.getPart1(s3, "ORDER BY");
+			this._OrderBy = orderPart[1];
+
+			String[] s4 = getSqlSplit(orderPart[0], "group\\s*by");
+			String[] groupPart = getPart1(s4, "GROUP BY");
+			this._TableName = groupPart[0].trim();
+
+			String[] s5 = getSqlSplit(groupPart[1], "having");
+			String[] havingPart = getPart1(s5, "HAVING");
+			this._GroupBy = havingPart[0];
+			this._Having = havingPart[1];
+			return;
+		}
+
 		String[] s3 = getSqlSplit(s2[1], "order\\s*by");
 		String[] where = this.getPart1(s3, "ORDER BY");
 		this._OrderBy = where[1];
