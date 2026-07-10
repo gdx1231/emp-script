@@ -64,18 +64,20 @@ public class SqlTable {
 	 */
 	public void createSqlTable(Table table, String databaseType) throws Exception {
 		this.setTable(table);
-		this.setDatabaseType(databaseType);
-		this.fix = FixTableOrField.getInstance(databaseType);
+		// Normalize to canonical form: "POSTGRES"→"POSTGRESQL", "SQLSERVER"→"MSSQL", etc.
+		String canonicalDbType = normalizeDbType(databaseType);
+		this.setDatabaseType(canonicalDbType);
+		this.fix = FixTableOrField.getInstance(canonicalDbType);
 
-		boolean sameDatebaseType = databaseType != null && databaseType.equalsIgnoreCase(table.getDatabaseType());
+		boolean sameDatebaseType = canonicalDbType != null && canonicalDbType.equalsIgnoreCase(table.getDatabaseType());
 
 		boolean isSourceMysql = SqlUtils.isMySql(table.getDatabaseType());
 		boolean isSourceSqlServer = SqlUtils.isSqlServer(table.getDatabaseType());
-		boolean isMysql = SqlUtils.isMySql(databaseType);
-		boolean isSqlServer = SqlUtils.isSqlServer(databaseType);
+		boolean isMysql = SqlUtils.isMySql(canonicalDbType);
+		boolean isSqlServer = SqlUtils.isSqlServer(canonicalDbType);
 
 		LOGGER.info("Create {} {} DDL from {} to {}", table.getTableType(), table.getName(), table.getDatabaseType(),
-				databaseType);
+				canonicalDbType);
 		// 数据库一致而且带有创建对象的DDL语句
 		if (sameDatebaseType) {
 			if (table.getSqlTable() != null && table.getSqlTable().trim().length() > 0) {
@@ -178,10 +180,9 @@ public class SqlTable {
 		if (mapType.getEwa() == null || mapType.getEwa().getMapTo() == null) {
 			throw new Exception("数据类型：" + fieldType + "未找到对应的EWA类型");
 		}
-		// Normalize to uppercase for case-insensitive HashMap lookup
-		// (TypesMap.xml stores keys as uppercase, but DataConnection.getDatabaseType()
-		//  may return mixed-case like "PostgreSql")
-		String dbTypeUpper = databaseType.toUpperCase().trim();
+		// Normalize: uppercase + map common aliases to canonical TypesMap.xml keys
+		// (DataConnection may return e.g. "POSTGRES", "PostgreSql", "SQLSERVER", etc.)
+		String dbTypeUpper = normalizeDbType(databaseType);
 		MapFieldType[] b = mapType.getEwa().getMapTo().get(dbTypeUpper);
 		if (b == null || b.length == 0) {
 			throw new Exception("数据类型：" + fieldType + "未找到对应的类型《" + databaseType + "》！");
@@ -191,8 +192,34 @@ public class SqlTable {
 	}
 
 	/**
+	 * Normalize database type to canonical uppercase key matching TypesMap.xml.
+	 * Handles common aliases/short-forms that may come from DataConnection.
+	 * Canonical keys: POSTGRESQL, MSSQL, MYSQL, ORACLE, HSQLDB
+	 */
+	private String normalizeDbType(String dbType) {
+		if (dbType == null) {
+			return "";
+		}
+		String upper = dbType.toUpperCase().trim();
+		// PostgreSQL aliases: "POSTGRES", "PG", "POSTGRESQL"
+		if (upper.equals("POSTGRES") || upper.equals("PG") || upper.equals("POSTGRESQL")
+				|| upper.startsWith("POSTGRES")) {
+			return "POSTGRESQL";
+		}
+		// SQL Server aliases
+		if (upper.equals("SQLSERVER") || upper.equals("MSSQL")) {
+			return "MSSQL";
+		}
+		// MySQL/MariaDB
+		if (upper.equals("MARIADB")) {
+			return "MYSQL";
+		}
+		return upper;
+	}
+
+	/**
 	 * 创建表字段表达式
-	 * 
+	 *
 	 * @param f
 	 * @param alFrom
 	 * @return

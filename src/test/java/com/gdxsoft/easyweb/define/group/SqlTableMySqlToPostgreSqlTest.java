@@ -350,4 +350,72 @@ public class SqlTableMySqlToPostgreSqlTest {
                 "Non-unique index ending with '_pk' must not be filtered out");
         assertTrue(indexes.get(0).contains("idx_name_pk"));
     }
+
+    // ======================== Regression: databaseType alias normalization ========================
+    // "POSTGRES" (missing "QL") should normalize to "POSTGRESQL" for TypesMap.xml lookup
+
+    @Test
+    public void testPostgresAliasNormalized() throws Exception {
+        Table t = new Table();
+        t.initBlankFrame();
+        t.setName("test_alias");
+        t.setDatabaseType("MYSQL");
+        t.getPk().setPkName("PRIMARY");
+
+        Field f = createField("id", "INT", true, true, false, 10);
+        addFieldToTable(t, f);
+
+        // "POSTGRES" (short form, missing "QL") — should be normalized to "POSTGRESQL"
+        SqlTable st = new SqlTable();
+        st.createSqlTable(t, "POSTGRES");
+        String ddl = st.getCreate();
+
+        assertNotNull(ddl);
+        assertTrue(ddl.contains("CREATE TABLE"), "DDL should be generated");
+        assertTrue(ddl.contains("serial"), "INT identity should become serial");
+        assertEquals("POSTGRESQL", st.getDatabaseType(),
+                "POSTGRES alias should be normalized to POSTGRESQL");
+    }
+
+    @Test
+    public void testPostgresAliasWithSqlAlsoWorks() throws Exception {
+        // "PostgreSql" (mixed case) should also work
+        Table t = new Table();
+        t.initBlankFrame();
+        t.setName("test_mixedcase");
+        t.setDatabaseType("MYSQL");
+        t.getPk().setPkName("PRIMARY");
+
+        Field f = createField("id", "INT", true, true, false, 10);
+        addFieldToTable(t, f);
+
+        SqlTable st = new SqlTable();
+        st.createSqlTable(t, "PostgreSql");
+        String ddl = st.getCreate();
+
+        assertNotNull(ddl);
+        assertTrue(ddl.contains("serial"));
+        assertEquals("POSTGRESQL", st.getDatabaseType(),
+                "Mixed case should normalize to POSTGRESQL");
+    }
+
+    @Test
+    public void testPgAliasNormalized() throws Exception {
+        Table t = new Table();
+        t.initBlankFrame();
+        t.setName("test_pg_alias");
+        t.setDatabaseType("MYSQL");
+        t.getPk().setPkName("PRIMARY");
+
+        Field f = createField("id", "INT", true, true, false, 10);
+        addFieldToTable(t, f);
+
+        SqlTable st = new SqlTable();
+        st.createSqlTable(t, "pg");
+        String ddl = st.getCreate();
+
+        assertNotNull(ddl);
+        assertTrue(ddl.contains("serial"));
+        assertEquals("POSTGRESQL", st.getDatabaseType());
+    }
 }
