@@ -17,7 +17,7 @@ SQLite is a lightweight embedded database that requires no standalone server pro
 </dependency>
 ```
 
-> **Version Notice**: Do not use version 3.45.x or later. These versions have a compatibility issue with HikariCP connection proxies, throwing `SafeStmtPtr.isClosed() NPE` during SQL execution. Version 3.36.0.3 has been verified to work correctly.
+> **Version Notice**: Currently pinned to 3.36.0.3. Version 3.41.2.2 fixes a CVE (RCE via attacker-controlled JDBC URL) but is incompatible with both HikariCP (SafeStmtPtr NPE) and Druid (batch execution failures). Since our JDBC URLs come from trusted configuration, the CVE risk is minimal. Will upgrade once sqlite-jdbc resolves connection pool compatibility.
 
 ---
 

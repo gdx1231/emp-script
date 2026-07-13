@@ -17,7 +17,7 @@ SQLite 作为轻量级嵌入式数据库，无需独立服务进程，非常适�
 </dependency>
 ```
 
-> **版本注意**：不要使用 3.45.x 及以上版本。该版本与 HikariCP 连接代理存在兼容性问题，执行 SQL 时会抛出 `SafeStmtPtr.isClosed() NPE`。3.36.0.3 经过验证可正常工作。
+> **版本注意**：当前锁定 3.36.0.3。3.41.2.2 修复了 CVE（攻击者控制 JDBC URL 时的 RCE 漏洞），但与 HikariCP（SafeStmtPtr NPE）和 Druid（批量执行失败）均不兼容。项目 JDBC URL 来自受信配置，CVE 风险极低。待 sqlite-jdbc 修复连接池兼容性问题后再升级。
 
 ---
 

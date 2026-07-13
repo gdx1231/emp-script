@@ -1542,7 +1542,12 @@ public class DataConnection {
 
 		if (sql != null) {
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Start update. (" + sql + ")");
-			this._ds.getStatement().executeUpdate(sql);
+			Statement useDbSt = this._ds.getStatement();
+			try {
+				useDbSt.executeUpdate(sql);
+			} finally {
+				closeStatment(useDbSt);
+			}
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
 
 			return true;
