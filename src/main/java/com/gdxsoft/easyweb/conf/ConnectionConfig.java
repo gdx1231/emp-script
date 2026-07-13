@@ -80,6 +80,7 @@ public class ConnectionConfig {
 				}
 				_Pool.add(name, value);
 			}
+			resolvePoolPaths(this._Pool);
 		}
 	}
 
@@ -167,7 +168,67 @@ public class ConnectionConfig {
 	 * @param pool the _Pool to set
 	 */
 	public void setPool(MTableStr pool) {
+		resolvePoolPaths(pool);
 		_Pool = pool;
+	}
+
+	/**
+	 * 解析 pool 中 url 的路径表达式，将快捷路径替换为绝对路径。<br>
+	 * 支持的表达式：
+	 * <ul>
+	 *   <li><code>~</code> / <code>@home</code> — 用户主目录 ({@code user.home})</li>
+	 *   <li><code>@temp</code> — 系统临时目录 ({@code java.io.tmpdir})</li>
+	 *   <li><code>@cwd</code> / <code>@pwd</code> — 当前工作目录 ({@code user.dir})</li>
+	 * </ul>
+	 * 示例：{@code jdbc:sqlite:~/data/test.db} → {@code jdbc:sqlite:/home/user/data/test.db}
+	 *
+	 * @param pool 连接池参数
+	 */
+	private void resolvePoolPaths(MTableStr pool) {
+		if (pool == null) {
+			return;
+		}
+		String url = pool.get("url");
+		if (url == null) {
+			return;
+		}
+		String resolved = resolvePath(url);
+		if (!resolved.equals(url)) {
+			LOGGER.info("Resolved pool url: {} -> {}", url, resolved);
+			pool.put("url", resolved);
+		}
+	}
+
+	/**
+	 * 解析路径表达式，将 ~、@temp、@cwd、@pwd、@home 替换为对应的绝对路径。
+	 *
+	 * @param path 原始路径
+	 * @return 替换后的路径
+	 */
+	public static String resolvePath(String path) {
+		if (path == null) {
+			return null;
+		}
+		String result = path;
+		// @temp → 系统临时目录
+		if (result.contains("@temp")) {
+			result = result.replace("@temp", System.getProperty("java.io.tmpdir"));
+		}
+		// @cwd / @pwd → 当前工作目录
+		if (result.contains("@cwd")) {
+			result = result.replace("@cwd", System.getProperty("user.dir"));
+		}
+		if (result.contains("@pwd")) {
+			result = result.replace("@pwd", System.getProperty("user.dir"));
+		}
+		// ~ / @home → 用户主目录
+		if (result.contains("~")) {
+			result = result.replace("~", System.getProperty("user.home"));
+		}
+		if (result.contains("@home")) {
+			result = result.replace("@home", System.getProperty("user.home"));
+		}
+		return result;
 	}
 
 	public boolean isHiddenInDefine() {
