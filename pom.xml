@@ -340,6 +340,13 @@
 			<version>12.4.3.jre8</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- SQLite JDBC for in-memory database testing -->
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.36.0.3</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
