@@ -1,6 +1,8 @@
 package com.gdxsoft.easyweb.script.display.action;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,7 +13,9 @@ import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItemValue;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
+import com.gdxsoft.easyweb.uploader.FileUpload;
 import com.gdxsoft.easyweb.uploader.Upload;
+import com.gdxsoft.easyweb.uploader.UploadUtils;
 import com.gdxsoft.easyweb.utils.UAes;
 import com.gdxsoft.easyweb.utils.UFile;
 import com.gdxsoft.easyweb.utils.UPath;
@@ -244,77 +248,41 @@ public class ActionFrame extends ActionBase implements IAction {
 			return;
 		}
 
-		if (dataType != null && dataType.equalsIgnoreCase("binary")) {
-			long m10 = 1024 * 1024 * 10; // 10M
-			if (f.length() <= m10) {// 读取文件，为了避免OOM，因此只读取10M一下文件内容
-				byte[] buf = UFile.readFileBytes(f.getAbsolutePath());
-				// 替换参数，转换成文件二进制
-				if (rv.getPageValues().getValue(uploadName) == null) {
-					rv.addValue(uploadName, buf, "binary", buf.length);
-				} else {
-					rv.changeValue(uploadName, buf, "binary", buf.length);
-				}
-			}
-		} else {
-			if (item1 != null) {
-				// html5upload
-				// 字符串类型表示存储url地址
-				String file_url = item1.getString("UP_URL");
-				if (rv.getPageValues().getValue(uploadName) == null) {
-					rv.addValue(uploadName, file_url);
-				} else {
-					rv.changeValue(uploadName, file_url, "string", file_url.length());
-				}
-			} else {
-				// swfupload
-			}
+		// 构建 FileUpload 并委托到 UploadUtils 执行参数映射
+		FileUpload fu = new FileUpload();
+		fu.setSavePath(f.getAbsolutePath());
+		fu.setSaveFileName(f.getName());
+		fu.setExt(UFile.getFileExt(f.getName()));
+		fu.setLength((int) f.length());
+		if (item1 != null) {
+			fu.setFileUrl(item1.getString("UP_URL"));
+			fu.setUnid(item1.getString("UP_UNID"));
+			fu.setUserLocalPath(item1.optString("UP_LOCAL_NAME", null));
 		}
+
+		List<FileUpload> alFiles = new ArrayList<FileUpload>();
+		alFiles.add(fu);
+		UploadUtils.createUploadPara(uploadName, dataType, alFiles, p, rv);
+
+		// 覆盖 _JSON 为 ActionFrame 解密后的原始格式（保留 ISREAL 等字段）
 		if (arr != null) {
-			// 上传文件(1或多个)的JSON
 			rv.addValue(uploadName + "_JSON", arr.toString());
 		}
 
-		/* ------------ 以下仅对单个文件上传有意义 ----------------- */
-
-		// 文件md5
-		String md5 = UFile.md5(f);
-		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_MD5=" + md5);
-		rv.addValue(uploadName + "_MD5", md5);
-		// 文件保存名称
+		// debug 日志
+		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_MD5=" + UFile.md5(f));
 		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_NAME=" + f.getName());
-		rv.addValue(uploadName + "_NAME", f.getName());
-		// 文件物理地址( 完整路径)
 		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_PATH=" + f.getAbsolutePath());
-		rv.addValue(uploadName + "_PATH", f.getAbsolutePath());
-		// 去除UPath.getPATH_UPLOAD() 的路径
 		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_PATH_SHORT=" + shortPath);
-		rv.addValue(uploadName + "_PATH_SHORT", shortPath);
-
-		// 文件字节 length/size
 		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_SIZE=" + f.length());
-		rv.addValue(uploadName + "_SIZE", f.length());
 		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_LENGTH=" + f.length());
-		rv.addValue(uploadName + "_LENGTH", f.length());
-
-		// 文件扩展名
 		super.getDebugFrames().addDebug(this, "Upload", uploadName + "_EXT=" + UFile.getFileExt(f.getName()));
-		rv.addValue(uploadName + "_EXT", UFile.getFileExt(f.getName()));
-
 		if (item1 != null) {
-			// 上传文件(1或多个)的UNID
 			super.getDebugFrames().addDebug(this, "Upload", uploadName + "_UP_UNID=" + item1.getString("UP_UNID"));
-			rv.addValue(uploadName + "_UP_UNID", item1.getString("UP_UNID"));
-			// 文件URL
 			super.getDebugFrames().addDebug(this, "Upload", uploadName + "_URL=" + item1.getString("UP_URL"));
-			rv.addValue(uploadName + "_URL", item1.getString("UP_URL"));
-
-			// 上传文件的Url前缀
 			super.getDebugFrames().addDebug(this, "Upload", uploadName + "_CT=" + item1.getString("CT"));
-			rv.addValue(uploadName + "_CT", item1.getString("CT"));
-			// 上传文件的本地名称
 			super.getDebugFrames().addDebug(this, "Upload",
 					uploadName + "_LOCAL_NAME=" + item1.getString("UP_LOCAL_NAME"));
-			rv.addValue(uploadName + "_LOCAL_NAME", item1.getString("UP_LOCAL_NAME"));
 		}
 	}
 

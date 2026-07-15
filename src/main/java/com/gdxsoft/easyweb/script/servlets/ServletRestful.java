@@ -9,9 +9,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,7 +26,9 @@ import com.gdxsoft.easyweb.script.restful.ApiDocumentation;
 import com.gdxsoft.easyweb.script.userConfig.UserConfig;
 import com.gdxsoft.easyweb.script.userConfig.UserXItem;
 import com.gdxsoft.easyweb.script.userConfig.UserXItems;
+import com.gdxsoft.easyweb.uploader.FileUpload;
 import com.gdxsoft.easyweb.uploader.Upload;
+import com.gdxsoft.easyweb.uploader.UploadUtils;
 import com.gdxsoft.easyweb.utils.UPath;
 
 /**
@@ -181,7 +180,7 @@ public class ServletRestful extends HttpServlet {
 			// 仅当配置支持上传（UserConfig 中存在 h5upload 项）才真正处理上传，否则降级为 handleConf
 			if (this.isUploadSupported(conf)) {
 				response.setContentType("application/json; charset=utf-8");
-				this.handleUpload(conf, rv, request, result);
+				this.handleUpload(conf, rv, request, response, result);
 			} else {
 				// 配置不支持上传，按普通 conf 处理
 				response.setContentType("application/json; charset=utf-8");
@@ -599,7 +598,7 @@ public class ServletRestful extends HttpServlet {
 	 * 处理上传逻辑：解析 multipart 请求并调用 Upload 组件完成文件保存
 	 */
 	public void handleUpload(ConfRestful conf, RequestValue rv, HttpServletRequest request,
-			RestfulResult<Object> result) {
+			HttpServletResponse response, RestfulResult<Object> result) {
 		try {
 			this.initUploadParameters(conf, rv, result);
 		} catch (Exception e2) {
@@ -610,66 +609,57 @@ public class ServletRestful extends HttpServlet {
 			LOGGER.error(e2.getMessage());
 			return;
 		}
-		Upload up = new Upload();
-		up.setRv(rv);
+
 		try {
-			up.init(rv.getRequest());
-		} catch (Exception e1) {
+			Upload up = UploadUtils.parseAndUpload(request, rv);
+
+			// 将上传文件元数据映射到 RequestValue（参照 ActionFrame.createUploadPara）
+			mapUploadParametersToRv(conf, up, rv);
+
+			// 执行 Item 的 Action SQL（如 INSERT/UPDATE），
+			// handleConf 会设置 result 的 success/code/data 等字段
+			this.handleConf(conf, rv, response, result);
+
+		} catch (Exception err) {
 			result.setSuccess(false);
 			result.setCode(500);
 			result.setHttpStatusCode(500);
-			result.setData(e1.getMessage());
-			LOGGER.error(e1.getMessage());
+			result.setData(err.getMessage());
+			LOGGER.error(err.getMessage());
+		}
+	}
+
+	/**
+	 * 将上传文件元数据映射到 RequestValue，使 Item Action SQL 可引用 @字段名, @字段名_EXT 等参数。
+	 * 参照 ActionFrame.createUploadPara() 的逻辑。
+	 *
+	 * @param conf RESTful 配置
+	 * @param up   已完成 upload() 的 Upload 实例
+	 * @param rv   请求参数对象
+	 */
+	public static void mapUploadParametersToRv(ConfRestful conf, Upload up, RequestValue rv) throws Exception {
+		List<FileUpload> alFiles = up.getAlFiles();
+		if (alFiles == null || alFiles.isEmpty()) {
 			return;
 		}
 
-		DiskFileItemFactory factory = new DiskFileItemFactory();
-		// 设置内存缓冲区，超过后写入临时文件
-		int bufferSize = 1024 * 1024 * 10; // 10M
+		UserConfig uc = UserConfig.instance(conf.getXmlName(), conf.getItemName(), null);
+		UserXItems items = uc.getUserXItems();
 
-		factory.setSizeThreshold(bufferSize);// 设置缓冲区大小，这里是10M
-		// 设置临时文件存储位置
-		File tempPath = new File(UPath.getPATH_UPLOAD() + "/" + Upload.DEFAULT_UPLOAD_PATH);
-		factory.setRepository(tempPath);
-		ServletFileUpload upload = new ServletFileUpload(factory);
-
-		long maxSize = 1024 * 1024 * 1024 * 2; // 2g
-		upload.setSizeMax(maxSize);
-
-		List<?> items = null;
-		try {
-			items = upload.parseRequest(rv.getRequest());
-			for (int i = 0; i < items.size(); i++) {
-				FileItem item = (FileItem) items.get(i);
-				if (item.isFormField()) {
-					rv.addValue(item.getFieldName(), item.getString());
-				} else {
-					// 文件字段，Upload 组件稍后处理
-				}
+		for (int i = 0; i < items.count(); i++) {
+			UserXItem item = items.getItem(i);
+			String tag = item.getSingleValue("Tag");
+			if (!("h5upload".equals(tag) || "image".equals(tag) || "swffile".equals(tag))) {
+				continue;
 			}
-		} catch (Exception err) {
-			result.setSuccess(false);
-			result.setCode(500);
-			result.setHttpStatusCode(500);
-			result.setData(err.getMessage());
-			LOGGER.error(err.getMessage());
-			return;
-		}
+			if (!item.testName("Upload")) {
+				continue;
+			}
 
-		up.setUploadItems(items);
+			String uploadName = item.getName();
+			String dataType = item.getSingleValue("DataItem", "DataType");
 
-		try {
-			String s = up.upload();
-			result.setSuccess(true);
-			result.setCode(200);
-			result.setHttpStatusCode(200);
-			result.setData(new JSONArray(s));
-		} catch (Exception err) {
-			result.setSuccess(false);
-			result.setCode(500);
-			result.setHttpStatusCode(500);
-			result.setData(err.getMessage());
-			LOGGER.error(err.getMessage());
+			UploadUtils.createUploadPara(uploadName, dataType, alFiles, up.getUploadDir(), rv);
 		}
 	}
 
