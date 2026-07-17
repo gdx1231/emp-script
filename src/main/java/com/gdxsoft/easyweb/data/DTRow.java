@@ -80,10 +80,20 @@ public class DTRow implements Serializable {
 		_Table = table;
 	}
 
+	/**
+	 * 获取列数量
+	 * @return
+	 */
 	public int getCount() {
 		return this._Table.getColumns().getCount();
 	}
-
+	/**
+	 * 获取列数量
+	 * @return
+	 */
+	public int size() {
+		return this._Table.getColumns().getCount();
+	}
 	public DTCell getCell(int index) {
 
 		if (this._RowData.size() <= index || this._RowData.get(index) == null) {

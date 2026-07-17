@@ -19,6 +19,7 @@ import com.gdxsoft.easyweb.conf.ConfRestful;
 import com.gdxsoft.easyweb.conf.ConfRestfuls;
 import com.gdxsoft.easyweb.script.HtmlControl;
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.script.display.frame.FrameFrame;
 import com.gdxsoft.easyweb.script.display.frame.FrameList;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.script.restful.RestfulResult;
@@ -29,7 +30,9 @@ import com.gdxsoft.easyweb.script.userConfig.UserXItems;
 import com.gdxsoft.easyweb.uploader.FileUpload;
 import com.gdxsoft.easyweb.uploader.Upload;
 import com.gdxsoft.easyweb.uploader.UploadUtils;
+import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
+import com.gdxsoft.easyweb.acl.IAcl;
 
 /**
  * ServletRestful
@@ -55,6 +58,9 @@ public class ServletRestful extends HttpServlet {
 	public void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
 			String resultContent = this.ewaRestfulHandler(req, resp);
+			if (resultContent == null) { // download
+				return;
+			}
 			this.outContent(req, resp, resultContent);
 		} catch (Exception err) {
 			// 带 throwable 才能完整保留堆栈与 cause chain
@@ -146,11 +152,11 @@ public class ServletRestful extends HttpServlet {
 			return result.toString();
 		}
 
-		// 判断是否为下载/内联下载（图片/文件）。用 &-split 解析 KV，避免 indexOf 子串误判（如"EWA_AJAX=DOWNLOAD-OTHER"被误判为"DOWNLOAD-INLINE"）
+		// 判断是否为下载/内联下载（图片/文件）。用 &-split 解析 KV，避免 indexOf
+		// 子串误判（如"EWA_AJAX=DOWNLOAD-OTHER"被误判为"DOWNLOAD-INLINE"）
 		String ewaAjax = rv.s(FrameParameters.EWA_AJAX);
 		String confEwaAjax = lookupConfParameter(conf.getParameters(), "EWA_AJAX");
-		if ("DOWNLOAD-INLINE".equalsIgnoreCase(ewaAjax)
-				|| "DOWNLOAD-INLINE".equalsIgnoreCase(confEwaAjax)) {
+		if ("DOWNLOAD-INLINE".equalsIgnoreCase(ewaAjax) || "DOWNLOAD-INLINE".equalsIgnoreCase(confEwaAjax)) {
 			// 以字节输出，例如图片、PDF
 			isOutImage = true;
 		} else if ("DOWNLOAD".equalsIgnoreCase(ewaAjax) || "DOWNLOAD".equalsIgnoreCase(confEwaAjax)) {
@@ -160,19 +166,30 @@ public class ServletRestful extends HttpServlet {
 
 		// 根据前面判断调用相应的处理器
 		if (isOutImage) {
-			// Image 成功时 handleImage 会通过 FileOut 直接写字节流；先设置 CORS/状态码，避免内联图片响应遗漏跨域头
+			// Image: handleImage 通过 FileOut 直接写字节流
+			// 先预设 200 状态码和 CORS，因为写字节后 response 可能立即 committed
+			result.setHttpStatusCode(HttpServletResponse.SC_OK);
 			this.applyResponseHeaders(request, response, result);
 			this.handleImage(conf, rv, response, result);
 			if (result.isSuccess()) {
-				return null; // 已直接写入 response（文件字节），返回 null 表示无需再次输出 JSON
+				return null;
+			}
+			// 失败时若 response 已提交或输出流已使用，不能再写 JSON
+			if (response.isCommitted()) {
+				return null;
 			}
 			return result.toString();
 		} else if (isDownload) {
-			// 下载走二进制 attachment，Content-Type 由 FileOut 根据扩展名设置；这里只先设 CORS/状态码
+			// 下载走二进制 attachment，先预设 200 和 CORS
+			result.setHttpStatusCode(HttpServletResponse.SC_OK);
 			this.applyResponseHeaders(request, response, result);
 			this.handleDownload(conf, rv, response, result);
 			if (result.isSuccess()) {
 				return null; // FileOut 已写出附件字节流，避免再次写入 JSON
+			}
+			// 失败时若 response 已提交或输出流已使用，不能再写 JSON
+			if (response.isCommitted()) {
+				return null;
 			}
 			// 失败回退为 JSON 错误体
 			response.setContentType("application/json; charset=utf-8");
@@ -225,7 +242,8 @@ public class ServletRestful extends HttpServlet {
 
 	/**
 	 * 在 conf.parameters 字符串中按 KV 精确匹配指定 key 的 value（大小写不敏感）。 替代原先的
-	 * {@code indexOf("EWA_AJAX=DOWNLOAD")} 形式，避免"EWA_AJAX=DOWNLOAD-OTHER"被误判为"DOWNLOAD"。
+	 * {@code indexOf("EWA_AJAX=DOWNLOAD")}
+	 * 形式，避免"EWA_AJAX=DOWNLOAD-OTHER"被误判为"DOWNLOAD"。
 	 *
 	 * @param parameters conf.parameters 字符串（如 "EWA_RESTFUL=1&EWA_AJAX=DOWNLOAD"）
 	 * @param key        要查询的键名
@@ -276,8 +294,8 @@ public class ServletRestful extends HttpServlet {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.warn("isUploadSupported load UserConfig error: xml={}, item={}, err={}",
-					conf.getXmlName(), conf.getItemName(), e.getMessage());
+			LOGGER.warn("isUploadSupported load UserConfig error: xml={}, item={}, err={}", conf.getXmlName(),
+					conf.getItemName(), e.getMessage());
 		}
 		return false;
 	}
@@ -437,7 +455,8 @@ public class ServletRestful extends HttpServlet {
 		}
 		String resize = rv.s(FrameParameters.EWA_IMAGE_RESIZE);
 		if (StringUtils.isNotBlank(resize)) {
-			File imgSize = FileOut.getImageResizedFile(image, resize);
+			String accept = rv.getRequest().getHeader("accept"); // 获取请求头中的accept字段
+			File imgSize = FileOut.getOrCreateImageResizedFile(image, resize, true, accept);
 			if (imgSize != null && imgSize.exists()) {
 				image = imgSize;
 			} else {
@@ -454,7 +473,14 @@ public class ServletRestful extends HttpServlet {
 		fo.initFile(image);
 
 		long oneWeek = 604800L; // seconds
-		fo.outFileBytesInline(true, oneWeek);
+		long len = fo.outFileBytesInline(true, oneWeek);
+		if (len >= 0) {
+			result.setSuccess(true);
+			result.setHttpStatusCode(200);
+		} else {
+			result.setSuccess(false);
+			result.setHttpStatusCode(500);
+		}
 
 	}
 
@@ -551,7 +577,8 @@ public class ServletRestful extends HttpServlet {
 	}
 
 	/**
-	 * 初始化上传所需的参数并进行 ACL 校验
+	 * 初始化上传所需的参数并进行 ACL 校验。 直接从 UserConfig 加载 ACL 类进行轻量校验，不创建 HtmlControl， 避免与后续
+	 * handleConf 重复执行重量级的 HtmlCreator.init()。
 	 */
 	public void initUploadParameters(ConfRestful conf, RequestValue rv, RestfulResult<Object> result) throws Exception {
 		rv.addOrUpdateValue(FrameParameters.XMLNAME, conf.getXmlName());
@@ -568,30 +595,43 @@ public class ServletRestful extends HttpServlet {
 		}
 		rv.addOrUpdateValue("name", uploadName);
 
-		HtmlControl ht = new HtmlControl();
-
-		String params = this.createEwaParameters(conf, rv);
-
-		ht.init(conf.getXmlName(), conf.getItemName(), params, rv, null);
-
-		// 请求头授权校验
-		if (!ht.getHtmlCreator().checkAcl()) {
-			result.setHttpStatusCode(HttpServletResponse.SC_UNAUTHORIZED); // 401
-			result.setSuccess(false);
-			try {
-				JSONObject msg = new JSONObject(ht.getHtmlCreator().getAcl().getDenyMessage());
-				if (msg.has("code")) {
-					result.setCode(msg.optInt("code"));
-				}
-				if (msg.has("message")) {
-					result.setMessage(msg.optString("message"));
-				}
-			} catch (Exception err) {
-				LOGGER.warn(err.getMessage());
-			}
+		// 轻量 ACL 校验：直接从 UserConfig 加载 ACL 类，不创建 HtmlControl
+		if (!uc.getUserPageItem().testName("Acl") || uc.getUserPageItem().getItem("Acl").count() == 0) {
+			return;
+		}
+		String aclExp = uc.getUserPageItem().getItem("Acl").getItem(0).getItem("Acl").trim();
+		if (aclExp.length() <= 5) {
 			return;
 		}
 
+		UObjectValue ov = new UObjectValue();
+		Object o = ov.loadClass(aclExp, null);
+		if (!(o instanceof IAcl)) {
+			return;
+		}
+		IAcl acl = (IAcl) o;
+		acl.setXmlName(conf.getXmlName());
+		acl.setItemName(conf.getItemName());
+		acl.setRequestValue(rv);
+
+		if (acl.canRun()) {
+			return;
+		}
+
+		// ACL 校验未通过
+		result.setHttpStatusCode(HttpServletResponse.SC_UNAUTHORIZED); // 401
+		result.setSuccess(false);
+		try {
+			JSONObject msg = new JSONObject(acl.getDenyMessage());
+			if (msg.has("code")) {
+				result.setCode(msg.optInt("code"));
+			}
+			if (msg.has("message")) {
+				result.setMessage(msg.optString("message"));
+			}
+		} catch (Exception err) {
+			LOGGER.warn(err.getMessage());
+		}
 	}
 
 	/**
@@ -630,8 +670,8 @@ public class ServletRestful extends HttpServlet {
 	}
 
 	/**
-	 * 将上传文件元数据映射到 RequestValue，使 Item Action SQL 可引用 @字段名, @字段名_EXT 等参数。
-	 * 参照 ActionFrame.createUploadPara() 的逻辑。
+	 * 将上传文件元数据映射到 RequestValue，使 Item Action SQL 可引用 @字段名, @字段名_EXT 等参数。 参照
+	 * ActionFrame.createUploadPara() 的逻辑。
 	 *
 	 * @param conf RESTful 配置
 	 * @param up   已完成 upload() 的 Upload 实例
@@ -685,7 +725,7 @@ public class ServletRestful extends HttpServlet {
 		}
 
 		// 列表查询（路径以 s 结尾表示集合资源）
-		if ("GET".equals(conf.getMethod()) && conf.getPath().endsWith("s")) {
+		if ("GET".equals(conf.getMethod())) {
 			if (ht.getLastTable() == null) {
 				result.setSuccess(false);
 				result.setHttpStatusCode(HttpServletResponse.SC_NOT_FOUND); // not found
@@ -701,12 +741,23 @@ public class ServletRestful extends HttpServlet {
 					result.setPageCount(ht.getPageSplit().getPageCount());
 					result.setRecordCount(ht.getPageSplit().getRecordCount());
 				}
+				JSONObject data = new JSONObject(ht.getHtml());
+				result.setData(data.optJSONArray("DATA"));
+			} else if (ht.getHtmlCreator().getFrame() instanceof FrameFrame) {
+				FrameFrame f = (FrameFrame) ht.getHtmlCreator().getFrame();
+				try {
+					f.createJsonContent(false);
+				} catch (Exception e) {
+					LOGGER.error("frameFrame {}", e);
+					result.setSuccess(false);
+					result.setHttpStatusCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+					result.setMessage(e.getLocalizedMessage());
+					return;
+				}
 			}
-			JSONObject data = new JSONObject(ht.getHtml());
 
 			result.setSuccess(true);
 			result.setHttpStatusCode(HttpServletResponse.SC_OK);
-			result.setData(data.optJSONArray("DATA"));
 
 			return;
 		}

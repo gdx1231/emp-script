@@ -1,6 +1,7 @@
 package com.gdxsoft.easyweb.data;
 
 import java.io.Serializable;
+import java.util.NoSuchElementException;
 
 import com.gdxsoft.easyweb.utils.msnet.MList;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
@@ -30,8 +31,7 @@ public class DTColumns implements Serializable {
 	/**
 	 * 设置字段主键
 	 * 
-	 * @param keys
-	 *            主键表达式
+	 * @param keys 主键表达式
 	 */
 	public void setKeys(String[] keys) {
 		for (int i = 0; i < keys.length; i++) {
@@ -47,7 +47,7 @@ public class DTColumns implements Serializable {
 		return (DTColumn) this._Columns.get(index);
 	}
 
-	public DTColumn getColumn(String name) throws Exception {
+	public DTColumn getColumn(String name) {
 		String n = name.toUpperCase().trim();
 		if (this._ColumnNames.containsKey(n)) {
 			int index = ((Integer) this._ColumnNames.get(n)).intValue();
@@ -56,15 +56,14 @@ public class DTColumns implements Serializable {
 			MStr sb = new MStr();
 			String s1 = this._ColumnNames.join(";", ",");
 			sb.append(s1);
-			throw new Exception("字段“" + n + "”不在表中。(" + sb.toString() + ")");
+			throw new NoSuchElementException("字段“" + n + "”不在表中。(" + sb.toString() + ")");
 		}
 	}
 
 	/**
 	 * 获取可以使用的字段表明，如果已经存在，则字段加序号
 	 * 
-	 * @param name
-	 *            原始名称
+	 * @param name 原始名称
 	 * @return 可用的字段名称
 	 */
 	public String getCanUsedName(String name) {
@@ -90,13 +89,13 @@ public class DTColumns implements Serializable {
 		col.setIndex(index);
 
 	}
-	
+
 	/**
 	 * Refresh the columns name index, manual call by changed column name
 	 */
 	public void refreshNamesIndex() {
 		this._ColumnNames = new MTable();
-		for(int i=0;i<this._Columns.size();i++) {
+		for (int i = 0; i < this._Columns.size(); i++) {
 			DTColumn col = this.getColumn(i);
 			String n = col.getName().toUpperCase().trim();
 			this._ColumnNames.put(n, i);
@@ -104,6 +103,10 @@ public class DTColumns implements Serializable {
 	}
 
 	public int getCount() {
+		return this._Columns.size();
+	}
+
+	public int size() {
 		return this._Columns.size();
 	}
 
@@ -141,8 +144,7 @@ public class DTColumns implements Serializable {
 	}
 
 	/**
-	 * @param table
-	 *            the _Table to set
+	 * @param table the _Table to set
 	 */
 	public void setTable(DTTable table) {
 		_Table = table;

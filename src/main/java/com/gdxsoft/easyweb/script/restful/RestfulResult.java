@@ -6,6 +6,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.gdxsoft.easyweb.utils.UJSon;
+
 public class RestfulResult<T> {
 	private static Logger LOGGER = LoggerFactory.getLogger(RestfulResult.class);
 	private boolean success_ = true;
@@ -83,6 +85,11 @@ public class RestfulResult<T> {
 	public JSONObject toJson() {
 		JSONObject obj = new JSONObject();
 		obj.put("success", success_);
+		if(success_) {
+			UJSon.rstSetTrue(obj, null);
+		} else {
+			UJSon.rstSetFalse(obj, message_);
+		}
 		// 仅在已设置时输出数值字段，避免客户端 json.optInt 等调用出现歧义
 		if (this.code_ != null) {
 			obj.put("code", this.code_);

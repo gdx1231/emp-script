@@ -170,7 +170,7 @@ public class SdkBase {
 
 		if (StringUtils.isNotBlank(this.userToken)) {
 			parts.add("  -H 'Authorization: " + this.userToken + "'");
-			
+
 		} else if (StringUtils.isNotBlank(this.serverToken)) {
 			parts.add("  -H 'Authorization: Bearer " + this.serverToken + "'");
 		}
@@ -200,14 +200,15 @@ public class SdkBase {
 		} else {
 			net.setUserAgent("UNet/1.1.10 (gdxsoft.com)");
 		}
-		if(this.userToken!=null && !this.userToken.isEmpty()) {
+		if (this.userToken != null && !this.userToken.isEmpty()) {
 			// userToken 优先级高于 serverToken
 			net.addHeader("Authorization", this.userToken);
-		} else if(this.serverToken!=null && !this.serverToken.isEmpty()) {
+		} else if (this.serverToken != null && !this.serverToken.isEmpty()) {
 			// 使用 serverToken 授权方式
 			net.addHeader("Authorization", "Bearer " + serverToken);
 		} else {
-			throw new IllegalStateException("No authorization token provided. Please set either userToken or serverToken.");
+			throw new IllegalStateException(
+					"No authorization token provided. Please set either userToken or serverToken.");
 		}
 		net.setIsShowLog(false);
 
@@ -234,7 +235,8 @@ public class SdkBase {
 	}
 
 	public String getApiPath(String path) {
-		return this.apiRoot + (this.apiRoot.endsWith("/") ? "" : "/") + path;
+		return this.apiRoot + (this.apiRoot.endsWith("/") ? "" : "/")
+				+ (path.startsWith("/") ? path.substring(1) : path);
 	}
 
 	public String createUrl(String path) {

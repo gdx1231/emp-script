@@ -23,22 +23,42 @@ public class GZipOut {
 	}
 
 	public void outContent(String cnt) throws ServletException, IOException {
-		if (this._IsGZip && cnt != null && cnt.length() > 0) {
+		if (cnt == null) {
+			return;
+		}
+		if (this._IsGZip && cnt.length() > 0) {
 			_Response.setHeader("X-EWA", "gzip");
 			this.outGZip(cnt);
 		} else {
 			_Response.setHeader("X-EWA", "nogzip");
-			PrintWriter out = _Response.getWriter();
-			out.print(cnt == null ? "" : cnt);
-			out.flush();
-			out.close();
+			try {
+				PrintWriter out = _Response.getWriter();
+				out.print(cnt);
+				out.flush();
+				out.close();
+			} catch (IllegalStateException e) {
+				// getOutputStream() 已被调用（如图片/文件下载），降级用 OutputStream 输出
+				ServletOutputStream out = _Response.getOutputStream();
+				out.print(cnt);
+				out.flush();
+				out.close();
+			}
 		}
 	}
 
 	public void outGZip(String cnt) throws ServletException, IOException {
-		//long a = System.currentTimeMillis();
 		_Response.setHeader("Content-Encoding", "gzip");
-		ServletOutputStream output = _Response.getOutputStream();
+		ServletOutputStream output;
+		try {
+			output = _Response.getOutputStream();
+		} catch (IllegalStateException e) {
+			// getWriter() 已被调用，降级用 Writer 输出（放弃 gzip）
+			PrintWriter writer = _Response.getWriter();
+			writer.print(cnt);
+			writer.flush();
+			writer.close();
+			return;
+		}
 		GZIPOutputStream o = new GZIPOutputStream(output);
 		
 //		int loc0=cnt.toString().indexOf("EWA_ITEMS_XML_");

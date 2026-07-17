@@ -18,8 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.acl.IAcl;
 import com.gdxsoft.easyweb.acl.IAcl2;
-import com.gdxsoft.easyweb.cache.CacheEwaScript;
-import com.gdxsoft.easyweb.cache.CacheLoadResult;
 import com.gdxsoft.easyweb.data.Bin2Base64BinaryHandle;
 import com.gdxsoft.easyweb.data.Bin2HexBinaryHandle;
 import com.gdxsoft.easyweb.data.DTTable;
@@ -1077,53 +1075,7 @@ public class HtmlCreator {
 		}
 	}
 
-	/**
-	 * 读取Cache
-	 * 
-	 * @return 内容
-	 */
-	@SuppressWarnings("unused")
-	@Deprecated
-	private CacheEwaScript loadCached() {
-		CacheEwaScript cache = null;
-		if (!this._SysParas.isCached() || this._SysParas.getCachedSeconds() <= 0) {
-			return null;
-		}
-		String ct = this._SysParas.getCachedType().trim().toLowerCase();
-		if (ct.equals("all") || (ct.equals("load") && !this._SysParas.isPagePost())
-				|| (ct.equals("action") && this._SysParas.isPagePost())) {
-			try {
-				cache = new CacheEwaScript(this._SysParas.getRequestValue());
-				// 读取Cache
-				cache.getCachedContent(_SysParas.getCachedSeconds());
-				return cache;
-			} catch (Exception e) {
-				LOGGER.error(e.getMessage(), e);
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * 写chache
-	 * 
-	 * @param cnt
-	 * @return
-	 */
-	@SuppressWarnings("unused")
-	@Deprecated
-	private boolean writeCache(CacheEwaScript cache, String cnt) {
-		if (cache == null || !this._SysParas.isCached() && this._SysParas.getCachedSeconds() <= 0) {
-			return false;
-		}
-		try {
-			cache.writeCache(cnt);
-			return true;
-		} catch (Exception e1) {
-			LOGGER.error(e1.getMessage(), e1);
-			return false;
-		}
-	}
+	  
 
 	private String getJsonName() {
 		String jsonName = this._RequestValue.getString(FrameParameters.EWA_JSON_NAME);

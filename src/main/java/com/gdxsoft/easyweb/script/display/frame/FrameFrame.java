@@ -16,6 +16,7 @@ import com.gdxsoft.easyweb.data.DTCell;
 import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.data.JsonFieldNameCase;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.HtmlUtils;
 import com.gdxsoft.easyweb.script.display.ItemValues;
@@ -194,6 +195,9 @@ public class FrameFrame extends FrameBase implements IFrame {
 				}
 			}
 		}
+
+		JsonFieldNameCase jfnc = new JsonFieldNameCase(rv);
+
 		for (int r = 0; r < mainTb.getCount(); r++) {
 			DTRow row = mainTb.getRow(r);
 			if (r > 0) {
@@ -213,7 +217,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 				first = false;
 				DTCell cell = row.getCell(fieldName);
 				Object v = cell.isNull() ? null : cell.getValue();
-				sb.append("\"" + Utils.textToJscript(fieldName) + "\"");
+
+				sb.append("\"" + Utils.textToJscript(jfnc.createJsonObjectName(fieldName)) + "\"");
 				sb.a(": ");
 				sb.a(v == null ? "null" : "\"" + Utils.textToJscript(v.toString()) + "\"");
 			}
@@ -627,9 +632,9 @@ public class FrameFrame extends FrameBase implements IFrame {
 		return tag.equalsIgnoreCase("button") || tag.equalsIgnoreCase("submit") || tag.toUpperCase().startsWith("DHTML")
 				|| tag.equalsIgnoreCase("h5upload") || tag.equalsIgnoreCase("textarea") || tag.equals("markDown")
 				|| tag.equalsIgnoreCase("xmleditor") || tag.equalsIgnoreCase("jseditor")
-				|| tag.equalsIgnoreCase("csseditor")
-				|| tag.equalsIgnoreCase("sqleditor") || tag.equalsIgnoreCase("user")
-				|| tag.equalsIgnoreCase("ewaconfigitem") || tag.equalsIgnoreCase("signature");
+				|| tag.equalsIgnoreCase("csseditor") || tag.equalsIgnoreCase("sqleditor")
+				|| tag.equalsIgnoreCase("user") || tag.equalsIgnoreCase("ewaconfigitem")
+				|| tag.equalsIgnoreCase("signature");
 	}
 
 	/**
@@ -968,10 +973,8 @@ public class FrameFrame extends FrameBase implements IFrame {
 			sb.append(tmps[0]); // <td class="EWA_TD_L">您的邮箱</td>
 
 			/*
-			 * String info = tmps[3];
-			 * if (tmps[4] != null && tmps[4].length() > 0 && !info.equals(tmps[4])) {
-			 * info += ", " + tmps[4];
-			 * }
+			 * String info = tmps[3]; if (tmps[4] != null && tmps[4].length() > 0 &&
+			 * !info.equals(tmps[4])) { info += ", " + tmps[4]; }
 			 * sb.append("<td class=\"EWA_TD_L\">").append(info).append("</td>");
 			 */
 			sb.append("</tr>\n<tr class='" + trClass + " ewa-row-item' " + disp + ">\n");

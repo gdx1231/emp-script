@@ -97,7 +97,19 @@ public class DTRows implements Serializable{
 		}
 	}
 
+	/**
+	 * 获取记录行
+	 * @return
+	 */
 	public int getCount() {
+		return this._Rows.size();
+	}
+	
+	/**
+	 * 获取记录行
+	 * @return
+	 */
+	public int size() {
 		return this._Rows.size();
 	}
 

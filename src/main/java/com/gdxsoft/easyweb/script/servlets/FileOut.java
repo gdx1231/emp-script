@@ -1048,26 +1048,46 @@ public class FileOut {
 
 	public static File getImageResizedFile(File image, String resize) {
 
+		return getOrCreateImageResizedFile(image, resize, false, null);
+	}
+
+	public static File getOrCreateImageResizedFile(File image, String resize, boolean createNew, String accept) {
 		// 获取尺寸表达式，同时过滤非法的字符或路径
 		Dimension size = FileOut.getImageResize(resize);
 		if (size == null) {
 			return null;
 		}
-		StringBuilder sb = new StringBuilder();
-		sb.append(image.getAbsolutePath());
-		sb.append("$resized");
-		sb.append(File.separator);
-		sb.append(size.width);
-		sb.append("x");
-		sb.append(size.height);
-		sb.append(".jpg");
-		String imgSizePath = sb.toString();
+		String oriExt = UFile.getFileExt(image.getName());
+		String imgExt = "jpeg"; // 默认图片格式为jpeg
+		if ("png".equalsIgnoreCase(oriExt)) {
+			imgExt = "png";
+		} else if (UImages.checkImageMagick() && accept != null) { // 如果accept字段不为空
+			if (accept.indexOf("image/avif") >= 0) { // ms edge 暂时不支持
+				imgExt = "avif"; // 如果支持avif格式并且accept字段包含image/avif，就选择avif格式
+			} else if (accept.indexOf("image/webp") >= 0) {
+				imgExt = "webp"; // 如果支持webp格式并且accept字段包含image/webp，就选择webp格式
+			} else if (accept.indexOf("image/heic") >= 0) {
+				imgExt = "heic"; // 如果支持heic格式并且accept字段包含image/heic，就选择heic格式
+			}
+		}
 
-		File imgSize = new File(imgSizePath);
+		String exitspic = UImages.getResizedImageName(image, size.width, size.height, imgExt);
+
+		File imgSize = new File(exitspic);
 		if (imgSize.exists()) {
 			return imgSize;
-		} else {
+		}
+		if (!createNew) {
 			return null;
+		}
+		try {
+			// 否则调用UImages类的方法来创建一个缩放后的图片文件，并返回其路径
+			String f2 = UImages.createSmallImage(image.getAbsolutePath(), size.width, size.height, imgExt, 70);
+			// 根据路径创建一个新的文件对象并返回
+			return new File(f2);
+		} catch (Exception err1) { // 如果发生异常
+			LOGGER.error("{}->{},{}", image, exitspic, err1.getMessage()); // 记录错误信息到日志中
+			return null; // 返回空值
 		}
 	}
 
@@ -1078,7 +1098,7 @@ public class FileOut {
 	 * @return null or dimension
 	 */
 	public static Dimension getImageResize(String resize) {
-		 return UImages.parseSize(resize);
+		return UImages.parseSize(resize);
 	}
 
 	private HttpServletRequest request;

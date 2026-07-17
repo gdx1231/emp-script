@@ -16,8 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.cache.CachedValue;
 import com.gdxsoft.easyweb.cache.CachedValueManager;
+import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
+import com.gdxsoft.easyweb.data.JsonFieldNameCase;
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.script.RequestValue;
@@ -1508,13 +1510,25 @@ public class FrameList extends FrameBase implements IFrame {
 
 		DTTable tb = (DTTable) tbs.get(tbs.size() - 1);
 		super.getHtmlClass().getItemValues().setListFrameTable(tb);
-
+		if (tb.getCount() == 0) {
+			return "[]";
+		}
+		
 		JSONArray arr = new JSONArray();
+		
+		// 根据EWA_JSON_FIELD_CASE 确定json返回字段的大小写设定
+		JsonFieldNameCase jfnc = new JsonFieldNameCase(rv);
+		Map<String, String> jsonFieldNames = new HashMap<>();
+		for (int i = 0; i < tb.getColumns().getCount(); i++) {
+			DTColumn col = tb.getColumns().getColumn(i);
+			String nameJson = jfnc.createJsonObjectName(col.getName());
+			jsonFieldNames.put(col.getName(), nameJson);
+		}
 
 		for (int i = 0; i < tb.getCount(); i++) {
 			DTRow row = tb.getRow(i); // 将数据移动到当前行
 
-			JSONObject rowJson = this.createJsonRow(row, skipUnDefined, sysParas, rv, isApiPrompt);
+			JSONObject rowJson = this.createJsonRow(row, skipUnDefined, sysParas, rv, isApiPrompt, jsonFieldNames);
 
 			if (!isApiPrompt) {
 				// ai prompt 不需要 EWA_KEY
@@ -1529,17 +1543,19 @@ public class FrameList extends FrameBase implements IFrame {
 	/**
 	 * 生成页面的每一行JSON数据
 	 * 
-	 * @param row           数据行
-	 * @param skipUnDefined 是否略过未定义的字段
-	 * @param sysParas      系统参数
-	 * @param rv            请求值
-	 * @param isApiPrompt   是否为AI Prompt
+	 * @param row            数据行
+	 * @param skipUnDefined  是否略过未定义的字段
+	 * @param sysParas       系统参数
+	 * @param rv             请求值
+	 * @param isApiPrompt    是否为AI Prompt
+	 * @param jsonFieldNames 返回 json 的字段名称大小写设定
 	 * 
 	 * @return JSONObject 每一行的JSON数据
 	 * @throws Exception
 	 */
 	private JSONObject createJsonRow(DTRow row, boolean skipUnDefined, SysParameters sysParas, RequestValue rv,
-			boolean isApiPrompt) throws Exception {
+			boolean isApiPrompt, Map<String, String> jsonFieldNames) throws Exception {
+
 		JSONObject obj = new JSONObject();
 		HashMap<String, Boolean> map = null;
 
@@ -1564,6 +1580,7 @@ public class FrameList extends FrameBase implements IFrame {
 			// }
 
 			String s2 = this.createJsonCell(uxi);
+			String name = jsonFieldNames.getOrDefault(uxi.getName(), uxi.getName());
 			if (s2 != null && s2.indexOf("~!@`") >= 0) {
 				String[] ss = s2.split("~!@`");
 				if (ss.length == 0) { // s2 == "~!@`"
@@ -1573,17 +1590,17 @@ public class FrameList extends FrameBase implements IFrame {
 				if (isApiPrompt) { // ai prompt 不需要_HTML数据
 					if (ss.length > 1) {
 						ss[1] = "null".equals(ss[1]) ? null : ss[1];
-						obj.put(uxi.getName(), ss[1]);
+						obj.put(name, ss[1]);
 					} else {
-						obj.put(uxi.getName(), ss[0]);
+						obj.put(name, ss[0]);
 					}
 				} else {
-					obj.put(uxi.getName(), ss[0]);
+					obj.put(name, ss[0]);
 					if (ss.length > 1) {
 						ss[1] = "null".equals(ss[1]) ? null : ss[1];
-						obj.put(uxi.getName() + "_HTML", ss[1]);
+						obj.put(name + "_HTML", ss[1]);
 					} else {
-						obj.put(uxi.getName() + "_HTML", ss[0]);
+						obj.put(name + "_HTML", ss[0]);
 					}
 				}
 			} else {
@@ -1593,7 +1610,7 @@ public class FrameList extends FrameBase implements IFrame {
 						s2 = ItemImage.getImage(rv.getContextPath(), buf);
 					}
 				}
-				obj.put(uxi.getName(), "null".equals(s2) ? null : s2);
+				obj.put(name, "null".equals(s2) ? null : s2);
 			}
 		}
 
@@ -1610,8 +1627,9 @@ public class FrameList extends FrameBase implements IFrame {
 			// 将不在页面框架上的数据显示出来
 			for (int i = 0; i < this._JsonUsedFields.size(); i++) {
 				String name = this._JsonUsedFields.get(i);
+				String name1 = jsonFieldNames.getOrDefault(name, name);
 				if (!row.getCell(name).isNull()) {
-					obj.put(name, row.getCell(name).getValue());
+					obj.put(name1, row.getCell(name).getValue());
 				}
 			}
 		}

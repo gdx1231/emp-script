@@ -37,7 +37,6 @@ import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.datasource.DataResult;
 import com.gdxsoft.easyweb.datasource.SqlUtils;
 import com.gdxsoft.easyweb.script.RequestValue;
-import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.UXml;
@@ -74,7 +73,8 @@ public class DTTable implements Serializable {
 	private int _TimeDiffMinutes; // 用户和系统的时差
 	private String originalSql; // 原始sql
 	private String execedSql; // 执行的sql
-	private String tableName; //重ewa_table_name中提取
+	private String tableName; // 重ewa_table_name中提取
+
 	/**
 	 * 用户和系统的时差(分钟)
 	 * 
@@ -276,7 +276,7 @@ public class DTTable implements Serializable {
 
 		String tableName = SqlUtils.getTableNameBySqlComment(sql);
 		conn.executeQuery(sql);
-		DTTable tb =  returnTable(conn);
+		DTTable tb = returnTable(conn);
 		tb.setTableName(tableName);
 		return tb;
 	}
@@ -339,7 +339,7 @@ public class DTTable implements Serializable {
 		DTTable tb = returnTable(conn);
 		tb.setTableName(tableName);
 		return tb;
-		
+
 	}
 
 	/**
@@ -1170,7 +1170,7 @@ public class DTTable implements Serializable {
 	/**
 	 * 返回JSON数据
 	 * 
-	 * 含有图片的最多返回50条记录，其它最多1000条数据
+	 * 含有图片的最多返回50条记录，其它最多50000条数据
 	 * 
 	 * @param rv 现在没啥用了
 	 * @return JSONObject
@@ -1181,16 +1181,9 @@ public class DTTable implements Serializable {
 		boolean ishaveImage = false;
 		String contentpath = rv != null ? rv.getContextPath() : "";
 
-		int field_name_case = 0; // 原始
-		if (rv != null) {
-			if (rv.s(FrameParameters.EWA_JSON_FIELD_CASE) != null) {
-				if (rv.s(FrameParameters.EWA_JSON_FIELD_CASE).equalsIgnoreCase("upper")) {
-					field_name_case = 1; // 大写字段
-				} else if (rv.s(FrameParameters.EWA_JSON_FIELD_CASE).equalsIgnoreCase("lower")) {
-					field_name_case = 2; // 小写字段
-				}
-			}
-		}
+		// 根据EWA_JSON_FIELD_CASE 确定json返回字段的大小写设定
+		JsonFieldNameCase jfnc = new JsonFieldNameCase(rv);
+
 		Map<String, Boolean> map = new HashMap<String, Boolean>();
 		for (int m = 0; m < getCount(); m++) {
 			DTRow r = getRow(m);
@@ -1210,12 +1203,7 @@ public class DTTable implements Serializable {
 				if (i > 0) {
 					sb.append(", ");
 				}
-				if (field_name_case == 1) {
-					name = name.toUpperCase();
-				} else if (field_name_case == 2) {
-					name = name.toLowerCase();
-				}
-				sb.append("\"" + Utils.textToJscript(name) + "\"");
+				sb.append("\"" + Utils.textToJscript(jfnc.createJsonObjectName(name)) + "\"");
 				sb.append(": ");
 				sb.append(v == null ? "null" : "\"" + Utils.textToJscript(v.toString()) + "\"");
 			}
@@ -1223,7 +1211,7 @@ public class DTTable implements Serializable {
 			if (ishaveImage && m > 50) { // 含有图片的最多返回50条记录
 				break;
 			}
-			if (m > 50000) { // 最多1000条数据
+			if (m > 50000) { // 最多50000条数据
 				break;
 			}
 		}
@@ -1933,7 +1921,7 @@ public class DTTable implements Serializable {
 	}
 
 	/**
-	 * 获取数据行数
+	 * 获取数据行数，同size()
 	 * 
 	 * @return the table rows count
 	 */
@@ -1943,6 +1931,15 @@ public class DTTable implements Serializable {
 		} else {
 			return -1;
 		}
+	}
+
+	/**
+	 * 获取数据行数，同getCount()
+	 * 
+	 * @return
+	 */
+	public int size() {
+		return this.getCount();
 	}
 
 	public DTCell getCell(int rowIndex, int colIndex) {
@@ -2340,6 +2337,7 @@ public class DTTable implements Serializable {
 
 	/**
 	 * 从 ewa_table_name提取
+	 * 
 	 * @return
 	 */
 	public String getTableName() {
@@ -2348,6 +2346,7 @@ public class DTTable implements Serializable {
 
 	/**
 	 * 从 ewa_table_name提取
+	 * 
 	 * @param tableName
 	 */
 	public void setTableName(String tableName) {
