@@ -385,6 +385,12 @@
 		管理发布地址
 		https://oss.sonatype.org/
 	-->
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/gdx1231/emp-script</url>
+		</repository>
+	</distributionManagement>
 	<profiles>
 		<profile>
 			<id>release</id> <!-- 部署要用到 -->
