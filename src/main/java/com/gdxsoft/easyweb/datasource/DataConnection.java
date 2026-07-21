@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 
 import org.slf4j.Logger;
@@ -24,8 +23,6 @@ import org.slf4j.LoggerFactory;
 import com.gdxsoft.easyweb.conf.ConfExtraGlobal;
 import com.gdxsoft.easyweb.conf.ConfExtraGlobals;
 import com.gdxsoft.easyweb.conf.ConnectionConfig;
-import com.gdxsoft.easyweb.conf.ConnectionConfigs;
-import com.gdxsoft.easyweb.datasource.ConnectionSession;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.PageValue;
@@ -2151,138 +2148,152 @@ public class DataConnection {
 		return pv;
 	}
 
+	/**
+	 * Bind a single named parameter to a PreparedStatement at the given index.
+	 * <p>Optimized: debug strings only built when _DebugFrames is active;
+	 * null-safe on _RequestValue; constant-left .equals().
+	 */
 	public void addStatementParameter(PreparedStatement cst, String parameterName, int index) throws SQLException {
-		String dt;
+		if (this._RequestValue == null) {
+			cst.setObject(index, null);
+			return;
+		}
+
 		PageValue pv = this._RequestValue.getPageValues().getValue(parameterName);
+		String dt;
+
 		if (pv == null) {
 			pv = this.getParameterByEndWithType(parameterName);
 			dt = pv.getDataType();
 			if (pv.getLength() == -1) { // 不是扩展类型数据
-				// hash, md5 ...
 				String othVal = this._RequestValue.getOtherValue(parameterName);
 				if (othVal == null) {
 					cst.setObject(index, null);
-					this.writeDebug(this, "添加参数(Object)" + index, parameterName + "=null");
+					debugParam(parameterName, "Object", index, "null");
+				} else if (parameterName.endsWith(".HASH")) {
+					Integer intVal = Integer.parseInt(othVal);
+					cst.setInt(index, intVal);
+					debugParam(parameterName, "INTEGER", index, String.valueOf(intVal));
 				} else {
-					if (parameterName.endsWith(".HASH")) { // hashCode
-						Integer intVal = Integer.parseInt(othVal);
-						cst.setInt(index, intVal);
-						this.writeDebug(this, "添加参数(INTEGER)" + index, parameterName + "=" + intVal);
-					} else {
-						cst.setString(index, othVal);
-						String des1 = parameterName + "=" + othVal;
-						this.writeDebug(this, "添加参数(String)" + index, des1);
-					}
+					cst.setString(index, othVal);
+					debugParam(parameterName, "String", index, othVal);
 				}
 				return;
 			}
 		}
+
 		dt = pv.getDataType();
-		dt = (dt == null ? (pv.getValue() == null ? "STRING" : pv.getValue().getClass().getName()) : dt).toUpperCase()
-				.trim();
+		if (dt == null) {
+			dt = pv.getValue() == null ? "STRING" : pv.getValue().getClass().getName();
+		}
+		dt = dt.toUpperCase().trim();
 
-		String v1 = pv.getStringValue();
-		if ("JAVA.LANG.STRING".equals(dt) || "STRING".equals(dt)) {
-			// 字符串
+		// ── Type dispatch (constant-left .equals() for null-safety) ──
+		if ("STRING".equals(dt) || "JAVA.LANG.STRING".equals(dt)) {
+			String v1 = pv.getStringValue();
 			cst.setString(index, v1);
-			String des1 = parameterName + "=" + (v1 == null ? "null" : v1);
-			this.writeDebug(this, "添加参数(String)" + index, des1);
+			debugParam(parameterName, "String", index, v1 == null ? "null" : v1);
 			return;
 		}
-
-		if (dt.equals("BINARY") || dt.equals("[B") || dt.equals("BYTE[]")) {
+		if ("BINARY".equals(dt) || "[B".equals(dt) || "BYTE[]".equals(dt)) {
 			byte[] b = this.getParaBinary(pv);
-			String des = b == null ? "null" : b.length + "";
-			this.writeDebug(this, "添加参数(" + dt + "/byte[])" + index, parameterName + "=(" + des + ")");
 			cst.setBytes(index, b);
+			debugParam(parameterName, dt + "/byte[]", index, b == null ? "null" : "(" + b.length + ")");
 			return;
 		}
-		if (dt.equals("INT") || dt.equals("INTEGER") || dt.equals("JAVA.LANG.INTEGER")) {
+		if ("INT".equals(dt) || "INTEGER".equals(dt) || "JAVA.LANG.INTEGER".equals(dt)) {
 			Integer intVal = this.getParaInteger(pv);
 			if (intVal == null) {
 				cst.setNull(index, java.sql.Types.INTEGER);
-				this.writeDebug(this, "添加参数(" + dt + "/INT)" + index, parameterName + "=null");
+				debugParam(parameterName, dt + "/INT", index, "null");
 			} else {
 				cst.setInt(index, intVal);
-				this.writeDebug(this, "添加参数(" + dt + "/INT)" + index, parameterName + "=" + intVal);
+				debugParam(parameterName, dt + "/INT", index, String.valueOf(intVal));
 			}
 			return;
 		}
-		if (dt.equals("BIGINT") || dt.equals("LONG") || dt.equals("JAVA.LANG.LONG")) {
+		if ("BIGINT".equals(dt) || "LONG".equals(dt) || "JAVA.LANG.LONG".equals(dt)) {
 			Long longVal = this.getParaLong(pv);
 			if (longVal == null) {
 				cst.setNull(index, java.sql.Types.BIGINT);
-				this.writeDebug(this, "添加参数(" + dt + "/LONG)" + index, parameterName + "=null");
+				debugParam(parameterName, dt + "/LONG", index, "null");
 			} else {
 				cst.setLong(index, longVal);
-				this.writeDebug(this, "添加参数(" + dt + "/LONG)" + index, parameterName + "=" + longVal);
+				debugParam(parameterName, dt + "/LONG", index, String.valueOf(longVal));
 			}
 			return;
 		}
-		if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("JAVA.LANG.DOUBLE")) {
+		if ("NUMBER".equals(dt) || "DOUBLE".equals(dt) || "JAVA.LANG.DOUBLE".equals(dt)) {
 			BigDecimal dbVal = this.getParaBigDecimal(pv);
 			if (dbVal == null) {
 				cst.setNull(index, java.sql.Types.DOUBLE);
-				this.writeDebug(this, "添加参数(" + dt + "/BigDecimal)" + index, parameterName + "=null");
+				debugParam(parameterName, dt + "/BigDecimal", index, "null");
 			} else {
 				cst.setBigDecimal(index, dbVal);
-				// cst.setDouble(index, dbVal);
-				this.writeDebug(this, "添加参数(" + dt + "/BigDecimal)" + index, parameterName + "=" + dbVal);
+				debugParam(parameterName, dt + "/BigDecimal", index, dbVal.toString());
 			}
 			return;
 		}
-		if (dt.equals("DATE") || dt.equals("JAVA.UTIL.DATE") || dt.equals("JAVA.SQL.DATE")) {
+		if ("DATE".equals(dt) || "JAVA.UTIL.DATE".equals(dt) || "JAVA.SQL.DATE".equals(dt)) {
 			Timestamp t1 = this.getParaTimestamp(pv);
 			if (t1 == null) {
 				cst.setNull(index, java.sql.Types.TIMESTAMP);
-				this.writeDebug(this, "添加参数(Timestamp)" + index, parameterName + "=null");
+				debugParam(parameterName, "Timestamp", index, "null");
 			} else {
 				cst.setTimestamp(index, t1);
-				this.writeDebug(this, "添加参数(" + dt + ")/Timestamp" + index, parameterName + "=" + t1);
+				debugParam(parameterName, dt + "/Timestamp", index, t1.toString());
 			}
 			return;
 		}
-		if (dt.equals("BOOL") || dt.equals("BOOLEN") /* 拼写错误 */ || dt.equals("BOOLEAN")
-				|| dt.equals("JAVA.LANG.BOOLEAN")) {
-			boolean v = Utils.cvtBool(v1);
+		if ("BOOLEAN".equals(dt) || "BOOL".equals(dt) || "BOOLEN".equals(dt) || "JAVA.LANG.BOOLEAN".equals(dt)) {
+			boolean v = Utils.cvtBool(pv.getStringValue());
 			cst.setBoolean(index, v);
-			this.writeDebug(this, "添加参数(Bool)" + index, parameterName + "=v");
+			debugParam(parameterName, "Bool", index, String.valueOf(v));
 			return;
 		}
 		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT64".equals(dt) || "UINT64".equals(dt)) {
 			UInt64 uint64 = (UInt64) pv.getValue();
 			cst.setBigDecimal(index, new BigDecimal(uint64.bigInteger()));
-			this.writeDebug(this, "添加参数(" + dt + ")/BigDecimal" + index, parameterName + "=" + uint64);
+			debugParam(parameterName, dt + "/BigDecimal", index, uint64.toString());
 			return;
 		}
 		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT32".equals(dt) || "UINT32".equals(dt)) {
 			UInt32 uint32 = (UInt32) pv.getValue();
 			cst.setLong(index, uint32.longValue());
-			this.writeDebug(this, "添加参数(" + dt + ")/Long" + index, parameterName + "=" + uint32);
+			debugParam(parameterName, dt + "/Long", index, uint32.toString());
 			return;
 		}
 		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT16".equals(dt) || "UINT16".equals(dt)) {
 			UInt16 uint16 = (UInt16) pv.getValue();
 			cst.setInt(index, uint16.intValue());
-			this.writeDebug(this, "添加参数(" + dt + ")/Int" + index, parameterName + "=" + uint16);
+			debugParam(parameterName, dt + "/Int", index, uint16.toString());
 			return;
 		}
 		if ("JAVA.MATH.BIGDECIMAL".equals(dt) || "BIGDECIMAL".equals(dt)) {
 			BigDecimal bigd = (BigDecimal) pv.getValue();
 			cst.setBigDecimal(index, bigd);
-			this.writeDebug(this, "添加参数(" + dt + ")" + index, parameterName + "=" + bigd);
+			debugParam(parameterName, dt, index, bigd.toString());
 			return;
 		}
 		if ("JAVA.MATH.BIGINTEGER".equals(dt) || "BIGINTEGER".equals(dt)) {
 			BigInteger bigi = (BigInteger) pv.getValue();
 			cst.setBigDecimal(index, new BigDecimal(bigi));
-			this.writeDebug(this, "添加参数(" + dt + ")/BigDecimal" + index, parameterName + "=" + bigi);
+			debugParam(parameterName, dt + "/BigDecimal", index, bigi.toString());
 			return;
 		}
-		// 默认字符串字符串
-		cst.setString(index, v1);
-		String des1 = parameterName + "=" + (v1 == null ? "null" : v1);
-		this.writeDebug(this, "添加参数(" + dt + ")" + index, des1);
+		// 默认字符串
+		String fallbackVal = pv.getStringValue();
+		cst.setString(index, fallbackVal);
+		debugParam(parameterName, dt, index, fallbackVal == null ? "null" : fallbackVal);
+	}
+
+	/**
+	 * Lazy debug helper — string concatenation only when _DebugFrames is active.
+	 */
+	private void debugParam(String paramName, String type, int index, String value) {
+		if (_DebugFrames != null) {
+			writeDebug(this, "添加参数(" + type + ")" + index, paramName + "=" + value);
+		}
 	}
 
 	/**
