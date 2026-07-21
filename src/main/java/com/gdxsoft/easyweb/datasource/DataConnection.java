@@ -25,6 +25,7 @@ import com.gdxsoft.easyweb.conf.ConfExtraGlobal;
 import com.gdxsoft.easyweb.conf.ConfExtraGlobals;
 import com.gdxsoft.easyweb.conf.ConnectionConfig;
 import com.gdxsoft.easyweb.conf.ConnectionConfigs;
+import com.gdxsoft.easyweb.datasource.ConnectionSession;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.PageValue;
@@ -57,26 +58,14 @@ import com.gdxsoft.easyweb.utils.types.UInt64;
 public class DataConnection {
 	private static Logger LOGGER = LoggerFactory.getLogger(DataConnection.class);
 
-	private DataHelper _ds;
-	private PreparedStatement _pst;
-
-	private Statement _queryStatement;
+	/** Delegate for connection/transaction/statement lifecycle (God Class refactor). */
+	private ConnectionSession _session;
 
 	private String _errorMsg; // 错误信息和 SQL
 	private String _errorMsgOnly; // 只有错误信息
 
-	private MList _ResultSetList = new MList();
-	private String _DatabaseType;
-	private String _SchemaName;
-	private String _ConnectionString;
-	private ConnectionConfigs _Configs;
-	private ConnectionConfig _CurrentConfig;
-	private Connection _Connection;
 	private DebugFrames _DebugFrames;
 	private RequestValue _RequestValue;
-	private boolean _IsTrans;
-	private String _DataBaseName;
-
 	// 用于分割字符串，生成临时数据
 	private CreateSplitData _CreateSplitData;
 
@@ -426,7 +415,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String getDataBaseName() {
-		return _DataBaseName;
+		return _session.getDataBaseName();
 	}
 
 	/**
@@ -435,7 +424,7 @@ public class DataConnection {
 	 * @param dataBaseName
 	 */
 	public void setDataBaseName(String dataBaseName) {
-		_DataBaseName = dataBaseName;
+		_session.setDataBaseName(dataBaseName);
 	}
 
 	/**
@@ -444,32 +433,11 @@ public class DataConnection {
 	 * @return
 	 */
 	public boolean transBegin() {
-		try {
-			_ds.connect();
-			_Connection = _ds.getConnection();
-		} catch (Exception e2) {
-			_IsTrans = false;
-			LOGGER.error(e2.getLocalizedMessage());
-			this.setError(e2, "连接到数据库");
-			return false;
+		boolean ok = _session.transBegin();
+		if (!ok) {
+			this._errorMsg = "事务开始错误";
 		}
-		try {
-			_IsTrans = true;
-			_Connection.setAutoCommit(false);
-			LOGGER.debug("Start tansaction");
-			return true;
-		} catch (SQLException e) {
-			_IsTrans = false;
-			try {
-				_Connection.close();
-			} catch (SQLException e1) {
-				LOGGER.error(e1.getLocalizedMessage());
-				this.setError(e1, "关闭错误的事务");
-			}
-			LOGGER.error(e.getLocalizedMessage());
-			this.setError(e, "事务开始错误");
-			return false;
-		}
+		return ok;
 	}
 
 	/**
@@ -478,19 +446,11 @@ public class DataConnection {
 	 * @throws SQLException
 	 */
 	public boolean transCommit() {
-		try {
-			this._Connection.commit();
-			LOGGER.debug("Commit tansaction");
-			return true;
-		} catch (Exception e) {
-			LOGGER.error(e.getLocalizedMessage());
-			this.setError(e, "提交事务");
-			this.close();
-			return false;
-		} finally {
-			this._IsTrans = false;
+		boolean ok = _session.transCommit();
+		if (!ok) {
+			this._errorMsg = "提交事务失败";
 		}
-
+		return ok;
 	}
 
 	/**
@@ -499,31 +459,23 @@ public class DataConnection {
 	 * @throws SQLException
 	 */
 	public void transRollback() {
-		try {
-			this._Connection.rollback();
-			LOGGER.debug("Rollback tansaction");
-		} catch (SQLException e) {
-			LOGGER.error(e.getLocalizedMessage());
-			this.setError(e, "回滚事务");
-		} finally {
-			this.close();
-		}
+		_session.transRollback();
 	}
 
 	/**
 	 * 关闭事务连接
 	 */
 	public void transClose() {
-		this.close();
+		_session.transClose();
 	}
 
 	public ConnectionConfig getCurrentConfig() {
-		return this._CurrentConfig;
+		return _session.getCurrentConfig();
 	}
 
 	public DataConnection() {
 		try {
-			_Configs = ConnectionConfigs.instance();
+			_session = new ConnectionSession();
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
 			this._errorMsg = e.getMessage();
@@ -533,7 +485,7 @@ public class DataConnection {
 
 	public DataConnection(RequestValue rv) {
 		try {
-			_Configs = ConnectionConfigs.instance();
+			_session = new ConnectionSession();
 
 			this.setConfigName("");
 			this.setRequestValue(rv);
@@ -547,7 +499,7 @@ public class DataConnection {
 
 	public DataConnection(String configName, RequestValue rv) {
 		try {
-			_Configs = ConnectionConfigs.instance();
+			_session = new ConnectionSession(configName);
 
 			this.setConfigName(configName);
 			this.setRequestValue(rv);
@@ -560,13 +512,7 @@ public class DataConnection {
 	}
 
 	public void setConfigName(String configName) {
-		if (configName == null || !this._Configs.containsKey(configName.trim().toLowerCase())) {
-			// 第一个数据库配置
-			_CurrentConfig = this._Configs.getConfig(0);
-		} else {
-			_CurrentConfig = this._Configs.get(configName.trim().toLowerCase());
-		}
-		initConnection();
+		_session.setConfigName(configName);
 	}
 
 	/**
@@ -576,42 +522,25 @@ public class DataConnection {
 	 * @param dataBaseName
 	 */
 	public void setConfigName(String configName, String dataBaseName) {
-		this.setConfigName(configName);
-
-		initConnection();
+		_session.setConfigName(configName);
 	}
 
 	public boolean connect() {
-
-		try {
-			if (this._ds == null) {
-				this.initConnection();
-			}
-
-			_ds.connect();
-			return true;
-		} catch (Exception e) {
-			LOGGER.error(e.getLocalizedMessage());
-			return false;
-		}
+		return _session.connect();
 	}
 
 	private void initConnection() {
 		if (this._DebugFrames != null) {
 			this._DebugFrames.addDebug(this, "SQL", "[initConnection()] Start building connection. ("
-					+ this._CurrentConfig.getConnectionString() + ")");
+					+ _session.getCurrentConfig().getConnectionString() + ")");
 		}
 
-		_ds = new DataHelper(this._CurrentConfig);
+		_session.setCurrentConfig(_session.getCurrentConfig());
 
 		if (this._DebugFrames != null) {
 			this._DebugFrames.addDebug(this, "SQL",
-					"[initConnection()] build a connection. (" + this._CurrentConfig.getConnectionString() + ")");
+					"[initConnection()] build a connection. (" + _session.getCurrentConfig().getConnectionString() + ")");
 		}
-		this._ConnectionString = this._CurrentConfig.getConnectionString();
-		this._SchemaName = this._CurrentConfig.getSchemaName();
-		this._DatabaseType = this._CurrentConfig.getType();
-
 	}
 
 	public boolean executeQueryNoParameter(String sql) {
@@ -621,16 +550,16 @@ public class DataConnection {
 		debuginfo.append(sql);
 		writeDebug(this, "SQL", debuginfo.toString());
 
-		this.closeStatment(this._queryStatement);
+		this.closeStatment(_session.getQueryStatement());
 		try {
 			this.useDatabase();
 
 			sql = this.rebuildSql(sql);
 
-			_ds.connect();
+			_session.getDataHelper().connect();
 
-			this._queryStatement = _ds.getStatement();
-			ResultSet rs = _queryStatement.executeQuery(sql);
+			_session.setQueryStatement(_session.getDataHelper().getStatement());
+			ResultSet rs = _session.getQueryStatement().executeQuery(sql);
 			this.addResult(rs, sql, sql);
 			writeDebug(this, "SQL", "[executeQuery(sql)] End query.");
 			return true;
@@ -646,16 +575,7 @@ public class DataConnection {
 	}
 
 	private DataResult addResult(ResultSet rs, String sqlExecute, String sqlOrigin) {
-		DataResult ds = new DataResult();
-		ds.setIsEof(false);
-		ds.setIsNext(false);
-		ds.setResultSet(rs);
-
-		ds.setSqlExecute(sqlExecute);
-		ds.setSqlOrigin(sqlOrigin);
-		this._ResultSetList.add(ds);
-
-		return ds;
+		return _session.addResult(rs, sqlExecute, sqlOrigin);
 	}
 
 	private void executeEwaFunctions() {
@@ -855,7 +775,7 @@ public class DataConnection {
 				debuginfo.append(sql1);
 				writeDebug(this, "SQL", debuginfo.toString());
 			}
-			if (this._ds == null) {
+			if (_session.getDataHelper() == null) {
 				// 没有设置configName,取第一个配置
 				this.setConfigName(null);
 			}
@@ -864,28 +784,28 @@ public class DataConnection {
 
 			ResultSet rs;
 
-			this.closeStatment(this._queryStatement);
+			this.closeStatment(_session.getQueryStatement());
 			if (parameters.size() > 0) {
-				_pst = this._ds.getPreparedStatement(sql1);
+				_session.setPst(_session.getDataHelper().getPreparedStatement(sql1));
 				this._errorMsg = null;
 				// add parameter
-				addSqlParameter(parameters, _pst);
-				this._queryStatement = _pst;
-				rs = _pst.executeQuery();
+				addSqlParameter(parameters, _session.getPst());
+				_session.setQueryStatement(_session.getPst());
+				rs = _session.getPst().executeQuery();
 			} else {
-				_ds.connect();
+				_session.getDataHelper().connect();
 				this._errorMsg = null;
-				this._queryStatement = _ds.getStatement();
-				rs = this._queryStatement.executeQuery(sql1);
+				_session.setQueryStatement(_session.getDataHelper().getStatement());
+				rs = _session.getQueryStatement().executeQuery(sql1);
 			}
 			this.addResult(rs, sql, oriSql);
 			writeDebug(this, "SQL", "[executeQuery(sql,rv)] End query.");
 			return true;
 		} catch (Exception e) {
 			StringBuilder errInfo = new StringBuilder();
-			errInfo.append("\nconnStr=").append(this._ConnectionString).append("\nCurrentConfig:\n")
-					.append(_IsTrans ? "Transaction," : "No Transaction,").append("\nname=")
-					.append(this._CurrentConfig.getName()).append("\n").append(this._CurrentConfig.getConnectionString())
+			errInfo.append("\nconnStr=").append(_session.getConnectionString()).append("\nCurrentConfig:\n")
+					.append(_session.isTrans() ? "Transaction," : "No Transaction,").append("\nname=")
+					.append(_session.getCurrentConfig().getName()).append("\n").append(_session.getCurrentConfig().getConnectionString())
 					.append("\n\n").append(sql1).append("\n\n").append(e.getLocalizedMessage());
 			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
 			LOGGER.error(errInfo.toString());
@@ -904,18 +824,7 @@ public class DataConnection {
 	 * @throws SQLException
 	 */
 	public List<DataResult> getMoreResults() throws SQLException {
-		if (this._queryStatement == null) {
-			return null;
-		}
-		List<DataResult> lst = new ArrayList<>();
-		int inc = 0;
-		while (this._queryStatement.getMoreResults()) {
-			ResultSet rs = this._queryStatement.getResultSet();
-			DataResult ds = this.addResult(rs, "more", inc + "");
-			inc++;
-			lst.add(ds);
-		}
-		return lst;
+		return _session.getMoreResults();
 	}
 
 	/**
@@ -988,7 +897,7 @@ public class DataConnection {
 		sp.setSql(sql);
 
 		MStr sb = new MStr();
-		if (this._DatabaseType.equals("ORACLE")) {
+		if (_session.getDatabaseType().equals("ORACLE")) {
 			sb.append("SELECT * FROM (SELECT ROWNUM EMP__X___G____D_RN, ");
 			// if(fields.equals("*")){
 			sb.append("GGDDXX.*");
@@ -1001,7 +910,7 @@ public class DataConnection {
 			sb.append(")GGDDXX WHERE ROWNUM <=" + currentPage * pageSize);
 
 			sb.append(") AGDXA WHERE EMP__X___G____D_RN >" + (currentPage - 1) * pageSize);
-		} else if (this._DatabaseType.equals("MSSQL")) {
+		} else if (_session.getDatabaseType().equals("MSSQL")) {
 			MStr sqlTmp = new MStr();
 
 			if (sp.getGroupBy().length() > 0) {
@@ -1046,7 +955,7 @@ public class DataConnection {
 				sb.append(" AND " + currentPage * pageSize);
 				sb.append("\r\n ORDER BY EMP__X___G____D_RN");
 			}
-		} else if (this._DatabaseType.equals("HSQLDB") || this._DatabaseType.equals("MYSQL")) {
+		} else if (_session.getDatabaseType().equals("HSQLDB") || _session.getDatabaseType().equals("MYSQL")) {
 			sb.append(sql);
 			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);
 		} else { // 默认模式
@@ -1059,20 +968,12 @@ public class DataConnection {
 	}
 
 	public String closeStatment(Statement stmt) {
-		if (stmt == null) {
-			return null;
-		}
-		try {
-			stmt.close();
-			return null;
-		} catch (SQLException e) {
-			String err = e.getLocalizedMessage();
-			LOGGER.error("Close the statment {}", err);
+		String err = _session.closeStatment(stmt);
+		if (err != null) {
 			this.writeDebug(this, "ERR", err);
-			setError(e, "Close the statment");
-
-			return err;
+			setError(new SQLException(err), "Close the statment");
 		}
+		return err;
 	}
 	/**
 	 * Log and debug SQLWarnings from a Statement. Extracted to eliminate
@@ -1155,8 +1056,8 @@ public class DataConnection {
 				if (transcation) {
 					this.transCommit();
 				} else {
-					if (!this._Connection.getAutoCommit()) {
-						this._Connection.commit();
+					if (!_session.getConnection().getAutoCommit()) {
+						_session.getConnection().commit();
 					}
 				}
 			}
@@ -1418,15 +1319,15 @@ public class DataConnection {
 			// sqlserver 更换数据库
 			this.useDatabase();
 
-			closeStatment(_pst);
-			_pst = this._ds.getPreparedStatementAutoIncrement(sql1);
+			closeStatment(_session.getPst());
+			_session.setPst(_session.getDataHelper().getPreparedStatementAutoIncrement(sql1));
 			this.writeDebug(this, "SQL", "[创建自增] PST");
 			// add parameter
-			addSqlParameter(parameters, _pst);
-			_pst.executeUpdate();
+			addSqlParameter(parameters, _session.getPst());
+			_session.getPst().executeUpdate();
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
 
-			ResultSet rs = _pst.getGeneratedKeys();
+			ResultSet rs = _session.getPst().getGeneratedKeys();
 			if (rs.next()) {
 				autoKey = rs.getObject(1);
 				if (autoKey == null) {
@@ -1436,9 +1337,9 @@ public class DataConnection {
 				}
 			}
 
-			if (!this._IsTrans) {
-				if (!this._ds.getConnection().getAutoCommit()) {
-					this._ds.getConnection().commit();
+			if (!_session.isTrans()) {
+				if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+					_session.getDataHelper().getConnection().commit();
 				}
 			}
 			// 放到close处理，以便复用时不用重复创建
@@ -1515,22 +1416,22 @@ public class DataConnection {
 
 		try {
 			this.useDatabase();
-			closeStatment(_pst);
-			_pst = this._ds.getPreparedStatement(sql1);
+			closeStatment(_session.getPst());
+			_session.setPst(_session.getDataHelper().getPreparedStatement(sql1));
 			// add parameter
-			this.addSqlParameter(parameters, _pst);
-			_pst.executeUpdate();
+			this.addSqlParameter(parameters, _session.getPst());
+			_session.getPst().executeUpdate();
 
 			if (sql.toLowerCase().indexOf("update") != -1 || sql.toLowerCase().indexOf("insert") != -1
 					|| sql.toLowerCase().indexOf("delete") != -1) {
-				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + _pst.getUpdateCount());
+				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + _session.getPst().getUpdateCount());
 			} else {
-				logSqlWarnings(_pst, sql);
+				logSqlWarnings(_session.getPst(), sql);
 			}
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
-			if (!this._IsTrans) {
-				if (!this._ds.getConnection().getAutoCommit()) {
-					this._ds.getConnection().commit();
+			if (!_session.isTrans()) {
+				if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+					_session.getDataHelper().getConnection().commit();
 				}
 			}
 			// 放到close处理，以便复用时不用重复创建
@@ -1559,29 +1460,23 @@ public class DataConnection {
 	 * @throws SQLException
 	 */
 	public boolean useDatabase() throws Exception {
-		if (this._DataBaseName == null || this._DataBaseName.trim().length() == 0) {
+		if (_session.getDataBaseName() == null || _session.getDataBaseName().trim().length() == 0) {
 			return false;
 		}
+		String dbName = _session.getDataBaseName();
 		String sql = null;
 		if (SqlUtils.isMySql(this)) {
-			sql = "USE `" + this._DataBaseName + "`";
+			sql = "USE `" + dbName + "`";
 		} else if (SqlUtils.isSqlServer(this)) {
-			sql = "USE [" + this._DataBaseName + "]";
+			sql = "USE [" + dbName + "]";
 		}
 
 		if (sql != null) {
-			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Start update. (" + sql + ")");
-			Statement useDbSt = this._ds.getStatement();
-			try {
-				useDbSt.executeUpdate(sql);
-			} finally {
-				closeStatment(useDbSt);
-			}
-			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
-
+			this.writeDebug(this, "SQL", "[useDatabase] " + sql);
+			_session.useDatabase();
 			return true;
 		} else {
-			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Not sqlserve or mysql [" + this._DataBaseName + "].");
+			this.writeDebug(this, "SQL", "[useDatabase] Not sqlserver or mysql [" + dbName + "].");
 			return false;
 		}
 
@@ -1641,15 +1536,15 @@ public class DataConnection {
 			// sqlserver 更换数据库
 			this.useDatabase();
 
-			closeStatment(_pst);
-			_pst = this._ds.getPreparedStatement(sql1);
+			closeStatment(_session.getPst());
+			_session.setPst(_session.getDataHelper().getPreparedStatement(sql1));
 			// add parameter
-			addSqlParameter(parameters, _pst);
-			_pst.executeUpdate();
+			addSqlParameter(parameters, _session.getPst());
+			_session.getPst().executeUpdate();
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
-			if (!this._IsTrans) {
-				if (!this._ds.getConnection().getAutoCommit()) {
-					this._ds.getConnection().commit();
+			if (!_session.isTrans()) {
+				if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+					_session.getDataHelper().getConnection().commit();
 				}
 			}
 			// 放到close处理，以便复用时不用重复创建
@@ -1689,7 +1584,7 @@ public class DataConnection {
 		try {
 			this.useDatabase();
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql)] update. (" + sql + ")");
-			Statement st = this._ds.getStatement();
+			Statement st = _session.getDataHelper().getStatement();
 			st.executeUpdate(sql);
 
 			if (sql.toLowerCase().indexOf("update") != -1 || sql.toLowerCase().indexOf("insert") != -1
@@ -1700,9 +1595,9 @@ public class DataConnection {
 			}
 
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql,rv)] End update.");
-			if (!this._IsTrans) {
-				if (!this._ds.getConnection().getAutoCommit()) {
-					this._ds.getConnection().commit();
+			if (!_session.isTrans()) {
+				if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+					_session.getDataHelper().getConnection().commit();
 				}
 			}
 			closeStatment(st);
@@ -1747,8 +1642,8 @@ public class DataConnection {
 		}
 		int m1 = 0;
 		if (executeQuery(sb.toString())) {
-			int rsIndex = this._ResultSetList.size() - 1;
-			ResultSet rs = ((DataResult) this._ResultSetList.get(rsIndex)).getResultSet();
+			int rsIndex = _session.getResultSetList().size() - 1;
+			ResultSet rs = ((DataResult) _session.getResultSetList().get(rsIndex)).getResultSet();
 			try {
 				rs.next();
 				m1 = rs.getInt("GDX");
@@ -1764,7 +1659,7 @@ public class DataConnection {
 				} catch (SQLException e) {
 					LOGGER.error(e.getLocalizedMessage());
 				}
-				this._ResultSetList.removeAt(rsIndex);
+				_session.getResultSetList().removeAt(rsIndex);
 			}
 		}
 		return m1;
@@ -2464,20 +2359,7 @@ public class DataConnection {
 	 * 清除所有返回的 resultSet，当长期执行查询的时，会造成内存占用过高 关闭连接会自动执行清除
 	 */
 	public void clearResultSets() {
-		if (this._ResultSetList == null || this._ResultSetList.size() == 0) {
-			return;
-		}
-		for (int i = 0; i < this._ResultSetList.size(); i++) {
-			DataResult r = (DataResult) _ResultSetList.get(i);
-			try {
-				r.getResultSet().close();
-			} catch (SQLException e) {
-				LOGGER.error(e.getLocalizedMessage());
-				setError(e, "Error _resultSet close");
-			}
-		}
-		// 清除数据所有返回的 resultSet
-		this._ResultSetList.clear();
+		_session.clearResultSets();
 	}
 
 	/**
@@ -2491,17 +2373,10 @@ public class DataConnection {
 			this.writeDebug(this, "SQL", "删除分割临时数据 END.");
 			this._CreateSplitData = null;
 		}
-		// 清除所有返回的 resultSet，当长期执行查询的时，会造成内存占用过高
-		// 郭磊 2019-02-14
-		this.clearResultSets();
-		this.closeStatment(this._pst);
-		this.closeStatment(this._queryStatement);
 		if (_DebugFrames != null) {
 			_DebugFrames.addDebug(this, "SQL", "[close] Close connection.");
 		}
-		if (_ds != null) {
-			_ds.close();
-		}
+		_session.close();
 
 	}
 
@@ -2540,7 +2415,7 @@ public class DataConnection {
 	 */
 	private void setError(Exception e, String sql) {
 		this._errorMsg = "SQL: " + sql + "<br>\r\nERROR: " + e.getMessage() + "<br>DATASOURCE: "
-				+ this._CurrentConfig.getName() + "(" + this._ConnectionString + ")";
+				+ _session.getCurrentConfig().getName() + "(" + _session.getConnectionString() + ")";
 		this._errorMsgOnly = e.getMessage();
 		// LOGGER.error(this._errorMsg);
 	}
@@ -2643,13 +2518,13 @@ public class DataConnection {
 		sql1 = this.replaceSqlParameters(sql);
 		this.writeDebug(this, "开始执行", sql1);
 		try {
-			CallableStatement cst = this._ds.getCallableStatement(sql1);
+			CallableStatement cst = _session.getDataHelper().getCallableStatement(sql1);
 			outValues = this.addSqlParameter(al, cst);
 			cst.execute();
 
 			this.getOutValues(outValues, cst);
-			if (!this._ds.getConnection().getAutoCommit()) {
-				this._ds.getConnection().commit();
+			if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+				_session.getDataHelper().getConnection().commit();
 			}
 			cst.close();
 		} catch (Exception e) {
@@ -2705,8 +2580,8 @@ public class DataConnection {
 		this.writeDebug(this, "开始执行", sql1);
 		int inc = 0;
 		try {
-			CallableStatement cst = this._ds.getCallableStatement(sql1);
-			this._queryStatement = cst;
+			CallableStatement cst = _session.getDataHelper().getCallableStatement(sql1);
+			_session.setQueryStatement(cst);
 
 			outValues = this.addSqlParameter(al, cst);
 			this.getOutValues(outValues, cst);
@@ -2715,8 +2590,8 @@ public class DataConnection {
 
 			logSqlWarnings(cst, sql);
 
-			if (!this._ds.getConnection().getAutoCommit()) {
-				this._ds.getConnection().commit();
+			if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+				_session.getDataHelper().getConnection().commit();
 			}
 
 			DataResult ds0 = this.addResult(rs, sql, sql1);
@@ -2755,13 +2630,13 @@ public class DataConnection {
 
 		this.writeDebug(this, "开始执行", sql);
 		try {
-			CallableStatement cst = this._ds.getCallableStatement(sql);
+			CallableStatement cst = _session.getDataHelper().getCallableStatement(sql);
 			cst.execute();
 
 			logSqlWarnings(cst, sql);
 
-			if (!this._ds.getConnection().getAutoCommit()) {
-				this._ds.getConnection().commit();
+			if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+				_session.getDataHelper().getConnection().commit();
 			}
 			cst.close();
 		} catch (Exception e) {
@@ -2853,11 +2728,11 @@ public class DataConnection {
 	}
 
 	public String getConnectionString() {
-		return _ConnectionString;
+		return _session.getConnectionString();
 	}
 
 	public String getDatabaseType() {
-		return _DatabaseType;
+		return _session.getDatabaseType();
 	}
 
 	/**
@@ -2890,7 +2765,7 @@ public class DataConnection {
 		}
 		// 先获取字符串的转换的 yyyy-MM-dd HH:mm:ss 表达式（2011-04-02 11:29:31）
 		String s2 = Utils.getDateTimeString(new Date(dt.getTime()));
-		if ("ORACLE".equalsIgnoreCase(this._DatabaseType)) {
+		if ("ORACLE".equalsIgnoreCase(_session.getDatabaseType())) {
 			return "to_date('" + s2 + "','YYYY-MM-DD HH24:MI:SS')";
 		} else {
 			// ISO 8601 格式（YYYY-MM-DD HH:MI:SS）
@@ -2929,25 +2804,22 @@ public class DataConnection {
 	}
 
 	public String getSchemaName() {
-		return _SchemaName;
+		return _session.getSchemaName();
 	}
 
 	public Connection getConnection() {
-		if (this._Connection == null) {
-			this._Connection = _ds.getConnection();
-		}
-		return _Connection;
+		return _session.getConnection();
 	}
 
 	public void setConnection(Connection cnn) {
-		this._Connection = cnn;
+		_session.setConnection(cnn);
 	}
 
 	/**
 	 * @param currentConfig the _CurrentConfig to set
 	 */
 	public void setCurrentConfig(ConnectionConfig currentConfig) {
-		_CurrentConfig = currentConfig;
+		_session.setCurrentConfig(currentConfig);
 		initConnection();
 	}
 
@@ -2986,11 +2858,11 @@ public class DataConnection {
 	 * @return the _ResultSetList
 	 */
 	public MList getResultSetList() {
-		return _ResultSetList;
+		return _session.getResultSetList();
 	}
 
 	public DataResult getLastResult() {
-		return (DataResult) this._ResultSetList.getLast();
+		return _session.getLastResult();
 	}
 
 	/**
@@ -2999,7 +2871,7 @@ public class DataConnection {
 	 * @return the _IsTrans
 	 */
 	public boolean isTrans() {
-		return _IsTrans;
+		return _session.isTrans();
 	}
 
 	/**
@@ -3015,14 +2887,14 @@ public class DataConnection {
 	 * @return the DataHelper
 	 */
 	public DataHelper getDataHelper() {
-		return _ds;
+		return _session.getDataHelper();
 	}
 
 	/**
 	 * @param dataHelper the DataHelper to set
 	 */
 	public void setDataHelper(DataHelper dataHelper) {
-		this._ds = dataHelper;
+		_session.setDataHelper(dataHelper);
 	}
 
 	/**
