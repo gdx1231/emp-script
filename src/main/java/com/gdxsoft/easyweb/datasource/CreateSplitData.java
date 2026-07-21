@@ -54,9 +54,7 @@ public class CreateSplitData {
 		String databaseType = this.cnn.getDatabaseType();
 		boolean sqlserver = "sqlserver".equalsIgnoreCase(databaseType) || "mssql".equalsIgnoreCase(databaseType);
 		boolean mysql = "MYSQL".equalsIgnoreCase(databaseType);
-		this.isPg = "POSTGRESQL".equalsIgnoreCase(databaseType)
-				|| "POSTGRES".equalsIgnoreCase(databaseType)
-				|| "PG".equalsIgnoreCase(databaseType);
+		this.isPg = SqlUtils.isPostgreSql(databaseType); // 含 KingbaseES 人大金仓
 
 		if (sqlserver) {
 			this.tempTableName = "[#EWA_SPT_DATA_" + this.uid + "]"; // 使用内存
