@@ -25,7 +25,7 @@ public class CreateSplitData {
 	private static Logger LOGGER = LoggerFactory.getLogger(CreateSplitData.class);
 	private RequestValue rv_;
 
-	// _EWA_SPT_DATA.tag和数据列表
+	// _EWA_SPT_DATA.tag和数据列表（PG 不使用）
 	private HashMap<String, ArrayList<String>> tempData_;
 	// 分割表达式和 tempData_.key （_EWA_SPT_DATA.tag）的关系表
 	private HashMap<String, String> keyMap_;
@@ -40,6 +40,9 @@ public class CreateSplitData {
 	private boolean tempTableCreated;
 	private boolean dropOnClose;
 
+	/** PostgreSQL — use unnest(string_to_array(...)) inline, no temp table. */
+	boolean isPg;
+
 	public CreateSplitData(RequestValue rv, DataConnection cnn) {
 		this.rv_ = rv;
 		this.cnn = cnn;
@@ -51,13 +54,20 @@ public class CreateSplitData {
 		String databaseType = this.cnn.getDatabaseType();
 		boolean sqlserver = "sqlserver".equalsIgnoreCase(databaseType) || "mssql".equalsIgnoreCase(databaseType);
 		boolean mysql = "MYSQL".equalsIgnoreCase(databaseType);
+		this.isPg = "POSTGRESQL".equalsIgnoreCase(databaseType)
+				|| "POSTGRES".equalsIgnoreCase(databaseType)
+				|| "PG".equalsIgnoreCase(databaseType);
+
 		if (sqlserver) {
 			this.tempTableName = "[#EWA_SPT_DATA_" + this.uid + "]"; // 使用内存
 			dropOnClose = true;
 		} else if (mysql) {
-			// this.tempTableName = "`EWA_SPT_DATA_" + this.uid + "`"; // 使用内存
-			// dropOnClose = true;
+			// MYSQL 临时表在一条查询里只能打开一次
+			// ERROR 1137 (HY000): Can't reopen table: '_ewa_spt_data'
 			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
+		} else if (isPg) {
+			// PG 使用 unnest(string_to_array(...)) 内联，不需要物理表
+			this.tempTableName = null;
 		} else {
 			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
 		}
@@ -68,6 +78,10 @@ public class CreateSplitData {
 	 */
 	public void createEwaSplitTempData() {
 		if (this.getTempData().size() == 0) {
+			return;
+		}
+		// PG 使用 unnest 内联，无临时表
+		if (isPg) {
 			return;
 		}
 		String databaseType = this.cnn.getDatabaseType();
@@ -151,6 +165,10 @@ public class CreateSplitData {
 		if (this.getTempData().size() == 0) {
 			return;
 		}
+		// PG 使用 unnest 内联，无临时表需要清理
+		if (isPg) {
+			return;
+		}
 		LOGGER.debug("clearEwaSplitTempData, table={}, dropOnClose={}", this.tempTableName, this.dropOnClose);
 		if (dropOnClose) {
 			String sqlDrop = "drop table " + this.tempTableName;
@@ -210,9 +228,68 @@ public class CreateSplitData {
 		}
 
 		String exp = sql.substring(loc, locEnd + 1);
-		String dataExp = insertTmpData(exp);
-		sql = sql.replace(exp, "(select idx, col from " + this.tempTableName + " where tag='" + dataExp + "')");
+
+		if (isPg) {
+			// PG: 使用 unnest(string_to_array(...)) 内联，零 IO，无临时表
+			String pgInline = buildPgUnnest(exp);
+			if (pgInline != null) {
+				sql = sql.replace(exp, pgInline);
+			}
+		} else {
+			String dataExp = insertTmpData(exp);
+			if (dataExp != null) {
+				sql = sql.replace(exp,
+						"(select idx, col from " + this.tempTableName + " where tag='" + dataExp + "')");
+			}
+		}
 		return sql;
+	}
+
+	/**
+	 * Parse an ewa_split expression and return a PG inline subquery using
+	 * {@code unnest(string_to_array(...)) WITH ORDINALITY}, avoiding any
+	 * temporary-table I/O.
+	 *
+	 * <p>Example transformation:
+	 * <pre>{@code
+	 *   ewa_split(@ids, ',')
+	 *   →
+	 *   (SELECT ordinality - 1 AS idx, t.val AS col
+	 *    FROM unnest(string_to_array('1,2,3', ',')) WITH ORDINALITY AS t(val, ordinality))
+	 * }</pre>
+	 *
+	 * @param exp the full ewa_split expression, e.g. {@code EWA_SPLIT(@ids, ',')}
+	 * @return a PG subquery that returns (idx, col), or null if params are missing
+	 */
+	String buildPgUnnest(String exp) {
+		MListStr paras = Utils.getParameters(exp, "@");
+		if (paras.size() == 0) {
+			return null;
+		}
+		String paramName = paras.get(0);
+		String v1 = this.rv_.getString(paramName);
+		if (v1 == null) {
+			// 空值 → 返回空结果集
+			return "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
+		}
+
+		int loc0 = exp.indexOf(",");
+		int loc1 = exp.lastIndexOf(")");
+		String delimiter = loc0 >= 0 && loc1 > loc0
+				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
+				: ",";
+
+		// 转义 PG 字符串字面量中的特殊字符
+		String escapedValue = v1.replace("'", "''");
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("(SELECT ordinality - 1 AS idx, t.val AS col ");
+		sb.append("FROM unnest(string_to_array('");
+		sb.append(escapedValue);
+		sb.append("', '");
+		sb.append(delimiter.replace("'", "''"));
+		sb.append("')) WITH ORDINALITY AS t(val, ordinality))");
+		return sb.toString();
 	}
 
 	private String insertTmpData(String para) {
