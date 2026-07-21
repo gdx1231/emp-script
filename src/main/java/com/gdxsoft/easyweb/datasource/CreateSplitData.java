@@ -52,8 +52,8 @@ public class CreateSplitData {
 		this.keyMap_ = new HashMap<>();
 
 		String databaseType = this.cnn.getDatabaseType();
-		boolean sqlserver = "sqlserver".equalsIgnoreCase(databaseType) || "mssql".equalsIgnoreCase(databaseType);
-		boolean mysql = "MYSQL".equalsIgnoreCase(databaseType);
+		boolean sqlserver = SqlUtils.isSqlServer(databaseType);
+		boolean mysql = SqlUtils.isMySql(databaseType);
 		this.isPg = SqlUtils.isPostgreSql(databaseType); // 含 KingbaseES 人大金仓
 
 		if (sqlserver) {
@@ -83,8 +83,8 @@ public class CreateSplitData {
 			return;
 		}
 		String databaseType = this.cnn.getDatabaseType();
-		boolean mysql = "MYSQL".equalsIgnoreCase(databaseType);
-		boolean sqlserver = "sqlserver".equalsIgnoreCase(databaseType) || "mssql".equalsIgnoreCase(databaseType);
+		boolean mysql = SqlUtils.isMySql(databaseType);
+		boolean sqlserver = SqlUtils.isSqlServer(databaseType);
 		if (!tempTableCreated) {
 			if (sqlserver) {
 				String sqlCreate = DDL_SQLSERVER.replace("_ewa_spt_data", this.tempTableName);
