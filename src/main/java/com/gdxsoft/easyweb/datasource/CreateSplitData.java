@@ -42,6 +42,8 @@ public class CreateSplitData {
 
 	/** PostgreSQL — use unnest(string_to_array(...)) inline, no temp table. */
 	boolean isPg;
+	/** Oracle / 达梦DM — use XMLTABLE inline, no temp table. */
+	boolean isOracle;
 
 	public CreateSplitData(RequestValue rv, DataConnection cnn) {
 		this.rv_ = rv;
@@ -54,7 +56,8 @@ public class CreateSplitData {
 		String databaseType = this.cnn.getDatabaseType();
 		boolean sqlserver = SqlUtils.isSqlServer(databaseType);
 		boolean mysql = SqlUtils.isMySql(databaseType);
-		this.isPg = SqlUtils.isPostgreSql(databaseType); // 含 KingbaseES 人大金仓
+		this.isPg = SqlUtils.isPostgreSql(databaseType);
+		this.isOracle = SqlUtils.isOracle(databaseType); // 含达梦DM
 
 		if (sqlserver) {
 			this.tempTableName = "[#EWA_SPT_DATA_" + this.uid + "]"; // 使用内存
@@ -63,8 +66,8 @@ public class CreateSplitData {
 			// MYSQL 临时表在一条查询里只能打开一次
 			// ERROR 1137 (HY000): Can't reopen table: '_ewa_spt_data'
 			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
-		} else if (isPg) {
-			// PG 使用 unnest(string_to_array(...)) 内联，不需要物理表
+		} else if (isPg || isOracle) {
+			// PG/Oracle 内联方案，零 IO，不需要物理表
 			this.tempTableName = null;
 		} else {
 			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
@@ -78,8 +81,8 @@ public class CreateSplitData {
 		if (this.getTempData().size() == 0) {
 			return;
 		}
-		// PG 使用 unnest 内联，无临时表
-		if (isPg) {
+		// PG/Oracle 内联，无临时表
+		if (isPg || isOracle) {
 			return;
 		}
 		String databaseType = this.cnn.getDatabaseType();
@@ -163,8 +166,8 @@ public class CreateSplitData {
 		if (this.getTempData().size() == 0) {
 			return;
 		}
-		// PG 使用 unnest 内联，无临时表需要清理
-		if (isPg) {
+		// PG/Oracle 内联，无临时表需要清理
+		if (isPg || isOracle) {
 			return;
 		}
 		LOGGER.debug("clearEwaSplitTempData, table={}, dropOnClose={}", this.tempTableName, this.dropOnClose);
@@ -228,10 +231,14 @@ public class CreateSplitData {
 		String exp = sql.substring(loc, locEnd + 1);
 
 		if (isPg) {
-			// PG: 使用 unnest(string_to_array(...)) 内联，零 IO，无临时表
 			String pgInline = buildPgUnnest(exp);
 			if (pgInline != null) {
 				sql = sql.replace(exp, pgInline);
+			}
+		} else if (isOracle) {
+			String oraInline = buildOracleXmltable(exp);
+			if (oraInline != null) {
+				sql = sql.replace(exp, oraInline);
 			}
 		} else {
 			String dataExp = insertTmpData(exp);
@@ -287,6 +294,63 @@ public class CreateSplitData {
 		sb.append("', '");
 		sb.append(delimiter.replace("'", "''"));
 		sb.append("')) WITH ORDINALITY AS t(val, ordinality))");
+		return sb.toString();
+	}
+
+	/**
+	 * Parse an ewa_split expression and return an Oracle inline subquery using
+	 * {@code XMLTABLE}, avoiding temporary-table I/O.
+	 *
+	 * <p>Example transformation:
+	 * <pre>{@code
+	 *   ewa_split(@ids, ',')
+	 *   →
+	 *   (SELECT ROWNUM - 1 AS idx, TRIM(COLUMN_VALUE) AS col
+	 *    FROM XMLTABLE(('"' || REPLACE('1,2,3', ',', '","') || '"')))
+	 * }</pre>
+	 *
+	 * <p>Values containing XML-special characters ({@code " < > &}) are escaped.
+	 *
+	 * @param exp the full ewa_split expression, e.g. {@code EWA_SPLIT(@ids, ',')}
+	 * @return an Oracle subquery returning (idx, col), or null if params missing
+	 */
+	String buildOracleXmltable(String exp) {
+		MListStr paras = Utils.getParameters(exp, "@");
+		if (paras.size() == 0) {
+			return null;
+		}
+		String paramName = paras.get(0);
+		String v1 = this.rv_.getString(paramName);
+		if (v1 == null) {
+			return "(SELECT 0 AS idx, '' AS col FROM DUAL WHERE 1=0)";
+		}
+
+		int loc0 = exp.indexOf(",");
+		int loc1 = exp.lastIndexOf(")");
+		String delimiter = loc0 >= 0 && loc1 > loc0
+				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
+				: ",";
+
+		// Escape XML special characters in values
+		String escapedValue = v1
+				.replace("&", "&amp;")
+				.replace("\"", "&quot;")
+				.replace("<", "&lt;")
+				.replace(">", "&gt;");
+
+		String escapedDelimiter = delimiter
+				.replace("&", "&amp;")
+				.replace("\"", "&quot;")
+				.replace("<", "&lt;")
+				.replace(">", "&gt;");
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("(SELECT ROWNUM - 1 AS idx, TRIM(COLUMN_VALUE) AS col ");
+		sb.append("FROM XMLTABLE(('\"' || REPLACE('");
+		sb.append(escapedValue);
+		sb.append("', '");
+		sb.append(escapedDelimiter);
+		sb.append("', '\",\"') || '\"')))");
 		return sb.toString();
 	}
 

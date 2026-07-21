@@ -1,7 +1,5 @@
 package com.gdxsoft.easyweb.datasource;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,19 +7,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.conf.ConfExtraGlobal;
-import com.gdxsoft.easyweb.conf.ConfExtraGlobals;
 import com.gdxsoft.easyweb.conf.ConnectionConfig;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.debug.DebugFrames;
@@ -29,16 +22,11 @@ import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
-import com.gdxsoft.easyweb.utils.UFormat;
-import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
-import com.gdxsoft.easyweb.utils.types.UInt16;
-import com.gdxsoft.easyweb.utils.types.UInt32;
-import com.gdxsoft.easyweb.utils.types.UInt64;
 
 /**
  * Database connection wrapper providing SQL execution, transaction management,

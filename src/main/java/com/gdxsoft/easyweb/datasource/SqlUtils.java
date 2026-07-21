@@ -411,6 +411,7 @@ public class SqlUtils {
 
 	/**
 	 * MySQL or MariaDB
+	 * 
 	 * @param databaseType
 	 * @return
 	 */
@@ -438,13 +439,16 @@ public class SqlUtils {
 	}
 
 	/**
-	 * PostgreSQL or KingbaseES/ Kingbase (人大金仓)
+	 * PostgreSQL/PG/Postgre/Postgres or KingbaseES/ Kingbase (人大金仓)
+	 * 
 	 * @param databaseType
 	 * @return
 	 */
 	public static boolean isPostgreSql(String databaseType) {
-		//KingbaseES 人大金仓
-		return "PostgreSql".equalsIgnoreCase(databaseType) || "KingbaseES".equalsIgnoreCase(databaseType) || "Kingbase".equalsIgnoreCase(databaseType);
+		// KingbaseES 人大金仓
+		return "PostgreSql".equalsIgnoreCase(databaseType) || "PG".equalsIgnoreCase(databaseType)
+				|| "Postgre".equalsIgnoreCase(databaseType) || "Postgres".equalsIgnoreCase(databaseType)
+				|| "KingbaseES".equalsIgnoreCase(databaseType) || "Kingbase".equalsIgnoreCase(databaseType);
 	}
 
 	public static boolean isPostgreSql(DataConnection cnn) {
@@ -453,11 +457,12 @@ public class SqlUtils {
 
 	/**
 	 * Oracle or DM达梦
+	 * 
 	 * @param databaseType
 	 * @return
 	 */
 	public static boolean isOracle(String databaseType) {
-		//达梦 DM（国产主流数据库，仿 Oracle，小调整）
+		// 达梦 DM（国产主流数据库，仿 Oracle，小调整）
 		return "Oracle".equalsIgnoreCase(databaseType) || "DM".equalsIgnoreCase(databaseType);
 	}
 
@@ -467,6 +472,7 @@ public class SqlUtils {
 
 	/**
 	 * HSQLDB or H2
+	 * 
 	 * @param databaseType
 	 * @return
 	 */
@@ -480,6 +486,7 @@ public class SqlUtils {
 
 	/**
 	 * SQLite
+	 * 
 	 * @param databaseType
 	 * @return
 	 */
@@ -601,26 +608,20 @@ public class SqlUtils {
 	// ==================== SQL Safety Check ====================
 
 	/** Allowed DDL prefixes — checked first, before blacklist */
-	private static final Set<String> ALLOWED_DDL = new HashSet<>(Arrays.asList(
-			"CREATE TEMPORARY ", "CREATE GLOBAL TEMPORARY ", "CREATE LOCAL TEMPORARY ",
-			"CREATE TEMP ", "DROP TEMPORARY "
-	));
+	private static final Set<String> ALLOWED_DDL = new HashSet<>(Arrays.asList("CREATE TEMPORARY ",
+			"CREATE GLOBAL TEMPORARY ", "CREATE LOCAL TEMPORARY ", "CREATE TEMP ", "DROP TEMPORARY "));
 
-	/** Forbidden statement prefixes — any statement starting with these is blocked */
-	private static final Set<String> FORBIDDEN_PREFIXES = new HashSet<>(Arrays.asList(
-			"CREATE ", "ALTER ", "DROP ", "TRUNCATE ", "RENAME ",
-			"GRANT ", "REVOKE ", "KILL ", "SHUTDOWN ", "FLUSH ",
-			"PURGE ", "RESET ", "LOCK ", "HANDLER ", "INSTALL ", "UNINSTALL ",
-			"ANALYZE ", "CHECKSUM ", "OPTIMIZE ", "REPAIR ",
-			"CACHE ", "BACKUP ", "RESTORE ", "CHECK TABLE ",
-			"LOAD ", "REPLACE ", "XA ",
-			"SET GLOBAL ", "SET PERSIST "
-	));
+	/**
+	 * Forbidden statement prefixes — any statement starting with these is blocked
+	 */
+	private static final Set<String> FORBIDDEN_PREFIXES = new HashSet<>(Arrays.asList("CREATE ", "ALTER ", "DROP ",
+			"TRUNCATE ", "RENAME ", "GRANT ", "REVOKE ", "KILL ", "SHUTDOWN ", "FLUSH ", "PURGE ", "RESET ", "LOCK ",
+			"HANDLER ", "INSTALL ", "UNINSTALL ", "ANALYZE ", "CHECKSUM ", "OPTIMIZE ", "REPAIR ", "CACHE ", "BACKUP ",
+			"RESTORE ", "CHECK TABLE ", "LOAD ", "REPLACE ", "XA ", "SET GLOBAL ", "SET PERSIST "));
 
 	/** Forbidden substrings — statement containing these anywhere is blocked */
-	private static final Set<String> FORBIDDEN_CONTAINS = new HashSet<>(Arrays.asList(
-			" INTO OUTFILE ", " INTO DUMPFILE "
-	));
+	private static final Set<String> FORBIDDEN_CONTAINS = new HashSet<>(
+			Arrays.asList(" INTO OUTFILE ", " INTO DUMPFILE "));
 
 	/**
 	 * Check SQL for dangerous operations (DDL, destructive DML, file I/O, admin
@@ -672,7 +673,7 @@ public class SqlUtils {
 			}
 
 			// 5. SELECT INTO (creates new table, not INSERT INTO).
-			//    Allow INTO @variable (MySQL user variable assignment).
+			// Allow INTO @variable (MySQL user variable assignment).
 			if (!upper.startsWith("INSERT ")) {
 				int si = upper.indexOf("SELECT ");
 				int ii = si >= 0 ? upper.indexOf(" INTO ", si) : -1;

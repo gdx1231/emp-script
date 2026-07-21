@@ -143,12 +143,83 @@ class CreateSplitDataTest {
 		c.close();
 	}
 
+
+	// ═══════════════════════════════════════════════════════════
+	//  Oracle inline path (unit tests via buildOracleXmltable)
+	// ═══════════════════════════════════════════════════════════
+
+	@Test
+	@Order(6)
+	void testBuildOracleXmltableComma() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("IDS", "1,2,3", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isOracle = true;
+
+		String result = csd.buildOracleXmltable("EWA_SPLIT(@IDS, ',')");
+		assertNotNull(result);
+		assertTrue(result.contains("XMLTABLE"), "Should use XMLTABLE");
+		assertTrue(result.contains("ROWNUM - 1 AS idx"), "0-based idx");
+		assertTrue(result.contains("TRIM(COLUMN_VALUE) AS col"), "Should alias as col");
+		assertTrue(result.contains("REPLACE('1,2,3'"), "Should contain split values");
+		assertFalse(result.contains("_EWA_SPT_DATA"), "No temp table on Oracle");
+		c.close();
+	}
+
+	@Test
+	@Order(7)
+	void testBuildOracleXmltableCustomDelimiter() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("TAGS", "a|b|c", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isOracle = true;
+
+		String result = csd.buildOracleXmltable("EWA_SPLIT(@TAGS, '|')");
+		assertNotNull(result);
+		assertTrue(result.contains("REPLACE('a|b|c', '|'"), "Should use custom delimiter");
+		c.close();
+	}
+
+	@Test
+	@Order(8)
+	void testBuildOracleXmltableNullValue() {
+		RequestValue rv = new RequestValue();
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isOracle = true;
+
+		String result = csd.buildOracleXmltable("EWA_SPLIT(@MISSING, ',')");
+		assertNotNull(result);
+		assertTrue(result.contains("WHERE 1=0"), "Null value → empty result set");
+		c.close();
+	}
+
+	@Test
+	@Order(9)
+	void testBuildOracleXmltableXmlEscaping() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("VAL", "a<b&c>d\"e", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isOracle = true;
+
+		String result = csd.buildOracleXmltable("EWA_SPLIT(@VAL, ',')");
+		assertNotNull(result);
+		assertTrue(result.contains("&amp;"), "& should be escaped");
+		assertTrue(result.contains("&lt;"), "< should be escaped");
+		assertTrue(result.contains("&gt;"), "> should be escaped");
+		assertTrue(result.contains("&quot;"), "\" should be escaped");
+		c.close();
+	}
+
 	// ═══════════════════════════════════════════════════════════════
 	//  HSQLDB temp-table path (integration)
 	// ═══════════════════════════════════════════════════════════════
 
 	@Test
-	@Order(10)
+	@Order(15)
 	void testReplaceSplitDataHsqldb() throws Exception {
 		conn.executeUpdateNoParameter("DELETE FROM _EWA_SPT_DATA");
 		conn.executeUpdateNoParameter("DELETE FROM test_split");
@@ -169,22 +240,22 @@ class CreateSplitDataTest {
 	}
 
 	@Test
-	@Order(11)
-	void testCreateSplitDataDetectsPg() {
-		// Test that isPg is correctly set for different type strings
+	@Order(16)
+	void testCreateSplitDataDetectsDb() {
+		// Test isPg/isOracle detection
 		RequestValue rv = new RequestValue();
 		DataConnection c = new DataConnection(CFG, rv);
 
-		// HSQLDB → not PG
+		// HSQLDB → not PG, not Oracle
 		CreateSplitData csd = new CreateSplitData(rv, c);
 		assertFalse(csd.isPg, "HSQLDB should NOT be detected as PG");
-
+		assertFalse(csd.isOracle, "HSQLDB should NOT be detected as Oracle");
 		c.close();
 	}
 
 	@Test
-	@Order(12)
-	void testClearEwaSplitTempDataSkipsPg() {
+	@Order(17)
+	void testClearEwaSplitTempDataSkipsInline() {
 		RequestValue rv = new RequestValue();
 		rv.addValue("IDS", "1,2,3", PageValueTag.FORM);
 		DataConnection c = new DataConnection(CFG, rv);
@@ -192,8 +263,11 @@ class CreateSplitDataTest {
 
 		// Force PG mode
 		csd.isPg = true;
+		csd.isOracle = true;
 		// Should not throw even with no temp table
 		assertDoesNotThrow(() -> csd.clearEwaSplitTempData());
+		// No temp data should be created
+		assertEquals(0, csd.getTempData().size());
 
 		c.close();
 	}
