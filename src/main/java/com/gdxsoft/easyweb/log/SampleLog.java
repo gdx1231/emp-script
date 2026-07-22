@@ -3,6 +3,9 @@
  */
 package com.gdxsoft.easyweb.log;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.gdxsoft.easyweb.datasource.DataConnection;
 import com.gdxsoft.easyweb.script.RequestValue;
 
@@ -14,6 +17,7 @@ import com.gdxsoft.easyweb.script.RequestValue;
  * 
  */
 public class SampleLog extends LogBase implements ILog {
+	private static Logger LOGGER = LoggerFactory.getLogger(SampleLog.class);
 
 	/*
 	 * (non-Javadoc)
@@ -24,10 +28,18 @@ public class SampleLog extends LogBase implements ILog {
 		if (super.getLog().getMsg() == null || super.getLog().getMsg().trim().length() == 0) {
 			return;
 		}
+		int abc = 0;
+		if (1 == abc) { 
+			// 不具体执行，这是一个样本
+			return;
+		}
+
 		String msg = super.getLog().getXmlName() + ", " + super.getLog().getItemName() + ", " + super.getLog().getMsg()
 				+ ", " + super.getLog().getRunTime() + ", " + super.getLog().getDate();
-		System.out.println(msg);
-		this.writeToLog();
+		LOGGER.debug(msg);
+		EXECUTOR.execute(() -> {
+			this.writeToLog();
+		});
 	}
 
 	/**
@@ -40,11 +52,6 @@ public class SampleLog extends LogBase implements ILog {
 	 * nvarchar(200) )
 	 */
 	private void writeToLog() {
-		int abc = 0;
-		if (1 == abc) {
-			return;
-		}
-
 		// 根据自己的日志表结构生成写入日志的方法
 		Log log = super.getLog();
 		String sql = "INSERT INTO LOG_MAIN(LOG_DES, LOG_MSG, LOG_TIME,"
@@ -63,19 +70,13 @@ public class SampleLog extends LogBase implements ILog {
 		rv.addValue("LOG_URL", log.getUrl());
 		rv.addValue("LOG_REFERER", log.getRefererUrl());
 
-		DataConnection a = log.getDataConn();
-		// 取得数据连接当前的 RequestValue
-		RequestValue rvOld = a.getRequestValue();
+		DataConnection a = new DataConnection(LogBase.getConnConfigName(), rv);
 		try {
 			a.connect();
-			// 设在日志的 RequestValue
-			a.setRequestValue(rv);
 			a.executeUpdate(sql);
 		} catch (Exception e) {
-			System.err.println(e);
+			LOGGER.error("{}", e);
 		} finally {
-			// 恢复RequestValue
-			a.setRequestValue(rvOld);
 			a.close();
 		}
 	}

@@ -56,6 +56,8 @@ public class CreateSplitData {
 	/** SQL Server 2005-2014 — use XML nodes() inline, no temp table. */
 	boolean isSqlServerPre2016;
 
+	int databaseMajorVersion = -1;
+
 	public CreateSplitData(RequestValue rv, DataConnection cnn) {
 		this.rv_ = rv;
 		this.cnn = cnn;
@@ -99,28 +101,35 @@ public class CreateSplitData {
 			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
 		}
 	}
+
 	/**
 	 * 空值参数 → 空结果集子查询。Oracle 需 FROM DUAL。
+	 * 
 	 * @return (SELECT 0 AS idx, '' AS col WHERE 1=0)
 	 */
 	private String emptyResultSet() {
-		return isOracle
-				? "(SELECT 0 AS idx, '' AS col FROM DUAL WHERE 1=0)"
-				: "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
+		return isOracle ? "(SELECT 0 AS idx, '' AS col FROM DUAL WHERE 1=0)" : "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
 	}
-	
+
 	/**
-	 * 检测数据库大版本号是否 ≥ 指定值。
-	 * 连接不可用或检测失败时，保守返回 false（退回旧路径）。
+	 * 检测数据库大版本号是否 ≥ 指定值。 连接不可用或检测失败时，保守返回 false（退回旧路径）。
 	 *
 	 * @param major 目标大版本号（MySQL 8, SQL Server 13/2016）
 	 */
 	private boolean checkVersionGe(int major) {
+		if (databaseMajorVersion > -1) {
+			return databaseMajorVersion >= major;
+		}
+		if (!this.cnn.connect()) {
+			LOGGER.debug("checkVersionGe({}) failed, NOT connect()");
+			return false;
+		}
 		try {
 			Connection conn = this.cnn.getConnection();
 			if (conn != null && !conn.isClosed()) {
 				DatabaseMetaData meta = conn.getMetaData();
-				return meta.getDatabaseMajorVersion() >= major;
+				this.databaseMajorVersion = meta.getDatabaseMajorVersion();
+				return databaseMajorVersion >= major;
 			}
 		} catch (SQLException e) {
 			LOGGER.debug("checkVersionGe({}) failed, assume < {}: {}", major, major, e.getMessage());
@@ -279,8 +288,7 @@ public class CreateSplitData {
 		String exp = sql.substring(loc, locEnd + 1);
 
 		// 计算缓存 key（与 insertTmpData 一致：分隔符/gdx/值）
-		boolean isInline = isPg || isOracle || isSqlServer2016Plus
-				|| isSqlServerPre2016 || isMysql;
+		boolean isInline = isPg || isOracle || isSqlServer2016Plus || isSqlServerPre2016 || isMysql;
 		String cacheKey = null;
 		if (isInline) {
 			MListStr ppp = Utils.getParameters(exp, "@");
@@ -289,9 +297,7 @@ public class CreateSplitData {
 				String pv = this.rv_.getString(pn);
 				int l0 = exp.indexOf(",");
 				int l1 = exp.lastIndexOf(")");
-				String dl = l0 >= 0 && l1 > l0
-						? exp.substring(l0 + 1, l1).trim().replace("'", "")
-						: ",";
+				String dl = l0 >= 0 && l1 > l0 ? exp.substring(l0 + 1, l1).trim().replace("'", "") : ",";
 				cacheKey = dl + "/gdx/" + (pv == null ? "__null__" : UDigest.digestHex(pv, "md5"));
 				// 命中缓存 → 直接复用
 				String cached = this.inlineCache_.get(cacheKey);
@@ -325,8 +331,7 @@ public class CreateSplitData {
 			// 非内联数据库 → 临时表路径
 			String dataExp = insertTmpData(exp);
 			if (dataExp != null) {
-				sql = sql.replace(exp,
-						"(select idx, col from " + this.tempTableName + " where tag='" + dataExp + "')");
+				sql = sql.replace(exp, "(select idx, col from " + this.tempTableName + " where tag='" + dataExp + "')");
 			}
 		}
 		// 内联 build 返回 null（无 @param），不做替换，留给下次循环或原样
@@ -338,7 +343,9 @@ public class CreateSplitData {
 	 * {@code unnest(string_to_array(...)) WITH ORDINALITY}, avoiding any
 	 * temporary-table I/O.
 	 *
-	 * <p>Example transformation:
+	 * <p>
+	 * Example transformation:
+	 * 
 	 * <pre>{@code
 	 *   ewa_split(@ids, ',')
 	 *   →
@@ -363,9 +370,7 @@ public class CreateSplitData {
 
 		int loc0 = exp.indexOf(",");
 		int loc1 = exp.lastIndexOf(")");
-		String delimiter = loc0 >= 0 && loc1 > loc0
-				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
-				: ",";
+		String delimiter = loc0 >= 0 && loc1 > loc0 ? exp.substring(loc0 + 1, loc1).trim().replace("'", "") : ",";
 
 		// 转义 PG 字符串字面量中的特殊字符
 		String escapedValue = v1.replace("'", "''");
@@ -384,7 +389,9 @@ public class CreateSplitData {
 	 * Parse an ewa_split expression and return an Oracle inline subquery using
 	 * {@code XMLTABLE}, avoiding temporary-table I/O.
 	 *
-	 * <p>Example transformation:
+	 * <p>
+	 * Example transformation:
+	 * 
 	 * <pre>{@code
 	 *   ewa_split(@ids, ',')
 	 *   →
@@ -392,7 +399,8 @@ public class CreateSplitData {
 	 *    FROM XMLTABLE(('"' || REPLACE('1,2,3', ',', '","') || '"')))
 	 * }</pre>
 	 *
-	 * <p>Values containing XML-special characters ({@code " < > &}) are escaped.
+	 * <p>
+	 * Values containing XML-special characters ({@code " < > &}) are escaped.
 	 *
 	 * @param exp the full ewa_split expression, e.g. {@code EWA_SPLIT(@ids, ',')}
 	 * @return an Oracle subquery returning (idx, col), or null if params missing
@@ -410,21 +418,13 @@ public class CreateSplitData {
 
 		int loc0 = exp.indexOf(",");
 		int loc1 = exp.lastIndexOf(")");
-		String delimiter = loc0 >= 0 && loc1 > loc0
-				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
-				: ",";
+		String delimiter = loc0 >= 0 && loc1 > loc0 ? exp.substring(loc0 + 1, loc1).trim().replace("'", "") : ",";
 
 		// Escape XML special characters in values
-		String escapedValue = v1
-				.replace("&", "&amp;")
-				.replace("\"", "&quot;")
-				.replace("<", "&lt;")
-				.replace(">", "&gt;");
+		String escapedValue = v1.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">",
+				"&gt;");
 
-		String escapedDelimiter = delimiter
-				.replace("&", "&amp;")
-				.replace("\"", "&quot;")
-				.replace("<", "&lt;")
+		String escapedDelimiter = delimiter.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;")
 				.replace(">", "&gt;");
 
 		StringBuilder sb = new StringBuilder();
@@ -441,10 +441,13 @@ public class CreateSplitData {
 	 * Parse an ewa_split expression and return a MySQL inline subquery using
 	 * {@code JSON_TABLE}, avoiding temporary-table I/O.
 	 *
-	 * <p>Requires MySQL 8.0.4+. JSON-special characters ({@code \ "}) in values
-	 * are escaped via a SQL REPLACE chain inside a CONCAT-built JSON array.
+	 * <p>
+	 * Requires MySQL 8.0.4+. JSON-special characters ({@code \ "}) in values are
+	 * escaped via a SQL REPLACE chain inside a CONCAT-built JSON array.
 	 *
-	 * <p>Example transformation:
+	 * <p>
+	 * Example transformation:
+	 * 
 	 * <pre>{@code
 	 *   ewa_split(@ids, ',')
 	 *   →
@@ -472,11 +475,10 @@ public class CreateSplitData {
 
 		int loc0 = exp.indexOf(",");
 		int loc1 = exp.lastIndexOf(")");
-		String delimiter = loc0 >= 0 && loc1 > loc0
-				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
-				: ",";
+		String delimiter = loc0 >= 0 && loc1 > loc0 ? exp.substring(loc0 + 1, loc1).trim().replace("'", "") : ",";
 
-		// SQL string literal escaping: ' → ''; \ → \\ only if NO_BACKSLASH_ESCAPES is off
+		// SQL string literal escaping: ' → ''; \ → \\ only if NO_BACKSLASH_ESCAPES is
+		// off
 		String sqlEscaped = v1.replace("'", "''");
 		if (!this.cnn.isMysqlNoBackslashEscapes()) {
 			sqlEscaped = sqlEscaped.replace("\\", "\\\\");
@@ -488,7 +490,8 @@ public class CreateSplitData {
 			sqlEscapedDelim = sqlEscapedDelim.replace("\\", "\\\\");
 		}
 
-		// Build: CONCAT('["', REPLACE(REPLACE(REPLACE(val,'\\','\\\\'),'"','\\"'),delim,'","'),'"]')
+		// Build: CONCAT('["',
+		// REPLACE(REPLACE(REPLACE(val,'\\','\\\\'),'"','\\"'),delim,'","'),'"]')
 		StringBuilder sb = new StringBuilder();
 		sb.append("(SELECT t.idx - 1 AS idx, t.val AS col ");
 		sb.append("FROM JSON_TABLE(");
@@ -506,10 +509,13 @@ public class CreateSplitData {
 	 * Parse an ewa_split expression and return a SQL Server inline subquery using
 	 * {@code OPENJSON}, avoiding temporary-table I/O.
 	 *
-	 * <p>Requires SQL Server 2016+. The key advantage over {@code STRING_SPLIT}:
+	 * <p>
+	 * Requires SQL Server 2016+. The key advantage over {@code STRING_SPLIT}:
 	 * {@code OPENJSON} guarantees ordinal position via the {@code [key]} column.
 	 *
-	 * <p>Example transformation:
+	 * <p>
+	 * Example transformation:
+	 * 
 	 * <pre>{@code
 	 *   ewa_split(@ids, ',')
 	 *   →
@@ -533,9 +539,7 @@ public class CreateSplitData {
 
 		int loc0 = exp.indexOf(",");
 		int loc1 = exp.lastIndexOf(")");
-		String delimiter = loc0 >= 0 && loc1 > loc0
-				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
-				: ",";
+		String delimiter = loc0 >= 0 && loc1 > loc0 ? exp.substring(loc0 + 1, loc1).trim().replace("'", "") : ",";
 
 		// T-SQL string literal escaping: only ' → '' (backslash is literal)
 		String tsvEscaped = v1.replace("'", "''");
@@ -557,10 +561,13 @@ public class CreateSplitData {
 	 * Parse an ewa_split expression and return a SQL Server inline subquery using
 	 * XML {@code nodes()}, avoiding temporary-table I/O.
 	 *
-	 * <p>Works on SQL Server 2005+. Values are XML-escaped, then wrapped in
+	 * <p>
+	 * Works on SQL Server 2005+. Values are XML-escaped, then wrapped in
 	 * {@code <x>…</x>} tags and shredded via {@code CROSS APPLY xml.nodes('/x')}.
 	 *
-	 * <p>Example transformation:
+	 * <p>
+	 * Example transformation:
+	 * 
 	 * <pre>{@code
 	 *   ewa_split(@ids, ',')
 	 *   →
@@ -586,24 +593,14 @@ public class CreateSplitData {
 
 		int loc0 = exp.indexOf(",");
 		int loc1 = exp.lastIndexOf(")");
-		String delimiter = loc0 >= 0 && loc1 > loc0
-				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
-				: ",";
+		String delimiter = loc0 >= 0 && loc1 > loc0 ? exp.substring(loc0 + 1, loc1).trim().replace("'", "") : ",";
 
-		// XML entity escaping: & < > " '  (must be done before SQL embedding)
-		String xmlEscaped = v1
-				.replace("&", "&amp;")
-				.replace("<", "&lt;")
-				.replace(">", "&gt;")
-				.replace("\"", "&quot;")
+		// XML entity escaping: & < > " ' (must be done before SQL embedding)
+		String xmlEscaped = v1.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
 				.replace("'", "&apos;");
 
-		String xmlEscapedDelim = delimiter
-				.replace("&", "&amp;")
-				.replace("<", "&lt;")
-				.replace(">", "&gt;")
-				.replace("\"", "&quot;")
-				.replace("'", "&apos;");
+		String xmlEscapedDelim = delimiter.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+				.replace("\"", "&quot;").replace("'", "&apos;");
 
 		// Build XML doc: <x>v1</x><x>v2</x>..., then shred with nodes('/x')
 		StringBuilder sb = new StringBuilder();
