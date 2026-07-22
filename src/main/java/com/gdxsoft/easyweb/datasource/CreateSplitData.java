@@ -6,12 +6,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.gdxsoft.easyweb.script.RequestValue;
+import com.gdxsoft.easyweb.utils.UDigest;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 
@@ -22,6 +24,7 @@ import com.gdxsoft.easyweb.utils.msnet.MListStr;
  *
  */
 public class CreateSplitData {
+	public static String DDL_SQLSERVER = "CREATE TABLE _ewa_spt_data(idx int NOT NULL,col nvarchar(4000), tag varchar(50) NOT NULL, PRIMARY KEY (tag,idx) )";
 	private static Logger LOGGER = LoggerFactory.getLogger(CreateSplitData.class);
 	private RequestValue rv_;
 
@@ -29,6 +32,8 @@ public class CreateSplitData {
 	private HashMap<String, ArrayList<String>> tempData_;
 	// 分割表达式和 tempData_.key （_EWA_SPT_DATA.tag）的关系表
 	private HashMap<String, String> keyMap_;
+	// 内联表达式缓存：keyExp → 内联 SQL
+	private HashMap<String, String> inlineCache_;
 
 	/**
 	 * EWA_SPLIT标识
@@ -37,6 +42,8 @@ public class CreateSplitData {
 	private String uid;
 	private DataConnection cnn;
 	private String tempTableName;
+	private boolean tempTableCreated;
+	private boolean dropOnClose;
 
 	/** PostgreSQL — use unnest(string_to_array(...)) inline, no temp table. */
 	boolean isPg;
@@ -56,22 +63,26 @@ public class CreateSplitData {
 
 		this.tempData_ = new HashMap<>();
 		this.keyMap_ = new HashMap<>();
+		this.inlineCache_ = new HashMap<>();
 
 		String databaseType = this.cnn.getDatabaseType();
 		boolean isSqlServerDb = SqlUtils.isSqlServer(databaseType);
 		boolean isMysqlDb = SqlUtils.isMySql(databaseType);
+		boolean isOracleDb = SqlUtils.isOracle(databaseType); // 含达梦DM
 		this.isPg = SqlUtils.isPostgreSql(databaseType);
-		this.isOracle = SqlUtils.isOracle(databaseType); // 含达梦DM
-
-		// MySQL 8.0+ → JSON_TABLE 内联；5.7 → 物理表
-		this.isMysql = isMysqlDb && checkVersionGe(8);
-		// SQL Server 2016+ → OPENJSON；2005-2014 → XML nodes()
+		// Oracle 10gR2+ → XMLTABLE；达梦DM 全版本 → XMLTABLE
+		this.isOracle = isOracleDb && (checkVersionGe(10) || "DM".equalsIgnoreCase(databaseType));
+		// SQL Server: 2016+ → OPENJSON, 2005-2014 → XML nodes(), 2000 → #temp
 		this.isSqlServer2016Plus = isSqlServerDb && checkVersionGe(13);
-		this.isSqlServerPre2016 = isSqlServerDb && !isSqlServer2016Plus;
+		this.isSqlServerPre2016 = isSqlServerDb && !isSqlServer2016Plus && checkVersionGe(9);
 
 		if (isSqlServer2016Plus || isSqlServerPre2016) {
-			// SQL Server 全版本内联，零 IO，不需临时表
+			// SQL Server 2005+ 内联，零 IO
 			this.tempTableName = null;
+		} else if (isSqlServerDb) {
+			// SQL Server 2000 → #temp 内存临时表
+			this.tempTableName = "[#EWA_SPT_DATA_" + this.uid + "]";
+			dropOnClose = true;
 		} else if (isMysql) {
 			// MySQL 8.0+ 使用 JSON_TABLE 内联，零 IO，不需物理表
 			this.tempTableName = null;
@@ -79,13 +90,25 @@ public class CreateSplitData {
 			// MySQL 5.7 退回物理表
 			this.tempTableName = "_EWA_SPT_DATA";
 		} else if (isPg || isOracle) {
-			// PG/Oracle 内联方案，零 IO，不需要物理表
+			// PG/Oracle/达梦 内联方案，零 IO，不需要物理表
 			this.tempTableName = null;
+		} else if (isOracleDb) {
+			// Oracle < 10g → 物理表
+			this.tempTableName = "_EWA_SPT_DATA";
 		} else {
 			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
 		}
 	}
-
+	/**
+	 * 空值参数 → 空结果集子查询。Oracle 需 FROM DUAL。
+	 * @return (SELECT 0 AS idx, '' AS col WHERE 1=0)
+	 */
+	private String emptyResultSet() {
+		return isOracle
+				? "(SELECT 0 AS idx, '' AS col FROM DUAL WHERE 1=0)"
+				: "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
+	}
+	
 	/**
 	 * 检测数据库大版本号是否 ≥ 指定值。
 	 * 连接不可用或检测失败时，保守返回 false（退回旧路径）。
@@ -117,9 +140,17 @@ public class CreateSplitData {
 			return;
 		}
 		String databaseType = this.cnn.getDatabaseType();
-		// 只有 MySQL 5.7 / HSQLDB / 其他小众库才走到这里，SQL Server/PG/Oracle/MySQL 8.0+ 已内联
 		boolean mysql = SqlUtils.isMySql(databaseType);
+		boolean sqlserver = SqlUtils.isSqlServer(databaseType); // SQL Server 2000
 
+		if (!tempTableCreated) {
+			if (sqlserver) {
+				String sqlCreate = DDL_SQLSERVER.replace("_ewa_spt_data", this.tempTableName);
+				LOGGER.debug("Create sqlserver temp table. {}", sqlCreate);
+				this.cnn.executeUpdateNoParameter(sqlCreate);
+				tempTableCreated = true;
+			}
+		}
 		String insertHeader = "insert into " + this.tempTableName + " (idx, col, tag) values ";
 
 		List<String> values = new ArrayList<String>();
@@ -136,7 +167,13 @@ public class CreateSplitData {
 				sb.append(", ");
 
 				String col = al.get(i);
-				if (mysql) {
+				if (sqlserver) {
+					// SQL Server 2000: nvarchar(4000) limit
+					if (col.length() > 4000) {
+						col = col.substring(0, 4000);
+						LOGGER.warn("EwaSplitTempData col size > 4000, truncation");
+					}
+				} else if (mysql) {
 					if (col.length() > 8000) {
 						col = col.substring(0, 8000);
 						LOGGER.warn("EwaSplitTempData col size > 8000, truncation");
@@ -177,11 +214,17 @@ public class CreateSplitData {
 		if (this.getTempData().size() == 0) {
 			return;
 		}
-		// PG/Oracle/MySQL 内联，无临时表需要清理
-		if (isPg || isOracle || isMysql) {
+		// 内联路径，无临时表需要清理
+		if (isPg || isOracle || isMysql || isSqlServer2016Plus || isSqlServerPre2016) {
 			return;
 		}
-		LOGGER.debug("clearEwaSplitTempData, table={}", this.tempTableName);
+		LOGGER.debug("clearEwaSplitTempData, table={}, dropOnClose={}", this.tempTableName, this.dropOnClose);
+		if (dropOnClose) {
+			String sqlDrop = "drop table " + this.tempTableName;
+			LOGGER.debug(sqlDrop);
+			cnn.executeUpdateNoParameter(sqlDrop);
+			return;
+		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("delete from _EWA_SPT_DATA where tag in (");
 		int i = 0;
@@ -235,38 +278,58 @@ public class CreateSplitData {
 
 		String exp = sql.substring(loc, locEnd + 1);
 
+		// 计算缓存 key（与 insertTmpData 一致：分隔符/gdx/值）
+		boolean isInline = isPg || isOracle || isSqlServer2016Plus
+				|| isSqlServerPre2016 || isMysql;
+		String cacheKey = null;
+		if (isInline) {
+			MListStr ppp = Utils.getParameters(exp, "@");
+			if (ppp.size() > 0) {
+				String pn = ppp.get(0);
+				String pv = this.rv_.getString(pn);
+				int l0 = exp.indexOf(",");
+				int l1 = exp.lastIndexOf(")");
+				String dl = l0 >= 0 && l1 > l0
+						? exp.substring(l0 + 1, l1).trim().replace("'", "")
+						: ",";
+				cacheKey = dl + "/gdx/" + (pv == null ? "__null__" : UDigest.digestHex(pv, "md5"));
+				// 命中缓存 → 直接复用
+				String cached = this.inlineCache_.get(cacheKey);
+				if (cached != null) {
+					sql = sql.replace(exp, cached);
+					return sql;
+				}
+			}
+		}
+
+		String inline = null;
 		if (isPg) {
-			String pgInline = buildPgUnnest(exp);
-			if (pgInline != null) {
-				sql = sql.replace(exp, pgInline);
-			}
+			inline = buildPgUnnest(exp);
 		} else if (isOracle) {
-			String oraInline = buildOracleXmltable(exp);
-			if (oraInline != null) {
-				sql = sql.replace(exp, oraInline);
-			}
+			inline = buildOracleXmltable(exp);
 		} else if (isSqlServer2016Plus) {
-			String mssqlInline = buildSqlServerOpenJson(exp);
-			if (mssqlInline != null) {
-				sql = sql.replace(exp, mssqlInline);
-			}
+			inline = buildSqlServerOpenJson(exp);
 		} else if (isSqlServerPre2016) {
-			String mssqlInline = buildSqlServerXmlNodes(exp);
-			if (mssqlInline != null) {
-				sql = sql.replace(exp, mssqlInline);
-			}
+			inline = buildSqlServerXmlNodes(exp);
 		} else if (isMysql) {
-			String mysqlInline = buildMySqlJsonTable(exp);
-			if (mysqlInline != null) {
-				sql = sql.replace(exp, mysqlInline);
+			inline = buildMySqlJsonTable(exp);
+		}
+
+		if (inline != null) {
+			// 写入缓存
+			if (cacheKey != null) {
+				this.inlineCache_.put(cacheKey, inline);
 			}
-		} else {
+			sql = sql.replace(exp, inline);
+		} else if (!isInline) {
+			// 非内联数据库 → 临时表路径
 			String dataExp = insertTmpData(exp);
 			if (dataExp != null) {
 				sql = sql.replace(exp,
 						"(select idx, col from " + this.tempTableName + " where tag='" + dataExp + "')");
 			}
 		}
+		// 内联 build 返回 null（无 @param），不做替换，留给下次循环或原样
 		return sql;
 	}
 
@@ -295,7 +358,7 @@ public class CreateSplitData {
 		String v1 = this.rv_.getString(paramName);
 		if (v1 == null) {
 			// 空值 → 返回空结果集
-			return "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
+			return emptyResultSet();
 		}
 
 		int loc0 = exp.indexOf(",");
@@ -342,7 +405,7 @@ public class CreateSplitData {
 		String paramName = paras.get(0);
 		String v1 = this.rv_.getString(paramName);
 		if (v1 == null) {
-			return "(SELECT 0 AS idx, '' AS col FROM DUAL WHERE 1=0)";
+			return emptyResultSet();
 		}
 
 		int loc0 = exp.indexOf(",");
@@ -404,7 +467,7 @@ public class CreateSplitData {
 		String v1 = this.rv_.getString(paramName);
 		if (v1 == null) {
 			// 空值 → 返回空结果集
-			return "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
+			return emptyResultSet();
 		}
 
 		int loc0 = exp.indexOf(",");
@@ -413,15 +476,17 @@ public class CreateSplitData {
 				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
 				: ",";
 
-		// SQL string literal escaping: \ → \\, ' → ''
-		String sqlEscaped = v1
-				.replace("\\", "\\\\")
-				.replace("'", "''");
+		// SQL string literal escaping: ' → ''; \ → \\ only if NO_BACKSLASH_ESCAPES is off
+		String sqlEscaped = v1.replace("'", "''");
+		if (!this.cnn.isMysqlNoBackslashEscapes()) {
+			sqlEscaped = sqlEscaped.replace("\\", "\\\\");
+		}
 
 		// Delimiter also needs SQL escaping
-		String sqlEscapedDelim = delimiter
-				.replace("\\", "\\\\")
-				.replace("'", "''");
+		String sqlEscapedDelim = delimiter.replace("'", "''");
+		if (!this.cnn.isMysqlNoBackslashEscapes()) {
+			sqlEscapedDelim = sqlEscapedDelim.replace("\\", "\\\\");
+		}
 
 		// Build: CONCAT('["', REPLACE(REPLACE(REPLACE(val,'\\','\\\\'),'"','\\"'),delim,'","'),'"]')
 		StringBuilder sb = new StringBuilder();
@@ -463,7 +528,7 @@ public class CreateSplitData {
 		String paramName = paras.get(0);
 		String v1 = this.rv_.getString(paramName);
 		if (v1 == null) {
-			return "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
+			return emptyResultSet();
 		}
 
 		int loc0 = exp.indexOf(",");
@@ -516,7 +581,7 @@ public class CreateSplitData {
 		String paramName = paras.get(0);
 		String v1 = this.rv_.getString(paramName);
 		if (v1 == null) {
-			return "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
+			return emptyResultSet();
 		}
 
 		int loc0 = exp.indexOf(",");
@@ -542,14 +607,14 @@ public class CreateSplitData {
 
 		// Build XML doc: <x>v1</x><x>v2</x>..., then shred with nodes('/x')
 		StringBuilder sb = new StringBuilder();
-		sb.append("(SELECT ROW_NUMBER() OVER (ORDER BY (SELECT 1)) - 1 AS idx, ");
+		sb.append("(\n\tSELECT ROW_NUMBER() OVER (ORDER BY (SELECT 1)) - 1 AS idx, ");
 		sb.append("LTRIM(RTRIM(x.value('.', 'NVARCHAR(MAX)'))) AS col ");
-		sb.append("FROM (SELECT CAST('<x>' + REPLACE('");
+		sb.append("\n\tFROM (\n\t\tSELECT CAST('<x>' + REPLACE('");
 		sb.append(xmlEscaped);
 		sb.append("', '");
 		sb.append(xmlEscapedDelim);
-		sb.append("', '</x><x>') + '</x>' AS XML) AS xml_doc) src ");
-		sb.append("CROSS APPLY xml_doc.nodes('/x') AS t(x))");
+		sb.append("', '</x><x>') + '</x>' AS XML) AS xml_doc\n\t) src ");
+		sb.append("CROSS APPLY xml_doc.nodes('/x') AS t(x)\n)\n");
 		return sb.toString();
 	}
 
@@ -566,25 +631,15 @@ public class CreateSplitData {
 
 		// 分割字符串的 分割符
 		String splitStr0 = para.substring(loc0 + 1, loc1).trim().replace("'", "");
-		String keyExp = splitStr0 + "/gdx/" + v1;
+		String keyExp = splitStr0 + "/gdx/" + (v1 == null ? "__null__" : UDigest.digestHex(v1, "md5"));
 		if (this.keyMap_.containsKey(keyExp)) {
 			return this.keyMap_.get(keyExp);
 		}
 		// 创建在_ewa_split_data.tag (唯一ID)
-		String tmpDataTag = this.uid + ".gdx." + this.keyMap_.size();
+		String tmpDataTag = (this.dropOnClose ? "" : this.uid) + ".gdx." + this.keyMap_.size();
 		LOGGER.debug("Create temp data {}", tmpDataTag);
 
 		this.keyMap_.put(keyExp, tmpDataTag);
-
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < splitStr0.length(); i++) {
-			sb.append("\\");
-			sb.append(splitStr0.charAt(i));
-		}
-		// 分割字符串的正则表达式
-		String splitStr = sb.toString();
-
-		boolean isAppendBlank = false;
 
 		ArrayList<String> al = new ArrayList<String>();
 		this.tempData_.put(tmpDataTag, al);
@@ -592,20 +647,11 @@ public class CreateSplitData {
 			// 创建空记录
 			return tmpDataTag;
 		}
-		if (v1.endsWith(splitStr0)) {
-			v1 += " ";
-			isAppendBlank = true;
-		}
-		// System.out.println(splitStr);
-		String[] vs = v1.split(splitStr);
+		// Pattern.quote 转义正则特殊字符（. | * + 等）；-1 保留尾部空串
+		String[] vs = v1.split(Pattern.quote(splitStr0), -1);
 
-		// 创建数组列表
 		for (int i = 0; i < vs.length; i++) {
-			String v2 = vs[i];
-			if (isAppendBlank && i == vs.length - 1) {
-				v2 = "";
-			}
-			al.add(v2);
+			al.add(vs[i]);
 		}
 		return tmpDataTag;
 	}

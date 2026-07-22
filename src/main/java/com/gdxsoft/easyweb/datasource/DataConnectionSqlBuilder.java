@@ -37,15 +37,15 @@ import com.gdxsoft.easyweb.utils.types.UInt64;
  * <p>Holds a back-reference to the owning {@link DataConnection} for
  * operations that require connection state (CreateSplitData, ReverseIds).
  */
-public class SqlBuilder {
+public class DataConnectionSqlBuilder {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SqlBuilder.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataConnectionSqlBuilder.class);
 
 	private final DataConnection owner;
 	private CreateSplitData createSplitData;
 	private EwaSqlFunctions ewaSqlFunctions;
 
-	public SqlBuilder(DataConnection owner) {
+	public DataConnectionSqlBuilder(DataConnection owner) {
 		this.owner = owner;
 	}
 
@@ -650,6 +650,12 @@ public class SqlBuilder {
 		parameter = parameter.replace("'", "''");
 		if (databaseType != null) {
 			if (SqlUtils.isMySql(databaseType)) {
+				// MySQL 默认 \ 是转义符 → 需要 \\ 表示 \；
+				// NO_BACKSLASH_ESCAPES 模式下 \ 是普通字符 → 不双写
+				if (!owner.isMysqlNoBackslashEscapes()) {
+					parameter = parameter.replace("\\", "\\\\");
+				}
+			} else if (SqlUtils.isHsqlDb(databaseType)) {
 				parameter = parameter.replace("\\", "\\\\");
 			}
 			parameter = "'" + parameter + "'";

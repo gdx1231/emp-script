@@ -27,9 +27,9 @@ import com.gdxsoft.easyweb.utils.msnet.MList;
  * <p><b>Thread Safety:</b> Not thread-safe. One instance per
  * {@link DataConnection}.
  */
-public class ConnectionSession {
+public class DataConnectionSession {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionSession.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataConnectionSession.class);
 
 	private DataHelper ds;
 	private PreparedStatement pst;
@@ -50,7 +50,7 @@ public class ConnectionSession {
 	/**
 	 * Minimal constructor — picks the first configured data-source.
 	 */
-	public ConnectionSession() throws Exception {
+	public DataConnectionSession() throws Exception {
 		this.configs = ConnectionConfigs.instance();
 		this.currentConfig = this.configs.getConfig(0);
 		initConnection();
@@ -60,7 +60,7 @@ public class ConnectionSession {
 	 * Constructor that picks a named configuration (or the first if the name is
 	 * unknown).
 	 */
-	public ConnectionSession(String configName) throws Exception {
+	public DataConnectionSession(String configName) throws Exception {
 		this.configs = ConnectionConfigs.instance();
 		setConfigName(configName);
 	}

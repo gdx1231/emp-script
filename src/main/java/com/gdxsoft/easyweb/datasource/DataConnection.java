@@ -32,22 +32,24 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
  * Database connection wrapper providing SQL execution, transaction management,
  * batch operations, and parameter handling.
  * 
- * <p><b>Thread Safety:</b> This class is <i>not thread-safe</i>.
- * Instances hold mutable state (Statements, ResultSets, Connection references)
- * and should not be shared across threads. Each thread should create its own
- * instance, or use the static utility methods which create and dispose instances
- * internally.
+ * <p>
+ * <b>Thread Safety:</b> This class is <i>not thread-safe</i>. Instances hold
+ * mutable state (Statements, ResultSets, Connection references) and should not
+ * be shared across threads. Each thread should create its own instance, or use
+ * the static utility methods which create and dispose instances internally.
  * 
  * @author guolei
  */
 public class DataConnection {
 	private static Logger LOGGER = LoggerFactory.getLogger(DataConnection.class);
 
-	/** Delegate for connection/transaction/statement lifecycle (God Class refactor). */
-	private ConnectionSession _session;
+	/**
+	 * Delegate for connection/transaction/statement lifecycle (God Class refactor).
+	 */
+	private DataConnectionSession _session;
 
 	/** Delegate for SQL building and parameter binding (God Class refactor). */
-	private SqlBuilder _sqlBuilder;
+	private DataConnectionSqlBuilder _sqlBuilder;
 
 	private String _errorMsg; // 错误信息和 SQL
 	private String _errorMsgOnly; // 只有错误信息
@@ -304,7 +306,7 @@ public class DataConnection {
 			DataResult r = (DataResult) cnn.getResultSetList().get(i);
 			DTTable tb = new DTTable();
 			tb.initData(r.getResultSet());
-				tables.add(tb);
+			tables.add(tb);
 		}
 		cnn.close();
 		return tables;
@@ -460,8 +462,8 @@ public class DataConnection {
 
 	public DataConnection() {
 		try {
-			_session = new ConnectionSession();
-			_sqlBuilder = new SqlBuilder(this);
+			_session = new DataConnectionSession();
+			_sqlBuilder = new DataConnectionSqlBuilder(this);
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
 			this._errorMsg = e.getMessage();
@@ -471,8 +473,8 @@ public class DataConnection {
 
 	public DataConnection(RequestValue rv) {
 		try {
-			_session = new ConnectionSession();
-			_sqlBuilder = new SqlBuilder(this);
+			_session = new DataConnectionSession();
+			_sqlBuilder = new DataConnectionSqlBuilder(this);
 
 			this.setConfigName("");
 			this.setRequestValue(rv);
@@ -486,8 +488,8 @@ public class DataConnection {
 
 	public DataConnection(String configName, RequestValue rv) {
 		try {
-			_session = new ConnectionSession(configName);
-			_sqlBuilder = new SqlBuilder(this);
+			_session = new DataConnectionSession(configName);
+			_sqlBuilder = new DataConnectionSqlBuilder(this);
 
 			this.setConfigName(configName);
 			this.setRequestValue(rv);
@@ -526,8 +528,8 @@ public class DataConnection {
 		_session.setCurrentConfig(_session.getCurrentConfig());
 
 		if (this._DebugFrames != null) {
-			this._DebugFrames.addDebug(this, "SQL",
-					"[initConnection()] build a connection. (" + _session.getCurrentConfig().getConnectionString() + ")");
+			this._DebugFrames.addDebug(this, "SQL", "[initConnection()] build a connection. ("
+					+ _session.getCurrentConfig().getConnectionString() + ")");
 		}
 	}
 
@@ -690,8 +692,9 @@ public class DataConnection {
 			StringBuilder errInfo = new StringBuilder();
 			errInfo.append("\nconnStr=").append(_session.getConnectionString()).append("\nCurrentConfig:\n")
 					.append(_session.isTrans() ? "Transaction," : "No Transaction,").append("\nname=")
-					.append(_session.getCurrentConfig().getName()).append("\n").append(_session.getCurrentConfig().getConnectionString())
-					.append("\n\n").append(sql1).append("\n\n").append(e.getLocalizedMessage());
+					.append(_session.getCurrentConfig().getName()).append("\n")
+					.append(_session.getCurrentConfig().getConnectionString()).append("\n\n").append(sql1)
+					.append("\n\n").append(e.getLocalizedMessage());
 			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
 			LOGGER.error(errInfo.toString());
 			setError(e, sql1);
@@ -860,12 +863,13 @@ public class DataConnection {
 		}
 		return err;
 	}
+
 	/**
-	 * Log and debug SQLWarnings from a Statement. Extracted to eliminate
-	 * duplicated warning-handling logic across multiple methods.
+	 * Log and debug SQLWarnings from a Statement. Extracted to eliminate duplicated
+	 * warning-handling logic across multiple methods.
 	 * 
-	 * @param stmt  the Statement whose warnings to process
-	 * @param sql   the associated SQL for logging context
+	 * @param stmt the Statement whose warnings to process
+	 * @param sql  the associated SQL for logging context
 	 */
 	private void logSqlWarnings(Statement stmt, String sql) {
 		try {
@@ -1674,8 +1678,9 @@ public class DataConnection {
 
 	/**
 	 * Bind a single named parameter to a PreparedStatement at the given index.
-	 * <p>Optimized: debug strings only built when _DebugFrames is active;
-	 * null-safe on _RequestValue; constant-left .equals().
+	 * <p>
+	 * Optimized: debug strings only built when _DebugFrames is active; null-safe on
+	 * _RequestValue; constant-left .equals().
 	 */
 	public void addStatementParameter(PreparedStatement cst, String parameterName, int index) throws SQLException {
 		_sqlBuilder.addStatementParameter(cst, parameterName, index);
@@ -2068,6 +2073,43 @@ public class DataConnection {
 
 	public void setConnection(Connection cnn) {
 		_session.setConnection(cnn);
+	}
+
+	/** Cached: MySQL @@sql_mode contains NO_BACKSLASH_ESCAPES? */
+	private Boolean mysqlNoBackslashEscapes_;
+
+	/**
+	 * Check whether the current MySQL connection has NO_BACKSLASH_ESCAPES enabled.
+	 * Queries @@SESSION.sql_mode once and caches the result.
+	 * 
+	 * @return true/false
+	 */
+	public boolean isMysqlNoBackslashEscapes() {
+		if (mysqlNoBackslashEscapes_ != null) {
+			return mysqlNoBackslashEscapes_;
+		}
+		try {
+			Connection conn = _session.getConnection();
+			if (conn != null && !conn.isClosed()) {
+				Statement st = conn.createStatement();
+				try {
+					ResultSet rs = st.executeQuery("SELECT @@SESSION.sql_mode");
+					if (rs.next()) {
+						String mode = rs.getString(1);
+						mysqlNoBackslashEscapes_ = mode != null && mode.toUpperCase().contains("NO_BACKSLASH_ESCAPES");
+					}
+					rs.close();
+				} finally {
+					st.close();
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.debug("Failed to check MySQL sql_mode: {}", e.getMessage());
+		}
+		if (mysqlNoBackslashEscapes_ == null) {
+			mysqlNoBackslashEscapes_ = Boolean.FALSE;
+		}
+		return mysqlNoBackslashEscapes_;
 	}
 
 	/**
