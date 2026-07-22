@@ -54,6 +54,7 @@ read_file /Users/admin/java/ewa_page_cached_pf2023/scripts_cached/examples/membe
 | 📋 合并单元格 | `ewa.Merge()` / `ewa.MergeExp()` | 中频 |
 | 📋 分组 Tab 切换 | `ewa.GroupShow()` | 中频 |
 | 📋 下拉框刷新 | `ewa.itemReload()` | 中频 |
+| 🔥 select/droplist 取行数据 | `option:selected` json / `.next()` para_ | 高频 |
 | 🔧 向导分步表单 | `ewa.GuideShowCreate()` | 低频 |
 | 🔧 开关按钮回调 | `ewa.extSwitchCallBack` | 低频 |
 
@@ -202,6 +203,41 @@ var selected = getObj('#FIELD_ID option:selected').val();
 ```
 
 > **注意**：如果是在 **ListFrame** 中操作，选择器前缀应改为 `#EWA_LF_@SYS_FRAME_UNID`。`@SYS_FRAME_UNID` 是服务端替换的占位符，运行时为实际帧 ID 字符串。
+
+### 获取 select / droplist 选中行完整数据
+
+EWA 的 select 和 droplist 控件在渲染/选中时，会把 SQL 查询的完整行数据附加到 DOM 属性上，JS 可直接读取。
+
+| 控件类型 | XML Tag | 数据存储位置 | 获取方式 |
+|----------|---------|-------------|----------|
+| **select** | `<Tag Tag="select"/>` | 每个 `<option>` 的 `json` 属性 | `option:selected` → `attr("json")` → `JSON.parse` |
+| **droplist** | `<Tag Tag="droplist"/>` | 元素自身的 `para_{字段名小写}` 属性 | `attr("para_xxx")` |
+
+**select tag — 从 option 的 json 属性获取行数据**
+
+框架渲染 select 时，将 SQL 每行转为 JSON 写入 `<option json="...">`（`ItemRepeat.java`）。
+
+```javascript
+// 获取选中行的完整 JSON
+var jsonStr = getObj("#FIELD_NAME option:selected").attr("json");
+var row = JSON.parse(jsonStr);
+
+// 读取任意字段
+var name = row.BAS_TAG_NAME;       // 显示名
+var para7 = row.BAS_TAG_PARA7;     // 自定义字段
+```
+
+**droplist tag — 从元素的 para_ 属性获取行数据**
+
+droplist 选中后，框架通过 AJAX 获取行数据，将每个字段存为元素的 `para_{field_name_lowercase}` 属性（`ewa.js _GetDropListValue1`）。
+
+```javascript
+// 直接获取元素上的 para_ 属性
+var cityEn = getObj("#FIELD_NAME").attr("para_city_name_en") || "";
+var code = getObj("#FIELD_NAME").attr("para_city_code") || "";
+```
+
+> **注意**：droplist 的 `para_` 属性在选中值后由框架自动设置，页面初次加载时如果已有默认值，属性也会存在。
 
 ### 动态设置必填 / 非必填
 
