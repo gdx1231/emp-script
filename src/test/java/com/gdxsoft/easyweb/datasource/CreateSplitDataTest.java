@@ -215,11 +215,265 @@ class CreateSplitDataTest {
 	}
 
 	// ═══════════════════════════════════════════════════════════════
-	//  HSQLDB temp-table path (integration)
+	//  MySQL inline path (unit tests via buildMySqlJsonTable)
+	// ═══════════════════════════════════════════════════════════════
+
+	@Test
+	@Order(10)
+	void testBuildMySqlJsonTableComma() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("IDS", "1,2,3", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isMysql = true;
+
+		String result = csd.buildMySqlJsonTable("EWA_SPLIT(@IDS, ',')");
+		assertNotNull(result);
+		assertTrue(result.contains("JSON_TABLE"), "Should use JSON_TABLE");
+		assertTrue(result.contains("t.idx - 1 AS idx"), "Should be 0-based idx");
+		assertTrue(result.contains("t.val AS col"), "Should alias as col");
+		assertTrue(result.contains("REPLACE('1,2,3'"), "Should contain split values");
+		assertTrue(result.contains("'$[*]' COLUMNS"), "Should use JSON path $[*]");
+		assertFalse(result.contains("_EWA_SPT_DATA"), "No temp table on MySQL");
+		c.close();
+	}
+
+	@Test
+	@Order(11)
+	void testBuildMySqlJsonTableCustomDelimiter() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("TAGS", "a|b|c", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isMysql = true;
+
+		String result = csd.buildMySqlJsonTable("EWA_SPLIT(@TAGS, '|')");
+		assertNotNull(result);
+		assertTrue(result.contains("REPLACE('a|b|c'"), "Should contain value with pipe");
+		assertTrue(result.contains("', '\",\"')"), "Should use REPLACE for delimiter");
+		c.close();
+	}
+
+	@Test
+	@Order(12)
+	void testBuildMySqlJsonTableNullValue() {
+		RequestValue rv = new RequestValue(); // no param
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isMysql = true;
+
+		String result = csd.buildMySqlJsonTable("EWA_SPLIT(@MISSING, ',')");
+		assertNotNull(result);
+		assertTrue(result.contains("WHERE 1=0"), "Null value → empty result set");
+		c.close();
+	}
+
+	@Test
+	@Order(13)
+	void testBuildMySqlJsonTableNoParams() {
+		RequestValue rv = new RequestValue();
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isMysql = true;
+
+		String result = csd.buildMySqlJsonTable("EWA_SPLIT('a,b,c', ',')");
+		assertNull(result, "No @param → null");
+		c.close();
+	}
+
+	@Test
+	@Order(14)
+	void testBuildMySqlJsonTableQuoteAndBackslashEscaping() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("VAL", "a\\b\"c", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isMysql = true;
+
+		String result = csd.buildMySqlJsonTable("EWA_SPLIT(@VAL, ',')");
+		assertNotNull(result);
+		// REPLACE chain: first replaces \, then replaces "
+		assertTrue(result.contains("REPLACE(REPLACE(REPLACE("), "Should have nested REPLACE for escaping");
+		c.close();
+	}
+
+	// ═══════════════════════════════════════════════════════════════
+	//  SQL Server inline path (unit tests via buildSqlServerOpenJson)
 	// ═══════════════════════════════════════════════════════════════
 
 	@Test
 	@Order(15)
+	void testBuildSqlServerOpenJsonComma() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("IDS", "1,2,3", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isSqlServer2016Plus = true;
+
+		String result = csd.buildSqlServerOpenJson("EWA_SPLIT(@IDS, ',')");
+		assertNotNull(result);
+		assertTrue(result.contains("OPENJSON"), "Should use OPENJSON");
+		assertTrue(result.contains("CAST(t.[key] AS INT) AS idx"), "Should be 0-based idx");
+		assertTrue(result.contains("t.value AS col"), "Should alias as col");
+		assertTrue(result.contains("REPLACE('1,2,3'"), "Should contain split values");
+		assertFalse(result.contains("_EWA_SPT_DATA"), "No temp table on SQL Server");
+		assertFalse(result.contains("#EWA_SPT_DATA"), "No #temp table");
+		c.close();
+	}
+
+	@Test
+	@Order(16)
+	void testBuildSqlServerOpenJsonCustomDelimiter() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("TAGS", "a|b|c", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isSqlServer2016Plus = true;
+
+		String result = csd.buildSqlServerOpenJson("EWA_SPLIT(@TAGS, '|')");
+		assertNotNull(result);
+		assertTrue(result.contains("REPLACE('a|b|c'"), "Should contain value with pipe");
+		assertTrue(result.contains("', '\",\"')"), "Should use REPLACE for delimiter → JSON array");
+		c.close();
+	}
+
+	@Test
+	@Order(17)
+	void testBuildSqlServerOpenJsonNullValue() {
+		RequestValue rv = new RequestValue(); // no param
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isSqlServer2016Plus = true;
+
+		String result = csd.buildSqlServerOpenJson("EWA_SPLIT(@MISSING, ',')");
+		assertNotNull(result);
+		assertTrue(result.contains("WHERE 1=0"), "Null value → empty result set");
+		c.close();
+	}
+
+	@Test
+	@Order(18)
+	void testBuildSqlServerOpenJsonNoParams() {
+		RequestValue rv = new RequestValue();
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isSqlServer2016Plus = true;
+
+		String result = csd.buildSqlServerOpenJson("EWA_SPLIT('a,b,c', ',')");
+		assertNull(result, "No @param → null");
+		c.close();
+	}
+
+	@Test
+	@Order(19)
+	void testBuildSqlServerOpenJsonQuoteBackslashEscaping() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("VAL", "a\\b\"c'd", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isSqlServer2016Plus = true;
+
+		String result = csd.buildSqlServerOpenJson("EWA_SPLIT(@VAL, ',')");
+		assertNotNull(result);
+		// T-SQL: ' → '' (double single quote)
+		assertTrue(result.contains("a\\b\"c''d") || result.contains("a\\b"),
+				"Should have T-SQL escaped value");
+		assertTrue(result.contains("REPLACE(REPLACE(REPLACE("), "Should have REPLACE chain");
+		c.close();
+	}
+
+	// ═══════════════════════════════════════════════════════════════
+	//  SQL Server 2005-2014 XML nodes() path (unit tests)
+	// ═══════════════════════════════════════════════════════════════
+
+	@Test
+	@Order(20)
+	void testBuildSqlServerXmlNodesComma() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("IDS", "1,2,3", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isSqlServerPre2016 = true;
+
+		String result = csd.buildSqlServerXmlNodes("EWA_SPLIT(@IDS, ',')");
+		assertNotNull(result);
+		assertTrue(result.contains("CAST('<x>' + REPLACE"), "Should build XML doc");
+		assertTrue(result.contains("nodes('/x')"), "Should use nodes() for shredding");
+		assertTrue(result.contains("ROW_NUMBER() OVER"), "Should have ROW_NUMBER for idx");
+		assertTrue(result.contains("LTRIM(RTRIM(x.value"), "Should extract x.value");
+		assertFalse(result.contains("_EWA_SPT_DATA"), "No temp table");
+		assertFalse(result.contains("#EWA_SPT_DATA"), "No #temp table");
+		c.close();
+	}
+
+	@Test
+	@Order(21)
+	void testBuildSqlServerXmlNodesCustomDelimiter() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("TAGS", "a|b|c", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isSqlServerPre2016 = true;
+
+		String result = csd.buildSqlServerXmlNodes("EWA_SPLIT(@TAGS, '|')");
+		assertNotNull(result);
+		assertTrue(result.contains("REPLACE('a|b|c'"), "Should contain value with pipe");
+		assertTrue(result.contains("</x><x>"), "Should have XML tag wrap");
+		c.close();
+	}
+
+	@Test
+	@Order(22)
+	void testBuildSqlServerXmlNodesNullValue() {
+		RequestValue rv = new RequestValue();
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isSqlServerPre2016 = true;
+
+		String result = csd.buildSqlServerXmlNodes("EWA_SPLIT(@MISSING, ',')");
+		assertNotNull(result);
+		assertTrue(result.contains("WHERE 1=0"), "Null value → empty result set");
+		c.close();
+	}
+
+	@Test
+	@Order(23)
+	void testBuildSqlServerXmlNodesNoParams() {
+		RequestValue rv = new RequestValue();
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isSqlServerPre2016 = true;
+
+		String result = csd.buildSqlServerXmlNodes("EWA_SPLIT('a,b,c', ',')");
+		assertNull(result, "No @param → null");
+		c.close();
+	}
+
+	@Test
+	@Order(24)
+	void testBuildSqlServerXmlNodesXmlEscaping() {
+		RequestValue rv = new RequestValue();
+		rv.addValue("VAL", "a<b&c>d\"e'f", PageValueTag.FORM);
+		DataConnection c = new DataConnection(CFG, rv);
+		CreateSplitData csd = new CreateSplitData(rv, c);
+		csd.isSqlServerPre2016 = true;
+
+		String result = csd.buildSqlServerXmlNodes("EWA_SPLIT(@VAL, ',')");
+		assertNotNull(result);
+		assertTrue(result.contains("&amp;"), "& should be XML-escaped");
+		assertTrue(result.contains("&lt;"), "< should be XML-escaped");
+		assertTrue(result.contains("&gt;"), "> should be XML-escaped");
+		assertTrue(result.contains("&quot;"), "\" should be XML-escaped");
+		assertTrue(result.contains("&apos;"), "' should be XML-escaped");
+		c.close();
+	}
+
+	// ═══════════════════════════════════════════════════════════════
+	//  HSQLDB temp-table path (integration)
+	// ═══════════════════════════════════════════════════════════════
+
+	@Test
+	@Order(30)
 	void testReplaceSplitDataHsqldb() throws Exception {
 		conn.executeUpdateNoParameter("DELETE FROM _EWA_SPT_DATA");
 		conn.executeUpdateNoParameter("DELETE FROM test_split");
@@ -240,30 +494,36 @@ class CreateSplitDataTest {
 	}
 
 	@Test
-	@Order(16)
+	@Order(21)
 	void testCreateSplitDataDetectsDb() {
-		// Test isPg/isOracle detection
+		// Test isPg/isOracle/isMysql detection
 		RequestValue rv = new RequestValue();
 		DataConnection c = new DataConnection(CFG, rv);
 
-		// HSQLDB → not PG, not Oracle
+		// HSQLDB → not PG, not Oracle, not MySQL, not SQL Server 2016+
 		CreateSplitData csd = new CreateSplitData(rv, c);
 		assertFalse(csd.isPg, "HSQLDB should NOT be detected as PG");
 		assertFalse(csd.isOracle, "HSQLDB should NOT be detected as Oracle");
+		assertFalse(csd.isMysql, "HSQLDB should NOT be detected as MySQL");
+		assertFalse(csd.isSqlServer2016Plus, "HSQLDB should NOT be SQL Server 2016+");
+		assertFalse(csd.isSqlServerPre2016, "HSQLDB should NOT be SQL Server pre-2016");
 		c.close();
 	}
 
 	@Test
-	@Order(17)
+	@Order(22)
 	void testClearEwaSplitTempDataSkipsInline() {
 		RequestValue rv = new RequestValue();
 		rv.addValue("IDS", "1,2,3", PageValueTag.FORM);
 		DataConnection c = new DataConnection(CFG, rv);
 		CreateSplitData csd = new CreateSplitData(rv, c);
 
-		// Force PG mode
+		// Force all inline modes — no temp tables
 		csd.isPg = true;
 		csd.isOracle = true;
+		csd.isMysql = true;
+		csd.isSqlServer2016Plus = true;
+		csd.isSqlServerPre2016 = true;
 		// Should not throw even with no temp table
 		assertDoesNotThrow(() -> csd.clearEwaSplitTempData());
 		// No temp data should be created

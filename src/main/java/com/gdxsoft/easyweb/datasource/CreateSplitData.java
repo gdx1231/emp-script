@@ -1,5 +1,8 @@
 package com.gdxsoft.easyweb.datasource;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,9 +22,6 @@ import com.gdxsoft.easyweb.utils.msnet.MListStr;
  *
  */
 public class CreateSplitData {
-	public static String DDL_SQLSERVER = "CREATE TABLE _ewa_spt_data(idx int NOT NULL,col nvarchar(MAX), tag varchar(50) NOT NULL, PRIMARY KEY (tag,idx) )";
-	public static String DDL_MYSQL = "CREATE TABLE _ewa_spt_data(idx int NOT NULL,col varchar(8000), tag varchar(50) NOT NULL, PRIMARY KEY(tag,idx))DEFAULT CHARSET=utf8mb4";
-	public static String DDL_COMMON = "CREATE TABLE _ewa_spt_data(idx int NOT NULL,col varchar(1000), tag varchar(50) NOT NULL, PRIMARY KEY(tag,idx))";
 	private static Logger LOGGER = LoggerFactory.getLogger(CreateSplitData.class);
 	private RequestValue rv_;
 
@@ -37,13 +37,17 @@ public class CreateSplitData {
 	private String uid;
 	private DataConnection cnn;
 	private String tempTableName;
-	private boolean tempTableCreated;
-	private boolean dropOnClose;
 
 	/** PostgreSQL — use unnest(string_to_array(...)) inline, no temp table. */
 	boolean isPg;
 	/** Oracle / 达梦DM — use XMLTABLE inline, no temp table. */
 	boolean isOracle;
+	/** MySQL 8.0+ — use JSON_TABLE inline, no temp table. */
+	boolean isMysql;
+	/** SQL Server 2016+ — use OPENJSON inline, no temp table. */
+	boolean isSqlServer2016Plus;
+	/** SQL Server 2005-2014 — use XML nodes() inline, no temp table. */
+	boolean isSqlServerPre2016;
 
 	public CreateSplitData(RequestValue rv, DataConnection cnn) {
 		this.rv_ = rv;
@@ -54,18 +58,26 @@ public class CreateSplitData {
 		this.keyMap_ = new HashMap<>();
 
 		String databaseType = this.cnn.getDatabaseType();
-		boolean sqlserver = SqlUtils.isSqlServer(databaseType);
-		boolean mysql = SqlUtils.isMySql(databaseType);
+		boolean isSqlServerDb = SqlUtils.isSqlServer(databaseType);
+		boolean isMysqlDb = SqlUtils.isMySql(databaseType);
 		this.isPg = SqlUtils.isPostgreSql(databaseType);
 		this.isOracle = SqlUtils.isOracle(databaseType); // 含达梦DM
 
-		if (sqlserver) {
-			this.tempTableName = "[#EWA_SPT_DATA_" + this.uid + "]"; // 使用内存
-			dropOnClose = true;
-		} else if (mysql) {
-			// MYSQL 临时表在一条查询里只能打开一次
-			// ERROR 1137 (HY000): Can't reopen table: '_ewa_spt_data'
-			this.tempTableName = "_EWA_SPT_DATA"; // 物理表
+		// MySQL 8.0+ → JSON_TABLE 内联；5.7 → 物理表
+		this.isMysql = isMysqlDb && checkVersionGe(8);
+		// SQL Server 2016+ → OPENJSON；2005-2014 → XML nodes()
+		this.isSqlServer2016Plus = isSqlServerDb && checkVersionGe(13);
+		this.isSqlServerPre2016 = isSqlServerDb && !isSqlServer2016Plus;
+
+		if (isSqlServer2016Plus || isSqlServerPre2016) {
+			// SQL Server 全版本内联，零 IO，不需临时表
+			this.tempTableName = null;
+		} else if (isMysql) {
+			// MySQL 8.0+ 使用 JSON_TABLE 内联，零 IO，不需物理表
+			this.tempTableName = null;
+		} else if (isMysqlDb) {
+			// MySQL 5.7 退回物理表
+			this.tempTableName = "_EWA_SPT_DATA";
 		} else if (isPg || isOracle) {
 			// PG/Oracle 内联方案，零 IO，不需要物理表
 			this.tempTableName = null;
@@ -75,38 +87,39 @@ public class CreateSplitData {
 	}
 
 	/**
+	 * 检测数据库大版本号是否 ≥ 指定值。
+	 * 连接不可用或检测失败时，保守返回 false（退回旧路径）。
+	 *
+	 * @param major 目标大版本号（MySQL 8, SQL Server 13/2016）
+	 */
+	private boolean checkVersionGe(int major) {
+		try {
+			Connection conn = this.cnn.getConnection();
+			if (conn != null && !conn.isClosed()) {
+				DatabaseMetaData meta = conn.getMetaData();
+				return meta.getDatabaseMajorVersion() >= major;
+			}
+		} catch (SQLException e) {
+			LOGGER.debug("checkVersionGe({}) failed, assume < {}: {}", major, major, e.getMessage());
+		}
+		return false;
+	}
+
+	/**
 	 * 创建临时表
 	 */
 	public void createEwaSplitTempData() {
 		if (this.getTempData().size() == 0) {
 			return;
 		}
-		// PG/Oracle 内联，无临时表
-		if (isPg || isOracle) {
+		// 所有主流数据库内联路径，无临时表
+		if (isPg || isOracle || isMysql || isSqlServer2016Plus || isSqlServerPre2016) {
 			return;
 		}
 		String databaseType = this.cnn.getDatabaseType();
+		// 只有 MySQL 5.7 / HSQLDB / 其他小众库才走到这里，SQL Server/PG/Oracle/MySQL 8.0+ 已内联
 		boolean mysql = SqlUtils.isMySql(databaseType);
-		boolean sqlserver = SqlUtils.isSqlServer(databaseType);
-		if (!tempTableCreated) {
-			if (sqlserver) {
-				String sqlCreate = DDL_SQLSERVER.replace("_ewa_spt_data", this.tempTableName);
-				LOGGER.debug("Create sqlserver temp table. {}" + sqlCreate);
-				// SQLServer创建内存临时表
-				this.cnn.executeUpdateNoParameter(sqlCreate);
-				tempTableCreated = true;
-			} else if (mysql) {
-				// MYSQL 临时表在一条查询里只能打开一次
-				// ERROR 1137 (HY000): Can't reopen table: '_ewa_spt_data'
-				// • You cannot refer to a TEMPORARY table more than once in the same query.
-				
-				/*
-				 * String sqlCreate = DDL_MYSQL.replace("_ewa_spt_data", this.tempTableName);
-				 * LOGGER.debug("Create mysql temp table. {}" + sqlCreate); // mysql 创建内存临时表
-				 * this.cnn.executeUpdateNoParameter(sqlCreate); tempTableCreated = true;
-				 */
-			}
-		}
+
 		String insertHeader = "insert into " + this.tempTableName + " (idx, col, tag) values ";
 
 		List<String> values = new ArrayList<String>();
@@ -123,9 +136,7 @@ public class CreateSplitData {
 				sb.append(", ");
 
 				String col = al.get(i);
-				if (sqlserver) {
-					// max 2g
-				} else if (mysql) {
+				if (mysql) {
 					if (col.length() > 8000) {
 						col = col.substring(0, 8000);
 						LOGGER.warn("EwaSplitTempData col size > 8000, truncation");
@@ -166,17 +177,11 @@ public class CreateSplitData {
 		if (this.getTempData().size() == 0) {
 			return;
 		}
-		// PG/Oracle 内联，无临时表需要清理
-		if (isPg || isOracle) {
+		// PG/Oracle/MySQL 内联，无临时表需要清理
+		if (isPg || isOracle || isMysql) {
 			return;
 		}
-		LOGGER.debug("clearEwaSplitTempData, table={}, dropOnClose={}", this.tempTableName, this.dropOnClose);
-		if (dropOnClose) {
-			String sqlDrop = "drop table " + this.tempTableName;
-			LOGGER.debug(sqlDrop);
-			cnn.executeUpdateNoParameter(sqlDrop);
-			return;
-		}
+		LOGGER.debug("clearEwaSplitTempData, table={}", this.tempTableName);
 		StringBuilder sb = new StringBuilder();
 		sb.append("delete from _EWA_SPT_DATA where tag in (");
 		int i = 0;
@@ -239,6 +244,21 @@ public class CreateSplitData {
 			String oraInline = buildOracleXmltable(exp);
 			if (oraInline != null) {
 				sql = sql.replace(exp, oraInline);
+			}
+		} else if (isSqlServer2016Plus) {
+			String mssqlInline = buildSqlServerOpenJson(exp);
+			if (mssqlInline != null) {
+				sql = sql.replace(exp, mssqlInline);
+			}
+		} else if (isSqlServerPre2016) {
+			String mssqlInline = buildSqlServerXmlNodes(exp);
+			if (mssqlInline != null) {
+				sql = sql.replace(exp, mssqlInline);
+			}
+		} else if (isMysql) {
+			String mysqlInline = buildMySqlJsonTable(exp);
+			if (mysqlInline != null) {
+				sql = sql.replace(exp, mysqlInline);
 			}
 		} else {
 			String dataExp = insertTmpData(exp);
@@ -354,6 +374,185 @@ public class CreateSplitData {
 		return sb.toString();
 	}
 
+	/**
+	 * Parse an ewa_split expression and return a MySQL inline subquery using
+	 * {@code JSON_TABLE}, avoiding temporary-table I/O.
+	 *
+	 * <p>Requires MySQL 8.0.4+. JSON-special characters ({@code \ "}) in values
+	 * are escaped via a SQL REPLACE chain inside a CONCAT-built JSON array.
+	 *
+	 * <p>Example transformation:
+	 * <pre>{@code
+	 *   ewa_split(@ids, ',')
+	 *   →
+	 *   (SELECT t.idx - 1 AS idx, t.val AS col
+	 *    FROM JSON_TABLE(
+	 *        CONCAT('["', REPLACE(REPLACE(REPLACE('1,2,3', '\\', '\\\\'), '"', '\\"'), ',', '","'), '"]'),
+	 *        '$[*]' COLUMNS(idx FOR ORDINALITY, val VARCHAR(8000) PATH '$')
+	 *    ) AS t)
+	 * }</pre>
+	 *
+	 * @param exp the full ewa_split expression, e.g. {@code EWA_SPLIT(@ids, ',')}
+	 * @return a MySQL subquery returning (idx, col), or null if params missing
+	 */
+	String buildMySqlJsonTable(String exp) {
+		MListStr paras = Utils.getParameters(exp, "@");
+		if (paras.size() == 0) {
+			return null;
+		}
+		String paramName = paras.get(0);
+		String v1 = this.rv_.getString(paramName);
+		if (v1 == null) {
+			// 空值 → 返回空结果集
+			return "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
+		}
+
+		int loc0 = exp.indexOf(",");
+		int loc1 = exp.lastIndexOf(")");
+		String delimiter = loc0 >= 0 && loc1 > loc0
+				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
+				: ",";
+
+		// SQL string literal escaping: \ → \\, ' → ''
+		String sqlEscaped = v1
+				.replace("\\", "\\\\")
+				.replace("'", "''");
+
+		// Delimiter also needs SQL escaping
+		String sqlEscapedDelim = delimiter
+				.replace("\\", "\\\\")
+				.replace("'", "''");
+
+		// Build: CONCAT('["', REPLACE(REPLACE(REPLACE(val,'\\','\\\\'),'"','\\"'),delim,'","'),'"]')
+		StringBuilder sb = new StringBuilder();
+		sb.append("(SELECT t.idx - 1 AS idx, t.val AS col ");
+		sb.append("FROM JSON_TABLE(");
+		sb.append("CONCAT('[\"', REPLACE(REPLACE(REPLACE('");
+		sb.append(sqlEscaped);
+		sb.append("', '\\\\', '\\\\\\\\'), '\"', '\\\\\"'), '");
+		sb.append(sqlEscapedDelim);
+		sb.append("', '\",\"'), '\"]')");
+		sb.append(", '$[*]' COLUMNS(idx FOR ORDINALITY, val VARCHAR(8000) PATH '$')");
+		sb.append(") AS t)");
+		return sb.toString();
+	}
+
+	/**
+	 * Parse an ewa_split expression and return a SQL Server inline subquery using
+	 * {@code OPENJSON}, avoiding temporary-table I/O.
+	 *
+	 * <p>Requires SQL Server 2016+. The key advantage over {@code STRING_SPLIT}:
+	 * {@code OPENJSON} guarantees ordinal position via the {@code [key]} column.
+	 *
+	 * <p>Example transformation:
+	 * <pre>{@code
+	 *   ewa_split(@ids, ',')
+	 *   →
+	 *   (SELECT CAST(t.[key] AS INT) AS idx, t.value AS col
+	 *    FROM OPENJSON('["' + REPLACE(REPLACE(REPLACE('1,2,3', '\', '\\'), '"', '\"'), ',', '","') + '"]') AS t)
+	 * }</pre>
+	 *
+	 * @param exp the full ewa_split expression, e.g. {@code EWA_SPLIT(@ids, ',')}
+	 * @return a SQL Server subquery returning (idx, col), or null if params missing
+	 */
+	String buildSqlServerOpenJson(String exp) {
+		MListStr paras = Utils.getParameters(exp, "@");
+		if (paras.size() == 0) {
+			return null;
+		}
+		String paramName = paras.get(0);
+		String v1 = this.rv_.getString(paramName);
+		if (v1 == null) {
+			return "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
+		}
+
+		int loc0 = exp.indexOf(",");
+		int loc1 = exp.lastIndexOf(")");
+		String delimiter = loc0 >= 0 && loc1 > loc0
+				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
+				: ",";
+
+		// T-SQL string literal escaping: only ' → '' (backslash is literal)
+		String tsvEscaped = v1.replace("'", "''");
+		String tsvEscapedDelim = delimiter.replace("'", "''");
+
+		// JSON escaping inside T-SQL: backslash and quote are literal chars
+		// REPLACE chain: \ → \\, " → \", delimiter → ","
+		StringBuilder sb = new StringBuilder();
+		sb.append("(SELECT CAST(t.[key] AS INT) AS idx, t.value AS col ");
+		sb.append("FROM OPENJSON('[\"' + REPLACE(REPLACE(REPLACE('");
+		sb.append(tsvEscaped);
+		sb.append("', '\\', '\\\\'), '\"', '\\\"'), '");
+		sb.append(tsvEscapedDelim);
+		sb.append("', '\",\"') + '\"]') AS t)");
+		return sb.toString();
+	}
+
+	/**
+	 * Parse an ewa_split expression and return a SQL Server inline subquery using
+	 * XML {@code nodes()}, avoiding temporary-table I/O.
+	 *
+	 * <p>Works on SQL Server 2005+. Values are XML-escaped, then wrapped in
+	 * {@code <x>…</x>} tags and shredded via {@code CROSS APPLY xml.nodes('/x')}.
+	 *
+	 * <p>Example transformation:
+	 * <pre>{@code
+	 *   ewa_split(@ids, ',')
+	 *   →
+	 *   (SELECT ROW_NUMBER() OVER (ORDER BY (SELECT 1)) - 1 AS idx,
+	 *           LTRIM(RTRIM(x.value('.', 'NVARCHAR(MAX)'))) AS col
+	 *    FROM (SELECT CAST('<x>' + REPLACE('1,2,3', ',', '</x><x>') + '</x>' AS XML) AS xml_doc) src
+	 *    CROSS APPLY xml_doc.nodes('/x') AS t(x))
+	 * }</pre>
+	 *
+	 * @param exp the full ewa_split expression, e.g. {@code EWA_SPLIT(@ids, ',')}
+	 * @return a SQL Server subquery returning (idx, col), or null if params missing
+	 */
+	String buildSqlServerXmlNodes(String exp) {
+		MListStr paras = Utils.getParameters(exp, "@");
+		if (paras.size() == 0) {
+			return null;
+		}
+		String paramName = paras.get(0);
+		String v1 = this.rv_.getString(paramName);
+		if (v1 == null) {
+			return "(SELECT 0 AS idx, '' AS col WHERE 1=0)";
+		}
+
+		int loc0 = exp.indexOf(",");
+		int loc1 = exp.lastIndexOf(")");
+		String delimiter = loc0 >= 0 && loc1 > loc0
+				? exp.substring(loc0 + 1, loc1).trim().replace("'", "")
+				: ",";
+
+		// XML entity escaping: & < > " '  (must be done before SQL embedding)
+		String xmlEscaped = v1
+				.replace("&", "&amp;")
+				.replace("<", "&lt;")
+				.replace(">", "&gt;")
+				.replace("\"", "&quot;")
+				.replace("'", "&apos;");
+
+		String xmlEscapedDelim = delimiter
+				.replace("&", "&amp;")
+				.replace("<", "&lt;")
+				.replace(">", "&gt;")
+				.replace("\"", "&quot;")
+				.replace("'", "&apos;");
+
+		// Build XML doc: <x>v1</x><x>v2</x>..., then shred with nodes('/x')
+		StringBuilder sb = new StringBuilder();
+		sb.append("(SELECT ROW_NUMBER() OVER (ORDER BY (SELECT 1)) - 1 AS idx, ");
+		sb.append("LTRIM(RTRIM(x.value('.', 'NVARCHAR(MAX)'))) AS col ");
+		sb.append("FROM (SELECT CAST('<x>' + REPLACE('");
+		sb.append(xmlEscaped);
+		sb.append("', '");
+		sb.append(xmlEscapedDelim);
+		sb.append("', '</x><x>') + '</x>' AS XML) AS xml_doc) src ");
+		sb.append("CROSS APPLY xml_doc.nodes('/x') AS t(x))");
+		return sb.toString();
+	}
+
 	private String insertTmpData(String para) {
 		MListStr paras = Utils.getParameters(para, "@");
 		if (paras.size() == 0) {
@@ -372,7 +571,7 @@ public class CreateSplitData {
 			return this.keyMap_.get(keyExp);
 		}
 		// 创建在_ewa_split_data.tag (唯一ID)
-		String tmpDataTag = (this.dropOnClose ? "" : this.uid) + ".gdx." + this.keyMap_.size();
+		String tmpDataTag = this.uid + ".gdx." + this.keyMap_.size();
 		LOGGER.debug("Create temp data {}", tmpDataTag);
 
 		this.keyMap_.put(keyExp, tmpDataTag);

@@ -92,8 +92,8 @@ class SqlBuilderTest {
 	@Order(2)
 	void testRebuildSqlWithParam() throws Exception {
 		String result = conn.rebuildSql("SELECT * FROM test_user WHERE name = @NAME");
-		assertTrue(result.contains("?"));
-		assertFalse(result.contains("@NAME"));
+		// rebuildSql preserves @paramName for later inline/parameter binding
+		assertTrue(result.contains("@NAME"));
 	}
 
 	@Test
@@ -275,6 +275,7 @@ class SqlBuilderTest {
 		DataConnection c2 = new DataConnection(CFG, rv2);
 
 		String sql = c2.rebuildSql("INSERT INTO test_user (name, age) VALUES (@N, 1)");
+			sql = c2.replaceSqlParameters(sql); // convert @N to ?
 		PreparedStatement pst = conn.getDataHelper().getPreparedStatement(sql);
 		MListStr params = new MListStr();
 		params.add("N");
@@ -328,6 +329,7 @@ class SqlBuilderTest {
 		DataConnection c2 = new DataConnection(CFG, rv2);
 
 		String sql = c2.rebuildSql("INSERT INTO test_user (name, age) VALUES (@N, @A)");
+			sql = c2.replaceSqlParameters(sql); // convert @N,@A to ?
 		PreparedStatement pst = conn.getDataHelper().getPreparedStatement(sql);
 		MListStr params = new MListStr();
 		params.add("N");

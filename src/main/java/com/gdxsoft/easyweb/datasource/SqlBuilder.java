@@ -118,7 +118,9 @@ public class SqlBuilder {
 			LOGGER.error(err.getLocalizedMessage());
 		}
 
-		// 8) @param → ? substitution
+		// 8) @param → random placeholder (preserve @paramName for
+		//    replaceSqlSelectParameters to inline later in SELECT queries)
+		HashMap<String, String> fieldsMap = new HashMap<String, String>();
 		MListStr paras = Utils.getParameters(sql1, "@");
 		for (int i = 0; i < paras.size(); i++) {
 			String para = paras.get(i);
@@ -164,8 +166,16 @@ public class SqlBuilder {
 				}
 				sql1 = sql1.replaceFirst(paraName + "\\b", sb.toString());
 			} else {
-				sql1 = sql1.replaceFirst(paraName + "\\b", "?");
+				// 避免 @code_key 和 @code 的冲突，用随机占位符保护 @paramName
+				// 后续 replaceSqlSelectParameters / replaceSqlParameters 会处理
+				String randomName = "[gDx[" + Utils.randomStr(30) + Utils.getGuid() + "]GdX]";
+				sql1 = sql1.replaceFirst(paraName + "\\b", randomName);
+				fieldsMap.put(randomName, paraName);
 			}
+		}
+		// 还原随机占位符为 @paramName，供 replaceSqlSelectParameters 使用
+		for (String randomName : fieldsMap.keySet()) {
+			sql1 = sql1.replace(randomName, fieldsMap.get(randomName));
 		}
 		return sql1;
 	}
