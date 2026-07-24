@@ -48,6 +48,7 @@
 | 文档 | 说明 |
 |------|------|
 | [DATABASE_USAGE.md](DATABASE_USAGE.md) | 数据库调用方式详解（DTTable/DataConnection/XML配置/SqlCached） |
+| [DATABASE_TABLES.md](DATABASE_TABLES.md) | 系统表结构 DDL（EWA配置/RESTful/Module，MySQL/HSQLDB/SQL Server） |
 | [MYSQL.functions.md](MYSQL.functions.md) | MySQL 自定义函数（GETDATE/CHARINDEX/fn_chn_money/f_getpy 等） |
 
 ## 测试与调试

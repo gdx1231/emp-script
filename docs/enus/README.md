@@ -48,6 +48,7 @@ This directory contains English technical documentation for the emp-script (EWA)
 | Document | Description |
 |----------|-------------|
 | [DATABASE_USAGE.md](DATABASE_USAGE.md) | Database access methods (DTTable/DataConnection/XML config/SqlCached) |
+| [DATABASE_TABLES.md](DATABASE_TABLES.md) | System table DDL (EWA config/RESTful/Module, MySQL/HSQLDB/SQL Server) |
 | [MYSQL.functions.md](MYSQL.functions.md) | MySQL custom functions (GETDATE/CHARINDEX/fn_chn_money/f_getpy, etc.) |
 
 ## Testing & Debugging
