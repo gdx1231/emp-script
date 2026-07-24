@@ -1337,8 +1337,11 @@ public class FileOut {
 			return -1;
 		}
 		long total = file.length();
-		// Safari无法播放MP4文件流 Range分段请求相关
-		// 第一次请求 range: bytes=0-1
+		// 浏览器媒体文件(Range)分段请求：
+		//   Chrome 发 bytes=0- 探测，缓冲一定量数据后主动断开(服务端收到 Broken pipe)，
+		//   后续再发精确 Range(如 bytes=2293760-)，多次请求拼成完整文件。
+		//   Safari 首次发 bytes=0-1 探测，必须返回 206 + Content-Range 否则拒绝播放。
+		// Broken pipe 是正常行为，不应记为 ERROR。
 		if (this.request != null && this.request.getHeader("range") != null) {
 			String range = request.getHeader("range");
 			String[] ranges = (range + " ").split("-");
@@ -1358,13 +1361,17 @@ public class FileOut {
 					response.setHeader("content-range", "bytes " + start + "-" + end + "/" + total);
 
 					long rangeBytes = IOUtils.copyLarge(input, response.getOutputStream(), start, length);
-					IOUtils.close(input);
-
 					return rangeBytes;
 				} catch (Exception err) {
-					response.setStatus(500);
-					LOGGER.error("out image: {}, {}", file.getAbsolutePath(), err.getMessage());
+					if (isBrokenPipe(err)) {
+						LOGGER.debug("range broken pipe: {}, {}", file.getAbsolutePath(), err.getMessage());
+					} else {
+						response.setStatus(500);
+						LOGGER.error("out image: {}, {}", file.getAbsolutePath(), err.getMessage());
+					}
 					return -1;
+				} finally {
+					IOUtils.closeQuietly(input);
 				}
 			}
 		}
@@ -1372,18 +1379,32 @@ public class FileOut {
 		try {
 			return IOUtils.copyLarge(input, response.getOutputStream(), 0, total);
 		} catch (Exception err) {
-			response.setStatus(500);
-			LOGGER.error("out image: {}, {}", file.getAbsolutePath(), err.getMessage());
+			if (isBrokenPipe(err)) {
+				LOGGER.debug("broken pipe: {}, {}", file.getAbsolutePath(), err.getMessage());
+			} else {
+				response.setStatus(500);
+				LOGGER.error("out image: {}, {}", file.getAbsolutePath(), err.getMessage());
+			}
 			return -1;
 		} finally {
-			if (input != null) {
-				try {
-					input.close();
-				} catch (Exception err1) {
-					LOGGER.error("out image, close input: {}, {}", file.getAbsolutePath(), err1.getMessage());
-				}
-			}
+			IOUtils.closeQuietly(input);
 		}
+	}
+
+	/**
+	 * 判断异常是否为客户端断开连接(Broken pipe / Connection reset by peer)，
+	 * 遍历整个 cause 链匹配。
+	 */
+	private static boolean isBrokenPipe(Throwable err) {
+		Throwable cause = err;
+		while (cause != null) {
+			String msg = cause.getMessage();
+			if (msg != null && (msg.contains("Broken pipe") || msg.contains("Connection reset by peer"))) {
+				return true;
+			}
+			cause = cause.getCause();
+		}
+		return false;
 	}
 
 	public HttpServletRequest getRequest() {

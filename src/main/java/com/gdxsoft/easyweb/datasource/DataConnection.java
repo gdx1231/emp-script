@@ -1,7 +1,5 @@
 package com.gdxsoft.easyweb.datasource;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,68 +7,58 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.conf.ConfExtraGlobal;
-import com.gdxsoft.easyweb.conf.ConfExtraGlobals;
 import com.gdxsoft.easyweb.conf.ConnectionConfig;
-import com.gdxsoft.easyweb.conf.ConnectionConfigs;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.debug.DebugFrames;
 import com.gdxsoft.easyweb.script.PageValue;
 import com.gdxsoft.easyweb.script.PageValueTag;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.display.frame.FrameParameters;
-import com.gdxsoft.easyweb.utils.UFormat;
-import com.gdxsoft.easyweb.utils.ULogic;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MList;
 import com.gdxsoft.easyweb.utils.msnet.MListStr;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
-import com.gdxsoft.easyweb.utils.types.UInt16;
-import com.gdxsoft.easyweb.utils.types.UInt32;
-import com.gdxsoft.easyweb.utils.types.UInt64;
 
+/**
+ * Database connection wrapper providing SQL execution, transaction management,
+ * batch operations, and parameter handling.
+ * 
+ * <p>
+ * <b>Thread Safety:</b> This class is <i>not thread-safe</i>. Instances hold
+ * mutable state (Statements, ResultSets, Connection references) and should not
+ * be shared across threads. Each thread should create its own instance, or use
+ * the static utility methods which create and dispose instances internally.
+ * 
+ * @author guolei
+ */
 public class DataConnection {
 	private static Logger LOGGER = LoggerFactory.getLogger(DataConnection.class);
 
-	private DataHelper _ds;
-	private PreparedStatement _pst;
+	/**
+	 * Delegate for connection/transaction/statement lifecycle (God Class refactor).
+	 */
+	private DataConnectionSession _session;
 
-	private Statement _queryStatement;
+	/** Delegate for SQL building and parameter binding (God Class refactor). */
+	private DataConnectionSqlBuilder _sqlBuilder;
 
 	private String _errorMsg; // 错误信息和 SQL
 	private String _errorMsgOnly; // 只有错误信息
 
-	private MList _ResultSetList = new MList();
-	private String _DatabaseType;
-	private String _SchemaName;
-	private String _ConnectionString;
-	private ConnectionConfigs _Configs;
-	private ConnectionConfig _CurrentConfig;
-	private Connection _Connection;
 	private DebugFrames _DebugFrames;
 	private RequestValue _RequestValue;
-	private boolean _IsTrans;
-	private String _DataBaseName;
-
 	// 用于分割字符串，生成临时数据
-	private CreateSplitData _CreateSplitData;
 
 	private int _TimeDiffMinutes; // 用户和系统的时差
-
-	private EwaSqlFunctions ewaSqlFunctions;
 
 	// 批处理更新返回的表
 	private List<DTTable> updateBatchTables;
@@ -318,6 +306,7 @@ public class DataConnection {
 			DataResult r = (DataResult) cnn.getResultSetList().get(i);
 			DTTable tb = new DTTable();
 			tb.initData(r.getResultSet());
+			tables.add(tb);
 		}
 		cnn.close();
 		return tables;
@@ -413,7 +402,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String getDataBaseName() {
-		return _DataBaseName;
+		return _session.getDataBaseName();
 	}
 
 	/**
@@ -422,7 +411,7 @@ public class DataConnection {
 	 * @param dataBaseName
 	 */
 	public void setDataBaseName(String dataBaseName) {
-		_DataBaseName = dataBaseName;
+		_session.setDataBaseName(dataBaseName);
 	}
 
 	/**
@@ -431,32 +420,11 @@ public class DataConnection {
 	 * @return
 	 */
 	public boolean transBegin() {
-		try {
-			_ds.connect();
-			_Connection = _ds.getConnection();
-		} catch (Exception e2) {
-			_IsTrans = false;
-			LOGGER.error(e2.getLocalizedMessage());
-			this.setError(e2, "连接到数据库");
-			return false;
+		boolean ok = _session.transBegin();
+		if (!ok) {
+			this._errorMsg = "事务开始错误";
 		}
-		try {
-			_IsTrans = true;
-			_Connection.setAutoCommit(false);
-			LOGGER.debug("Start tansaction");
-			return true;
-		} catch (SQLException e) {
-			_IsTrans = false;
-			try {
-				_Connection.close();
-			} catch (SQLException e1) {
-				LOGGER.error(e1.getLocalizedMessage());
-				this.setError(e1, "关闭错误的事务");
-			}
-			LOGGER.error(e.getLocalizedMessage());
-			this.setError(e, "事务开始错误");
-			return false;
-		}
+		return ok;
 	}
 
 	/**
@@ -465,19 +433,11 @@ public class DataConnection {
 	 * @throws SQLException
 	 */
 	public boolean transCommit() {
-		try {
-			this._Connection.commit();
-			LOGGER.debug("Commit tansaction");
-			return true;
-		} catch (Exception e) {
-			LOGGER.error(e.getLocalizedMessage());
-			this.setError(e, "提交事务");
-			this.close();
-			return false;
-		} finally {
-			this._IsTrans = false;
+		boolean ok = _session.transCommit();
+		if (!ok) {
+			this._errorMsg = "提交事务失败";
 		}
-
+		return ok;
 	}
 
 	/**
@@ -486,31 +446,24 @@ public class DataConnection {
 	 * @throws SQLException
 	 */
 	public void transRollback() {
-		try {
-			this._Connection.rollback();
-			LOGGER.debug("Rollback tansaction");
-		} catch (SQLException e) {
-			LOGGER.error(e.getLocalizedMessage());
-			this.setError(e, "回滚事务");
-		} finally {
-			this.close();
-		}
+		_session.transRollback();
 	}
 
 	/**
 	 * 关闭事务连接
 	 */
 	public void transClose() {
-		this.close();
+		_session.transClose();
 	}
 
 	public ConnectionConfig getCurrentConfig() {
-		return this._CurrentConfig;
+		return _session.getCurrentConfig();
 	}
 
 	public DataConnection() {
 		try {
-			_Configs = ConnectionConfigs.instance();
+			_session = new DataConnectionSession();
+			_sqlBuilder = new DataConnectionSqlBuilder(this);
 		} catch (Exception e) {
 			LOGGER.error(e.getLocalizedMessage());
 			this._errorMsg = e.getMessage();
@@ -520,7 +473,8 @@ public class DataConnection {
 
 	public DataConnection(RequestValue rv) {
 		try {
-			_Configs = ConnectionConfigs.instance();
+			_session = new DataConnectionSession();
+			_sqlBuilder = new DataConnectionSqlBuilder(this);
 
 			this.setConfigName("");
 			this.setRequestValue(rv);
@@ -534,7 +488,8 @@ public class DataConnection {
 
 	public DataConnection(String configName, RequestValue rv) {
 		try {
-			_Configs = ConnectionConfigs.instance();
+			_session = new DataConnectionSession(configName);
+			_sqlBuilder = new DataConnectionSqlBuilder(this);
 
 			this.setConfigName(configName);
 			this.setRequestValue(rv);
@@ -547,13 +502,7 @@ public class DataConnection {
 	}
 
 	public void setConfigName(String configName) {
-		if (configName == null || !this._Configs.containsKey(configName.trim().toLowerCase())) {
-			// 第一个数据库配置
-			_CurrentConfig = this._Configs.getConfig(0);
-		} else {
-			_CurrentConfig = this._Configs.get(configName.trim().toLowerCase());
-		}
-		initConnection();
+		_session.setConfigName(configName);
 	}
 
 	/**
@@ -563,42 +512,25 @@ public class DataConnection {
 	 * @param dataBaseName
 	 */
 	public void setConfigName(String configName, String dataBaseName) {
-		this.setConfigName(configName);
-
-		initConnection();
+		_session.setConfigName(configName);
 	}
 
 	public boolean connect() {
-
-		try {
-			if (this._ds == null) {
-				this.initConnection();
-			}
-
-			_ds.connect();
-			return true;
-		} catch (Exception e) {
-			LOGGER.error(e.getLocalizedMessage());
-			return false;
-		}
+		return _session.connect();
 	}
 
 	private void initConnection() {
 		if (this._DebugFrames != null) {
 			this._DebugFrames.addDebug(this, "SQL", "[initConnection()] Start building connection. ("
-					+ this._CurrentConfig.getConnectionString() + ")");
+					+ _session.getCurrentConfig().getConnectionString() + ")");
 		}
 
-		_ds = new DataHelper(this._CurrentConfig);
+		_session.setCurrentConfig(_session.getCurrentConfig());
 
 		if (this._DebugFrames != null) {
-			this._DebugFrames.addDebug(this, "SQL",
-					"[initConnection()] build a connection. (" + this._CurrentConfig.getConnectionString() + ")");
+			this._DebugFrames.addDebug(this, "SQL", "[initConnection()] build a connection. ("
+					+ _session.getCurrentConfig().getConnectionString() + ")");
 		}
-		this._ConnectionString = this._CurrentConfig.getConnectionString();
-		this._SchemaName = this._CurrentConfig.getSchemaName();
-		this._DatabaseType = this._CurrentConfig.getType();
-
 	}
 
 	public boolean executeQueryNoParameter(String sql) {
@@ -608,16 +540,16 @@ public class DataConnection {
 		debuginfo.append(sql);
 		writeDebug(this, "SQL", debuginfo.toString());
 
-		this.closeStatment(this._queryStatement);
+		this.closeStatment(_session.getQueryStatement());
 		try {
 			this.useDatabase();
 
 			sql = this.rebuildSql(sql);
 
-			_ds.connect();
+			_session.getDataHelper().connect();
 
-			this._queryStatement = _ds.getStatement();
-			ResultSet rs = _queryStatement.executeQuery(sql);
+			_session.setQueryStatement(_session.getDataHelper().getStatement());
+			ResultSet rs = _session.getQueryStatement().executeQuery(sql);
 			this.addResult(rs, sql, sql);
 			writeDebug(this, "SQL", "[executeQuery(sql)] End query.");
 			return true;
@@ -633,23 +565,14 @@ public class DataConnection {
 	}
 
 	private DataResult addResult(ResultSet rs, String sqlExecute, String sqlOrigin) {
-		DataResult ds = new DataResult();
-		ds.setIsEof(false);
-		ds.setIsNext(false);
-		ds.setResultSet(rs);
-
-		ds.setSqlExecute(sqlExecute);
-		ds.setSqlOrigin(sqlOrigin);
-		this._ResultSetList.add(ds);
-
-		return ds;
+		return _session.addResult(rs, sqlExecute, sqlOrigin);
 	}
 
 	private void executeEwaFunctions() {
-		if (this.ewaSqlFunctions == null || this.ewaSqlFunctions.getTempData().size() == 0) {
+		if (_sqlBuilder.getEwaSqlFunctions() == null || _sqlBuilder.getEwaSqlFunctions().getTempData().size() == 0) {
 			return;
 		}
-		this.ewaSqlFunctions.executeEwaFunctions(_RequestValue, this._DebugFrames);
+		_sqlBuilder.getEwaSqlFunctions().executeEwaFunctions(_RequestValue, this._DebugFrames);
 	}
 
 	/**
@@ -659,53 +582,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String createSqlByEwaBlockTest(String orignalSql) {
-		if (this._RequestValue == null || orignalSql == null
-				|| orignalSql.toLowerCase().indexOf("ewa_block_test") == -1) {
-			return orignalSql;
-		}
-		String[] sqls = orignalSql.split("\n");
-		MStr str = new MStr();
-		str.setNewLine("\n");
-		boolean lastResult = true;
-		boolean inTestBlock = false;
-		for (int m = 0; m < sqls.length; m++) {
-			String sql = sqls[m].trim();
-			String len = sql.toLowerCase();
-			if (!len.startsWith("--")) {
-				if (!inTestBlock || lastResult) {
-					str.al(sqls[m]); // 不改变原来SQL的前导空白
-				}
-				continue;
-			}
-
-			// 获取表达式，例如：-- ewa_test_block @abc is not null
-			int loc0 = len.indexOf("ewa_block_test");
-			if (loc0 == -1) {
-				if (!inTestBlock || lastResult) {
-					str.al(sqls[m]); // 不改变原来SQL的前导空白
-				}
-				continue;
-			}
-			String len2 = sql.substring(loc0 + 14).trim(); // 去除ewa_block_test
-			String exp = null;
-			if (len2.length() == 0) {
-				// -- ewa_block_test
-				inTestBlock = false;
-				lastResult = true;
-			} else {
-				// -- ewa_block_test @name is null or @name = ''
-				exp = this.replaceSqlSelectParameters(len2, "HSQLDB");
-				// 利用HSQLDB数据库执行判断逻辑
-				lastResult = ULogic.runLogic(exp);
-				inTestBlock = true;
-			}
-			// pre 不支持html标签渲染
-			// str.a(lastResult ? "<b style='color:green'>" : "<i style='color:red'>");
-			str.al("-- ewa_block_test<" + lastResult + "> " + len2.replace("@", "&#64;")
-					+ (exp == null ? "" : " (" + exp + ")"));
-			// str.a(lastResult ? "</b>" : "</i>");
-		}
-		return str.toString();
+		return _sqlBuilder.createSqlByEwaBlockTest(orignalSql);
 	}
 
 	/**
@@ -726,49 +603,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String createSqlByEwaTest(String orignalSql) {
-		if (this._RequestValue == null || orignalSql == null || orignalSql.toLowerCase().indexOf("ewa_test") == -1) {
-			return orignalSql;
-		}
-		String[] sqls = orignalSql.split("\n");
-		MStr str = new MStr();
-		str.setNewLine("\n");
-		boolean lastResult = true;
-		for (int m = 0; m < sqls.length; m++) {
-			String sql = sqls[m].trim();
-			String len = sql.toLowerCase();
-			if (!len.startsWith("--")) {
-				if (lastResult) {
-					str.al(sqls[m]); // 不改变原来SQL的前导空白
-				}
-				continue;
-			}
-
-			// 获取表达式，例如：-- ewa_test @abc is not null
-			int loc0 = len.indexOf("ewa_test");
-			if (loc0 == -1) {
-				if (lastResult) {
-					str.al(sqls[m]); // 不改变原来SQL的前导空白
-				}
-				continue;
-			}
-			String len2 = sql.substring(loc0 + 8).trim(); // 去除ewa_test
-			String exp = null;
-			if (len2.length() == 0) {
-				// -- ewa_test
-				lastResult = true;
-			} else {
-				// -- ewa_test @name is null or @name = ''
-				exp = this.replaceSqlSelectParameters(len2, "HSQLDB");
-				// 利用数据库执行判断逻辑
-				lastResult = ULogic.runLogic(exp);
-			}
-			// str.a(lastResult ? "<b style='color:green'>" : "<i style='color:red'>");
-			str.al("-- ewa_test<" + lastResult + "> " + len2.replace("@", "&#64;")
-					+ (exp == null ? "" : " (" + exp + ")"));
-			// str.a(lastResult ? "</b>" : "</i>");
-		}
-
-		return str.toString();
+		return _sqlBuilder.createSqlByEwaTest(orignalSql);
 	}
 
 	/**
@@ -778,22 +613,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String replaceSqlCommentAtSymbol(String orignalSql) {
-		if (orignalSql == null || orignalSql.indexOf("--") == -1) {
-			return orignalSql;
-		}
-		String[] sqls = orignalSql.split("\n");
-		MStr str = new MStr();
-		str.setNewLine("\n");
-		for (int m = 0; m < sqls.length; m++) {
-			String sql = sqls[m].trim();
-			if (!sql.startsWith("--") || !sql.contains("@")) {
-				str.al(sqls[m]); // 不改变原来SQL的前导空白
-				continue;
-			}
-			String replaced = sqls[m].replace("@", "&#64;");
-			str.al(replaced);
-		}
-		return str.toString();
+		return _sqlBuilder.replaceSqlCommentAtSymbol(orignalSql);
 	}
 
 	/**
@@ -842,7 +662,7 @@ public class DataConnection {
 				debuginfo.append(sql1);
 				writeDebug(this, "SQL", debuginfo.toString());
 			}
-			if (this._ds == null) {
+			if (_session.getDataHelper() == null) {
 				// 没有设置configName,取第一个配置
 				this.setConfigName(null);
 			}
@@ -851,29 +671,30 @@ public class DataConnection {
 
 			ResultSet rs;
 
-			this.closeStatment(this._queryStatement);
+			this.closeStatment(_session.getQueryStatement());
 			if (parameters.size() > 0) {
-				_pst = this._ds.getPreparedStatement(sql1);
+				_session.setPst(_session.getDataHelper().getPreparedStatement(sql1));
 				this._errorMsg = null;
 				// add parameter
-				addSqlParameter(parameters, _pst);
-				this._queryStatement = _pst;
-				rs = _pst.executeQuery();
+				addSqlParameter(parameters, _session.getPst());
+				_session.setQueryStatement(_session.getPst());
+				rs = _session.getPst().executeQuery();
 			} else {
-				_ds.connect();
+				_session.getDataHelper().connect();
 				this._errorMsg = null;
-				this._queryStatement = _ds.getStatement();
-				rs = this._queryStatement.executeQuery(sql1);
+				_session.setQueryStatement(_session.getDataHelper().getStatement());
+				rs = _session.getQueryStatement().executeQuery(sql1);
 			}
 			this.addResult(rs, sql, oriSql);
 			writeDebug(this, "SQL", "[executeQuery(sql,rv)] End query.");
 			return true;
 		} catch (Exception e) {
 			StringBuilder errInfo = new StringBuilder();
-			errInfo.append("\nconnStr=").append(this._ConnectionString).append("\nCurrentConfig:\n")
-					.append(_IsTrans ? "Transaction," : "No Transaction,").append("\nname=")
-					.append(this._CurrentConfig.getName()).append("\n").append(this._CurrentConfig.getConnectionString())
-					.append("\n\n").append(sql1).append("\n\n").append(e.getLocalizedMessage());
+			errInfo.append("\nconnStr=").append(_session.getConnectionString()).append("\nCurrentConfig:\n")
+					.append(_session.isTrans() ? "Transaction," : "No Transaction,").append("\nname=")
+					.append(_session.getCurrentConfig().getName()).append("\n")
+					.append(_session.getCurrentConfig().getConnectionString()).append("\n\n").append(sql1)
+					.append("\n\n").append(e.getLocalizedMessage());
 			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
 			LOGGER.error(errInfo.toString());
 			setError(e, sql1);
@@ -891,18 +712,7 @@ public class DataConnection {
 	 * @throws SQLException
 	 */
 	public List<DataResult> getMoreResults() throws SQLException {
-		if (this._queryStatement == null) {
-			return null;
-		}
-		List<DataResult> lst = new ArrayList<>();
-		int inc = 0;
-		while (this._queryStatement.getMoreResults()) {
-			ResultSet rs = this._queryStatement.getResultSet();
-			DataResult ds = this.addResult(rs, "more", inc + "");
-			inc++;
-			lst.add(ds);
-		}
-		return lst;
+		return _session.getMoreResults();
 	}
 
 	/**
@@ -975,7 +785,7 @@ public class DataConnection {
 		sp.setSql(sql);
 
 		MStr sb = new MStr();
-		if (this._DatabaseType.equals("ORACLE")) {
+		if (_session.getDatabaseType().equals("ORACLE")) {
 			sb.append("SELECT * FROM (SELECT ROWNUM EMP__X___G____D_RN, ");
 			// if(fields.equals("*")){
 			sb.append("GGDDXX.*");
@@ -988,7 +798,7 @@ public class DataConnection {
 			sb.append(")GGDDXX WHERE ROWNUM <=" + currentPage * pageSize);
 
 			sb.append(") AGDXA WHERE EMP__X___G____D_RN >" + (currentPage - 1) * pageSize);
-		} else if (this._DatabaseType.equals("MSSQL")) {
+		} else if (_session.getDatabaseType().equals("MSSQL")) {
 			MStr sqlTmp = new MStr();
 
 			if (sp.getGroupBy().length() > 0) {
@@ -1033,7 +843,7 @@ public class DataConnection {
 				sb.append(" AND " + currentPage * pageSize);
 				sb.append("\r\n ORDER BY EMP__X___G____D_RN");
 			}
-		} else if (this._DatabaseType.equals("HSQLDB") || this._DatabaseType.equals("MYSQL")) {
+		} else if (_session.getDatabaseType().equals("HSQLDB") || _session.getDatabaseType().equals("MYSQL")) {
 			sb.append(sql);
 			sb.append(" limit " + pageSize + " offset " + (currentPage - 1) * pageSize);
 		} else { // 默认模式
@@ -1046,19 +856,37 @@ public class DataConnection {
 	}
 
 	public String closeStatment(Statement stmt) {
-		if (stmt == null) {
-			return null;
-		}
-		try {
-			stmt.close();
-			return null;
-		} catch (SQLException e) {
-			String err = e.getLocalizedMessage();
-			LOGGER.error("Close the statment {}", err);
+		String err = _session.closeStatment(stmt);
+		if (err != null) {
 			this.writeDebug(this, "ERR", err);
-			setError(e, "Close the statment");
+			setError(new SQLException(err), "Close the statment");
+		}
+		return err;
+	}
 
-			return err;
+	/**
+	 * Log and debug SQLWarnings from a Statement. Extracted to eliminate duplicated
+	 * warning-handling logic across multiple methods.
+	 * 
+	 * @param stmt the Statement whose warnings to process
+	 * @param sql  the associated SQL for logging context
+	 */
+	private void logSqlWarnings(Statement stmt, String sql) {
+		try {
+			SQLWarning warning = stmt.getWarnings();
+			int incWarnings = 0;
+			while (warning != null) {
+				String msg = warning.getLocalizedMessage();
+				if (incWarnings == 0) {
+					LOGGER.warn("SQL: {}", sql);
+				}
+				LOGGER.warn("Warning: {}", msg);
+				this.writeDebug(this, "SQL-INFO", msg);
+				warning = warning.getNextWarning();
+				incWarnings++;
+			}
+		} catch (SQLException e) {
+			LOGGER.warn("Failed to retrieve SQLWarnings: {}", e.getMessage());
 		}
 	}
 
@@ -1116,8 +944,8 @@ public class DataConnection {
 				if (transcation) {
 					this.transCommit();
 				} else {
-					if (!this._Connection.getAutoCommit()) {
-						this._Connection.commit();
+					if (!_session.getConnection().getAutoCommit()) {
+						_session.getConnection().commit();
 					}
 				}
 			}
@@ -1142,10 +970,10 @@ public class DataConnection {
 	 * 将字符串分割成表数据，字符串限制长度1000
 	 */
 	private void createEwaSplitTempData() {
-		if (this._CreateSplitData == null) {
+		if (_sqlBuilder.getCreateSplitData() == null) {
 			return;
 		}
-		this._CreateSplitData.createEwaSplitTempData();
+		_sqlBuilder.getCreateSplitData().createEwaSplitTempData();
 	}
 
 	/**
@@ -1365,7 +1193,7 @@ public class DataConnection {
 			writeDebug(this, "ERR", "[executeQuery(sql,rv)] <font color=red>" + e.getMessage() + "</font>" + ")");
 			LOGGER.error(e.getLocalizedMessage());
 			setError(e, sql);
-			return false;
+			return -1;
 		}
 
 		this.createEwaSplitTempData(); // guolei 2015-09-08
@@ -1379,14 +1207,15 @@ public class DataConnection {
 			// sqlserver 更换数据库
 			this.useDatabase();
 
-			_pst = this._ds.getPreparedStatementAutoIncrement(sql1);
+			closeStatment(_session.getPst());
+			_session.setPst(_session.getDataHelper().getPreparedStatementAutoIncrement(sql1));
 			this.writeDebug(this, "SQL", "[创建自增] PST");
 			// add parameter
-			addSqlParameter(parameters, _pst);
-			_pst.executeUpdate();
+			addSqlParameter(parameters, _session.getPst());
+			_session.getPst().executeUpdate();
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
 
-			ResultSet rs = _pst.getGeneratedKeys();
+			ResultSet rs = _session.getPst().getGeneratedKeys();
 			if (rs.next()) {
 				autoKey = rs.getObject(1);
 				if (autoKey == null) {
@@ -1396,9 +1225,9 @@ public class DataConnection {
 				}
 			}
 
-			if (!this._IsTrans) {
-				if (!this._ds.getConnection().getAutoCommit()) {
-					this._ds.getConnection().commit();
+			if (!_session.isTrans()) {
+				if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+					_session.getDataHelper().getConnection().commit();
 				}
 			}
 			// 放到close处理，以便复用时不用重复创建
@@ -1475,33 +1304,22 @@ public class DataConnection {
 
 		try {
 			this.useDatabase();
-			_pst = this._ds.getPreparedStatement(sql1);
+			closeStatment(_session.getPst());
+			_session.setPst(_session.getDataHelper().getPreparedStatement(sql1));
 			// add parameter
-			this.addSqlParameter(parameters, _pst);
-			_pst.executeUpdate();
+			this.addSqlParameter(parameters, _session.getPst());
+			_session.getPst().executeUpdate();
 
 			if (sql.toLowerCase().indexOf("update") != -1 || sql.toLowerCase().indexOf("insert") != -1
 					|| sql.toLowerCase().indexOf("delete") != -1) {
-				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + _pst.getUpdateCount());
+				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + _session.getPst().getUpdateCount());
 			} else {
-				// print语句的输出可通过SQLWarnings获得
-				SQLWarning warning = _pst.getWarnings();
-				int incWarings = 0;
-				while (warning != null) {
-					String msg = warning.getLocalizedMessage();
-					if (incWarings == 0) {
-						LOGGER.warn("SQL: {}", sql);
-					}
-					LOGGER.warn("Warning: {}", msg);
-					this.writeDebug(this, "SQL-INFO", msg);
-					warning = warning.getNextWarning();
-					incWarings++;
-				}
+				logSqlWarnings(_session.getPst(), sql);
 			}
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
-			if (!this._IsTrans) {
-				if (!this._ds.getConnection().getAutoCommit()) {
-					this._ds.getConnection().commit();
+			if (!_session.isTrans()) {
+				if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+					_session.getDataHelper().getConnection().commit();
 				}
 			}
 			// 放到close处理，以便复用时不用重复创建
@@ -1530,29 +1348,23 @@ public class DataConnection {
 	 * @throws SQLException
 	 */
 	public boolean useDatabase() throws Exception {
-		if (this._DataBaseName == null || this._DataBaseName.trim().length() == 0) {
+		if (_session.getDataBaseName() == null || _session.getDataBaseName().trim().length() == 0) {
 			return false;
 		}
+		String dbName = _session.getDataBaseName();
 		String sql = null;
 		if (SqlUtils.isMySql(this)) {
-			sql = "USE `" + this._DataBaseName + "`";
+			sql = "USE `" + dbName + "`";
 		} else if (SqlUtils.isSqlServer(this)) {
-			sql = "USE [" + this._DataBaseName + "]";
+			sql = "USE [" + dbName + "]";
 		}
 
 		if (sql != null) {
-			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Start update. (" + sql + ")");
-			Statement useDbSt = this._ds.getStatement();
-			try {
-				useDbSt.executeUpdate(sql);
-			} finally {
-				closeStatment(useDbSt);
-			}
-			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
-
+			this.writeDebug(this, "SQL", "[useDatabase] " + sql);
+			_session.useDatabase();
 			return true;
 		} else {
-			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] Not sqlserve or mysql [" + this._DataBaseName + "].");
+			this.writeDebug(this, "SQL", "[useDatabase] Not sqlserver or mysql [" + dbName + "].");
 			return false;
 		}
 
@@ -1612,14 +1424,15 @@ public class DataConnection {
 			// sqlserver 更换数据库
 			this.useDatabase();
 
-			_pst = this._ds.getPreparedStatement(sql1);
+			closeStatment(_session.getPst());
+			_session.setPst(_session.getDataHelper().getPreparedStatement(sql1));
 			// add parameter
-			addSqlParameter(parameters, _pst);
-			_pst.executeUpdate();
+			addSqlParameter(parameters, _session.getPst());
+			_session.getPst().executeUpdate();
 			this.writeDebug(this, "SQL", "[executeUpdate(sql,rv)] End update.");
-			if (!this._IsTrans) {
-				if (!this._ds.getConnection().getAutoCommit()) {
-					this._ds.getConnection().commit();
+			if (!_session.isTrans()) {
+				if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+					_session.getDataHelper().getConnection().commit();
 				}
 			}
 			// 放到close处理，以便复用时不用重复创建
@@ -1659,32 +1472,20 @@ public class DataConnection {
 		try {
 			this.useDatabase();
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql)] update. (" + sql + ")");
-			Statement st = this._ds.getStatement();
+			Statement st = _session.getDataHelper().getStatement();
 			st.executeUpdate(sql);
 
 			if (sql.toLowerCase().indexOf("update") != -1 || sql.toLowerCase().indexOf("insert") != -1
 					|| sql.toLowerCase().indexOf("delete") != -1) {
 				this.writeDebug(this, "SQL", "[执行更新] 影响行数: " + st.getUpdateCount());
 			} else {
-				// print语句的输出可通过SQLWarnings获得
-				SQLWarning warning = st.getWarnings();
-				int incWarings = 0;
-				while (warning != null) {
-					String msg = warning.getLocalizedMessage();
-					if (incWarings == 0) {
-						LOGGER.warn("SQL: {}", sql);
-					}
-					LOGGER.warn("Warning: {}", msg);
-					this.writeDebug(this, "SQL-INFO", msg);
-					warning = warning.getNextWarning();
-					incWarings++;
-				}
+				logSqlWarnings(st, sql);
 			}
 
 			this.writeDebug(this, "SQL", "[executeUpdateNoParameter(sql,rv)] End update.");
-			if (!this._IsTrans) {
-				if (!this._ds.getConnection().getAutoCommit()) {
-					this._ds.getConnection().commit();
+			if (!_session.isTrans()) {
+				if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+					_session.getDataHelper().getConnection().commit();
 				}
 			}
 			closeStatment(st);
@@ -1729,8 +1530,8 @@ public class DataConnection {
 		}
 		int m1 = 0;
 		if (executeQuery(sb.toString())) {
-			int rsIndex = this._ResultSetList.size() - 1;
-			ResultSet rs = ((DataResult) this._ResultSetList.get(rsIndex)).getResultSet();
+			int rsIndex = _session.getResultSetList().size() - 1;
+			ResultSet rs = ((DataResult) _session.getResultSetList().get(rsIndex)).getResultSet();
 			try {
 				rs.next();
 				m1 = rs.getInt("GDX");
@@ -1746,13 +1547,13 @@ public class DataConnection {
 				} catch (SQLException e) {
 					LOGGER.error(e.getLocalizedMessage());
 				}
-				this._ResultSetList.removeAt(rsIndex);
+				_session.getResultSetList().removeAt(rsIndex);
 			}
 		}
 		return m1;
 	}
 
-	private void writeDebug(Object obj, String eventName, String des) {
+	void writeDebug(Object obj, String eventName, String des) {
 		this.showSqlDebug(obj.toString() + ": " + des);
 		if (this._RequestValue != null && this._RequestValue.getString(FrameParameters.EWA_DB_LOG) != null) {
 			String x = this._RequestValue.getString(FrameParameters.XMLNAME);
@@ -1771,7 +1572,7 @@ public class DataConnection {
 			// if (des.indexOf("End update") > 0) {
 			// System.out.println(this._RequestValue.listValues(false));
 			// }
-			System.out.println(log);
+			LOGGER.debug(log);
 			// }
 		}
 		if (this._DebugFrames == null)
@@ -1789,13 +1590,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public boolean skipReplaceParameter(String paramName) {
-		if (paramName == null) {
-			return false;
-		}
-		if (paramName.toLowerCase().indexOf("rownum") == 0) {
-			return true;
-		}
-		return false;
+		return _sqlBuilder.skipReplaceParameter(paramName);
 	}
 
 	/**
@@ -1810,142 +1605,7 @@ public class DataConnection {
 	 * @throws Exception
 	 */
 	public String rebuildSql(String sql) throws Exception {
-		if (sql == null) {
-			return null;
-		}
-		String sql1 = sql;
-		// SQL语句预替换，即在SQL语句执行前，替换SQL语句本身的参数
-		// 例如 SELECT * FROM ~TB, 如参数TB是 USERS 则替换成 SELECT * FROM USERS
-		MListStr preReplaces = Utils.getParameters(sql, "~");
-		for (int i = 0; i < preReplaces.size(); i++) {
-			String para = preReplaces.get(i);
-			PageValue pv = this._RequestValue.getPageValues().getValue(para);
-			String v1 = pv.getStringValue();
-			if (v1 == null || v1.trim().length() == 0) {
-				LOGGER.error(this + ".rebuildSql, 参数" + para + "不存在");
-				throw new Exception("The param (~" + para + ") not exists");
-			}
-
-			// 判断是否来自可信源
-			boolean fromTrustedSource = (pv.getPVTag() == PageValueTag.SESSION //
-					|| pv.getPVTag() == PageValueTag.SYSTEM //
-					|| pv.getPVTag() == PageValueTag.DTTABLE //
-					|| pv.getPVTag() == PageValueTag.OTHER //
-					|| pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS);
-
-			// 使用完整的SQL标识符验证
-			try {
-				String validatedValue = SqlIdentifierValidator.validateTildeParam(para, v1, fromTrustedSource);
-				sql1 = sql1.replace("~" + para, validatedValue);
-			} catch (SecurityException | IllegalArgumentException e) {
-				LOGGER.error("Security violation in rebuildSql: parameter={}, value={}, error={}", para, v1,
-						e.getMessage());
-				throw new Exception("SQL injection detected in parameter ~" + para + ": " + e.getMessage(), e);
-			}
-		}
-		// 根据逻辑判断组合SQL, 判断条件是 "-- ewa_block_test"
-		sql1 = this.createSqlByEwaBlockTest(sql1);
-		// 根据逻辑判断组合SQL, 判断条件是 "-- ewa_test"
-		sql1 = this.createSqlByEwaTest(sql1);
-		// 替换SQL注释中的@参数
-		sql1 = this.replaceSqlCommentAtSymbol(sql1);
-		// 分割字符串函数 ewa_split(@xxx, ',')
-		if (this._RequestValue != null) {
-			if (_CreateSplitData == null) {
-				_CreateSplitData = new CreateSplitData(this._RequestValue, this);
-			}
-			sql = _CreateSplitData.replaceSplitData(sql1);
-			sql1 = sql;
-		}
-
-		// 查询上级或下级id，ewa_ids_sub或 ewa_ids_up
-		// select * from adm_dept where dep_id in (
-		// ewa_ids_sub('adm_dept','dep_id','dep_pid',@dep_id)
-		// )
-		ReverseIds reverseIds = new ReverseIds(this);
-		String sqlReverseIds = reverseIds.replaceReverseIds(sql1);
-		sql1 = sqlReverseIds;
-
-		// 提取 EWA定义的 方法，在 EwaFunctions.xml中
-		EwaSqlFunctions esf = new EwaSqlFunctions();
-		sql1 = esf.extractEwaSqlFunctions(sql1);
-		this.ewaSqlFunctions = esf;
-
-		// 替换json表达式， 例如 EWA_JSON(FIELD_NAME,@NAME, @SEX, @AGE, @MOBILE)
-		CreateJsonData createJsonData = new CreateJsonData(this._RequestValue);
-		try {
-			sql1 = createJsonData.replaceJsonData(sql1);
-		} catch (Exception err) {
-			LOGGER.error(err.getLocalizedMessage());
-		}
-		// 合成SQL语句，如果参数名为XX_SPLIT，为分割参数
-		// 例如 select * from users where id in(1,2,3)
-		MListStr paras = Utils.getParameters(sql1, "@");
-		Map<String, String> fieldsMap = new HashMap<String, String>();
-		for (int i = 0; i < paras.size(); i++) {
-			String para = paras.get(i);
-			if (this.skipReplaceParameter(para)) {
-				// 特点的不替换参数名称
-				continue;
-			}
-			PageValue pv = this._RequestValue.getPageValues().getValue(para);
-			if (pv == null) {
-				// md5, sha1，json...
-				String otherValue = this._RequestValue.getOtherValue(para);
-				if (otherValue != null) {
-					pv = new PageValue();
-					pv.setValue(otherValue);
-					pv.setDataType("string");
-				}
-			}
-			String v1 = null;
-			if (pv == null) {
-				// 获取根据类型的数据
-				pv = this.getParameterByEndWithType(para);
-				if (pv != null && pv.getLength() > -1) {
-					v1 = pv.getStringValue();
-				}
-			} else {
-				v1 = pv.getStringValue();
-			}
-
-			// 是EwaFunctions的参数
-			if (v1 == null && esf.getTempData().containsKey(para)) {
-				v1 = esf.getTempData().get(para).toString();
-			}
-
-			String paraName = "@" + para;
-			if (v1 == null) {
-				// postgresql $1 is null could not determine data type of parameter $1
-				// NULL 值在SQL里提前替换
-				sql1 = sql1.replaceFirst(paraName, " null ");
-			} else if (para.toUpperCase().indexOf("_SPLIT") > 0) {
-				// 逗号分割的字符串
-				StringBuilder sb = new StringBuilder();
-				String[] v2 = v1.split(",");
-				for (int m = 0; m < v2.length; m++) {
-					String v3 = this.sqlParameterStringExp(v2[m]);
-					if (m == 0) {
-						sb.append(v3);
-					} else {
-						sb.append(", ");
-						sb.append(v3);
-					}
-				}
-				sql1 = sql1.replace(paraName, sb.toString());
-			} else {
-				// 避免 @code_key 和 @code的冲突，即 @code替换了@code_key
-				String randomName = "[gDx[" + Utils.randomStr(30) + Utils.getGuid() + "]GdX]";
-				sql1 = sql1.replaceFirst(paraName, randomName);
-				fieldsMap.put(randomName, paraName);
-			}
-
-		}
-		for (String randomName : fieldsMap.keySet()) {
-			String para = fieldsMap.get(randomName);
-			sql1 = sql1.replace(randomName, para);
-		}
-		return sql1;
+		return _sqlBuilder.rebuildSql(sql);
 	}
 
 	/**
@@ -1955,26 +1615,7 @@ public class DataConnection {
 	 * @return 替换后的sql
 	 */
 	public String replaceSqlParameters(String sql) {
-		String sql1 = sql;
-		MListStr al = Utils.getParameters(sql, "@");
-		for (int i = 0; i < al.size(); i++) {
-			String paramName = al.get(i);
-			if (skipReplaceParameter(paramName)) {
-				// 不替换rownum开头的参数，mysql使用
-				// select les_out_idx, @rownum := @rownum+1
-				// from camp_lesson_outline b ,(select @rownum :=0) c
-				continue;
-			}
-			String parameterTag = "?";
-			sql1 = sql1.replaceFirst("@" + al.get(i), parameterTag);
-		}
-
-		// 保留@符号
-		if (sql1.indexOf("{@}") >= 0) {
-			sql1 = sql1.replace("{@}", "@");
-		}
-
-		return sql1;
+		return _sqlBuilder.replaceSqlParameters(sql);
 	}
 
 	/**
@@ -1985,7 +1626,7 @@ public class DataConnection {
 	 * @return 替换后的sql
 	 */
 	public String replaceSqlSelectParameters(String sql) {
-		return this.replaceSqlSelectParameters(sql, this.getDatabaseType());
+		return _sqlBuilder.replaceSqlSelectParameters(sql);
 	}
 
 	/**
@@ -1996,33 +1637,7 @@ public class DataConnection {
 	 * @return 替换后的sql
 	 */
 	public String replaceSqlSelectParameters(String sql, String databaseType) {
-		String sql1 = sql;
-		MListStr al = Utils.getParameters(sql, "@");
-
-		for (int i = 0; i < al.size(); i++) {
-			String paramName = al.get(i);
-			String paramValue = null;
-
-			if (skipReplaceParameter(paramName)) {
-				continue;
-			}
-			try {
-				paramValue = this.getReplaceParameterValueExp(paramName, databaseType);
-			} catch (Exception err) {
-				LOGGER.error("replaceSqlSelectParameters[" + paramName + "]: {}", err.getMessage());
-			}
-			// 参数值带@符号不提换，否则出现{@}问题，例如邮件 郭磊 2019-11-11
-			if (paramValue == null || paramValue.indexOf("@") >= 0) {
-				paramValue = "[[@]]" + paramName;
-			}
-			// "$"导致报错：java.sql.Exception:Illegal group reference 2022-04-21
-			String paramValue1 = Matcher.quoteReplacement(paramValue);
-			sql1 = sql1.replaceFirst("@" + paramName, paramValue1);
-		}
-
-		sql1 = sql1.replace("[[@]]", "@");
-
-		return sql1;
+		return _sqlBuilder.replaceSqlSelectParameters(sql, databaseType);
 	}
 
 	/**
@@ -2032,7 +1647,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String getReplaceParameterValueExp(String paramName) {
-		return this.getReplaceParameterValueExp(paramName, this.getDatabaseType());
+		return _sqlBuilder.getReplaceParameterValueExp(paramName);
 	}
 
 	/**
@@ -2043,66 +1658,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String getReplaceParameterValueExp(String paramName, String databaseType) {
-		PageValue pv = this._RequestValue.getPageValues().getValue(paramName);
-
-		String v1 = null;
-		if (pv == null || pv.getValue() == null) {
-			String otherValue = this._RequestValue.getOtherValue(paramName);
-			if (otherValue != null) {
-				pv = new PageValue();
-				pv.setValue(otherValue);
-				pv.setDataType("string");
-			}
-		}
-		if (pv == null || pv.getValue() == null) {
-			pv = this.getParameterByEndWithType(paramName);
-			if (pv == null || pv.getValue() == null) {
-				return "null";
-			}
-		}
-
-		if (pv.getValue() instanceof java.util.Date) {
-			Date dt1 = (Date) pv.getValue();
-			Timestamp ts1 = new Timestamp(dt1.getTime());
-			String dateStr = this.getDateTimePara(ts1);
-			return dateStr;
-		}
-
-		String dt = pv == null ? "String" : pv.getDataType();
-		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
-		if (dt.equals("BINARY") || dt.equals("B[")) {
-			return null;
-		}
-
-		v1 = pv.getStringValue();
-		if (dt.equals("INT") || dt.equals("INTEGER")) {
-
-			return String.valueOf(this.getParaInteger(pv));
-		} else if (dt.equals("LONG") || dt.equals("BIGINT")) {
-			return String.valueOf(this.getParaLong(pv));
-		} else if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("FLOAT")) {
-			BigDecimal v = this.getParaBigDecimal(pv);
-			return v == null ? "null" : this.getParaBigDecimal(pv).toPlainString();
-		} else if (dt.equals("DATE")) {
-			return this.getDateTimePara(v1);
-		}
-
-		// 字符串类型，处理@符号
-		String v1Exp = this.sqlParameterStringExp(v1, databaseType);
-		if (v1Exp.indexOf("@") < 0) {
-			return v1Exp;
-		}
-		// 处理@符号，替换为 char(64)
-		String v2 = SqlUtils.replaceSqlAtWithChar64(v1Exp, databaseType);
-		if (v2.equals(v1Exp)) {
-			// 没有支持的数据库类型，不替换
-			StringBuilder sb = new StringBuilder();
-			sb.append(v1Exp.replace("@", "{@}"));
-			return sb.toString();
-		} else {
-			return v2;
-		}
-
+		return _sqlBuilder.getReplaceParameterValueExp(paramName, databaseType);
 	}
 
 	/**
@@ -2113,361 +1669,28 @@ public class DataConnection {
 	 * @throws SQLException
 	 */
 	public void addSqlParameter(MListStr parameters, PreparedStatement pst) throws SQLException {
-		if (parameters == null || this._RequestValue == null) {
-			return;
-		}
-		int index = 0;
-		for (int i = 0; i < parameters.size(); i++) {
-			String PKey = parameters.get(i).toUpperCase();
-			if (skipReplaceParameter(PKey)) {
-				// 不替换rownum开头的参数，mysql使用
-				// select les_out_idx, @rownum := @rownum+1
-				// from camp_lesson_outline b ,(select @rownum :=0) c
-				continue;
-			}
-			index++;
-			this.addStatementParameter(pst, PKey, index);
-		}
-	}
-
-	/**
-	 * 获取参数的二进制
-	 * 
-	 * @param pv
-	 * @return
-	 */
-	private byte[] getParaBinary(PageValue pv) {
-		return pv.toBinary();
-	}
-
-	/**
-	 * 获取参数时间
-	 * 
-	 * @param pv
-	 * @return
-	 */
-	private Timestamp getParaTimestamp(PageValue pv) {
-		Object t1 = pv.getValue();
-		if (t1 == null) {
-			return null;
-		}
-
-		Timestamp tt1;
-
-		if (t1 instanceof java.util.Date) {
-			java.util.Date tt0 = (java.util.Date) t1;
-			tt1 = new java.sql.Timestamp(tt0.getTime());
-		} else {
-			String v1 = t1.toString();
-			if (v1.trim().length() > 0) {
-				tt1 = this.getTimestamp(v1);
-			} else {
-				return null;
-			}
-		}
-		// 系统时间不用计算时差
-		if (pv.getName() != null && pv.getName().equalsIgnoreCase("SYS_DATE")) {
-			return tt1;
-		}
-		if (this.getTimeDiffMinutes() != 0) {
-			tt1 = (Timestamp) Utils.getTimeDiffValue(tt1, this.getTimeDiffMinutes());
-		}
-		return tt1;
-	}
-
-	/**
-	 * 获取参数的整数
-	 * 
-	 * @param pv
-	 * @return
-	 */
-	private Integer getParaInteger(PageValue pv) {
-		return pv.toInteger();
-	}
-
-	/**
-	 * 获取参数的整数
-	 * 
-	 * @param pv
-	 * @return
-	 */
-	private Long getParaLong(PageValue pv) {
-		return pv.toLong();
-	}
-
-	private BigDecimal getParaBigDecimal(PageValue pv) {
-		return pv.toBigDecimal();
+		_sqlBuilder.addSqlParameter(parameters, pst);
 	}
 
 	public PageValue getParameterByEndWithType(String parameterName) {
-		PageValue pv = null;
-		String dt = null;
-		String pname = parameterName.toLowerCase();
-		if (pname.endsWith(".int")) {
-			String name1 = parameterName.substring(0, parameterName.length() - 4);
-			pv = this._RequestValue.getPageValues().getValue(name1);
-			dt = "int";
-		} else if (pname.endsWith(".bigint")) {
-			String name1 = parameterName.substring(0, parameterName.length() - 7);
-			pv = this._RequestValue.getPageValues().getValue(name1);
-			dt = "bigint";
-		} else if (pname.endsWith(".long")) {
-			String name1 = parameterName.substring(0, parameterName.length() - 5);
-			pv = this._RequestValue.getPageValues().getValue(name1);
-			dt = "bigint";
-		} else if (pname.endsWith(".date")) {
-			String name1 = parameterName.substring(0, parameterName.length() - 5);
-			pv = this._RequestValue.getPageValues().getValue(name1);
-			dt = "date";
-		} else if (pname.endsWith(".number")) {
-			String name1 = parameterName.substring(0, parameterName.length() - 7);
-			pv = this._RequestValue.getPageValues().getValue(name1);
-			dt = "number";
-		} else if (pname.endsWith(".double")) {
-			String name1 = parameterName.substring(0, parameterName.length() - 7);
-			pv = this._RequestValue.getPageValues().getValue(name1);
-			dt = "double";
-		} else if (pname.endsWith(".binary")) {
-			String name1 = parameterName.substring(0, parameterName.length() - 7);
-			pv = this._RequestValue.getPageValues().getValue(name1);
-			dt = "binary";
-		} else if (pname.endsWith(".bin")) {
-			String name1 = parameterName.substring(0, parameterName.length() - 4);
-			pv = this._RequestValue.getPageValues().getValue(name1);
-			dt = "binary";
-		}
-		if (pv != null) {
-			pv.setDataType(dt);
-		} else {
-			pv = new PageValue();
-			pv.setDataType(dt);
-			pv.setLength(-1);
-		}
-		return pv;
-	}
-
-	public void addStatementParameter(PreparedStatement cst, String parameterName, int index) throws SQLException {
-		String dt;
-		PageValue pv = this._RequestValue.getPageValues().getValue(parameterName);
-		if (pv == null) {
-			pv = this.getParameterByEndWithType(parameterName);
-			dt = pv.getDataType();
-			if (pv.getLength() == -1) { // 不是扩展类型数据
-				// hash, md5 ...
-				String othVal = this._RequestValue.getOtherValue(parameterName);
-				if (othVal == null) {
-					cst.setObject(index, null);
-					this.writeDebug(this, "添加参数(Object)" + index, parameterName + "=null");
-				} else {
-					if (parameterName.endsWith(".HASH")) { // hashCode
-						Integer intVal = Integer.parseInt(othVal);
-						cst.setInt(index, intVal);
-						this.writeDebug(this, "添加参数(INTEGER)" + index, parameterName + "=" + intVal);
-					} else {
-						cst.setString(index, othVal);
-						String des1 = parameterName + "=" + othVal;
-						this.writeDebug(this, "添加参数(String)" + index, des1);
-					}
-				}
-				return;
-			}
-		}
-		dt = pv.getDataType();
-		dt = (dt == null ? (pv.getValue() == null ? "STRING" : pv.getValue().getClass().getName()) : dt).toUpperCase()
-				.trim();
-
-		String v1 = pv.getStringValue();
-		if ("JAVA.LANG.STRING".equals(dt) || "STRING".equals(dt)) {
-			// 字符串
-			cst.setString(index, v1);
-			String des1 = parameterName + "=" + (v1 == null ? "null" : v1);
-			this.writeDebug(this, "添加参数(String)" + index, des1);
-			return;
-		}
-
-		if (dt.equals("BINARY") || dt.equals("[B") || dt.equals("BYTE[]")) {
-			byte[] b = this.getParaBinary(pv);
-			String des = b == null ? "null" : b.length + "";
-			this.writeDebug(this, "添加参数(" + dt + "/byte[])" + index, parameterName + "=(" + des + ")");
-			cst.setBytes(index, b);
-			return;
-		}
-		if (dt.equals("INT") || dt.equals("INTEGER") || dt.equals("JAVA.LANG.INTEGER")) {
-			Integer intVal = this.getParaInteger(pv);
-			if (intVal == null) {
-				cst.setNull(index, java.sql.Types.INTEGER);
-				this.writeDebug(this, "添加参数(" + dt + "/INT)" + index, parameterName + "=null");
-			} else {
-				cst.setInt(index, intVal);
-				this.writeDebug(this, "添加参数(" + dt + "/INT)" + index, parameterName + "=" + intVal);
-			}
-			return;
-		}
-		if (dt.equals("BIGINT") || dt.equals("LONG") || dt.equals("JAVA.LANG.LONG")) {
-			Long longVal = this.getParaLong(pv);
-			if (longVal == null) {
-				cst.setNull(index, java.sql.Types.BIGINT);
-				this.writeDebug(this, "添加参数(" + dt + "/LONG)" + index, parameterName + "=null");
-			} else {
-				cst.setLong(index, longVal);
-				this.writeDebug(this, "添加参数(" + dt + "/LONG)" + index, parameterName + "=" + longVal);
-			}
-			return;
-		}
-		if (dt.equals("NUMBER") || dt.equals("DOUBLE") || dt.equals("JAVA.LANG.DOUBLE")) {
-			BigDecimal dbVal = this.getParaBigDecimal(pv);
-			if (dbVal == null) {
-				cst.setNull(index, java.sql.Types.DOUBLE);
-				this.writeDebug(this, "添加参数(" + dt + "/BigDecimal)" + index, parameterName + "=null");
-			} else {
-				cst.setBigDecimal(index, dbVal);
-				// cst.setDouble(index, dbVal);
-				this.writeDebug(this, "添加参数(" + dt + "/BigDecimal)" + index, parameterName + "=" + dbVal);
-			}
-			return;
-		}
-		if (dt.equals("DATE") || dt.equals("JAVA.UTIL.DATE") || dt.equals("JAVA.SQL.DATE")) {
-			Timestamp t1 = this.getParaTimestamp(pv);
-			if (t1 == null) {
-				cst.setNull(index, java.sql.Types.TIMESTAMP);
-				this.writeDebug(this, "添加参数(Timestamp)" + index, parameterName + "=null");
-			} else {
-				cst.setTimestamp(index, t1);
-				this.writeDebug(this, "添加参数(" + dt + ")/Timestamp" + index, parameterName + "=" + t1);
-			}
-			return;
-		}
-		if (dt.equals("BOOL") || dt.equals("BOOLEN") /* 拼写错误 */ || dt.equals("BOOLEAN")
-				|| dt.equals("JAVA.LANG.BOOLEAN")) {
-			boolean v = Utils.cvtBool(v1);
-			cst.setBoolean(index, v);
-			this.writeDebug(this, "添加参数(Bool)" + index, parameterName + "=v");
-			return;
-		}
-		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT64".equals(dt) || "UINT64".equals(dt)) {
-			UInt64 uint64 = (UInt64) pv.getValue();
-			cst.setBigDecimal(index, new BigDecimal(uint64.bigInteger()));
-			this.writeDebug(this, "添加参数(" + dt + ")/BigDecimal" + index, parameterName + "=" + uint64);
-			return;
-		}
-		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT32".equals(dt) || "UINT32".equals(dt)) {
-			UInt32 uint32 = (UInt32) pv.getValue();
-			cst.setLong(index, uint32.longValue());
-			this.writeDebug(this, "添加参数(" + dt + ")/Long" + index, parameterName + "=" + uint32);
-			return;
-		}
-		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT16".equals(dt) || "UINT16".equals(dt)) {
-			UInt16 uint16 = (UInt16) pv.getValue();
-			cst.setInt(index, uint16.intValue());
-			this.writeDebug(this, "添加参数(" + dt + ")/Int" + index, parameterName + "=" + uint16);
-			return;
-		}
-		if ("JAVA.MATH.BIGDECIMAL".equals(dt) || "BIGDECIMAL".equals(dt)) {
-			BigDecimal bigd = (BigDecimal) pv.getValue();
-			cst.setBigDecimal(index, bigd);
-			this.writeDebug(this, "添加参数(" + dt + ")" + index, parameterName + "=" + bigd);
-			return;
-		}
-		if ("JAVA.MATH.BIGINTEGER".equals(dt) || "BIGINTEGER".equals(dt)) {
-			BigInteger bigi = (BigInteger) pv.getValue();
-			cst.setBigDecimal(index, new BigDecimal(bigi));
-			this.writeDebug(this, "添加参数(" + dt + ")/BigDecimal" + index, parameterName + "=" + bigi);
-			return;
-		}
-		// 默认字符串字符串
-		cst.setString(index, v1);
-		String des1 = parameterName + "=" + (v1 == null ? "null" : v1);
-		this.writeDebug(this, "添加参数(" + dt + ")" + index, des1);
+		return _sqlBuilder.getParameterByEndWithType(parameterName);
 	}
 
 	/**
-	 * 设置SQL参数 CallableStatement <br>
-	 * 对象为所有的DBMS 提供了一种以标准形式调用已储存过程的方法。已储 存过程储存在数据库中。对已储存过程的调用是
-	 * CallableStatement对象所含的内容。这种调用是 用一种换码语法来写的，有两种形式：一种形式带结果参，另一种形式不带结果参数。结果参数是
-	 * 一种输出 (OUT) 参数，是已储存过程的返回值。两种形式都可带有数量可变的输入（IN 参数）、 输出（OUT 参数）或输入和输出（INOUT
-	 * 参数）的参数。问号将用作参数的占位符。
-	 * 
-	 * @param parameters
-	 * @param cst
-	 * @return 输出参数map，key转换为大写
-	 * @throws SQLException
+	 * Bind a single named parameter to a PreparedStatement at the given index.
+	 * <p>
+	 * Optimized: debug strings only built when _DebugFrames is active; null-safe on
+	 * _RequestValue; constant-left .equals().
 	 */
-	private HashMap<String, Object> addSqlParameter(MListStr parameters, CallableStatement cst) throws SQLException {
-		HashMap<String, Object> outValues = new HashMap<>();
-		if (parameters == null || this._RequestValue == null) {
-			return outValues;
-		}
-		PreparedStatement pst = (PreparedStatement) cst;
-		int index = 0;
-		for (int i = 0; i < parameters.size(); i++) {
-			String key = parameters.get(i).trim();
-			String key1 = key.toUpperCase();
-			if (skipReplaceParameter(key1)) {
-				// 不替换rownum开头的参数，mysql使用
-				// select les_out_idx, @rownum := @rownum+1
-				// from camp_lesson_outline b ,(select @rownum :=0) c
-				continue;
-			}
-			index++;
-			if (!key1.endsWith("_OUT") && !key1.endsWith("_OUTPUT")) {
-				// 非输出参数
-				this.addStatementParameter(pst, key, index);
-				continue;
-			}
-			// 输出参数
-			if (key1.indexOf("_BIGINT_") >= 0 || key1.indexOf("_LONG_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.BIGINT);
-			} else if (key1.indexOf("_TINYINT_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.TINYINT);
-			} else if (key1.indexOf("_SMALLINT_") >= 0 || key1.indexOf("_SHORT_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.SMALLINT);
-			} else if (key1.indexOf("_INT_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.INTEGER);
-			} else if (key1.indexOf("_BIT_") >= 0 || key1.indexOf("_BOOL_") >= 0 || key1.indexOf("_BOOLEAN_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.BIT);
-			} else if (key1.indexOf("_NUMBER_") >= 0 || key1.indexOf("_MONEY_") >= 0 || key1.indexOf("_DECIMAL_") >= 0
-					|| key1.indexOf("_NUMERIC_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.DECIMAL);
-			} else if (key1.indexOf("_DOUBLE_") >= 0 || key1.indexOf("_FLOAT_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.DOUBLE);
-			} else if (key1.indexOf("_IMAGE_") >= 0 || key1.indexOf("_BLOB_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.BLOB);
-			} else if (key1.indexOf("_TEXT_") >= 0 || key1.indexOf("_CLOB_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.CLOB);
-			} else if (key1.indexOf("_BINARY_") >= 0 || key1.indexOf("_BYTE_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.VARBINARY);
-			} else if (key1.indexOf("_DATE_") >= 0 || key1.indexOf("_DATETIME_") >= 0
-					|| key1.indexOf("_TIMESTAMP_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.TIMESTAMP);
-			} else if (key1.indexOf("_TIME_") >= 0) {
-				cst.registerOutParameter(index, java.sql.Types.TIME);
-			} else {
-				cst.registerOutParameter(index, java.sql.Types.VARCHAR);
-			}
-			outValues.put(key1, "" + (index));
-			this.writeDebug(this, "添返回加参数(String)" + index, key);
-		}
-		return outValues;
+	public void addStatementParameter(PreparedStatement cst, String parameterName, int index) throws SQLException {
+		_sqlBuilder.addStatementParameter(cst, parameterName, index);
 	}
 
 	/**
 	 * 清除所有返回的 resultSet，当长期执行查询的时，会造成内存占用过高 关闭连接会自动执行清除
 	 */
 	public void clearResultSets() {
-		if (this._ResultSetList == null || this._ResultSetList.size() == 0) {
-			return;
-		}
-		for (int i = 0; i < this._ResultSetList.size(); i++) {
-			DataResult r = (DataResult) _ResultSetList.get(i);
-			try {
-				r.getResultSet().close();
-			} catch (SQLException e) {
-				LOGGER.error(e.getLocalizedMessage());
-				setError(e, "Error _resultSet close");
-			}
-		}
-		// 清除数据所有返回的 resultSet
-		this._ResultSetList.clear();
+		_session.clearResultSets();
 	}
 
 	/**
@@ -2475,23 +1698,11 @@ public class DataConnection {
 	 */
 	public void close() {
 		// 放到close处理，以便复用时不用重复创建
-		if (this._CreateSplitData != null) {
-			this.writeDebug(this, "SQL", "删除分割临时数据 START.");
-			this._CreateSplitData.clearEwaSplitTempData();
-			this.writeDebug(this, "SQL", "删除分割临时数据 END.");
-			this._CreateSplitData = null;
-		}
-		// 清除所有返回的 resultSet，当长期执行查询的时，会造成内存占用过高
-		// 郭磊 2019-02-14
-		this.clearResultSets();
-		this.closeStatment(this._pst);
-		this.closeStatment(this._queryStatement);
+		_sqlBuilder.clearCreateSplitData();
 		if (_DebugFrames != null) {
 			_DebugFrames.addDebug(this, "SQL", "[close] Close connection.");
 		}
-		if (_ds != null) {
-			_ds.close();
-		}
+		_session.close();
 
 	}
 
@@ -2530,7 +1741,7 @@ public class DataConnection {
 	 */
 	private void setError(Exception e, String sql) {
 		this._errorMsg = "SQL: " + sql + "<br>\r\nERROR: " + e.getMessage() + "<br>DATASOURCE: "
-				+ this._CurrentConfig.getName() + "(" + this._ConnectionString + ")";
+				+ _session.getCurrentConfig().getName() + "(" + _session.getConnectionString() + ")";
 		this._errorMsgOnly = e.getMessage();
 		// LOGGER.error(this._errorMsg);
 	}
@@ -2633,13 +1844,13 @@ public class DataConnection {
 		sql1 = this.replaceSqlParameters(sql);
 		this.writeDebug(this, "开始执行", sql1);
 		try {
-			CallableStatement cst = this._ds.getCallableStatement(sql1);
-			outValues = this.addSqlParameter(al, cst);
+			CallableStatement cst = _session.getDataHelper().getCallableStatement(sql1);
+			outValues = _sqlBuilder.addSqlParameter(al, cst);
 			cst.execute();
 
 			this.getOutValues(outValues, cst);
-			if (!this._ds.getConnection().getAutoCommit()) {
-				this._ds.getConnection().commit();
+			if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+				_session.getDataHelper().getConnection().commit();
 			}
 			cst.close();
 		} catch (Exception e) {
@@ -2695,30 +1906,18 @@ public class DataConnection {
 		this.writeDebug(this, "开始执行", sql1);
 		int inc = 0;
 		try {
-			CallableStatement cst = this._ds.getCallableStatement(sql1);
-			this._queryStatement = cst;
+			CallableStatement cst = _session.getDataHelper().getCallableStatement(sql1);
+			_session.setQueryStatement(cst);
 
-			outValues = this.addSqlParameter(al, cst);
+			outValues = _sqlBuilder.addSqlParameter(al, cst);
 			this.getOutValues(outValues, cst);
 
 			ResultSet rs = cst.executeQuery();
 
-			// print语句的输出可通过SQLWarnings获得
-			SQLWarning warning = cst.getWarnings();
-			int incWarings = 0;
-			while (warning != null) {
-				String msg = warning.getLocalizedMessage();
-				if (incWarings == 0) {
-					LOGGER.warn("SQL: {}", sql);
-				}
-				LOGGER.warn("Warning: {}", msg);
-				this.writeDebug(this, "SQL-INFO", msg);
-				warning = warning.getNextWarning();
-				incWarings++;
-			}
+			logSqlWarnings(cst, sql);
 
-			if (!this._ds.getConnection().getAutoCommit()) {
-				this._ds.getConnection().commit();
+			if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+				_session.getDataHelper().getConnection().commit();
 			}
 
 			DataResult ds0 = this.addResult(rs, sql, sql1);
@@ -2757,25 +1956,13 @@ public class DataConnection {
 
 		this.writeDebug(this, "开始执行", sql);
 		try {
-			CallableStatement cst = this._ds.getCallableStatement(sql);
+			CallableStatement cst = _session.getDataHelper().getCallableStatement(sql);
 			cst.execute();
 
-			// print语句的输出可通过SQLWarnings获得
-			SQLWarning warning = cst.getWarnings();
-			int incWarings = 0;
-			while (warning != null) {
-				String msg = warning.getLocalizedMessage();
-				if (incWarings == 0) {
-					LOGGER.warn("SQL: {}", sql);
-				}
-				LOGGER.warn("Warning: {}", msg);
-				this.writeDebug(this, "SQL-INFO", msg);
-				warning = warning.getNextWarning();
-				incWarings++;
-			}
+			logSqlWarnings(cst, sql);
 
-			if (!this._ds.getConnection().getAutoCommit()) {
-				this._ds.getConnection().commit();
+			if (!_session.getDataHelper().getConnection().getAutoCommit()) {
+				_session.getDataHelper().getConnection().commit();
 			}
 			cst.close();
 		} catch (Exception e) {
@@ -2814,7 +2001,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String sqlParameterStringExp(String parameter) {
-		return sqlParameterStringExp(parameter, this.getDatabaseType());
+		return _sqlBuilder.sqlParameterStringExp(parameter);
 	}
 
 	/**
@@ -2824,28 +2011,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String sqlParameterStringExp(String parameter, String databaseType) {
-		if (parameter == null) {
-			return "NULL";
-		}
-		if (parameter.length() == 0) {
-			return "''";
-		}
-		parameter = parameter.replace("'", "''");
-		if (databaseType != null) {
-			boolean isMysql = SqlUtils.isMySql(databaseType);// this.getDatabaseType().equalsIgnoreCase("MYSQL");
-			boolean isSqlServer = SqlUtils.isSqlServer(databaseType);// this.getDatabaseType().equalsIgnoreCase("MSSQL");
-			if (isMysql) {
-				// MySql字符转义符 反斜线(‘\’)开始，
-				parameter = parameter.replace("\\", "\\\\");
-			}
-			parameter = "'" + parameter + "'";
-			if (isSqlServer) {
-				parameter = "N" + parameter;
-			}
-		} else {
-			parameter = "'" + parameter + "'";
-		}
-		return parameter;
+		return _sqlBuilder.sqlParameterStringExp(parameter, databaseType);
 	}
 
 	/**
@@ -2855,23 +2021,15 @@ public class DataConnection {
 	 * @return 带上[(sqlserver)或`(mysql)的字段或表名
 	 */
 	public String sqlFieldOrTableExp(String fieldOrTable) {
-		boolean isMysql = this.getDatabaseType().equalsIgnoreCase("MYSQL");
-		boolean isSqlServer = this.getDatabaseType().equalsIgnoreCase("MSSQL");
-		if (isMysql) {
-			return "`" + fieldOrTable + "`";
-		} else if (isSqlServer) {
-			return "[" + fieldOrTable + "]";
-		} else {
-			return fieldOrTable; // 不处理
-		}
+		return _sqlBuilder.sqlFieldOrTableExp(fieldOrTable);
 	}
 
 	public String getConnectionString() {
-		return _ConnectionString;
+		return _session.getConnectionString();
 	}
 
 	public String getDatabaseType() {
-		return _DatabaseType;
+		return _session.getDatabaseType();
 	}
 
 	/**
@@ -2881,14 +2039,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String getDateTimePara(String s1) {
-		if (s1 == null || s1.trim().length() == 0) {
-			return null;
-		}
-		String s2 = s1.replace("'", "");
-		// 先获取字符串的转换的 yyyy-mm-dd表达式
-		Timestamp timestamp = this.getTimestamp(s2);
-
-		return getDateTimePara(timestamp);
+		return _sqlBuilder.getDateTimePara(s1);
 	}
 
 	/**
@@ -2899,17 +2050,7 @@ public class DataConnection {
 	 * @return
 	 */
 	public String getDateTimePara(java.sql.Timestamp dt) {
-		if (dt == null) {
-			return null;
-		}
-		// 先获取字符串的转换的 yyyy-MM-dd HH:mm:ss 表达式（2011-04-02 11:29:31）
-		String s2 = Utils.getDateTimeString(new Date(dt.getTime()));
-		if ("ORACLE".equalsIgnoreCase(this._DatabaseType)) {
-			return "to_date('" + s2 + "','YYYY-MM-DD HH24:MI:SS')";
-		} else {
-			// ISO 8601 格式（YYYY-MM-DD HH:MI:SS）
-			return "'" + s2 + "'";
-		}
+		return _sqlBuilder.getDateTimePara(dt);
 	}
 
 	/**
@@ -2919,49 +2060,63 @@ public class DataConnection {
 	 * @return
 	 */
 	public java.sql.Timestamp getTimestamp(String s1) {
-		String lang = this._RequestValue != null ? this._RequestValue.getLang() : "zhcn";
-		// 是否为英式日期格式
-		boolean isUKFormat = false;
-		if (ConfExtraGlobals.getInstance() != null && "enus".equalsIgnoreCase(lang)) {
-			ConfExtraGlobal extra = ConfExtraGlobals.getInstance().getConfExtraGlobalByLang(lang);
-			if (extra != null) {
-				if (extra.getDate() != null && extra.getDate().equalsIgnoreCase(UFormat.DATE_FROMAT_ENUS)) {
-					// 通过在ewa_conf.xml中定义 global lang=enus date=dd/MM/yyyy
-					isUKFormat = true;
-				} else if (this._RequestValue != null) {
-					// 通过参数SYS_EWA_ENUS_YMD定义
-					isUKFormat = UFormat.DATE_FROMAT_ENUS.equalsIgnoreCase(this._RequestValue.s("SYS_EWA_ENUS_YMD"));
-				}
-			}
-		}
-		try {
-			return Utils.getTimestamp(s1, lang, isUKFormat);
-		} catch (Exception e) {
-			LOGGER.error("转换时间错误: {} , lang={}, isUKFormat={}", s1, lang, isUKFormat);
-			return null;
-		}
+		return _sqlBuilder.getTimestamp(s1);
 	}
 
 	public String getSchemaName() {
-		return _SchemaName;
+		return _session.getSchemaName();
 	}
 
 	public Connection getConnection() {
-		if (this._Connection == null) {
-			this._Connection = _ds.getConnection();
-		}
-		return _Connection;
+		return _session.getConnection();
 	}
 
 	public void setConnection(Connection cnn) {
-		this._Connection = cnn;
+		_session.setConnection(cnn);
+	}
+
+	/** Cached: MySQL @@sql_mode contains NO_BACKSLASH_ESCAPES? */
+	private Boolean mysqlNoBackslashEscapes_;
+
+	/**
+	 * Check whether the current MySQL connection has NO_BACKSLASH_ESCAPES enabled.
+	 * Queries @@SESSION.sql_mode once and caches the result.
+	 * 
+	 * @return true/false
+	 */
+	public boolean isMysqlNoBackslashEscapes() {
+		if (mysqlNoBackslashEscapes_ != null) {
+			return mysqlNoBackslashEscapes_;
+		}
+		try {
+			Connection conn = _session.getConnection();
+			if (conn != null && !conn.isClosed()) {
+				Statement st = conn.createStatement();
+				try {
+					ResultSet rs = st.executeQuery("SELECT @@SESSION.sql_mode");
+					if (rs.next()) {
+						String mode = rs.getString(1);
+						mysqlNoBackslashEscapes_ = mode != null && mode.toUpperCase().contains("NO_BACKSLASH_ESCAPES");
+					}
+					rs.close();
+				} finally {
+					st.close();
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.debug("Failed to check MySQL sql_mode: {}", e.getMessage());
+		}
+		if (mysqlNoBackslashEscapes_ == null) {
+			mysqlNoBackslashEscapes_ = Boolean.FALSE;
+		}
+		return mysqlNoBackslashEscapes_;
 	}
 
 	/**
 	 * @param currentConfig the _CurrentConfig to set
 	 */
 	public void setCurrentConfig(ConnectionConfig currentConfig) {
-		_CurrentConfig = currentConfig;
+		_session.setCurrentConfig(currentConfig);
 		initConnection();
 	}
 
@@ -3000,11 +2155,11 @@ public class DataConnection {
 	 * @return the _ResultSetList
 	 */
 	public MList getResultSetList() {
-		return _ResultSetList;
+		return _session.getResultSetList();
 	}
 
 	public DataResult getLastResult() {
-		return (DataResult) this._ResultSetList.getLast();
+		return _session.getLastResult();
 	}
 
 	/**
@@ -3013,7 +2168,7 @@ public class DataConnection {
 	 * @return the _IsTrans
 	 */
 	public boolean isTrans() {
-		return _IsTrans;
+		return _session.isTrans();
 	}
 
 	/**
@@ -3029,14 +2184,14 @@ public class DataConnection {
 	 * @return the DataHelper
 	 */
 	public DataHelper getDataHelper() {
-		return _ds;
+		return _session.getDataHelper();
 	}
 
 	/**
 	 * @param dataHelper the DataHelper to set
 	 */
 	public void setDataHelper(DataHelper dataHelper) {
-		this._ds = dataHelper;
+		_session.setDataHelper(dataHelper);
 	}
 
 	/**
