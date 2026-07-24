@@ -85,7 +85,22 @@ public class FrameList extends FrameBase implements IFrame {
 	 * @return the _WorkFlowBut
 	 */
 	public String getWorkFlowButJson() {
+		if (_WorkFlowButJson != null) {
+			return _WorkFlowButJson;
+		}
+		boolean hasButFlow = false;
 		try {
+			for (int i = 0; i < super.getHtmlClass().getUserConfig().getUserXItems().count(); i++) {
+				UserXItem uxi = super.getHtmlClass().getUserConfig().getUserXItems().getItem(i);
+				String tag = uxi.getSingleValue("Tag");
+				if (tag.equalsIgnoreCase("butFlow")) {
+					hasButFlow = true; //有工作流
+					break;
+				}
+			}
+			if (!hasButFlow) {
+				return null;
+			}
 			this.loadWorkFlowApp();
 		} catch (Exception err) {
 			// System.err.println(err.getMessage());
@@ -1513,9 +1528,9 @@ public class FrameList extends FrameBase implements IFrame {
 		if (tb.getCount() == 0) {
 			return "[]";
 		}
-		
+
 		JSONArray arr = new JSONArray();
-		
+
 		// 根据EWA_JSON_FIELD_CASE 确定json返回字段的大小写设定
 		JsonFieldNameCase jfnc = new JsonFieldNameCase(rv);
 		Map<String, String> jsonFieldNames = new HashMap<>();
