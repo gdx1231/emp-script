@@ -247,6 +247,14 @@ new_item = re.sub(r'<Set Info="[^"]*" Lang="zhcn"[^>]*>',
 new_item = re.sub(r'DataType="String"', 'DataType="目标类型"', new_item)
 ```
 
+**XItem 排序规则**：`textarea` / `ntext` 类型字段放在所有字段最后、按钮之前，避免大文本框撑开表单布局。
+
+```python
+# 插入到 butOk 之前（textarea 自动在最后）
+insert_pos = xml.index('<XItem Name="butOk">')
+xml = xml[:insert_pos] + new_item + '\n' + xml[insert_pos:]
+```
+
 ### 同步修改 F.NM 的 SQL
 
 - **INSERT (OnNew SQL)**：columns 列表 + VALUES 列表都要加新字段
