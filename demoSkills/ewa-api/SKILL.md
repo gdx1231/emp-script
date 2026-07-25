@@ -202,6 +202,67 @@ PYEOF
 | Token 过期（401） | 重新 `./ewa-api.sh login` |
 | 缺失 Content-Type | 必须设 `application/x-www-form-urlencoded` |
 
+## 补充表字段规则
+
+当数据库表新增列后，需同步更新对应的 EWA XML 配置（LF.M 列表 + F.NM 表单）。
+
+### 工作流程
+
+```
+getTable → 获取表全部字段
+getConfItem → 获取 LF.M / F.NM 当前字段
+对比差异 → 找出缺失字段
+getConfItem → 读取 F.NM 的 OnNew SQL (INSERT)
+根据 INSERT 判断自动赋值字段 → 排除无需表单填写的字段
+补 XItem → 构建缺失字段的 XML 节点
+F.NM 同步修改 INSERT / UPDATE SQL
+updateConfItem → 推送
+```
+
+### F.NM 表单字段判断规则
+
+读取 `OnNew SQL`（INSERT 语句）的 VALUES 子句，判断每个字段的赋值方式：
+
+| 赋值方式 | 示例 | 是否需加入表单 |
+|----------|------|:---:|
+| `@sys_unid` | 自动生成 UUID | ❌ 不需要 |
+| `'USED'` / 常量 | 自动设定状态 | ❌ 不需要 |
+| `@SYS_DATE` | 自动取当前时间 | ❌ 不需要 |
+| `@G_ADM_ID` | 自动取当前管理员 | ❌ 不需要 |
+| `@字段名`（非系统变量） | 用户输入参数 | ✅ 需要 |
+
+常见自动赋值字段（无需加入表单）：`*_UID`、`*_STATUS`、`*_CDATE`、`*_MDATE`、`ADM_ID`
+
+### 构建 XItem
+
+从已有字段取模板（`re.search` 提取完整 `<XItem>...</XItem>`），替换关键属性：
+
+```python
+template = match.group(1)  # XItem 内部内容
+new_item = f'<XItem Name="新字段名">{template}</XItem>'  # 必须闭合！
+new_item = re.sub(r'<Set Name="旧名"', '<Set Name="新名"', new_item)
+new_item = re.sub(r'DataField="旧名"', 'DataField="新名"', new_item)
+new_item = re.sub(r'<Set Info="[^"]*" Lang="zhcn"[^>]*>', 
+                  '<Set Info="中文描述" Lang="zhcn" Memo=""/>', new_item)
+new_item = re.sub(r'DataType="String"', 'DataType="目标类型"', new_item)
+```
+
+### 同步修改 F.NM 的 SQL
+
+- **INSERT (OnNew SQL)**：columns 列表 + VALUES 列表都要加新字段
+- **UPDATE (OnModify SQL)**：SET 子句加 `新字段 = @新字段`
+- **SELECT**：通常用 `A.*` 无需改动
+
+### 常见陷阱
+
+| 陷阱 | 解决 |
+|------|------|
+| XItem 缺少 `</XItem>` 闭合 | 模板是 `(.*?)</XItem>` 不含闭合标签，需手动拼接 |
+| XML 校验失败 | push 前用 `ET.fromstring(xml)` 验证 |
+| 表单 Tag 选错 | 短文本用 `text`，长文本用 `textarea`，下拉用 `select` |
+| money 字段未设精度 | Double 类型补 `NumberScale="4"` |
+| `\/` 转义 | API 返回的 XML 中 `/` 被转义为 `\/`，编辑前先 `.replace('\\/', '/')` |
+
 ## 注意事项
 
 - `description` 为技能发现入口，触发关键词需保留在 frontmatter 中。
