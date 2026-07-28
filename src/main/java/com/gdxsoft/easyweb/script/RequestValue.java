@@ -1747,8 +1747,20 @@ public class RequestValue implements Cloneable {
 		rv._Request = this._Request;
 		rv._ContextPath = this._ContextPath;
 		rv._Session = this._Session;
-		return rv;
+		rv._ParameterHashCode = this._ParameterHashCode;
+		rv.jsonBodyParameters = this.jsonBodyParameters;
 
+		if (this.httpHeaders != null) {
+			rv.httpHeaders = new HashMap<>(this.httpHeaders);
+		}
+		if (this.mapJson_ != null) {
+			rv.mapJson_ = new HashMap<>(this.mapJson_);
+		}
+		if (this.querys != null) {
+			rv.querys = new HashMap<>(this.querys);
+		}
+
+		return rv;
 	}
 
 	/**
