@@ -1114,6 +1114,10 @@ public class HtmlCreator {
 			return sb.toString();
 		}
 		DTTable dt = (DTTable) this._ItemValues.getDTTables().get(len - 1);
+		if(len>1 && this._HtmlClass.getFrame() instanceof FrameList) {
+			FrameList fl = (FrameList)this._HtmlClass.getFrame();
+			dt = fl.getSplitPageTable();
+		}
 		// 时差
 		dt.setTimeDiffMinutes(this._HtmlClass.getSysParas().getTimeDiffMinutes());
 

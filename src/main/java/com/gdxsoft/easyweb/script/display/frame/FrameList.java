@@ -1524,6 +1524,9 @@ public class FrameList extends FrameBase implements IFrame {
 		boolean isApiPrompt = AjaxParameters.JSON_AI_PROMPT.equalsIgnoreCase(sysParas.getAjaxCallType());
 
 		DTTable tb = (DTTable) tbs.get(tbs.size() - 1);
+		if(tbs.size()>1  ) {
+			tb = this.getSplitPageTable();
+		}
 		super.getHtmlClass().getItemValues().setListFrameTable(tb);
 		if (tb.getCount() == 0) {
 			return "[]";

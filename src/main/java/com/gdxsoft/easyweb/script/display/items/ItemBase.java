@@ -253,7 +253,9 @@ public class ItemBase implements IItem {
 	 */
 	public String createFormatValue() throws Exception {
 		String val = getValue();
-
+		if(null == val) {
+			return val;
+		}
 		val = this.createJsonRefValue(val);
 		return val;
 	}
