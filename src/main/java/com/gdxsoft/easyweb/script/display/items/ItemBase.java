@@ -776,7 +776,7 @@ public class ItemBase implements IItem {
 				HashMap<String, String> paras = new HashMap<String, String>();
 
 				try {
-					h1 = this.replaceProperties(uv, paras, events, a, h1);
+					h1 = this.replaceProperties(uv, paras, events, a, h1, _UserXItemValues.getParameter().getName());
 					if (h1 != null) {
 						inc++;
 						paras.put("---GDX-RST---", h1);
@@ -804,7 +804,7 @@ public class ItemBase implements IItem {
 	 * @throws Exception
 	 */
 	private String replaceProperties(UserXItemValue uv, HashMap<String, String> paras, EwaEvents events, MListStr a,
-			String h1) throws Exception {
+			String h1, String parameterName) throws Exception {
 
 		// attName允许为空，名称根据AttValue的名称来定义
 		String fixedAttName = "";
@@ -832,6 +832,12 @@ public class ItemBase implements IItem {
 				v = fixedAttName;
 			}
 			if (v == null || v.trim().equals("")) {
+				// CallAction 的空值（ConfirmInfo/AfterTip）替换为空，避免 @placeholder 原样留在 HTML 中
+				if ("CallAction".equals(parameterName)) {
+					html.replace("@" + key, "");
+					paras.put(key, "");
+					isOk = true;
+				}
 				continue;
 			}
 			if (events.testName(v)) {// 是否为内置的事件
