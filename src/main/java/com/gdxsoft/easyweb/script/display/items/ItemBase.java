@@ -836,7 +836,6 @@ public class ItemBase implements IItem {
 				if ("CallAction".equals(parameterName)) {
 					html.replace("@" + key, "");
 					paras.put(key, "");
-					isOk = true;
 				}
 				continue;
 			}
