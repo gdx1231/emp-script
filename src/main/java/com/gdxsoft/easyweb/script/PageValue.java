@@ -1,6 +1,10 @@
 package com.gdxsoft.easyweb.script;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Date;
+
+import com.gdxsoft.easyweb.utils.Utils;
 
 public class PageValue {
 
@@ -19,28 +23,37 @@ public class PageValue {
 		if (this._Value == null)
 			return;
 
-		if (this._Value instanceof java.lang.String) {
+		if (this._Value instanceof byte[] || this._Value instanceof Byte[]) {
+			this._DataType = "Binary";
+		} else if (this._Value instanceof java.lang.String) {
 			this._DataType = "String";
 		} else if (this._Value instanceof java.util.Date) {
 			this._DataType = "Date";
+		} else if (this._Value instanceof java.time.LocalDate) {
+			this._DataType = "Date";
+		} else if (this._Value instanceof java.time.LocalTime) {
+			this._DataType = "Time";
+		} else if (this._Value instanceof java.time.LocalDateTime ||
+				this._Value instanceof java.time.ZonedDateTime ||
+				this._Value instanceof java.time.OffsetDateTime ||
+				this._Value instanceof java.time.Instant) {
+			this._DataType = "DateTime";
 		} else if (this._Value instanceof java.lang.Long) {
 			this._DataType = "BigInt";
 		} else if (this._Value instanceof java.lang.Integer || this._Value instanceof java.lang.Short) {
 			this._DataType = "Int";
 		} else if (this._Value instanceof java.lang.Double || this._Value instanceof java.lang.Float) {
 			this._DataType = "Number";
-		}
-		String simpleName = this._Value.getClass().getSimpleName();
-		if (simpleName.equals("byte[]") || simpleName.equals("Byte[]")) {
-			this._DataType = "Binary";
+		} else if (this._Value instanceof java.math.BigDecimal) {
+			this._DataType = "Number";
 		} else {
-			this._DataType = simpleName;
+			this._DataType = this._Value.getClass().getSimpleName();
 		}
 	}
 
 	/**
 	 * 获取二进制数组
-	 * 
+	 *
 	 * @return
 	 */
 	public byte[] toBinary() {
@@ -48,26 +61,23 @@ public class PageValue {
 		if (v == null) {
 			return null;
 		}
-		// 类型为Byte[]时，需要手动转换为 byte[]
-		if (v.getClass().getSimpleName().equals("Byte[]")) {
-			Byte[] bb = (Byte[]) v;
-			byte[] bb1 = new byte[bb.length];
-			for (int i = 0; i < bb.length; i++) {
-				Byte b = bb[i];
-				if (b == null) {
-					b = 0;
-				}
-				bb1[i] = b;
-			}
-			return bb1;
+		if (v instanceof byte[]) {
+			return (byte[]) v;
 		}
-		return (byte[]) v;
+		if (v instanceof Byte[]) {
+			Byte[] bb = (Byte[]) v;
+			byte[] result = new byte[bb.length];
+			for (int i = 0; i < bb.length; i++) {
+				result[i] = bb[i] == null ? 0 : bb[i];
+			}
+			return result;
+		}
+		return null;
 	}
 
 	/**
 	 * 获取参数的整数
-	 * 
-	 * @param pv
+	 *
 	 * @return
 	 */
 	public Integer toInteger() {
@@ -75,25 +85,23 @@ public class PageValue {
 		if (t1 == null) {
 			return null;
 		}
-		if (t1 instanceof java.lang.Integer) {
-			return (Integer) t1;
+		if (t1 instanceof Number) {
+			return ((Number) t1).intValue();
 		}
-		String v1 = t1.toString();
-		if (v1.trim().length() > 0) {
-			if (v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
-				return null;
-			}
-			int intVal = Integer.parseInt(v1.split("\\.")[0]);
-			return intVal;
-		} else {
+		String v1 = t1.toString().trim().replace(",", "");
+		if (v1.isEmpty() || v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
 			return null;
 		}
+		int dotIndex = v1.indexOf('.');
+		if (dotIndex >= 0) {
+			v1 = v1.substring(0, dotIndex);
+		}
+		return Integer.parseInt(v1);
 	}
 
 	/**
 	 * 获取参数的长整数
-	 * 
-	 * @param pv
+	 *
 	 * @return
 	 */
 	public Long toLong() {
@@ -101,25 +109,23 @@ public class PageValue {
 		if (t1 == null) {
 			return null;
 		}
-		if (t1 instanceof java.lang.Long) {
-			return (Long) t1;
+		if (t1 instanceof Number) {
+			return ((Number) t1).longValue();
 		}
-		String v1 = t1.toString();
-		if (v1.trim().length() > 0) {
-			if (v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
-				return null;
-			}
-			long intVal = Long.parseLong(v1.split("\\.")[0]);
-			return intVal;
-		} else {
+		String v1 = t1.toString().trim().replace(",", "");
+		if (v1.isEmpty() || v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
 			return null;
 		}
+		int dotIndex = v1.indexOf('.');
+		if (dotIndex >= 0) {
+			v1 = v1.substring(0, dotIndex);
+		}
+		return Long.parseLong(v1);
 	}
 
 	/**
 	 * 获取参数的双精度
-	 * 
-	 * @param pv
+	 *
 	 * @return
 	 */
 	public Double toDouble() {
@@ -127,19 +133,14 @@ public class PageValue {
 		if (t1 == null) {
 			return null;
 		}
-		if (t1 instanceof java.lang.Double) {
-			return (Double) t1;
+		if (t1 instanceof Number) {
+			return ((Number) t1).doubleValue();
 		}
-		String v1 = t1.toString();
-		if (v1 != null && v1.trim().length() > 0) {
-			if (v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
-				return null;
-			}
-			double dbVal = Double.parseDouble(v1);
-			return dbVal;
-		} else {
+		String v1 = t1.toString().trim().replace(",", "");
+		if (v1.isEmpty() || v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
 			return null;
 		}
+		return Double.parseDouble(v1);
 	}
 
 	public BigDecimal toBigDecimal() {
@@ -147,19 +148,58 @@ public class PageValue {
 		if (t1 == null) {
 			return null;
 		}
-		if (t1 instanceof java.math.BigDecimal) {
+		if (t1 instanceof BigDecimal) {
 			return (BigDecimal) t1;
 		}
-		String v1 = t1.toString();
-		if (v1.trim().length() > 0) {
-			if (v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
-				return null;
-			}
-			BigDecimal dbVal = new BigDecimal(v1);
-			return dbVal;
-		} else {
+		if (t1 instanceof Number) {
+			return new BigDecimal(t1.toString());
+		}
+		String v1 = t1.toString().trim().replace(",", "");
+		if (v1.isEmpty() || v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
 			return null;
 		}
+		return new BigDecimal(v1);
+	}
+
+	/**
+	 * 获取参数的日期
+	 *
+	 * @return
+	 */
+	public java.util.Date toDate(String lang) {
+		Object t1 = this.getValue();
+		if (t1 == null) {
+			return null;
+		}
+		if (t1 instanceof java.util.Date) {
+			return (java.util.Date) t1;
+		}
+		if (t1 instanceof java.time.Instant) {
+			return java.util.Date.from((java.time.Instant) t1);
+		}
+		if (t1 instanceof java.time.LocalDateTime) {
+			return java.util.Date.from(((java.time.LocalDateTime) t1).atZone(java.time.ZoneId.systemDefault()).toInstant());
+		}
+		if (t1 instanceof java.time.LocalDate) {
+			return java.util.Date.from(((java.time.LocalDate) t1).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant());
+		}
+		if (t1 instanceof java.time.ZonedDateTime) {
+			return java.util.Date.from(((java.time.ZonedDateTime) t1).toInstant());
+		}
+		if (t1 instanceof java.time.OffsetDateTime) {
+			return java.util.Date.from(((java.time.OffsetDateTime) t1).toInstant());
+		}
+		if (t1 instanceof Number) {
+			return new java.util.Date(((Number) t1).longValue());
+		}
+		String v1 = t1.toString().trim();
+		if (v1.isEmpty() || v1.equalsIgnoreCase("undefined") || v1.equalsIgnoreCase("null")) {
+			return null;
+		}
+		Timestamp t = Utils.getTimestamp(v1, lang, false);
+
+		Date date = new Date(t.getTime());
+		return date; 
 	}
 
 	public PageValue(String name, String value) {

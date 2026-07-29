@@ -57,8 +57,7 @@ public class PageValues {
 		pv.setPVTag(pvTag);
 		pv.setTag(pvTag.toString());
 
-		// oracle 出现错误，因此暂时禁止自动检测类型
-		// pv.autoDetectDataType();
+		pv.autoDetectDataType();
 
 		this.addValue(pv);
 
@@ -82,9 +81,32 @@ public class PageValues {
 	 * @param key
 	 */
 	public void remove(String key) {
+		this.removeInner(key, false);
+
+	}
+
+	/**
+	 * 从对象中安全删除Key，排除 COOKIE_ENCYRPT 和 SESSION
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public void removeSafe(String key) {
+		this.removeInner(key, true);
+	}
+
+	/**
+	 * 从对象中删除 key
+	 * @param key
+	 * @param safeRemove 是否安全删除，排除 COOKIE_ENCYRPT 和 SESSION
+	 */
+	private void removeInner(String key, boolean safeRemove) {
 		Iterator<Object> it = this._Values.getTable().keySet().iterator();
 		while (it.hasNext()) {
-			Object key1 = it.next();
+			PageValueTag key1 = (PageValueTag) it.next();
+			if (safeRemove && (key1 == PageValueTag.COOKIE_ENCYRPT || key1 == PageValueTag.SESSION)) {
+				continue;
+			}
 			MTable mt = (MTable) this._Values.get(key1);
 			mt.removeKey(key.toUpperCase().trim());
 		}
@@ -92,26 +114,30 @@ public class PageValues {
 	}
 
 	/**
-	 * 从所有对象中删除keys
+	 * 从所有对象中安全删除keys，排除SESSION/COOKIE_ENCYRPT
+	 * 
 	 * @param keys
 	 */
 	public void removes(List<String> keys) {
 		for (String key : keys) {
-			this.remove(key);
+			this.removeSafe(key);
 		}
-		
+
 	}
+
 	/**
 	 * 从指定来源对象中删除keys
-	 * @param keys 	
-	 * @param pvTag
+	 * 
+	 * @param keys
+	 * @param pvTag 
 	 */
 	public void removes(List<String> keys, PageValueTag pvTag) {
 		for (String key : keys) {
 			this.remove(key, pvTag);
 		}
-		
+
 	}
+
 	/**
 	 * 从指定来源对象中删除key
 	 * 
@@ -132,7 +158,7 @@ public class PageValues {
 	 * @param pv
 	 */
 	public void addOrUpdateValue(PageValue pv) {
-		this.remove(pv.getName());
+		this.removeSafe(pv.getName());
 		this.addValue(pv);
 	}
 
@@ -259,17 +285,17 @@ public class PageValues {
 		PageValue pv = this.getPageValue(name, PageValueTag.SYSTEM);
 		return pv == null ? null : pv.getStringValue();
 	}
-	
+
 	public String getDTableValue(String name) {
 		PageValue pv = this.getPageValue(name, PageValueTag.DTTABLE);
 		return pv == null ? null : pv.getStringValue();
 	}
-	
+
 	public String getHCParasValue(String name) {
 		PageValue pv = this.getPageValue(name, PageValueTag.HTML_CONTROL_PARAS);
 		return pv == null ? null : pv.getStringValue();
 	}
-	
+
 	public String getFormValue(String name) {
 		PageValue pv = this.getPageValue(name, PageValueTag.FORM);
 		return pv == null ? null : pv.getStringValue();

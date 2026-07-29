@@ -3,7 +3,6 @@ package com.gdxsoft.easyweb.script;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -710,8 +709,8 @@ public class RequestValue implements Cloneable {
 	 * isBlank(null)      = true
 	 * isBlank("")        = true
 	 * isBlank(" ")       = true
-	 * isBlank("bob")     = false
-	 * isBlank("  bob  ") = false
+	 * isBlank("gdx")     = false
+	 * isBlank("  gdx  ") = false
 	 * </pre>
 	 * 
 	 * @param name 参数名称
@@ -739,7 +738,9 @@ public class RequestValue implements Cloneable {
 	 * @return 整型
 	 */
 	public int getInt(String name) {
-		return Integer.parseInt(this.getString(name));
+		PageValue pv = this.getPageValues().getValue(name);
+		Integer iv = pv.toInteger();
+		return iv == null ? 0 : iv.intValue();
 
 	}
 
@@ -750,7 +751,9 @@ public class RequestValue implements Cloneable {
 	 * @return 长整型
 	 */
 	public long getLong(String name) {
-		return Long.parseLong(this.getString(name));
+		PageValue pv = this.getPageValues().getValue(name);
+		Long lv = pv.toLong();
+		return lv == null ? 0 : lv.longValue();
 	}
 
 	/**
@@ -761,14 +764,8 @@ public class RequestValue implements Cloneable {
 	 * @return 时间
 	 */
 	public Date getDate(String name, String lang) {
-		String s = this.getString(name);
-		if (s == null) {
-			return null;
-		}
-		Timestamp t = Utils.getTimestamp(s, lang, false);
-
-		Date t1 = new Date(t.getTime());
-		return t1;
+		PageValue pv = this.getPageValues().getValue(name);
+		return pv.toDate(lang);
 	}
 
 	/**
@@ -788,11 +785,9 @@ public class RequestValue implements Cloneable {
 	 * @return 双精度
 	 */
 	public Double getDouble(String name) {
-		String s = this.getString(name);
-		if (s == null) {
-			return null;
-		}
-		return Double.parseDouble(s);
+		PageValue pv = this.getPageValues().getValue(name);
+		Double dv = pv.toDouble();
+		return dv == null ? 0 : dv.doubleValue();
 	}
 
 	/**
@@ -1363,8 +1358,32 @@ public class RequestValue implements Cloneable {
 	 * @return 添加的字段
 	 */
 	public List<String> addValues(JSONObject json) {
-
 		return this.addValues(json, null);
+	}
+
+	/**
+	 * 添加 Map 到 Rv 里
+	 * 
+	 * @param map
+	 * @return 添加的字段
+	 */
+	public List<String> addValues(Map<String, Object> map) {
+		if (map == null) {
+			return null;
+		}
+		List<String> addList = new ArrayList<String>();
+		Iterator<String> it = map.keySet().iterator();
+		while (it.hasNext()) {
+			String key = it.next();
+			addList.add(key);
+			this.addOrUpdateValue(key, map.get(key));
+		}
+
+		return addList;
+	}
+
+	public void removeSafe(String key) {
+		this._ReqValues.removeSafe(key);
 	}
 
 	/**
@@ -1383,7 +1402,7 @@ public class RequestValue implements Cloneable {
 		while (it.hasNext()) {
 			String key = it.next().toString();
 			String key1 = prefix == null ? key : prefix + key;
-			this._ReqValues.remove(key1);
+			this.removeSafe(key1);
 			try {
 				Object val = json.get(key);
 				if (val == null) {
@@ -1445,11 +1464,15 @@ public class RequestValue implements Cloneable {
 
 	public void addValue(PageValue pv) {
 		String key = pv.getName().toUpperCase().trim();
-		MTable pvs = this._ReqValues.getFormValues();
+		PageValueTag pvTag = pv.getPVTag();
+		if (pvTag == null) {
+			pvTag = PageValueTag.OTHER;
+		}
+		MTable pvs = this._ReqValues.getTagValues(pvTag);
 		if (pvs.containsKey(key)) {
 			pvs.removeKey(key);
 		}
-		this._ReqValues.getFormValues().put(key, pv);
+		pvs.put(key, pv);
 	}
 
 	/**
@@ -1509,56 +1532,60 @@ public class RequestValue implements Cloneable {
 	/**
 	 * 修改参数，如果参数不存在，则不修改
 	 * 
-	 * @param Key
-	 * @param Val
+	 * @param key
+	 * @param val
 	 * @param dataType
 	 * @param maxLength
 	 */
-	public void changeValue(String Key, Object Val, String dataType, int maxLength) {
-		PageValue pv = this._ReqValues.getValue(Key);
+	public void changeValue(String key, Object val, String dataType, int maxLength) {
+		PageValue pv = this._ReqValues.getValue(key);
 		if (pv == null)
 			return;
 		pv.setDataType(dataType);
 		pv.setLength(maxLength);
-		pv.setValue(Val);
+		pv.setValue(val);
 	}
 
 	/**
 	 * 新增或修改任意等级的 参数
 	 * 
-	 * @param Key
-	 * @param Val
+	 * @param key
+	 * @param val
 	 */
-	public void addOrUpdateValue(String Key, Object Val) {
-		this.addOrUpdateValue(Key, Val, "String", -1);
+	public void addOrUpdateValue(String key, Object val) {
+		PageValue pv = new PageValue();
+		pv.setPVTag(PageValueTag.OTHER);
+		pv.setName(key.toUpperCase());
+		pv.setValue(val);
+		pv.autoDetectDataType();
+
+		this.removeSafe(key);
+		this._ReqValues.addValue(pv);
 	}
 
 	/**
 	 * 新增或修改任意等级的 参数
 	 * 
-	 * @param Key
-	 * @param Val
+	 * @param key
+	 * @param val
 	 * @param dataType
 	 * @param maxLength
 	 */
-	public void addOrUpdateValue(String Key, Object Val, String dataType, int maxLength) {
+	public void addOrUpdateValue(String key, Object val, String dataType, int maxLength) {
 		PageValue pv = new PageValue();
 
-		Key = Key.toUpperCase(); // 2019-04-12
+		key = key.toUpperCase(); // 2019-04-12
 
-		pv.setName(Key); // 为啥原来没有设定呢？？？？？ 2019-01-10
+		pv.setName(key);
 
 		pv.setDataType(dataType);
 		if (maxLength > 0) {
 			pv.setLength(maxLength);
 		}
-		pv.setValue(Val);
+		pv.setValue(val);
 		pv.setPVTag(PageValueTag.OTHER);
 
-		// 删除所有等级下的参数
-		this._ReqValues.remove(Key);
-
-		// 添加到PageValueTag.OTHER下
+		this.removeSafe(key);
 		this._ReqValues.addValue(pv);
 	}
 
