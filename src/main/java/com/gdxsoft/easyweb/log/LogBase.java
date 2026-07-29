@@ -25,9 +25,9 @@ public class LogBase {
 	 */
 	private static final AtomicInteger DETAIL_MAX_SIZE_ATOM = new AtomicInteger(MAX_DETAIL_LENGTH);
 	/**
-	 * 写入日志数据库的连接池名称
+	 * 写入日志数据库的连接池名称，默认 ewa_log
 	 */
-	private static AtomicReference<String> CONN_CONFIG_NAME = new AtomicReference<>("");
+	private static AtomicReference<String> CONN_CONFIG_NAME = new AtomicReference<>("ewa_log");
 	/**
 	 * 日志写入线程池核心线程数
 	 */
@@ -63,6 +63,10 @@ public class LogBase {
 		CONN_CONFIG_NAME.set(name);
 	}
 
+	/**
+	 * 获取写日志的链接池名称，默认 ewa_log，需要在ewa_conf.xml里配置，不配置的话，会选择第一个连接
+	 * @return
+	 */
 	public static String getConnConfigName() {
 		return CONN_CONFIG_NAME.get();
 	}
