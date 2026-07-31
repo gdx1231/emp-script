@@ -3,7 +3,6 @@
  */
 package com.gdxsoft.easyweb.conf;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.gdxsoft.easyweb.utils.UFile;
+import com.gdxsoft.easyweb.utils.ConfValueResolvers;
 import com.gdxsoft.easyweb.utils.UXml;
 import com.gdxsoft.easyweb.utils.Utils;
 import com.gdxsoft.easyweb.utils.msnet.MTableStr;
@@ -75,35 +75,12 @@ public class ConnectionConfig {
 				Node att = p.getAttributes().item(i);
 				String name = att.getNodeName().trim();
 				String value = att.getNodeValue().trim();
-				if ("password".equalsIgnoreCase(name) && value.startsWith("file://")) {
-					value = this.getPasswordFromFile(value);
+				if ("password".equalsIgnoreCase(name)) {
+					value = ConfValueResolvers.resolve(value);
 				}
 				_Pool.add(name, value);
 			}
 			resolvePoolPaths(this._Pool);
-		}
-	}
-
-	/**
-	 * Read password from file
-	 * @param value starts with "file://"
-	 * @return the password 
-	 */
-	private String getPasswordFromFile(String value) {
-		if (!value.startsWith("file://")) {
-			return value;
-		}
-
-		String filePath = value.substring(7);
-
-		try {
-			String content = UFile.readFileText(filePath);
-			LOGGER.debug("Read db password from: {}", value);
-			
-			return content.trim();
-		} catch (IOException e) {
-			LOGGER.error("Read password fail from: {} {}", value, e.getLocalizedMessage());
-			return e.getLocalizedMessage();
 		}
 	}
 

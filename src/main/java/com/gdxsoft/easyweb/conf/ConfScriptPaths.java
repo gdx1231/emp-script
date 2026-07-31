@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.gdxsoft.easyweb.utils.ConfValueResolvers;
 import com.gdxsoft.easyweb.script.userConfig.ResourceConfig;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
@@ -60,6 +61,12 @@ public class ConfScriptPaths {
 			uv.setObject(sp);
 			uv.setAllValue(item);
 
+			// 解析路径中的变量（如 ${env.EWA_HOME}、${user.home} 等）
+			if (sp.getPath() != null && !sp.isJdbc() && !sp.isResources()) {
+				String resolved = ConfValueResolvers.resolve(sp.getPath());
+				sp.setPath(resolved);
+			}
+
 			if (sp.isResources()) { // force read-only mode
 				sp.setReadOnly(true);
 				// 初始化资源，放置到缓存中
@@ -85,7 +92,12 @@ public class ConfScriptPaths {
 			if ("script_path".equals(attrs.get("name"))) {
 				ConfScriptPath sp = new ConfScriptPath();
 				sp.setName(attrs.get("name"));
-				sp.setPath(attrs.get("value"));
+				String pathValue = attrs.get("value");
+				// 解析路径中的变量
+				if (pathValue != null && !pathValue.startsWith("jdbc:") && !pathValue.startsWith("resources:")) {
+					pathValue = ConfValueResolvers.resolve(pathValue);
+				}
+				sp.setPath(pathValue);
 				return sp;
 			}
 		}

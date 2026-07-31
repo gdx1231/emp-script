@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.gdxsoft.easyweb.utils.ConfValueResolver;
+import com.gdxsoft.easyweb.utils.ConfValueResolvers;
 import com.gdxsoft.easyweb.utils.UObjectValue;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.Utils;
@@ -31,7 +33,7 @@ public class ConfAdmins {
 
 	/**
 	 * The define admin login
-	 * 
+	 *
 	 * @param loginId
 	 * @param password
 	 * @return the define admin data
@@ -46,10 +48,6 @@ public class ConfAdmins {
 	}
 
 	private synchronized static ConfAdmins createConfAdmins() {
-		/*
-		 * <scriptPaths> <scriptPath name="/ewa" path="resources:/user.xml/ewa" />
-		 * <scriptPath name="/" path="jdbc:ewa" /> </scriptPaths>
-		 */
 		ConfAdmins sps = new ConfAdmins();
 
 		if (UPath.getCfgXmlDoc() == null) {
@@ -76,20 +74,24 @@ public class ConfAdmins {
 			return null;
 		}
 
+		ConfValueResolver resolver = ConfValueResolvers.getResolver();
+
 		for (int i = 0; i < nlAdm.getLength(); i++) {
 			Element item = (Element) nlAdm.item(i);
 			ConfAdmin sp = new ConfAdmin();
 
-			/*
-			 * Map<String, String> vals = UXml.getElementAttributes(item, true);
-			 * sp.setUserName( vals.get("username") );
-			 * sp.setCreateDate(vals.get("createdate")); sp.setLoginId(vals.get("loginid"));
-			 * sp.setPassword(vals.get("password"));
-			 */
 			UObjectValue uo = new UObjectValue();
 
 			uo.setObject(sp);
 			uo.setAllValue(item);
+
+			// 通过解析器处理密码（环境变量、文件读取、自定义逻辑等）
+			if (sp.getPassword() != null) {
+				String resolved = resolver.resolve(sp.getPassword());
+				if (resolved != null) {
+					sp.setPassword(resolved);
+				}
+			}
 
 			if (StringUtils.isBlank(sp.getLoginId())) {
 				String randomLoginId = Utils.randomStr(8);
@@ -115,7 +117,7 @@ public class ConfAdmins {
 
 	/**
 	 * Get the ConfAdmin by the loginId and password
-	 * 
+	 *
 	 * @param loginId  the ConfAdmin.loginId
 	 * @param password the ConfAdmin.password
 	 * @return ConfAdmin
