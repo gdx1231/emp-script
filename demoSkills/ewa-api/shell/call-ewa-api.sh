@@ -22,6 +22,16 @@ API_BASE_URL="${EWA_API_URL:-http://localhost:8080/ewa/servletApi}"
 API_LOGIN_ID="${EWA_API_LOGIN_ID:-admin}"
 API_PASSWORD="${EWA_API_PASSWORD:-}"
 
+# 解析 file:// 前缀（密码从文件读取）
+if [[ "$API_PASSWORD" == file://* ]]; then
+    _pwd_file="${API_PASSWORD#file://}"
+    _pwd_file="${_pwd_file/#\~/$HOME}"
+    if [ -f "$_pwd_file" ]; then
+        API_PASSWORD=$(cat "$_pwd_file" | tr -d '\r\n')
+    fi
+    unset _pwd_file
+fi
+
 # Token 缓存文件
 TOKEN_FILE="${EWA_TOKEN_FILE:-/tmp/.ewa_api_token}"
 
@@ -175,6 +185,23 @@ format_json() {
 
 # ==================== 认证函数 ====================
 
+# 解析密码：支持 file:// 前缀从文件读取
+resolve_password() {
+    local pwd="$1"
+    if [[ "$pwd" == file://* ]]; then
+        local filepath="${pwd#file://}"
+        # 展开 ~ 为用户主目录
+        filepath="${filepath/#\~/$HOME}"
+        if [ ! -f "$filepath" ]; then
+            log_error "密码文件不存在: $filepath"
+            exit 1
+        fi
+        cat "$filepath" | tr -d '\r\n'
+    else
+        printf '%s' "$pwd"
+    fi
+}
+
 # 登录获取 Token
 do_login() {
     # 支持直接传参: login <login_id> <password>
@@ -188,6 +215,13 @@ do_login() {
     if [ -z "$API_PASSWORD" ]; then
         log_error "未设置密码，请使用 -p 参数或设置 EWA_API_PASSWORD 环境变量"
         exit 1
+    fi
+
+    # 解析 file:// 前缀
+    local resolved_pwd
+    resolved_pwd=$(resolve_password "$API_PASSWORD")
+    if [ -n "$resolved_pwd" ]; then
+        API_PASSWORD="$resolved_pwd"
     fi
 
     local response

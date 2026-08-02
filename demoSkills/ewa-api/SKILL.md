@@ -139,43 +139,36 @@ URL 参数过长会触发 Nginx 414 错误，大 XML（> 2KB）需通过 POST bo
 
 ### Step 1: Fetch — 获取配置项
 
+用 `jq -r` 提取 XML，正确处理 JSON unicode 转义（`\uXXXX` → 中文字符）：
+
 ```bash
-./ewa-api.sh --simple getConfItem "/business/ai/ai_chat.xml" "ITEM.NAME" xml 2>/dev/null > /tmp/item.xml
+./ewa-api.sh getConfItem "/business/ai/ai_chat.xml" "ITEM.NAME" xml 2>/dev/null \
+  | sed 's/\x1b\[[0-9;]*m//g' \
+  | sed -n '/^{/,/^}/p' \
+  | jq -r '.XML' > /tmp/item.xml
 ```
 
-**关键陷阱**：
-- `[INFO]` 行带有 ANSI 颜色代码，必须用 `2>/dev/null` 重定向
-- 响应是 JSON 包裹，XML 在 `"XML"` 字段（不是 `"DATA"`）
-- JSON 中 `/` 被转义为 `\/`，解析后需 `.replace('\\/', '/')`
+**管道说明**：
+1. `2>/dev/null` — 去掉 `[INFO]` 日志行（含 ANSI 颜色代码）
+2. `sed 's/\x1b\[...//g'` — 清除残留 ANSI 转义序列
+3. `sed -n '/^{/,/^}/p'` — 只保留 JSON 对象行（跳过非 JSON 输出）
+4. `jq -r '.XML'` — 正确解码 JSON（含 `\uXXXX` → 中文、`\"` → `"`、`\\` → `\`）
+
+> **禁止用 sed 手动解码 JSON**（如 `s/\\"/"/g`），会破坏 JSON 转义结构，导致 `\uXXXX` 被当字面文本存入数据库，中文前出现残留反斜杠。
 
 ### Step 2: Modify — 解析并修改 XML
 
+此时 `/tmp/item.xml` 已是纯 XML（UTF-8），可直接用 sed/perl 修改：
+
 ```bash
-python3 << 'PYEOF'
-import json, re
+# 修改示例：替换 SQL Server 语法为 PostgreSQL
+sed -e 's/getdate()/CURRENT_TIMESTAMP/g' \
+    -e 's/ISNULL(/COALESCE(/g' \
+    -e 's/isnull(/COALESCE(/g' \
+    /tmp/item.xml > /tmp/item_updated.xml
 
-with open('/tmp/item.xml', 'rb') as f:
-    raw = f.read()
-
-# 跳过 ANSI 行
-idx = raw.index(b'{')
-d = json.loads(raw[idx:])
-
-# 提取 XML（在 "XML" 字段），反转义斜杠
-xml = d['XML'].replace('\\/', '/')
-
-# 修改示例：更新 SQL
-xml = xml.replace('WHERE 1=1', 'WHERE 1=1 AND ai_id = @ai_id', 1)
-
-# 修改示例：更新 JS（CDATA 内）
-cdata_start, cdata_end = '<![CDATA[', ']]>'
-idx_start = xml.index(cdata_start) + len(cdata_start)
-idx_end = xml.index(cdata_end)
-xml = xml[:idx_start] + '新 JS 代码' + xml[idx_end:]
-
-with open('/tmp/item_updated.xml', 'w') as f:
-    f.write(xml)
-PYEOF
+# 修改示例：用 perl 替换 SQL
+perl -pe 's/GETDATE\(\)/CURRENT_TIMESTAMP/g' /tmp/item.xml > /tmp/item_updated.xml
 ```
 
 ### Step 3: Push — 用 ewa-api.sh 提交
@@ -183,24 +176,55 @@ PYEOF
 ```bash
 # 推荐：从文件读取（避免引号、特殊字符问题）
 ./ewa-api.sh updateConfItem "/business/ai/ai_chat.xml" "ITEM.NAME" "@/tmp/item_updated.xml"
-
-# 或直接传 XML（仅适用于简单内容）
-./ewa-api.sh updateConfItem "/business/ai/ai_chat.xml" "ITEM.NAME" "<xml>...</xml>"
 ```
 
 `updateConfItem` 内部使用 POST body 提交，自动处理 URL 编码。`@file` 方式通过环境变量传递文件路径，避免 shell 引号嵌套问题。
 
 **成功响应**：`{"MSG":"Item updated successfully","RST":true,...}`
 
+### 批量更新整个配置文件的所有模板
+
+当需要修改整个 XML 文件中所有模板的 SQL 语法时，逐个 getConfItem → modify → updateConfItem：
+
+```bash
+XMLNAME="/business/orgniziation/admin.xml"
+for ITEM in "TPL_A" "TPL_B" "TPL_C"; do
+  # Fetch（jq 正确解码 unicode）
+  ./ewa-api.sh getConfItem "$XMLNAME" "$ITEM" xml 2>/dev/null \
+    | sed 's/\x1b\[[0-9;]*m//g' | sed -n '/^{/,/^}/p' \
+    | jq -r '.XML' > /tmp/tpl.xml
+
+  # Modify
+  sed -e 's/getdate()/CURRENT_TIMESTAMP/g' \
+      -e 's/ISNULL(/COALESCE(/g' -e 's/isnull(/COALESCE(/g' \
+      /tmp/tpl.xml > /tmp/tpl_pg.xml
+
+  # Push
+  ./ewa-api.sh updateConfItem "$XMLNAME" "$ITEM" "@/tmp/tpl_pg.xml"
+done
+```
+
+### 修复 unicode 转义损坏
+
+如果之前用 sed 错误提取 JSON 导致中文前出现 `\`（如 `\获取` 而非 `获取`），用 perl 去除中文前的残留反斜杠：
+
+```bash
+./ewa-api.sh getConfItem "$XMLNAME" "$ITEM" xml 2>/dev/null \
+  | sed 's/\x1b\[[0-9;]*m//g' | sed -n '/^{/,/^}/p' \
+  | jq -r '.XML' \
+  | perl -CSD -pe 's/\\([\p{Han}])/$1/g' > /tmp/tpl_fixed.xml
+```
+
 **常见陷阱**：
 
 | 陷阱 | 解决 |
 |------|------|
-| ANSI 颜色代码导致 JSON 解析失败 | `2>/dev/null` 或 `raw.index(b'{')` 跳过 |
-| XML 在 `d['XML']` 不是 `d['DATA']` | 使用 `d['XML']` |
-| JSON 中 `/` 转义为 `\/` | `.replace('\\/', '/')` |
+| 用 sed 解码 JSON 导致 unicode 损坏 | 用 `jq -r '.XML'` 提取 |
+| 中文前出现 `\`（如 `\获取`） | `perl -CSD -pe 's/\\([\p{Han}])/$1/g'` |
+| ANSI 颜色代码导致 JSON 解析失败 | `sed 's/\x1b\[[0-9;]*m//g'` |
+| XML 在 `.XML` 不是 `.DATA` | 使用 `jq -r '.XML'` |
 | Token 过期（401） | 重新 `./ewa-api.sh login` |
-| 缺失 Content-Type | 必须设 `application/x-www-form-urlencoded` |
+| updateConfItem 要求单 `<EasyWebTemplate>` | getConfItem 返回的已是单个模板 |
 
 ## 补充表字段规则
 
@@ -210,14 +234,16 @@ PYEOF
 
 ```
 getTable → 获取表全部字段
-getConfItem → 获取 LF.M / F.NM 当前字段
+getConfItem + jq -r '.XML' → 获取 LF.M / F.NM 当前 XML
 对比差异 → 找出缺失字段
-getConfItem → 读取 F.NM 的 OnNew SQL (INSERT)
+getConfItem + jq -r '.XML' → 读取 F.NM 的 OnNew SQL (INSERT)
 根据 INSERT 判断自动赋值字段 → 排除无需表单填写的字段
 补 XItem → 构建缺失字段的 XML 节点
 F.NM 同步修改 INSERT / UPDATE SQL
-updateConfItem → 推送
+updateConfItem @file → 推送
 ```
+
+> **注意**：所有 `getConfItem` 输出必须经 `jq -r '.XML'` 提取，不要用 sed 手动解码 JSON。
 
 ### F.NM 表单字段判断规则
 
@@ -235,24 +261,24 @@ updateConfItem → 推送
 
 ### 构建 XItem
 
-从已有字段取模板（`re.search` 提取完整 `<XItem>...</XItem>`），替换关键属性：
+从已有字段取模板（用 sed/perl 提取完整 `<XItem>...</XItem>`），替换关键属性：
 
-```python
-template = match.group(1)  # XItem 内部内容
-new_item = f'<XItem Name="新字段名">{template}</XItem>'  # 必须闭合！
-new_item = re.sub(r'<Set Name="旧名"', '<Set Name="新名"', new_item)
-new_item = re.sub(r'DataField="旧名"', 'DataField="新名"', new_item)
-new_item = re.sub(r'<Set Info="[^"]*" Lang="zhcn"[^>]*>', 
-                  '<Set Info="中文描述" Lang="zhcn" Memo=""/>', new_item)
-new_item = re.sub(r'DataType="String"', 'DataType="目标类型"', new_item)
+```bash
+# 从现有 XML 提取模板并替换属性
+sed -n '/<XItem Name="模板字段">/,/<\/XItem>/p' /tmp/tpl.xml \
+  | sed 's/Name="模板字段"/Name="新字段名"/' \
+  | sed 's/DataField="模板字段"/DataField="新字段名"/' \
+  | sed 's/Info="[^"]*" Lang="zhcn"[^>]*>/Info="中文描述" Lang="zhcn" Memo="\"\/>/' \
+  | sed 's/DataType="String"/DataType="目标类型"/'
 ```
 
 **XItem 排序规则**：`textarea` / `ntext` 类型字段放在所有字段最后、按钮之前，避免大文本框撑开表单布局。
 
-```python
+```bash
 # 插入到 butOk 之前（textarea 自动在最后）
-insert_pos = xml.index('<XItem Name="butOk">')
-xml = xml[:insert_pos] + new_item + '\n' + xml[insert_pos:]
+sed '/<XItem Name="butOk">/i\
+'"$new_item"'
+' /tmp/tpl.xml > /tmp/tpl_updated.xml
 ```
 
 ### 同步修改 F.NM 的 SQL
@@ -265,11 +291,11 @@ xml = xml[:insert_pos] + new_item + '\n' + xml[insert_pos:]
 
 | 陷阱 | 解决 |
 |------|------|
-| XItem 缺少 `</XItem>` 闭合 | 模板是 `(.*?)</XItem>` 不含闭合标签，需手动拼接 |
-| XML 校验失败 | push 前用 `ET.fromstring(xml)` 验证 |
+| XItem 缺少 `</XItem>` 闭合 | sed 范围匹配 `/<XItem>/,/<\/XItem>/p` 包含闭合标签 |
+| XML 校验失败 | push 前用 `xmllint --noout file.xml` 验证 |
 | 表单 Tag 选错 | 短文本用 `text`，长文本用 `textarea`，下拉用 `select` |
 | money 字段未设精度 | Double 类型补 `NumberScale="4"` |
-| `\/` 转义 | API 返回的 XML 中 `/` 被转义为 `\/`，编辑前先 `.replace('\\/', '/')` |
+| JSON unicode 损坏中文 | 用 `jq -r '.XML'` 提取，不要用 sed 手动解码 |
 
 ## 注意事项
 
