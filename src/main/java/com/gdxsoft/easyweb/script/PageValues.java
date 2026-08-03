@@ -184,7 +184,7 @@ public class PageValues {
 			}
 		} else {
 			// 如果pv没有设定类型，根据ewa_conf.xml中定义的数据类型进行设置
-			if (pv.getDataType() == null || pv.getDataType().trim().length() == 0) {
+			if (pv.getDataType() == null || pv.getDataType().trim().length() == 0 || "string".equalsIgnoreCase(pv.getDataType().trim())) {
 				String key = pv.getName().toUpperCase();
 				this.changeToDefinedType(key, pv);
 			}
@@ -212,7 +212,7 @@ public class PageValues {
 			pv.setDataType(paramType);
 			return;
 		}
-		if ("int".equals(paramType)) {
+		if ("int".equalsIgnoreCase(paramType)) {
 			// 测试整型
 			try {
 				int intVal = Integer.parseInt(paramValue);
@@ -221,7 +221,7 @@ public class PageValues {
 			} catch (Exception err) {
 				// 非整形
 			}
-		} else if ("number".equals(paramType)) {
+		} else if ("number".equalsIgnoreCase(paramType)) {
 			// 测试数字
 			try {
 				double douVal = Double.parseDouble(paramValue);
@@ -230,7 +230,7 @@ public class PageValues {
 			} catch (Exception err) {
 				// 非双精度
 			}
-		} else if ("bigint".equals(paramType)) {
+		} else if ("bigint".equalsIgnoreCase(paramType) || "long".equalsIgnoreCase(paramType)) {
 			// 测试长整型
 			try {
 				Long longVal = Long.parseLong(paramValue);
