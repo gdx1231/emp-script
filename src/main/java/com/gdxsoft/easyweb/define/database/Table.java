@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.commons.lang3.Strings;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
@@ -92,18 +91,18 @@ public class Table {
 		if (this.getReplaceMetaDatabaseName() == null || this.getReplaceMetaDatabaseName().trim().length() == 0) {
 			return "";
 		}
-		boolean isPostgreSql = SqlUtils.isPostgreSql(targetDatabaseType);
-		boolean isOracle = SqlUtils.isOracle(targetDatabaseType);
+//		boolean isPostgreSql = SqlUtils.isPostgreSql(targetDatabaseType);
+//		boolean isOracle = SqlUtils.isOracle(targetDatabaseType);
 		boolean isSqlServer = SqlUtils.isSqlServer(targetDatabaseType);
 
 		// PostgreSQL/Oracle: 使用 SchemaName 而非数据库名作为前缀
-		if (isPostgreSql || isOracle) {
-			String schema = this.getSchemaName();
-			if (schema != null && schema.trim().length() > 0) {
-				return schema + ".";
-			}
-			return "";
-		}
+//		if (isPostgreSql || isOracle) {
+//			String schema = this.getSchemaName();
+//			if (schema != null && schema.trim().length() > 0) {
+//				return schema + ".";
+//			}
+//			return "";
+//		}
 
 		StringBuilder sb = new StringBuilder();
 		if (this.fromMetaDatabase()) {

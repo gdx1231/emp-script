@@ -2,12 +2,15 @@ package com.gdxsoft.easyweb.datasource;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.regex.Matcher;
 
 import org.slf4j.Logger;
@@ -30,12 +33,14 @@ import com.gdxsoft.easyweb.utils.types.UInt64;
  * SQL text builder and parameter binder — extracted from DataConnection to
  * reduce the God Class anti-pattern.
  *
- * <p>Owns all SQL-string manipulation (rebuildSql and its 10+ sub-methods),
+ * <p>
+ * Owns all SQL-string manipulation (rebuildSql and its 10+ sub-methods),
  * parameter binding ({@code addSqlParameter}, {@code addStatementParameter}),
  * and the type-conversion helpers they depend on.
  *
- * <p>Holds a back-reference to the owning {@link DataConnection} for
- * operations that require connection state (CreateSplitData, ReverseIds).
+ * <p>
+ * Holds a back-reference to the owning {@link DataConnection} for operations
+ * that require connection state (CreateSplitData, ReverseIds).
  */
 public class DataConnectionSqlBuilder {
 
@@ -50,7 +55,7 @@ public class DataConnectionSqlBuilder {
 	}
 
 	// ═══════════════════════════════════════════════════════════════
-	//  SQL Text Building
+	// SQL Text Building
 	// ═══════════════════════════════════════════════════════════════
 
 	/**
@@ -72,10 +77,8 @@ public class DataConnectionSqlBuilder {
 			if (v1 == null || v1.trim().length() == 0) {
 				throw new Exception("The param (~" + para + ") not exists");
 			}
-			boolean fromTrustedSource = (pv.getPVTag() == PageValueTag.SESSION
-					|| pv.getPVTag() == PageValueTag.SYSTEM
-					|| pv.getPVTag() == PageValueTag.DTTABLE
-					|| pv.getPVTag() == PageValueTag.OTHER
+			boolean fromTrustedSource = (pv.getPVTag() == PageValueTag.SESSION || pv.getPVTag() == PageValueTag.SYSTEM
+					|| pv.getPVTag() == PageValueTag.DTTABLE || pv.getPVTag() == PageValueTag.OTHER
 					|| pv.getPVTag() == PageValueTag.HTML_CONTROL_PARAS);
 			try {
 				String validatedValue = SqlIdentifierValidator.validateTildeParam(para, v1, fromTrustedSource);
@@ -119,7 +122,7 @@ public class DataConnectionSqlBuilder {
 		}
 
 		// 8) @param → random placeholder (preserve @paramName for
-		//    replaceSqlSelectParameters to inline later in SELECT queries)
+		// replaceSqlSelectParameters to inline later in SELECT queries)
 		HashMap<String, String> fieldsMap = new HashMap<String, String>();
 		MListStr paras = Utils.getParameters(sql1, "@");
 		for (int i = 0; i < paras.size(); i++) {
@@ -198,8 +201,8 @@ public class DataConnectionSqlBuilder {
 	}
 
 	/**
-	 * Replace @param with literal values in SELECT queries (avoids full table
-	 * scans on SQL Server).
+	 * Replace @param with literal values in SELECT queries (avoids full table scans
+	 * on SQL Server).
 	 */
 	public String replaceSqlSelectParameters(String sql) {
 		return replaceSqlSelectParameters(sql, owner.getDatabaseType());
@@ -257,7 +260,8 @@ public class DataConnectionSqlBuilder {
 		}
 		String dt = pv.getDataType();
 		dt = dt == null ? "STRING" : dt.toUpperCase().trim();
-		if ("BINARY".equals(dt) || "B[".equals(dt)) {
+		if ("BINARY".equals(dt) || "B[".equals(dt) || "BOOLEAN".equals(dt) || "BOOL".equals(dt)) {
+			// bool类型在不同数据库里表达式不一致
 			return null;
 		}
 		String v1 = pv.getStringValue();
@@ -416,6 +420,16 @@ public class DataConnectionSqlBuilder {
 		} else if (pname.endsWith(".bin")) {
 			pv = rv.getPageValues().getValue(parameterName.substring(0, parameterName.length() - 4));
 			dt = "binary";
+		} else if (pname.endsWith(".uuid")) {
+			pv = rv.getPageValues().getValue(parameterName.substring(0, parameterName.length() - 5));
+			try {
+				UUID uuid = UUID.fromString(pv.getStringValue());
+				dt = "uuid";
+				pv.setValue(uuid);
+				pv.setLength(36);
+			} catch (Exception err) {
+				LOGGER.warn("Convert to UUID error {}->{},{}", pv.getName(), pv.getValue(), err);
+			}
 		}
 		if (pv != null) {
 			pv.setDataType(dt);
@@ -428,7 +442,7 @@ public class DataConnectionSqlBuilder {
 	}
 
 	// ═══════════════════════════════════════════════════════════════
-	//  Parameter Binding
+	// Parameter Binding
 	// ═══════════════════════════════════════════════════════════════
 
 	public void addSqlParameter(MListStr parameters, PreparedStatement pst) throws SQLException {
@@ -475,8 +489,8 @@ public class DataConnectionSqlBuilder {
 				cst.registerOutParameter(index, java.sql.Types.INTEGER);
 			} else if (key1.indexOf("_BIT_") >= 0 || key1.indexOf("_BOOL_") >= 0 || key1.indexOf("_BOOLEAN_") >= 0) {
 				cst.registerOutParameter(index, java.sql.Types.BIT);
-			} else if (key1.indexOf("_NUMBER_") >= 0 || key1.indexOf("_MONEY_") >= 0
-					|| key1.indexOf("_DECIMAL_") >= 0 || key1.indexOf("_NUMERIC_") >= 0) {
+			} else if (key1.indexOf("_NUMBER_") >= 0 || key1.indexOf("_MONEY_") >= 0 || key1.indexOf("_DECIMAL_") >= 0
+					|| key1.indexOf("_NUMERIC_") >= 0) {
 				cst.registerOutParameter(index, java.sql.Types.DECIMAL);
 			} else if (key1.indexOf("_DOUBLE_") >= 0 || key1.indexOf("_FLOAT_") >= 0) {
 				cst.registerOutParameter(index, java.sql.Types.DOUBLE);
@@ -510,7 +524,6 @@ public class DataConnectionSqlBuilder {
 		String dt;
 		if (pv == null) {
 			pv = getParameterByEndWithType(parameterName);
-			dt = pv.getDataType();
 			if (pv.getLength() == -1) {
 				String othVal = rv.getOtherValue(parameterName);
 				if (othVal == null) {
@@ -534,12 +547,20 @@ public class DataConnectionSqlBuilder {
 		dt = dt.toUpperCase().trim();
 
 		if ("STRING".equals(dt) || "JAVA.LANG.STRING".equals(dt)) {
+			if (pv.getValue() == null) {
+				cst.setNull(index, Types.VARCHAR);
+				return;
+			}
 			String v1 = pv.getStringValue();
 			cst.setString(index, v1);
 			debugParam(parameterName, "String", index, v1 == null ? "null" : v1);
 			return;
 		}
 		if ("BINARY".equals(dt) || "[B".equals(dt) || "BYTE[]".equals(dt)) {
+			if (pv.getValue() == null) {
+				cst.setNull(index, Types.BINARY);
+				return;
+			}
 			byte[] b = getParaBinary(pv);
 			cst.setBytes(index, b);
 			debugParam(parameterName, dt + "/byte[]", index, b == null ? "null" : "(" + b.length + ")");
@@ -590,40 +611,89 @@ public class DataConnectionSqlBuilder {
 			return;
 		}
 		if ("BOOLEAN".equals(dt) || "BOOL".equals(dt) || "BOOLEN".equals(dt) || "JAVA.LANG.BOOLEAN".equals(dt)) {
+			if (pv.getValue() == null) {
+				cst.setNull(index, Types.BOOLEAN);
+				return;
+			}
 			boolean v = Utils.cvtBool(pv.getStringValue());
 			cst.setBoolean(index, v);
 			debugParam(parameterName, "Bool", index, String.valueOf(v));
 			return;
 		}
 		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT64".equals(dt) || "UINT64".equals(dt)) {
+			if (pv.getValue() == null) {
+				cst.setNull(index, Types.NUMERIC);
+				return;
+			}
 			UInt64 uint64 = (UInt64) pv.getValue();
 			cst.setBigDecimal(index, new BigDecimal(uint64.bigInteger()));
 			debugParam(parameterName, dt + "/BigDecimal", index, uint64.toString());
 			return;
 		}
 		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT32".equals(dt) || "UINT32".equals(dt)) {
+			if (pv.getValue() == null) {
+				cst.setNull(index, Types.BIGINT);
+				return;
+			}
 			UInt32 uint32 = (UInt32) pv.getValue();
 			cst.setLong(index, uint32.longValue());
 			debugParam(parameterName, dt + "/Long", index, uint32.toString());
 			return;
 		}
 		if ("COM.GDXSOFT.EASYWEB.UTILS.TYPES.UINT16".equals(dt) || "UINT16".equals(dt)) {
+			if (pv.getValue() == null) {
+				cst.setNull(index, Types.INTEGER);
+				return;
+			}
 			UInt16 uint16 = (UInt16) pv.getValue();
 			cst.setInt(index, uint16.intValue());
 			debugParam(parameterName, dt + "/Int", index, uint16.toString());
 			return;
 		}
 		if ("JAVA.MATH.BIGDECIMAL".equals(dt) || "BIGDECIMAL".equals(dt)) {
+			if (pv.getValue() == null) {
+				cst.setNull(index, Types.NUMERIC);
+				return;
+			}
 			BigDecimal bigd = (BigDecimal) pv.getValue();
 			cst.setBigDecimal(index, bigd);
 			debugParam(parameterName, dt, index, bigd.toString());
 			return;
 		}
 		if ("JAVA.MATH.BIGINTEGER".equals(dt) || "BIGINTEGER".equals(dt)) {
+			if (pv.getValue() == null) {
+				cst.setNull(index, Types.NUMERIC);
+				return;
+			}
 			BigInteger bigi = (BigInteger) pv.getValue();
 			cst.setBigDecimal(index, new BigDecimal(bigi));
 			debugParam(parameterName, dt + "/BigDecimal", index, bigi.toString());
 			return;
+		}
+		if ("UUID".equals(dt)) { // 2026-08-03
+			if (pv.getValue() == null) {
+				cst.setNull(index, Types.OTHER);
+				return;
+			}
+			try {
+				UUID uuid = UUID.fromString(pv.getStringValue());
+				if (SqlUtils.isPostgreSql(owner) || SqlUtils.isHsqlDb(owner)) {
+					cst.setObject(index, uuid);
+				} else if (SqlUtils.isMySql(owner) || SqlUtils.isOracle(owner)) {
+					// ORACLE RAW(16)
+					// 1. 将 UUID 转换为 16 字节的数组
+					ByteBuffer buffer = ByteBuffer.allocate(16);
+					buffer.putLong(uuid.getMostSignificantBits());
+					buffer.putLong(uuid.getLeastSignificantBits());
+					byte[] uuidBytes = buffer.array();
+					cst.setBytes(index, uuidBytes);
+				} else {
+					cst.setString(index, pv.getStringValue());
+				}
+				return;
+			} catch (Exception err) {
+				LOGGER.warn("Convert to uuid error {} -> {}, {}", pv.getName(), pv.getStringValue(), err);
+			}
 		}
 		String fallbackVal = pv.getStringValue();
 		cst.setString(index, fallbackVal);
@@ -637,7 +707,7 @@ public class DataConnectionSqlBuilder {
 	}
 
 	// ═══════════════════════════════════════════════════════════════
-	//  Type Conversion Helpers
+	// Type Conversion Helpers
 	// ═══════════════════════════════════════════════════════════════
 
 	public String sqlParameterStringExp(String parameter) {
@@ -645,8 +715,10 @@ public class DataConnectionSqlBuilder {
 	}
 
 	public String sqlParameterStringExp(String parameter, String databaseType) {
-		if (parameter == null) return "NULL";
-		if (parameter.length() == 0) return "''";
+		if (parameter == null)
+			return "NULL";
+		if (parameter.length() == 0)
+			return "''";
 		parameter = parameter.replace("'", "''");
 		if (databaseType != null) {
 			if (SqlUtils.isMySql(databaseType)) {
@@ -679,14 +751,16 @@ public class DataConnectionSqlBuilder {
 	}
 
 	public String getDateTimePara(String s1) {
-		if (s1 == null || s1.trim().length() == 0) return null;
+		if (s1 == null || s1.trim().length() == 0)
+			return null;
 		String s2 = s1.replace("'", "");
 		Timestamp timestamp = getTimestamp(s2);
 		return getDateTimePara(timestamp);
 	}
 
 	public String getDateTimePara(Timestamp dt) {
-		if (dt == null) return null;
+		if (dt == null)
+			return null;
 		String s2 = Utils.getDateTimeString(new Date(dt.getTime()));
 		if ("ORACLE".equalsIgnoreCase(owner.getDatabaseType())) {
 			return "to_date('" + s2 + "','YYYY-MM-DD HH24:MI:SS')";
@@ -716,17 +790,21 @@ public class DataConnectionSqlBuilder {
 		}
 	}
 
-	private byte[] getParaBinary(PageValue pv) { return pv.toBinary(); }
+	private byte[] getParaBinary(PageValue pv) {
+		return pv.toBinary();
+	}
 
 	private Timestamp getParaTimestamp(PageValue pv) {
 		Object t1 = pv.getValue();
-		if (t1 == null) return null;
+		if (t1 == null)
+			return null;
 		Timestamp tt1;
 		if (t1 instanceof java.util.Date) {
 			tt1 = new Timestamp(((java.util.Date) t1).getTime());
 		} else {
 			String v1 = t1.toString();
-			if (v1.trim().length() == 0) return null;
+			if (v1.trim().length() == 0)
+				return null;
 			tt1 = getTimestamp(v1);
 		}
 		if (pv.getName() != null && pv.getName().equalsIgnoreCase("SYS_DATE")) {
@@ -738,16 +816,30 @@ public class DataConnectionSqlBuilder {
 		return tt1;
 	}
 
-	private Integer getParaInteger(PageValue pv) { return pv.toInteger(); }
-	private Long getParaLong(PageValue pv) { return pv.toLong(); }
-	private BigDecimal getParaBigDecimal(PageValue pv) { return pv.toBigDecimal(); }
+	private Integer getParaInteger(PageValue pv) {
+		return pv.toInteger();
+	}
+
+	private Long getParaLong(PageValue pv) {
+		return pv.toLong();
+	}
+
+	private BigDecimal getParaBigDecimal(PageValue pv) {
+		return pv.toBigDecimal();
+	}
 
 	// ═══════════════════════════════════════════════════════════════
-	//  Accessors
+	// Accessors
 	// ═══════════════════════════════════════════════════════════════
 
-	public EwaSqlFunctions getEwaSqlFunctions() { return ewaSqlFunctions; }
-	public CreateSplitData getCreateSplitData() { return createSplitData; }
+	public EwaSqlFunctions getEwaSqlFunctions() {
+		return ewaSqlFunctions;
+	}
+
+	public CreateSplitData getCreateSplitData() {
+		return createSplitData;
+	}
+
 	public void clearCreateSplitData() {
 		if (createSplitData != null) {
 			createSplitData.clearEwaSplitTempData();
