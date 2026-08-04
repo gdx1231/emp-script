@@ -114,10 +114,11 @@ tb.getRows();           // 行集合
 // 获取单元格数据
 tb.getCell(rowIndex, colIndex);      // 按行列索引
 tb.getCell(rowIndex, "columnName");  // 按列名
-tb.getCell(row, col).toString();     // 转字符串
-tb.getCell(row, col).toInt();        // 转整数
-tb.getCell(row, col).toDouble();     // 转浮点数
-tb.getCell(row, col).toTime();       // 转日期
+tb.getCell(rowIndex, col).toString();  // 转字符串
+tb.getCell(rowIndex, col).toInt();     // 转整数
+tb.getCell(rowIndex, col).toDouble();  // 转浮点数
+tb.getCell(rowIndex, col).toTime();    // long（时间戳毫秒）
+tb.getCell(rowIndex, col).toDate();    // java.util.Date
 
 // 数据导出
 tb.toJson();            // 导出 JSON
@@ -430,19 +431,147 @@ DTTable tb = DTTable.getJdbcTable(sql, rv);
 // 参数自动替换为 PreparedStatement 的?占位符
 ```
 
-### 6.2 参数类型映射
+### 6.2 参数类型后缀（`getParameterByEndWithType`）
 
-| Java 类型 | SQL 参数类型 |
-|----------|------------|
-| String | VARCHAR |
-| int/Integer | INTEGER |
-| long/Long | BIGINT |
-| double/Double | DOUBLE |
-| BigDecimal | DECIMAL |
-| Date/Timestamp | TIMESTAMP |
-| byte[] | BLOB |
+SQL 中的参数可通过 `.类型后缀` 显式指定绑定类型，框架在解析 `@param.xxx` 时自动剥离后缀、取对应值并按指定类型绑定 PreparedStatement。
 
-### 6.3 特殊字符处理
+| 后缀 | 示例 | 绑定类型 | PreparedStatement 方法 |
+|------|------|---------|----------------------|
+| `.int` | `@USER_ID.int` | INTEGER | `setInt()` |
+| `.bigint` | `@ORDER_ID.bigint` | BIGINT | `setLong()` |
+| `.long` | `@ORDER_ID.long` | BIGINT（`.bigint` 别名） | `setLong()` |
+| `.double` | `@AMOUNT.double` | DOUBLE | `setBigDecimal()` |
+| `.number` | `@PRICE.number` | NUMBER | `setBigDecimal()` |
+| `.date` | `@CREATE_DATE.date` | DATE/TIMESTAMP | `setTimestamp()` |
+| `.binary` | `@DATA.binary` | BINARY | `setBytes()` |
+| `.bin` | `@DATA.bin` | BINARY（`.binary` 别名） | `setBytes()` |
+| `.uuid` | `@OBJ_ID.uuid` | UUID | PostgreSQL/HSQLDB: `setObject(UUID)`；MySQL/Oracle: `setBytes(16字节)`；其他: `setString()` |
+| `.HASH` | `@FILTER.HASH` | INTEGER（哈希值） | `setInt()` |
+
+**使用场景**：当参数值来自 URL/表单（始终为 String），但需要按特定类型绑定时：
+
+```sql
+-- @PAGE_SIZE 来自 URL，值为字符串 "20"，加 .int 后按 INTEGER 绑定
+SELECT * FROM users LIMIT @PAGE_SIZE.int
+
+-- @AMOUNT 来自表单，加 .double 后按 BigDecimal 绑定
+UPDATE products SET price = @AMOUNT.double WHERE id = @ID
+
+-- @OBJ_ID 为 UUID 字符串，加 .uuid 后按 UUID 类型绑定（PostgreSQL 原生 UUID）
+SELECT * FROM objects WHERE obj_id = @OBJ_ID.uuid
+```
+
+**解析规则**（`DataConnectionSqlBuilder.getParameterByEndWithType`）：
+1. 参数名转小写后检查是否以 `.int` / `.bigint` / `.long` / `.date` / `.number` / `.double` / `.binary` / `.bin` / `.uuid` 结尾
+2. 剥离后缀（如 `USER_ID.int` → `USER_ID`），从 RequestValue 中取原始值
+3. 设置 `PageValue.dataType` 为对应类型，后续 `addStatementParameter` 按此类型绑定
+
+> **Java 端显式指定类型 → SQL 中不需要后缀**
+>
+> `RequestValue.addOrUpdateValue(key, val, dataType, maxLength)` 会在 `PageValue` 上设置 `dataType`，`addStatementParameter` 直接使用该类型绑定，SQL 中无需加 `.xxx` 后缀：
+>
+> ```java
+> // Java 端已指定 dataType="long"，SQL 中写 @ID 即可，不需要 @ID.long
+> rv.addOrUpdateValue("id", 123, "long", 100);
+>
+> // Java 端已指定 dataType="date"，SQL 中写 @CREATE_DATE 即可，不需要 @CREATE_DATE.date
+> rv.addOrUpdateValue("create_date", new Date(), "date", 100);
+> ```
+>
+> **何时需要 `.xxx` 后缀**：参数值来自 URL/表单（始终为 String），且 Java 端未通过 `addOrUpdateValue(key, val, dataType, length)` 显式指定类型时，框架无法自动推断目标绑定类型，此时必须在 SQL 中加后缀。
+
+> **强类型数据库（PostgreSQL / Oracle / HSQLDB）必须使用类型后缀**
+>
+> MySQL / SQL Server 属于弱类型数据库，`setString()` 传入 `"123"` 到 `INTEGER` 列时会自动做隐式类型转换，不会报错。
+> 但 **PostgreSQL / Oracle / HSQLDB** 是强类型数据库，JDBC 驱动严格按 `PreparedStatement` 的绑定类型匹配列类型，类型不一致直接报错：
+>
+> | 场景 | MySQL / SQL Server | PostgreSQL / Oracle |
+> |------|-------------------|---------------------|
+> | `setString("123")` → `INTEGER` 列 | ✅ 隐式转换 | ❌ `ERROR: column is of type integer but expression is of type character` |
+> | `setString("550e8400-...")` → `UUID` 列 | ✅ 隐式转换 | ❌ `ERROR: column is of type uuid but expression is of type character` |
+> | `setString("2024-01-01")` → `TIMESTAMP` 列 | ✅ 隐式转换 | ❌ `ERROR: column is of type timestamp but expression is of type character` |
+> | `setString("1.5")` → `NUMERIC` 列 | ✅ 隐式转换 | ❌ `ERROR: column is of type numeric but expression is of type character` |
+>
+> **结论**：编写需要跨数据库兼容的 SQL 时，对非 String 类型的参数**始终加上类型后缀**：
+>
+> ```sql
+> -- ❌ 在 PG 上报错（@ID 以 String 绑定，但 user_id 是 integer 列）
+> SELECT * FROM users WHERE user_id = @ID
+>
+> -- ✅ 所有数据库兼容
+> SELECT * FROM users WHERE user_id = @ID.int
+>
+> -- ❌ PG 上 UUID 列报错
+> SELECT * FROM objects WHERE obj_id = @OBJ_ID
+>
+> -- ✅ 所有数据库兼容
+> SELECT * FROM objects WHERE obj_id = @OBJ_ID.uuid
+> ```
+
+### 6.3 运行时类型绑定（`addStatementParameter`）
+
+当参数不带类型后缀时，框架根据 `PageValue` 中值的 Java 类型自动选择绑定方式：
+
+| Java 类型 | SQL 类型 | PreparedStatement 方法 |
+|----------|---------|----------------------|
+| `String` | VARCHAR | `setString()` |
+| `Integer` / `int` | INTEGER | `setInt()` |
+| `Long` / `long` | BIGINT | `setLong()` |
+| `Double` / `double` | DOUBLE | `setBigDecimal()` |
+| `Number` | DOUBLE | `setBigDecimal()` |
+| `Boolean` / `boolean` | BOOLEAN | `setBoolean()` |
+| `java.util.Date` / `java.sql.Date` | TIMESTAMP | `setTimestamp()` |
+| `byte[]` | BINARY | `setBytes()` |
+| `BigDecimal` | NUMERIC | `setBigDecimal()` |
+| `BigInteger` | NUMERIC | `setBigDecimal(new BigDecimal(bigInteger))` |
+| `UInt64` | NUMERIC | `setBigDecimal()` |
+| `UInt32` | BIGINT | `setLong()` |
+| `UInt16` | INTEGER | `setInt()` |
+| `UUID` | OTHER / BINARY / VARCHAR | 按数据库类型自动选择（见上表） |
+| 其他 | VARCHAR | `setString()`（兜底） |
+
+### 6.4 `_SPLIT` 参数 — 逗号分隔列表展开
+
+参数名包含 `_SPLIT` 时，框架自动将逗号分隔的值展开为 SQL 内联列表（用于 `IN()` 子句）：
+
+```sql
+-- 如果 @CITY_SPLIT = "1,2,3"
+-- 框架展开为: WHERE city_id IN (1, 2, 3)
+WHERE city_id IN (@CITY_SPLIT)
+
+-- 如果 @IDS_SPLIT = "'a','b','c'"
+-- 框架展开为: WHERE id IN ('a', 'b', 'c')
+WHERE id IN (@IDS_SPLIT)
+```
+
+展开逻辑在 `DataConnectionSqlBuilder` 中：按 `,` 分割值，每个元素经 `sqlParameterStringExp` 处理后用 `, ` 拼接替换原参数位置。
+
+### 6.5 存储过程 OUT 参数类型命名
+
+存储过程的 OUT/OUTPUT 参数通过名称中的类型标记注册 JDBC 类型：
+
+| 名称包含 | 注册类型 |
+|----------|---------|
+| `_BIGINT_` / `_LONG_` | `Types.BIGINT` |
+| `_TINYINT_` | `Types.TINYINT` |
+| `_SMALLINT_` / `_SHORT_` | `Types.SMALLINT` |
+| `_INT_` | `Types.INTEGER` |
+| `_BIT_` / `_BOOL_` / `_BOOLEAN_` | `Types.BIT` |
+| `_NUMBER_` / `_MONEY_` / `_DECIMAL_` / `_NUMERIC_` | `Types.DECIMAL` |
+| `_DOUBLE_` / `_FLOAT_` | `Types.DOUBLE` |
+| `_IMAGE_` / `_BLOB_` | `Types.BLOB` |
+| `_TEXT_` / `_CLOB_` | `Types.CLOB` |
+| `_BINARY_` / `_BYTE_` | `Types.VARBINARY` |
+| `_DATE_` / `_DATETIME_` / `_TIMESTAMP_` | `Types.TIMESTAMP` |
+| `_TIME_` | `Types.TIME` |
+| 其他（默认） | `Types.VARCHAR` |
+
+```sql
+-- OUT 参数示例：名称中包含 _INT_ 和 _BIGINT_
+EXEC PR_GET_STATS @user_id, @count_INT_OUT OUTPUT, @total_BIGINT_OUT OUTPUT
+```
+
+### 6.6 特殊字符处理
 
 ```java
 // 日期格式自动转换
