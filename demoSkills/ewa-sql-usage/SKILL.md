@@ -106,7 +106,7 @@ JSONArray arr = tb.toJSONArray();
 
 | 特性 | 说明 |
 |------|------|
-| 密码列自动脱敏 | 列名包含 `PASSWORD` 或以 `_PWD` / `_PASS` 结尾 → 输出 `"******"` |
+| 密码列自动脱敏 | 列名包含 `PASSWORD` 或以 `_PWD` / `_PASS` / `_KEY` 结尾 → 输出 `"******"` |
 | Long → String | 避免 JavaScript 精度丢失（`Number.MAX_SAFE_INTEGER` 限制） |
 | byte[] 二进制 | 通过 `JsonBinaryHandle` 转为文件 URL（含图片时最多返回 50 行） |
 | CLOB | 转为 String |
@@ -126,12 +126,80 @@ JSONObject lower = tb.getRow(0).toJson("LOWER");  // {"id":1, "name":"Alice"}
 
 > **注意**：`DTRow.toJson()` **不做密码脱敏**（与 `toJSONArray()` 不同）。如需脱敏，使用 `toJSONArray()` 或手动处理。
 
-#### `DTTable.toJson(rv)` — 含分页信息的 JSON 字符串
+#### `DTTable.toJson(rv)` — 返回 JSON 数组字符串
 
 ```java
 String json = tb.toJson(rv);
-// {"ROWS":[...], "PageSplit":{"PageCount":10, "RecordCount":200, ...}}
+// [{"id":1, "name":"Alice"},{"id":2, "name":"Bob"}]
 ```
+
+**行为特性**：
+
+| 特性 | 说明 |
+|------|------|
+| 返回格式 | **纯 JSON 数组字符串** `[...]`，无分页信息 |
+| 字段名大小写 | 由参数 `EWA_JSON_FIELD_CASE`（upper / lower）控制；不设置保持原样 |
+| 密码列脱敏 | 列名包含 `PASSWORD` 或以 `_PWD` / `_PASS` / `_KEY` 结尾 → 输出 `"******"` |
+| null 值 | 输出 `null`（无引号） |
+| 值转义 | 值经 `Utils.textToJscript` 转义后以字符串形式输出 |
+| 二进制 | `rv.getContextPath()` 作为二进制处理内容路径 |
+| 行数上限 | 含图片最多 50 条；其他最多 50000 条 |
+
+> **注意**：`toJson(rv)` 的参数 `rv` 用于读取 `EWA_JSON_FIELD_CASE` 字段大小写配置和二进制内容路径，**不包含分页信息**。如需分页信息，使用 `PageSplit` 单独获取。
+
+#### `DTTable.toKVJSONObject()` — 转 KV 键值对 JSONObject
+
+```java
+// 按列名
+JSONObject kv = tb.toKVJSONObject("code", "name");
+// {"A001":"Alice", "A002":"Bob"}
+
+// 按列索引
+JSONObject kv2 = tb.toKVJSONObject(0, 1);
+
+// 表数据
+// code | name  | password
+// A001 | Alice | pwd123
+// 结果 → {"A001":"Alice"}
+```
+
+**行为特性**：列不存在返回 `null`；value 字段为密码列（`PASSWORD` / `_PWD` / `_PASS` / `_KEY`）时脱敏为 `"******"`；value 经 `getCellValueByJson` 转换（Long→String、CLOB→String 等）。
+
+#### `DTTable.toJSONObjectGroup()` — 按字段分组
+
+```java
+JSONObject groups = tb.toJSONObjectGroup("dept_id");
+// {"D001":[{"id":1,"name":"Alice"},{"id":2,"name":"Bob"}],
+//  "D002":[{"id":3,"name":"Carol"}]}
+```
+
+**行为特性**：
+
+| 特性 | 说明 |
+|------|------|
+| 分组键 | 分组字段值作为 key，分组内每行转为 JSONObject 组成 JSONArray |
+| 分组字段移除 | 每行的 JSON 中自动移除分组字段本身 |
+| 空值分组 | 分组字段为 null/空白时归入 `"NULL"` 组 |
+| 字段不存在 | 返回空 JSONObject，并输出 warn 日志 |
+
+#### `DTTable.toCSV()` — 转 CSV 字符串
+
+```java
+String csv = tb.toCSV();
+// code,name,password\r\n
+// A001,Alice,******\r\n
+// A002,Bob,******\r\n
+```
+
+**行为特性**：
+
+| 特性 | 说明 |
+|------|------|
+| 首行标题 | 列名作为标题行 |
+| CSV 转义 | 字段含逗号/换行/双引号时用双引号包围，内部 `"` → `""` |
+| 密码列脱敏 | `PASSWORD` / `_PWD` / `_PASS` / `_KEY` 结尾列输出 `"******"` |
+| null 处理 | null 输出空字符串；空字段输出 `""` |
+| 行分隔符 | `\r\n` |
 
 ---
 

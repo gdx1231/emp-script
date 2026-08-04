@@ -790,7 +790,8 @@ public class DTTable implements Serializable {
 			return false;
 		}
 		String name = passwordColumn.trim().toUpperCase();
-		if (name.indexOf("PASSWORD") >= 0 || name.endsWith("_PWD") || name.endsWith("_PASS")) {
+		if (name.indexOf("PASSWORD") >= 0 || name.endsWith("_PWD") || name.endsWith("_PASS")
+				|| name.endsWith("_KEY")) {
 			return true;
 		}
 		return false;
