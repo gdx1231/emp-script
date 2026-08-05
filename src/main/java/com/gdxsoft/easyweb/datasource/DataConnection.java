@@ -1236,7 +1236,7 @@ public class DataConnection {
 
 			return autoKey;
 		} catch (Exception err) {
-			LOGGER.error(err.getLocalizedMessage());
+			LOGGER.error("SQL: {}, {}", sql1, err);
 			this.writeDebug(this, "ERR", err.getMessage());
 			setError(err, sql1);
 			return -1;
