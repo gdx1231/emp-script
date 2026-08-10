@@ -955,6 +955,71 @@ public class DTTable implements Serializable {
 	}
 
 	/**
+	 * 返回指定字段的 json
+	 * 
+	 * @param fields 用字符串拼接的字段，用","分割，例如 <code>id, name, age</code>
+	 * @return
+	 * @throws JSONException
+	 */
+	public JSONArray toJSONArray(String fields) throws JSONException {
+		String[] arrFields = fields.split(",");
+		for (int i = 0; i < arrFields.length; i++) {
+			arrFields[i] = arrFields[i].trim();
+		}
+		return this.toJSONArray(arrFields);
+	}
+
+	/**
+	 * 输出指定字段的 json
+	 * 
+	 * @param fields 字段列表
+	 * @return
+	 * @throws JSONException
+	 */
+	public JSONArray toJSONArray(String... fields) throws JSONException {
+		JSONArray json = new JSONArray();
+		String contentpath = "";
+		Map<String, String> mapFields = new HashMap<String, String>();
+		for (int i = 0; i < fields.length; i++) {
+			mapFields.put(fields[i].toUpperCase(), fields[i]);
+		}
+		Map<String, Boolean> map = new HashMap<String, Boolean>();
+
+		for (int m = 0; m < getCount(); m++) {
+			DTRow r = getRow(m);
+			JSONObject obj = new JSONObject();
+			for (int i = 0; i < getColumns().getCount(); i++) {
+				String name = getColumns().getColumn(i).getName();
+				if (!mapFields.containsKey(name.toUpperCase())) {
+					continue;
+				}
+				String jsonName = mapFields.get(name.toUpperCase());
+				if (!map.containsKey(name)) {
+					map.put(name, this.checkPasswordColumn(name));
+				}
+
+				boolean isPwd = map.get(name);
+
+				DTCell cell = r.getCell(i);
+				// 隐含密码
+				Object v = isPwd ? "******" : getCellValueByJson(cell, contentpath);
+
+				obj.put(jsonName, v);
+
+			}
+			json.put(obj);
+
+			if (this._IshaveImage && m > 50) { // 含有图片的最多返回50条记录
+				break;
+			}
+			if (m > 50000) { // 最多50000条数据
+				break;
+			}
+		}
+		return json;
+	}
+
+	/**
 	 * 返回JSON对象 含有图片的最多返回50条记录，其它最多50000条数据
 	 * 
 	 * @return the JSON array
