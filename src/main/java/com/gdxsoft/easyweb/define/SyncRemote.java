@@ -2,10 +2,14 @@ package com.gdxsoft.easyweb.define;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -179,7 +183,8 @@ public class SyncRemote {
 	}
 
 	/**
-	 * 本地和远程执行，根据filter获取目录下的文件的JSON
+	 * 本地和远程执行，根据filter获取目录下的文件的JSON。
+	 * 遍历目录为单线程，新增/变化文件的 MD5 计算在遍历结束后多线程并行执行
 	 *
 	 * @param path
 	 * @throws JSONException
@@ -188,7 +193,20 @@ public class SyncRemote {
 		if (path == null) {
 			path = this._Root;
 		}
+		// 需要重新计算MD5的文件 {展示用File, 真实File, hash}，遍历阶段只收集
+		List<Object[]> pendingMd5 = new ArrayList<Object[]>();
+		scanDir(path, pendingMd5);
+		fillMd5(pendingMd5);
+	}
 
+	/**
+	 * 递归遍历目录，命中历史缓存的直接放入JSON，未命中的收集到 pendingMd5
+	 *
+	 * @param path
+	 * @param pendingMd5 待计算MD5的文件列表 {展示用File, 真实File, hash}
+	 * @throws JSONException
+	 */
+	private void scanDir(String path, List<Object[]> pendingMd5) throws JSONException {
 		File f1 = new File(path);
 		String name = f1.getName().toUpperCase();
 		if (name.indexOf("_") == 0 || name.indexOf("TMP_") == 0 || name.indexOf("TEMP_") == 0
@@ -211,16 +229,17 @@ public class SyncRemote {
 				LOGGER.info("NOT EXISTS :" + file.getAbsolutePath());
 				continue;
 			}
+			String realName = realFile.getName();
 			if (realFile.isDirectory()) {
-				if (realFile.getName().equals("node_modules")) {
+				if (realName.equals("node_modules")) {
 					// 取消 node 模块 2020-04-14
 					continue;
 				}
 				dirs.add(file);
 				continue;
 			}
-			if (realFile.getName().startsWith("application.") // SpringBoot
-					|| realFile.getName().equals("ewa_conf.xml") // ewa
+			if (realName.startsWith("application.") // SpringBoot
+					|| realName.equals("ewa_conf.xml") // ewa
 			) {
 				LOGGER.info("Skip file: " + realFile.getAbsolutePath());
 				continue;
@@ -230,21 +249,21 @@ public class SyncRemote {
 				continue;
 			}
 
-			if (realFile.length() > limitedMaxSize) {
+			// length/lastModified 都是本地系统调用，缓存起来避免重复 stat
+			long len = realFile.length();
+			if (len > limitedMaxSize) {
 				LOGGER.info("Skip BIG file: " + realFile.getAbsolutePath());
 				continue;
 			}
 
-			String hash = getFileCacheHash(realFile);
+			String hash = getFileCacheHash(realFile, len, realFile.lastModified());
 			// 和历史记录进行比对
 			JSONObject sameObj = checkSame(file, hash);
 			if (sameObj != null) {
 				addToJson(file, sameObj);
 			} else {
-				// 生成新的md5
-				String md5source = UFile.createMd5(realFile);
-				addToJson(file, md5source, hash);
-				LOGGER.info(md5source + ":" + realFile.getAbsolutePath());
+				// 收集起来，遍历结束后并行计算md5
+				pendingMd5.add(new Object[] { file, realFile, hash });
 			}
 			// System.out.println(ff[i].getAbsolutePath());
 		}
@@ -252,8 +271,64 @@ public class SyncRemote {
 		for (int i = 0; i < dirs.size(); i++) {
 			// 真实的文件（非ln -s)
 			File file = dirs.get(i);
-			this.getDir(file.getAbsolutePath());
+			this.scanDir(file.getAbsolutePath(), pendingMd5);
 		}
+	}
+
+	/**
+	 * 多线程并行计算文件的MD5并写入JSON
+	 *
+	 * @param pendingMd5 待计算MD5的文件列表 {展示用File, 真实File, hash}
+	 */
+	private void fillMd5(List<Object[]> pendingMd5) {
+		if (pendingMd5.isEmpty()) {
+			return;
+		}
+		int poolSize = Math.min(pendingMd5.size(), Runtime.getRuntime().availableProcessors());
+		if (poolSize <= 1) {
+			// 只有少量文件，直接串行计算
+			for (Object[] item : pendingMd5) {
+				fillMd5One(item);
+			}
+			return;
+		}
+		ExecutorService pool = Executors.newFixedThreadPool(poolSize);
+		try {
+			List<Callable<Void>> tasks = new ArrayList<Callable<Void>>(pendingMd5.size());
+			for (Object[] item : pendingMd5) {
+				tasks.add(() -> {
+					fillMd5One(item);
+					return null;
+				});
+			}
+			// invokeAll 会等待全部任务完成
+			pool.invokeAll(tasks);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			LOGGER.error("fillMd5 interrupted: " + e.getMessage());
+		} finally {
+			pool.shutdown();
+		}
+	}
+
+	/**
+	 * 计算单个文件的MD5并写入JSON（线程安全）
+	 *
+	 * @param item {展示用File, 真实File, hash}
+	 */
+	private void fillMd5One(Object[] item) {
+		File file = (File) item[0];
+		File realFile = (File) item[1];
+		String hash = (String) item[2];
+		String md5source = UFile.createMd5(realFile);
+		try {
+			synchronized (this._Json) {
+				addToJson(file, md5source, hash);
+			}
+		} catch (JSONException e) {
+			LOGGER.error(e.getMessage());
+		}
+		LOGGER.info(md5source + ":" + realFile.getAbsolutePath());
 	}
 
 	/**
@@ -382,10 +457,12 @@ public class SyncRemote {
 	 * 获取文件表达式的hash值 路径+长度+文件修改日期
 	 *
 	 * @param f
+	 * @param len          文件长度（调用方已获取，避免重复 stat）
+	 * @param lastModified 文件修改日期（同上）
 	 * @return
 	 */
-	private String getFileCacheHash(File f) {
-		String txt = f.getAbsolutePath() + "_" + f.length() + "_" + f.lastModified();
+	private String getFileCacheHash(File f, long len, long lastModified) {
+		String txt = f.getAbsolutePath() + "_" + len + "_" + lastModified;
 		return txt.hashCode() + "";
 	}
 
@@ -717,22 +794,15 @@ public class SyncRemote {
 	}
 
 	private File getRealFile(File from) {
-
-		File pfile;
-		int inc = 0;
 		try {
-			pfile = from.getCanonicalFile();
-			while (!pfile.getAbsolutePath().equals(from.getAbsolutePath())) {
-				inc++;
-				if (inc > 10) {
-					return from;
-				}
-				pfile = pfile.getCanonicalFile();
+			// 只有符号链接才需要解析真实路径，直接返回避免每个文件都做昂贵的 canonicalize 系统调用。
+			// （原逻辑在路径包含链接时 while 条件恒真，会循环调用 getCanonicalFile 达 11 次，且结果不变）
+			if (!Files.isSymbolicLink(from.toPath())) {
+				return from;
 			}
-			return pfile;
+			return from.getCanonicalFile();
 		} catch (IOException e) {
 			return from;
 		}
-
 	}
 }
