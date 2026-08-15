@@ -4683,11 +4683,21 @@ function show_fields(key) {
     });
 }
 
+function _setSelectValueCI(id, val) {
+    var sel = $X(id);
+    var v = val.toUpperCase();
+    for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value.toUpperCase() == v) {
+            sel.selectedIndex = i;
+            return;
+        }
+    }
+}
 function setParameters(value, disp, title, sort, where) {
-    $X('ValueField').value = value; //"BAS_TAG";
-    $X('DisplayField').value = disp; //"BAS_TAG_NAME";
-    $X('TitleField').value = title; //"BAS_TAG_NAME_EN";
-    $X('sort').value = sort; // "BAS_TAG_ORD";
+    _setSelectValueCI('ValueField', value);
+    _setSelectValueCI('DisplayField', disp);
+    _setSelectValueCI('TitleField', title);
+    _setSelectValueCI('sort', sort);
     $("#Where").val(where);
     $("#Where")[0].focus();
     $('#ValueField').change();
