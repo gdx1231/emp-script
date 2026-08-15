@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,6 +44,7 @@ import com.gdxsoft.easyweb.acl.IAcl;
  * 主要职责： - 解析请求（包括 multipart 上传） - 根据请求路径和方法查找 ConfRestful - 根据 ConfRestful
  * 执行对应逻辑（上传/下载/图片/数据操作） - 封装统一的 JSON 响应格式（RestfulResult）并设置 HTTP 状态码
  */
+@MultipartConfig(fileSizeThreshold = 10485760, maxFileSize = -1L, maxRequestSize = 2147483648L)
 public class ServletRestful extends HttpServlet {
 	private static Logger LOGGER = LoggerFactory.getLogger(ServletRestful.class);
 	/**

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,6 +36,7 @@ import com.gdxsoft.easyweb.utils.UFormat;
 import com.gdxsoft.easyweb.utils.UPath;
 import com.gdxsoft.easyweb.utils.msnet.MStr;
 
+@MultipartConfig(fileSizeThreshold = 10485760, maxFileSize = -1L, maxRequestSize = 2147483648L)
 public class ServletMain extends HttpServlet {
 	private static Logger LOGGER = LoggerFactory.getLogger(ServletMain.class);
 

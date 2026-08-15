@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
-import org.apache.commons.fileupload.FileItem;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -414,18 +414,19 @@ public class Upload {
 		int m = 0;
 		if (this._UploadItems != null) { // 处理文件上传
 			for (int i = 0; i < this._UploadItems.size(); i++) {
-				FileItem item = (FileItem) this._UploadItems.get(i);
-				if (item.isFormField() && item.getFieldName().equals(_uploadName) || !item.isFormField()) {
-					FileUpload fu = this.takeFileUpload(item, m);
+				Part part = (Part) this._UploadItems.get(i);
+				boolean isFormField = part.getSubmittedFileName() == null;
+				if (isFormField && part.getName().equals(_uploadName) || !isFormField) {
+					FileUpload fu = this.takeFileUpload(part, m);
 					handleSubs(fu);
 					if (!this.checkSizeLimit(fu)) {
-						String msg = "the file size limit exceeded " + item.getName() + " " + fu.getLength() + " > "
+						String msg = "the file size limit exceeded " + part.getSubmittedFileName() + " " + fu.getLength() + " > "
 								+ this.upLimit;
 						LOGGER.error(msg);
 						throw new Exception(msg);
 					}
 					if (!this.checkValidExt(fu)) {
-						String msg = "the upload file ext " + item.getName() + " is invalid";
+						String msg = "the upload file ext " + part.getSubmittedFileName() + " is invalid";
 						LOGGER.error(msg);
 						throw new Exception(msg);
 					}
@@ -968,16 +969,16 @@ public class Upload {
 			fu.setLength(itemobj.toString().length() / 3);
 			fu.setContextType("image/jpeg");
 		} else {
-			FileItem item = (FileItem) itemobj;
+			Part part = (Part) itemobj;
 			try {
-				byte[] buf = item.getName().getBytes("UTF-8");
+				byte[] buf = part.getSubmittedFileName().getBytes("UTF-8");
 				name = new String(buf, "UTF-8");
 				name = name.replace("?", ".");
 			} catch (UnsupportedEncodingException e) {
-				name = item.getName();
+				name = part.getSubmittedFileName();
 			}
-			fu.setLength((int) item.getSize());
-			fu.setContextType(item.getContentType());
+			fu.setLength((int) part.getSize());
+			fu.setContextType(part.getContentType());
 		}
 		// 用户本地文件名称
 		fu.setUserLocalPath(name);
@@ -1035,8 +1036,8 @@ public class Upload {
 			UFile.createBinaryFile(uploadedFile.getAbsolutePath(), buf, true);
 
 		} else {
-			FileItem item = (FileItem) itemobj;
-			item.write(uploadedFile);
+			Part part = (Part) itemobj;
+			part.write(uploadedFile.getAbsolutePath());
 		}
 	}
 

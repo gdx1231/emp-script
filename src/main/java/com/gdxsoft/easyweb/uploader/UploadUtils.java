@@ -1,13 +1,16 @@
 package com.gdxsoft.easyweb.uploader;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -43,27 +46,24 @@ public class UploadUtils {
 		up.setRv(rv);
 		up.init(request);
 
-		DiskFileItemFactory factory = new DiskFileItemFactory();
-		int bufferSize = 1024 * 1024 * 10; // 10M
-		factory.setSizeThreshold(bufferSize);
-		File tempPath = new File(UPath.getPATH_UPLOAD() + "/" + Upload.DEFAULT_UPLOAD_PATH);
-		factory.setRepository(tempPath);
-		ServletFileUpload upload = new ServletFileUpload(factory);
-		long maxSize = 1024L * 1024 * 1024 * 2; // 2G
-		upload.setSizeMax(maxSize);
-
-		List<?> items = upload.parseRequest(request);
-		for (int i = 0; i < items.size(); i++) {
-			FileItem item = (FileItem) items.get(i);
-			if (item.isFormField()) {
-				rv.addValue(item.getFieldName(), item.getString());
+		List<Part> items = new ArrayList<>();
+		for (Part part : request.getParts()) {
+			if (part.getSubmittedFileName() == null) {
+				rv.addValue(part.getName(), readPartValue(part));
 			}
+			items.add(part);
 		}
 
 		up.setUploadItems(items);
 		up.upload();
 
 		return up;
+	}
+
+	public static String readPartValue(Part part) throws IOException {
+		try (InputStream in = part.getInputStream()) {
+			return IOUtils.toString(in, StandardCharsets.UTF_8);
+		}
 	}
 
 	/**

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +18,7 @@ import com.gdxsoft.easyweb.uploader.Upload;
 import com.gdxsoft.easyweb.uploader.UploadUtils;
 import com.gdxsoft.easyweb.utils.UJSon;
 
+@MultipartConfig(fileSizeThreshold = 10485760, maxFileSize = -1L, maxRequestSize = 2147483648L)
 public class ServletUpload extends HttpServlet {
 	private static Logger LOGGER = LoggerFactory.getLogger(ServletUpload.class);
 	/**

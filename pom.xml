@@ -5,7 +5,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.gdxsoft.easyweb</groupId>
-	<artifactId>emp-script</artifactId>
+	<artifactId>emp-script${artifact.suffix}</artifactId>
 	<version>1.1.12</version>
 	<name>Easy Web Application Builder</name>
 	<description>Easy Web Application Builder - a rapid web application development framework that builds systems such as CRM, OA and SCM through XML configuration instead of hard-coded page composition, greatly reducing development cycles and costs</description>
@@ -45,6 +45,12 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<artifact.suffix></artifact.suffix>
+		<utils.artifactId>emp-script-utils</utils.artifactId>
+		<utils.version>1.1.12</utils.version>
+		<utils.scope>compile</utils.scope>
 	</properties>
 	<build>
 		<plugins>
@@ -52,8 +58,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
 				</configuration>
 			</plugin>
 			<!--
@@ -197,8 +203,16 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.gdxsoft.easyweb</groupId>
-			<artifactId>emp-script-utils</artifactId>
-			<version>1.1.12</version>
+			<artifactId>${utils.artifactId}</artifactId>
+			<version>${utils.version}</version>
+			<scope>${utils.scope}</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20250517</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
@@ -221,12 +235,6 @@
 			<version>3.18.0</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>1.6.0</version>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -386,6 +394,63 @@
 		https://oss.sonatype.org/
 	-->
 	<profiles>
+		<profile>
+			<id>jakarta</id>
+			<properties>
+				<maven.compiler.source>17</maven.compiler.source>
+				<maven.compiler.target>17</maven.compiler.target>
+				<artifact.suffix>-jakarta</artifact.suffix>
+				<utils.scope>provided</utils.scope>
+				<maven.test.skip>true</maven.test.skip>
+			</properties>
+			<dependencies>
+				<!-- Jakarta EE 10 servlet/websocket API (provided by Tomcat 10.1) -->
+				<dependency>
+					<groupId>jakarta.servlet</groupId>
+					<artifactId>jakarta.servlet-api</artifactId>
+					<version>6.0.0</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>jakarta.websocket</groupId>
+					<artifactId>jakarta.websocket-api</artifactId>
+					<version>2.1.0</version>
+					<scope>provided</scope>
+				</dependency>
+				<!-- jakarta 版 utils（runtime），编译仍用 javax 版 -->
+				<dependency>
+					<groupId>com.gdxsoft.easyweb</groupId>
+					<artifactId>emp-script-utils-jakarta</artifactId>
+					<version>1.1.12</version>
+					<scope>runtime</scope>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<!-- 字节码级改写 javax.* → jakarta.* -->
+					<plugin>
+						<groupId>org.eclipse.transformer</groupId>
+						<artifactId>transformer-maven-plugin</artifactId>
+						<version>1.0.0</version>
+						<executions>
+							<execution>
+								<id>transform-jakarta</id>
+								<phase>process-classes</phase>
+								<goals>
+									<goal>transform</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<rules>
+								<jakartaDefaults>true</jakartaDefaults>
+								<overwrite>true</overwrite>
+							</rules>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<profile>
 			<id>release</id> <!-- 部署要用到 -->
 			<build>
