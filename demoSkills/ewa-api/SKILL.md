@@ -84,8 +84,21 @@ source ewa-api.conf
 | `getXmlFile` | `<xmlname> [output] [scriptpath]` | 直接读取 XML 文件内容（File/JDBC） |
 | `validateSql` | `<db> <sql>` | 校验 SQL 语法安全性（在事务中执行并回滚，拒绝 DROP/DELETE without WHERE 等危险操作） |
 
-**frametype**: `ListFrame` \| `Frame` \| `Tree`  
+**frametype**: `ListFrame` \| `Frame` \| `Tree`
 **operationtype**: `N`（新增）\| `M`（修改）\| `V`（查看）\| `NM`（新增+修改）
+
+> **⚠ ListFrame 没有 `NM` 模板** — `EwaDefine.xml` 中 `ListFrame` 只定义了 `V`（无按钮）和 `M`（含 5 个按钮：butNew/butModify/butCopy/butDelete/butRestore + OnFrameDelete/OnFrameRestore SQL + 回收站支持）。传 `NM` 时 `getTmpConfig` 返回 null，**按钮和 JS 全部丢失**。
+>
+> 正确用法：**ListFrame 用 `M`**，Frame 用 `NM`。
+>
+> ```bash
+> # ✅ 正确 — ListFrame 带按钮
+> ./ewa-api.sh createBusinessXml aic my_table ListFrame M /path/to/xml MY_TABLE.LF.M
+> # ✅ 正确 — Frame 新增+修改
+> ./ewa-api.sh createBusinessXml aic my_table Frame NM /path/to/xml MY_TABLE.F.NM
+> # ❌ 错误 — ListFrame 没有 NM 模板，不会生成按钮
+> ./ewa-api.sh createBusinessXml aic my_table ListFrame NM /path/to/xml MY_TABLE.LF.NM
+> ```
 
 ## 新增参数
 
@@ -121,7 +134,8 @@ source ewa-api.conf
 ./ewa-api.sh getConfItem "/meta-data/services/ser_main.xml" "SER_MAIN_CAT.T.Modify" json
 ./ewa-api.sh previewBusinessXml work MY_TABLE ListFrame V ewa/m json           # 不指定路径→自动创建
 ./ewa-api.sh previewBusinessXml work MY_TABLE ListFrame V ewa/m json pf       # 指定路径 pf
-./ewa-api.sh createBusinessXml work MY_TABLE Frame NM ewa/m MY_TABLE.F.NM     # 不指定路径→自动创建
+./ewa-api.sh createBusinessXml work MY_TABLE ListFrame M ewa/m MY_TABLE.LF.M  # ListFrame 用 M（带按钮）
+./ewa-api.sh createBusinessXml work MY_TABLE Frame NM ewa/m MY_TABLE.F.NM     # Frame 用 NM（不指定路径→自动创建）
 ./ewa-api.sh createBusinessXml work MY_TABLE Frame NM ewa/m MY_TABLE.F.NM pf  # 指定路径 pf
 ```
 
@@ -296,6 +310,49 @@ sed '/<XItem Name="butOk">/i\
 | 表单 Tag 选错 | 短文本用 `text`，长文本用 `textarea`，下拉用 `select` |
 | money 字段未设精度 | Double 类型补 `NumberScale="4"` |
 | JSON unicode 损坏中文 | 用 `jq -r '.XML'` 提取，不要用 sed 手动解码 |
+| updateConfItem 报"根元素应为 EasyWebTemplate" | **必须提交完整 `<EasyWebTemplate>` 文档**，不是 XItem 片段 |
+| Python 正则替换后文档变小 | 用 `xml.replace(m.group(0), new_item, 1)` 只替换匹配块；**不要** `xml = m.group(1)+...+m.group(3)`（会把整个文档替换成捕获组片段） |
+| call-ewa-api.sh 不处理 `@file` 参数 | 直接 curl：`curl -X POST "$EWA_API_URL" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/x-www-form-urlencoded" --data-urlencode "method=updateConfItem" --data-urlencode "xmlname=..." --data-urlencode "itemname=..." --data-urlencode "xml@/tmp/file.xml"` |
+| JSP tag `<%! %>` 方法调 `getCell` 报 Unhandled exception | 方法签名必须 `throws Exception` |
+
+## DataRef 字典显示（LF.M 列表）
+
+列表列把 code 显示为字典名（span 只读展示）：
+
+```xml
+<DataRef><Set RefKey="BAS_TAG" RefShow="BAS_TAG_NAME"
+    RefSql="SELECT BAS_TAG, BAS_TAG_NAME FROM AIC_META.BAS_TAG WHERE BAS_TAG_GRP = 'MODEL_TYPE'"/></DataRef>
+```
+
+- `RefSql`：字典查询，结果必须含 key 列 + show 列
+- `RefKey`：字典表 key 列（匹配源字段值）
+- `RefShow`：显示列
+- 框架用 `dt.getRowByKey(refKey, v)` 查行 → 显示 `refShow` 值（`ItemFormat.java` / `ItemValues.getRefTable`）
+
+## select 下拉（F.NM 表单）
+
+表单字段从字典生成下拉（`Tag="select"` + List）：
+
+```xml
+<XItem Name="APM_TYPE">
+  <Tag><Set IsLFEdit="0" SpanShowAs="" Tag="select"/></Tag>
+  <List><Set DisplayField="BAS_TAG_NAME" ValueField="BAS_TAG" ListAddBlank="1"
+      Sql="SELECT BAS_TAG, BAS_TAG_NAME FROM AIC_META.BAS_TAG WHERE BAS_TAG_GRP = 'MODEL_TYPE'"/></List>
+</XItem>
+```
+
+- `Sql`：字典查询
+- `DisplayField`：下拉显示列；`ValueField`：提交值列（存 code 不存名）
+- `ListAddBlank="1"`：首行空选项
+- 有 `List.Sql` 时 DataRef 可留空（select 走 List，显示翻译走 DataRef，二选一即可）
+
+## 批量更新 XML 配置项（新增表字段时）
+
+1. `getConfItem` 拉取 LF.M 与 F.NM 的完整 XML（`jq -r '.XML'` 解码）
+2. 用 `make_xitem()` Python 模板生成新字段 XItem（`DataField`/`DataType`/中文 Info）
+3. LF.M：插到 `<XItem Name="butNew">` 前（`SELECT A.*` 自动带出新列）；只读列 Tag 用 `span`
+4. F.NM：插到 `<XItem Name="butOk">` 前（textarea 类最后）；同步改 INSERT/UPDATE SQL
+5. `xmllint` 校验后 curl push，回读 `getConfItem` 验证
 
 ## 注意事项
 

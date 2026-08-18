@@ -9,13 +9,15 @@
 # 获取脚本所在目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# 自动加载配置文件（如果存在）
-if [ -f "${SCRIPT_DIR}/ewa-api.conf" ]; then
-    source "${SCRIPT_DIR}/ewa-api.conf"
-fi
-
 # 实际脚本路径
 REAL_SCRIPT="${SCRIPT_DIR}/shell/call-ewa-api.sh"
+
+# 加载技能目录内的项目配置
+if [[ -f "${SCRIPT_DIR}/ewa-api.conf" ]]; then
+    set -a
+    source "${SCRIPT_DIR}/ewa-api.conf"
+    set +a
+fi
 
 # 检查脚本是否存在
 if [ ! -f "$REAL_SCRIPT" ]; then
