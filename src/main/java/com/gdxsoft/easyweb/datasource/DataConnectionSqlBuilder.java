@@ -6,8 +6,11 @@ import java.nio.ByteBuffer;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
@@ -408,6 +411,9 @@ public class DataConnectionSqlBuilder {
 		} else if (pname.endsWith(".date")) {
 			pv = rv.getPageValues().getValue(parameterName.substring(0, parameterName.length() - 5));
 			dt = "date";
+		} else if (pname.endsWith(".time")) {
+			pv = rv.getPageValues().getValue(parameterName.substring(0, parameterName.length() - 5));
+			dt = "time";
 		} else if (pname.endsWith(".number")) {
 			pv = rv.getPageValues().getValue(parameterName.substring(0, parameterName.length() - 7));
 			dt = "number";
@@ -608,6 +614,17 @@ public class DataConnectionSqlBuilder {
 				cst.setTimestamp(index, t1);
 				debugParam(parameterName, dt + "/Timestamp", index, t1.toString());
 			}
+			return;
+		}
+		if ("TIME".equals(dt) || "JAVA.SQL.TIME".equals(dt) || "JAVA.TIME.LOCALTIME".equals(dt)) {
+			Time time = getParaTime(pv);
+			if (time == null) {
+				cst.setNull(index, Types.TIME);
+				debugParam(parameterName, "Time", index, "null");
+				return;
+			}
+			cst.setTime(index, time);
+			debugParam(parameterName, dt + "/Time", index, time.toString());
 			return;
 		}
 		if ("BOOLEAN".equals(dt) || "BOOL".equals(dt) || "BOOLEN".equals(dt) || "JAVA.LANG.BOOLEAN".equals(dt)) {
@@ -814,6 +831,35 @@ public class DataConnectionSqlBuilder {
 			tt1 = (Timestamp) Utils.getTimeDiffValue(tt1, owner.getTimeDiffMinutes());
 		}
 		return tt1;
+	}
+
+	private Time getParaTime(PageValue pv) {
+		Object value = pv.getValue();
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof Time) {
+			return (Time) value;
+		}
+		if (value instanceof LocalTime) {
+			return Time.valueOf((LocalTime) value);
+		}
+		if (value instanceof Date) {
+			return new Time(((Date) value).getTime());
+		}
+		String timeValue = value.toString().trim();
+		if (timeValue.length() == 0) {
+			return null;
+		}
+		try {
+			return Time.valueOf(LocalTime.parse(timeValue));
+		} catch (DateTimeParseException e) {
+			Timestamp timestamp = getTimestamp(timeValue);
+			if (timestamp == null) {
+				throw new IllegalArgumentException("Invalid time value: " + timeValue, e);
+			}
+			return new Time(timestamp.getTime());
+		}
 	}
 
 	private Integer getParaInteger(PageValue pv) {

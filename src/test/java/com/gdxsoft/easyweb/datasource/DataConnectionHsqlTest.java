@@ -623,4 +623,27 @@ class DataConnectionHsqlTest {
 		assertEquals("alice", c.getRequestValue().getString("NAME"));
 		c.close();
 	}
+
+	@Test
+	@Order(99)
+	void testTimeParameterBinding() {
+		DataConnection setup = createConnNoRv();
+		setup.executeUpdateNoParameter("DROP TABLE dc_time_test IF EXISTS");
+		setup.executeUpdateNoParameter("CREATE TABLE dc_time_test (time_value TIME)");
+		setup.close();
+
+		RequestValue rv = new RequestValue();
+		rv.addValue("TIME_VALUE", "08:09", PageValueTag.FORM);
+		rv.getPageValues().getValue("TIME_VALUE").setDataType("TIME");
+
+		DataConnection c = createConn(rv);
+		assertTrue(c.executeUpdate("INSERT INTO dc_time_test (time_value) VALUES (@TIME_VALUE)"), c.getErrorMsg());
+		c.close();
+
+		DataConnection verify = createConnNoRv();
+		DTTable table = DTTable.getJdbcTable("SELECT time_value FROM dc_time_test", verify);
+		assertEquals("08:09:00", table.getCell(0, 0).toString());
+		verify.executeUpdateNoParameter("DROP TABLE dc_time_test IF EXISTS");
+		verify.close();
+	}
 }
