@@ -12,7 +12,7 @@ if %ERRORLEVEL% neq 0 (
     rmdir /s /q "%STASH%" 2>nul
     exit /b 1
 )
-copy /y target\*.jar "%STASH%\" >nul
+copy /y target\*.jar "%STASH%" >nul
 
 echo.
 echo ===== [2/2] building jakarta (-Pjakarta) =====
@@ -22,7 +22,7 @@ if %ERRORLEVEL% neq 0 (
     rmdir /s /q "%STASH%" 2>nul
     exit /b 1
 )
-copy /y "%STASH%\*.jar" target\ >nul
+copy /y "%STASH%\*.jar" target >nul
 
 rmdir /s /q "%STASH%" 2>nul
 
