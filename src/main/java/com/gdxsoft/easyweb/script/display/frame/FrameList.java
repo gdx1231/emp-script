@@ -76,7 +76,7 @@ public class FrameList extends FrameBase implements IFrame {
 	private HashMap<String, String> _SubBottoms;
 
 	private HashMap<Integer, String> _TdAddCssClass = new HashMap<Integer, String>();
-
+	private HashMap<Integer, String> _TdDesMemoAttr = new HashMap<Integer, String>();
 	private IItem _LastItem;
 
 	/**
@@ -94,7 +94,7 @@ public class FrameList extends FrameBase implements IFrame {
 				UserXItem uxi = super.getHtmlClass().getUserConfig().getUserXItems().getItem(i);
 				String tag = uxi.getSingleValue("Tag");
 				if (tag.equalsIgnoreCase("butFlow")) {
-					hasButFlow = true; //有工作流
+					hasButFlow = true; // 有工作流
 					break;
 				}
 			}
@@ -1069,7 +1069,7 @@ public class FrameList extends FrameBase implements IFrame {
 				continue;
 			}
 
-			String s1 = this.createFrameHeaderCell(uxi, fUnid, userOrder, header);
+			String s1 = this.createFrameHeaderCell(uxi, fUnid, userOrder, header, i);
 			sb.appendLine(s1);
 		}
 		sb.appendLine("</tr>");
@@ -1086,12 +1086,17 @@ public class FrameList extends FrameBase implements IFrame {
 	 * @return
 	 * @throws Exception
 	 */
-	private String createFrameHeaderCell(UserXItem uxi, String fUnid, String userOrder, String header)
+	private String createFrameHeaderCell(UserXItem uxi, String fUnid, String userOrder, String header, int index)
 			throws Exception {
-		String des = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Info",
+		final String des = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Info",
 				super.getHtmlClass().getSysParas().getLang());// 描述
-		String memo = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Memo",
+		final String memo = HtmlUtils.getDescription(uxi.getItem("DescriptionSet"), "Memo",
 				super.getHtmlClass().getSysParas().getLang());// 描述
+		if (super.isAppendDesMemoAttr()) {
+			String desMemoAttr = " ewa_des=\"" + Utils.textToInputValue(des) + "\" ewa_memo=\""
+					+ Utils.textToInputValue(memo) + "\" ";
+			this._TdDesMemoAttr.put(index, desMemoAttr);
+		}
 		if (uxi.getName().equals("*")) {
 			String[] ffs = uxi.getSingleValue("DataItem", "DataField").replace(" ", "").split(",");
 			String[] infos = new String[ffs.length];
@@ -1486,6 +1491,11 @@ public class FrameList extends FrameBase implements IFrame {
 			}
 
 			s2 = s2.replace("class=\"EWA_TD_M\"", st1);
+
+			if (super.isAppendDesMemoAttr()) {
+				String desMemoAttr = this._TdDesMemoAttr.get(i);
+				s2 = s2.replace(">", desMemoAttr + ">");
+			}
 			sb.appendLine(s2);
 		}
 		if (sb.indexOf("@") > 0) { // 替换未替换的值
@@ -1524,7 +1534,7 @@ public class FrameList extends FrameBase implements IFrame {
 		boolean isApiPrompt = AjaxParameters.JSON_AI_PROMPT.equalsIgnoreCase(sysParas.getAjaxCallType());
 
 		DTTable tb = (DTTable) tbs.get(tbs.size() - 1);
-		if(tbs.size()>1  ) {
+		if (tbs.size() > 1) {
 			tb = this.getSplitPageTable();
 		}
 		super.getHtmlClass().getItemValues().setListFrameTable(tb);

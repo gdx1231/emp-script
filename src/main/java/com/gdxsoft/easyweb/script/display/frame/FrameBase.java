@@ -62,8 +62,27 @@ public class FrameBase {
 	// 需要隐藏的字段集合
 	private MTable _HiddenFields = null;
 
+	private Boolean isAppendDesMemoAttr = null;
+
 	public FrameBase getFrameBase() {
 		return this;
+	}
+
+	/**
+	 * 是否 附加 des/memo 在td上
+	 * 
+	 * @return 是否 显示标题栏
+	 */
+	public boolean isAppendDesMemoAttr() {
+		if (isAppendDesMemoAttr != null) {
+			return isAppendDesMemoAttr.booleanValue();
+		}
+
+		RequestValue rv = this._HtmlClass.getSysParas().getRequestValue();
+		String paraIsHidden = rv.s(FrameParameters.EWA_DES_MEMO_ATTR);
+		isAppendDesMemoAttr = paraIsHidden != null;
+
+		return isAppendDesMemoAttr.booleanValue();
 	}
 
 	/**
@@ -730,7 +749,7 @@ public class FrameBase {
 
 		String callMethod = rv.s(FrameParameters.EWA_CALL_METHOD);
 
-		//通过外部设置的ajaxCallUrl参数调用，优先级高于INNER_CALL
+		// 通过外部设置的ajaxCallUrl参数调用，优先级高于INNER_CALL
 		String ajaxCallUrl = this.getHtmlClass().getSysParas().getAjaxCallUrl();
 
 		// INNER_CALL 调用模式，表示为ewaconfigitem或 JSp程序调用
@@ -739,9 +758,9 @@ public class FrameBase {
 			UUrl uu1 = new UUrl(ajaxCallUrl);
 			uu.setPath(uu1.getPath());
 			uu.getParams().forEach((k, v) -> {
-				if(!uu1.getParams().containsKey(k.toUpperCase())) {
+				if (!uu1.getParams().containsKey(k.toUpperCase())) {
 					uu1.add(k, v);
-				}  
+				}
 			});
 			uu = uu1;
 		} else if (FrameParameters.INNER_CALL.equalsIgnoreCase(callMethod)) {
@@ -750,7 +769,7 @@ public class FrameBase {
 
 			uu.add(FrameParameters.XMLNAME, rv.s(FrameParameters.XMLNAME));
 			uu.add(FrameParameters.ITEMNAME, rv.s(FrameParameters.ITEMNAME));
-		}  
+		}
 		// 来自HtmlControl的参数放到 PageValueTag.HTML_CONTROL_PARAS 中
 		// 覆盖queryString
 		this.attachHtmlControlParas(uu, rv);
@@ -1531,7 +1550,7 @@ public class FrameBase {
 		RequestValue rv = new RequestValue();
 		dc.setRequestValue(rv);
 		ItemValues ic = this._HtmlClass.getItemValues();
-		
+
 		String[] lines = originalHtml.split("\n");
 		MStr str = new MStr();
 		str.setNewLine("\n");
@@ -1594,7 +1613,7 @@ public class FrameBase {
 			}
 		}
 	}
-	
+
 	/**
 	 * 根据逻辑判断组合HTML模板, 判断条件是 <b>"<!-- ewa_test -->"</b><br>
 	 * 用于控制单行HTML的显示<br>
@@ -1616,9 +1635,9 @@ public class FrameBase {
 		DataConnection dc = new DataConnection();
 		RequestValue rv = new RequestValue();
 		dc.setRequestValue(rv);
-		
+
 		ItemValues ic = this._HtmlClass.getItemValues();
-		
+
 		String[] lines = originalHtml.split("\n");
 		MStr str = new MStr();
 		str.setNewLine("\n");

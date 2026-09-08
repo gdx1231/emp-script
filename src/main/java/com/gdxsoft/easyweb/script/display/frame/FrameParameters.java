@@ -1,6 +1,11 @@
 package com.gdxsoft.easyweb.script.display.frame;
 
 public class FrameParameters {
+	
+	/**
+	 * 是否附加des/memo属性在 td 上
+	 */
+	public final static String EWA_DES_MEMO_ATTR="EWA_DES_MEMO_ATTR";
 	/**
 	 * 在frame页面创建json_all
 	 */
