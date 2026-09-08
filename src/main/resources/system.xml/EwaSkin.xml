@@ -193,8 +193,8 @@ EWA_App.showFrameAsMobile(EWA.F.FOS["@sys_frame_unid"] );
 			</Style>
 			<Top>
 				<![CDATA[
-<form autocomplete="off" id="f_@SYS_FRAME_UNID" name="f_@SYS_FRAME_UNID" method="post" onsubmit="window.EWA.F.FOS['@SYS_FRAME_UNID'].DoPost(this);return false;">
-<table id="EWA_FRAME_@SYS_FRAME_UNID" class="EWA_TABLE ewa-frame {EWA_MTYPE}" border="0" cellpadding="1" cellspacing="1">
+<form class="{FRAME_PARENT_CSS}" autocomplete="off" id="f_@SYS_FRAME_UNID" name="f_@SYS_FRAME_UNID" method="post" onsubmit="window.EWA.F.FOS['@SYS_FRAME_UNID'].DoPost(this);return false;">
+<table id="EWA_FRAME_@SYS_FRAME_UNID" class="EWA_TABLE ewa-frame {EWA_MTYPE} {FRAME_CSS}" border="0" cellpadding="1" cellspacing="1">
 ]]>
 			</Top>
 			<ItemHeader>
@@ -230,7 +230,7 @@ EWA_App.showFrameAsMobile(EWA.F.FOS["@sys_frame_unid"] );
 			<Top>
 				<![CDATA[
 <!-- ListFrame START -->
-<table border="0" class="ewa-lf-frame EWA_TABLE" id="EWA_LF_@SYS_FRAME_UNID" cellpadding="1" cellspacing="1" width="100%" align="center">
+<table border="0" class="ewa-lf-frame EWA_TABLE {FRAME_CSS}" id="EWA_LF_@SYS_FRAME_UNID" cellpadding="1" cellspacing="1" width="100%" align="center">
 ]]>
 			</Top>
 			<ItemHeader><![CDATA[<td class="EWA_TD_H" !!>{__EWA_ITEM__}</td>]]></ItemHeader>
@@ -364,8 +364,8 @@ EWA_App.showFrameAsMobile(EWA.F.FOS["@sys_frame_unid"] );
 				<![CDATA[]]>
 			</Style>
 			<Top><![CDATA[ 
-<form autocomplete="off" id="f_@SYS_FRAME_UNID" method="post" name="f_@SYS_FRAME_UNID" onsubmit="window.EWA.F.FOS['@SYS_FRAME_UNID'].DoPost(this);return false;">
-<table id="EWA_FRAME_@SYS_FRAME_UNID" class="ewa-frame EWA_TABLE {EWA_MTYPE}" border="0" cellpadding="1" cellspacing="1">
+<form class="{FRAME_PARENT_CSS}" autocomplete="off" id="f_@SYS_FRAME_UNID" method="post" name="f_@SYS_FRAME_UNID" onsubmit="window.EWA.F.FOS['@SYS_FRAME_UNID'].DoPost(this);return false;">
+<table id="EWA_FRAME_@SYS_FRAME_UNID" class="ewa-frame EWA_TABLE {EWA_MTYPE} {FRAME_CSS}" border="0" cellpadding="1" cellspacing="1">
 ]]>
 			</Top>
 			<ItemHeader><![CDATA[
@@ -399,7 +399,7 @@ EWA_App.showFrameAsMobile(EWA.F.FOS["@sys_frame_unid"] );
 			</Style>
 			<Top><![CDATA[
 <!-- ListFrame START -->
-<table border="0" class="ewa-lf-frame EWA_TABLE" id="EWA_LF_@SYS_FRAME_UNID" cellpadding="1" cellspacing="1" align="center">
+<table border="0" class="ewa-lf-frame EWA_TABLE {FRAME_CSS}" id="EWA_LF_@SYS_FRAME_UNID" cellpadding="1" cellspacing="1" align="center">
 ]]>
 			</Top>
 			<ItemHeader>

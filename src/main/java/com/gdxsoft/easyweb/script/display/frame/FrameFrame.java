@@ -273,6 +273,12 @@ public class FrameFrame extends FrameBase implements IFrame {
 
 		if (userHtml.trim().length() == 0) {
 			// 皮肤定义的头部
+			// <form class="{FRAME_PARENT_CSS}" autocomplete="off" id="f_@SYS_FRAME_UNID"
+			// name="f_@SYS_FRAME_UNID" method="post"
+			// onsubmit="window.EWA.F.FOS['@SYS_FRAME_UNID'].DoPost(this);return false;">
+			// <table id="EWA_FRAME_@SYS_FRAME_UNID" class="EWA_TABLE ewa-frame {EWA_MTYPE}
+			// {FRAME_CSS}" border="0" cellpadding="1" cellspacing="1">
+
 			MStr sb = new MStr();
 			sb.append("<!--皮肤定义的头部-->");
 
@@ -288,6 +294,19 @@ public class FrameFrame extends FrameBase implements IFrame {
 				mtypeCss = "";
 			}
 			skinTop = skinTop.replace("{EWA_MTYPE}", mtypeCss);
+			String frameCss = super.getPageItemValue("size", "FrameCss");
+			if (frameCss == null) {
+				frameCss = "";
+			}
+			// table
+			skinTop = skinTop.replace("{FRAME_CSS}", frameCss);
+
+			String frameParentCss = super.getPageItemValue("size", "FrameParentCss");
+			if (frameParentCss == null) {
+				frameParentCss = "";
+			}
+			// form
+			skinTop = skinTop.replace("{FRAME_PARENT_CSS}", frameParentCss);
 
 			sb.append(skinTop);
 
@@ -667,6 +686,7 @@ public class FrameFrame extends FrameBase implements IFrame {
 
 		// Frame单独一行
 		boolean oneCell = false;
+		boolean isNumber = false;
 		// 合并对象
 		if (uxi.testName("DataItem")) {
 			String mt = uxi.getSingleValue("DataItem", "MeargeTo");
@@ -682,6 +702,10 @@ public class FrameFrame extends FrameBase implements IFrame {
 			String paraOneCell = uxi.getSingleValue("DataItem", "FrameOneCell");
 			if ("yes".equalsIgnoreCase(paraOneCell)) {
 				oneCell = true;
+			}
+			String dataType = uxi.getSingleValue("DataItem", "DataType");
+			if (dataType != null && "INT".equalsIgnoreCase(dataType)) {
+				isNumber = true;
 			}
 		}
 		if (uxi.testName("List")) {
@@ -846,6 +870,30 @@ public class FrameFrame extends FrameBase implements IFrame {
 		}
 		// 根据逻辑表达式去除属性
 		itemHtml = this.removeAttrsByLogic(uxi, itemHtml);
+
+		if ("text".equalsIgnoreCase(tag) && isNumber) {
+			// MaxMinValue
+			String maxValue = uxi.getSingleValue("MaxMinValue", "MaxValue");
+			String minValue = uxi.getSingleValue("MaxMinValue", "MinValue");
+			StringBuilder newType = new StringBuilder("type=\"number\"");
+			if (maxValue != null && maxValue.trim().length() > 0) {
+				try {
+					int max = Integer.parseInt(maxValue);
+					newType.append(" max='" + max + "'");
+				} catch (Exception err) {
+
+				}
+			}
+			if (minValue != null && minValue.trim().length() > 0) {
+				try {
+					int min = Integer.parseInt(minValue);
+					newType.append(" min='" + min + "'");
+				} catch (Exception err) {
+
+				}
+			}
+			itemHtml = itemHtml.replace("type=\"text\"", newType.toString());
+		}
 
 		String s2 = parentHtml.replace(SkinFrame.TAG_ITEM, itemHtml);
 

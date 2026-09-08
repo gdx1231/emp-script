@@ -3829,12 +3829,25 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="enus" Info="Cols" />
 						</DescriptionSet>
 					</Value>
+					<Value Name="FrameCss" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="附加的 css" />
+							<Set Lang="enus" Info="Append css" />
+						</DescriptionSet>
+					</Value>
+					<Value Name="FrameParentCss" Type="string">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="父元素附加的 css" />
+							<Set Lang="enus" Info="Parent el append css" />
+						</DescriptionSet>
+					</Value>
 					<Value Name="TextareaAuto" Type="group">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="Textarea 根据内容自动大小" />
 							<Set Lang="enus" Info="Textarea auto size by content" />
 						</DescriptionSet>
 					</Value>
+					
 				</Values>
 			</XItemParameter>
 
