@@ -13,6 +13,7 @@ public interface IFrame {
 	FrameBase getFrameBase();
 
 	 
+	String getSearchExp();
 
 	/**
 	 * 创建用于AI提示词的JSON格式的页面框架(2025-08-23)

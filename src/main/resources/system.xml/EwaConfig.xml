@@ -1952,6 +1952,13 @@ action_js 执行后调用脚本&#x0D;&#x0A;" />
 							<Set Lang="enus" Info="Search Multi" />
 						</DescriptionSet>
 					</Value>
+					<Value Type="group" Name="SearchStatistics">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="统计数量" />
+							<Set Lang="enus" Info="Statistics number" />
+						</DescriptionSet>
+					</Value>
+					
 					<Value Type="string" Name="SearchExp">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="检索表达式" />
@@ -3519,13 +3526,18 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 					<Set Lang="enus" Info=",Text,Date,Number,Fix" />
 				</DescriptionSet>
 			</XGroupValue>
-			<XGroupValue Name="SearchMulti" Default="2" Values="2,1,0">
+			<XGroupValue Name="SearchMulti" Default="2" Values="2,1,0,3">
 				<DescriptionSet>
-					<Set Lang="zhcn" Info="SELECT,Checkbox,RADIO" />
-					<Set Lang="enus" Info="Select,Checkbox,Radio" />
+					<Set Lang="zhcn" Info="下拉框,多选,单选,按钮" />
+					<Set Lang="enus" Info="Select,Checkbox,Radio,Button" />
 				</DescriptionSet>
 			</XGroupValue>
-
+			<XGroupValue Name="SearchStatistics" Default="no" Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
 			<XGroupValue Name="CallMethod" Default="0" Values=",OpenReloadClose,OpenReload">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info=",刷新并关闭,刷新" />

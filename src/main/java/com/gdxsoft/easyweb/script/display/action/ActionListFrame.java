@@ -21,6 +21,7 @@ import com.gdxsoft.easyweb.data.export.ExcelExport;
 import com.gdxsoft.easyweb.data.export.IExport;
 import com.gdxsoft.easyweb.data.export.XmlExport;
 import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.datasource.DataConnectionSqlBuilder;
 import com.gdxsoft.easyweb.datasource.IClassDao;
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.datasource.SearchParameter;
@@ -44,8 +45,17 @@ import com.gdxsoft.easyweb.utils.msnet.MStr;
 public class ActionListFrame extends ActionBase implements IAction {
 	private static Logger LOG = LoggerFactory.getLogger(ActionListFrame.class);
 	public static final String EXECUTE_SPLIT_SQL = "EXECUTE_SPLIT_SQL";
+	/**
+	 * 执行的 SQL，包含搜索排序
+	 */
 	public static final String SPLIT_SQL = "SPLIT_SQL";
 	public static final String PAGE_SIZE = "PAGE_SIZE";
+	/**
+	 * 原始 SQL，不包含搜索排序
+	 */
+	public static final String SPLIT_SQL_ORI = "SPLIT_SQL_ORI";
+
+	private DTTable tbSplit;
 
 	public void executeCallClass(String name) throws Exception {
 
@@ -188,6 +198,23 @@ public class ActionListFrame extends ActionBase implements IAction {
 		this.executeSessionsCookies(sqlItem);
 	}
 
+	public DTTable querySqlStatistics(DataConnection conn, String statisticsFields) throws Exception {
+		if (tbSplit == null) {
+			return null;
+		}
+
+		String oriSql = (String) tbSplit.getAttsTable().get(SPLIT_SQL_ORI);
+		String searchByStatistics = this.createSqlSearchByStatistics(conn);
+		SqlPart sp = new SqlPart();
+		sp.setSql(oriSql);
+
+		String temp = SqlUtils.chnOrderTemplate(conn.getDatabaseType());
+		String sql = sp.rebuildSql("", searchByStatistics, temp);
+		DataConnectionSqlBuilder dsb = new DataConnectionSqlBuilder(conn);
+		String sql1 = dsb.createSqlStatistics(sql, statisticsFields);
+		return DTTable.getJdbcTable(sql1, conn);
+	}
+
 	/**
 	 * 执行分页查询
 	 * 
@@ -214,23 +241,27 @@ public class ActionListFrame extends ActionBase implements IAction {
 				String key = "DOWN_DATA_" + rv.getString("EWA.ID");
 				rv.addValue(key, dataName);
 			}
-		} else if (ajax.indexOf("JSON")==0) {
+		} else if (ajax.indexOf("JSON") == 0) {
 			boolean useSplit = rv.getString(FrameParameters.EWA_PAGESIZE) != null;
 			DTTable tb = this.executeSqlWithPageSplit(sql1, conn, rv, useSplit);
 			tb.setName(name);
 			if (tb.isOk()) {
 				super.getDTTables().add(tb);
+				tb.getAttsTable().put(SPLIT_SQL_ORI, sql);
 				// 加载Hor数据
 				super.executeExtOpt(sql, tb);
+				tbSplit = tb;
 			}
 		} else {
 			DTTable tb = this.executeSqlWithPageSplit(sql1, conn, rv, true);
 			tb.setName(name);
 			if (tb.isOk()) {
 				super.getDTTables().add(tb);
+				tb.getAttsTable().put(SPLIT_SQL_ORI, sql);
 				// 加载Hor数据
 				super.executeExtOpt(sql, tb);
 				super.checkActionErrorOutInTable(tb);
+				tbSplit = tb;
 
 			}
 		}
@@ -252,11 +283,11 @@ public class ActionListFrame extends ActionBase implements IAction {
 			int iPageSize = this.getUserSettingPageSize();
 			ps = new PageSplit(0, rv, iPageSize);
 			String keyField = this.getPageItemValue("PageSize", "KeyField");
-			tb = DTTable.getJdbcTable(sql1, keyField, ps.getPageSize(),ps.getPageCurrent(), conn);
+			tb = DTTable.getJdbcTable(sql1, keyField, ps.getPageSize(), ps.getPageCurrent(), conn);
 		} else {
 			tb = DTTable.getJdbcTable(sql1, conn); // all
 		}
-		 
+
 		if (tb.isOk()) {
 			tb.getAttsTable().add(EXECUTE_SPLIT_SQL, "1");
 			tb.getAttsTable().add(SPLIT_SQL, sql1);
@@ -523,13 +554,13 @@ public class ActionListFrame extends ActionBase implements IAction {
 		if (orderNames.length > 1) {
 			asc = orderNames[1].trim();
 		}
-		
+
 		if (orderNames.length == 1 || asc.equalsIgnoreCase("asc")) {
-			s1 += " desc"; //默认倒序 2024-12-04 郭磊
+			s1 += " desc"; // 默认倒序 2024-12-04 郭磊
 		} else {
-			s1 +=" asc";
+			s1 += " asc";
 		}
-		
+
 		userOrder = s1;
 		if (keyField == null || keyField.trim().length() == 0) {
 			return userOrder;
@@ -768,6 +799,106 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @return
 	 * @throws Exception
 	 */
+	public String createSqlSearchByStatistics(DataConnection conn) throws Exception {
+		RequestValue rv = super.getItemValues().getRequestValue();
+
+		String userSearch = rv.getString(FrameParameters.EWA_LF_SEARCH);
+		if (userSearch == null || userSearch.trim().length() == 0) {
+			return "";
+		}
+
+		UserConfig uc = super.getUserConfig();
+		StringBuilder sb = new StringBuilder();
+		sb.append("  (1=1 ");
+		String[] para = userSearch.split("@!@");
+		for (int i = 1; i < para.length; i++) {
+			SearchParameter lsp = new SearchParameter(para[i]);
+			if (!lsp.isValid()) {
+				continue;
+			}
+
+			HashMap<String, String> fieldMap = new HashMap<String, String>();
+			String[] searchNames = lsp.getName().split(",");
+			for (int mm = 0; mm < searchNames.length; mm++) {
+				String searchName = searchNames[mm];
+				UserXItem uxi = uc.getUserXItems().getItem(searchName);
+				if (!uxi.testName("DataItem") || !uxi.testName("OrderSearch")) {
+					continue;
+				}
+				if (uxi.getItem("OrderSearch").getItem(0).testName("SearchStatistics")) {
+					String searchStatistics = uxi.getItem("OrderSearch").getItem(0).getItem("SearchStatistics");
+					if ("yes".equalsIgnoreCase(searchStatistics)) {
+						// 统计数字不需要在搜索里
+						continue;
+					}
+				}
+
+				UserXItemValues us = uxi.getItem("DataItem");
+				if (us.count() == 0)
+					continue;
+				UserXItemValue u = us.getItem(0);
+
+				String dataType = u.getItem("DataType").trim().toUpperCase();
+				String dataField = u.getItem("DataField");
+				if (fieldMap.containsKey(dataField)) {
+					continue;
+				}
+				// 用户自定义排序表达式
+				if (uxi.getItem("OrderSearch").getItem(0).testName("SearchExp")) {
+					String searchExp = uxi.getItem("OrderSearch").getItem(0).getItem("SearchExp");
+					if (searchExp.trim().length() > 0) {
+						dataField = searchExp;
+					}
+				}
+
+				fieldMap.put(dataField, dataType);
+			}
+
+			if (fieldMap.size() == 0) {
+				continue;
+			}
+
+			int inc = 0;
+			StringBuilder sbExp = new StringBuilder();
+			for (String dataField : fieldMap.keySet()) {
+				String dataType = fieldMap.get(dataField); // 字段类型
+				String exp = this.createSearchSql(lsp, conn, dataField, dataType);
+
+				// System.out.println(exp);
+
+				if (exp == null) {
+					continue;
+				}
+				if (inc == 0) {
+					sbExp.append(" ");
+				} else {
+					sbExp.append(" OR ");
+				}
+				sbExp.append("(");
+				sbExp.append(exp);
+				sbExp.append(")");
+
+				inc++;
+			}
+			if (inc > 0) {
+				sb.append(" AND (");
+				sb.append(sbExp);
+
+				sb.append(" )");
+
+			}
+		}
+		userSearch = sb.toString() + ")";
+		return userSearch;
+	}
+
+	/**
+	 * 合成用户检索表达式
+	 * 
+	 * @param conn
+	 * @return
+	 * @throws Exception
+	 */
 	private String createSqlSearch(DataConnection conn) throws Exception {
 		RequestValue rv = super.getItemValues().getRequestValue();
 
@@ -861,9 +992,10 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @param dataField
 	 * @param dataType
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	private String createSearchSql(SearchParameter lsp, DataConnection conn, String dataField, String dataType) throws Exception {
+	private String createSearchSql(SearchParameter lsp, DataConnection conn, String dataField, String dataType)
+			throws Exception {
 		String exp = null;
 		if (lsp.isDouble()) { // 双字段
 			exp = createSearchDoubleSql(lsp, conn, dataField, dataType);
@@ -1094,9 +1226,10 @@ public class ActionListFrame extends ActionBase implements IAction {
 	 * @param dataField
 	 * @param dataType
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	private String createSearchDoubleSql(SearchParameter lsp, DataConnection conn, String dataField, String dataType) throws Exception {
+	private String createSearchDoubleSql(SearchParameter lsp, DataConnection conn, String dataField, String dataType)
+			throws Exception {
 		StringBuilder sb = new StringBuilder();
 
 		if (dataType.indexOf("DATE") >= 0 || dataType.indexOf("TIME") >= 0) {// 日期形式
@@ -1158,7 +1291,7 @@ public class ActionListFrame extends ActionBase implements IAction {
 				sb.append(dataField + " <= " + lsp.getPara2());
 			}
 		} else {
-			throw new Exception("Not support data type " + dataField +"(" + dataType+")");
+			throw new Exception("Not support data type " + dataField + "(" + dataType + ")");
 		}
 
 		return sb.toString();

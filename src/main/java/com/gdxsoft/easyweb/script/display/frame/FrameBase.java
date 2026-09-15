@@ -67,6 +67,10 @@ public class FrameBase {
 	public FrameBase getFrameBase() {
 		return this;
 	}
+	
+	public String getSearchExp() {
+		return null;
+	}
 
 	/**
 	 * 是否 附加 des/memo 在td上

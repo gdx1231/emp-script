@@ -14,13 +14,12 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gdxsoft.easyweb.cache.CachedValue;
-import com.gdxsoft.easyweb.cache.CachedValueManager;
 import com.gdxsoft.easyweb.data.DTColumn;
 import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.data.JsonFieldNameCase;
 import com.gdxsoft.easyweb.datasource.DataConnection;
+import com.gdxsoft.easyweb.datasource.DataConnectionSqlBuilder;
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.Workflow.EwaWfMain;
@@ -60,7 +59,7 @@ public class FrameList extends FrameBase implements IFrame {
 	private boolean _IsLuSearch;
 	private boolean luStickyHeaders; // 是否启用表头固定（sticky headers）
 	private boolean _ComposeSearchTexts; // 合并文字搜索
-	// 分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
+	// 分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio,button)
 	private boolean _SearchGroup = true;
 
 	private String _LuSelect = "";
@@ -237,7 +236,8 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 		if (this._IsLuSearch) {
 			boolean compose = this._ComposeSearchTexts; // 合并搜索
-			boolean denySearchGroup = !this._SearchGroup; // 分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio)
+			// 分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio，button)
+			boolean denySearchGroup = !this._SearchGroup;
 			String js = fname + ".ShowSearch(" + compose + ", " + denySearchGroup + ");";
 			sJs.al(js);
 		}
@@ -1232,6 +1232,125 @@ public class FrameList extends FrameBase implements IFrame {
 		return rst;
 	}
 
+	public DTTable queryStatistics(String statisticsFields) {
+		super.getHtmlClass().getDebugFrames().addDebug(this, "queryStatistics", statisticsFields);
+		DataConnection cnn = super.getHtmlClass().getItemValues().getDataConn();
+
+		try {
+			ActionListFrame act = (ActionListFrame) super.getHtmlClass().getAction();
+			DTTable tb = act.querySqlStatistics(cnn, statisticsFields);
+			return tb;
+		} catch (Exception e) {
+			LOGGER.error("queryStatistics {}", e.getMessage(), e);
+			return null;
+		}
+
+	}
+
+	private String createCellSearchFix(UserXItem uxi, UserXItemValue u, boolean isEn) throws Exception {
+		MStr s = new MStr();
+		String searchSql = u.getItem("SearchSql");
+
+		if (searchSql.trim().length() == 0) {
+			LOGGER.error("固定查询没有定义SQL");
+			return "";
+		}
+
+		DataConnection cnn = super.getHtmlClass().getItemValues().getDataConn();
+
+		MStr s1 = new MStr();
+		DTTable tb = DTTable.getJdbcTable(searchSql, cnn);
+		cnn.getResultSetList().removeValue(cnn.getLastResult());
+		if (tb == null || !tb.isOk()) {
+			LOGGER.error("数据查询错误");
+			return "";
+		}
+
+		boolean isStatistics = false;
+		try {
+			String searchStatistics = u.getItem("SearchStatistics");
+			if ("yes".equalsIgnoreCase(searchStatistics)) {
+				isStatistics = true;
+			}
+		} catch (Exception err) {
+
+		}
+		Map<String, DTRow> mapStatistics = null;
+		if (isStatistics) {
+			String statisticsField = uxi.getName();
+			DTTable tbStatistics = this.queryStatistics(statisticsField);
+			if (tbStatistics == null) {
+				mapStatistics = new HashMap<>();
+			} else {
+				mapStatistics = tbStatistics.toMapRow(0);
+			}
+		}
+
+		s1.a(", D: [");
+		int idxId = 0;
+		int idxTxt = 1;
+		if (isEn) {
+			String colName = tb.getColumns().getColumn(idxTxt).getName();
+			int idxEn = tb.getColumns().getNameIndex(colName + "_en");
+			if (idxEn == -1) {
+				idxEn = tb.getColumns().getNameIndex(colName + "en");
+			}
+			if (idxEn == -1) {
+				idxEn = tb.getColumns().getNameIndex(colName + "_enus");
+			}
+			if (idxEn == -1) {
+				idxEn = tb.getColumns().getNameIndex(colName + "enus");
+			}
+			if (idxEn > 0) {
+				idxTxt = idxEn;
+			}
+		}
+		int inc = 0;
+		// 2,1,0,3 (Select,Checkbox,Radio,Button)
+		String searchMulti = u.getItem("SearchMulti");
+
+		// 添加全部选项
+		if ("3".equals(searchMulti) && isStatistics) {
+			long[] totalRecords = { 0 };
+			mapStatistics.forEach((k, v) -> {
+				totalRecords[0] += v.getCell(1).isNull() ? 0 : v.getCell(1).toLong();
+			});
+			inc = 1;
+			String des = isEn ? "All" : "全部";
+			s1.a("[\"\", \"" + des + "\", " + totalRecords[0] + "]");
+		}
+		for (int i = 0; i < tb.getCount(); i++) {
+			DTRow r = tb.getRow(i);
+
+			String t1 = r.getCell(idxId).getString();
+			String t2 = r.getCell(idxTxt).toString();
+			if (t1 == null || t2 == null) {
+				continue;
+			}
+			if (inc > 0) {
+				s1.a(",");
+			}
+			inc++;
+			s1.a("[\"" + Utils.textToJscript(t1.trim()) + "\", \"" + Utils.textToJscript(t2.trim()) + "\" ");
+			if (isStatistics) {
+				// 添加统计数量信息
+				Long num = null;
+				if (mapStatistics.containsKey(t1)) {
+					num = mapStatistics.get(t1).getCell(1).toLong();
+				}
+				s1.a(",").a(num == null ? 0 : num.longValue());
+			}
+			s1.a("]");
+		}
+
+		s.a(s1.toString());
+		tb.setName(searchSql);
+		super.getSearchFixTables().put(uxi.getName(), tb);
+
+		s.a("], M:'" + searchMulti + "'");
+		return s.toString();
+	}
+
 	/**
 	 * 检查是否为检索
 	 * 
@@ -1265,74 +1384,8 @@ public class FrameList extends FrameBase implements IFrame {
 		boolean isEn = rv.getLang().equals("enus");
 
 		if (searchType.equals("fix")) {
-			String searchSql = u.getItem("SearchSql");
-			String searchMulti = u.getItem("SearchMulti");
-
-			if (searchSql.trim().length() == 0) {
-				LOGGER.error("固定查询没有定义SQL");
-				return "";
-			}
-
-			// 区分中英文
-			String cacheKey = searchSql + " . " + isEn;
-			CachedValue c = CachedValueManager.getValue(cacheKey);
-			if (c == null) {// 不在缓存中
-				MStr s1 = new MStr();
-				DataConnection cnn = super.getHtmlClass().getItemValues().getDataConn();
-
-				cnn.executeQuery(searchSql);
-				DTTable tb = DTTable.getJdbcTable(searchSql, cnn);
-
-				if (tb == null || !tb.isOk()) {
-					LOGGER.error("数据查询错误");
-					return "";
-				}
-
-				cnn.getResultSetList().removeValue(cnn.getLastResult());
-				s1.a(", D: [");
-				int idxId = 0;
-				int idxTxt = 1;
-				if (isEn) {
-					String colName = tb.getColumns().getColumn(idxTxt).getName();
-					int idxEn = tb.getColumns().getNameIndex(colName + "_en");
-					if (idxEn == -1) {
-						idxEn = tb.getColumns().getNameIndex(colName + "en");
-					}
-					if (idxEn == -1) {
-						idxEn = tb.getColumns().getNameIndex(colName + "_enus");
-					}
-					if (idxEn == -1) {
-						idxEn = tb.getColumns().getNameIndex(colName + "enus");
-					}
-					if (idxEn > 0) {
-						idxTxt = idxEn;
-					}
-				}
-				int inc = 0;
-				for (int i = 0; i < tb.getCount(); i++) {
-					DTRow r = tb.getRow(i);
-
-					String t1 = r.getCell(idxId).getString();
-					String t2 = r.getCell(idxTxt).toString();
-					if (t1 == null || t2 == null) {
-						continue;
-					}
-					if (inc > 0) {
-						s1.a(",");
-					}
-					inc++;
-					s1.a("[\"" + Utils.textToJscript(t1.trim()) + "\", \"" + Utils.textToJscript(t2.trim()) + "\"]");
-				}
-				if (searchSql.indexOf("@") == -1) { // searchSql 有参数的话不缓存
-					CachedValueManager.addValue(cacheKey, s1.toString());
-				}
-				s.a(s1.toString());
-				tb.setName(searchSql);
-				super.getSearchFixTables().put(uxi.getName(), tb);
-			} else { // 从缓存中获取
-				s.a(c.getValue().toString());
-			}
-			s.a("], M:'" + searchMulti + "'");
+			String s1 = this.createCellSearchFix(uxi, u, isEn);
+			s.append(s1);
 		}
 		s.a("}");
 		if (this._SearchExp.length() > 0) {
@@ -1991,4 +2044,10 @@ public class FrameList extends FrameBase implements IFrame {
 		}
 	}
 
+	/**
+	 * 获取搜索表达式 JSON
+	 */
+	public String getSearchExp() {
+		return this._SearchExp.toString();
+	}
 }

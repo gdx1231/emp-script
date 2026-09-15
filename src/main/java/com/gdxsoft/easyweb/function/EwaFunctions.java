@@ -28,7 +28,7 @@ public class EwaFunctions {
 		try {
 			return uv.invokeStatic(func.getClassName(), func.getMethodName(), methodParameters);
 		} catch (Exception e) {
-			LOGGER.warn("Invoke error ", func.getClassName(), func.getMethodName(), methodParameters, e.getMessage());
+			LOGGER.warn("Invoke error {}, {}, {}, {}", func.getClassName(), func.getMethodName(), methodParameters, e.getMessage(), e);
 			return null;
 		}
 

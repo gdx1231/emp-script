@@ -1075,8 +1075,6 @@ public class HtmlCreator {
 		}
 	}
 
-	  
-
 	private String getJsonName() {
 		String jsonName = this._RequestValue.getString(FrameParameters.EWA_JSON_NAME);
 		if (jsonName != null && jsonName.length() > 0) {
@@ -1114,8 +1112,8 @@ public class HtmlCreator {
 			return sb.toString();
 		}
 		DTTable dt = (DTTable) this._ItemValues.getDTTables().get(len - 1);
-		if(len>1 && this._HtmlClass.getFrame() instanceof FrameList) {
-			FrameList fl = (FrameList)this._HtmlClass.getFrame();
+		if (len > 1 && this._HtmlClass.getFrame() instanceof FrameList) {
+			FrameList fl = (FrameList) this._HtmlClass.getFrame();
 			dt = fl.getSplitPageTable();
 		}
 		// 时差
@@ -1729,6 +1727,11 @@ public class HtmlCreator {
 			String content = this._Document.getScriptHtml().toString();
 			content = this._ItemValues.replaceParameters(content, true);
 			sb.append(content.replace(IItem.REP_AT_STR, "@"));
+
+			String jsSearch = this._Frame.getSearchExp();
+			// 更新数量
+			sb.append("<script>EWA.F.FOS['" + this.getSysParas().getFrameUnid() + "'].reShowStatistics({").a(jsSearch)
+					.append("});</script>");
 			this._PageHtml = sb.toString();
 		} else if (ajax.equalsIgnoreCase(AjaxParameters.INSTALL)) { // listframe reload
 			// MStr sb = new MStr();

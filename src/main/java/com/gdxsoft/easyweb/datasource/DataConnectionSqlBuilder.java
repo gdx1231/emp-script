@@ -62,6 +62,37 @@ public class DataConnectionSqlBuilder {
 	// ═══════════════════════════════════════════════════════════════
 
 	/**
+	 * 重新组合SQL，获取按字段记录数，创建出<br>
+	 * <code>SELECT statisticsField, COUNT(*) GDX FROM TB WHERE ... GROUP By statisticsField</code>
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public String createSqlStatistics(String sql, String statisticsField) {
+		SqlPart sp = new SqlPart();
+		sp.setSql(sql);
+
+		StringBuilder sb = new StringBuilder();
+		if (sp.isHasWithBlock()) {
+			sb.append(sp.getWithBlock()).append("\n");
+		}
+		sb.append("SELECT " + statisticsField + ", COUNT(*) GDX FROM \n");
+		if (sp.getGroupBy().length() > 0) {
+			sb.append("(").append(sql).append(") tmp");
+		} else {
+			sb.append(sp.getTableName());
+
+			if (!sp.getWhere().equals("")) {
+				sb.append(" WHERE ");
+				sb.append(sp.getWhere());
+			}
+
+		}
+		sb.append(" group by " + statisticsField);
+		return sb.toString();
+	}
+
+	/**
 	 * Master SQL rewriter — applies all transformations to a raw SQL string.
 	 */
 	public String rebuildSql(String sql) throws Exception {
