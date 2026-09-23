@@ -43,6 +43,9 @@ TOKEN_FILE="${EWA_TOKEN_FILE:-/tmp/.ewa_api_token}"
 
 # 认证模式: token, hmac, simple
 AUTH_MODE="${EWA_AUTH_MODE:-token}"
+
+# curl 额外参数（如 -k 跳过 SSL 验证）
+CURL_OPTS="${EWA_CURL_OPTS:-}"
 # =================================================
 
 # 颜色定义
@@ -210,7 +213,7 @@ do_login() {
     fi
 
     local response
-    response=$(curl -s -X POST "${API_BASE_URL}?method=login" \
+    response=$(curl -s $CURL_OPTS -X POST "${API_BASE_URL}?method=login" \
         -H "Content-Type: application/x-www-form-urlencoded" \
         -d "login_id=${API_LOGIN_ID}&password=${API_PASSWORD}")
 
@@ -249,7 +252,7 @@ do_logout() {
     fi
     
     log_info "正在注销..."
-    curl -s -X POST "${API_BASE_URL}?method=logout" \
+    curl -s $CURL_OPTS -X POST "${API_BASE_URL}?method=logout" \
         -H "X-Api-Token: $token" | format_json
     
     rm -f "$TOKEN_FILE"
@@ -276,7 +279,7 @@ send_token_request() {
         token=$(get_cached_token)
     fi
     
-    curl -s -H "X-Api-Token: $token" "${API_BASE_URL}?${params}" | format_json
+    curl -s $CURL_OPTS -H "X-Api-Token: $token" "${API_BASE_URL}?${params}" | format_json
 }
 
 # 发送 HMAC 签名请求
@@ -314,7 +317,7 @@ ${params}"
     log_info "Nonce: $nonce"
     log_info "签名: $signature"
     
-    curl -s \
+    curl -s $CURL_OPTS \
         -H "X-Api-Key: $API_LOGIN_ID" \
         -H "X-Api-Timestamp: $timestamp" \
         -H "X-Api-Nonce: $nonce" \
@@ -331,7 +334,7 @@ send_simple_request() {
         exit 1
     fi
     
-    curl -s -H "token: $API_PASSWORD" "${API_BASE_URL}?${params}" | format_json
+    curl -s $CURL_OPTS -H "token: $API_PASSWORD" "${API_BASE_URL}?${params}" | format_json
 }
 
 # 发送请求（根据认证模式）
@@ -446,7 +449,7 @@ do_update_conf_item() {
         token=$(get_cached_token)
     fi
 
-    curl -s -X POST \
+    curl -s $CURL_OPTS -X POST \
         -H "X-Api-Token: $token" \
         "${API_BASE_URL}?method=updateConfItem&xmlname=${xmlname}&itemname=${itemname}" \
         --data-urlencode "xml=${xml}" | format_json
@@ -657,7 +660,7 @@ do_validate_sql() {
         token=$(get_cached_token)
     fi
 
-    curl -s -X POST \
+    curl -s $CURL_OPTS -X POST \
         -H "X-Api-Token: $token" \
         "${API_BASE_URL}?method=validateSql&db=${db}" \
         --data-urlencode "sql=${sql}" | format_json
@@ -666,7 +669,7 @@ do_validate_sql() {
 # 获取帮助（不需要认证）
 do_help() {
     log_info "获取 API 帮助..."
-    curl -s "${API_BASE_URL}?method=help" | format_json
+    curl -s $CURL_OPTS "${API_BASE_URL}?method=help" | format_json
 }
 
 # ==================== 主程序 ====================

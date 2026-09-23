@@ -32,6 +32,11 @@ export EWA_DEFAULT_DB="work"
 # 默认输出格式: json, xml, csv
 export EWA_DEFAULT_OUTPUT="json"
 
+# ==================== curl 配置 ====================
+
+# curl 额外参数（自签名证书需要 -k）
+export EWA_CURL_OPTS="-k"
+
 # ==================== 示例用法 ====================
 
 # 登录:
