@@ -4064,10 +4064,16 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 							<Set Lang="enus" Info="Searchs" />
 						</DescriptionSet>
 					</Value>
-					<Value Type="group" Name="luStickyHeaders" Step="0" CreateValue="'1'">
+					<Value Type="group" Name="luStickyHeaders" Step="0" CreateValue="'no'">
 						<DescriptionSet>
 							<Set Lang="zhcn" Info="在垂直方向固定头部" />
 							<Set Lang="enus" Info="Fix the header in the vertical direction" />
+						</DescriptionSet>
+					</Value>
+					<Value Type="group" Name="luMergeButtons" Step="0" CreateValue="'no'">
+						<DescriptionSet>
+							<Set Lang="zhcn" Info="合并操作按钮" />
+							<Set Lang="enus" Info="Merge buttons" />
 						</DescriptionSet>
 					</Value>
 					<Value Type="group" Name="luSelect" Step="0" CreateValue="'S'">
@@ -4391,7 +4397,12 @@ EWA.UI.Dialog.OpenWindow(u,'selectxitem',624,400);"
 			</XItemParameter>
 		</XItemParameters>
 		<XGroupValues>
-
+			<XGroupValue Name="luMergeButtons" default="no" Values="no,yes">
+				<DescriptionSet>
+					<Set Lang="zhcn" Info="否,是" />
+					<Set Lang="enus" Info="No,Yes" />
+				</DescriptionSet>
+			</XGroupValue>
 			<XGroupValue Name="luStickyHeaders" default="no" Values="no,yes">
 				<DescriptionSet>
 					<Set Lang="zhcn" Info="否,是" />

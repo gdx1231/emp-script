@@ -19,7 +19,6 @@ import com.gdxsoft.easyweb.data.DTRow;
 import com.gdxsoft.easyweb.data.DTTable;
 import com.gdxsoft.easyweb.data.JsonFieldNameCase;
 import com.gdxsoft.easyweb.datasource.DataConnection;
-import com.gdxsoft.easyweb.datasource.DataConnectionSqlBuilder;
 import com.gdxsoft.easyweb.datasource.PageSplit;
 import com.gdxsoft.easyweb.script.RequestValue;
 import com.gdxsoft.easyweb.script.Workflow.EwaWfMain;
@@ -58,6 +57,7 @@ public class FrameList extends FrameBase implements IFrame {
 	private boolean _IsLuButtons;
 	private boolean _IsLuSearch;
 	private boolean luStickyHeaders; // 是否启用表头固定（sticky headers）
+	private boolean luMergeButtons = false; // 是否合并操作按钮到一行
 	private boolean _ComposeSearchTexts; // 合并文字搜索
 	// 分组搜索，就是先文字、日期，最后固定搜索（select,checkbox,radio,button)
 	private boolean _SearchGroup = true;
@@ -241,7 +241,10 @@ public class FrameList extends FrameBase implements IFrame {
 			String js = fname + ".ShowSearch(" + compose + ", " + denySearchGroup + ");";
 			sJs.al(js);
 		}
-
+		if (this.luMergeButtons) {
+			String js = fname + ".mergeButtonsInRowInit();";
+			sJs.al(js);
+		}
 		if (this._LuSelect.length() > 0) {
 			if (this._LuSelect.equals("S")) { // 单选
 				String js = fname + ".SelectSingle();";
@@ -529,7 +532,15 @@ public class FrameList extends FrameBase implements IFrame {
 				this.luStickyHeaders = true;
 			}
 		}
-
+		if ("yes".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_MERGE_BUTTONS))) {
+			this.luStickyHeaders = true;
+		} else if (x.checkItemExists("luMergeButtons")
+				&& !("no".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_MERGE_BUTTONS)))) {
+			String v1 = x.getItem("luMergeButtons");
+			if (v1.equals("yes")) {
+				this.luMergeButtons = true;
+			}
+		}
 		// 重绘按钮
 		if (x.checkItemExists("luButtons") && !("no".equalsIgnoreCase(rv.s(FrameParameters.EWA_LU_BUTTONS)))) {
 			String v1 = x.getItem("luButtons");

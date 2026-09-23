@@ -247,8 +247,13 @@ public class FrameParameters {
 	 * 列表不进行重绘按钮，限定值为NO，参数大小写无关<br>
 	 */
 	public static final String EWA_LU_BUTTONS = "EWA_LU_BUTTONS";
+	
 	/**
-	 * 列表不进行重绘搜索，限定值为NO，参数大小写无关<br>
+	 * 操作按钮合并为一行，限定值为YES/NO，参数大小写无关
+	 */
+	public static final String EWA_LU_MERGE_BUTTONS = "EWA_LU_MERGE_BUTTONS";
+	/**
+	 * 列表不进行重绘搜索，限定值为NO，参数大小写无关
 	 */
 	public static final String EWA_LU_SEARCH = "EWA_LU_SEARCH";
 	/**
